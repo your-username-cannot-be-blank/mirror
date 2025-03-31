@@ -1,0 +1,56 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проблема-с-dns-в-singbox</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>dimzon(Dmitry)</td><td><p>На сервере стоит singbox+dnsmasq на 127.0.0.1:53<br>
+DNS-запросы на клиенте заворачиваются в туннель, на сервере направляются в udp://127.0.0.1:53<br>
+Периодически (крайне нестабильно) данные не грузятся с ошибкой NAME_NOT_RESOLVED.<br>
+Грешил на все подряд пока не посмотрел на логи на сервере (включил loglevel=trace на серверном singbox). Что с этим делать, почему “operation was canceled” это совсем непонятно. Пробовал вместо udp://127.0.0.1 использовать tcp://127.0.0.1 - ничего не изменилось. Кто виноват и куда дальше копать?</p>
+<pre><code class="lang-auto">+0300 2025-01-18 01:06:30 INFO [2168186484 2ms] inbound/vmess[vmess]: inbound connection from 98.199.217.26:42224
++0300 2025-01-18 01:06:30 INFO [2168186484 3ms] inbound/vmess[vmess]: [raw-Dmitry] inbound packet connection to 8.8.8.8:53
++0300 2025-01-18 01:06:30 DEBUG [2168186484 3ms] router: match[0] inbound=[socks5debug ss2022 ss vmess vm-ws rl r00 r01 r02 r03 r04 r05 r06 r07 r08 r09 r10 r11 r12 r13 r14 r15 r16] =&gt; sniff(1s)
++0300 2025-01-18 01:06:30 DEBUG [2168186484 3ms] router: sniffed packet protocol: dns
++0300 2025-01-18 01:06:30 DEBUG [2168186484 3ms] router: match[2] protocol=dns =&gt; hijack-dns
++0300 2025-01-18 01:06:30 DEBUG [2168186484 3ms] dns: exchange i1.imageban.ru. IN A via default-dns-server
++0300 2025-01-18 01:06:30 INFO [2168186484 3ms] outbound/direct[freedom]: outbound packet connection to 127.0.0.1:53
++0300 2025-01-18 01:06:30 ERROR [2168186484 3ms] dns: exchange failed for i1.imageban.ru. IN A: dial udp 127.0.0.1:53: operation was canceled
++0300 2025-01-18 01:06:30 DEBUG [2168186484 4ms] dns: exchange s.rutor.info. IN A via default-dns-server
++0300 2025-01-18 01:06:30 INFO [2168186484 4ms] outbound/direct[freedom]: outbound packet connection to 127.0.0.1:53
++0300 2025-01-18 01:06:30 ERROR [2168186484 4ms] dns: exchange failed for s.rutor.info. IN A: dial udp 127.0.0.1:53: operation was canceled```</code></pre></td><td>2025-01-17T22:44:13.554Z</td></tr><tr><td>Dr4tez(Dr4tez)</td><td><p>Лучше конфиг sing-box покажите. Подозреваю, что проблема растет оттуда.<br>
+Хотя… Если sing-box и dnsmasq работают под одним ip, не исключён какой-нибудь конфликт из-за dns запросов, это зависит от правил iptables nat prerouting. Но это уже целая отдельная история. Так что для начала конфиг в студию.</p></td><td>2025-01-21T18:10:51.513Z</td></tr><tr><td>recovery</td><td><p>У меня вообще была проблема в том, что в MikroTik Firewall какие-то правила временами это блокировали.</p></td><td>2025-01-23T11:19:51.551Z</td></tr>
+    </table>
+      </body>
+    </html>

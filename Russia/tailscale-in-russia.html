@@ -1,0 +1,137 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>tailscale-in-russia</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>x2922477383(x2922477383)</td><td><p>Решил установить себе <a href="https://tailscale.com/" rel="noopener nofollow ugc">tailscale</a> и споткнулся на первом же шаге - не вышло скачать gpg ключ для репозитория</p>
+<pre><code class="lang-auto">curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg &gt;/dev/null
+
+</code></pre>
+<p>The requested URL returned error: 451</p>
+<p>Оказывается <a href="http://pkgs.tailscale.com" rel="noopener nofollow ugc">pkgs.tailscale.com</a> временно или постоянно недоступен по юридическим причинам, т.е. ни ключ, ни пакеты для установки/обновления не доступны с IP мобильного Мегафона.<br>
+Стоит ли tailscale устанавливать обходными путями? Работает ли он в России вообще? Проходят ли подключения к координационным и ретрансляционным серверам, жизнеспособны ли их WG туннели?</p></td><td>2023-11-15T22:05:18.044Z</td></tr><tr><td>Xunlei</td><td><p>Если не принципиально, попробуйте <a href="https://www.zerotier.com/" rel="noopener nofollow ugc">ZeroTier</a>: до 25 устройств бесплатно, для подключения к созданной сети нужен только ID, затем администратор в личном кабинете разрешает новое устройство. Пока работает без проблем.</p></td><td>2023-11-15T22:59:36.744Z</td></tr><tr><td>x2922477383(x2922477383)</td><td><p>В итоге поставил Tailscale на дебиан (там уже работал тор + апт транспорт через тор): добавил прокси в команды, потом в адрес репо добавил транспорт. Все установилось и работает, соединения идут.</p>
+<pre><code class="lang-auto">curl --socks5 127.0.0.1:9050 -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg &gt;/dev/null
+curl --socks5 127.0.0.1:9050 -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
+nano /etc/apt/sources.list.d/tailscale.list
+    deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] tor://pkgs.tailscale.com/stable/debian bookworm main
+apt update
+apt install tailscale
+</code></pre>
+<p>ZeroTier тоже параллельно поставил. Интересно что он иногда строит соединение через Tailscale.</p></td><td>2023-11-22T18:06:38.722Z</td></tr><tr><td>invu(invu)</td><td><aside class="quote no-group" data-username="x2922477383" data-post="3" data-topic="6268">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/87869e/48.png" class="avatar"> x2922477383:</div>
+<blockquote>
+<p>Интересно что он иногда строит соединение через Tailscale.</p>
+</blockquote>
+</aside>
+<p>В Zerotier же можно interfacePrefixBlacklist прописать.<br>
+Не нравится когда разработчики элементарных вещей не предусматривают. Смысл ставить несколько mesh-сетей чтобы они трафик через себя гоняли.</p></td><td>2023-11-24T09:22:03.601Z</td></tr><tr><td>x2922477383(x2922477383)</td><td><p>Спасибо за наводку про настройку!<br>
+для истории:<br>
+<a href="https://docs.zerotier.com/config#local-configuration-options" rel="noopener nofollow ugc">Configuration</a></p>
+<pre><code class="lang-auto">nano /var/lib/zerotier-one/local.conf
+{
+    "settings": {
+        "interfacePrefixBlacklist": [ "tun0", "tailscale0" ]
+    }
+}
+рестарт сервиса/перезагрузка
+</code></pre>
+<p>а так инструмент интересный, богатый на настройки <a href="https://docs.zerotier.com/multipath" rel="noopener nofollow ugc">Multipath</a><br>
+подобную настройку для tailscale не нашел</p></td><td>2023-11-24T16:34:23.004Z</td></tr><tr><td>invu(invu)</td><td><aside class="quote no-group" data-username="x2922477383" data-post="5" data-topic="6268">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/87869e/48.png" class="avatar"> x2922477383:</div>
+<blockquote>
+<p>а так инструмент интересный</p>
+</blockquote>
+</aside>
+<p>А с учетом того что в Zerotier можно свои сервера делать ( <a href="https://github.com/zerotier/ZeroTierOne/blob/dev/attic/world/mkworld.cpp" class="inline-onebox" rel="noopener nofollow ugc">ZeroTierOne/attic/world/mkworld.cpp at dev · zerotier/ZeroTierOne · GitHub</a> ), для “чебурнета” самое то.</p>
+<p>Как легко поднять сервер в Zerotier, и сколько я мучался в Tailscale (Headscale). Единственное что лучше в Tailscale - это DERP сервера.</p></td><td>2023-11-24T17:15:19.944Z</td></tr><tr><td>reyist(Reyist)</td><td><p>Сегодня админка tailscale и сам клиент возвращают 451, через ВПС все работает. Так что скорее всего заблочили уже не только пакеты…</p></td><td>2024-10-02T06:10:45.976Z</td></tr><tr><td>Nekit(Nikita Puzyryov)</td><td><p>Подтверждаю. Придется наконец поднимать Headscale</p></td><td>2024-10-02T09:33:14.481Z</td></tr><tr><td>prostochelovek</td><td><p>Зарегистрировался, чтобы дать инфу. Кому нужен tailscale накатываем селфлост headscale инфа есть на оф сайте.<br>
+Для удобства можете накатить ui <a href="https://github.com/tale/headplane" class="inline-onebox" rel="noopener nofollow ugc">GitHub - tale/headplane: An advanced UI for juanfont/headscale</a> в 500 раз лучше становится.<br>
+Готовый конфиг self hosted compose<br>
+Headscale и веб морды IP:3000/admin/</p>
+<pre><code class="lang-auto">version: "3.7"
+services:
+  headscale:
+    image: headscale/headscale:latest
+    restart: unless-stopped
+    container_name: headscale
+    ports:
+      - 0.0.0.0:8080:8080
+      - 0.0.0.0:9090:9090
+    volumes:
+      - /etc/headscale:/etc/headscale
+    command: serve
+  headplane:
+    container_name: headplane
+    image: ghcr.io/tale/headplane:0.3.9
+    restart: unless-stopped
+    volumes:
+      - ./data:/var/lib/headscale
+      - /etc/headscale:/etc/headscale
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 3000:3000
+    environment:
+      HEADSCALE_URL: http://0.0.0.0:8080
+      HEADSCALE_INTEGRATION: docker
+      HEADSCALE_CONTAINER: headscale
+      DISABLE_API_KEY_LOGIN: "true"
+      HOST: 0.0.0.0
+      PORT: "3000"
+      ROOT_API_KEY: 123abcdefghijklmnopqrstuvwxyz
+networks: {}
+</code></pre>
+<p>Но чтобы накатить клиент на винду, нужен впн при установки самого ехе(любой рабочий).<br>
+и после делаем так</p>
+<pre><code class="lang-auto">tailscale up --login-server=http://headscaleip:8080
+</code></pre>
+<p>Чтобы установить клиент на консоли в России.</p>
+<pre><code class="lang-auto">apt install tor
+apt install apt-transport-tor
+torsocks curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg &gt;/dev/null
+torsocks curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
+apt install apt-transport-tor
+nano /etc/apt/sources.list.d/tailscale.list
+    deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] tor://pkgs.tailscale.com/stable/debian bookworm main
+apt update
+apt install tailscale
+tailscale up --login-server=http://headscaleip:8080
+</code></pre>
+<p>Надеюсь кому-то поможет.</p></td><td>2024-12-07T15:46:22.641Z</td></tr><tr><td>kekmaster(Silence)</td><td><p>Tailscale и zt к сожалению не работают в сотовых сетях, поэтому пришлось поднимать headscale. Благо что wg еще внутри страны не заблокировали</p></td><td>2024-12-09T06:21:18.572Z</td></tr>
+    </table>
+      </body>
+    </html>

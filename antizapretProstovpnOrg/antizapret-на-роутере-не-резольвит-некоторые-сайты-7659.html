@@ -1,0 +1,85 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>antizapret-на-роутере-не-резольвит-некоторые-сайты-7659</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Olejka</td><td><p>По какой-то причине некоторые поддомены не резольвятся вообще. Ярким примером в моем случае является поддомен <a href="http://lkfl2.nalog.ru" rel="noopener nofollow ugc">lkfl2.nalog.ru</a>, а также 3 поддомена на моем сайте, недавно добавленные через Cloudflare.</p>
+<p>Ещё стоит упомянуть, что идентичная проблема возникала когда я добавил в <code>include-hosts-custom.txt</code> поддомен <a href="http://api.fast.com" rel="noopener nofollow ugc">api.fast.com</a> без основного <a href="http://fast.com" rel="noopener nofollow ugc">fast.com</a>: сразу же после отработки doall.sh <code>api</code> перестал резольвится вообще. Тогда мне помогло включение всего домена, однако делать это со всеми подобными сайтами мне не хочется (да и российские ресурсы это вряд ли полюбят)</p>
+<p>Пробовал все нижеперечисленное, однако браузеры продолжают выдавать NXDOMAIN.</p>
+<pre><code class="lang-auto">echo "cache.clear()" | socat - /run/knot-resolver/control/1
+</code></pre>
+<pre><code class="lang-auto">/root/antizapret/doall.sh
+</code></pre>
+<p>Одним из вариантов решения является установка третьего DNS сервера (благо кинетик позволяет), но тогда через некоторое время отваливаются заблокированные сайты т.е. тоже так себе. Может я что-то пропустил при установке контейнера?</p></td><td>2024-04-08T18:31:09.079Z</td></tr><tr><td>ValdikSS</td><td><p>Проверьте, резолвится ли домен с IP-адреса сервера:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">dig +short nalog.ru @213.59.255.110
+dig +short nalog.ru @46.61.230.203
+</code></pre>
+<p>Если нет, то проблема не в ПО, а в сетевой связности или блокировки со стороны серверов nalog.ru.</p></td><td>2024-04-09T09:53:44.797Z</td></tr><tr><td>Olejka</td><td><p>Всё зарезолвилось, IP выдало.</p>
+<p>Да и опять же, дело явно не в <a href="http://nalog.ru" rel="noopener nofollow ugc">nalog.ru</a>, с новыми поддоменами на cloudflare и <a href="http://api.fast.com" rel="noopener nofollow ugc">api.fast.com</a> под антизапретом такая же проблема</p></td><td>2024-04-09T17:19:58.951Z</td></tr><tr><td>ValdikSS</td><td><p>Попробуйте после строки <code>cache.min_ttl(120)</code> в файле <code>/etc/knot-resolver/kresd.conf</code> добавить строку <code>trust_anchors.remove('.')</code>, это отключит DNSSEC.<br>
+Сбросьте кеш и перезапустите kresd.</p></td><td>2024-04-10T19:19:06.222Z</td></tr><tr><td>Olejka</td><td><p>О, действительно помогло. Теперь и ЛК <a href="http://nalog.ru" rel="noopener nofollow ugc">nalog.ru</a> загружается, и <a href="http://api.fast.com" rel="noopener nofollow ugc">api.fast.com</a> отдельно, спасибо</p></td><td>2024-04-12T16:44:22.153Z</td></tr><tr><td>bync(Ole)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="4" data-topic="7659">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>перезапустите kresd</p>
+</blockquote>
+</aside>
+<p>подскажите, как это сделать?</p></td><td>2024-06-10T11:48:04.407Z</td></tr><tr><td>ValdikSS</td><td><p><code>systemctl restart kresd@1</code></p></td><td>2024-06-12T02:29:11.795Z</td></tr><tr><td>bync(Ole)</td><td><p>Спасибо!</p></td><td>2024-06-12T13:00:37.433Z</td></tr><tr><td>bync(Ole)</td><td><p>после перезапуска кстати заметил, что раньше там где на скрине 77,3М было всего ~12<br>
+<img src="antizapret-на-роутере-не-резольвит-некоторые-сайты-7659/71cb7d231b6b8ad1a64083aed4dafdb8ae7975da.png" alt="image" data-base62-sha1="geFVt9Q9HsmvD4eC0VWdg43ngh4" width="647" height="118"><br>
+это значит что у меня что-то не работало?</p></td><td>2024-06-14T10:37:05.661Z</td></tr><tr><td>Olejka</td><td><p>Перестало <img src="https://ntc.party/images/emoji/twitter/confused.png?v=12" title=":confused:" class="emoji" alt=":confused:" loading="lazy" width="20" height="20">. Те ДНС сервера, что предоставили вы не выдают IP, однако из контейнера без указания доп серверов через @ всё резольвит и адрес ДНС показывает 8.8.8.8. Также не резольвило на хост машине, через systemd-resolved поменял ДНС на 1.1.1.1 и 8.8.8.8 и на ней также всё заработало, но под VPN антизапрета всё также not resolved. Отключение DNSSEC как в прошлый раз не помогло</p></td><td>2024-08-28T14:53:37.477Z</td></tr><tr><td>ValdikSS</td><td><p>О каких DNS речь? Я вам ничего не предлагал, насколько вижу. В сообщении выше оригинальные NS домена, которые у вас, предположительно, недоступны.</p>
+<p>Вам нужно что-то такое:</p>
+<aside class="quote" data-post="372" data-topic="129">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%B9%D0%BD%D0%B5%D1%80-vpn-%D0%B0%D0%BD%D1%82%D0%B8%D0%B7%D0%B0%D0%BF%D1%80%D0%B5%D1%82%D0%B0-%D0%B4%D0%BB%D1%8F-%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B8-%D0%BD%D0%B0-%D1%81%D0%BE%D0%B1%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80/129/372">Контейнер VPN АнтиЗапрета для установки на собственный сервер</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/az-self-hosted/38"><span data-category-id="38" style="--category-badge-color: #0088CC; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #8C6238;" data-parent-category-id="5" data-drop-close="true" class="badge-category --has-parent" title="Вопросы и особенности работы контейнера VPN АнтиЗапрета на своих серверах"><span class="badge-category__name">АнтиЗапрет на собственном сервере (self-hosted)</span></span></a>
+  </div>
+  <blockquote>
+    Вероятно, NS-серверы домена заблокировали сетевой доступ для IP-адреса вашего сервера. 
+Можно настроить резолв конкретно этого домена через публичный DNS-резолвер. Добавьте в конец конфигурационного файла /etc/knot-resolver/kresd.conf: 
+policy.add(
+    policy.suffix(
+        policy.FORWARD(
+            {'77.88.8.8'}
+        ),
+        policy.todnames({'citilink.ru.'})
+    )
+)
+  </blockquote>
+</aside>
+</td><td>2024-09-15T10:32:08.671Z</td></tr>
+    </table>
+      </body>
+    </html>

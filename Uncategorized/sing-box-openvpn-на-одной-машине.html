@@ -1,0 +1,146 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>sing-box-openvpn-на-одной-машине</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>suribaki</td><td><p>Здраствуйте.<br>
+Нужна помощь сетевых богов. У меня есть пару десятков клиентов OpenVPN, которые используют его для доступа в рабочую локалку и получают через него определенные маршруты (push route x.x.x.x 255.255.255.255)<br>
+С тех пор как наши западные партнеры стали блокировать подключения с IP-адресов РФ надо еще и прикидываться нероссийскими пользователями для условного <a href="http://microsoft.com" rel="noopener nofollow ugc">microsoft.com</a>, типикал кейс.<br>
+В общем, задумка следующая, OpenVPN остается для доступа в локалку и прочим рабочим серверам, Sing-Box используется для доступа к запрещенке и всё на одной машине, работают параллельно.<br>
+Конфиг Sing-Box следующий</p>
+<pre><code class="lang-auto">{
+    "log": {
+      "level": "debug"
+    },
+    "inbounds": [
+      {
+	"tag": "tun-in",
+        "type": "tun",
+        "interface_name": "tun10",
+        "inet4_address": "172.16.250.1/30",
+        "auto_route": true,
+        "inet4_route_exclude_address": [
+    	  "192.168.222.0/24",
+    	  "192.168.96.0/20"
+	],
+        "strict_route": false,
+        "sniff": true,
+	"domain_strategy": "prefer_ipv4"
+     }
+    ],
+      "outbounds": [
+	{
+	  "type": "direct",
+	  "tag": "direct-out"
+	},
+        {
+	  "tag": "canada-02-out",
+          "type": "vless",
+          "server": "x.x.x.x",
+          "server_port": 443,
+          "uuid": "xxxxxxxxxxxxxxxxxxxxxxxxx",
+          "flow": "xtls-rprx-vision",
+          "tls": {
+            "enabled": true,
+            "insecure": false,
+            "server_name": "linux.org",
+            "utls": {
+              "enabled": true,
+              "fingerprint": "chrome"
+            },
+            "reality": {
+              "enabled": true,
+              "public_key": "xxxxxxxxxxxxxxxxxxxxxxxxx",
+              "short_id": "xxxxxxxxxxxxxxxxxxxxxxxxx"
+            }
+          }
+	}
+    ],
+    "route": {
+      "rules": [
+	    {
+		  "domain": [
+			"ifconfig.co",
+			"rutracker.org",
+			"eth0.me"
+		  ],
+		  "domain_suffix": [
+			".atlassian.net",
+			".atlassian.com",
+			".rutracker.org",
+			".eth0.me"
+		  ],
+		  "outbound": "canada-02-out"
+	}
+      ],
+      "final": "direct-out",      
+      "auto_detect_interface": true
+    }
+  }
+
+
+</code></pre>
+<p>Проблем несколько:</p>
+<ol>
+<li>
+<p>я не до конца понимаю, как работает outbound direct<br>
+Пример. OpenVPN пушит роут на 1.2.3.4, который имеет имя <a href="http://site1.example.com" rel="noopener nofollow ugc">site1.example.com</a> через свой туннель. 1.2.3.4 пускает на себя только если трафик идет через туннель (в ACL allow OpenVPN address). По идее конфиг Sing-Box этот адрес должен пустить напрямую, а таблица маршрутизации уже отправит трафик в туннель OpenVPN. Но судя по tcpdump трафик отправляется от адреса tun-интерфейса Sing-Box и на этом все. Пока не пропишешь адрес 1.2.3.4 в inet4_route_exclude_address, тогда работает. Обязательно прописать все адреса, которые пушит OpenVPN в таблицу исключений Sing-Box или есть способ проще? Outbound Direct это разве не системная таблица маршрутизации? Или таблица маршрутов Sing-Box  превалирует над дефолтной? На линуксе это можно переиграть, а на винде как?</p>
+</li>
+<li>
+<p>Допустим, сервер xray доступен только при подключении OpenVPN, так настроен ACL сервера xray. Конфиг тот же, но без подключенного OpenVPN работать не должно. OpenVPN пушит роут для адреса outbound canada-02-out<br>
+Проблема: не работает и с подключенным OpenVPN. Домены прописанные в Rules → Canada-02-out не отвечают вообще. В логах Sing-Box - io/timeout %addr_of_outbound_canada-02-out%:443<br>
+Зачем так сложно? OpenVPN умеет в LDAP, а SingBox нет.</p>
+</li>
+</ol>
+<p>Спасибо!</p></td><td>2025-01-14T15:31:11.364Z</td></tr><tr><td>0ka(0ka)</td><td><p>системный socks5 прокси не подойдёт? fakeip/smartdns не рассматривал? (это роутинг через подмену днс ответов)</p></td><td>2025-01-14T15:41:02.063Z</td></tr><tr><td>suribaki</td><td><p>Хотел бы иметь прозрачный прокси через tun. Без лишних настроек со стороны клиента, сунул конфиг и пусть работает. И чтобы работало не только из браузеров.</p>
+<blockquote>
+<p>fakeip/smartdns не рассматривал? (это роутинг через подмену днс ответов)</p>
+</blockquote>
+<p>не рассматривал, не в курсе как это работает</p></td><td>2025-01-14T15:45:16.031Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="suribaki" data-post="3" data-topic="14580">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/8e7dd6/48.png" class="avatar"> suribaki:</div>
+<blockquote>
+<p>tun. Без лишних настроек со стороны клиента</p>
+</blockquote>
+</aside>
+<p>tun проблемный, иногда не работает по неизвестным причинам, прокси работает везде и его может быть достаточно (если нужная прога его поддерживает)</p></td><td>2025-01-14T15:47:33.424Z</td></tr><tr><td>Dr4tez(Dr4tez)</td><td><p>По поводу первой проблемы. Есть подозрение, что outbound direct отправляет всё, что вы ему скармливаете, в интерфейс, имеющий выход в интернет, а не просто в таблицу маршрутизации устройства. А интерфейс этот определяется параметром <code>"auto_detect_interface": true</code>. Попробуйте убрать этот параметр совсем или поставить ему значение false. Возможно это сломает что-то другое, т.к. у вас ещё в tun прописан параметр <code>"auto_route": true</code>, тогда придётся вручную прописывать маршруты и правила для sing-box и отключать ещё и этот параметр. А может и так проканает. Но я ни в чём не уверен. Просто попробуйте. Когда разрабатывал скрипт для работы sing-box на своём роутере Асус, тоже столкнулся с проблемой, что директ не попадал в основную таблицу маршрутизации роутера. Но там я сразу не использовал автороут, т.к. это ломало работу роутера, и потому все маршруты и правила для sing-box создаются скриптом. Когда убрал из конфига <code>"auto_detect_interface": true</code>, direct outbound заработал как надо.<br>
+Ну и так, к сведению- строчку <code>"final": "direct-out",</code> можно не писать, т.к. первым в outbounds у вас прописан direct, то всё, кроме прописанного в правилах route.rules, по умолчанию и так будет попадать в него.<br>
+По поводу второй проблемы подумайте в следующем направлении- sing-box запущенный с параметром <code>"auto_route": true</code> в конфиге, перестраивает маршруты и правила в системе таким образом, чтобы весь трафик устройства шел через него. С openvpn дел не имел, и как он там работает, х.з., но что-то не представляю как могут две проги одновременно работать в режиме vpn на одном устройстве, особенно если как минимум одна из них тянет всё одеяло на себя. И представлять, если честно, лень.</p></td><td>2025-01-14T18:28:31.308Z</td></tr><tr><td>suribaki</td><td><p>Спасибо, но при <code>"auto_detect_interface": false</code> вообще все ломается и в логах бесконечные ошибки</p>
+<p>Друго вопрос. Как заставить sing-box не пушить свой DNS-сервер? Мне не нужен резолвинг от Sing-Box, все DNS-серверы у меня в туннеле OpenVPN. DNS-сервер от Sing-Box вызывает лаг в резолвинге, поскольку он ничего не отдает полминуты, а потом в ход идут другие системные резолверы</p></td><td>2025-01-16T09:39:07.390Z</td></tr><tr><td>suribaki</td><td><p>Отвечаю на собственный вопрос, надо отключать auto_route. Иначе никак. Глянул в сорцы, если переменная в true, то пушится днс-сервер.<br>
+Короче, походу надо фича-реквест постить, чтобы это поведение регулировалось отдельной опцией</p></td><td>2025-01-16T15:16:45.077Z</td></tr><tr><td>0ka(0ka)</td><td><p>Не ожидайте ничего от автора, он скорее всего сразу же закроет issue. Он много хороших идей забраковал по неизвестным причинам. Я ему задал вопрос что не так с моим issue и он меня вообще забанил.</p></td><td>2025-01-16T15:56:29.672Z</td></tr>
+    </table>
+      </body>
+    </html>

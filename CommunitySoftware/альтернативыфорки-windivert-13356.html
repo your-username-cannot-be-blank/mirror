@@ -1,0 +1,98 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>альтернативыфорки-windivert-13356</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>junkofuruto(FUMOBOMBER)</td><td><p>Разрабатываю свои утилиты для обхода блокировок и заметил, что последний коммит в WinDivert был два года назад. Беспокоит то, что библиотека долго не поддеживается <em>(возможно я что-то упускаю)</em>.</p></td><td>2024-11-25T05:41:44.337Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>Что-то упускаешь. Библа самодостаточна, серьезных багов не выявлено, поэтому не обновляется.<br>
+Посмотри форки на гитхабе, там кто-то мелкие багфиксы все же делал. Можно самому собрать без проблем.</p></td><td>2024-11-25T08:53:55.731Z</td></tr><tr><td>bolvan</td><td><p>Главная проблема - подпись драйвера</p></td><td>2024-11-25T10:25:04.681Z</td></tr><tr><td>Xunlei</td><td><p>Да, надо платить по 300$ в год за EV Code Signing Certificate.</p></td><td>2024-11-25T12:58:41.612Z</td></tr><tr><td>bolvan</td><td><p>если бы еще только платить.<br>
+надо быть юридическим лицом.<br>
+и вопрос не пошлет ли Россию микрософт</p>
+<p>И дрова надо сдавать все на проверку в МС</p></td><td>2024-11-25T13:42:24.636Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Ага, каждая вторая игра из-за него вылетает</p></td><td>2024-11-25T21:55:20.699Z</td></tr><tr><td>junkofuruto(FUMOBOMBER)</td><td><p>Просто если посмотреть что к чему в коде у драйвера, то там много каких вызовов уже устарели в 10 винде (поддержка десятки закончится уже в октябре 2025, поэтому в 11+ уже без шансов)</p>
+<p><img src="альтернативыфорки-windivert-13356/c00750c8aa0680f486c1ebbaa010e7b3060cbd75.png" alt="image" data-base62-sha1="roLlz7gPqNjvQnDcW4FFomTBqVT" width="413" height="159"><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="альтернативыфорки-windivert-13356/7580d307f1cfe6f4cc1eb3e4f1fb5ed96324e6b4.png" data-download-href="https://ntc.party/uploads/default/7580d307f1cfe6f4cc1eb3e4f1fb5ed96324e6b4" title="image"><img src="альтернативыфорки-windivert-13356/7580d307f1cfe6f4cc1eb3e4f1fb5ed96324e6b4.png" alt="image" data-base62-sha1="gLtRS7uwYVdUecD38243AfRW6Lq" width="690" height="128" data-dominant-color="705424"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">691×129 5.64 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-11-26T07:51:28.133Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><aside class="quote no-group" data-username="junkofuruto" data-post="7" data-topic="13356">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/junkofuruto/48/13402_2.png" class="avatar"> junkofuruto:</div>
+<blockquote>
+<p>то там много каких вызовов уже устарели в 10 винде</p>
+</blockquote>
+</aside>
+<p>Ну так можно пофиксить и пересобрать. В чем проблема?<br>
+Пример замены от самих мягких</p>
+<pre><code class="lang-auto">// Old code
+PVOID Allocation = ExAllocatePoolWithTag(PagedPool, 100, 'abcd');
+RtlZeroMemory(Allocation, 100);
+// New code
+PVOID Allocation = ExAllocatePool2(POOL_FLAG_PAGED, 100, 'abcd');
+</code></pre>
+<p>Или маппингом</p>
+<pre><code class="lang-auto">// Old code
+PVOID Allocation = ExAllocatePoolWithTag(PagedPool, 100, 'abcd');
+RtlZeroMemory(Allocation, 100);
+
+// New code
+
+// Before headers are pulled in (or compiler defined)
+#define POOL_ZERO_DOWN_LEVEL_SUPPORT
+
+// Once during driver initialization
+// Argument can be any value
+ExInitializeDriverRuntime(0);
+
+// Replacement for each pool allocation
+PVOID Allocation = ExAllocatePoolZero(PagedPool, 100, 'abcd');
+</code></pre>
+<p>Вторым даже проще, я обычно предпочитаю второй подход, так как нередко для новой функции нужно переписывать всё заново.</p>
+<p>И, кстати, deprecated не означает removed. Устаревшие функции в большинстве своем продолжают работать.</p>
+<aside class="quote no-group" data-username="junkofuruto" data-post="7" data-topic="13356">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/junkofuruto/48/13402_2.png" class="avatar"> junkofuruto:</div>
+<blockquote>
+<p>поддержка десятки закончится уже в октябре 2025</p>
+</blockquote>
+</aside>
+<p>Поддержка win10 заканчивается в 2032 году. Это поддержка win10 22H2 в 2025 навернется.<br>
+Я уже устал об этом постоянно писать, надоело, что люди не умеют читать EoS.</p></td><td>2024-11-26T08:53:24.413Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>Игра вылетает не из-за драйвера, а из-за кончености систем защиты, которые ненавидят любой буфер между приложением и стэком.<br>
+С этим драйвером у меня никогда ничего не вылетало, даже игры с изи или батл-ай.</p></td><td>2024-11-26T08:59:02.201Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>В Windows до сих пор есть исключение: при проверке подписи драйверов она доверяет сертификатам, выпущенным до 2015 года и имеющим кросс-подпись от Microsoft. Соответственно, делается подпись таким сертификатом (их можно отыскать в утечках из различных компаний, у меня на руках 6 таких сертификатов и о существовании ещё нескольких известно), а поверх делается отметка времени (указывающая на дату, когда сертификат был валиден) вашим собственным сервером таймштампов и корневой сертификат сервера таймштампов загоняется в доверенные корневые, чтобы Windows доверяла метке времени.</p>
+<p>Антивирусы на это реагируют нервно, т.к. эти утёкшие сертификаты использовались и в грязных целях. Античиты онлайн-игр могут тоже брыкаться. Но это единственный способ получить работающий драйвер без отправки в Microsoft.</p>
+<p>Если кто-то будет заниматься разработкой драйвера, я подпишу.</p></td><td>2024-11-28T20:06:47.119Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><blockquote>
+<p>Да, надо платить по 300$ в год за EV Code Signing Certificate.</p>
+</blockquote>
+<p>Не нужно, см. например, драйвер DiskCryptor, на нём только подпись Microsoft. Подписи разработчика нет.</p></td><td>2024-11-28T20:18:16.084Z</td></tr><tr><td>Chatlanin</td><td><p>на unknowncheats люди переодически выкидывают сертификаты которые античиты уже внесли в свои базы, для других целей они пойдут</p></td><td>2024-11-28T20:59:50.514Z</td></tr><tr><td>D4NICKY(D4NICKY)</td><td><p>Вылетает колда варзон, можно конечно обойти это переименованием файла и правлением WinDivert.dll но довольно небезопасно</p></td><td>2024-11-29T13:20:17.005Z</td></tr><tr><td>Ori</td><td><p>Тут уже был случай когда человек переименовал и его в валоранте забанили. Так что это точно плохая идея.</p></td><td>2024-11-29T13:44:12.179Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Если местные эксперты по написанию драйверов (чей флуд я только что вычистил) вместо чесания языками пришлют автору пулл-реквесты, доводящие драйвер до идела, от этого будет хоть какая-то польза.</p>
+<p>Ответ на вопрос топикстартера дан: известных альтернатив нет, если появятся - свистите, переоткрою тему.</p></td><td>2024-11-29T18:19:02.021Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td></td><td>2024-11-29T18:25:04.836Z</td></tr>
+    </table>
+      </body>
+    </html>

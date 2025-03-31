@@ -1,0 +1,81 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>а-что-на-счёт-quic</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Quqas(Quqas)</td><td><p>без относительно темы тормозов ютуба (хотя именно в ней подчерпнул совет QUIC  отключить)</p>
+<p>какая ситуация с QUIC  в целом? и надо ли его включить\отключить как проверить и т.д.?</p>
+<p>т.е. его определяют безотносительно hostname или как?</p>
+<p>gbd с ним работает или нет?</p>
+<p>стал смотреть по f12 в network timing если h3 протокол то фрагменты типа videoplayback?expire грузятся секунды</p>
+<p>а если h2 они же десятки\сотни миллисекунд</p>
+<p>это то самое замедление или как? хотя все советуют QUIC  как “более лучший”</p>
+<p>и почему тогда gbd это не пробивает?</p>
+<p>а ещё странно что в Microsoft Network Monitor применительно к chrome не вижу udp трафик если h3 . хотя явно должен быть. но возможно считается как other (тоже неясно почему)</p></td><td>2024-07-31T08:25:33.483Z</td></tr><tr><td>bolvan</td><td><blockquote>
+<p>какая ситуация с QUIC в целом? и надо ли его включить\отключить как проверить и т.д.?</p>
+</blockquote>
+<p>надо.<br>
+<code>curl --http3-only -4s -o/dev/null -k --connect-to ::google.com -k -H Host:\ metsalehti-staging-s4uzwwd6nq-lz.a.run.app https://test.googlevideo.com/app/uploads/2021/11/2022-mediakortti.pdf -w %{speed_download}</code><br>
+curl должен быть с поддержкой http3. виндовый с schannel - не подходит</p>
+<blockquote>
+<p>т.е. его определяют безотносительно hostname или как?</p>
+</blockquote>
+<p>расшифровывают initial и секут sni</p>
+<blockquote>
+<p>gbd с ним работает или нет?</p>
+</blockquote>
+<p>нет. zapret работает. в том числе с kyber вариантом многопакетным<br>
+zapret есть и под винду - winws<br>
+замедление обходится через --dpi-desync=fake, равно как и блокировка</p>
+<blockquote>
+<p>это то самое замедление или как? хотя все советуют QUIC как “более лучший”</p>
+</blockquote>
+<p>оно самое похоже.  возможно, какие-то ТСПУ еще не научились дербанить kyber quic, и хромовский дефолт это пробивает</p>
+<blockquote>
+<p>но возможно считается как other (тоже неясно почему)</p>
+</blockquote>
+<p>Microsoft Network Monitor стар. и такие глюки на нем ловил десяток лет назад<br>
+в шарке современные диссекторы, но нет функции фильтра по процессам</p></td><td>2024-07-31T09:12:56.901Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>сейчас что то тестить…<br>
+у меня вот curl selectel + SNI googlevideo<br>
+то до нуля падает даже не успев скачать хоть 1 МБ<br>
+то медленно но верно качает<br>
+то незаметно замедления (канал 1000 КБ/сек)<br>
+такое ощущение что они через round-robin как то балансят запросы<br>
+причем любые. даже IPv6<br>
+curl <strong>-6</strong> -o NUL -k --connect-to ::speedtest.selectel.ru <a href="https://test.googlevideo.com/10MB">https://test.googlevideo.com/10MB</a> -w %{speed_download}<br>
+выдало 62 232</p></td><td>2024-07-31T12:09:42.038Z</td></tr>
+    </table>
+      </body>
+    </html>

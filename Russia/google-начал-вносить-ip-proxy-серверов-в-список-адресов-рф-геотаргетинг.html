@@ -1,0 +1,532 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>google-начал-вносить-ip-proxy-серверов-в-список-адресов-рф-геотаргетинг</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>roman_sv</td><td><p>Заметили, что загрузка видео на youtube через прокси стала надолго повисать. Иногда требуется обновить страницу (а некоторые видео не начинают грузиться даже после нескольких F5).<br>
+В режиме разработчика браузер показывает множество timeout при соединении с googlevideo. Если скопировать адрес из строки с таймаутом, выясняется, что этот хост GGC расположен в РФ. У него соответствующий ip и он пингуется за 23мс. После ряда таймаутов иногда начинает грузить из Киевского GGC.</p>
+<ul>
+<li>Причина не в протечке DNS. -Резолв выполняется внутри прокси. Да и в TUN режиме то же самое. Поэтому можно исключить такую проблему, как выдача DNS сервером IP адреса для конкретного региона, когда резолв идет мимо прокси.</li>
+<li>Смена dns сервера ничего не даёт.</li>
+<li>Утечка по v6 так же исключена полностью.</li>
+<li>webrtc вырублен (тем более, ситуация повторяется при проверке командой <code>yt-dlp --get-url</code>).</li>
+<li><strong>При загрузке через yt-dlp напрямую из терминала NL сервера всё равно отправляет в рф.</strong></li>
+<li>Проблема наблюдается с разными хостингами.</li>
+</ul>
+<p>Но по всей видимости не касается (или в меньшей степени касается) юзеров крупных публичных VPN сервисов, т.к. в отношении них бесполезно проводить маркировку по регионам.</p>
+<p><strong>Если завернуть Warp в Proxy (Detour Warp Through Proxies) или запустить warp прямо на прокси сервере, чтобы google видел IP CF, а не прокси. Тогда timeout до GGC РФ исчезают, видео начинает грузиться нормально. А <code>yt-dlp --get-url</code> получает корректные адреса googlevideo</strong></p>
+<p>Подробнее о проверке симптомов у себя в браузере:</p>
+<aside class="quote no-group" data-username="roman_sv" data-post="62" data-topic="9111" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>Открыть режим разработчика в браузере, вкладка “сеть”.<br>
+Обновить страницу и смотреть на ошибки соединения с названием videoplayback.<br>
+Копировать url из строки с такой ошибкой. Взять из него хост с <code>googlevideo.com</code>. Типа такого <code>rr5---sn-gvnuxaxjvh-n8vk.googlevideo.com</code></p>
+<p>И сделать с ним ping. Если время около 25мс, то сразу понятно, что это РФ GGC. Если не ответит на пинги или время больше. Можно взять ip, который показала команда ping и пробить так <code>https://ipinfo.io/213.59.210.16</code> В нашем примере там: " Moscow, Russia, AS12389 - PJSC Rostelecom, Other providers place this IP in Khabarovsk, Khabarovsk"<br>
+-Видим, что РФ. Убеждаемся, что ютуб посылает европейский сервер загружать поток из РФ, но РФ отвечает таймаутами. Если в итоге видео пошло всё таки после ряда таймаутов, можно скопировать url из строки videoplayback, где ошибки соединения нет. И посмотреть, в каком регионе этот хост. Скорее всего он будет в киеве, а вовсе не в стране физического нахождения прокси сервера.</p>
+<p>Всё это не нормально. При подключении через цепочку прокси+CDN CF таймаутов вообще нет. А видео грузится из страны физического расположения прокси сервера.</p>
+</blockquote>
+</aside>
+<p><strong>UPD:</strong><br>
+После  <a href="https://support.google.com/websearch/workflow/9308722?hl=en" rel="noopener nofollow ugc">Report IP problems - Google Search Help </a>  IP пробыл в Нидерландах сутки, а затем вернулся обратно в РФ. Но при этом уже нет таймаутов. Только 403 ошибки.<br>
+Снова посылает на РФ хосты, но сейчас они уже отдают видео поток, чего не наблюдалось несколько дней назад (когда качало только из киева, а РФ показывала таймауты).</p>
+<p>На проксе из другого хостинга, для которой тикетов не создавалось и регион не менялся, тоже починился просмотр.</p>
+<p>Интересное наблюдение:</p>
+<ol>
+<li>Когда IP был привязан к NL региону, даже 403 ошибок не возникало. Сразу выдавало корректные хосты для googlevideo.</li>
+<li>Аналогично при работе через CDN CF: ни одной 403 ошибки - все соединения с googlevideo корректные.<br>
+Т.е. оно вроде и починилось, просмотр не виснет теперь. Но, когда регион IP, который видит google, соответствует фактическому местоположению этого сервера, то работает без 403 ошибок. И без петли размером в пол мира из рф в NL и обратно.</li>
+</ol>
+<aside class="quote no-group" data-username="navion" data-post="34" data-topic="9111" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/navion/48/3845_2.png" class="avatar"> navion:</div>
+<blockquote>
+<p>Этот геотаргетинг начался летом 2023. В линуксе можно выдернуть регион так:</p>
+<pre><code class="lang-auto">curl -s https://www.google.com/ 2&gt;&amp;1 | 
+grep -o -P '(?&lt;=www\.google\.ru\/intl\/).*(?=\/about\/products)'
+</code></pre>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="Quarx2k" data-post="22" data-topic="9111" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quarx2k/48/6555_2.png" class="avatar"> Quarx2k:</div>
+<blockquote>
+<p>Да гугл так делает. Заметил еще до ютуба. Пользовался Gemini успешно, потом он стал писать, что в моей стране не поддерживается. Решил погуглить на эту тему и нашел инфу, что гугл присваивает ип адресу другую страну на основании многих факторов где он используется.<br>
+Сейчас если на VPS Нидерландов с v4 сделать yt-dlp --get-url то отдается в 100% московский GGC и идут таймауты. Если на сервере запустить клиента WG до CF, то гугл начинает отдавать нормальный иностранный адрес до <a href="http://googlevideo.com/" rel="noopener nofollow ugc">googlevideo.com </a>.<br>
+Зарепортил гуглу свой ип <a href="https://support.google.com/websearch/workflow/9308722?hl=en" rel="noopener nofollow ugc">Report IP problems - Google Search Help </a> и написал хостеру. Может что-то выйдет.<br>
+По другим базам ип бьется как NL и SW, но никак не Россия.</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="navion" data-post="27" data-topic="9111" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/navion/48/3845_2.png" class="avatar"> navion:</div>
+<blockquote>
+<p>Они меняют привязку, но через месяц <em>вернут на родину</em> при утечке локации гуглоаккаунта через карты, использовании без прокси и т.п.<br>
+При этом на адресах VPN-провайдеров вроде Протона смена локации не происходит - видимо куча пользователей из разных стран ломают статистику и берётся адрес из базы RIR.</p>
+</blockquote>
+</aside>
+<p>Из другого треда:</p>
+<aside class="quote no-group" data-username="Shii" data-post="71" data-topic="8259" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shii/48/4750_2.png" class="avatar"><a href="https://ntc.party/t/%D0%BD%D0%B8%D0%B7%D0%BA%D0%B0%D1%8F-%D1%81%D0%BA%D0%BE%D1%80%D0%BE%D1%81%D1%82%D1%8C-%D0%BF%D1%80%D0%B8-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B8-vless-reality/8259/71">Низкая скорость при использовании VLESS + REALITY</a></div>
+<blockquote>
+<p>У меня немного другая проблема с vless reality. Сервер в Финляндии, до него из дома стабильные 500 мбит в обе стороны. Ютуб работает странно, иногда при открытии ролика буфер падает до нуля и проигрывание останавливается через 10-20 секунд, но если обновить страницу почти со 100% вероятностью начинает работать и буферизировать нормально. Уж не знаю в какую сторону копать. Так же при входе на главную страницу ютуба в дебаг панели браузера вижу несколько странных GET запросов с рандомными IP адресами в них и ответом 403. URL вида:</p>
+<p><code>https://rr2---sn-q4fl6ndl.googlevideo.com/videoplayback?expire=064****1&amp;ei=o6EQ******HKP&amp;ip=13.64.##.##&amp;id=o-AFGRYae*2gwAlE</code></p>
+<p>(звёздочки и решетки я вставил)<br>
+Коннект с vps тестировал, потерь пакетов нет. Одинаковые проблемы в Firefox, Chrome, Edge.</p>
+</blockquote>
+</aside></td><td>2024-08-10T12:32:52.810Z</td></tr><tr><td>roman_sv</td><td><p>Думаю, что для залета в базу IP РФ достаточно недельку посмотреть ютуб через проксю.<br>
+В других GeoIP базах адрес будет правильно показывать регион. Но у гугла своя отдельная база регионов.</p></td><td>2024-08-10T12:39:47.925Z</td></tr><tr><td>Xunlei</td><td><p>DNS тут не причём, писал об этом:</p><aside class="quote" data-post="439" data-topic="8074">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-youtube-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/8074/439">Обсуждение: Замедление YouTube в России</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    По всей видимости в каждом скачанном блобе с американского сервера есть рекомендация обратится к локальному GGC для моей сети, браузер каждый раз пытается туда залезть, не получает ответа (скрипт не запоминает, что предыдущее обращение было ошибочным), и лазит опять на американский амстердамский. Для снижения паразитного траффика стал добавлять такие домены в NX Domain (в кэше всего у меня таких триста штук).
+  </blockquote>
+</aside>
+<aside class="quote" data-post="6" data-topic="8673">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BF%D0%BB%D0%B0%D0%B3%D0%B8%D0%BD-tdns-%D0%B4%D0%BB%D1%8F-%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D0%B0%D1%86%D0%B8%D0%B8-%D0%BD%D0%B5%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D1%8B%D1%85-ggc/8673/6">Плагин TDNS для фильтрации недоступных GGC</a> <a class="badge-category__wrapper " href="/c/community-software/27"><span data-category-id="27" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Anti-censorship software of our community developers"><span class="badge-category__name">Community software</span></span></a>
+  </div>
+  <blockquote>
+    Перепроверил ещё раз, забыл самое важное написать: 
+Необходимо *.youtube.com пустить через прокси европейский/американский, даже работает на бесплатном WARP.  *.googlevideo.com идёт через byedpi. Если *.youtube.com идёт напрямую, то видео не грузит. Можно в SwitchyOmega это настроить.
+  </blockquote>
+</aside>
+<p>
+Если попадаются видео, скрипт которых не хочет лезть на европейские сервера, запускаю через прокси, а после загрузки первого куска пускаю через byedpi остальное.</p></td><td>2024-08-10T12:46:59.026Z</td></tr><tr><td>roman_sv</td><td><aside class="quote no-group" data-username="Xunlei" data-post="3" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>DNS тут не причём</p>
+</blockquote>
+</aside>
+<p>Я тоже написал, что днс тут ни при чем.<br>
+Локальный ggc для IP прокси сервера в NL это точно не GGC в РФ. А когда после прокси в detour режиме warp, то гугл уже правильно отправляет на ggc в NL или лондоне, например. Вы читали пост вообще?</p></td><td>2024-08-10T12:48:59.196Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="roman_sv" data-post="4" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>Вы читали пост вообще?</p>
+</blockquote>
+</aside>
+<p>Да, три раза перечитал.</p></td><td>2024-08-10T12:49:50.059Z</td></tr><tr><td>0ka(0ka)</td><td><p>Гугл отправляет вас на ру кеш серверы и вы видите в этом что-то большее чем распределение нагрузки на серверы? Иначе я не понял поста</p></td><td>2024-08-10T12:55:29.052Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="roman_sv" data-post="2" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>Думаю, что для залета в базу IP РФ достаточно недельку посмотреть ютуб через проксю</p>
+</blockquote>
+</aside>
+<p>Четыре года смотрю через американскую проксю, в базу не попадал пока.</p></td><td>2024-08-10T12:56:28.079Z</td></tr><tr><td>roman_sv</td><td><p>Что непонятного? Гугл отправляет амстердамского юзера грузить видео из РФ. Но РФ GGC вообще не могут отвечать на запросы из амстера. Если вы тут не видите ничего странного, ну ладно. Будете просто страничку почаще обновлять, пока к киеву не прицепится.</p></td><td>2024-08-10T12:58:32.905Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="roman_sv" data-post="8" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>Гугл отправляет амстердамского юзера грузить видео из РФ</p>
+</blockquote>
+</aside>
+<p>Возможно IP этого юзера привязан к российскому юр. лицу.</p></td><td>2024-08-10T13:00:26.173Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="roman_sv" data-post="8" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>Гугл отправляет амстердамского юзера грузить видео из РФ.</p>
+</blockquote>
+</aside>
+<p>Браузер чистый? Вход в аккаунт не выполнен? Попробуйте в incognito mode.</p></td><td>2024-08-10T13:00:46.308Z</td></tr><tr><td>0ka(0ka)</td><td><p>что в этом странного? так работают кеш серверы, они созданы для снижения нагрузки на основные серверы, а то что в рф они лагучие, гугл еще не разобрались. я несколько месяцев назад мониторил трафик на молдавской впс, там видео грузились с турецких кеш серверов местных инет провайдеров. на немецкой впс щас посмотрел: в основном франкфурт, но проскакивает сша (as google)</p></td><td>2024-08-10T13:00:46.618Z</td></tr><tr><td>roman_sv</td><td><aside class="quote no-group" data-username="anon60595749" data-post="10" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="/letter_avatar_proxy/v4/letter/a/85e7bf/48.png" class="avatar"> anon60595749:</div>
+<blockquote>
+<p>Браузер чистый</p>
+</blockquote>
+</aside>
+<p>Я же сказал, что <code>yt-dlp --get-url</code> показывает то же поведение, а это наиболее чистый браузер по сути из всех возможных. Без варпа получает адреса в РФ. С варпом получает нормальные адреса, близкие к прокси серверу.<br>
+Я больше не будут отвечать на одни и те же вопросы, раскрытые в посте.</p></td><td>2024-08-10T13:03:12.481Z</td></tr><tr><td>0ka(0ka)</td><td><p>в гугл поиске пролистайте вниз, там будет написано к какой стране гугл вас относит. на чистых айпи адресах берет локацию по geoip, но если как-то засветить реальную локацию (может по gps, точно не знаю), то она поменяется и привяжется к ip адресу</p></td><td>2024-08-10T13:07:44.988Z</td></tr><tr><td>Xunlei</td><td><p>Пробейте IP амстердамского юзера по базам, мои европейские VPS приобретённые у хостеров в РФ в половине случаев определяются как РФ.</p>
+<aside class="quote no-group" data-username="roman_sv" data-post="1" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>И НЕ наблюдалась на другом от vpnGen. Сегодня стала наблюдаться и на проксе от vpnGen</p>
+</blockquote>
+</aside>
+<p>Сейчас попробую полностью через прокси подключится и проверить перенаправление в РФ.</p></td><td>2024-08-10T13:08:45.070Z</td></tr><tr><td>artenox</td><td><p>Я бы всё-таки не сбрасывал со счетов dns, слышал doh передаёт регион для распределения нагрузки. Попробуйте 9.9.9.9, он не передаёт. Вдруг, он у вас всё-таки напрямую или по accept language какому-нибудь смотрит.</p></td><td>2024-08-10T13:09:11.184Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Xunlei" data-post="14" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>Сейчас попробую полностью через прокси подключится и проверить перенаправление в РФ.</p>
+</blockquote>
+</aside>
+<p>Проверил: Полностью через прокси через Ctrl+F5 загрузил страницу — скрипт в РФ не лезет. Если во время просмотра переключить <code>*.googlevideo.com</code> на byedpi, то скрипт начинает долбится в РФ, мой плагин это отсекает и видео продолжает грузится из старого места.</p>
+<p>Добавлено: Если переключить обратно всё через прокси, то скрипт ломается и продолжает пытается подключится к РФ через американский прокси, хотя с точки зрения кэша надо перестать это делать.</p>
+<aside class="quote no-group" data-username="artenox" data-post="15" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>по accept language какому-нибудь смотрит.</p>
+</blockquote>
+</aside>
+<p>У меня en-US, по часовому поясу спуфинг Лондона.</p></td><td>2024-08-10T13:15:55.064Z</td></tr><tr><td>roman_sv</td><td><aside class="quote no-group" data-username="artenox" data-post="15" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>9.9.9.9</p>
+</blockquote>
+</aside>
+<p>Киев и москва через амстердамский прокси. Таймаутов не меньше. Появились еще таймауты до GGC в сша.<br>
+9999 выдало в США WoodyNet</p></td><td>2024-08-10T13:18:11.727Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="roman_sv" data-post="17" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>Киев и москва через амстердамский прокси.</p>
+</blockquote>
+</aside>
+<p>Может быть дело в видео, которое вы качаете? Можете предположить, в каких странах его целевая аудитория? В Амстердаме оно кому-нибудь интересно? Как вариант - отдается из кеша, где подавляющее число зрителей, несмотря на ваш европейский IP-адрес.</p></td><td>2024-08-10T13:23:50.983Z</td></tr><tr><td>roman_sv</td><td><aside class="quote no-group" data-username="anon60595749" data-post="18" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="/letter_avatar_proxy/v4/letter/a/85e7bf/48.png" class="avatar"> anon60595749:</div>
+<blockquote>
+<p>Может быть дело в видео</p>
+</blockquote>
+</aside>
+<p>Видео из тайваня на китайском для очень узко специализированной аудитории.<br>
+<code>https://www.youtube.com/watch?v=8BR987FOuF8</code></p>
+<p>Запрос непосредственно из сервера без проксей - лезет в рф.</p></td><td>2024-08-10T13:58:58.151Z</td></tr><tr><td>Xunlei</td><td><p>Открыл — лезет в РФ и не кажет, нажал Ctrl+F5 — начал грузить из Франкфурта и показывать.</p></td><td>2024-08-10T14:09:36.373Z</td></tr><tr><td>roman_sv</td><td><p>Вот именно. До f5 посылает в рф на хосты, которые даже отвечать не хотят. Но при этом часто не выдает другие.</p></td><td>2024-08-10T14:56:24.488Z</td></tr><tr><td>Quarx2k(Nickolay)</td><td><p>Да гугл так делает. Заметил еще до ютуба. Пользовался Gemini успешно,  потом он стал писать, что в моей стране не поддерживается. Решил погуглить на эту тему и нашел инфу, что гугл присваивает ип адресу другую страну на основании многих факторов где он используется.<br>
+Сейчас если на VPS Нидерландов  с v4 сделать yt-dlp  --get-url  то отдается в 100% московский GGC и идут таймауты. Если на сервере запустить клиента WG до CF, то гугл начинает отдавать нормальный иностранный адрес до <a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a>.<br>
+Зарепортил гуглу свой ип <a href="https://support.google.com/websearch/workflow/9308722?hl=en" class="inline-onebox" rel="noopener nofollow ugc">Report IP problems - Google Search Help</a>  и написал хостеру. Может что-то выйдет.<br>
+По другим базам ип бьется как NL и SW, но никак не Россия.</p></td><td>2024-08-10T17:03:26.053Z</td></tr><tr><td>Tyman</td><td><p>За неделю-две использования VPN в Нидерландах я видел как сервера были то в Украине (Киев, Днепр, Харьков), РФ (Спб), Нидерландах… думаю в плане ютуба так в первую очередь раскидывают нагрузку серверов и канала.</p>
+<p>И при обращении к googlevideo передается ип определенный на youtube, и если ип разные то некоторые googlevideo могут не отдать видео</p></td><td>2024-08-10T23:38:20.775Z</td></tr><tr><td>roman_sv</td><td><p>При проверке в yt-dlp непосредственно из сервера без проксей и браузеров всё равно выдает РФные гуглвидео. Не надо придумывать лишние сущности.<br>
+Да и не передается нигде айпишник отдельно. Уже исключили днс и в yt-dlp внутри отсылаемых данных нет IP клиента. Гугл видит тот ip, который к нему обратился и никакой другой.</p></td><td>2024-08-10T23:50:34.239Z</td></tr><tr><td>Tyman</td><td><p>В браузере при запросе к гуглвидео ип передается, были сервера где при различии в ип не отдавали видео, но у вас что то другое раз с хоста не получается даже</p>
+<p><img src="google-начал-вносить-ip-proxy-серверов-в-список-адресов-рф-геотаргетинг/30865e8d00c1615fdd429bafa04e8389360135a8.png" alt="Снимок экрана 2024-08-11 025957" data-base62-sha1="6VgNOTuOdhi20qHqpMpTwYgz0Io" width="553" height="96"></p></td><td>2024-08-11T00:22:47.304Z</td></tr><tr><td>roman_sv</td><td><p>Да я имел ввиду, что домашний ip нигде не фигурирует, когда через прокси запрос идет.<br>
+А когда непосредственно из сервера, так тем более не может взяться никакого РФ ip при отправке запроса.</p></td><td>2024-08-11T06:46:05.551Z</td></tr><tr><td>navion</td><td><aside class="quote no-group" data-username="Quarx2k" data-post="22" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quarx2k/48/6555_2.png" class="avatar"> Quarx2k:</div>
+<blockquote>
+<p>Зарепортил гуглу свой ип <a href="https://support.google.com/websearch/workflow/9308722?hl=en" rel="noopener nofollow ugc">Report IP problems - Google Search Help </a> и написал хостеру. Может что-то выйдет.</p>
+</blockquote>
+</aside>
+<p>Они меняют привязку, но через месяц <em>вернут на родину</em> при утечке локации гуглоаккаунта через карты, использовании без прокси и т.п.</p>
+<p>При этом на адресах VPN-провайдеров вроде Протона смена локации не происходит - видимо куча пользователей из разных стран ломают статистику и берётся адрес из базы RIR.</p></td><td>2024-08-11T11:37:13.231Z</td></tr><tr><td>0ka(0ka)</td><td><p>Так никто и не посмотрел…</p></td><td>2024-08-11T11:47:12.636Z</td></tr><tr><td>Xunlei</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="google-начал-вносить-ip-proxy-серверов-в-список-адресов-рф-геотаргетинг/d5418ee45aaa8916ff543f65976d32d0b0e4772a.png" data-download-href="https://ntc.party/uploads/default/d5418ee45aaa8916ff543f65976d32d0b0e4772a" title="image"><img src="google-начал-вносить-ip-proxy-серверов-в-список-адресов-рф-геотаргетинг/d5418ee45aaa8916ff543f65976d32d0b0e4772a_2_690x333.png" alt="image" data-base62-sha1="uqy9QY8eGG6GcfmgIF3jlkFOMSm" width="690" height="333" srcset="google-начал-вносить-ip-proxy-серверов-в-список-адресов-рф-геотаргетинг/d5418ee45aaa8916ff543f65976d32d0b0e4772a_2_690x333.png, google-начал-вносить-ip-proxy-серверов-в-список-адресов-рф-геотаргетинг/d5418ee45aaa8916ff543f65976d32d0b0e4772a_2_1035x499.png 1.5x, google-начал-вносить-ip-proxy-серверов-в-список-адресов-рф-геотаргетинг/d5418ee45aaa8916ff543f65976d32d0b0e4772a_2_1380x666.png 2x" data-dominant-color="FDFDFD"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1600×774 17.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Где тут посмотреть?</p></td><td>2024-08-11T11:57:06.902Z</td></tr><tr><td>0ka(0ka)</td><td><p>Внизу слева обычно написано, на странице с результатами поиска тоже есть</p></td><td>2024-08-11T12:00:25.805Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Как я понял, если ничего не пишет, значит USA.</p></td><td>2024-08-11T12:07:49.972Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Есть сервер из Финляндии у российского провайдера, Google пишет Россия.</p></td><td>2024-08-11T12:10:58.978Z</td></tr><tr><td>roman_sv</td><td><p>Да не важно, что там написано. У меня пишет россия под проксей, которая пока еще не внесена а базу РФ и получает корректные хосты googlevideo из NL.</p></td><td>2024-08-11T12:26:26.194Z</td></tr><tr><td>navion</td><td><p>Этот геотаргетинг начался летом 2023. В линуксе можно выдернуть регион так:</p>
+<pre><code class="lang-auto">curl -s https://www.google.com/ 2&gt;&amp;1 | 
+grep -o -P '(?&lt;=www\.google\.ru\/intl\/).*(?=\/about\/products)'
+</code></pre></td><td>2024-08-11T12:37:49.714Z</td></tr><tr><td>Xunlei</td><td><p>Интересно, как быстро гугл убёрет недоступные серверы в РФ из выдачи.</p></td><td>2024-08-11T12:58:27.384Z</td></tr><tr><td>Quarx2k(Nickolay)</td><td><p>Да напрямую с NL VPS выдало RU =(</p></td><td>2024-08-11T13:15:31.697Z</td></tr><tr><td>spellozz(Spellozz)</td><td><p>У меня был туннель настроен на опенврт с вг и влесс с точечной маршрутизацией по доменам. Добавил кучу гугловских доменов вручную И на обоих лагало. И получалось так что открывается сайт долго, но если открыть видос, то тянет 4к нормально. В итоге я плюнул на этот авторезолвинг и зафигачил все гугловские подсети в статические маршруты и все как рукой сняло.</p>
+<p>UPD: если полностью заворачивать трафик или по приложениям с телефона, то проблем так же нет. Проблема именно в точечной маршрутизации. Как будто имеется хост, который вообще никак не фигурирует в списках обхода блокировок , по которому гугл определяет местоположение. Поэтому было решено весь гугл завернуть в тунель</p></td><td>2024-08-11T13:24:18.450Z</td></tr><tr><td>Xunlei</td><td><p>ru только напрямую и через warp, через остальные прокси ничего не написало</p>
+<aside class="quote no-group" data-username="spellozz" data-post="37" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/spellozz/48/3875_2.png" class="avatar"> spellozz:</div>
+<blockquote>
+<p>если полностью заворачивать трафик или по приложениям с телефона, то проблем так же нет</p>
+</blockquote>
+</aside>
+<p>Да, опросил пользователей тунелей, которые всё машрутизируют, проблем нет.</p></td><td>2024-08-11T14:31:30.969Z</td></tr><tr><td>roman_sv</td><td><p>Всё. У меня ютуб через NL полностью умер. Ни один видос не грузится дольше пары минут. Если вчера после серии таймаутов хотя бы кидало на киевский хост, который отдавал видео. То сегодня бесконечно долбится в таймауты. Хоть ты 50 раз F5 жми.</p>
+<p>Стоит только скрыть прокси сервер за CF, сразу идёт загрузка и ни одного таймаута в логе браузера.</p>
+<p><em>Я уже готов поверить в сговор. Тем более после того, как яблоко начало скрывать vpn приложения для рф.</em></p></td><td>2024-08-11T14:41:44.444Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="roman_sv" data-post="39" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>Хоть ты 50 раз F5 жми</p>
+</blockquote>
+</aside>
+<p>А Ctrl+F5 не помогает?</p>
+<aside class="quote no-group" data-username="roman_sv" data-post="39" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>То сегодня бесконечно долбится в таймауты.</p>
+</blockquote>
+</aside>
+<p>А в чей IP ломится, московский?</p>
+<aside class="quote no-group" data-username="roman_sv" data-post="39" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>видос не грузится дольше пары минут</p>
+</blockquote>
+</aside>
+<p>Никогда такого не ловил, была проблема <code>OgQIAxAK</code>, либо не грузил с момента открытия страницы, до предёргивания прокси или Ctrl+F5.</p></td><td>2024-08-11T14:47:57.983Z</td></tr><tr><td>spellozz(Spellozz)</td><td><p>Я обычно первым делом после создания впн на сервачке лезу проверять как у меня открывается сайт делла и как меня узнает гугль. Если не подходит , удаляю и регаю до тех пор пока нормально не определит</p></td><td>2024-08-11T14:51:59.633Z</td></tr><tr><td>Shii</td><td><p>Меня стало чаще кидать на российские сервера, но всё ещё работает. Что странно, yt-dlp --get-url с vds российские сервера гугл видео вообще не выдает (чаще всего загружает с Одессы), а вот с браузеров на локальной машине периодически проскакивает. Проверял на dnsleak, приватный режим, всё чисто.</p></td><td>2024-08-11T15:13:19.620Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Shii" data-post="42" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shii/48/4750_2.png" class="avatar"> Shii:</div>
+<blockquote>
+<p>Проверял на dnsleak</p>
+</blockquote>
+</aside>
+<p>Есть ещё <a href="https://en.wikipedia.org/wiki/EDNS_Client_Subnet" rel="noopener nofollow ugc">ECS</a>, но стандарными резолвероми вроде не заполняется.</p></td><td>2024-08-11T15:20:14.159Z</td></tr><tr><td>xofamim548</td><td><aside class="quote no-group" data-username="spellozz" data-post="37" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/spellozz/48/3875_2.png" class="avatar"> spellozz:</div>
+<blockquote>
+<p>В итоге я плюнул на этот авторезолвинг и зафигачил все гугловские подсети в статические маршруты и все как рукой сняло.</p>
+</blockquote>
+</aside>
+<p>Расскажите, пожалуйста: а как?</p></td><td>2024-08-11T15:36:57.809Z</td></tr><tr><td>spellozz(Spellozz)</td><td><p><a href="https://www.gstatic.com/ipranges/goog.json" rel="noopener nofollow ugc">https://www.gstatic.com/ipranges/goog.json</a> список подсетей . добавлять в зависимости от роутера</p></td><td>2024-08-11T15:41:42.160Z</td></tr><tr><td>Quarx2k(Nickolay)</td><td><p>Не поможет если ип впс уже внесен в геотрекинг как российский. Даже с самого впс работать не будет.</p></td><td>2024-08-11T15:45:08.012Z</td></tr><tr><td>xofamim548</td><td><p>А, они даже сами предоставляют. Благодарю, не знал.</p></td><td>2024-08-11T15:51:23.502Z</td></tr><tr><td>artenox</td><td><aside class="quote no-group" data-username="roman_sv" data-post="1" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>начинает грузить видео из Киевского GGC</p>
+</blockquote>
+</aside>
+<p>К слову, cloudflare warp vpn (wireguard) Новосибирск (вроде как ru ip, но без цензуры). Тоже тянет видео с киевского GGC (74.125.15.224). Интересно, почему не из Белоруси.<br>
+А вычислил регион я так: просто посмотрел, где меньше всего <a href="https://ping-admin.ru/free_ping/">ping</a> (1мс).</p>
+<p>Upd: без warp тянул из Москвы (173.194.179.217). У меня провайдер Йота.</p></td><td>2024-08-11T18:38:38.439Z</td></tr><tr><td>voper</td><td><p>Вопрос как обойти все это великолепие, немецкий VPS показывает ру регион, как и Бинг, однако по ipinfo показывает регион DE<br>
+PS: через прокси видосы грузит , bing ai пашет</p></td><td>2024-08-11T19:43:24.168Z</td></tr><tr><td>navion</td><td><aside class="quote no-group" data-username="Xunlei" data-post="38" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>ru только напрямую и через warp, через остальные прокси ничего не написало</p>
+</blockquote>
+</aside>
+<p>Там может быть капча без логина, если Гуглу что-то не нравится. А warp <a href="https://developers.cloudflare.com/warp-client/known-issues-and-faq/#does-warp-reveal-my-ip-address-to-websites-i-visit" rel="noopener nofollow ugc">отдаёт</a> серверу IP из твоей реальной локации.</p></td><td>2024-08-11T20:23:10.633Z</td></tr><tr><td>Dhohbr</td><td><aside class="quote no-group" data-username="spellozz" data-post="45" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/spellozz/48/3875_2.png" class="avatar"> spellozz:</div>
+<blockquote>
+<p><a href="https://www.gstatic.com/ipranges/goog.json">https://www.gstatic.com/ipranges/goog.json </a> список подсетей</p>
+</blockquote>
+</aside>
+<p>Здесь только адреса, принадлежащие гуглу, там нет локальных GGC. Так, для информации, если кто-то будет использовать этот список для проксирования Youtube.</p></td><td>2024-08-12T00:27:00.836Z</td></tr><tr><td>spellozz(Spellozz)</td><td><p>А что , гуглу не принадлежат гугловские ggc?))) Выше определили Киевский ggc, он есть в списке</p></td><td>2024-08-12T04:00:13.546Z</td></tr><tr><td>Dhohbr</td><td><p>Я глубоко не погружался в работу GGC. Но я собирал адреса *.googlevideo.com в своей домашней сети, выяснил что кроме узлов в США, я еще подключаюсь к Московскому (87.226.176.0), Владикавказскому (79.133.77.0), Иркутскому (176.59.159.0). Точных ip и имен нет, т.к. добавлял с маской /24. Эти адреса принадлежат РФ провайдерам, в гугловом списке их нет.</p>
+<p>Вот, нашел</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><a href="http://rr13---sn-n8v7kn7e.googlevideo.com">rr13---sn-n8v7kn7e.googlevideo.com</a>      173.194.163.159 Истон<br>
+<a href="http://rr9---sn-n8v7kn7l.googlevideo.com">rr9---sn-n8v7kn7l.googlevideo.com</a>       173.194.163.219 Истон<br>
+<a href="http://r15---sn-n8v7kn7s.googlevideo.com">r15---sn-n8v7kn7s.googlevideo.com</a>       173.194.176.33  Истон<br>
+<a href="http://rr2---sn-n8v7kn7z.googlevideo.com">rr2---sn-n8v7kn7z.googlevideo.com</a>       173.194.176.84  Истон<br>
+<a href="http://rr14---sn-n8v7kn7y.googlevideo.com">rr14---sn-n8v7kn7y.googlevideo.com</a>      173.194.177.160 Истон<br>
+<a href="http://rr6---sn-n8v7kn7k.googlevideo.com">rr6---sn-n8v7kn7k.googlevideo.com</a>       173.194.177.24  Истон<br>
+<a href="http://rr8---sn-n8v7knee.googlevideo.com">rr8---sn-n8v7knee.googlevideo.com</a>       173.194.178.26  Истон<br>
+<a href="http://rr13---sn-n8v7znse.googlevideo.com">rr13---sn-n8v7znse.googlevideo.com</a>      173.194.179.95  Истон<br>
+<a href="http://r13---sn-n8v7knes.googlevideo.com">r13---sn-n8v7knes.googlevideo.com</a>       173.194.180.159 Истон<br>
+<a href="http://rr2---sn-n8v7znsr.googlevideo.com">rr2---sn-n8v7znsr.googlevideo.com</a>       173.194.181.212 Истон<br>
+<a href="http://rr5---sn-n8v7znsr.googlevideo.com">rr5---sn-n8v7znsr.googlevideo.com</a>       173.194.181.215 Истон<br>
+<a href="http://rr14---sn-n8v7znsd.googlevideo.com">rr14---sn-n8v7znsd.googlevideo.com</a>      173.194.181.96  Истон<br>
+<a href="http://r11---sn-n8v7kne6.googlevideo.com">r11---sn-n8v7kne6.googlevideo.com</a>       74.125.110.219  США<br>
+<a href="http://rr3---sn-4g5ednsy.googlevideo.com">rr3---sn-4g5ednsy.googlevideo.com</a>       74.125.173.136  Моунтайн-Вью<br>
+<a href="http://rr1---sn-gvnuxaxjvh-88vz.googlevideo.com">rr1---sn-gvnuxaxjvh-88vz.googlevideo.com</a>        79.133.77.108   Владикавказ<br>
+<a href="http://rr2---sn-gvnuxaxjvh-88vz.googlevideo.com">rr2---sn-gvnuxaxjvh-88vz.googlevideo.com</a>        79.133.77.109   Владикавказ<br>
+<a href="http://rr3---sn-gvnuxaxjvh-88vz.googlevideo.com">rr3---sn-gvnuxaxjvh-88vz.googlevideo.com</a>        79.133.77.110   Владикавказ<br>
+<a href="http://rr1---sn-gvnuxaxjvh-88vs.googlevideo.com">rr1---sn-gvnuxaxjvh-88vs.googlevideo.com</a>        87.226.176.204  Москва<br>
+<a href="http://rr2---sn-gvnuxaxjvh-88vs.googlevideo.com">rr2---sn-gvnuxaxjvh-88vs.googlevideo.com</a>        87.226.176.205  Москва<br>
+<a href="http://rr3---sn-gvnuxaxjvh-88vs.googlevideo.com">rr3---sn-gvnuxaxjvh-88vs.googlevideo.com</a>        87.226.176.206  Москва<br>
+<a href="http://rr2---sn-gvnuxaxjvh-3i8l.googlevideo.com">rr2---sn-gvnuxaxjvh-3i8l.googlevideo.com</a>        92.50.230.13    Кызыл<br>
+<a href="http://rr4---sn-gvnuxaxjvh-3i8l.googlevideo.com">rr4---sn-gvnuxaxjvh-3i8l.googlevideo.com</a>        92.50.230.15    Кызыл</p>
+</details></td><td>2024-08-12T05:47:46.452Z</td></tr><tr><td>Shii</td><td><p>Возникла идея. А может ли быть такое, что ютуб так же руководствуется часовым поясом vps при выборе сервера для отдачи видео? Я на своём сервере поставил московский часовой пояс, т.к. с финским поясом часть сайтов тупила и не открывалась или открывалась очень долго после нескольких обновлений.</p></td><td>2024-08-12T10:36:56.187Z</td></tr><tr><td>artenox</td><td><p>Кстати, попробуйте отключить Kyber. Я заметил, что Kyber ломает <code>googlevideo.com</code> (только его) в РФ.</p></td><td>2024-08-12T10:40:08.201Z</td></tr><tr><td>Shii</td><td><p>Абсолютно одинаково, что с ним, что без него. Просто иногда попадаются сервера googlevideo на ростелекоме и в этом случае загрузка останавливается. Помогает обновление страницы.</p></td><td>2024-08-12T11:16:43.607Z</td></tr><tr><td>roman_sv</td><td><aside class="quote no-group" data-username="Shii" data-post="56" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shii/48/4750_2.png" class="avatar"> Shii:</div>
+<blockquote>
+<p>Помогает обновление страницы.</p>
+</blockquote>
+</aside>
+<p>Пока…<br>
+Мне тоже помогало раньше. Сейчас можно тыкать F5 до посинения, но без CF не подсунет рабочих googlevideo.<br>
+Сам сайт с картинками и превью при этом работает ок и без CF.</p></td><td>2024-08-12T11:22:25.160Z</td></tr><tr><td>Lingihn(Михаил)</td><td><p>Начал сегодня получать 400-500кбс в Ютуб (connection speed) через домашний интернет, жуткие лаги через VPN (VMESS). Ролик постоянно пытается открыться в 144-480p. Другие сайты работают корректно, с интернетом все в порядке, сервер в норме. Наткнулся на эту тему. Выглядит очень похожим. Как я могу проверить, оно ли это? и как с этим бороться.<br>
+upd: Сервер в Эстонии, отправил команду с VPN сервера - получил ru</p></td><td>2024-08-13T07:53:36.577Z</td></tr><tr><td>artenox</td><td><p>Google начал вносить IP Proxy серверов в список адресов РФ (геотаргетинг). При этом они физически не RU и соединиться с российскими GGC не могут?<br>
+Потому что, настоящие RU клиенты идут через московский GGC, например.<br>
+Как я говорил, cloudflare vpn псевдоru пошёл в Украину, но успешно.<br>
+Да, это может быть проблемой.</p></td><td>2024-08-13T08:11:23.109Z</td></tr><tr><td>User69</td><td><p>del</p></td><td>2024-08-13T08:20:06.714Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Lingihn" data-post="58" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/lingihn/48/2895_2.png" class="avatar"> Lingihn:</div>
+<blockquote>
+<p>Как я могу проверить, оно ли это?</p>
+</blockquote>
+</aside>
+<p>В инструментах разработчика в браузере. Смотрите домен URL с которого загружается видео и проверяете трасировкой куда маршрут идёт.</p>
+<aside class="quote no-group" data-username="Lingihn" data-post="58" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/lingihn/48/2895_2.png" class="avatar"> Lingihn:</div>
+<blockquote>
+<p>и как с этим бороться</p>
+</blockquote>
+</aside>
+<p>Недоступные сети в РФ можно заблокировать в файле hosts или <a href="https://ntc.party/t/%D0%BF%D0%BB%D0%B0%D0%B3%D0%B8%D0%BD-tdns-%D0%B4%D0%BB%D1%8F-%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D0%B0%D1%86%D0%B8%D0%B8-%D0%BD%D0%B5%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D1%8B%D1%85-ggc/8673">так</a>.</p></td><td>2024-08-13T08:46:47.624Z</td></tr><tr><td>roman_sv</td><td><p>Открыть режим разработчика в браузере, вкладка “сеть”.<br>
+Обновить страницу и смотреть на ошибки соединения с названием videoplayback.<br>
+Копировать url из строки с такой ошибкой. Взять из него хост с <code>googlevideo.com</code>. Типа такого <code>rr5---sn-gvnuxaxjvh-n8vk.googlevideo.com</code></p>
+<p>И сделать с ним ping. Если время около 25мс, то сразу понятно, что это РФ GGC. Если не ответит на пинги или время больше. Можно взять ip, который показала команда ping и пробить так <code>https://ipinfo.io/213.59.210.16</code> В нашем примере там: " Moscow, Russia, AS12389 - PJSC Rostelecom, Other providers place this IP in Khabarovsk, Khabarovsk"<br>
+-Видим, что РФ. Убеждаемся, что ютуб посылает европейский сервер загружать поток из РФ, но РФ отвечает таймаутами. Если в итоге видео пошло всё таки после ряда таймаутов, можно скопировать url из строки videoplayback, где ошибки соединения нет. И посмотреть, в каком регионе этот хост. Скорее всего он будет в киеве, а вовсе не в стране физического нахождения прокси сервера.</p>
+<p>Всё это не нормально. При подключении через цепочку прокси+CDN CF таймаутов вообще нет. А видео грузится из страны физического расположения прокси сервера.</p></td><td>2024-08-13T10:33:17.360Z</td></tr><tr><td>roman_sv</td><td><p>Напишите ещё раз, как там дела. Действительно ли это оно самое. Я процитирую пост.</p></td><td>2024-08-13T10:45:27.197Z</td></tr><tr><td>Dhohbr</td><td><p>Мне больше кажется вероятным сценарий, когда пользователи заходя через VPN на YouTube логинятся своей гугловой учеткой, в которой указана локация РФ, идентифицируются как из РФ, и Гугл направляет их на GGC РФ.<br>
+Так же может иметь дело фингерпринтинг устройства/браузера для определения геолокации.<br>
+Ещё есть теория, что пользователи проксируют список доменов *.googlevideo.com, но не проксируют например <a href="http://redirector.google.com">redirector.google.com</a>, который возможно тоже участвует в определении какой GGC выдать пользователю.<br>
+А теория, в которой Гугл вносит IP проксей в какую-то базу, мне пока кажется конспирологической.</p></td><td>2024-08-13T12:20:40.046Z</td></tr><tr><td>roman_sv</td><td><blockquote>
+<p>логинятся своей гугловой учеткой</p>
+</blockquote>
+<p>yt-dlp --get-url не логинится и не берёт куки браузера. Всё равно получает РФ адрес.</p>
+<blockquote>
+<p>фингерпринтинг устройства/браузера</p>
+</blockquote>
+<p>Проверка из терминала непосредственно на сервере даёт тот же результат.</p>
+<blockquote>
+<p>пользователи проксируют список доменов <code>*.googlevideo.com</code>, но не проксируют например <code>[redirector.google.com](http://redirector.google.com/)</code></p>
+</blockquote>
+<p>Проверялось в TUN режиме. Там весь трафик роутится в проксю.</p>
+<p>Тред не читай - сразу в конспирологии обвиняй.</p></td><td>2024-08-13T12:32:46.127Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Dhohbr" data-post="64" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> Dhohbr:</div>
+<blockquote>
+<p>пользователи заходя через VPN на YouTube логинятся своей гугловой учеткой</p>
+</blockquote>
+</aside>
+<p>Возможно, как одна из частей эвристики, но пока клиенты которые сидят полностью под впн ни разу не жаловались, ютуб показывает хорошо. У меня для входа в учётку почты отдельная машина с отдельным браузером через тор прокси работает.</p>
+<aside class="quote no-group" data-username="Dhohbr" data-post="64" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> Dhohbr:</div>
+<blockquote>
+<p>но не проксируют например <code>redirector.google.com</code></p>
+</blockquote>
+</aside>
+<p>Этого домена не существует, есть <code>redirector.googlevideo.com</code>, но я обращение к нему ни разу не ловил при использовании ютуба.</p>
+<aside class="quote no-group" data-username="Dhohbr" data-post="64" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> Dhohbr:</div>
+<blockquote>
+<p>А теория, в которой Гугл вносит IP проксей в какую-то базу, мне пока кажется конспирологической.</p>
+</blockquote>
+</aside>
+<p>Есть американская прокси которая при открытии гугла иногда показывает Иран и дату проставляет по лунному календарю, вчера мне показали скриншот.</p></td><td>2024-08-13T12:48:30.408Z</td></tr><tr><td>Dhohbr</td><td><p>Я вас не обвиняю, просто мне кажется этому есть какое-то логичное объяснение. Ни для кого не секрет что крупные компании собирают “цифровые профили” пользователей, если IP вашего VPN уже засветился под вашей РФ учеткой, то он добавился к вашему профилю. Гугл это делает и в том числе для правильного таргетинга рекламы, от которого зависят выплаты блогеров.</p>
+<p>Можно провести эксперимент, поставить на виртуалке английскую ОС, с часовым поясом VPNа, без раскладки RU, браузер, которым вы ни разу не пользовались. И подключиться к другому VPN с другим IP. В гугловую учётку не логиниться. По идее, YouTube должен будет выдавать вам GGC из региона VPN.</p></td><td>2024-08-13T12:52:35.879Z</td></tr><tr><td>Dhohbr</td><td><aside class="quote no-group" data-username="Xunlei" data-post="66" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>Этого домена не существует, есть <code>redirector.googlevideo.com</code></p>
+</blockquote>
+</aside>
+<p>Да, я ошибся, у меня на этот домен постоянно идут запросы, когда я смотрю Ютюб.</p>
+<pre><code class="lang-auto">Domain
+redirector.googlevideo.com
+Response
+CNAME: wide-youtube.l.google.com. (ttl=10)
+A: 64.233.162.198 (ttl=10)
+</code></pre></td><td>2024-08-13T12:56:12.202Z</td></tr><tr><td>roman_sv</td><td><p>Я еще раз повторю. Можно хоть из чистого терминала с тихоокеанским временем проверять. Все равно в РФ отправит. Потому что IP уж проклят и внесён в базу, как РФ.</p>
+<p>Как он определяет локацию, уже не важно. Понятно, что надо полностью весь трафик зарулить в прокси, чтобы никогда не подключаться под своим аком и на своем телефоне напрямую к гуглу. Да мало того, еще и от GPS отказаться, и от wifi (к SSID точек привязаны координаты). О возникновении такого гемора повествует эта тема. Где тут конспирология?</p></td><td>2024-08-13T12:57:05.535Z</td></tr><tr><td>Xunlei</td><td><p>Странно, у меня даже в кэше за три дня нет его (включен serve stale).</p></td><td>2024-08-13T13:03:24.223Z</td></tr><tr><td>Dhohbr</td><td><p>Может у вас используется такой домен?</p>
+<pre><code class="lang-auto">Domain
+redirector.gvt1.com
+Response
+CNAME: wide-youtube.l.google.com. (ttl=55)
+A: 64.233.163.198 (ttl=55)
+</code></pre></td><td>2024-08-13T13:10:30.202Z</td></tr><tr><td>Xunlei</td><td><p>Нет, в кэше из этой зоны только <code>me.gvt1.com</code>.</p></td><td>2024-08-13T13:12:19.781Z</td></tr><tr><td>Anyuta1166</td><td><p>Я уже сталкивалась с таким задолго до замедления ютуба, поскольку делаю покупки в гугл плей, а гугл запрещает делать покупки, если IP адрес определяется как РФ.<br>
+У гугл своя собственная база Geo IP. Изначально при добавлении IP они руководствуются публичными данными. Но потом они смотрят на геолокацию (по GPS, Wi-Fi, сотовым сетям) телефона, с которого вошли в гугл аккаунт, и если она длительное время не совпадает с предположительным местонахождением IP адреса по публичным базам, то IP адрес “переезжает” в место фактической локации.<br>
+При этом скорее всего смотрят не на каждый отдельно взятый IP, а на целые подсети. Если у какого-то VPS/VPN провайдера много пользователей из РФ, то вся подсеть адресов “переедет” в РФ.<br>
+Возможные варианты - не входить в гугл аккаунт, отключить геолокацию на телефоне - не удобны, да и никто ими не пользуется. Поэтому все больше и больше подсетей разных провайдеров оказывается якобы в РФ, и постоянно приходится искать новых. Почему оказывается именно в РФ - потому что именно из РФ больше всего пользуются VPN. Один раз только мне попался провайдер, при подключении с которого мне показало что я в Иране, видимо были пользователи оттуда, но потом и эта подсеть ушла в РФ.</p></td><td>2024-08-13T13:14:29.907Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Anyuta1166" data-post="73" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/5fc32e/48.png" class="avatar"> Anyuta1166:</div>
+<blockquote>
+<p>Если у какого-то VPS/VPN провайдера много пользователей из РФ, то вся подсеть адресов “переедет” в РФ</p>
+</blockquote>
+</aside>
+<p>Это объяснет, почему у большинства пользователей такой проблемы нет.</p></td><td>2024-08-13T13:16:35.579Z</td></tr><tr><td>Moonlighter</td><td><p>На российском JustHost с польской локацией занятно. Первые недели ресурсы Google определяли, что я в Польше, а недавно перекинуло на США: в “подвале” страниц отображается США, реклама стала на английском, <span class="bbcode-s">видео тянутся из США</span>, правда рядом с логотипом YouTube почему-то стало отображаться RU. Глянул WHOIS по IP адресу и хоть страна адреса PL, но регистрация организации оказалась в США, вероятно из-за этого. Ну, повезло, что у них адреса оформлены на заграничную Baxet Group Inc. вместо ООО Баксэт.</p>
+<p>Upd: Ошибся, видео загружаются в основном с польских серверов, реже из Нидерландов.</p></td><td>2024-08-13T16:53:55.107Z</td></tr><tr><td>disappointed</td><td><p>У меня обычный учётка гугла RU, и я всегда хожу к ним только с RU адресов. В гуглпэй удалил старый платёжный профиль, создал новый, указав страну эмитента карты (европа), привязал карту, все покупки в play проходят без проблем. ЧЯДНТ?</p></td><td>2024-08-13T17:04:52.839Z</td></tr><tr><td>0ka(0ka)</td><td><p>А если загуглить suicide то что выдает первым результатом?</p></td><td>2024-08-13T18:47:02.239Z</td></tr><tr><td>Waffenrock</td><td><p>Одновременно с началом войны и смертью международных платёжных систем я удалил все адреса и карты из своего Google аккаунта, завёл себе тогда ещё работавшую халявную виртуалку VISA от Bankoff и прописал в настройках аккаунта Google эту карту как способ платежа и выданный с ней адрес в США (Миннесота, г.Миннетонка) как свой адрес. Но при этом в настройках youtube я ставлю русский язык и страну - Латвия, чтобы выдача по рекомендациям была более-менее интересной.</p>
+<p>Не знаю точно, но в консоли Firefox при просмотре youtube через свой VPS в Нидерландах (Меппел) по VLESS-Reality в консоли во вкладке сети нет явных ошибок 403. Зато часто повторяется вот такое:</p>
+<pre><code class="lang-auto">Запрос из постороннего источника заблокирован: Политика одного источника запрещает чтение удаленного ресурса на https://play.google.com/log?format=json&amp;hasfast=true&amp;authuser=0. (Причина: не удалось выполнить запрос CORS). Код состояния: (null).
+</code></pre>
+<p>И такое:</p>
+<pre><code class="lang-auto">Referrer policy: Менее строгая политика origin-when-cross-origin игнорирована для междоменного запроса: https://rr3---sn-5hne6nz6.googlevideo.com/videoplayback?expire=1723985623&amp;ei=d5rBZsiWKoCP6dsP65iNgAQ&amp;ip= |ip моего сервера| &amp;id=o-AIoGQrqpsEOYyws_fXPxlbmp9ZOQLhtbD4EjWZlEzEDA&amp;source=youtube&amp;requiressl=yes&amp;xpc=EgVo2aDSNQ%3D%3D&amp;mh=Fh&amp;mm=31%2C29&amp;mn=sn-5hne6nz6%2Csn-5hnekn7s&amp;ms=au%2Crdu&amp;mv=m&amp;mvi=3&amp;pl=25&amp;initcwndbps=2831250&amp;siu=1&amp;spc=Mv1m9tmCvqMj7oPdJmy7vY9vQ09sTxEtH77pjTNCupQ2OtIh8yGWpGbFAAVjxnLicYcReUuqpA&amp;svpuc=1&amp;ns=xKIkej7KyEpXjhh4piLY7WMQ&amp;sabr=1&amp;rqh=1&amp;mt=1723963517&amp;fvip=1&amp;keepalive=yes&amp;c=WEB&amp;n=UIRu4zxyYWyvEg&amp;sparams=expire%2Cei%2Cip%2Cid%2Csource%2Crequiressl%2Cxpc%2Csiu%2Cspc%2Csvpuc%2Cns%2Csabr%2Crqh&amp;sig=AJfQdSswRAIgUhtBFMB9VRZCejciTYHfCBuX6IJXX5VJAeeLjTDBCc0CIHjrES6Bf7EAQxPB3Z3_AUslEn3DzDi8viSD3vtoxAz5&amp;lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&amp;lsig=AGtxev0wRAIgUP6mVyXQWxtc6HXVT5SQQt3GprWtvpsaqO0Kpigf3hECICUKMl2TrP0K5zJOL0m54Und7ey74N7pDz5GwV5-FpkJ&amp;cpn=RSnxDQEWkUtkAovs&amp;cver=2.20240816.01.00&amp;rn=28
+</code></pre>
+<p>По данным 2ip сервер GGC о котором указано в сообщениях расположен в США:<br>
+74.125.100.200<br>
+Host: <a href="http://rr3---sn-5hne6nz6.googlevideo.com" rel="noopener nofollow ugc">rr3---sn-5hne6nz6.googlevideo.com</a><br>
+City: [Jenkintown]<br>
+Country: United States<br>
+IP range: 74.125.0.0 - 74.125.255.255<br>
+ISP name: Google LLC</p></td><td>2024-08-18T07:05:03.844Z</td></tr><tr><td>artenox</td><td><aside class="quote no-group" data-username="Waffenrock" data-post="78" data-topic="9111">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/waffenrock/48/4632_2.png" class="avatar"> Waffenrock:</div>
+<blockquote>
+<p>По данным 2ip сервер GGC о котором указано в сообщениях расположен в США:<br>
+74.125.100.200</p>
+</blockquote>
+</aside>
+<p>Судя по пингу, это Нидерланды. Никак не может быть США (из США ping около 100 мс).<br>
+Верить whois сервисам в случае гугла нельзя.</p></td><td>2024-08-18T08:02:30.023Z</td></tr><tr><td>Shii</td><td><p>Заметил, что видео начало нормально работать даже при подключении с российским GGC через VPS, который их ловит время от времени. Может они там у себя убрали замедления трафика если он идёт на зарубежные сервера.</p></td><td>2024-08-25T12:28:46.254Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>тут может зависить от много чего<br>
+IP причем отдельно для IPv4 и IPv6<br>
+геолокация (GPS)<br>
+вполне может и DNS системы / ВНПа / браузера если включен DoH = распределяет на разные CDN</p>
+<p>с гуглом не особо проверял. но вот сайты за cloudflare на разные сервера одного и тогоже VPN реагируют по всякому. и не только “страна” а даже показ капчи (например jDownloader не умеет качать если включается капча cloudflare)</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><a href="http://wide-youtube.l.google.com" rel="noopener nofollow ugc">wide-youtube.l.google.com</a>.      A    74.125.131.198                  <a href="https://doh.opendns.com/dns-query" rel="noopener nofollow ugc">https://doh.opendns.com/dns-query</a>       775ms<br>
+<a href="http://wide-youtube.l.google.com" rel="noopener nofollow ugc">wide-youtube.l.google.com</a>.      AAAA    2a00:1450:4010:c0e::c6          <a href="https://doh.opendns.com/dns-query" rel="noopener nofollow ugc">https://doh.opendns.com/dns-query</a>       773ms</p>
+<p><a href="http://wide-youtube.l.google.com" rel="noopener nofollow ugc">wide-youtube.l.google.com</a>.      A     209.85.233.198                  dns.google:853  434ms<br>
+<a href="http://wide-youtube.l.google.com" rel="noopener nofollow ugc">wide-youtube.l.google.com</a>.      AAAA    2a00:1450:4010:c03::c6          dns.google:853  148ms</p>
+<p><a href="http://wide-youtube.l.google.com" rel="noopener nofollow ugc">wide-youtube.l.google.com</a>.      A      142.251.1.198                   one.one.one.one:853     401ms<br>
+<a href="http://wide-youtube.l.google.com" rel="noopener nofollow ugc">wide-youtube.l.google.com</a>.      AAAA    2a00:1450:4010:c1e::c6          one.one.one.one:853     189ms</p>
+</details>
+<p>во блин.<br>
+через 8.8.8.8 / 1.1.1.1 было<br>
+CNAME <a href="http://music.youtube.com" rel="noopener nofollow ugc">music.youtube.com</a>.            “<a href="http://youtube-ui.l.google.com" rel="noopener nofollow ugc">youtube-ui.l.google.com</a>.”<br>
+CNAME <a href="http://youtube-ui.l.google.com" rel="noopener nofollow ugc">youtube-ui.l.google.com</a>.      “<a href="http://wide-youtube.l.google.com" rel="noopener nofollow ugc">wide-youtube.l.google.com</a>.”</p>
+<p>а это через dnscrypt<br>
+CNAME <a href="http://music.youtube.com" rel="noopener nofollow ugc">music.youtube.com</a>.          “<a href="http://youtube-ui.l.google.com" rel="noopener nofollow ugc">youtube-ui.l.google.com</a>.”<br>
+A <a href="http://youtube-ui.l.google.com" rel="noopener nofollow ugc">youtube-ui.l.google.com</a>.    142.250.200.78<br>
+A <a href="http://youtube-ui.l.google.com" rel="noopener nofollow ugc">youtube-ui.l.google.com</a>.    172.217.17.14<br>
+A <a href="http://youtube-ui.l.google.com" rel="noopener nofollow ugc">youtube-ui.l.google.com</a>.    216.58.209.78</p></td><td>2024-08-25T13:11:02.110Z</td></tr><tr><td>roman_sv</td><td><p>Я об этом дописал уже в OP. Починили спустя неделю примерно так ,что начало посылать на такие РФ адреса, которые отдают видео.<br>
+Зато через CF снова появились 403 ошибки, хотя ранее их не было. Но на просмотр это не влияет уже. Видео не виснет.</p></td><td>2024-08-25T13:37:47.287Z</td></tr>
+    </table>
+      </body>
+    </html>

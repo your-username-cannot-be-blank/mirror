@@ -1,0 +1,164 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>v2ray-tls-ws-nginx-не-работает-path</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>quester</td><td><p>Приветствую. Пытаюсь обуздать плагин v2ray (<a href="https://github.com/shadowsocks/v2ray-plugin" class="inline-onebox" rel="noopener nofollow ugc">GitHub - shadowsocks/v2ray-plugin: A SIP003 plugin based on v2ray</a>), возникла проблема при совмещение его с nginx, чтобы спрятать его за сайтом</p>
+<p>Работает в режиме v2ray-tls-ws<br>
+На сервере запускаю:</p>
+<blockquote>
+<p>v2ray-plugin -server -tls -host МОЙ_ДОМЕН -cert /etc/letsencrypt/live/МОЙ_ДОМЕН/fullchain.pem -key /etc/letsencrypt/live/МОЙ_ДОМЕН/privkey.pem -localAddr АДРЕС_ВПС -localPort 443 -remotePort 22</p>
+</blockquote>
+<p>На клиенте запускаю:</p>
+<blockquote>
+<p>v2ray-plugin -tls -host МОЙ_ДОМЕН -localAddr 127.0.0.1 -localPort 8022 -remoteAddr АДРЕС_ВПС -remotePort 443</p>
+</blockquote>
+<p>Стучусь по ssh с клиента на сервер:</p>
+<blockquote>
+<p>ssh <a href="mailto:root@127.0.0.1">root@127.0.0.1</a> -p 8022</p>
+</blockquote>
+<p>Все нормально, получился TLSv1.3 туннель, судя по wireshark</p>
+<p>Теперь хочу скрыть все это за сайтом.<br>
+С таким конфигом:</p>
+<blockquote>
+<p>server {<br>
+server_name МОЙ_ДОМЕН;<br>
+root /var/www/МОЙ_ДОМЕН;<br>
+index index.html;<br>
+listen [::]:443 ssl ipv6only=on; # managed by Certbot<br>
+listen 443 ssl; # managed by Certbot<br>
+ssl_certificate /etc/letsencrypt/live/МОЙ_ДОМЕН/fullchain.pem; # managed by Certbot<br>
+ssl_certificate_key /etc/letsencrypt/live/МОЙ_ДОМЕН/privkey.pem; # managed by Certbot<br>
+include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot<br>
+ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot<br>
+location /v2ray {<br>
+proxy_pass <a href="http://127.0.0.1:9999" rel="noopener nofollow ugc">http://127.0.0.1:9999</a>;<br>
+proxy_http_version  1.1;<br>
+proxy_set_header    Upgrade $http_upgrade;<br>
+proxy_set_header    Connection “upgrade”;<br>
+proxy_set_header    Host $http_host;<br>
+proxy_set_header    X-Real-IP $remote_addr;</p>
+<pre><code>    proxy_connect_timeout       10m;
+    proxy_send_timeout          10m;
+    proxy_read_timeout          90m;
+    send_timeout                10m;
+    }
+</code></pre>
+<p>}<br>
+server {<br>
+if ($host = doomiddqd.xyz) {<br>
+return 301 https://$host$request_uri;<br>
+} # managed by Certbot</p>
+<pre><code>listen 80;
+listen [::]:80;
+server_name doomiddqd.xyz;
+return 404; # managed by Certbot
+</code></pre>
+<p>}</p>
+</blockquote>
+<p>Проверяю сайт, в браузере. Все ок https работает.</p>
+<p>Запускаю серверную часть на впс</p>
+<blockquote>
+<p>v2ray-plugin -server -tls -host МОЙ_ДОМЕН -path /v2ray -cert /etc/letsencrypt/live/МОЙ_ДОМЕН/fullchain.pem -key /etc/letsencrypt/live/МОЙ_ДОМЕН/privkey.pem -localAddr 127.0.0.1 -localPort 9999 -remotePort 22</p>
+</blockquote>
+<p>На клиенте:</p>
+<blockquote>
+<p>v2ray-plugin -tls -host МОЙ_ДОМЕН -path /v2ray -localAddr 127.0.0.1 -localPort 8022 -remoteAddr 5.2.74.240 -remotePort 443</p>
+</blockquote>
+<p>Опять пытаюсь подключится по ssh:</p>
+<blockquote>
+<p>ssh <a href="mailto:root@127.0.0.1">root@127.0.0.1</a> -p 8022</p>
+</blockquote>
+<p>Безрезультатно.</p>
+<p>Послушал tcpdump lo на vps,  трафик идет на 9999 порт при попытке подключения по ssh, но похоже, что v2ray-plugin не отвечает.</p>
+<p>Пробовал v2ray-plugin всмести с ss, тоже результата не добился<br>
+конфиг ss</p>
+<p>Клиент:</p>
+<blockquote>
+<p>{<br>
+“server”:“АДРЕС_ВПС”,<br>
+“server_port”:443,<br>
+“local_port”:1080,<br>
+“password”:“ПАРОЛЬ”,<br>
+“timeout”:600,<br>
+“method”:“aes-128-gcm”,<br>
+“fast_open”: true,<br>
+“dns”:“1.1.1.1”,<br>
+“nameserver”: “1.1.1.1”,<br>
+“reuse_port”: true,<br>
+“mode”: “tcp_only”,<br>
+“plugin”:“/etc/shadowsocks-libev/v2ray-plugin”,<br>
+“plugin_opts”: “tls;host=МОЙ_ДОМЕН;path=/v2ray”<br>
+}</p>
+</blockquote>
+<p>Сервер:</p>
+<blockquote>
+<p>{<br>
+“server”:“127.0.0.1”,<br>
+“server_port”:9999,<br>
+“local_port”:1080,<br>
+“password”:“ПАРОЛЬ”,<br>
+“timeout”:600,<br>
+“method”:“aes-128-gcm”,<br>
+“fast_open”: true,<br>
+“dns”:“1.1.1.1”,<br>
+“nameserver”: “1.1.1.1”,<br>
+“reuse_port”: true,<br>
+“mode”: “tcp_only”,<br>
+“plugin”:“/etc/shadowsocks-libev/v2ray-plugin”,<br>
+“plugin_opts”: “server;tls;host=МОЙ_ДОМЕН;path=/v2ray”<br>
+}</p>
+</blockquote>
+<p><strong>UPD</strong><br>
+Удалось запустить с nginx только так убрав ключ <strong>-tls</strong> у сервера:</p>
+<p>Сервер:</p>
+<blockquote>
+<p>v2ray-plugin -server -host МОЙ_ДОМЕН -path /v2ray  -cert /etc/letsencrypt/live/МОЙ_ДОМЕН/fullchain.pem -key /etc/letsencrypt/live/МОЙ_ДОМЕН/privkey.pem -localAddr 127.0.0.1 -localPort 9999 -remotePort 22 -remoteAddr 127.0.0.1</p>
+</blockquote>
+<p>Клиент:</p>
+<blockquote>
+<p>v2ray-plugin -tls -host МОЙ_ДОМЕН -path /v2ray -localAddr 127.0.0.1 -localPort 8022 -remoteAddr IP_СЕРВЕРА -remotePort 443</p>
+</blockquote></td><td>2021-12-03T10:31:50.373Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="quester" data-post="1" data-topic="1478">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quester/48/720_2.png" class="avatar"> quester:</div>
+<blockquote>
+<p>Удалось запустить с nginx только так убрав ключ <strong>-tls</strong> у сервера:</p>
+</blockquote>
+</aside>
+<p>В вашем конфигурационном файле nginx указан протокол HTTP у директивы proxy_pass, поэтому и используется нешифрованное соединение.</p></td><td>2021-12-03T16:40:07.840Z</td></tr>
+    </table>
+      </body>
+    </html>

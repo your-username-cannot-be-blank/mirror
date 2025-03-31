@@ -1,0 +1,398 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>На части провайдеров наблюдаю недоступность HTTP/HTTPS на портах 80, 443 при подключении к IP-адресам Linode и OVH. Запрос «застывает».</p>
+<p>Заблокированы диапазоны, как минимум:</p>
+<ul>
+<li>51.68.188.0/22</li>
+<li>51.38.124.0/22</li>
+<li>50.116.0.0/18</li>
+<li>151.101.0.0/16</li>
+<li>206.189.65.0/24</li>
+<li>51.15.0.0/17</li>
+</ul>
+<p>Несколько примеров заблокированых ресурсов:<br>
+<a href="https://tkgeisel.com">https://tkgeisel.com</a> - Linode (50.116.10.238)<br>
+<a href="https://nmap.org">https://nmap.org</a> - Linode (50.116.1.184)<br>
+<a href="http://50.116.3.249">http://50.116.3.249</a> - Linode<br>
+<a href="http://51.68.190.107">http://51.68.190.107</a> - OVH DE2<br>
+<a href="http://51.38.124.173">http://51.38.124.173</a> - OVH DE2<br>
+<a href="https://reddit.com">https://reddit.com</a> - Fastly<br>
+<a href="https://gitlab.redox-os.org">https://gitlab.redox-os.org</a> - Digital Ocean (206.189.65.122)</p>
+<p>Блокируется на:</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>ISP</th>
+<th>AS</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Beeline/Corbina</td>
+<td>AS8402</td>
+<td>Tula</td>
+</tr>
+<tr>
+<td>ER-Telecom Holding</td>
+<td>AS56981</td>
+<td>Tomsk</td>
+</tr>
+<tr>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Kemerovo</td>
+</tr>
+<tr>
+<td>P.a.k.t LLC</td>
+<td>AS39087</td>
+<td>Saint Petersburg</td>
+</tr>
+<tr>
+<td>UBS (ubsnet.ru)</td>
+<td>AS50042</td>
+<td>Sevastopol</td>
+</tr>
+<tr>
+<td>Igra-Service</td>
+<td>AS33991</td>
+<td>Krasnoyarsk</td>
+</tr>
+</tbody>
+</table>
+</div><p><a class="attachment" href="блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway/qBhd2OHZZDHx62KaFlRKgVD0Puq.pcapng">ovhlinode-05.07.2024-pakt.pcapng</a> (4.9 KB)</p></td><td>2024-07-05T11:18:05.021Z</td></tr><tr><td>ValdikSS</td><td><p>Это похоже на динамические блокировки Psiphon. Фильтр, по который я видел ранее (в прошлом месяце), был без таймаута — отправив TCP или UDP-пакеты на два и более IP-адреса Psiphon, доступ ко многим диапазонам OVH, Fastly, Akamai блокировался навсегда для этого IP-адреса, и восстановить доступ можно было только сменой адреса (переподключением роутера).</p></td><td>2024-07-05T11:35:21.669Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="1" data-topic="8029">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p><a class="attachment" href="блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway/qBhd2OHZZDHx62KaFlRKgVD0Puq.pcapng">ovhlinode-05.07.2024-pakt.pcapng</a> (4.9 KB)</p>
+</blockquote>
+</aside>
+<p>Что при этом интересно, рубятся не все .TLD.</p>
+<p>Так висим:<br>
+<code>curl -Svk https://nmap.org --connect-to ::50.116.1.184</code><br>
+<code>curl -Svk https://nmap.com --connect-to ::50.116.1.184</code><br>
+<code>curl -Svk https://nmap.net --connect-to ::50.116.1.184</code></p>
+<p>А так все ОК:<br>
+<code>curl -Svk https://nmap.gov --connect-to ::50.116.1.184</code><br>
+<code>curl -Svk https://nmap.ru --connect-to ::50.116.1.184</code></p>
+<p>И так ОК:<br>
+<code>curl -Svk https://nm.com --connect-to ::50.116.1.184</code></p>
+<p>Зачем так сложно заморачиваются?</p></td><td>2024-07-05T12:10:26.557Z</td></tr><tr><td>anon60595749</td><td><p>Да, если здесь заменить <code>https://</code> на <code>http://</code>, то висим везде.</p></td><td>2024-07-05T12:20:19.092Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="1" data-topic="8029">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>На части провайдеров наблюдаю недоступность HTTP/HTTPS на портах 80, 443 при подключении к IP-адресам Linode и OVH. Запрос «застывает».</p>
+</blockquote>
+</aside>
+<p>Дополнительно: если на IP-адресе есть служба SSH (как минимум на 22 порту), то при простом TCP-подключении (например при помощи <code>telnet</code>) не получаю в ответ SSH banner. Само TCP-соединение при этом устанавливается (как и в случае HTTP(S) на 80 и 443 портах).</p>
+<p>Блокировка HTTP так же работает только на 80 порту.</p></td><td>2024-07-05T12:37:14.607Z</td></tr><tr><td>ValdikSS</td><td><p><a class="mention" href="/u/anon60595749">@anon60595749</a>, вы как-то активировали блокировку, или она у вас сразу была?</p></td><td>2024-07-05T12:53:53.788Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="6" data-topic="8029">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>вы как-то активировали блокировку, или она у вас сразу была?</p>
+</blockquote>
+</aside>
+<p>Если и активировал, то сам того не зная. Замечаю, что есть блокировка, когда у меня перестает открываться <a href="http://reddit.com" rel="noopener nofollow ugc">reddit.com</a>. Так или иначе какой-либо VPN service на IP-адресах провайдеров/CDN из названия темы не использую.</p></td><td>2024-07-05T13:01:32.011Z</td></tr><tr><td>ValdikSS</td><td><p>Проблема пришла ко мне на домашний канал, в <span class="discourse-local-date" data-date="2024-07-06" data-email-preview="2024-07-06T18:31:00Z UTC" data-time="21:31:00" data-timezone="Europe/Moscow">2024-07-06T18:31:00Z</span>.</p>
+<p>Помимо всего прочего, на IP-адресе одного из прокси-серверов АнтиЗапрета 51.38.124.173 (OVH) заблокировался весь TCP-трафик (не проходит TCP SYN ни до одного порта), при этом другие адреса в диапазоне заблокированы обычным образом (соединение «зависает»).</p>
+<p>Блокируется только IPv4.</p>
+<p><span class="discourse-local-date" data-date="2024-07-08" data-email-preview="2024-07-07T22:31:00Z UTC" data-time="01:31:00" data-timezone="Europe/Moscow">2024-07-07T22:31:00Z</span> заблокировали 51.68.220.147<br>
+<span class="discourse-local-date" data-date="2024-07-08" data-email-preview="2024-07-08T13:32:00Z UTC" data-time="16:32:00" data-timezone="Europe/Moscow">2024-07-08T13:32:00Z</span> заблокировали 51.38.124.100</p></td><td>2024-07-06T22:23:56.971Z</td></tr><tr><td>navion</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="1" data-topic="8029">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>На части провайдеров наблюдаю недоступность HTTP/HTTPS на портах 80, 443 при подключении к IP-адресам Linode и OVH. Запрос «застывает».</p>
+</blockquote>
+</aside>
+<p>Аналогично на МГТС (AS25513) - недоступны Akamai и OVH, но ни к каким публичным VPN сервисам с этого IP не подключались.</p></td><td>2024-07-06T22:27:56.931Z</td></tr><tr><td>Dhohbr</td><td><p>У меня последние пару дней картинки с <a href="http://habr.com" rel="noopener nofollow ugc">habr.com</a> стали через раз грузиться, с домена <a href="http://habrastorage.org" rel="noopener nofollow ugc">habrastorage.org</a>.<br>
+А сейчас вечером вообще не грузятся.<br>
+При этом на телнет адреса отвечают, а curl не грузит.<br>
+Проводной Ростелеком.<br>
+Адреса <a href="http://habrastorage.org" rel="noopener nofollow ugc">habrastorage.org</a> как раз на ovh и hetzner расположены.</p></td><td>2024-07-07T14:47:59.678Z</td></tr><tr><td>ValdikSS</td><td><p>Да, это оно, у меня тоже не открывается один из адресов (51.89.30.72):</p>
+<pre data-code-wrap="txt"><code class="lang-txt">habrastorage.org has address 51.89.30.72
+habrastorage.org has address 65.21.120.121
+habrastorage.org has address 65.109.153.168
+</code></pre></td><td>2024-07-07T15:04:14.908Z</td></tr><tr><td>Dhohbr</td><td><p>Ещё столкнулся с блокировкой некоторых адресов <a href="http://fastpic.org" rel="noopener nofollow ugc">fastpic.org</a>.<br>
+Например:<br>
+<a href="http://i114.fastpic.org" rel="noopener nofollow ugc">i114.fastpic.org</a><br>
+<a href="http://i123.fastpic.org" rel="noopener nofollow ugc">i123.fastpic.org</a><br>
+<a href="http://i121.fastpic.org" rel="noopener nofollow ugc">i121.fastpic.org</a><br>
+Блокируются адреса 51.77.200.203, 51.77.211.179 (ovh)<br>
+Из других подсетей не блокируются. Прям все домены я конечно не перебирал.<br>
+Картина та же, телнет на 80 и 433 порты проходит. curl не грузит страницу, ни по https, ни по http.</p></td><td>2024-07-09T13:42:19.176Z</td></tr><tr><td>libneko</td><td><p>Сообщают про <a href="https://gentoo.org">https://gentoo.org</a>, тоже за fastly</p></td><td>2024-07-10T10:57:06.318Z</td></tr><tr><td>Anyuta1166</td><td><p>Ко мне тоже пришла эта проблема.</p>
+<p>Самое обидное, что не могу попасть на мой собственный личный сайт, который хостится у OVH, и никакого отношения к обходу блокировок вообще не имеет. При этом, если на тот же сервер повесить домен .ru, то все ок.<br>
+Ну и на мой любимый <a href="http://gentoo.org" rel="noopener nofollow ugc">gentoo.org</a> тоже попасть не могу.</p>
+<p>Проблема наблюдается у меня на основном провайдере - на Билайн Москва (проводной). На моих запасных провайдерах - Билайне мобильном, МТС мобильном и Ростелекоме проводном - этой проблемы нет. А теперь самое интересное наблюдение - у моих знакомых с Билайн Москва этой проблемы нет.</p>
+<p>По всей видимости это расширение динамических блокировок на ТСПУ, и блокировки применяются только при одновременном совпадении ряда условий:</p>
+<ul>
+<li>если запрос идет к определенным доменным зонам (com, net, org, ?)</li>
+<li>если IP-адрес назначения находится у определенных провайдеров (OVH и др.)</li>
+<li><strong>если IP-адрес источника ранее неоднократно замечен в использовании “запрещенных” VPN-протоколов</strong></li>
+</ul>
+<p>Целью, вероятно, является блокировка VPN-протоколов, маскирующихся под http(s).</p>
+<p>При этом я уже довольно давно не использую OpenVPN с Билайна, но до сих пор одной из первой получаю все новинки блокировок. Похоже, что мой билайновский IP-адрес попал в черный список ТСПУ на очень долгий срок, если не навечно.</p></td><td>2024-07-10T19:12:57.152Z</td></tr><tr><td>anon9001(anon)</td><td><p>del</p></td><td>2024-07-11T08:11:28.944Z</td></tr><tr><td>CyberTailor(CyberTailor)</td><td><p>Ещё неприятные блокировки (Ростелеком):</p>
+<p><a href="https://fosstodon.org" rel="noopener nofollow ugc">https://fosstodon.org</a> - Fastly<br>
+<a href="https://www.openstreetmap.org" rel="noopener nofollow ugc">https://www.openstreetmap.org</a> - Hurricane Electric<br>
+<a href="https://www.reverso.net" rel="noopener nofollow ugc">https://www.reverso.net</a> - OVH</p>
+<p>Видимо решили в борьбе с впнами совсем не считаться с сопутствующим ущербом.</p></td><td>2024-07-11T11:14:27.443Z</td></tr><tr><td>Anyuta1166</td><td><aside class="quote no-group" data-username="CyberTailor" data-post="17" data-topic="8029">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/cybertailor/48/4822_2.png" class="avatar"> CyberTailor:</div>
+<blockquote>
+<p><a href="https://www.openstreetmap.org" rel="noopener nofollow ugc">https://www.openstreetmap.org </a> - Hurricane Electric</p>
+</blockquote>
+</aside>
+<p>Это же Cloudflare, а не HE.</p></td><td>2024-07-11T13:15:55.324Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="CyberTailor" data-post="17" data-topic="8029">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/cybertailor/48/4822_2.png" class="avatar"> CyberTailor:</div>
+<blockquote>
+<p><a href="https://www.openstreetmap.org">https://www.openstreetmap.org</a></p>
+</blockquote>
+</aside>
+<p><span class="discourse-local-date" data-date="2024-07-11" data-email-preview="2024-07-11T13:25:00Z UTC" data-time="16:25:00" data-timezone="Europe/Moscow">2024-07-11T13:25:00Z</span> не работает не только в РФ</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://downforeveryoneorjustme.com/openstreetmap.org?www=1">
+  <header class="source">
+      <img src="блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway/1f71488616780377378f15316a068d46cb7a91b5.png" class="site-icon" data-dominant-color="939393" width="16" height="16">
+
+      <a href="https://downforeveryoneorjustme.com/openstreetmap.org?www=1" target="_blank" rel="noopener">Down For</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/390;"><img src="блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway/d3f4f4705f46bc109f36070f94b925397ee14ced.png" class="thumbnail" data-dominant-color="E6DFF0" width="690" height="390"></div>
+
+<h3><a href="https://downforeveryoneorjustme.com/openstreetmap.org?www=1" target="_blank" rel="noopener">Is Openstreetmap.org down? Live status and problems past 24 hours</a></h3>
+
+  <p>Live problems for Openstreetmap.org. Error received? Down? Slow? Check what is going on.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway/31d0cf3685106d1e489cdc6e532b9a0bd34f1791.png" data-download-href="https://ntc.party/uploads/default/31d0cf3685106d1e489cdc6e532b9a0bd34f1791" title="image"><img src="блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway/31d0cf3685106d1e489cdc6e532b9a0bd34f1791_2_690x155.png" alt="image" data-base62-sha1="76GLCTzgxcXl4H8Qpiaojf8okrn" width="690" height="155" srcset="блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway/31d0cf3685106d1e489cdc6e532b9a0bd34f1791_2_690x155.png, блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway/31d0cf3685106d1e489cdc6e532b9a0bd34f1791.png 1.5x, блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway/31d0cf3685106d1e489cdc6e532b9a0bd34f1791.png 2x" data-dominant-color="FAF1F1"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">714×161 11.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<aside class="quote no-group quote-modified" data-username="CyberTailor" data-post="17" data-topic="8029">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/cybertailor/48/4822_2.png" class="avatar"> CyberTailor:</div>
+<blockquote>
+<p><a href="https://fosstodon.org">https://fosstodon.org </a> - Fastly<br>
+<a href="https://www.reverso.net">https://www.reverso.net </a> - OVH</p>
+</blockquote>
+</aside>
+<p>Подтверждаю, на Билайне не работает <span class="discourse-local-date" data-date="2024-07-11" data-email-preview="2024-07-11T13:25:00Z UTC" data-time="16:25:00" data-timezone="Europe/Moscow">2024-07-11T13:25:00Z</span>.</p></td><td>2024-07-11T13:28:58.210Z</td></tr><tr><td>FPl</td><td><p>Помимо вышеперечисленного не работают только на Ростелекоме (работают на других)<br>
+195.154.81.43 - <a href="http://download.cpuid.com" rel="noopener nofollow ugc">download.cpuid.com</a> - Scaleway<br>
+104.94.100.72 - <a href="http://www.turkishairlines.com" rel="noopener nofollow ugc">www.turkishairlines.com</a> - Akamai</p>
+<p>Давно не работает нигде, не могу понять почему<br>
+37.19.202.36 - <a href="http://cdn78.foxitsoftware.com" rel="noopener nofollow ugc">cdn78.foxitsoftware.com</a></p></td><td>2024-07-11T14:27:37.018Z</td></tr><tr><td>Anyuta1166</td><td><aside class="quote no-group" data-username="FPl" data-post="20" data-topic="8029">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/fpl/48/1069_2.png" class="avatar"> FPl:</div>
+<blockquote>
+<p>195.154.81.43 - <a href="http://download.cpuid.com" rel="noopener nofollow ugc">download.cpuid.com </a> - Scaleway<br>
+104.94.100.72 - <a href="http://www.turkishairlines.com" rel="noopener nofollow ugc">www.turkishairlines.com</a> - Akamai</p>
+</blockquote>
+</aside>
+<p>Подтверждаю, не работает. Только у меня наоборот - на Билайне не работает, а на других, включая Ростелеком, работает. Что еще раз подтверждает привязку к конкретному IP источника, а не к провайдеру.</p>
+<p>UPD:<br>
+Обнаружена еще одна блокировка, это вообще за гранью добра и зла<br>
+123.60.238.192 - <a href="http://secsmsminiapp.eastcompeace.com" rel="noopener nofollow ugc">secsmsminiapp.eastcompeace.com</a> - Huawei Cloud</p>
+<p>Профиль esim не скачивался в телефон, пока не сменила провайдера.</p></td><td>2024-07-11T14:37:24.149Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="Anyuta1166" data-post="21" data-topic="8029">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/5fc32e/48.png" class="avatar"> Anyuta1166:</div>
+<blockquote>
+<p>Обнаружена еще одна блокировка, это вообще за гранью добра и зла<br>
+123.60.238.192 - <a href="http://secsmsminiapp.eastcompeace.com" rel="noopener nofollow ugc">secsmsminiapp.eastcompeace.com </a> - Huawei Cloud</p>
+</blockquote>
+</aside>
+<p>У меня актуальны все перечисленные в этой теме блокировки, но не эта.</p></td><td>2024-07-11T16:58:25.462Z</td></tr><tr><td>navion</td><td><p>Похоже user agent (или его фингерпринт) имеет значение - из чистого браузера заблокированный CDN открывается, а через curl блокируется после хендшейка:</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway/4d49942b4a858eb013be77fdfda52d19037abcac.png" data-download-href="https://ntc.party/uploads/default/4d49942b4a858eb013be77fdfda52d19037abcac" title="image"><img src="блокировка-httphttps-в-сторону-linode-ovh-fastly-digital-ocean-scaleway/4d49942b4a858eb013be77fdfda52d19037abcac.png" alt="image" data-base62-sha1="b1IpeGmUi4YzrIMMBggnLGNtPrK" width="690" height="137" data-dominant-color="727078"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1161×231 22.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Из-за этого пришлось выключить AdGuard и сломались приложения с контентом в Akamai (RGSC, Ubisoft Connect, Origin). При этом DO заблокирован полностью и через браузер тоже не открывается.</p>
+<p>Плюс у меня начали замедлять YouTube, смотреть ролики без VPN невозможно.</p></td><td>2024-07-11T20:35:14.723Z</td></tr><tr><td>bionicman(Vadim Rõbalko)</td><td><p>Вынесли <code>51.89.30.72</code> из списка edge-нод, но это, конечно, свинство, так делать. К нам в саппорт приходили жалобы, все как на подбор пользователи российского Билайна, при этом то работало, то не работало.</p>
+<p>Кстати, согласно графикам трафика, нода на OVH сервила примерно столько же трафика в Россию, сколько соседняя на том же Hetzner. Просадки было незаметно, что наводит на мысль о том, что у большинства всё работало плюс-минус нормально.</p></td><td>2024-07-12T11:28:15.366Z</td></tr><tr><td>ValdikSS</td><td><p>Мне по звонку «перенастроили ТСПУ на моей площадке», но не подтверждают, что у них что-либо работает нештатно. Отвечают, что необходимо заводить заявки в ДЦОА через техподдержку провайдера, в каждом случае.</p></td><td>2024-07-12T12:09:05.534Z</td></tr><tr><td>libneko</td><td><p>Наблюдаю следующую итерацию этой проблемы:</p>
+<p>Не работает таким же образом rubydoc.info (за Cloudflare), при этом со всем с чем были раньше проблемы (<a href="http://reddit.com">reddit.com</a>, <a href="http://gitlab.redox-os.org">gitlab.redox-os.org</a>, etc) проблем теперь не наблюдается.</p></td><td>2024-07-12T15:08:57.512Z</td></tr><tr><td>navion</td><td><aside class="quote no-group" data-username="navion" data-post="23" data-topic="8029">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/navion/48/3845_2.png" class="avatar"> navion:</div>
+<blockquote>
+<p>Похоже user agent (или его фингерпринт) имеет значение - из чистого браузера заблокированный CDN открывается, а через curl блокируется после хендшейка:</p>
+</blockquote>
+</aside>
+<p>На ресурсы в Akamai влияет версия HTTP, через МГТС работает только HTTP/3 по UDP:</p>
+<pre><code class="lang-auto">curl -v --http3-only https://www.asus.com/
+</code></pre></td><td>2024-07-13T10:42:08.461Z</td></tr><tr><td>ValdikSS</td><td><p>Если кому-то будет полезно, вот что я писал провайдеру:</p>
+<p>Я вот что писал:</p>
+<blockquote>
+<p>Приветствую, со вчерашнего дня перестали открываться сайты на крупнейших хостингах: OVH, Linode, Scaleway, Digital Ocean, Akamai</p>
+<p>Примеры недоступных ресурсов:<br>
+https://nmap.org - Linode (50.116.1.184)<br>
+http://51.68.190.107 - OVH<br>
+https://www.reddit.com - Fastly<br>
+https://www.gigabyte.com - Akamai</p>
+<p>Проблема, вероятнее всего, с ТСПУ. Прошу сообщить о проблеме в ГРЧЦ (по АСБИ), ДЦОА, создав заявку об инциденте.</p>
+</blockquote>
+<p>Меня спросили про трассировку, и т.п. Мой ответ:</p>
+<blockquote>
+<p>Происходит “зависание” соединения после отправки первого пакета. Т.е. TCP-соединение устанавливается (поэтому traceroute/mtr ничего не даст), но затем нет ответа от сервера.</p>
+</blockquote>
+<p>И отправил им curl’ы и pcap</p>
+<p>Также можно сослаться на мой тикет ДЦОА INC-19203\24-07-1180 как референс.</p></td><td>2024-07-14T15:58:45.207Z</td></tr><tr><td>ValdikSS</td><td><p>На текущий момент проблема сохраняется на:</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>isp</th>
+<th>asn</th>
+<th>city</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ru-012</td>
+<td>Beeline/Corbina</td>
+<td>AS8402</td>
+<td>Tula</td>
+</tr>
+<tr>
+<td>ru-021</td>
+<td>ER-Telecom Holding</td>
+<td>AS56981</td>
+<td>Tomsk</td>
+</tr>
+<tr>
+<td>ru-025</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Kemerovo</td>
+</tr>
+<tr>
+<td>ru-026</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Kemerovo</td>
+</tr>
+<tr>
+<td>ru-029</td>
+<td>Beeline</td>
+<td>AS16345</td>
+<td>Kemerovo</td>
+</tr>
+<tr>
+<td>ru-032</td>
+<td>Sibirskie Seti Ltd.</td>
+<td>AS34757</td>
+<td>Novosibirsk</td>
+</tr>
+<tr>
+<td>ru-033</td>
+<td>P.a.k.t LLC</td>
+<td>AS39087</td>
+<td>Saint Petersburg</td>
+</tr>
+<tr>
+<td>ru-035</td>
+<td>UBS (ubsnet.ru)</td>
+<td>AS50042</td>
+<td>Sevastopol</td>
+</tr>
+<tr>
+<td>ru-036</td>
+<td>Igra-Service</td>
+<td>AS33991</td>
+<td>Krasnoyarsk</td>
+</tr>
+<tr>
+<td>ru-038</td>
+<td>Beeline</td>
+<td>AS8402</td>
+<td>Krasnodar</td>
+</tr>
+<tr>
+<td>ru-041</td>
+<td>Zeltelecom</td>
+<td>AS57652</td>
+<td>Moscow</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2024-07-14T16:00:58.057Z</td></tr><tr><td>ValdikSS</td><td><p>Проблема более нигде не наблюдается.</p></td><td>2024-07-19T23:56:56.259Z</td></tr><tr><td>navion</td><td><p>Блокировку SSH до моего сервера тоже прекратили - также срабатывала после рукопожатия TCP, но только на Windows и на одном провайдере.<br>
+Проверил три разных клиента на нескольких компьютерах и везде получил блокировку, при этом с Android и Linux подключение проходило.</p></td><td>2024-07-20T11:55:34.279Z</td></tr><tr><td>hehehohohaha(hehehohohaha)</td><td><p>В последние дни опять проблемы с доступом к ресурсам на ovh, а также на hetzner (возможно к кому-то ещё) из мобильной беспроводной сети beeline Москва.</p>
+<p>Проявляется тем, что через рандомные N-минут доступ по портам 80/443 (другие не проверял) к web-ресурсам на ovh/hetzner перестаёт работать, а если постучаться через curl, то он зависает.</p>
+<p>Т.е. подключения то работает то нет, причем чёткой закономерности по длительности работы/не работы нет (может 40 минут работать, потом 10 минут не работать, потом 15 минут работать, потом 5 минут не работать итд, на первый взгляд временные интервалы случайны, во всяком случае никак не привязаны к моим действиям).</p>
+<p>В частности такая проблема наблюдается с официальным сайтом Archlinux <a href="https://archlinux.org" rel="noopener nofollow ugc">https://archlinux.org</a>  (95.217.163.246) который хостится на hetzner, а также с <a href="http://redirect.archlinux.org" rel="noopener nofollow ugc">redirect.archlinux.org</a>  (95.216.195.133) который тоже на hetzner и который в archlinux указан как проверочный адрес для NetworkManager (поэтому когда в очередной раз связь отваливается NetworkManager сообщает, что подключение к интернету ограничено или отсутствует)</p></td><td>2024-09-20T11:34:49.399Z</td></tr><tr><td>somula</td><td><p>Подтверждаю что есть блокировка в сторону hetzner через мобильный Билайн, но она очень странная, я отключаюсь от мобильно интернета потом через несколько секунд подключаюсь и все работает, меняется только IP адрес у Билайна, город и область через сайт <a href="https://browserleaks.com/ip" class="inline-onebox" rel="noopener nofollow ugc">My IP Address - BrowserLeaks</a> или <a href="https://2ip.ru" rel="noopener nofollow ugc">https://2ip.ru</a> определяется как один и тот же и не меняется.<br>
+Я пробую открывать сайты на hetzner через https в простом браузере, ничего не открывается пока не поменяют ip. Это уже продолжается неделю.</p></td><td>2024-09-28T14:29:29.148Z</td></tr><tr><td>ValdikSS</td><td><p>В сторону OVH (не знаю, только ли его, тестирую только на нём) работают некие пороговые фильтры, приводящие к обнаружению и ручной блокировке HTTPS-прокси.</p>
+<p>Предположительно, сценарий следующий:</p>
+<ol>
+<li>Большое количество соединений к одному IP-адресу и передача данных, похожих на HTTPS-прокси, вызывают срабатывание пороговых фильтров</li>
+<li>Данные об IP-адресе отправляются оператору</li>
+<li>Оператор, возможно, проводит ручную валидацию/проверку наличия прокси</li>
+<li>Оператор блокирует IP-адрес</li>
+</ol>
+<p>Выполняется это вручную ежедневно, только по будням. Блокировка происходит в 15-16 часов по Москве.</p>
+<p>К отдельным диапазонам адресов (например, <code>178.32.137.0/24</code>) более пристальное внимание, а другие (например, <code>94.23.69.0/24</code>) пока, похоже, не отслеживают.</p></td><td>2024-10-07T13:22:36.489Z</td></tr><tr><td>lucretia(lucretia)</td><td><p>И как с этим бороться?</p></td><td>2024-10-07T18:57:55.837Z</td></tr><tr><td>Frrienwrvale</td><td><p>Хороший вопрос, а главное своевременный.<br>
+Ведь “что-то делать” надо уже сейчас.<br>
+Покупать домен, уходить за CDN (Cloudflare и т.п.). Какие тут ещё варианты, если РКН active probing на ручном приводе запилить решил.</p></td><td>2024-10-07T20:08:01.107Z</td></tr><tr><td>CyberTailor(CyberTailor)</td><td><p>Раунд два</p>
+<aside class="quote quote-modified" data-post="1" data-topic="12845">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/58f4c7/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BD%D0%B5%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D0%BE%D1%81%D1%82%D1%8C-hetzner/12845">Недоступность Hetzner</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Вчера из РФ перестали открываться сайты, размещенные на хостинге Hetzner, которые отдают содержимое с него напрямую и не имеют других CDN по дороге. Через VPN других стран все работает. 
+Не открывается как сайт самой компании <a href="https://www.hetzner.com/" rel="noopener nofollow ugc">https://www.hetzner.com/</a>, так и многочисленные ресурсы с этого хостинга: <a href="https://w3techs.com/" rel="noopener nofollow ugc">https://w3techs.com/</a>, <a href="https://kde.org/" rel="noopener nofollow ugc">https://kde.org/</a>, <a href="https://archlinux.org/" rel="noopener nofollow ugc">https://archlinux.org/</a>, <a href="https://filezilla-project.org/" rel="noopener nofollow ugc">https://filezilla-project.org/</a>, список можно долго продолжать. 
+Анализ трафика показывает, что пакеты SYN остаются без ответа. Пинги при …
+  </blockquote>
+</aside>
+</td><td>2024-11-07T15:44:14.514Z</td></tr><tr><td>libneko</td><td><p>Добрый, как говорится, вечер:</p>
+<p><a href="https://api.paradox-interactive.com/">https://api.paradox-interactive.com/</a> (Fastly), g-service Красноярск</p>
+<p>Сбрасывается соединение, без “зависания” как было до этого при таких блокировках</p></td><td>2024-11-10T18:24:32.482Z</td></tr><tr><td>SpecteR</td><td><p>блокируют доступ к серверу у ovhcloud в сети 54.36.0.0/24 по вечерам, днем работает все, https, ssh. вечером наоборот.</p></td><td>2024-11-10T20:25:37.093Z</td></tr><tr><td>libneko</td><td><p><a href="https://redmine.org">https://redmine.org</a> (Hetzner), соединение зависает с таймаутом</p></td><td>2024-11-12T06:47:59.045Z</td></tr><tr><td>m0xfff</td><td><p>Полностью заблокировали подсети 54.37.0.0/16 и 54.38.0.0/16 . Проходит только icmp echo, остальные протоколы не работают.</p></td><td>2024-11-14T17:39:13.893Z</td></tr>
+    </table>
+      </body>
+    </html>

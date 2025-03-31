@@ -1,0 +1,868 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>защита-vps-сервера-метод-параноика</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>stiff(stiff)</td><td><p>Всем привет. Хотелось бы в этой теме обсудить защиту персонального VPS, на которого в том числе устанавливается всеми любимая панель 3x-ui и другие сервисы .</p>
+<p>Как говорится:«безопасности много не бывает» …</p>
+<p>Я напишу базовые вещи ,которые как мне кажется помогут в большинстве случаев.</p>
+<p>Если у кого есть готовый скрипт по этой теме ,  прикрепляйте ссылку на источник , думаю будет полезно многим пользователям.</p>
+<p>Напишите ваше мнение , конструктивную критику или возможно захотите от себя что-то добавить итд))</p>
+<ol>
+<li>Выбор VPS.</li>
+</ol>
+<hr>
+<p>Вижу что многие пользователи  экономят и покупают VPS ,которые физически находятся в РФ. А как мы знаем для товарища майора ничего не стоит сделать запрос и попросить хостера на территории РФ сделать дамп виртуального VPS  заинтересованного пользователя.  Поэтому рекомендуется покупка VPS за пределами РФ и желательно за XMR.  Естественно чтобы ping был низкий (менее 50-100 мс):. Где  можно купить ?  Как вариант здесь <a href="https://bitcoin-vps.com/" rel="noopener nofollow ugc">https://bitcoin-vps.com/</a></p>
+<p>Очень интересная и информативная статья про выбор VPS с сравнительной таблицей <a href="https://crippled.media/free-speech-vps-providers-put-to-the-test" class="inline-onebox" rel="noopener nofollow ugc">Free Speech Vps Providers Put To The Test</a></p>
+<ol start="2">
+<li>Установка на VPS свободного дистро Free GNU/Linux distributions</li>
+</ol>
+<hr>
+<p>Рекомендуется установить свободные дистро <a href="https://www.gnu.org/distros/free-distros.html" class="inline-onebox" rel="noopener nofollow ugc">List of Free GNU/Linux Distributions - GNU Project - Free Software Foundation</a><br>
+Если вы знаете хоcтеров у которых по умолчанию можно установить эти дистро, напишите пожалуйста. А так думаю 99%  используют Debian или Ubunta .</p>
+<ol start="3">
+<li>Шифрование своего VPS</li>
+</ol>
+<hr>
+<p>Оставлю ссылку пример <a href="https://alexhost.com/trust-and-security/how-to-encrypt-your-vps-disk-vps-or-dedicated-server-with-cryptsetup/" class="inline-onebox" rel="noopener nofollow ugc">How to Encrypt your VPS disk (VPS) or Dedicated Server with Cryptsetup ⋆ ALexHost SRL</a></p>
+<ol start="4">
+<li>При первом соединении с купленным VPS , проверить отпечатки</li>
+</ol>
+<hr>
+<p><code>$ ssh root@ip_вашего_сервера</code></p>
+<p>Вводим:</p>
+<p><code># ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub</code></p>
+<p>и сверяем с тем что вы видите.</p>
+<ol start="5">
+<li>Обновить репозиторий</li>
+</ol>
+<hr>
+<pre><code class="lang-auto"> # apt update
+
+ # apt upgrade
+
+ # apt-get full-upgrade
+ 
+ # apt-get --purge autoremove
+ 
+ # apt autoclean
+</code></pre>
+<ol start="6">
+<li>Создать обычного пользователя ( вместо root )</li>
+</ol>
+<hr>
+<pre><code class="lang-auto">
+ # adduser  stiff 
+  
+  # passd
+</code></pre>
+<p>Переключиться на пользователя stiff</p>
+<p><code> # su - stiff</code></p>
+<p>Переключиться на root</p>
+<p><code> # su</code></p>
+<ol start="7">
+<li>Копирование открытого ключа на сервер c ХОСТА на виртуальный сервер (VPS)</li>
+</ol>
+<hr>
+<p>на Хосте</p>
+<p><code>$ cd .ssh/</code></p>
+<p>Копируем ваш открый ключ на VPS</p>
+<p><code>$ ssh-copy-id  stiff@ip_вашего_сервера</code></p>
+<p>Не закрывая терминал , открыть второй терминал и попробовать зайти на VPS</p>
+<p>Заходим без ввода пароля.</p>
+<p><code>$ ssh stiff@ip_вашего_сервера</code></p>
+<p><code>$ logout</code></p>
+<p>Выйти так как мы зашли изначально как ROOT  пользователь</p>
+<p><code>$ exit</code></p>
+<p>Ввойти на сервер заново как обычнй пользователь.</p>
+<ol start="8">
+<li>Настройка SSH на VPS</li>
+</ol>
+<hr>
+<p>на VPS</p>
+<p><code>$ sudo nano /etc/ssh/sshd_config</code></p>
+<p>Расскомментируем ( уберем знак #)</p>
+<p>Изменим порт 22 на любой другой больше 1000 до 65535</p>
+<p><code>Port 45798</code></p>
+<p><code>PubkeyAuthentication yes</code></p>
+<p><span class="hashtag-raw">#PermitRootLogin</span> prohibit-password</p>
+<p>меняем на</p>
+<p><code>PermitRootLogin no</code></p>
+<p>Так же меняем с</p>
+<p><span class="hashtag-raw">#PasswordAuthentication</span> yes<br>
+<span class="hashtag-raw">#PermitEmptyPasswords</span> no</p>
+<p>на</p>
+<pre><code class="lang-auto">PasswordAuthentication no
+PermitEmptyPasswords no
+</code></pre>
+<p>Используем только вторую версию SSH</p>
+<pre><code class="lang-auto">Include /etc/ssh/sshd_config.d/*.conf 
+
+  Protocol 2
+</code></pre>
+<p>Далее</p>
+<pre><code class="lang-auto">X11Forwarding no 
+AllowTcpForwarding no
+</code></pre>
+<p>Установите LogLevel для мониторинга активности SSH</p>
+<p><code>LogLevel INFO</code></p>
+<p>Перегрузим SSH на VPS , проверим статус и снова зайдем на VPS</p>
+<pre><code class="lang-auto">$ sudo systemctl restart ssh
+ 
+$ sudo  systemctl status ssh
+
+$ ssh stiff@ip_вашего_сервера -p 45798
+</code></pre>
+<p>Проверим  сколько пользователей  на нашем VPS</p>
+<pre><code class="lang-auto"> $ who -q
+ 
+ $ pinky  -w
+</code></pre>
+<ol start="9">
+<li>Утснавка фаервола UFW или другой на ваш выбор</li>
+</ol>
+<hr>
+<pre><code class="lang-auto">
+$ sudo apt update
+
+$ sudo apt install ufw
+</code></pre>
+<p>Включаем Фаервол ( на VPS)</p>
+<p><code>$ sudo  ufw enable</code></p>
+<p>Проверим работу</p>
+<p><code> $ sudo systemctl status ufw.service</code></p>
+<p>Включим автозапуск</p>
+<blockquote>
+<p>$ sudo systemctl enable ufw.service</p>
+</blockquote>
+<p>Стартанем</p>
+<p><code>$ sudo systemctl start ufw.service</code></p>
+<p>Еще раз проверим</p>
+<p><code>$ sudo systemctl status ufw.service</code></p>
+<p>Создадим правило чтобы мы могли входить с Хоста на VPS используя  наш ip адрес. 123.456.789.123 вместо этого примера вставьте ваш ip адрес который вам назначил хостер.</p>
+<p><code>$ sudo  ufw allow from 123.456.789.123 to any port 45798 proto tcp</code></p>
+<p>Проверим какие программы и сервисы слушают порты</p>
+<p><code>$ sudo ufw show listening</code></p>
+<ol start="10">
+<li>Отключаем ПИНГ на свой сервер ( иногда это может не работать в зависимости от VPS провайдера.</li>
+</ol>
+<hr>
+<p><code>$ sudo nano /etc/ufw/before.rules</code></p>
+<p>Приводим в такой вид:</p>
+<pre><code class="lang-auto"> # ok icmp codes for INPUT
+-A ufw-before-input -p icmp --icmp-type destination-unreachable -j DROP  
+-A ufw-before-input -p icmp --icmp-type time-exceeded -j DROP  
+-A ufw-before-input -p icmp --icmp-type parameter-problem -j DROP  
+-A ufw-before-input -p icmp --icmp-type echo-request -j DROP  
+-A ufw-before-input -p icmp --icmp-type source-quench -j DROP
+</code></pre>
+<p>Перегружаем Фаервол</p>
+<p><code>$ sudo  ufw disable &amp;&amp; doas ufw enable</code></p>
+<p>Проверим пинг на НАШ сервер . Открыть терминал на Хосте и пингануть на ваш VPS</p>
+<p><code> $  ping 123.456.789.123</code></p>
+<p>Не работает , отлично</p>
+<ol start="11">
+<li>Отключаем ipv6</li>
+</ol>
+<hr>
+<p><code>$ sudo  bash</code></p>
+<p><code># sysctl  --all | grep  disable_ipv6</code></p>
+<p>Видим :</p>
+<pre><code class="lang-auto"> net.ipv6.conf.all.disable_ipv6 = 0
+ net.ipv6.conf.default.disable_ipv6 = 0
+ net.ipv6.conf.eth0.disable_ipv6 = 0
+ net.ipv6.conf.lo.disable_ipv6 = 0
+</code></pre>
+<p>Вводим в терминале</p>
+<p><code># nano /etc/sysctl.conf</code></p>
+<p>и вставляем</p>
+<pre><code class="lang-auto"> net.ipv6.conf.all.disable_ipv6 = 1
+ net.ipv6.conf.default.disable_ipv6 = 1
+ net.ipv6.conf.eth0.disable_ipv6 = 1
+ net.ipv6.conf.lo.disable_ipv6 = 1
+</code></pre>
+<p>Сохраняем , выходим</p>
+<p><code> # sysctl  -p</code></p>
+<ol start="12">
+<li>Логирование .</li>
+</ol>
+<hr>
+<p>Логирование является важной частью безопасности VPS.</p>
+<p>Ссылка пример по установке программы Rsyslog  <a href="https://www.howtoforge.com/how-to-setup-rsyslog-server-on-debian-11/" class="inline-onebox" rel="noopener nofollow ugc">How to Setup Rsyslog Server on Debian 11</a></p>
+<ol start="13">
+<li>Установка программы Fail2ban (Fail2Ban - программа для защиты серверов от атак методом грубой силы)</li>
+</ol>
+<hr>
+<p>Ссылка пример <a href="https://www.digitalocean.com/community/tutorials/how-to-protect-ssh-with-fail2ban-on-debian-11" class="inline-onebox" rel="noopener nofollow ugc">How To Protect SSH with Fail2Ban on Debian 11 | DigitalOcean</a></p>
+<ol start="14">
+<li>Установка DNSCrypt ( шифрование DNS)</li>
+</ol>
+<hr>
+<p>Ссылка пример <a href="https://www.alexgoldcheidt.com/vps-dnscrypt-proxy-on-debian-bookworm-with-dnscry-pt/" rel="noopener nofollow ugc">https://www.alexgoldcheidt.com/vps-dnscrypt-proxy-on-debian-bookworm-with-dnscry-pt/</a></p></td><td>2024-12-25T10:19:46.389Z</td></tr><tr><td>stiff(stiff)</td><td><ol start="15">
+<li>Используйте хорошие  генераторы паролей. Например программу <strong>pwgen</strong></li>
+</ol>
+<p><code>$ apt-cache search pwgen</code></p>
+<p>pwgen - Automatic Password generation</p>
+<p>Пример для сравнения, 15 знаков :</p>
+<pre><code class="lang-auto">$ openssl rand  -base64  15
+
+02iAThIyqJ9JLXQUIIor
+</code></pre>
+<pre><code class="lang-auto">$ pwgen -n -c -s  -y -1 15
+
+@D|!q&amp;L}$A;z6:h
+</code></pre></td><td>2024-12-25T10:45:40.797Z</td></tr><tr><td>allula</td><td><p>Привет.</p>
+<aside class="quote no-group" data-username="stiff" data-post="1" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<ol start="2">
+<li>Установка на VPS свободного дистро Free GNU/Linux distributions</li>
+</ol>
+</blockquote>
+</aside>
+<p>Но зачем? Скажи, пожалуйста, чем такой дистрибутив отличается от любого другого без установленного пакета <code>linux-firmware</code> и с ядром <code>linux-libre</code>?</p>
+<p>Не видел ни одного хостера, который бы давал по умолчанию установить подобный дистрибутив, но можно сделать это самому, даже если хостер не даёт подключать iso.</p>
+<aside class="quote no-group" data-username="stiff" data-post="1" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<ol start="3">
+<li>Шифрование своего VPS</li>
+</ol>
+</blockquote>
+</aside>
+<p>Тут надо явно сказать, что это не панацея. Вам также могут подсунуть буткит или выдернуть из оперативной памяти ключ шифрования, поэтому, если вы будете представлять ценность, шифрование не будет существенной помехой. Вместо вашей ссылки я бы порекомендовал почитать Арчвики:</p>
+<ul>
+<li><a href="https://wiki.archlinux.org/title/Dm-crypt/Encrypting_an_entire_system" rel="noopener nofollow ugc">dm-crypt/Encrypting an entire system</a>;</li>
+<li><a href="https://wiki.archlinux.org/title/Dm-crypt/Specialties" rel="noopener nofollow ugc">dm-crypt/Specialties</a>.</li>
+</ul>
+<p>По второй ссылке есть инструкция (только для Арч, но и на других системах можно сделать подобное) по расшифровыванию диска через ssh. Это удобно, чтобы не заходить каждый раз в VNC для ввода пароля после перезагрузки.</p>
+<p>Если быть параноиком, то нужно ставить свой сервер, к которому никто не будет иметь физического доступа, а если всё-таки получит, то сервер должен самоуничтожиться.</p>
+<p>Если вы хотите использовать сервер для хранения чувствительных данных, то вместо шифрования всей системы лучше использовать шифрование конкретных файлов, при этом расшифровка никогда не должна производиться на самом сервере.</p>
+<aside class="quote no-group" data-username="stiff" data-post="1" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<ol start="6">
+<li>Создать обычного пользователя ( вместо root )</li>
+</ol>
+</blockquote>
+</aside>
+<p>Пользователя <code>root</code> лучше заблокировать.</p>
+<pre><code class="lang-plaintext">$ sudo passwd -l root
+</code></pre>
+<p>При таком варианте должен быть настроен доступ через <code>sudo</code>. Если вы против <code>sudo</code>, могу понять, но интересно услышать вашу позицию (предположу, что вы всё-таки используете <code>doas</code>, а не <code>su</code>).</p>
+<aside class="quote no-group" data-username="stiff" data-post="1" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<ol start="7">
+<li>Копирование открытого ключа на сервер c ХОСТА на виртуальный сервер (VPS)</li>
+</ol>
+<hr>
+<p>на Хосте<br>
+<code>$ cd .ssh/</code></p>
+</blockquote>
+</aside>
+<p>Это необязательный шаг. <code>ssh-copy-id</code> по умолчанию и так ищет ключи по этому пути.</p>
+<aside class="quote no-group" data-username="stiff" data-post="1" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<ol start="8">
+<li>Настройка SSH на VPS</li>
+</ol>
+</blockquote>
+</aside>
+<p>В целом согласен, но параноик тут бы включил двухфакторную авторизацию (и по ключу, и по паролю), разрешил бы логиниться только конкретному пользователю и отключил бы ненадёжные алгоритмы шифрования. Также можно использовать <code>ssh-audit</code>, чтобы проверить настройки. В целом рекомендую очень вдумчиво почитать эту статью: <a href="https://wiki.archlinux.org/title/OpenSSH" rel="noopener nofollow ugc">OpenSSH</a>. Также нет ничего про скрытие ssh (port knoсking, например).</p>
+<aside class="quote no-group" data-username="stiff" data-post="1" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<ol start="9">
+<li>Утснавка фаервола UFW или другой на ваш выбор</li>
+</ol>
+</blockquote>
+</aside>
+<p>Будет работать, только, если провайдер выдаёт вам статичный белый IP, но в большинстве случаев это не так, поэтому настраивать в большинстве случаев нужно по-другому.</p>
+<aside class="quote no-group" data-username="stiff" data-post="1" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<ol start="11">
+<li>Отключаем ipv6</li>
+</ol>
+</blockquote>
+</aside>
+<p>Хватит одного параметра ядра для полного выключения: <code>ipv6.disable=1</code>. Ваш вариант (через <code>sysctl</code>) вызывает сомнения, потому что <code>systemd-sysctl.service</code> запускается до завершения настройки сети и другие сервисы могут вновь поднять IPv6.</p>
+<aside class="quote no-group" data-username="stiff" data-post="2" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<ol start="15">
+<li>Используйте хорошие генераторы паролей. Например программу <strong>pwgen</strong></li>
+</ol>
+</blockquote>
+</aside>
+<p>Такое стоит советовать, только если у человека хорошая память. Записать подобный пароль на бумажку или диск хуже, чем использовать пароль менее надёжный, но хранящийся только в памяти человека.</p>
+<p>Остальное пока нет сил комментировать. Если вы всё-таки параноик, то рекомендую почитать:<br>
+<a href="https://wiki.archlinux.org/title/Security" rel="noopener nofollow ugc">Security</a> (и все ссылки на этой странице);<br>
+<a href="https://fstec.ru/dokumenty/vse-dokumenty/spetsialnye-normativnye-dokumenty/metodicheskij-dokument-ot-25-dekabrya-2022-g" rel="noopener nofollow ugc">РЕКОМЕНДАЦИИ ПО БЕЗОПАСНОЙ НАСТРОЙКЕ ОПЕРАЦИОННЫХ СИСТЕМ LINUX</a> (рекомендации ФСТЭК России).</p></td><td>2024-12-26T15:43:45.777Z</td></tr><tr><td>stiff(stiff)</td><td><p>Привет. Спасибо за комментарии и мнение . <img src="https://ntc.party/images/emoji/twitter/handshake.png?v=12" title=":handshake:" class="emoji" alt=":handshake:" loading="lazy" width="20" height="20"></p>
+<ol>
+<li>
+<p>Что касается свободных  дистро , да ты прав это в первую очередь очищенное ядро<code> linux-libre</code><br>
+от проприетраных компонетнов. И да ты так же прав что по умолчанию  сложно найти VPS у которого есть  такие дистро. Но думаю что есть … по-моему я как-то встречал , вспомню , напишу сюда, но мне не понравился сайт , он был с  google трекерами и прочим мусором…</p>
+</li>
+<li>
+<p>Шифрование.  И здесь ты прав, свой сервер однозначно лучше  бесспорно ! Я бы добавил к твоим мыслям еще важную информацию чтобы другие тоже могли прочитать , важным аспектом является шифрование GRUB  и установка Libreboot  <a href="https://ru.wikipedia.org/wiki/Libreboot" class="inline-onebox" rel="noopener nofollow ugc">Libreboot — Википедия</a> вместо проприетарного BIOS и UEFI.  Где-то на просторах Mastodon я видел проект о котором ты говоришь …</p>
+</li>
+<li>
+<p>Да, пользователя  root можно  заблокировать. Что касается opendoas )) то да, это отличная альтернатива.  Кстати хорошее видео на эту тему   "Sudo Is Bloat. Use Doas Instead! " <a href="https://inv.nadeko.net/watch?v=A5buxcYXp7k" rel="noopener nofollow ugc">https://inv.nadeko.net/watch?v=A5buxcYXp7k</a></p>
+</li>
+<li>
+<p>Копирование открытого ключа SSH.  Спасибо за коррекцию.</p>
+</li>
+<li>
+<p>…и по ключу, и по паролю. Согласен. Если не сложно добавь пожалуйста от себя команды чтобы здесь сохранить твои заметки, а я могу подправить инструкцию.</p>
+</li>
+<li>
+<p>Настройка UFW.  Было бы интересно узнать как по другому ?)</p>
+</li>
+<li>
+<p>Отключаем ipv6. Согласен.</p>
+</li>
+<li>
+<p><strong>pwgen</strong> это  не для памяти ))  А так да ,  "<code> В лесу родилась ёлочка, В лесу она росла</code></p>
+</li>
+</ol>
+<p>"   он же   <code>dktcehjlbkfcmtkjxrfdktcejyfhjckf</code>     для памяти сойдет ))</p>
+<ol start="9">
+<li>Добавлю еще важный параметр это БЭКАПЫ черз SSH . Ссылка пример <a href="https://blog.racknerd.com/how-to-backup-your-vps-a-simple-guide-to-getting-started/" class="inline-onebox" rel="noopener nofollow ugc">How to Backup Your VPS: A Simple Guide to Getting Started — RackNerd</a></li>
+</ol>
+<p>Cсылка на  <code>The Ministry of Digital Development and Communications</code> не HTTPS  надо им было в Let’s Encrypt сертификат получать ))</p>
+<p>P.S  Дело вот в чем ,  то что здесь написана информация, которая  значительно - на 80% минимум улучшит  защиту арендованного VPS в стране где есть свобода слова или по крайне мере в ту сторону стремятся.<br>
+Если покупать VPS на территории РФ то даже эти настройки не помогут ))</p>
+<p>Когда лень пройдет )) напиши пожалуйста свои рекомендации , с удовольсвтием прочту и  приму к сведению <img src="https://ntc.party/images/emoji/twitter/fist.png?v=12" title=":fist:" class="emoji" alt=":fist:" loading="lazy" width="20" height="20"> <img src="https://ntc.party/images/emoji/twitter/+1.png?v=12" title=":+1:" class="emoji" alt=":+1:" loading="lazy" width="20" height="20"></p></td><td>2024-12-26T17:57:47.541Z</td></tr><tr><td>allula</td><td><aside class="quote no-group" data-username="stiff" data-post="4" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<ol>
+<li>Что касается свободных дистро , да ты прав это в первую очередь очищенное ядро<code> linux-libre</code></li>
+</ol>
+</blockquote>
+</aside>
+<p>Тут я пока считаю лучшим вариантом установить <code>linux-hardened</code> (по умолчанию включены многие настройки безопасности) и не устанавливать <code>linux-firmware</code>, потому что для VPS он не нужен.</p>
+<aside class="quote no-group" data-username="stiff" data-post="4" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>И да ты так же прав что по умолчанию сложно найти VPS у которого есть такие дистро.</p>
+</blockquote>
+</aside>
+<p>Нет смысла их искать. Если даже хостер не даёт подключать iso, думаю, ты сможешь установить нужный тебе дистрибутив прямо из запущенного дистрибутива, который даёт тебе хостер (я так делаю).</p>
+<aside class="quote no-group" data-username="stiff" data-post="4" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>важным аспектом является шифрование GRUB и установка Libreboot</p>
+</blockquote>
+</aside>
+<p>Libreboot всё-таки не про VPS из-за буквы V в этом слове. Уже хорошо, если хостер тебе даёт возможность включить UEFI с Secure Boot. У тех, что я видел, даже этого нет (только загрузка через BIOS). Использование GRUB для расшифровки никак не защищает от буткитов. С таким же успехом можно расшифровывать диск самим ядром. Виртуализация в этом плане сильно ограничивает возможности по сохранению приватности данных.</p>
+<aside class="quote no-group" data-username="stiff" data-post="4" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>Кстати хорошее видео на эту тему "Sudo Is Bloat. Use Doas Instead! "</p>
+</blockquote>
+</aside>
+<p>Кажется, я смотрел это видео или его пересказы. Точно помню, что в одном в качестве аргумента за <code>doas</code> приводилось сравнение количества найденных уязвимостей в <code>sudo</code> и <code>doas</code>. Конечно, разница была существенной, но пользователей и исследователей <code>sudo</code> кратно больше, поэтому неудивительно. То есть это не исключает того, что в <code>doas</code> есть уязвимости (возможно, их пока некому искать).</p>
+<aside class="quote no-group" data-username="stiff" data-post="4" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>…и по ключу, и по паролю. Согласен. Если не сложно добавь пожалуйста от себя команды чтобы здесь сохранить твои заметки, а я могу подправить инструкцию.</p>
+</blockquote>
+</aside>
+<p>Да, без проблем. По ссылке, которую я приводил, это тоже есть.</p>
+<pre><code class="lang-auto">AuthenticationMethods publickey,password
+</code></pre>
+<p>Ты можешь и больше факторов использовать (например, два ключа и пароль) или комбинировать разные двухфакторки (два ключа либо ключ и пароль). В документации можно про это почитать.</p>
+<p>Кстати, если ты любитель <code>doas</code>, то, возможно, есть смысл присмотреться к <code>tinyssh</code>:</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">tinysshd is a minimalistic SSH server which implements only a subset of SSHv2 features.
+
+tinysshd supports only secure cryptography (minimum 128-bit security, protected against cache-timing attacks)
+
+tinysshd doesn't implement older crypto (such as RSA, DSA, HMAC-MD5, HMAC-SHA1, 3DES, RC4, ...)
+
+tinysshd doesn't implement unsafe features (such as password or hostbased authentication)
+
+tinysshd doesn't have features such: SSH1 protocol, compression, port forwarding, agent forwarding, X11 forwarding ...
+
+tinysshd doesn't use dynamic memory allocation (no allocation failures, etc.)
+</code></pre>
+</details>
+<aside class="quote no-group" data-username="stiff" data-post="4" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>Настройка UFW. Было бы интересно узнать как по другому ?)</p>
+</blockquote>
+</aside>
+<p>У тебя хороший вариант, если провайдер выдаёт тебе статический адрес, но для большинства людей это не так (кому-то вообще нужно иметь возможность подключаться из разных сетей), поэтому если паранойя несильная, то я бы так настроил (вместо 22-го порта нужно использовать порт для ssh):</p>
+<pre><code class="lang-plaintext"># ufw default deny
+# ufw allow 443/tcp
+# ufw limit 22/tcp
+# ufw enable
+</code></pre>
+<p>Ещё можешь эту тему почитать (есть интересные идеи): <a href="https://ntc.party/t/%D0%B3%D0%B0%D0%B9%D0%B4-%D0%BF%D0%BE-%D0%BE%D0%B3%D1%80%D0%B0%D0%BD%D0%B8%D1%87%D0%B5%D0%BD%D0%B8%D1%8E-ssh-%D0%BD%D0%B0-vps/13691" class="inline-onebox">Гайд по ограничению ssh на vps</a>.</p>
+<aside class="quote no-group" data-username="stiff" data-post="4" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p><strong>pwgen</strong> это не для памяти )) А так да , "<code> В лесу родилась ёлочка, В лесу она росла</code></p>
+</blockquote>
+</aside>
+<p>Ну тут тоже надо меру знать. Лучше популярные фразы не использовать, атаку по словарю они могут не пройти.</p>
+<aside class="quote no-group" data-username="stiff" data-post="4" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>Cсылка на <code>The Ministry of Digital Development and Communications</code> не HTTPS надо им было в Let’s Encrypt сертификат получать ))</p>
+</blockquote>
+</aside>
+<p>HTTPS, нужно только довериться <img src="https://ntc.party/images/emoji/twitter/wink.png?v=12" title=":wink:" class="emoji" alt=":wink:" loading="lazy" width="20" height="20">. Если параноишь и не хочешь открывать, можешь тут почитать: <a href="https://www.opennet.ru/opennews/art.shtml?num=58533" rel="noopener nofollow ugc">ФСТЭК РФ опубликовал рекомендации по обеспечению безопасной настройки Linux</a>.</p>
+<aside class="quote no-group" data-username="stiff" data-post="4" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>P.S Дело вот в чем , то что здесь написана информация, которая значительно - на 80% минимум улучшит защиту арендованного VPS в стране где есть свобода слова или по крайне мере в ту сторону стремятся.</p>
+</blockquote>
+</aside>
+<p>Ты молодец. Считаю, что поднимаешь правильные темы. Лучше хоть какая-то безопасность, чем её полное отсутствие.</p></td><td>2024-12-26T19:37:00.565Z</td></tr><tr><td>somula</td><td><ol>
+<li>
+<p>Можете пояснить что плохого в IPv6?</p>
+</li>
+<li>
+<p>И у какого провайдера вы покупали VPS из этого списка? <a href="https://crippled.media/free-speech-vps-providers-put-to-the-test" class="inline-onebox" rel="noopener nofollow ugc">Putting Privacy Focused Free Speech VPS Providers To The Test.</a></p>
+</li>
+<li>
+<p>Если хотите мониторить систему то можно поставить: <a href="https://ru.wikipedia.org/wiki/Tripwire" class="inline-onebox" rel="noopener nofollow ugc">Tripwire — Википедия</a></p>
+</li>
+<li>
+<p>Зачем выключать форвадинг если только вы этой системой и пользуетесь?</p>
+</li>
+</ol>
+<pre><code class="lang-auto">X11Forwarding no 
+AllowTcpForwarding no    # Зачем это делать?
+</code></pre>
+<ol start="5">
+<li>По поводу DNS у меня этим занимается <strong>systemd-resolved</strong> и запросом через <strong>DoH</strong>.</li>
+</ol></td><td>2024-12-26T20:43:09.130Z</td></tr><tr><td>skyrunner(name)</td><td><p>Можно добавить установку jitterentropy, хардеринг.<br>
+Сомневаюсь, что systemd подходит для параноика</p></td><td>2024-12-27T06:29:49.980Z</td></tr><tr><td>mrplap</td><td><p>По поводу UFW.<br>
+Сначала добавляем разрешающие правила для ssh и только потом включаем. А то может получиться так, что придется лезть в панель хостера.</p></td><td>2024-12-27T06:55:33.717Z</td></tr><tr><td>naykaminka(Sergey)</td><td><p>Хотелось бы почитать защиту VPS от цензора, а не от хакиров.<br>
+Купленный за забором VPS не может отвалиться как хетзер ?</p></td><td>2024-12-27T08:42:16.104Z</td></tr><tr><td>bolvan</td><td><p>Непонятно какое отношение имеет отключение ipv6 к безопасности ?<br>
+Его обычно отключают, потому что не умеют/не хотят с ним возиться</p>
+<p>Полное шифрование , включая системный раздел, потребует при загрузке ввод кода через vnc каждый раз. Или патчить код модуля grub, чтобы зашить его туда. Это поможет от сисадминов, от кракеров кода - нет.<br>
+Хостер может всегда и незаметно снять snapshot работающей системы вместе с диском и памятью.</p></td><td>2024-12-27T09:46:20.889Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="skyrunner" data-post="7" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/skyrunner/48/15146_2.png" class="avatar"> skyrunner:</div>
+<blockquote>
+<p>jitterentropy</p>
+</blockquote>
+</aside>
+<p>Привет. Вы правы , но можно не закрывать терминал в которм идут настройки и  открыть второй )<br>
+А так да, вы правы.</p></td><td>2024-12-27T10:26:24.942Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>Почитал, приуныл.<br>
+Большинство телодвижений избыточны, никто на впс ломиться не будет.<br>
+Тоже не понял, зачем отрубать ipv6 и как это сказывается на бесопасности.</p></td><td>2024-12-27T10:38:34.526Z</td></tr><tr><td>stiff(stiff)</td><td><p>Привет.    По поводу отключения ipv6  лучше чем Ruheni Mathenge  не напишу)</p>
+<p>Источник: <a href="https://privacysavvy.com/security/safe-browsing/disable-ipv6/" class="inline-onebox" rel="noopener nofollow ugc">How to Disable IPv6 on All Your Devices - PrivacySavvy</a></p>
+<blockquote>
+<p>Почему мне следует отключить IPv6?</p>
+<p>Хотя IPv6 в целом хорошо работает с распространенным IPv4. Но он также может вызывать конфликты при определенных обстоятельствах, требуя от вас этого.</p>
+<p>Например, он может создавать проблемы с сетью или вызывать утечки VPN, когда вы хотите скрыть свое фактическое местоположение в сети и IP-адрес. К сожалению, многие надежные VPN, включая NordVPN или Surfshark, по-прежнему не поддерживают IPv6. Поэтому, хотя они предлагают расширенную защиту от утечки IP, вам все равно, возможно, придется отключить IPv6 вручную, чтобы предотвратить случайное раскрытие вашего фактического IP-адреса в сети.</p>
+<p>Аналогично, если ваше интернет-соединение неоднократно переподключается, ваш маршрутизатор может закрыть соединение из-за конфликта IPv6.</p>
+<p>Такие проблемы возникают из-за плохой адаптации IPv6 на уровне конечного пользователя. Кроме того, некоторые интернет-провайдеры, такие как AT&amp;T, Verizon и Xfinity, все еще борются с адекватной адаптацией и реализацией IPV6. Поэтому, чтобы избежать всех этих проблем, вам, возможно, придется решить отключить IPv6 на своем устройстве.</p>
+<p>Поэтому, чтобы избежать всех этих проблем, вам, возможно, придется принять решение об отключении IPv6 на вашем устройстве.</p>
+</blockquote>
+<p>Что касается полнодискового шифрования , есть такая проблема, согласен , вы мне напомнили еще один пункт который нужно включить в инструкцию, а именно :</p>
+<p><code>$ sudo apt-get --purge remove xinetd nis yp-tools tftpd atftpd tftpd-hpa telnetd rsh-server rsh-redone-server</code></p>
+<p>Удалим лишнее)</p>
+<p>Что касается дампа VPS я писал об этом , есть такая проблема и как мне кажется единственное решение это  полнодисковое шифрование , как показала практика такие конторы как Proton и Tuta  сдавали своих пользователей ,  а елси бы было шифрование ,то  тут посложнее было бы ))</p></td><td>2024-12-27T10:46:31.867Z</td></tr><tr><td>stiff(stiff)</td><td><p>Поддерживаю мысль,  если вы знаете VPS где по умолчание установлена хотябы <strong>Devuan ( OpenRC)</strong> дайте знать пожалуйста.</p></td><td>2024-12-27T10:49:31.266Z</td></tr><tr><td>stiff(stiff)</td><td><p>Привет. Не нашел в репо твою рекомендацию <strong>tripwire</strong> и на github с 2018 года ничего не обновлялось</p>
+<p>Что касается статьи по выбору VPS ( если вы читали) то автор купил и проверил везде и сделал выводы.  А дальше уже выбор за пользователем доберять аналитике автора или нет ))</p></td><td>2024-12-27T10:53:56.264Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="5" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Тут я пока считаю лучшим вариантом установить <code>linux-hardened</code> (по умолчанию включены многие настройки безопасности) и не устанавливать <code>linux-firmware</code>, потому что для VPS он не нужен.</p>
+</blockquote>
+</aside>
+<p>Поддерживаю мысль.</p></td><td>2024-12-27T10:56:31.911Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="5" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Нет смысла их искать. Если даже хостер не даёт подключать iso, думаю, ты сможешь установить нужный тебе дистрибутив прямо из запущенного дистрибутива, который даёт тебе хостер (я так делаю).</p>
+</blockquote>
+</aside>
+<p>Не помню у кого , но есть хостеры у которых можно подключить ISO в том числе и такие варианты как Trisquel , Devuan , Parabola итд  Но это через VNС что не есть хорошо…</p></td><td>2024-12-27T10:59:28.371Z</td></tr><tr><td>Dhohbr</td><td><p>Вы не настоящие параноики, если не используете SELinux)</p>
+<p>А ещё могу добавить, можно удалить агентов виртуализации. Например, на моем VPS пакет qemu-guest-agent.<br>
+И ключи ssh, которые добавляет себе техподдержка, чтобы иметь доступ к вашему серверу.</p></td><td>2024-12-27T11:02:12.367Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="5" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Libreboot всё-таки не про VPS из-за буквы V в этом слове. Уже хорошо, если хостер тебе даёт возможность включить UEFI с Secure Boot. У тех, что я видел, даже этого нет (только загрузка через BIOS). Использование GRUB для расшифровки никак не защищает от буткитов. С таким же успехом можно расшифровывать диск самим ядром. Виртуализация в этом плане сильно ограничивает возможности по сохранению приватности данных.</p>
+</blockquote>
+</aside>
+<p>Согласен , а вдруг VPS это что-то типо T200  <a href="https://shop.vikings.net/product/vikings-x200-laptop/?v=1a13105b7e4e" class="inline-onebox" rel="noopener nofollow ugc">Vikings X200 Laptop – FSF RYF certified (sold out) – Vikings Shop</a> и он  у дргуа в Нидерландах случайно оказался )) И там установлен Libreboot и заширофван по Argon2id  и так же  GRUB с gpg подписью и законодательство Нидерландов при запросе откажет запрашиваемым из РФ сторне в передаче данного PC ))))</p>
+<p>А так  конечно ты прав, ждем  пока появится VPS с свободным железом , может на rockchip итд</p></td><td>2024-12-27T11:06:04.583Z</td></tr><tr><td>stiff(stiff)</td><td><p>Привет . Если я не ошибаюсь после обновлени сервера и запуска команды</p>
+<p><code>$ sudo apt-get --purge autoremove</code></p>
+<p>qemu-guest-agent удаляется…</p></td><td>2024-12-27T11:10:09.311Z</td></tr><tr><td>bolvan</td><td><p>Отключение ipv6 на сервере никак не решает проблему утечки адреса на клиенте.<br>
+Если на клиенте есть ipv6, на сервере нет, то клиентский ipv6 потечет в сеть напрямую.<br>
+А если на сервере сделать раздачу ipv6 хотя бы через NAT6, то эта проблема как раз закрывается</p></td><td>2024-12-27T11:11:20.328Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="5" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Кажется, я смотрел это видео или его пересказы. Точно помню, что в одном в качестве аргумента за <code>doas</code> приводилось сравнение количества найденных уязвимостей в <code>sudo</code> и <code>doas</code>. Конечно, разница была существенной, но пользователей и исследователей <code>sudo</code> кратно больше, поэтому неудивительно. То есть это не исключает того, что в <code>doas</code> есть уязвимости (возможно, их пока некому искать).</p>
+</blockquote>
+</aside>
+<p>Мы здесь вместе с автором канала “DistroTube” популиризируем opendoas взамен sudo  )) Уязвимости есть везде , но когда 99% использую   sudo , то  1% или даже 00000.1%  будут немного в безопасности , так как кода меньше в opendoas _</p></td><td>2024-12-27T11:14:12.006Z</td></tr><tr><td>stiff(stiff)</td><td><p>Как-то традиционно завелеось у безопасников отключать  ipv6 , так и идет дальше.</p></td><td>2024-12-27T11:15:58.092Z</td></tr><tr><td>bolvan</td><td><p>Если вдруг хостер не поддерживает загрузку с ISO, всегда есть не очень красивый, но рабочий вариант. Подготовить образ диска того же размера у себя и загнать его на диск VPS через netcat или ssh прямо по сети. При этом убив все лишние процессы, кроме своего bash, чтобы не было записи никакой. В идеале перемонтировав root в R/O, но это вряд ли дадут из-за открытых файлов.</p></td><td>2024-12-27T11:16:19.483Z</td></tr><tr><td>bolvan</td><td><p>Я привел пример, когда отказ от имения дела с ipv6 создает проблему, а не решает ее<br>
+Тк клиенты бывают разные. Если чайник, он вряд ли будет отключать ipv6 у себя.<br>
+А если сервер выдаст ipv6 через VPN, то чайнику ничего делать не надо<br>
+Даже если и не чайник, можно банально забыть отключить на клиенте ipv6, загрузившись в другую систему или переставив винду и светануться. Может даже оборудование немного сьехать в винде, и определится новый адаптер, которому по умолчанию включат ipv6. И не заметить этого.<br>
+Например, в случае усб wifi</p></td><td>2024-12-27T11:19:25.580Z</td></tr><tr><td>stiff(stiff)</td><td><p>Привет .  Мысль хорошая, но на самом деле уже сейчас достаточно хостеров кто:</p>
+<ol>
+<li>Дает возможность оплаты VPS за XMR</li>
+<li>Есть возможность использовать другие ISO , есть в этом списке )) <a href="https://crippled.media/free-speech-vps-providers-put-to-the-test" class="inline-onebox" rel="noopener nofollow ugc">Putting Privacy Focused Free Speech VPS Providers To The Test.</a></li>
+</ol></td><td>2024-12-27T11:26:21.531Z</td></tr><tr><td>stiff(stiff)</td><td><p>Согласен с вами . Хорошо , отметим как на усмотрение пользователя) Чтобы не вашим и не нашим ))</p></td><td>2024-12-27T11:27:48.887Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="5" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Да, без проблем. По ссылке, которую я приводил, это тоже есть.</p>
+</blockquote>
+</aside>
+<p>Уточнение . Я правильно тебея понял , что в директории  <code>/etc/ssh/sshd_config.d/</code> у нас есть конфиг ,в который мы добавляем запись</p>
+<pre><code class="lang-auto"> PasswordAuthentication no
+AuthenticationMethods publickey
+</code></pre>
+<p>или как ты написал :</p>
+<p><code>AuthenticationMethods publickey,password</code></p></td><td>2024-12-27T11:35:18.391Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="5" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Кстати, если ты любитель <code>doas</code>, то, возможно, есть смысл присмотреться к <code>tinyssh</code>:</p>
+</blockquote>
+</aside>
+<p>Спасибо , поизучаю эту утилиту…</p></td><td>2024-12-27T11:36:20.360Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="5" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p><a href="https://ntc.party/t/%D0%B3%D0%B0%D0%B9%D0%B4-%D0%BF%D0%BE-%D0%BE%D0%B3%D1%80%D0%B0%D0%BD%D0%B8%D1%87%D0%B5%D0%BD%D0%B8%D1%8E-ssh-%D0%BD%D0%B0-vps/13691">Гайд по ограничению ssh на vps</a>.</p>
+</blockquote>
+</aside>
+<p>Спасибо за ссылку , поизучаю <img src="https://ntc.party/images/emoji/twitter/handshake.png?v=12" title=":handshake:" class="emoji" alt=":handshake:" loading="lazy" width="20" height="20"></p></td><td>2024-12-27T11:41:57.531Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="5" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Ну тут тоже надо меру знать. Лучше популярные фразы не использовать, атаку по словарю они могут не пройти.</p>
+</blockquote>
+</aside>
+<p>это был пример , а так да  , нужно смешивать цИферки букОвки и другие знаки )</p></td><td>2024-12-27T11:43:38.617Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="5" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Лучше хоть какая-то безопасность, чем её полное отсутствие.</p>
+</blockquote>
+</aside>
+<p>И тебе большое спасибо за вклад и всем кто создал данный форум -спасибо! <img src="https://ntc.party/images/emoji/twitter/handshake.png?v=12" title=":handshake:" class="emoji" alt=":handshake:" loading="lazy" width="20" height="20"> <img src="https://ntc.party/images/emoji/twitter/fist.png?v=12" title=":fist:" class="emoji" alt=":fist:" loading="lazy" width="20" height="20"> <img src="https://ntc.party/images/emoji/twitter/+1.png?v=12" title=":+1:" class="emoji" alt=":+1:" loading="lazy" width="20" height="20"></p>
+<p>Если кто-то по этой теме хочет добавить, пожалуйста пишите практические команды чтобы было удобно их применять на практике ,а не читать здесь и потом часами искать как это сделать в другом месте , поэтому я пишу команды чтобы было удобно.</p></td><td>2024-12-27T11:47:07.928Z</td></tr><tr><td>Dhohbr</td><td><aside class="quote no-group" data-username="stiff" data-post="20" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p><code>$ sudo apt-get --purge autoremove</code></p>
+<p>qemu-guest-agent удаляется…</p>
+</blockquote>
+</aside>
+<p>Нет. Этой командой вы удалите старые пакеты и зависимости.</p></td><td>2024-12-27T11:58:08.910Z</td></tr><tr><td>stiff(stiff)</td><td><p>ok, спасибо тогда запишем</p></td><td>2024-12-27T12:00:09.168Z</td></tr><tr><td>Xunlei</td><td><p>Отключать SSH port forwarding для доступа к админкам смысла нет, т.к. злоумышленник получивший клиенский SSH ключ откроет себе что угодно — на паранойю не оказывает влияния.</p>
+<p>IPv6 наоборот есть смысл настроить, у меня VPN клиентам раздаются IPv6 адреса для приёма входящих подключений, так, например 1/3 торрент трафика идёт через IPv6-only пиров.</p>
+<p>В качестве брандмауэра рекомендую firewalld — высокоуровневая абстракция над nftables. Удобно создавать зоны, службы и политики машрутизирования (можно защитить VPN клиентов, даже если на их стороне брандмауэр выключен).</p></td><td>2024-12-27T12:22:51.089Z</td></tr><tr><td>stiff(stiff)</td><td><p>Привет . Спасибо за совет. Можешь здесь написать  несколько правил для примера используя firewalld, возможно кто-то остановится на это решениии.</p></td><td>2024-12-27T18:40:38.427Z</td></tr><tr><td>allula</td><td><aside class="quote no-group" data-username="somula" data-post="6" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/a6a055/48.png" class="avatar"> somula:</div>
+<blockquote>
+<ol>
+<li>Можете пояснить что плохого в IPv6?</li>
+</ol>
+</blockquote>
+</aside>
+<p>Первое правило параноика заключается в том, чтобы отключать всё, что не используется. Не говорю, что я такой или вы должны такими быть.</p>
+<p>Раньше видел утверждения о том, что при включённом IPv6 труднее блокировать боты и сканеры из-за обилия дешёвых адресов. Не знаю, насколько эта информация актуальна сейчас. Также в некоторых случаях использование IPv6 сильно роняет скорость соединения.</p>
+<aside class="quote no-group" data-username="naykaminka" data-post="9" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/naykaminka/48/13848_2.png" class="avatar"> naykaminka:</div>
+<blockquote>
+<p>Купленный за забором VPS не может отвалиться как хетзер ?</p>
+</blockquote>
+</aside>
+<p>Использовать CDN, gRPC, серверы в разных локациях, иметь возможность оплатить любого хостера и уметь быстро разворачивать систему. Если совсем прижмёт, то даже это не поможет.</p>
+<aside class="quote no-group" data-username="bolvan" data-post="10" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Полное шифрование , включая системный раздел, потребует при загрузке ввод кода через vnc каждый раз. Или патчить код модуля grub, чтобы зашить его туда.</p>
+</blockquote>
+</aside>
+<p>Если не шифровать ядро и initramfs, то ничего патчить не надо. Можно настроить возможность расшифровки диска через ssh.</p>
+<aside class="quote no-group" data-username="bolvan" data-post="10" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Это поможет от сисадминов, от кракеров кода - нет.</p>
+</blockquote>
+</aside>
+<p>Я тоже писал, что это не панацея, но всё равно поверхность атаки сокращается.</p>
+<aside class="quote no-group" data-username="stiff" data-post="14" data-topic="14122" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>Поддерживаю мысль, если вы знаете VPS где по умолчание установлена хотябы <strong>Devuan ( OpenRC)</strong> дайте знать пожалуйста.</p>
+</blockquote>
+</aside>
+<p>Так установите сами у любого хостера. Если не даёт подключить iso, отрезаете наживую кусок раздела и устанавливаете туда, что хотите, или восстанавливаете из локального бэкапа через rsync. Можете даже <code>dd</code> через ssh загнать на весь диск. Вариантов много.</p>
+<aside class="quote no-group" data-username="Dhohbr" data-post="18" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> Dhohbr:</div>
+<blockquote>
+<p>Вы не настоящие параноики, если не используете SELinux</p>
+</blockquote>
+</aside>
+<p>В статье, которую я скидывал, всё это есть и даже больше, но не только лишь все, мало кто сможет осилить.</p>
+<aside class="quote no-group" data-username="Dhohbr" data-post="18" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> Dhohbr:</div>
+<blockquote>
+<p>А ещё могу добавить, можно удалить агентов виртуализации. Например, на моем VPS пакет qemu-guest-agent.<br>
+И ключи ssh, которые добавляет себе техподдержка, чтобы иметь доступ к вашему серверу.</p>
+</blockquote>
+</aside>
+<p>Повторюсь, проще установить свой личный православный дистрибутив, в котором ничего этого изначально не будет.</p>
+<aside class="quote no-group" data-username="stiff" data-post="19" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>Согласен , а вдруг VPS это что-то типо T200 <a href="https://shop.vikings.net/product/vikings-x200-laptop/?v=1a13105b7e4e" rel="noopener nofollow ugc">Vikings X200 Laptop – FSF RYF certified (sold out) – Vikings Shop</a> и он у дргуа в Нидерландах случайно оказался )) И там установлен Libreboot и заширофван по Argon2id и так же GRUB с gpg подписью и законодательство Нидерландов при запросе откажет запрашиваемым из РФ сторне в передаче данного PC ))))</p>
+</blockquote>
+</aside>
+<p>Вот это другое дело, прямо путь параноика. Хотя не понимаю, как у параноика могут быть друзья, но если друг найдётся, то у вас ещё и IP будет резидентский.</p>
+<aside class="quote no-group" data-username="stiff" data-post="28" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>Уточнение . Я правильно тебея понял , что в директории <code>/etc/ssh/sshd_config.d/</code> у нас есть конфиг ,в который мы добавляем запись</p>
+<pre><code class="lang-auto"> PasswordAuthentication no
+AuthenticationMethods publickey
+</code></pre>
+<p>или как ты написал :</p>
+<p><code>AuthenticationMethods publickey,password</code></p>
+</blockquote>
+</aside>
+<p>Если нужна двухфакторная авторизация (и по ключу, и по паролю), то как я написал.</p></td><td>2024-12-27T18:49:37.341Z</td></tr><tr><td>allula</td><td><p>Чтобы разрешить подключение через ssh конкретному пользователю, можно добавить в настройки такую строку: <code>AllowUsers </code><mark><code>your_user</code></mark>.</p>
+<p>Про шифрование в линуксе ещё рекомендую почитать эту обзорную статью: <a href="https://wiki.archlinux.org/title/Data-at-rest_encryption" rel="noopener nofollow ugc">Data-at-rest encryption</a>.</p></td><td>2024-12-27T18:55:13.431Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="37" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Вот это другое дело, прямо путь параноика. Хотя не понимаю, как у параноика могут быть друзья, но если друг найдётся, то у вас ещё и IP будет резидентский.</p>
+</blockquote>
+</aside>
+<p>Подумалось про параноиков))  есть такая классная веСч как децентрализация в виде социальных сетей , как здорово ,что ее придумали <img src="https://ntc.party/images/emoji/twitter/pinched_fingers.png?v=12" title=":pinched_fingers:" class="emoji" alt=":pinched_fingers:" loading="lazy" width="20" height="20"> Примеры , вдруг кто-то заинтересуется:<br>
+Mastodon, Pleroma, Nextcloud, PeerTube, Funkwhale, Friendica, PixelFed, BookWyrm, Lemmy, Plume, Writefreely, Misskey и другие.<br>
+там как раз образуется  армия LIBRE активистов , это к вопросу у пароноиков не может быть друзей)</p></td><td>2024-12-27T19:27:58.998Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="37" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Повторюсь, проще установить свой личный православный дистрибутив, в котором ничего этого изначально не будет.</p>
+</blockquote>
+</aside>
+<p>Истина , поддерживаю на 100% + )</p></td><td>2024-12-27T19:29:57.970Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="37" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Если нужна двухфакторная авторизация (и по ключу, и по паролю), то как я написал.</p>
+</blockquote>
+</aside>
+<p>ok, принято</p></td><td>2024-12-27T19:30:49.993Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="38" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Чтобы разрешить подключение через ssh конкретному пользователю, можно добавить в настройки такую строку: <code>AllowUsers </code> <mark><code>your_user</code></mark>.</p>
+</blockquote>
+</aside>
+<p>Возможно даже так:</p>
+<pre><code class="lang-auto">AllowUsers stiff 
+DenyUsers root
+DenyGroups root
+</code></pre></td><td>2024-12-27T19:33:25.470Z</td></tr><tr><td>stiff(stiff)</td><td><aside class="quote no-group" data-username="allula" data-post="3" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Также можно использовать <code>ssh-audit</code>, чтобы проверить настройки</p>
+</blockquote>
+</aside>
+<p>Ты имеешь ввиду этот скрипт ? <a href="https://github.com/vernu/vps-audit" class="inline-onebox" rel="noopener nofollow ugc">GitHub - vernu/vps-audit: lightweight, dependency-free bash script for security, performance auditing and infrastructure monitoring of Linux servers.</a></p></td><td>2024-12-27T19:35:59.386Z</td></tr><tr><td>allula</td><td><p>Я говорил конкретно про <a href="https://github.com/jtesta/ssh-audit" rel="noopener nofollow ugc">ssh-audit</a>. В ту же степь рекомендации mozilla: <a href="https://infosec.mozilla.org/guidelines/openssh.html" rel="noopener nofollow ugc">OpenSSH</a>.</p>
+<p>Если про всю систему, то есть такие скрипты: <a href="https://cisofy.com/lynis/" rel="noopener nofollow ugc">Lynis</a>, <a href="https://gitlab.archlinux.org/archlinux/arch-audit" rel="noopener nofollow ugc">arch-audit</a> или <a href="https://man.freebsd.org/cgi/man.cgi?query=pkg-audit&amp;sektion=8" rel="noopener nofollow ugc">pkg-audit</a>.</p></td><td>2024-12-27T19:52:22.476Z</td></tr><tr><td>stiff(stiff)</td><td><p>Спасибо еще раз за ссылки , попробуем осилить)  Надеюсь варинт <a href="https://github.com/jtesta/ssh-audit" class="inline-onebox" rel="noopener nofollow ugc">GitHub - jtesta/ssh-audit: SSH server &amp; client security auditing (banner, key exchange, encryption, mac, compression, compatibility, security, etc)</a> так же прост в установке и проверке как <a href="https://github.com/vernu/vps-audit" class="inline-onebox" rel="noopener nofollow ugc">GitHub - vernu/vps-audit: lightweight, dependency-free bash script for security, performance auditing and infrastructure monitoring of Linux servers.</a> .</p></td><td>2024-12-27T20:05:07.434Z</td></tr><tr><td>xofamim548</td><td><p>Насчет ipv6, когда-то MiraclePtr в одной из статей на хабре описывал проблему, которую я наблюдал лично. Оставляешь включенный ipv6 - vless работает нормально пару минут, а потом начинаются затупы и провалы в скорости. Отключаешь ipv6 - как часы. Дальше по логике надо бы разобраться и устранить причину такого поведения (вероятно, криво настроена сеть у хостера), но обычно проще отключить ipv6 и забить. Проблема неочевидная, тяжело диагностируется новичками, поэтому предложение отключать ipv6 по умолчанию считаю не лишенным оснований.</p></td><td>2024-12-27T20:36:04.874Z</td></tr><tr><td>skyrunner(name)</td><td><p>По умолчанию? Многие хостинги поддерживают свой iso.<br>
+Так-же многие поддерживают alpine, он вполне сгодиться, на счет именно devuan  не видел, но ничего не мешает договориться с хостингом напрямую</p></td><td>2024-12-27T21:14:35.420Z</td></tr><tr><td>bolvan</td><td><p>Возможно. Но тогда надо пояснять. Новичкам сюда, неновичкам туда.<br>
+Если все будут отключать ipv6, у нас никто всерьез не будет делать его лучше.<br>
+Все мы останемся за NATами, где нам очень тяжело общаться друг с другом.<br>
+Будем все писать на православно-майорском VK<br>
+Сам по себе ipv6 можно сделать нормальным. Только не набрана критическая масса, после которой бизнес и провайдеры начнут быть в этом заинтересованы<br>
+Глобализация и централизация, увы, только усугубляют эту проблему. Все у нас завязывается на поставщиков услуг, подменяя понятие интернета набором корпоративных сервисов</p>
+<p>Я себе везде делаю ipv6. В локалках, в VPNах, в тоннелях, всегда его поддерживаю в рабочем состоянии. Чтобы понимать как он работает, знать его, знать что сейчас с ним в глобальной сети, какие есть проблемы. И чтобы не пробрасывать порты в том числе</p></td><td>2024-12-28T06:36:52.319Z</td></tr><tr><td>stiff(stiff)</td><td><p>Привет. Alpinelinux  Cоглсаен <a href="https://wiki.alpinelinux.org/wiki/OpenRC" class="inline-onebox" rel="noopener nofollow ugc">OpenRC - Alpine Linux</a> неплохой вариант и вики у них тоже хорошая. По поводу договриться не знаю, не имел такой опыт )</p>
+<p>Информация для тех кто ищет дистро без SystemD <a href="https://nosystemd.org/" rel="noopener nofollow ugc">https://nosystemd.org/</a></p></td><td>2024-12-28T10:22:10.390Z</td></tr><tr><td>stiff(stiff)</td><td><p>А как же тема про то что IPV4 это дом , а IVP6 эта квартира с точки зрения безопасности ))</p></td><td>2024-12-28T10:24:13.921Z</td></tr><tr><td>Xunlei</td><td><p>Посмотрите на уголовные производства — IPv4 никак не решает эту проблему.</p></td><td>2024-12-28T12:12:45.635Z</td></tr><tr><td>stiff(stiff)</td><td><p>А что решает ? Можете подробнее написать что вы имели ввиду . Я про защиту сервера .</p></td><td>2024-12-28T12:40:09.343Z</td></tr><tr><td>stiff(stiff)</td><td><p>Нашел сайт где по умолчанию есть Devuan и Trisquel называется <a href="https://www.gnutransfer.com" rel="noopener nofollow ugc">https://www.gnutransfer.com</a></p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="защита-vps-сервера-метод-параноика/6edcf306bc45b8303b8fc079f41a8d2aa25ba7e4.png" data-download-href="https://ntc.party/uploads/default/6edcf306bc45b8303b8fc079f41a8d2aa25ba7e4" title=""><img src="защита-vps-сервера-метод-параноика/6edcf306bc45b8303b8fc079f41a8d2aa25ba7e4_2_690x358.png" alt="" data-base62-sha1="fOJU10nB8lnTqbfdXYOev5gSCEI" role="presentation" width="690" height="358" srcset="защита-vps-сервера-метод-параноика/6edcf306bc45b8303b8fc079f41a8d2aa25ba7e4_2_690x358.png, защита-vps-сервера-метод-параноика/6edcf306bc45b8303b8fc079f41a8d2aa25ba7e4_2_1035x537.png 1.5x, защита-vps-сервера-метод-параноика/6edcf306bc45b8303b8fc079f41a8d2aa25ba7e4.png 2x" data-dominant-color="282929"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename"></span><span class="informations">1325×688 395 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-12-28T12:41:32.054Z</td></tr><tr><td>Xunlei</td><td><p>Незнаю. Зависит от модели угроз. В первом сообщении нет ни целей создания VPS ни модели угроз. Для преступлений используют часто взломанные чужие серверы/роутеры. Для прослушивания лекций на заблокированном ютубе написанного достаточно.</p></td><td>2024-12-28T12:44:25.068Z</td></tr><tr><td>skyrunner(name)</td><td><p>Ничего сложного же, просто нужно писать им в на почту/xmpp. Людей много добрых же, мии… ~Нипаа</p></td><td>2024-12-28T13:32:42.868Z</td></tr><tr><td>stiff(stiff)</td><td><p>Согласен , важно подмечено  “Модель Угрозы” !  Мне нравится позиция блогера по  “Этичному Инфобезу”  = &gt;  “SunandreaS”  <a href="https://pol1.iv.ggtyler.dev/watch?v=X1Zhd0GNhPc" class="inline-onebox" rel="noopener nofollow ugc">Альтернатива YouTube. Этичная и свободная. Глобализм и Государства. - Invidious</a> , который всегда  задирает высокую планку в этом вопросе .</p></td><td>2024-12-29T12:25:12.746Z</td></tr><tr><td>stiff(stiff)</td><td><p>Дело в том , что не все готовы загрузить <a href="https://www.gnu.org/distros/free-distros.html" class="inline-onebox" rel="noopener nofollow ugc">List of Free GNU/Linux Distributions - GNU Project - Free Software Foundation</a>  но глобально я согласен с вашей точкой зрения.</p></td><td>2024-12-29T12:27:38.083Z</td></tr><tr><td>skyrunner(name)</td><td><p>дык медоль угроз понятна по заглавию - метод параноика - то-есть максимальная угроза</p></td><td>2024-12-29T16:11:05.711Z</td></tr><tr><td>Xunlei</td><td><p>Ареста и преследования за преступление? Тогда вычислят по входящему соединению. Наверное это обсуждение не по теме форума.</p></td><td>2024-12-29T16:48:23.659Z</td></tr><tr><td>skyrunner(name)</td><td><p>Почяму не по теме? усе по теме.</p></td><td>2024-12-29T17:34:21.894Z</td></tr><tr><td>Xunlei</td><td><p><a href="https://ntc.party/about">https://ntc.party/about</a><br>
+Discussion board for network censorship all around the world, with anti-censorship software developers, researchers and tech-savvy users.</p></td><td>2024-12-29T17:35:47.973Z</td></tr><tr><td>skyrunner(name)</td><td><p>арест и преступление может быть же из-за цензуры, в некое виде… Так что по теме покаместь</p></td><td>2024-12-29T17:36:45.739Z</td></tr><tr><td>stiff(stiff)</td><td><p>Защита частного сервера это защита своих персональных данных . Что здесь плохого ? Если вы хотите защить свои данные от разного рода взломов. Каждый день слышни новости о  таких случаях. Мне кажется полезная тема , тем более с практическими командами и помощью других пользователей.</p></td><td>2024-12-29T23:10:44.506Z</td></tr><tr><td>stiff(stiff)</td><td><p>Нашелся еще один хороший ресурс , где можно найти подходящий VPS для аренды <a href="https://btc-vps.com/" rel="noopener nofollow ugc">https://btc-vps.com/</a></p>
+<p>В самом низу сайта есть выбор по странам и другим параметрам <img src="https://ntc.party/images/emoji/twitter/ok_hand.png?v=12" title=":ok_hand:" class="emoji" alt=":ok_hand:" loading="lazy" width="20" height="20"></p></td><td>2024-12-29T23:15:24.586Z</td></tr><tr><td>somula</td><td><p>вот только сортировать по цене нельзя и в добавок цены не верные, написано 1$ перехожу на сайт 4.99$ и так для многих простых тарифов до 5$</p></td><td>2024-12-30T19:37:58.364Z</td></tr><tr><td>stiff(stiff)</td><td><p>Хорошее видео про <strong>ненужность использования IPV6</strong> <a href="https://pol1.iv.ggtyler.dev/watch?v=FuaWLwF6mL8" rel="noopener nofollow ugc">https://pol1.iv.ggtyler.dev/watch?v=FuaWLwF6mL8</a></p></td><td>2024-12-30T22:03:35.144Z</td></tr><tr><td>stiff(stiff)</td><td><p>Есть еще хороший сайт <a href="https://kycnot.me/" rel="noopener nofollow ugc">https://kycnot.me/</a> , если вам нужны VPS <strong>без KYC</strong>  (KYC- означает «Знай своего клиента» или «Знай своего клиента» и является важным инструментом для финансового сектора, в частности, для проверки личности своих клиентов )</p></td><td>2024-12-30T22:07:39.553Z</td></tr><tr><td>stiff(stiff)</td><td><p>Всем привет . С новым 2025 годом !</p>
+<p>Если среди читающих данный пост ,есть пользователи энтузиасты готовые написать скрипт по всему что здесь обсуждалось и выложить сюда в открытый доступ для всех. дайте знать в личном сообщении. Готов оплатить  работу по адекватной цене  <img src="https://ntc.party/images/emoji/twitter/handshake.png?v=12" title=":handshake:" class="emoji" alt=":handshake:" loading="lazy" width="20" height="20"></p></td><td>2025-01-07T12:34:37.239Z</td></tr><tr><td>skyrunner(name)</td><td><p>Я думаю такие есть в сети, посмотри на гитхабе, может и так все проще получиться</p></td><td>2025-01-08T06:28:21.100Z</td></tr><tr><td>Frestein(Frestein)</td><td><aside class="quote no-group" data-username="stiff" data-post="13" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>Tuta сдавали своих пользователей</p>
+</blockquote>
+</aside>
+<p>Доказательства способны привести?</p></td><td>2025-01-11T00:13:52.700Z</td></tr><tr><td>skyrunner(name)</td><td><p><a href="https://www.heise.de/news/Gericht-zwingt-Mailprovider-Tutanota-zu-Ueberwachungsfunktion-4972460.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag" class="onebox" target="_blank" rel="noopener nofollow ugc">https://www.heise.de/news/Gericht-zwingt-Mailprovider-Tutanota-zu-Ueberwachungsfunktion-4972460.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag</a><br>
+И какой-то человек утверждал, что они были приманкой для преступников</p></td><td>2025-01-11T06:08:41.344Z</td></tr><tr><td>Xunlei</td><td><p>Европейское юр. лицо будет выдавать все данные пользователя по запросу европола.</p>
+<aside class="quote no-group" data-username="stiff" data-post="66" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>Хорошее видео</p>
+</blockquote>
+</aside>
+<p>Плохое видео вводящее в заблуждение.</p></td><td>2025-01-11T06:25:06.463Z</td></tr><tr><td>bolvan</td><td><p>Давно задаюсь вопросом. Как в условиях копиразма удается выживать торент трекерам так долго ?<br>
+Почему западный мир не засудит и не прикроет их все ?<br>
+Ведь засуживали и прикрывали пиратбей, демоноид и прочее западное творчество. Не особо они и процветают.<br>
+Но русские трекеры живее всех живых. И качать могут с них и русские, и не русские.<br>
+Клоудфларе мог бы их сдать с потрохами по ордеру.<br>
+Это особое искусство и большой опыт выживания. И да, грамотно продуманная и проверенная модель угроз.<br>
+Или копирасты давно поняли, что гораздо выгоднее пасти и штрафовать юзеров, чем зарезать дойную корову ?</p></td><td>2025-01-11T07:40:53.215Z</td></tr><tr><td>stiff(stiff)</td><td><p>Привет. Смотрел пока не нашел , чтобы включал все что здесь упоминалось или лучше, хочу чтобы был скрипт и им могли воспользоваться пользователи .  На гитхабе что-то видел, то там то fail2ban нету то еще чего-то не хватает …</p>
+<p>Сюда что-то буду выкладывать …</p>
+<p>Скрипт для автоматической настройки Fail2Ban <a href="https://github.com/j0hnVu/fail2ban-autosetup-script" class="inline-onebox" rel="noopener nofollow ugc">GitHub - j0hnVu/fail2ban-autosetup-script: Script to setup Fail2Ban automatically because i reinstall my VPS way too many time (idk y)</a></p></td><td>2025-01-11T10:39:46.094Z</td></tr><tr><td>skyrunner(name)</td><td><p>Помню как-то видел скрипт хардеринга, да не найду никак</p></td><td>2025-01-11T10:55:37.795Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>русские трекеры живее всех живых. И качать могут с них и русские, и не русские</p>
+</blockquote>
+<p>В этом и причина, что ориентированы на ru. Здесь другой менталитет, исторически немного другое отношение к контенту и законности. А зарубежных пользователей на ru трекерах минимум.</p></td><td>2025-01-11T11:16:06.776Z</td></tr><tr><td>stiff(stiff)</td><td><p>Спасибо , если вдруг что-то попадется , дай знать .</p>
+<p>Я тоже работаю в это направлении. Было бы очень удобно иметь такой скрипт , купил VPS и с помощью скрипта установил все важные настройки и это доступно по GPL3  всем желающим))</p></td><td>2025-01-11T18:20:14.597Z</td></tr><tr><td>skyrunner(name)</td><td><p>Да, обязательно сообщу</p></td><td>2025-01-11T20:49:14.285Z</td></tr><tr><td>1unknown(Unknown)</td><td><aside class="quote no-group" data-username="bolvan" data-post="73" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Почему западный мир не засудит и не прикроет их все ?</p>
+</blockquote>
+</aside>
+<p>Мне кажется результат будет тот же что и у РКН с казино - сколько гидру не мочи, появится ещё.<br>
+Пока в интернете есть возможность создать новые сайты - смысл борьбы с существующими скорее номинальный чем реальный.</p>
+<p>Думается, они действительно пришли к выводу что удобнее контролировать пользователя через сигнатуры торрент файлов (например, в Германии штрафы за скачивание торрентов с АП) чем как РКН включать режим банхамера.</p></td><td>2025-01-11T23:30:58.756Z</td></tr><tr><td>bolvan</td><td><p>Торент трекер создать это не просто создать сайт.<br>
+Если взять банально впс, то при первых кляузах его очень быстро закроют. Хостерам не надо морочиться, они тебя просто выпнут,<br>
+Нужны особые антикопирастные схемы. Абузоустойчивость, анонимность.</p></td><td>2025-01-12T08:02:24.294Z</td></tr><tr><td>minecrafter(Minecrafter)</td><td><aside class="quote no-group" data-username="bolvan" data-post="73" data-topic="14122">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Давно задаюсь вопросом. Как в условиях копиразма удается выживать торент трекерам так долго ?<br>
+Почему западный мир не засудит и не прикроет их все ?</p>
+</blockquote>
+</aside>
+<p>Причин здесь целый ком. Самая очевидная, что эти трекеры не в их юрисдикции. А РФ не спешит закрывать по своим причинам, которых тоже сильно больше одной.<br>
+Все что могли у себя, они уже давно прикрилы, начиная еще с Напстера.</p></td><td>2025-01-12T09:09:14.169Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>Если сайт заблокировать, то команда разработчиков остается, а значит, зная схему работы предыдущего сайта, они будут повторять пока есть мотивация и возможности.<br>
+Видимо найден какой-то компромисс между всеми участниками.<br>
+В любом случае эта история, приобретая более сложные факторы, по сути своей остаётся такой же, как с другими сайтами.<br>
+Любопытно что Вы задумались на эту тему, что Вас сподвигло, если не секрет?</p></td><td>2025-01-12T13:32:10.828Z</td></tr><tr><td>bolvan</td><td><p>Большинство VPSок рубанет тебя при достаточно незначительной абузе<br>
+Кому надо морочиться за 5 баксов в месяц и нести юридические риски ?<br>
+Или не рубанет, а снимет дамп и отправит его кому надо.<br>
+Есть ряд хостингов, которые специализируются на абузоустойчивости. Вплоть до сервака в ядерном бункере. Но стоят они совсем других денег.<br>
+Вопрос абузоустойчивости хостинга - тоже возможная часть риск модели параноика</p></td><td>2025-01-12T14:35:33.110Z</td></tr><tr><td>stiff(stiff)</td><td><p>Очень хороший  пример Lavabit !</p>
+<p>Источник <a href="https://www.schneier.com/blog/archives/2013/08/lavabit_e-mail.html" class="inline-onebox" rel="noopener nofollow ugc">Lavabit E-Mail Service Shut Down - Schneier on Security</a></p>
+<p><strong>Lavabit</strong>, более защищенный сервис электронной почты, <strong>которым пользовался Эдвард Сноуде</strong>н, среди прочих, внезапно закрылся. Из сообщения на их домашней странице:</p>
+<p>Я был вынужден принять трудное решение: стать соучастником преступлений против американского народа или отказаться от почти десяти лет упорной работы, закрыв Lavabit. После серьезного самоанализа я решил приостановить работу. Хотел бы я иметь возможность законно поделиться с вами событиями, которые привели к моему решению. Я не могу…</p>
+<p>Этот опыт научил меня одному очень важному уроку: без действий Конгресса или сильного судебного прецедента <strong>я настоятельно не рекомендую никому доверять свои личные данные компании, имеющей физические связи с Соединенными Штатами.</strong></p>
+<p>В случае, если что-то случится с домашней страницей, полное сообщение записано здесь.</p>
+<p>Подробнее о партнерстве государственного и частного наблюдения. И еще одна новостная статья.</p>
+<p>Также вчера Silent Circle закрыл свой почтовый сервис:</p>
+<p>Мы видим, что стена висит на стене, и мы решили, что лучше всего закрыть Silent Mail сейчас. Мы не получали повесток, ордеров, писем безопасности или чего-либо еще от какого-либо правител</p></td><td>2025-01-12T16:30:07.942Z</td></tr><tr><td>skyrunner(name)</td><td><p>Лучший вариант, это роутер в другой стране с белым Ip, где нибудь в гостиннице с бесплатным интернетом</p></td><td>2025-01-12T18:17:20.810Z</td></tr><tr><td>stiff(stiff)</td><td><p>Мне понравилась мысль про бункеры)  Смотрел как-то сюжет , не помню в какой стране эти помещения сдавались за очень дешево как гостиницы.</p>
+<p>Хорошее место для серверной )) <a href="https://www.atlasobscura.com/lists/cold-war-tunnels-bunkers-history" rel="noopener nofollow ugc">https://www.atlasobscura.com/lists/cold-war-tunnels-bunkers-history</a></p></td><td>2025-01-13T15:40:15.832Z</td></tr>
+    </table>
+      </body>
+    </html>

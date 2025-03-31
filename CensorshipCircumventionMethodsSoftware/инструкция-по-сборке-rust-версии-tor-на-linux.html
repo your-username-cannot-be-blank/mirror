@@ -1,0 +1,88 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>инструкция-по-сборке-rust-версии-tor-на-linux</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>zinoid</td><td><p>Разработчики Tor решили переписать его на более безопасном Rust. Проект назвали arti.<br>
+Компилировал в июле 2021 года, когда он только вышел. На Xubuntu 16.04 i386. С тех пор Rust обновился.<br>
+Инструкцию писал для себя:</p>
+<pre><code class="lang-auto">15 Jul 2021
+Rust 1.53.0
+
+https://forge.rust-lang.org/infra/other-installation-methods.html#standalone
+cd /media/denis/Data/Documents/software/System
+aria2c --max-overall-download-limit=200K 'https://static.rust-lang.org/dist/rust-1.53.0-i686-unknown-linux-gnu.tar.gz'
+tar -xvf rust-1.53.0-i686-unknown-linux-gnu.tar.gz
+cd rust-1.53.0-i686-unknown-linux-gnu
+sudo sh install.sh --help
+sudo sh install.sh --list-components
+sudo sh install.sh --without=rust-docs --disable-verify --verbose
+rm -rdf /media/denis/Data/Documents/software/System/rust-1.53.0-i686-unknown-linux-gnu
+rustc --version
+cargo --version
+
+git clone https://gitlab.torproject.org/tpo/core/arti.git
+cd arti
+cargo build --release
+##build 34m (Pentium 4)
+strip --strip-unneeded /home/denis/arti/target/release/arti
+chmod +x /home/denis/arti/target/release/arti
+readelf -d /home/denis/arti/target/release/arti
+sudo systemctl stop tor
+rm -rdf /home/denis/arti
+rm -rdf /home/denis/.cargo
+sudo sh /usr/local/lib/rustlib/uninstall.sh
+
+arti
+4.7 MB
+/home/denis/.cache/arti
+socks 127.0.0.1:9150
+
+readelf -d /home/denis/.bin/apps/arti
+NEEDED libsqlite3.so.0
+NEEDED liblzma.so.5
+NEEDED libssl.so.1.0.0
+NEEDED libcrypto.so.1.0.0
+NEEDED libgcc_s.so.1
+NEEDED librt.so.1
+NEEDED libpthread.so.0
+NEEDED libm.so.6
+NEEDED libdl.so.2
+NEEDED libc.so.6
+NEEDED ld-linux.so.2
+</code></pre></td><td>2022-01-14T02:55:04.833Z</td></tr>
+    </table>
+      </body>
+    </html>

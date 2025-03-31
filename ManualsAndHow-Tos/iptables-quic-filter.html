@@ -1,0 +1,62 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>iptables-quic-filter</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0ka(0ka)</td><td><p>нужно заблокировать QUIC на роутере, но при этом оставить udp port 443 рабочим для других протоколов, пока ничего лучше<br>
+<code>iptables -A FORWARD -p udp --dport 443 -m string --hex-string "|0000000108|" --algo kmp -j REJECT</code><br>
+не придумал</p>
+<p>решено: <a href="https://ntc.party/t/iptables-quic-filter-help/11089/9" class="inline-onebox">Iptables QUIC filter - #9 by ValdikSS</a></p></td><td>2024-10-07T03:26:20.022Z</td></tr><tr><td>bolvan</td><td><p>по любому придется использовать ту или иную форму payload expressions<br>
+в iptables лучше u32, тк string ищет по всему пакету<br>
+надо сечь  quic initial<br>
+там в лонг хедере характерный маркер с версией 1<br>
+и можно ограничить по ctstate new<br>
+тк инитиалы идут в начале<br>
+и если их дропать, коннтрак запись не создастся<br>
+тут надо это тщательней проверить<br>
+может рубить на раннем хуке, чтобы это было так</p>
+<p>так можно сделать фильтр не жрущим проц</p></td><td>2024-10-07T05:22:17.131Z</td></tr><tr><td>Tyman</td><td><p>если не секрет, для чего хотите заблокировать? не для того, чтобы приложения ютуба не использовали QUIC через ру хостинги?</p></td><td>2024-10-07T11:26:03.209Z</td></tr><tr><td>zzr</td><td><p>может он на ркн работат <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-10-07T14:58:45.216Z</td></tr><tr><td>0ka(0ka)</td><td><p>QUIC через TCP vpn/proxy работает медленно</p></td><td>2024-10-07T15:24:38.053Z</td></tr><tr><td>Tyman</td><td><p>А не проверял, если QUIC заблокировать, оф приложение ютуба будет пробовать подключаться без его использования или нет?</p></td><td>2024-10-07T17:41:24.737Z</td></tr><tr><td>0ka(0ka)</td><td><p>если заблокировать QUIC то будет подключаться по TCP</p></td><td>2024-10-07T18:49:41.888Z</td></tr><tr><td>Tyman</td><td><p>спасибо, если поймешь как заблокировать то напиши</p></td><td>2024-10-07T19:09:36.996Z</td></tr><tr><td>ValdikSS</td><td><p>Нужно использовать <code>u32</code>.</p>
+<p>В GoodbyeDPI это делается так:</p>
+<pre data-code-wrap="txt"><code class="lang-txt">#define FILTER_PASSIVE_BLOCK_QUIC "outbound and !impostor and !loopback and udp " \
+        "and udp.DstPort == 443 and udp.PayloadLength &gt;= 1200 " \
+        "and udp.Payload[0] &gt;= 0xC0 and udp.Payload32[1b] == 0x01"
+</code></pre>
+<p>Соответственно u32 будет примерно такой:</p>
+<pre data-code-wrap="txt"><code class="lang-txt">iptables -A FORWARD -p udp --dport 443 -m connbytes --connbytes 0:20 --connbytes-dir original --connbytes-mode packets -m u32 --u32 '25 &amp; 0xF0 = 0xC0 &amp;&amp; 29 = 0x00000001' -j DROP
+ip6tables -A FORWARD -p udp --dport 443 -m connbytes --connbytes 0:20 --connbytes-dir original --connbytes-mode packets -m u32 --u32 '45 &amp; 0xF0 = 0xC0 &amp;&amp; 49 = 0x00000001' -j DROP
+</code></pre></td><td>2024-10-08T20:42:39.418Z</td></tr>
+    </table>
+      </body>
+    </html>

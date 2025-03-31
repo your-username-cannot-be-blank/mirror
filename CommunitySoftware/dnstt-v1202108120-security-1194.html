@@ -1,0 +1,55 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>dnstt-v1202108120-security-1194</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>I released v1.20210812.0 of dnstt. This is a security release that fixes an injection vulnerability in the dnstt-server log file.</p>
+<ul>
+<li><a href="https://www.bamsoftware.com/software/dnstt/#download" rel="noopener nofollow ugc">https://www.bamsoftware.com/software/dnstt/#download</a></li>
+<li>
+<a href="https://www.bamsoftware.com/software/dnstt/dnstt-20210812.zip" rel="noopener nofollow ugc">dnstt-20210812.zip</a> (<a href="https://www.bamsoftware.com/software/dnstt/dnstt-20210812.zip.asc" rel="noopener nofollow ugc">sig</a>, <a href="https://www.bamsoftware.com/david/david.asc" rel="noopener nofollow ugc">key</a>)</li>
+<li><a href="https://repo.or.cz/dnstt.git/shortlog/refs/tags/v1.20210812.0" rel="noopener nofollow ugc">https://repo.or.cz/dnstt.git/shortlog/refs/tags/v1.20210812.0</a></li>
+<li><a href="https://repo.or.cz/dnstt.git/blob/v1.20210812.0:/CHANGELOG" rel="noopener nofollow ugc">CHANGELOG</a></li>
+</ul>
+<p>The dnstt-server log message <a href="https://repo.or.cz/dnstt.git/blob/v1.20210812.0:/dnstt-server/main.go#l433" rel="noopener nofollow ugc"><code>NXDOMAIN: not authoritative for %s</code></a> contains a potentially attacker-controlled name. Because DNS labels may contain any byte value, the log message allowed an attacker to write arbitrary bytes to the dnstt-server log, with a variety of possible effects:</p>
+<ul>
+<li>A label containing a newline character (\x0a) could break the format of the log, or inject false log lines.</li>
+<li>Log output to a terminal could contain terminal escape sequences which could, for example, change the color of text, or have <a href="https://seclists.org/bugtraq/2003/Feb/315" rel="noopener nofollow ugc">even worse effects</a> with older terminal emulators.</li>
+<li>DNS names with a label that contained the dot character (\x2e) would be logged in an ambiguous way, with the intra-label dot appearing as a label separator.</li>
+</ul>
+<p>DNS names are now logged using backslash hex escapes for unusual bytes. This vulnerability was called to mind by the USENIX Security 2021 research paper <a href="https://www.usenix.org/conference/usenixsecurity21/presentation/jeitner" rel="noopener nofollow ugc">“Injection Attacks Reloaded: Tunnelling Malicious Payloads over DNS”</a> by Jeitner and Shulman.</p></td><td>2021-08-12T21:06:00.462Z</td></tr>
+    </table>
+      </body>
+    </html>

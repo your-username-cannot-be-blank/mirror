@@ -1,0 +1,239 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>wireguard-через-sing-box</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>boris1</td><td><p>Привет. Уже несколько недель пытаюсь настроить wireguard для роутера, чтобы он шел через trojan или что-то подобное.<br>
+Дано, есть два роутера, один из которых имеет интернет, другой берет интернет от первого и используется как роутер с впн. Раньше он подключался по wireguard напрямую к удаленному серверу, сейчас протокол неработает.</p>
+<p>Поэтому идея была подключать raspberrypi4, чтобы она раздавала wireguard( для второго роутера) и проксировала трафик наружу каким-то незаблокированным протоколом. Для этих целей купил trojan/vless проксю и пытаюсь ее настроить таким образом.</p>
+<p>Сразу оговорюсь, что я хоть и из айти, но никогда не работал с iptables, роутингами и прочим, поэтому все делается без понимания, но очень хотелось бы понять, как это должно работать.</p>
+<p>Идея была такая, чтобы поднять в sing-box интерфейс и заставить через него работать wg, но ничего не получилось.<br>
+Удалось подключиться с помощью sing-box и настроить интерфейс:</p>
+<pre data-code-wrap="json"><code class="lang-json">{
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-inbound",
+      "interface_name": "tun0",
+      "inet4_address": [
+        "10.0.0.2/24"
+      ],
+      "mtu": 1500
+    },
+    {
+      "type": "socks",
+      "tag": "socks-inbound",
+      "listen": "127.0.0.1",
+      "listen_port": 1080
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "trojan",
+      "tag": "trojan-outbound",
+      "server": "domain",
+      "server_port": 443,
+      "password": "password",
+      "tls": {
+        "enabled": true,
+        "server_name": "domain",
+        "insecure": false
+      },
+      "transport": {
+        "type": "ws",
+        "path": "/tw",
+        "headers": {
+          "Host": "host"
+        }
+      }
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "inbound": [
+          "tun-inbound",
+          "socks-inbound"
+        ],
+        "outbound": "trojan-outbound"
+      }
+    ]
+  }
+}
+</code></pre>
+<p>Через него даже заработал курл:<br>
+curl --interface tun0 <a href="http://ipinfo.io/ip" rel="noopener nofollow ugc">ipinfo.io/ip</a><br>
+Далее установил wg через скрипт быстрой установки <a href="https://github.com/angristan/wireguard-install" class="inline-onebox" rel="noopener nofollow ugc">GitHub - angristan/wireguard-install: WireGuard VPN installer for Linux servers</a><br>
+Во время установки он спросил про интерфейс, я там напечатал tun0 и он настроил такой конфиг:</p>
+<pre><code class="lang-auto">[Interface]
+Address = 10.66.66.1/24,fd42:42:42::1/64
+ListenPort = 52590
+PrivateKey = private_key
+PostUp = iptables -I INPUT -p udp --dport 52590 -j ACCEPT
+PostUp = iptables -I FORWARD -i tun0 -o wg0 -j ACCEPT
+PostUp = iptables -I FORWARD -i wg0 -o tun0 -j ACCEPT
+PostUp = iptables -t nat -A POSTROUTING -o tun0 -j MASQUERADE
+PostUp = ip6tables -I FORWARD -i wg0 -j ACCEPT
+PostUp = ip6tables -t nat -A POSTROUTING -o tun0 -j MASQUERADE
+PostDown = iptables -D INPUT -p udp --dport 52590 -j ACCEPT
+PostDown = iptables -D FORWARD -i tun0 -o wg0 -j ACCEPT
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT
+PostDown = iptables -t nat -D POSTROUTING -o tun0 -j MASQUERADE
+PostDown = ip6tables -D FORWARD -i wg0 -o tun0 -j ACCEPT
+PostDown = ip6tables -t nat -D POSTROUTING -o tun0 -j MASQUERADE
+
+### Client router
+[Peer]
+PublicKey = public_key
+PresharedKey = p9zs0WAMxRLPwhOUAAVv9mn2vJGKVexw7VI7dfi+nfU=
+AllowedIPs = 10.66.66.2/32,fd42:42:42::2/128
+</code></pre>
+<p>Но с таким конфигом трафик на клиенте не работает. Если поменять tun0 везде на eth0 в этом конфиге, то интернет появляется.</p>
+<p>Возможна ли вообще такая схема и если да, то что надо сделать чтобы заработало?</p>
+<p>На самом деле даже не понимаю зачем wireguard свой интерфейс и как правильно должен идти трафик.</p>
+<p>ВПН на роутере нужен для работы, так как на работе используется проприетарный palo alto, который нужно запускать поверх зарубежного. Возможно тут еще какие-то ограничения всплывут.</p></td><td>2024-09-08T10:48:57.839Z</td></tr><tr><td>sakontwist</td><td><p>Я успешно подключал WG поверх vless, для этого делал на своей стороне порт dokodemo, который прокидывается поверх vless на удаленный сервер, где для приема на lo добавлен vip-адрес. На этом випе слушает WG. Только надо учитывать, что в такой схеме трафик на вип при выходе из vless приходит с этого же випа. Это надо учитывать в allowed. И нужно включить в WG на своей стороне keepalive, чтобы туннель не отключался.</p>
+<p>Свой интерфейс нужен WG во-первых для route-based инкапсуляции, во-вторых - как защита от утечки трафика мимо (если правильно настроить)</p></td><td>2024-09-08T13:05:24.628Z</td></tr><tr><td>boris1</td><td><p>докодемо это значит v2ray? А можете показать настройки wg? И докудемо настройки если они какие-то особенные. К сожалению по словам ничего настроить не могу.</p></td><td>2024-09-08T13:14:49.931Z</td></tr><tr><td>sakontwist</td><td><p>dokodemo это проброс порта в Xray Core. Почему все предпочитают sing-box, не знаю…</p>
+<p>Попробую набросать схему.<br>
+Узел-клиент - назначаем vip на интерйфейс LO, например 10.8.88.254, поднимаем порт-слушатель для wireguard и отправляем все с него в VLESS-outbound на vps на адрес vip (10.8.11.254):</p>
+<pre><code class="lang-auto">  "inbounds": [
+    {
+      "tag": "in-wg1",
+      "listen": "10.8.88.254","port": 1090,
+      "protocol": "dokodemo-door",
+      "settings": {
+        	"address": "10.8.11.254",
+	    	"port": 1092,
+	    	"network": "tcp,udp"
+      }
+    },
+"routing": {
+		{
+			"inboundTag": ["in-wg1"],
+			"outboundTag": "vless-vps1",
+		},
+}
+outbounds.....
+</code></pre>
+<p>То есть на клиенте цепляемся на локальный порт, который пробрасывается на vps:</p>
+<pre><code class="lang-auto">[Interface]
+Address = 10.8.88.253/32
+PrivateKey = xxxx
+
+[Peer]
+PublicKey = xxx
+AllowedIPs = 10.8.11.0/24
+Endpoint = 10.8.88.254:1090
+PersistentKeepalive = 15
+</code></pre>
+<p>На vps нужно просто настроить приемник wireguard также на локальном адресе:</p>
+<pre><code class="lang-auto">[Interface]
+Address = 10.8.11.253/32
+ListenPort = 1092
+PrivateKey = xxxx
+
+[Peer]
+PublicKey = xxxx
+AllowedIPs = 10.8.88.0/24
+</code></pre>
+<p>Переложить на sing-box не могу, не уверен что там вообще есть dokodemo-in</p>
+<p>И еще - такая схема в целом не очень удачная, потому что обнуляет все плюсы wireguard. WG изначально UDP, то есть тут будет переклад в UoT. Теоретически такое лучше пускать по shadowsocks, но shadowsocks UDP уже палится и легко режется…</p></td><td>2024-09-08T14:06:00.952Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>А зачем в этой схеме dokodemo? Вполне достаточно обявить wireguard интерфейс на том ip, которым малинка смотрит в локалку. Типа</p>
+<pre><code class="lang-auto">   {
+      "listen": "192.168.0.xx",
+      "port": 3125,
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1420,
+        "secretKey": "PrivkeyB",
+        "peers": [
+          {
+            "privateKey": "PrivkeyA",
+            "publicKey": "PubkeyA",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "keepAlive": 0
+          }
+        ],
+        "kernelMode": false
+      },
+      "streamSettings": null,
+      "tag": "WG_in",
+      "sniffing": {
+        "enabled": false,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic",
+          "fakedns"
+        ],
+        "metadataOnly": false,
+        "routeOnly": false
+      }
+    }
+</code></pre>
+<p>Всё, после этого на роутере можно настраивать WG подключение на 192.168.0.xx:3125, а в xray соотв. прописать маршрут</p>
+<pre><code class="lang-auto">  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": [
+          "WG_in"
+        ],
+        "outboundTag": "Trojan_out"
+      },
+</code></pre></td><td>2024-09-08T14:21:21.176Z</td></tr><tr><td>boris1</td><td><p>а у кого wireguard есть на inbound протоколе? Видел только на outbound</p></td><td>2024-09-08T14:30:25.885Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>xray-core умеет ещё с зимы по-моему(и как следствие 3x-ui). У меня вышеописанная схема(только с VLESS) живёт с февраля этого года. Вот недавно заехала в контейнер прямо на роутере.<br>
+Вот тут буквально недавно восстановил мануал по настройке</p><aside class="quote quote-modified" data-post="21" data-topic="8708">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/s.v.d/48/6091_2.png" class="avatar">
+    <a href="https://ntc.party/t/mkirotik-vless-reality/8708/21">Mkirotik + VLESS + REALITY</a> <a class="badge-category__wrapper " href="/c/censorship-circumvention-software/tunneling-software/24"><span data-category-id="24" style="--category-badge-color: #652D90; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #92278F;" data-parent-category-id="11" data-drop-close="true" class="badge-category --has-parent" title="Everything that encapsulates data and transmits it to middlebox server: VPN, proxy, cloaking software"><span class="badge-category__name">Tunneling software</span></span></a>
+  </div>
+  <blockquote>
+    В связи с тем, что форум воспрял из пепла - восстаналиваю мануал (Копия есть в комментах на хабре <a href="https://habr.com/ru/articles/838452/#comment_27231344" class="inline-onebox" rel="noopener nofollow ugc">Решаем проблему блокировок (и YouTube) за 5 минут на роутере Mikrotik через контейнеры и без VPN / Хабр</a>) 
+На микроте ставим пакет с контейнерами, ребутаемся, включаем контейнеры 
+/system/device-mode/update container=yes 
+На железке после этого нужно будет нажать кнопку mode за ограниченное время, удалённо включить контейнеры не выйдет, т.к. потанцевальная дыра в безопасности. Дальше создаём VETH для…
+  </blockquote>
+</aside>
+</td><td>2024-09-08T14:39:50.691Z</td></tr><tr><td>sakontwist</td><td><p>Здесь вы не пробрасываете WG поверх другого протокола, а терминируете его на узле… Задача была поставлена несколько иначе</p></td><td>2024-09-08T14:47:26.803Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Я прочитал задачу как “подключаться по WG к малинке, которая будет проксировать траффик наружу по незаблокированному протоколу”. Но даже если стоит задача протянуть WG до улалённой тачки - то ИМХО лучше его всё же терминировать а на выходном узле развернуть такой же xray-core, но с wg-outbound. Туннель внутри туннеля - такое себе.</p></td><td>2024-09-08T14:50:53.548Z</td></tr><tr><td>boris1</td><td><p>на самом деле мне подойдет любой вариант, который бы мне сделал на роутере впн. Сейчас роутер поддерживает только wg и openvpn. Желательно чтобы это было энкапсулировано в каком-то устройстве.</p></td><td>2024-09-08T14:52:40.673Z</td></tr><tr><td>boris1</td><td><p>настроил через x-ui, фантастикак как просто все оказалось со встроенным wireguard)<br>
+стабильность правда сомнительная, видимо издержки протоколов, но это лучше чем ничего<br>
+спасибо за помощь<br>
+Как придет orangepi с двумя ланами, попробую на нем завести</p></td><td>2024-09-09T12:39:25.027Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>На работу с <a href="http://registry-1.docker.io" rel="noopener nofollow ugc">registry-1.docker.io</a> хватает. И на репку графаны тоже. На самом деле работает весь этот велосипед достаточно стабильно и ресурсов особо не жрёт. Единственная задержка в работе бывает при хендшейке, т.к. в этот момент на стороне сервера стягивается сертификат с подменного хоста. А в остальное время всё достаточно резво(в рамках интернет канала на стороне VPS разумеется)</p></td><td>2024-09-09T13:45:53.324Z</td></tr><tr><td>boris1</td><td><p>а когда после чего проихсодит? После того как соединение с прокси по таймауту рвется?<br>
+И есть ли разница между vless или trojan в этой конфигурации? Вроде они оба по tcp работают и должны быть аналогичны по накладным расходам</p></td><td>2024-09-12T10:15:53.472Z</td></tr>
+    </table>
+      </body>
+    </html>

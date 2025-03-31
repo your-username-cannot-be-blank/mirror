@@ -1,0 +1,55 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-massbrowser-unblocking-the-censored-web-for-the-masses-by-the-masses-ndss-20</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>MassBrowser: Unblocking the Censored Web for the Masses, by the Masses<br>
+Milad Nasr, Hadi Zolfaghari, Amir Houmansadr, Amirhossein Ghafari<br>
+<a href="https://censorbib.nymity.ch/#Nasr2020a" class="onebox" target="_blank" rel="nofollow noopener">https://censorbib.nymity.ch/#Nasr2020a</a><br>
+<a href="https://massbrowser.cs.umass.edu/" class="onebox" target="_blank" rel="nofollow noopener">https://massbrowser.cs.umass.edu/</a></p>
+<p>MassBrowser is a multi-modal circumvention system that aims to overcome the deficiencies of other systems by combining many circumvention techniques: selective proxying, CacheBrowsing (<a href="https://censorbib.nymity.ch/#Holowczak2015a" rel="nofollow noopener">Holowczak and Houmansadr 2015</a>, <a href="https://censorbib.nymity.ch/#Zolfaghari2016a" rel="nofollow noopener">Zolfaghari and Houmansadr 2016</a>), <a href="https://censorbib.nymity.ch/#Fifield2015a" rel="nofollow noopener">domain fronting</a>, volunteer proxies, and user-to-user proxying. It is designed to be difficult to block, provide high quality of service, be easy to deploy and cheap to operate, and enable users to control their level of privacy. The main design principle of MassBrowser is that circumvention systems should concentrate on providing blocking resistance only, with anonymity and privacy being optional features. The system has operated as an invitation-only beta for more than a year.</p>
+<p>The system consists of censored Clients, volunteer proxies called Buddies, and a collection of backend infrastructure called the Operator (<a href="https://www.ndss-symposium.org/wp-content/uploads/2020/02/24340.pdf#page=4" rel="nofollow noopener">Fig. 1</a>). Whenever a Client needs to connect to some destination, it considers a prioritized list of connection options, preferring options that have lower cost and higher performance (<a href="https://www.ndss-symposium.org/wp-content/uploads/2020/02/24340.pdf#page=10" rel="nofollow noopener">Fig. 4</a>):</p>
+<ul>
+<li>If the destination is known to be unblocked, just access it directly, without any circumvention.</li>
+<li>If the destination can be reached by CacheBrowsing (i.e., is hosted on certain CDNs), use CacheBrowsing.</li>
+<li>If the destination belongs to a whitelisted content category (Table III), consult the Operator to get matched up with a Buddy or another Client, and access the destination using the Buddy or Client as a proxy.</li>
+<li>Otherwise, access the destination over a Tor tunnel, using a Buddy that also acts as an obfuscated Tor bridge.</li>
+</ul>
+<p>The Operator is the arbiter of what destinations are considered blocked or CacheBrowseable. The operator sources this information from <a href="https://censorbib.nymity.ch/#Niaki2020a" rel="nofollow noopener">ICLab</a> and <a href="https://en.greatfire.org/analyzer" rel="nofollow noopener">GreatFire</a>, together with its own web crawls. Clients download this information from the Operator and refresh their local cache of it periodically. Clients’ communication with the Operator is protected by domain fronting, though any other unblockable channel (even a low-bandwidth or high-latency one) would work. Because a Client’s routing decisions depend on what destinations are being accessed, the MassBrowser Client software needs to be able to inspect traffic, even encrypted traffic. To that end, the Client installs a local root TLS certificate and does TLS interception of everything that flows through the Client software.</p>
+<p>To become a Buddy, a person downloads and runs the standalone MassBrowser Buddy software. Communication between Clients and Buddies is encrypted and obfuscated using an obfsproxy-like modular transport; because the Buddy software is not a browser extension, it is not limited to using web protocols like WebRTC and can be freer in its obfuscation. Clients may also use other censored Clients as Buddies; the intuition is that what is blocked in one censored network is usually not blocked in another. A Buddy is a one-hop proxy: it has the ability to inspect traffic, and any outgoing connections will be attributed to the Buddy. Buddies can express a whitelist of content categories they are willing to proxy; how it works is the Client contacts the Operator and says “I need to access a Gaming destination,” and then the operator matches the Client with a Buddy that has whitelisted the Gaming category. Certain content categories (pornography) are never proxied through one-hop Buddies but instead always go through a Tor tunnel. Besides content categories, the Operator considers compatibility of NATs and the current load on each Buddy when matching Clients with Buddies, and uses the <a href="https://censorbib.nymity.ch/#Nasr2019a" rel="nofollow noopener">Enemy at the Gateways</a> proxy distribution mechanism to mitigate the risk of Buddy-discovery attacks.</p>
+<p>Thanks to Amir Houmansadr for commenting on a draft of this summary.</p></td><td>2020-05-13T16:13:23.821Z</td></tr><tr><td>fortuna</td><td><p>How are the domains categorized? Is it a manual process? Do they use a third party category list?</p></td><td>2020-10-20T04:38:08.450Z</td></tr><tr><td>tango</td><td><p>Good question. I don’t know the answer. I searched the repository for <a href="https://github.com/SPIN-UMass/MassBrowser/search?q=gaming" rel="noopener nofollow ugc">“Gaming”</a> but found only localization files. I’m guessing categorization is done by the Operator and clients download the categories, but I don’t know if the Operator source code is online.</p></td><td>2020-10-23T04:30:43.402Z</td></tr>
+    </table>
+      </body>
+    </html>

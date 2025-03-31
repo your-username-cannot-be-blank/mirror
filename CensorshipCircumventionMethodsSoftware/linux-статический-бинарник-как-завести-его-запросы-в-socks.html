@@ -1,0 +1,168 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>linux-статический-бинарник-как-завести-его-запросы-в-socks</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>haste</td><td><p>Правильно ли я понимаю, что socksify сотоварищи работает только на динамически линкованных бинарниках? А вот есть небольшая прога на Go, собрана статически, и ее запросы к веб-серверам очень хочется завести на прокси-сервер. Смотреть на redsocks + фаервол, или есть еще какие-то варианты?</p></td><td>2024-10-06T10:07:00.224Z</td></tr><tr><td>odyxz</td><td><p>Создать tun0 на основе SOCKS и прокинуть к нему маршрут.</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/tun2proxy/tun2proxy">
+  <header class="source">
+
+      <a href="https://github.com/tun2proxy/tun2proxy" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="linux-статический-бинарник-как-завести-его-запросы-в-socks/2628a1be25e5ae1848dbb03ec5e75c50c87f0f82_2_690x344.png" class="thumbnail" data-dominant-color="EDEDEA">
+
+  <h3><a href="https://github.com/tun2proxy/tun2proxy" target="_blank" rel="noopener nofollow ugc">GitHub - tun2proxy/tun2proxy: Tunnel (TUN) interface for SOCKS and HTTP proxies</a></h3>
+
+    <p><span class="github-repo-description">Tunnel (TUN) interface for SOCKS and HTTP proxies</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-10-06T10:34:01.499Z</td></tr><tr><td>denium</td><td><p>redsocks (очень <a href="https://pastebin.com/raw/KrmftRpk" rel="noopener nofollow ugc">трудный</a>) или пересобрать прогу в shared. Для этого её обычно достаточно собрать на той же машине, а не кросскомпилом.<br>
+В случае с redsocks надо ещё мутить с dumb dns (я так и не осилил), или dns запросы пойдут напрямую (даже при использовании http прокси!). Тогда надо убедиться в их безопасности (dnscrypt, vpn).</p></td><td>2024-10-06T12:02:20.447Z</td></tr><tr><td>rngvalerka</td><td><aside class="quote no-group" data-username="haste" data-post="1" data-topic="11079">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/h/e0b2c6/48.png" class="avatar"> haste:</div>
+<blockquote>
+<p>завести на прокси-сервер</p>
+</blockquote>
+</aside>
+<pre><code class="lang-auto">user@host:~$ http_proxy=socks5://PROXYSERVER:PORT /path/to/your/golang-bin
+</code></pre>
+<p>не?<br>
+или вопрос был как поднять прокси? тогда причем тут бинарник?</p></td><td>2024-10-06T13:14:31.071Z</td></tr><tr><td>denium</td><td><p>Не все проги уважают эти настройки. Но можно тоже попробовать.<br>
+Вопрос был как проксировать непроксируемые <em>статические</em> бинарники (которые не имеют своих настроек прокси). Дело в том, что простые линуксовые проксификаторы proxychains и torsocks работают только с shared бинарниками.</p></td><td>2024-10-06T13:36:05.337Z</td></tr><tr><td>rngvalerka</td><td><p>Я думал он свое завести не может, тем более вроде как линукс мысли сразу про опенсорс. Чужое надо сажать в виртуалку и на уровне интерфейса смотреть куда оно полезло. В идеале вообще не связываться.</p></td><td>2024-10-06T15:09:11.684Z</td></tr><tr><td>ValdikSS</td><td><p>Если программа поддерживает выбор интерфейса (bind to interface/address), используйте tun2proxy/tun2socks и аналоги, и указывайте их tun-интерфейс.<br>
+Если не поддерживает, то дополнительно добавьте правило маршрутизации конкретного пользователя в отдельную таблицу маршрутизации (<code>ip rule … uidrange 1001-1001 table …</code>), в которой будет маршрут через tun2socks, и запускайте программу от отдельного пользователя (<code>sudo -u user2 ./app</code>).</p></td><td>2024-10-06T17:23:24.056Z</td></tr><tr><td>boltor</td><td><p>Можно с помощью sing-box поднимать дефолтный tun интерфейс и делать маршрутизацию по имени или пути процесса, а остальное пускать напрямую (или куда вам угодно, это ж sing-box):</p>
+<details>
+<summary>
+конфиг для наглядности, не проверялся, может содержать глупости</summary>
+<pre><code class="lang-auto">{
+  "log": {
+    "level": "debug"
+  },
+  "route": {
+    "rules": [
+      {
+        "process_name": [
+          "curl"
+        ],
+        "process_path": [
+          "/usr/bin/curl"
+        ],
+        "default_interface": "eth0",
+        // "outbound": "mixed-in",  // если socks прокси локальный, а не удалённый, а то вы не уточнили.
+        "outbound": "socks-out"
+      }
+    ],
+    "final": "direct"
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun",
+      "interface_name": "tun0",
+      "domain_strategy": "ipv4_only",
+      "address": "10.100.0.1/30",
+      "auto_route": true
+    },
+    // {
+      // "type": "mixed", // нужно если socks прокси локальный, а не удалённый, а то вы не уточнили.
+      // "tag": "mixed-in",
+      // "listen": "127.0.0.1",
+      // "listen_port": 1080,
+      // "sniff": true,
+      // "domain_strategy": "ipv4_only"
+    // }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    },
+    {
+      "type": "socks",
+      "tag": "socks-out",
+      "server": "10.20.30.40",
+      "server_port": 1080,
+      "version": "5",
+      "username": "admin",
+      "password": "admin"
+    }
+  ]
+}
+
+</code></pre>
+</details></td><td>2024-10-06T18:18:07.319Z</td></tr><tr><td>haste</td><td><p>Ух, сколько полезного сразу! Благодарю <img src="https://ntc.party/images/emoji/twitter/+1.png?v=12" title=":+1:" class="emoji" alt=":+1:" loading="lazy" width="20" height="20"></p></td><td>2024-10-06T19:13:57.388Z</td></tr><tr><td>hufrea</td><td><p>Может и поздно, но добавлю еще одно решение:</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/mzz2017/gg">
+  <header class="source">
+
+      <a href="https://github.com/mzz2017/gg" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="linux-статический-бинарник-как-завести-его-запросы-в-socks/bcc280208891de514f1f358e24ecc5466e4889f7_2_690x344.png" class="thumbnail" data-dominant-color="ECF1F3">
+
+  <h3><a href="https://github.com/mzz2017/gg" target="_blank" rel="noopener nofollow ugc">GitHub - mzz2017/gg: 一个支持节点与订阅链接的 Linux 命令行代理工具 | A command-line tool...</a></h3>
+
+    <p><span class="github-repo-description">一个支持节点与订阅链接的 Linux 命令行代理工具 | A command-line tool for one-click proxy in your research and development without installing v2ray or anything else (only for linux)</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-10-14T23:18:57.045Z</td></tr>
+    </table>
+      </body>
+    </html>

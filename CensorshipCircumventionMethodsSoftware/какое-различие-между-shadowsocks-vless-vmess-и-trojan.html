@@ -1,0 +1,90 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>какое-различие-между-shadowsocks-vless-vmess-и-trojan</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>doshik</td><td><p>В последнее время появилось очень много новых протоколов и я пытаюсь какая между ними разница. Если честно уже запутался, но понимаю так что весь трафик проходит через TLS у всех?</p></td><td>2022-01-23T18:33:51.712Z</td></tr><tr><td>fortuna</td><td><p>See <a href="https://github.com/net4people/bbs/issues/36" class="inline-onebox">Introduction to V2Ray · Issue #36 · net4people/bbs · GitHub</a> on V2Ray/Vmess.<br>
+You have to configure it the right way to get censorship resistance.</p>
+<p>Shadowsocks is battle-tested, simple to understand and has a lot less overhead. You don’t need a domain name and it performs better. I recommend setting up your own server with <a href="https://getoutline.org">Outline</a> (I’m one of the authors). Or manually setup a server following <a href="https://gfw.report/blog/ss_tutorial/en/" class="inline-onebox">How to Deploy a Censorship Resistant Shadowsocks-libev Server</a>. The protocol is explained at <a href="https://shadowsocks.org/en/wiki/AEAD-Ciphers.html" class="inline-onebox">Shadowsocks - AEAD Ciphers</a>.</p>
+<p>Trojan is explained at <a href="https://trojan-gfw.github.io/trojan/protocol.html" class="inline-onebox">The Trojan Protocol | trojan</a>, but I never used it.</p></td><td>2022-01-24T04:40:52.878Z</td></tr><tr><td>ValdikSS</td><td><p>V2ray/V2fly — мультипротокольный прокси-сервер и клиент. Он умеет инкапсулировать любой протокол в любой другой, а также строить цепочки протоколов/прокси. Собственных протоколов у него два: vmess и vless, а все остальные — сторонние, для подключения к уже существующим серверам по другим протоколам.</p>
+<p>Vmess — полноценный протокол туннелирования, с собственным шифрованием, «встроенным» в протокол. Он работает только по TCP, весь UDP-трафик также инкапсулируется в TCP (в отличие от Shadowsocks, где TCP-трафик передаётся по TCP, а UDP — по UDP). Шифрование протокола привязано ко времени: на сервере и клиенте время должно быть синхронизировано, иначе соединение не установится. Vmess не использует TLS и не выглядит как TLS-трафик (но его можно инкапсулировать в TLS, при необходимости).</p>
+<p>Vless — продолжение, развитие vmess, в котором убран слой шифрования <em>протокола</em>, что позволило избавиться от привязки ко времени. Протокол создавался для использования его с TLS-инкапсуляцией, для того, чтобы можно было определить тип TLS-запроса (vless или обычный TLS-запрос из браузера или другой программы) и перенаправить не-vless-трафик в другую программу или на другой порт, например, чтобы маскировать прокси под действующий веб-сайт: и прокси, и сайт будут работать на одном порту.</p>
+<p>Trojan работает по схожему с vless принципу TLS-инкапсуляции, отличие только в протоколе. Он появился достаточно рано, для демонстрации принципа «незаметной» инкапсуляции в TLS. Вот что пишут авторы:</p>
+<blockquote>
+<p>Trojan is not a fixed program or protocol. It’s an idea, an idea that imitating the most common service, to an extent that it behaves identically, could help you get across the Great FireWall permanently, without being identified ever. We are the GreatER Fire; we ship Trojan Horses.</p>
+</blockquote></td><td>2022-01-24T10:03:29.347Z</td></tr><tr><td>ValdikSS</td><td><p>4 posts were split to a new topic: <a href="/t/linux/1661">Проксификация на Linux</a></p></td><td>2022-01-26T10:58:16.545Z</td></tr><tr><td>lord(Savely Krasovsky)</td><td><p>По итогу Trojan выглядит наиболее простым. Честно говоря от китайских штук типа V2Ray или Xray как-то странно пахнет. Будто в них используется огромное количество велосипедов непонятно зачем. Я не исключаю, что всё это ради эффективного обхода блокировок, но вот например не понимаю зачем в большинстве гайдов создают такой оверхед, используя сразу TLS + WS + Vmess? Двойное шифрование с вебсокетами вместо обычного http/2.</p></td><td>2022-03-21T20:30:19.054Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="lord" data-post="5" data-topic="1655">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/lord/48/1123_2.png" class="avatar"> lord:</div>
+<blockquote>
+<p>зачем в большинстве гайдов создают такой оверхед, используя сразу TLS + WS + Vmess?</p>
+</blockquote>
+</aside>
+<p>Варианта два:</p>
+<ol>
+<li>Гайды пишет тот, кто до конца не разбирается;</li>
+<li>Так настраивают для туннелирования через CDN, например, Cloudflare, а не напрямую через сервер.</li>
+</ol></td><td>2022-03-21T20:45:36.836Z</td></tr><tr><td>lord(Savely Krasovsky)</td><td><p>Со вторым стало понятней. Получается Cloudflare умеет проксировать нормально только вебсокеты?</p></td><td>2022-03-21T21:00:04.935Z</td></tr><tr><td>zinoid</td><td><p>trojan-go у меня не заработал на российском провайдере с ТСПУ. Через VPN работает (в бесцензурном интернете). Вот же лол. Вроде все домены и ip доступны.<br>
+Там ведь еще какой-то sni.</p></td><td>2022-03-21T23:16:56.757Z</td></tr><tr><td>lord(Savely Krasovsky)</td><td><aside class="quote no-group quote-post-not-found" data-username="yatolkosprosit" data-post="11" data-topic="1655">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/y/aca169/48.png" class="avatar"> yatolkosprosit:</div>
+<blockquote>
+<p>И в своих видео они сами говорили, что используют ВПН, в том числе бесплатный.</p>
+</blockquote>
+</aside>
+<p>Я не понимаю какую мысль вы пытаетесь донести. Что в Китае нормальный интернет и блокировки легко обходятся? Ну да, блокировки можно обойти с TLS-инкапсуляцией, чем VPN в Китае (в том числе бесплатные) и пользуются. Но назвать это “легким обходом” у меня рука не поднимается.</p>
+<aside class="quote no-group" data-username="zinoid" data-post="10" data-topic="1655">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/8e8cbc/48.png" class="avatar"> zinoid:</div>
+<blockquote>
+<p>trojan-go у меня не заработал на российском провайдере с ТСПУ</p>
+</blockquote>
+</aside>
+<p><a href="https://ntc.party/t/topic/1425/3">Со слов</a> <a class="mention" href="/u/valdikss">@ValdikSS</a> trojan и trojan-go это не прокси, поэтому требуют дополнительного колдовства, дело не в ТСПУ. У меня тоже по началу нифига не работало, но стоило запусть это всё вместе WireGuard и вауля, магия.</p></td><td>2022-03-22T07:58:56.675Z</td></tr><tr><td>StalKlim</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="3" data-topic="1655">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Vless — продолжение, развитие vmess, в котором убран слой шифрования <em>протокола</em>, что позволило избавиться от привязки ко времени. Протокол создавался для использования его с TLS-инкапсуляцией, для того, чтобы можно было определить тип TLS-запроса (vless или обычный TLS-запрос из браузера или другой программы) и перенаправить не-vless-трафик в другую программу или на другой порт, например, чтобы маскировать прокси под действующий веб-сайт: и прокси, и сайт будут работать на одном порту.</p>
+</blockquote>
+</aside>
+<p>Еще такой момент, немаловажный, использование этого протокола подразумевает отсутствие возможности устанавливать нестандартные порты для подключения через него?  Или ошибаюсь?</p>
+<p>У меня вот сейчас настроены ShadowSocks сервера за NAT на разных портах (от провайдера дается определенный пул), попробовал ради теста поставить Vless Reality, но почему-то пока не удалось завести. На форумах и в различных инструкциях пишут что порт обязательно должен быть 443 (что в моем случае невозможно). Не подскажешь какой из протоколов можно было-бы настроить для обхода?</p></td><td>2023-11-15T11:20:32.483Z</td></tr><tr><td>0ka(0ka)</td><td><p>порт vless reality сервера может быть любой. с самого же сервера этот vless reality работает или тоже нет? сайт для маскировки должен поддерживать tls 1.3 <a href="https://www.cdn77.com/tls-test" class="inline-onebox">TLS Checker - Instant Results | CDN77.com</a>, <a href="http://www.site.com">www.site.com</a> и <a href="http://site.com">site.com</a> могут выдавать разные результаты</p></td><td>2023-11-16T10:51:34.452Z</td></tr><tr><td>c5sa(c5sa)</td><td><p>Здравствуйте, можете пожалуйста посоветовать инструмент/стек с маскировкой в TLS, если важны минимальные задержки/оверхед? Также важна возможность использования в качестве туннеля для произвольного трафика (не прокси).</p>
+<p>Спасибо!</p></td><td>2023-11-17T10:53:45.666Z</td></tr><tr><td>0ka(0ka)</td><td><p>для чего вам?</p></td><td>2023-11-17T14:09:38.497Z</td></tr><tr><td>c5sa(c5sa)</td><td><p>Идеальный пример - в онлайн игры играть</p></td><td>2023-11-17T14:16:24.143Z</td></tr><tr><td>0ka(0ka)</td><td><p>вы не заметите никакой разницы на любом протоколе даже с большим оверхедом, играм задержка почти что не важна, она там и так большая, дополнительные +5мс не заметит ни один человек. Более лучший пример - usbip, там дополнительная задержка в 0.5мс уже сильно ограничивает скорость передачи. Лучше обратите внимание на удобство настройки и использования, а не оверхед и задержки</p></td><td>2023-11-17T14:33:03.894Z</td></tr><tr><td>0ka(0ka)</td><td><p>вы хотите маскировку в tls, и из-за tcp туннеля уже можно получить много проблем, зачем вам tls? вы не в рф?</p></td><td>2023-11-17T14:37:10.972Z</td></tr><tr><td>Xunlei</td><td><p>Маскировка необходима, в том числе, для обхода корпоративного firewall. Разница в задержке между протоколами есть, тем более для шутеров. TCP туннель снижает payload и может дать проблемы если использовать системное API. Если использовать user space реализацию и заполнение только тех заголовков необходимых для пробива NAT ISP, то будет лучше, чем UDP работать (в виду отсутствия сетевого нейтралитета и приоритизации TCP провайдером). Для обхода firewall возможно потребуется заполнять и другие заголовки пакета. Для борьбы с TLS подобным траффиком DPI придётся использовать active probing, если есть защита от этого, то статистический анализ.</p></td><td>2023-11-17T15:29:35.638Z</td></tr>
+    </table>
+      </body>
+    </html>

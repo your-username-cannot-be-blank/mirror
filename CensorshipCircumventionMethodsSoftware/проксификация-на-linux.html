@@ -1,0 +1,176 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проксификация-на-linux</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>zinoid</td><td><p>Я скомпилил <a href="https://github.com/shadowsocks/shadowsocks-rust" rel="noopener nofollow ugc">shadowsocks-rust</a></p>
+<pre><code class="lang-auto">export RUSTFLAGS="-C target-cpu=native"
+cargo build --release
+</code></pre>
+<p>Все работает<br>
+<code>sslocal -b "127.0.0.1:1080" --server-url "ss://ID@IP:PORT"</code><br>
+Это пока что без всяких плагинов, обфускаций.<br>
+А вот как бы его пустить через вышестоящий прокси? Если такой опции нет, то печально. В линуксе проксификаторы почему-то толком не работает. Кстати, посоветуйте нормальный рабочий проксификатор.</p></td><td>2022-01-26T03:27:20.991Z</td></tr><tr><td>zinoid</td><td><p>Сижу читаю про redsocks, iptables… Блин, как же все-таки на винде все по человечески сделано в Proxifier.</p></td><td>2022-01-26T04:39:20.351Z</td></tr><tr><td>ValdikSS</td><td><p>V2fly поддерживает и любые комбинации/цепочки прокси, и «проксификацию» (создание входящего порта для приёма перенаправления через iptables), но для новичка его настроить нетривиально.</p></td><td>2022-01-26T10:57:33.212Z</td></tr><tr><td>zinoid</td><td><p>Я уже <a href="https://pastebin.com/raw/KrmftRpk" rel="noopener nofollow ugc">настроил redsocks</a>.<br>
+Это было увлекательнейшее исследование. Зато iptables осилит наверняка и перенаправление виртуалки, с чем не справляется виндовый Proxifier.</p></td><td>2022-01-26T14:03:23.133Z</td></tr><tr><td>zinoid</td><td><p>Все потому что в Linux (iptables) нет per applications правил. Поэтому приходится городить других пользователей/группы.</p></td><td>2022-01-26T14:08:20.926Z</td></tr><tr><td>zinoid</td><td><p>Посмотрел трафик shadowsocks - чистый мусор по TCP. DPI его не должен детектить (если только не отсекать все неопознанное). Слабое место если спалится IP.<br>
+И вот интересно, соединение с shadowsocks сервером устанавливается только когда браузер/клиент сделает какой-нибудь запрос (через локальный socks 127.0.0.1:1080)</p></td><td>2022-01-26T14:15:40.045Z</td></tr><tr><td>Enklomx</td><td><aside class="quote no-group" data-username="zinoid" data-post="7" data-topic="1661">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/8e8cbc/48.png" class="avatar"> zinoid:</div>
+<blockquote>
+<p>Слабое место если спалится IP</p>
+</blockquote>
+</aside>
+<p>Можно настроить v2ray-plugin в режиме вебсокета и пустить трафик через клаудфлару. Отличимо от обычного HTTPS не будет, разве что будет палиться домен в ClientHello.</p></td><td>2022-01-27T00:09:41.920Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Enklomx" data-post="8" data-topic="1661">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/e/ebca7d/48.png" class="avatar"> Enklomx:</div>
+<blockquote>
+<p>Отличимо от обычного HTTPS не будет</p>
+</blockquote>
+</aside>
+<p>Это заблуждение: v2ray websocket-трафик через CDN отличается от обычного браузерного соединения, т.к. websocket-библиотека, используемая в v2ray, не поддерживает upgrade в http2-соединениях, и v2ray вынужден использовать http/1.1, что отражается в TLS ALPN.</p>
+<aside class="onebox githubissue" data-onebox-src="https://github.com/v2fly/v2ray-core/issues/557#issuecomment-751950969">
+  <header class="source">
+
+      <a href="https://github.com/v2fly/v2ray-core/issues/557#issuecomment-751950969" target="_blank" rel="noopener">github.com/v2fly/v2ray-core</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row">
+  <div class="github-icon-container" title="Issue" data-github-private-repo="false">
+	  <svg width="60" height="60" class="github-icon" viewBox="0 0 14 16" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+  </div>
+
+  <div class="github-info-container">
+    <h4>
+      <a href="https://github.com/v2fly/v2ray-core/issues/557#issuecomment-751950969" target="_blank" rel="noopener">Deep packet inspection to classify V2Ray traffic in Dec, 2020</a>
+    </h4>
+
+    <div class="github-info">
+      <div class="date">
+        opened <span class="discourse-local-date" data-format="ll" data-date="2020-12-29" data-time="03:24:16" data-timezone="UTC">03:24AM - 29 Dec 20 UTC</span>
+      </div>
+
+        <div class="date">
+          closed <span class="discourse-local-date" data-format="ll" data-date="2021-12-29" data-time="01:51:10" data-timezone="UTC">01:51AM - 29 Dec 21 UTC</span>
+        </div>
+
+      <div class="user">
+        <a href="https://github.com/rickyzhang82" target="_blank" rel="noopener">
+          <img alt="rickyzhang82" src="проксификация-на-linux/89ed63c49b41347e5e4262d2eab82c2c4526106e.jpeg" class="onebox-avatar-inline" width="20" height="20" data-dominant-color="BCBCBC">
+          rickyzhang82
+        </a>
+      </div>
+    </div>
+
+    <div class="labels">
+        <span style="display:inline-block;margin-top:2px;background-color: #B8B8B8;padding: 2px;border-radius: 4px;color: #fff;margin-left: 3px;">
+          Stale
+        </span>
+    </div>
+  </div>
+</div>
+
+  <div class="github-row">
+    <p class="github-body-container">I collected V2Ray traffic data and reran my deep packet inspection test, as desc<span class="show-more-container"><a href="" rel="noopener" class="show-more">…</a></span><span class="excerpt hidden">ribed from [the issue here](https://github.com/v2ray/discussion/issues/569). 
+
+I compiled V2Ray (commit hash `5dffca842`) in Go 1.15 and use TLS + websocket.
+
+In 10 days, I collected V2ray connections 17,998, none-V2ray TLS connections 136,981. I trained the new CNN model. It still could reach traffic classification accuracy `0.9959`. It shows a perfect ROC curve.
+
+![ROC](https://user-images.githubusercontent.com/3475933/103256383-2108ab80-495b-11eb-9fb8-790cc00965a9.png)
+
+
+Has V2Ray dev team schedule any road map to blend in V2Ray with other none-V2Ray TLS traffic yet?</span></p>
+  </div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2022-01-27T01:44:29.636Z</td></tr><tr><td>zinoid</td><td><blockquote>
+<p>Я уже <a href="https://pastebin.com/raw/KrmftRpk" rel="noopener nofollow ugc">настроил redsocks</a></p>
+</blockquote>
+<p>DNS запросы идут <a href="https://github.com/darkk/redsocks/issues/111" rel="noopener nofollow ugc">мимо</a> прокси <img src="https://ntc.party/images/emoji/twitter/man_facepalming.png?v=12" title=":man_facepalming:" class="emoji" alt=":man_facepalming:" loading="lazy" width="20" height="20"><br>
+Там предполагается, что “тупой” DNS резолвер redsocks (на порту 5300?!, но он идет на UDP 53) вернет “усеченный” UDP ответ и клиент по стандарту должен повторить запрос по TCP:53 (что проксифицируется), но это не работает, конечно.</p>
+<p>А логи redsocks удалось отключить только так:</p>
+<pre><code class="lang-auto">/etc/redsocks.conf
+log = "file:/dev/null";
+</code></pre>
+<p>Слишком много выводит.</p></td><td>2022-01-27T04:07:27.492Z</td></tr><tr><td>zinoid</td><td><p>И чего я голову ломал. proxychains и torsocks работают, оказывается. Без плясок, DNS пробрасывают. С aria2c не работают, может я поэтому их сбросил со счетов. Вернее, proxychains с aria2c работает, но только с опцией --check-certificate=false почему-то.<br>
+На руборде на эту арию тоже жаловались.<br>
+У меня еще раньше были траблы с Opera 12 (/usr/bin/opera скрипт запускает /usr/lib/opera/opera), но сейчас нет. Мистика.</p>
+<p>На XP Proxifier <a href="https://github.com/q3aql/aria2-static-builds" rel="noopener nofollow ugc">вот эту арию</a> пробрасывает.<br>
+И на линуксе proxychains и torsocks с этой статичной арией работают. А с системной траблы.</p></td><td>2022-01-27T04:50:24.965Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="zinoid" data-post="11" data-topic="1661">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/8e8cbc/48.png" class="avatar"> zinoid:</div>
+<blockquote>
+<p>И на линуксе proxychains и torsocks с этой статичной арией работают.</p>
+</blockquote>
+</aside>
+<p>Боюсь, это невозможно — proxychains и torsocks перехватывают библиотечные вызовы динамически слинкованных программ, а со статически слинкованными они не работают, запросы идут вне прокси.</p></td><td>2022-01-27T06:50:31.787Z</td></tr><tr><td>zinoid</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="12" data-topic="1661">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>запросы идут вне прокси</p>
+</blockquote>
+</aside>
+<p>Да, вы правы. Недоглядел.<br>
+aria2c static проксируется redsocks+iptables, только DNS напрямую.<br>
+В бинарнике вообще нет динамического раздела (readelf -d и ldd ничего не показывают), довольно редкое явление.</p>
+<p>Заодно проверил Proxifier 3.21 в XP:<br>
+TCP и DNS идут через прокси (если прокси недоступен, никуда не идут). Хотя, DNS в некоторых программах идет напрямую, например в nslookup.exe<br>
+ICMP не работает, завернут в localhost.<br>
+UDP идет напрямую мимо прокси.</p>
+<p>Линуксовые наблюдения о не TCP протоколах:<br>
+proxychains ping: ICMP напрямую<br>
+torsocks ping: не работает с setuid приложением<br>
+proxychains traceroute: ICMP напрямую<br>
+torsocks ping: socket операция не позволена<br>
+proxychains fopnu torrent client: UDP напрямую<br>
+torsocks fopnu torrent client: операция не позволена, нет соединения с UDP</p>
+<p>В общем, надежнее всего redsocks и torsocks. Но torsocks socks only, а мне больше нужен вышестоящий http прокси.</p></td><td>2022-01-27T10:39:36.093Z</td></tr><tr><td>ValdikSS</td><td><p>ICMP не поддерживается ни одним прокси-протоколом, вообще. Для полноценного туннеля существует VPN.</p></td><td>2022-01-27T10:47:02.729Z</td></tr><tr><td>zinoid</td><td><p>Отправка DNS напрямую (мимо http прокси) в redsocks проксификаторе имеет свои забавные положительные особенности. Дело в том, что мой http прокси блочит некоторые сайты (ну такая политика предоставления услуг, я с этим мирюсь, достойной альтернативы нет), а если отправлять DNS запросы мимо и соединяться через прокси по IP адресам, то все заблокированные сайты открываются. И в таком случае админ прокси видит только айпишники. Это видимо редкое явление, когда DNS запросы не разрешаются через http прокси. Таких настроек в браузерах даже нет. Вот socks штатно можно мимо разрешать.</p>
+<p><a class="mention" href="/u/valdikss">@ValdikSS</a> UDP, ICMP, IPv6 как раз желательно бы иметь возможность резать при проксификации. Но зависит от целей, часто это не требуется.</p>
+<p>Я сейчас даже дошел то того, что redsocks натравил на локальный прокси-посредник, чтобы браузер запускался от моего имени с моим профилем.</p></td><td>2022-01-27T11:54:08.794Z</td></tr>
+    </table>
+      </body>
+    </html>

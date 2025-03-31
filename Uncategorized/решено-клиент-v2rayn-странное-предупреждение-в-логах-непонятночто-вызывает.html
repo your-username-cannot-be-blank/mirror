@@ -1,0 +1,61 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>решено-клиент-v2rayn-странное-предупреждение-в-логах-непонятночто-вызывает</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>lucretia(lucretia)</td><td><p>Сообщение<br>
+2024/12/23 18:35:43 [Warning] [1794731185] app/proxyman/inbound: connection ends &gt; proxy/http: failed to read http request &gt; malformed HTTP request “\x00”</p>
+<p>Тоже самое и на винде и на линуксе.</p>
+<p>v2rayN, апдейты установлены, установлены правила для России выбран профиль RUv1-Заблокированное, работает как системный прокси. Сервер добавлен подпиской.</p>
+<p>В логах больше ошибок каких-то не вижу, на первый взгляд все пашет- что заблокировано проксируется,что нет напрямую идет.</p>
+<p>Кто-нибудь может прдсказать куда смотреть,чтобы разобраться с предупреждением.</p>
+<p>спасибо</p></td><td>2024-12-23T15:45:11.504Z</td></tr><tr><td>0ka(0ka)</td><td><p>Gdpi, zapret отключены?</p></td><td>2024-12-23T15:54:36.413Z</td></tr><tr><td>lucretia(lucretia)</td><td><p>Ни разу не использовал</p></td><td>2024-12-23T15:56:47.309Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="lucretia" data-post="1" data-topic="14057">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/l/13edae/48.png" class="avatar"> lucretia:</div>
+<blockquote>
+<p>Кто-нибудь может прдсказать куда смотреть,чтобы разобраться с предупреждением.</p>
+</blockquote>
+</aside>
+<p>Какое-то приложение лезет на прокси не по протоколу SOCKS5, в <a href="https://www.jetbrains.com/go/" rel="noopener nofollow ugc">отладчике</a> можно поставить точку останова на <a href="https://github.com/XTLS/Xray-core/blob/d54d20abea8409135beff9cba4b7db40ae98d367/proxy/http/server.go#L116" rel="noopener nofollow ugc">строку</a>, посмотреть какой локальный порт источника задействуется и посмотреть в системных утилитах какое приложение с этого порта инициирует соединение, либо дописать код распечатки в лог названия приложения на это событие и запустить без отладки.</p></td><td>2024-12-23T16:21:12.255Z</td></tr><tr><td>lucretia(lucretia)</td><td><p>Все разобрался…  SIgnal лез тк в команде стояло http_proxy=“<a href="http://127.0.0.1:10808" rel="noopener nofollow ugc">http://127.0.0.1:10808</a>” https_proxy=“<a href="http://127.0.0.1:10808" rel="noopener nofollow ugc">http://127.0.0.1:10808</a>” flatpak run org.signal.Signal</p>
+<p>поменял на<br>
+http_proxy=“socks5://127.0.0.1:10808” https_proxy=“socks5://127.0.0.1:10808” flatpak run org.signal.Signal</p>
+<p>и все ОК,</p></td><td>2024-12-23T16:36:26.242Z</td></tr><tr><td>ilik1799</td><td><p>А где именно это менять нужно?</p></td><td>2025-01-04T23:08:02.842Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Это с очевидностью консольная команда, которой человек запускает Signal в своём линуксе.</p>
+<p>Параметры прокси передаются в качестве аргументов, дальше запускается Signal, упакованный в контейнер Flatpak.</p></td><td>2025-01-04T23:20:59.574Z</td></tr><tr><td>lucretia(lucretia)</td><td><p>исполняемый .sh файл сделал с содержимым</p>
+<p>#! /bin/sh<br>
+http_proxy=“socks5://127.0.0.1:10808” https_proxy=“socks5://127.0.0.1:10808” flatpak run org.signal.Signal</p></td><td>2025-01-05T08:32:42.307Z</td></tr>
+    </table>
+      </body>
+    </html>

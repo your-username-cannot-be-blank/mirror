@@ -1,0 +1,272 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>gitlab-lyrebird-buildrun-error</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>LeonMskRu(Leon MskRu)</td><td><p>с какого то момента после git pull перестали работать obfs4 мосты через lyrebird<br>
+причем я не настолько понимаю в git/go чтобы понять что сломалось</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/commits/main/?ref_type=HEADS">
+  <header class="source">
+      <img src="gitlab-lyrebird-buildrun-error/b81233e23a45a169a5e512561c8fcb71b3e7f10d.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/commits/main/?ref_type=HEADS" target="_blank" rel="noopener nofollow ugc">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="gitlab-lyrebird-buildrun-error/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/commits/main/?ref_type=HEADS" target="_blank" rel="noopener nofollow ugc">Commits · main · The Tor Project / Anti-censorship / Pluggable Transports /...</a></h3>
+
+  <p>Welcome to The Tor Project's Gitlab</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>через obfs4proxy или “старый” lyrebird как и раньше без проблем.<br>
+вот так только собирается/запускается</p>
+<pre><code class="lang-auto">C:\GitHub\lyrebird&gt;git branch
+* (HEAD detached from lyrebird-0.2.0)
+  fix_dependency_redirect
+  main
+</code></pre>
+<p>а вот это “последняя” версия == main</p>
+<pre><code class="lang-auto">2024/07/01 17:22:35 [NOTICE]: devel - launched
+2024/07/01 17:22:35 [INFO]: lyrebird-64.exe - initializing client transport listeners
+2024/07/01 17:22:35 [INFO]: obfs4 - registered listener: 127.0.0.1:50532
+2024/07/01 17:22:35 [INFO]: lyrebird-64.exe - accepting connections
+2024/07/01 17:22:35 [NOTICE]: Stdin is closed or unreadable: &lt;nil&gt;
+2024/07/01 17:22:35 [NOTICE]: lyrebird-64.exe - terminated
+</code></pre>
+<pre><code class="lang-auto">2024-07-01T14:36:20Z  WARN tor_ptmgr: Spawning PT for [PtTransportName("obfs4")] failed: Couldn't parse IPC line "STATUS TYPE=version IMPLEMENTATION="lyrebird" VERSION="devel"": no TRANSPORT in STATUS
+2024-07-01T14:36:20Z  WARN tor_ptmgr: PT for obfs4 failed to launch: Couldn't parse IPC line "STATUS TYPE=version IMPLEMENTATION="lyrebird" VERSION="devel"": no TRANSPORT in STATUS
+
+Attempt 1: Problem opening a channel to [23. .99:443 via obfs4 $cafdb3585f1675c07b8f9a2383bfcceb148a97d7]: Pluggable transport error: Couldn't parse IPC line "STATUS TYPE=version IMPLEMENTATION="lyrebird" VERSION="devel"": no TRANSPORT in STATUS
+</code></pre></td><td>2024-07-01T14:41:04.921Z</td></tr><tr><td>Xunlei</td><td><p>У меня работает последний main, но у меня собственный go.work с обновленными до последних версий локальными библиотеками с моими патчами и использую сишный тор, как более стабильный. Арти пока неюзабелен.</p></td><td>2024-07-01T14:51:26.997Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>“C:\Program Files\Go\bin\go.exe” version<br>
+go version go1.22.4 windows/amd64</p>
+<p>go get -u делаю после каждого git pull</p>
+<p>но вот вместо make build делаю</p>
+<p>env GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -p 1 -a -ldflags “-s -w” -o lyrebird-64.exe</p>
+<p>env GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -p 1 -a -ldflags “-s -w” -o lyrebird-32.exe</p>
+<p>раньше так собиралось/запускалось до “devel” версии (?!)</p>
+<p>p.s. tor.exe как и tor на ubuntu так же матерятся на новые сборки. но там то мне пофиг. а тут народу выкладывал сборки АРТИ и не сразу заметил неработающие lyrebird что я так же собирал/выкладывал (у меня 4 таргета в РУСТ и несколько конфигов obfs4/lyrebird/snowflake/webtunnel/bridges/etc. все проверить руки не доходят)</p>
+<p>пересобрал через make build<br>
+только версия в ошибке поменялась</p>
+<p>2024-07-01T15:24:11Z  WARN tor_ptmgr: PT for obfs4 failed to launch: Couldn’t parse IPC line “STATUS TYPE=version IMPLEMENTATION=“lyrebird” VERSION=“0.2.0-12-gf56896f””: no TRANSPORT in STATUS</p></td><td>2024-07-01T15:13:13.293Z</td></tr><tr><td>Xunlei</td><td><p>У меня в каталоге go.work</p>
+<pre><code class="lang-auto">go.exe build "-ldflags=-s -w" -trimpath -o lyrebird-client.exe gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/cmd/lyrebird
+</code></pre>
+<p><code>go get -u ./...</code> и <code>go get -u all</code> я тоже делаю, но после этого надо патчить, библиотеки не стабильны и меняются API. Например на <code>github.com/andybalholm/brotli v1.0.5</code> клиент не мог подключится. (Сейчас на 1.1.0 работает). Пробуйте на оригинальном go.mod собрать.</p></td><td>2024-07-01T15:33:54.853Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>неа. то же самое у меня выдает<br>
+даже пытался через MSYS2 ucrt пересобрать</p>
+<p>2024-07-01T15:51:45Z  WARN tor_ptmgr: PT for obfs4 failed to launch: Couldn’t parse IPC line “STATUS TYPE=version IMPLEMENTATION=“lyrebird” VERSION=“devel””: no TRANSPORT in STATUS</p>
+<pre><code class="lang-auto">C:\GitHub\lyrebird&gt;"C:\Program Files\Go\bin\go.exe" get -u ./...                                    
+go: upgraded go 1.20 =&gt; 1.21                                                                        
+go: added toolchain go1.22.4                                                                        
+go: upgraded github.com/andybalholm/brotli v1.0.6 =&gt; v1.1.0                                         
+go: upgraded github.com/cloudflare/circl v1.3.7 =&gt; v1.3.9                                           
+go: upgraded github.com/klauspost/compress v1.17.4 =&gt; v1.17.9                                       
+go: upgraded github.com/quic-go/quic-go v0.40.1 =&gt; v0.45.1                                          
+go: upgraded github.com/refraction-networking/utls v1.6.3 =&gt; v1.6.6
+</code></pre>
+<p>а можно как то сделать go get -u только для определенного git TAG ?<br>
+я вижу те же версии что в main но добавляется что то новое после<br>
+git switch --detach tags/lyrebird-0.2.0 --recurse-submodules</p>
+<pre><code class="lang-auto">C:\GitHub\lyrebird&gt;"C:\Program Files\Go\bin\go.exe" get -u ./...                                    
+go: upgraded go 1.20 =&gt; 1.21                                                                        
+go: added toolchain go1.22.4                                                                        
+go: upgraded github.com/andybalholm/brotli v1.0.6 =&gt; v1.1.0                                         
+go: upgraded github.com/cloudflare/circl v1.3.7 =&gt; v1.3.9                                           
+go: upgraded github.com/klauspost/compress v1.17.4 =&gt; v1.17.9                                       
+go: upgraded github.com/quic-go/quic-go v0.40.1 =&gt; v0.45.1                                          
+go: upgraded github.com/refraction-networking/utls v1.6.3 =&gt; v1.6.6                                 
+go: upgraded gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.0-20240220175603-399c24557a18 =&gt; v0.0.0-20240507101150-3b6faa481637                                          
+go: upgraded golang.org/x/crypto v0.21.0 =&gt; v0.24.0                                                 
+go: upgraded golang.org/x/net v0.22.0 =&gt; v0.26.0                                                    
+go: upgraded golang.org/x/sys v0.18.0 =&gt; v0.21.0                                                    
+go: upgraded golang.org/x/text v0.14.0 =&gt; v0.16.0
+</code></pre></td><td>2024-07-01T16:06:45.197Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="LeonMskRu" data-post="5" data-topic="8010">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/leonmskru/48/2810_2.png" class="avatar"> LeonMskRu:</div>
+<blockquote>
+<p>а можно как то сделать go get -u только для определенного git TAG ?</p>
+</blockquote>
+</aside>
+<p>Да, например <code>go get -u github.com/andybalholm/brotli@latest</code>. После @ можно указать тег или ветку.</p>
+<p>После всех махинаций можно прогнать <code>go mod tidy</code> для оптимизации go.mod.</p></td><td>2024-07-01T16:37:29.959Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="LeonMskRu" data-post="1" data-topic="8010">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/leonmskru/48/2810_2.png" class="avatar"> LeonMskRu:</div>
+<blockquote>
+<p><code>Couldn't parse IPC line "STATUS TYPE=version IMPLEMENTATION="lyrebird" VERSION="devel"": no TRANSPORT in STATUS</code></p>
+</blockquote>
+</aside>
+<p>What changed, after your git pull, is that lyrebird <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/commit/f56896ffb54a3a3604eff91c79c574a118b168d3">started reporting its version number to tor</a>. The STATUS protocol that is used by pluggable transports to report their version number was recently re-specified in an incompatible way. It looks like an unanticipated bug that it would cause problems with already deployed versions of tor that interpreted STATUS messages according to the old specification. I left some comments on the bug tracker:</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/issues/40018">
+  <header class="source">
+      <img src="gitlab-lyrebird-buildrun-error/881a62cce04156d12827c5835142332d46c57a11.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/issues/40018" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="gitlab-lyrebird-buildrun-error/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/issues/40018" target="_blank" rel="noopener">Version reporting incompatible with deployed versions of tor (no TRANSPORT in...</a></h3>
+
+  <p>This is more of a tor bug than a lyrebird bug, but the immediate cause was a change in lyrebird.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/core/torspec/-/merge_requests/63#note_3044771">
+  <header class="source">
+      <img src="gitlab-lyrebird-buildrun-error/881a62cce04156d12827c5835142332d46c57a11.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/core/torspec/-/merge_requests/63#note_3044771" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="gitlab-lyrebird-buildrun-error/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/core/torspec/-/merge_requests/63#note_3044771" target="_blank" rel="noopener">Add STATUS VERSION message for PT protcol (!63) · Merge requests · The Tor...</a></h3>
+
+  <p>Related to tor#11101</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>As a workaround, you can try removing the <code>pt.ReportVersion</code> calls from this commit: <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/commit/f56896ffb54a3a3604eff91c79c574a118b168d3" class="inline-onebox">Report the lyrebird version to tor (f56896ff) · Commits · The Tor Project / Anti-censorship / Pluggable Transports / lyrebird · GitLab</a>.</p></td><td>2024-07-01T22:42:06.830Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>thanks. i am not programmist. only user<br>
+waiting for future fix<br>
+my build worked with</p>
+<pre><code class="lang-auto">C:\GitHub\lyrebird&gt;git branch
+* (HEAD detached at lyrebird-0.2.0)
+  fix_dependency_redirect
+  main
+</code></pre></td><td>2024-07-01T22:47:09.724Z</td></tr><tr><td>tango</td><td><p><a class="mention" href="/u/leonmskru">@LeonMskRu</a> I didn’t notice, at first, that you are using Arti, not C-tor. Apparently, using a new lyrebird with an old version of C-tor is <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/issues/40018#note_3046531">only a warning</a>, but in Arti it is an error that prevents the pluggable transport from running. I opened a new issue in Arti.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/core/arti/-/issues/1488">
+  <header class="source">
+      <img src="gitlab-lyrebird-buildrun-error/f8ef62912436781ab4210c0cb9e60cf04c04de64.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/core/arti/-/issues/1488" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="gitlab-lyrebird-buildrun-error/f037cc2d40857d9065458c0a9f6b0ae7bc208d48.png" class="thumbnail onebox-avatar" data-dominant-color="9C7C78">
+
+<h3><a href="https://gitlab.torproject.org/tpo/core/arti/-/issues/1488" target="_blank" rel="noopener">PT STATUS messages require TRANSPORT; fails with current standard that uses...</a></h3>
+
+  <p>torspec!63 change pluggable transports STATUS messages to remove...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-07-10T23:12:51.144Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>thanks.<br>
+ARTI error == yes</p>
+<p>new TOR + any lyrebird OR obfs4proxy == strange things<br>
+i am dont make many tests and dont know tor.exe error dont same as ARTI</p>
+<p><strong>ClientUseIPv4 0</strong><br>
+ClientUseIPv6 1<br>
+ClientPreferIPv6ORPort 1</p>
+<p>full notice tor.exe 0.4.8.12 <code>https://gist.github.com/LeonMskRu/7a30b12f66c2e99e4c93e15d528a10ce</code></p>
+<p>Jul 11 03:55:33.000 [notice] Bridge at ‘82.165.34.70:443’ isn’t reachable by our firewall policy. Asking bridge authority instead.<br>
+Jul 11 03:55:33.000 [notice] Bridge at ‘135.125.182.106:17212’ isn’t reachable by our firewall policy. Asking bridge authority instead.<br>
+Jul 11 03:55:33.000 [notice] Bridge at ‘185.144.75.47:1035’ isn’t reachable by our firewall policy. Asking bridge authority instead.</p>
+<p>Jul 11 03:56:06.000 [notice] Tried to fetch a descriptor directly from a bridge, but that bridge is not reachable through our firewall.</p>
+<p>tor.exe dont warning/error only if change torrc to</p>
+<p><strong>ClientUseIPv4 1</strong><br>
+ClientUseIPv6 1<br>
+ClientPreferIPv6ORPort 1</p>
+<p>bridges_obfs4.conf have both IPv6 + IPv4 bridges<br>
+<code>https://gist.github.com/LeonMskRu/5e24d4fe01a7d13607f7ce86be5b2812</code></p></td><td>2024-07-11T01:18:27.230Z</td></tr><tr><td>tango</td><td><p>Lyrebird with Arti should start working again after this MR is merged:</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/core/arti/-/merge_requests/2307">
+  <header class="source">
+      <img src="gitlab-lyrebird-buildrun-error/0ae082b27f1d10ac6f587f88c450baf714009be1.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/core/arti/-/merge_requests/2307" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="gitlab-lyrebird-buildrun-error/f037cc2d40857d9065458c0a9f6b0ae7bc208d48.png" class="thumbnail onebox-avatar" data-dominant-color="9C7C78">
+
+<h3><a href="https://gitlab.torproject.org/tpo/core/arti/-/merge_requests/2307" target="_blank" rel="noopener">Don't require TRANSPORT for PT STATUS messages. (!2307) · Merge requests ·...</a></h3>
+
+  <p>As per discussion on the ticket and on IRC. I believe this will help with</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-08-06T01:51:40.606Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>Thanks!</p>
+<p>Aug 06, 2024<br>
+Merge branch ‘ahf/pt-status-ignore-transport’ into ‘main’<br>
+Nick Mathewson authored 2 hours ago</p></td><td>2024-08-07T00:39:55.980Z</td></tr>
+    </table>
+      </body>
+    </html>

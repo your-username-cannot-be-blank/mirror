@@ -1,0 +1,120 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-doxajournalru-на-тспу</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>Сайт блокируют на ТСПУ, причем только по HTTPS: в отличие от блокировки, например, <a href="https://ntc.party/t/the-insider-theins-ru/1746">the insider</a>, соединение не разрывается, а висит бесконечно долго (как в случае с Twitter/Facebook).<br>
+При HTTPS-запросе со SNI <code>doxajournal.ru</code> на другой, не заблокированный IP-адрес, соединение разрывается.</p>
+<p>Кроме блокировки, кто-то <a>угнал сайт</a> около 15 минут назад: сначала была <a href="https://pbs.twimg.com/media/FMsBnC9XIAEAYju.jpg:large">страница-заглушка сервиса Tilda</a>, позже сменившаяся текстом «здесь был фокси». Похоже на domain takeover в самом сервисе. DNS при этом по прежнему указывают на Cloudflare.</p>
+<pre><code class="lang-plaintext">% curl http://doxajournal.ru -v
+*   Trying 172.67.42.88:80...
+* Connected to doxajournal.ru (172.67.42.88) port 80 (#0)
+&gt; GET / HTTP/1.1
+&gt; Host: doxajournal.ru
+&gt; User-Agent: curl/7.80.0
+&gt; Accept: */*
+&gt; 
+* Mark bundle as not supporting multiuse
+&lt; HTTP/1.1 301 Moved Permanently
+&lt; Date: Mon, 28 Feb 2022 13:50:56 GMT
+&lt; Transfer-Encoding: chunked
+&lt; Connection: keep-alive
+&lt; Cache-Control: max-age=3600
+&lt; Expires: Mon, 28 Feb 2022 14:50:56 GMT
+&lt; Location: https://doxajournal.ru/
+&lt; X-Content-Type-Options: nosniff
+&lt; Server: cloudflare
+&lt; CF-RAY: 6e4a1ff06d06169f-DME
+&lt; 
+* Connection #0 to host doxajournal.ru left intact
+</code></pre>
+<pre><code class="lang-plaintext">% curl https://doxajournal.ru -v
+*   Trying 172.67.42.88:443...
+* Connected to doxajournal.ru (172.67.42.88) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+^C
+</code></pre>
+<pre><code class="lang-plaintext">% curl https://doxajournal.ru --connect-to ::31.220.5.43 -v
+* Connecting to hostname: 31.220.5.43
+*   Trying 31.220.5.43:443...
+* Connected to 31.220.5.43 (31.220.5.43) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* OpenSSL SSL_connect: Connection reset by peer in connection to doxajournal.ru:443 
+* Closing connection 0
+curl: (35) OpenSSL SSL_connect: Connection reset by peer in connection to doxajournal.ru:443
+</code></pre>
+<p><a class="attachment" href="блокировка-doxajournalru-на-тспу/jJQqxrWSqvI2hDWGwMrHEzYt2Vn.pcapng">doxajournal.ru_28.02.2022.pcapng</a> (9.7 KB)</p></td><td>2022-02-28T13:54:14.074Z</td></tr><tr><td>tango</td><td><p>For me, <a href="https://doxajournal.ru/">https://doxajournal.ru/</a> (<a href="https://web.archive.org/web/20220302143206/https://doxajournal.ru/">archive</a>) still shows the message “Брух! тут был фокси”. But <a href="https://news.doxajournal.ru/novosti/">https://news.doxajournal.ru/novosti/</a> (<a href="https://web.archive.org/web/20220302211257/https://news.doxajournal.ru/novosti/">archive</a>) and <a href="https://doxajournal.org/">https://doxajournal.org/</a> (<a href="https://web.archive.org/web/20220302211312/https://doxajournal.org/">archive</a>) look OK.</p>
+<p>It’s strange the the <a href="http://doxajournal.ru">doxajournal.ru</a> page should be broken for so long. I checked their Twitter to see if they say anything about it. I only found a tweet from 2022-02-28 that mentions RKN.</p>
+<p><a href="https://twitter.com/doxa_journal/status/1498282317000945665" class="onebox" target="_blank" rel="noopener">https://twitter.com/doxa_journal/status/1498282317000945665</a></p>
+<blockquote>
+<p>РКН потребовал удалить наш гайд о том, как разговаривать с родственниками и коллегами о войне. За нескольков часов с публикации его прочитали уже 270 тысяч раз.<br>
+<a href="https://doxajournal.ru/anti_war_handbook">doxajournal.ru/anti_war_handbook</a></p>
+</blockquote>
+<blockquote>
+<p><em>RKN demanded that our guide on how to talk to relatives and colleagues about the war be removed. Within hours of its publication, it had already been read 270,000 times.</em><br>
+<a href="https://doxajournal.ru/anti_war_handbook">doxajournal.ru/anti_war_handbook</a></p>
+</blockquote></td><td>2022-03-02T21:22:18.057Z</td></tr><tr><td>ValdikSS</td><td><p>Yes, it seems that they did not care about old domain or, more likely, had to link new domain to an existing website account on Tilda, it probably doesn’t allow a single website on many domains, so they had to disconnect it. That’s just my speculation.</p></td><td>2022-03-02T21:24:15.907Z</td></tr><tr><td>tango</td><td><p>Aha, I see it now.</p>
+<p><a href="https://twitter.com/doxa_journal/status/1498586803732946944" class="onebox" target="_blank" rel="noopener">https://twitter.com/doxa_journal/status/1498586803732946944</a></p>
+<blockquote>
+<p>Мы переехали на новый домен!</p>
+<p><a href="http://doxajournal.org/">doxajournal.org/</a></p>
+<p>Если у вас не открываются наши материалы, замените «.ru» и «.com» в ссылках на «.org».</p>
+<p><a href="http://xn--1di.ru">❌.ru</a><br>
+<a href="http://xn--1di.com">❌.com</a><br>
+<a href="http://xn--0bi.org">✅.org</a></p>
+<p>Поддержать DOXA: <a href="https://www.patreon.com/doxajournal">patreon.com/doxajournal</a></p>
+<p>Где найти антивоенный гайд, мы напишем совсем скоро. Stay tuned.</p>
+</blockquote>
+<blockquote>
+<p><em>We have moved to a new domain!</em></p>
+<p><em><a href="http://doxajournal.org/">doxajournal.org/</a></em></p>
+<p><em>If you can’t open our content, replace “.ru” and “.com” in the links with “.org”.</em></p>
+<p><em><a href="http://xn--1di.ru">❌.ru</a></em><br>
+<em><a href="http://xn--1di.com">❌.com</a></em><br>
+<em><a href="http://xn--0bi.org">✅.org</a></em></p>
+<p><em>Support DOXA: <a href="https://www.patreon.com/doxajournal">patreon.com/doxajournal</a></em></p>
+<p><em>Where to find the anti-war guide, we will write very soon. Stay tuned.</em></p>
+</blockquote></td><td>2022-03-02T21:30:51.246Z</td></tr>
+    </table>
+      </body>
+    </html>

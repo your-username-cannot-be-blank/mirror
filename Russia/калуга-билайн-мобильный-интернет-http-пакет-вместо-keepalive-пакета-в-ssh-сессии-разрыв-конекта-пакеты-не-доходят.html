@@ -1,0 +1,182 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>калуга-билайн-мобильный-интернет-http-пакет-вместо-keepalive-пакета-в-ssh-сессии-разрыв-конекта-пакеты-не-доходят</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Kiduvago</td><td><p>Здравствуйте.<br>
+Калуга, Билайн, Мобильный интернет.</p>
+<p>С августа наблюдаю очень частые разрывы SSH соединений.</p>
+<p>В качестве примера: открываю по 2-3 SSH сессии на 3 разных серверах и жду. Через какое то время, может в течении часа, может больше хоть одна сессия разрывается.<br>
+KeepAlive настроен так же, как и много лет назад, когда разрывов не наблюдалось.</p>
+<p>Решил начать записывать трафик и о чудо, я обнаруживаю HTTP пакет (с редиректом на <a href="http://blackhole.beeline.ru" rel="noopener nofollow ugc">blackhole.beeline.ru</a>) среди SSH соединения, с флагами “FIN, PSH, ACK” после чего мой ssh клиент инициирует завершение соединения пакетом “FIN, ACK”.</p>
+<p>Для пример настроил отправку keepAlive пакета на каждые 10 сек. от сервера к клиенту.<br>
+В /etc/ssh/sshd_config:</p>
+<pre><code class="lang-auto">ClientAliveInterval 10
+ClientAliveCountMax 2
+</code></pre>
+<p>На скриншоте ниже показана сессия с SSH сервером, сессия открыта из обычного терминала Konsole.<br>
+<code>192.168.1.2</code> - мой ip адрес компьютера, подключённого к моему роутеру.<br>
+<code>193.124.*.*</code> - ip адрес, где запущен SSH сервис (OpenSSH).<br>
+SSH сервис поднят на порту 47570.<br>
+На записе трафика на сервере видно, что сервер в 12:55:56 отправляет очередной keepAlive пакет с флагами “PSH, ACK” и размером 126 байт.<br>
+А на клиенте уже получаем HTTP пакет с флагами “FIN, PSH, ACK” и размером 128 байт. После чего клиент начинает завершать соединение, но оно не завершается корректно.</p>
+<p>Трафик со стороны сервера:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="калуга-билайн-мобильный-интернет-http-пакет-вместо-keepalive-пакета-в-ssh-сессии-разрыв-конекта-пакеты-не-доходят/0b7ff689ba4e25aa3c274c7ae0d0f00b266b0246.png" data-download-href="https://ntc.party/uploads/default/0b7ff689ba4e25aa3c274c7ae0d0f00b266b0246" title="SSH_HTTP_1_Server"><img src="калуга-билайн-мобильный-интернет-http-пакет-вместо-keepalive-пакета-в-ssh-сессии-разрыв-конекта-пакеты-не-доходят/0b7ff689ba4e25aa3c274c7ae0d0f00b266b0246_2_690x358.png" alt="SSH_HTTP_1_Server" data-base62-sha1="1DJpwEOmFi5yfCAjLbSiePUKPhI" width="690" height="358" srcset="калуга-билайн-мобильный-интернет-http-пакет-вместо-keepalive-пакета-в-ssh-сессии-разрыв-конекта-пакеты-не-доходят/0b7ff689ba4e25aa3c274c7ae0d0f00b266b0246_2_690x358.png, калуга-билайн-мобильный-интернет-http-пакет-вместо-keepalive-пакета-в-ssh-сессии-разрыв-конекта-пакеты-не-доходят/0b7ff689ba4e25aa3c274c7ae0d0f00b266b0246_2_1035x537.png 1.5x, калуга-билайн-мобильный-интернет-http-пакет-вместо-keepalive-пакета-в-ssh-сессии-разрыв-конекта-пакеты-не-доходят/0b7ff689ba4e25aa3c274c7ae0d0f00b266b0246_2_1380x716.png 2x" data-dominant-color="A7ABB3"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">SSH_HTTP_1_Server</span><span class="informations">1680×873 302 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Трафик со стороны клиента:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="калуга-билайн-мобильный-интернет-http-пакет-вместо-keepalive-пакета-в-ssh-сессии-разрыв-конекта-пакеты-не-доходят/fad008e509660b2b46cfc0a08b65f970b3a0b2d2.png" data-download-href="https://ntc.party/uploads/default/fad008e509660b2b46cfc0a08b65f970b3a0b2d2" title="SSH_HTTP_1_Client"><img src="калуга-билайн-мобильный-интернет-http-пакет-вместо-keepalive-пакета-в-ssh-сессии-разрыв-конекта-пакеты-не-доходят/fad008e509660b2b46cfc0a08b65f970b3a0b2d2_2_690x357.png" alt="SSH_HTTP_1_Client" data-base62-sha1="zMN4XvD5PHiAHd7TjXsiYuJpARA" width="690" height="357" srcset="калуга-билайн-мобильный-интернет-http-пакет-вместо-keepalive-пакета-в-ssh-сессии-разрыв-конекта-пакеты-не-доходят/fad008e509660b2b46cfc0a08b65f970b3a0b2d2_2_690x357.png, калуга-билайн-мобильный-интернет-http-пакет-вместо-keepalive-пакета-в-ssh-сессии-разрыв-конекта-пакеты-не-доходят/fad008e509660b2b46cfc0a08b65f970b3a0b2d2_2_1035x535.png 1.5x, калуга-билайн-мобильный-интернет-http-пакет-вместо-keepalive-пакета-в-ssh-сессии-разрыв-конекта-пакеты-не-доходят/fad008e509660b2b46cfc0a08b65f970b3a0b2d2_2_1380x714.png 2x" data-dominant-color="B5B8C1"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">SSH_HTTP_1_Client</span><span class="informations">1679×870 292 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Так же видно что в HTTP пакете имеется заголовок редиректа:</p>
+<pre><code class="lang-auto">HTTP/1.1 307 Temporary Redirect
+Location: http://blackhole.beeline.ru
+</code></pre>
+<p>На сервере в логе auth.log было зафиксировано следующее:</p>
+<pre><code class="lang-auto">2024-09-10T12:56:16.455022+03:00 srv1 sshd[15189]: Timeout, client not responding from user root 85.249.19.17 port 17280
+2024-09-10T12:56:16.468118+03:00 srv1 sshd[15189]: pam_unix(sshd:session): session closed for user root
+2024-09-10T12:56:16.479025+03:00 srv1 systemd-logind[374]: Session 141 logged out. Waiting for processes to exit.
+2024-09-10T12:56:16.481726+03:00 srv1 systemd-logind[374]: Removed session 141.
+</code></pre>
+<p>Видно, что клиент не инициировал корректно закрытие ssh сессии, а произошёл таймаут соединения.</p>
+<p>Чем чаще отправляется keepAlive пакет, тем больше шансов словить HTTP пакет.<br>
+Бывает и разрыв ssh соединения, но уже без http пакета, просто приходит пакет с флагом “FIN,PSH,ACK”, вместо отправленного “PSH, ACK”.<br>
+При отправке keepAlive пакет раз в 10 сек. на 3 запущенных ssh соединений можно словить дисконект уже через 10 мин.<br>
+При отправке keepAlive пакет раз в 60 сек. на 3 запущенных ssh соединений можно словить дисконект через 50 мин. или больше часа.</p>
+<p>Я прав или как? Если что не так, поправьте пожалуйста и объясните что не так?<br>
+Спасибо.</p>
+<p>Возникло пару вопросов:<br>
+Наблюдаются ли у кого нибудь в России с начала августа разрывы SSH сессий?<br>
+Наблюдал ли кто нибудь вообще за свою практику подобные HTTP пакеты в SSH сессии?</p>
+<p>Как мне подсказали, это результат работы DPI и он почему то видит в keepAlive пакетах на SSH соединении заблокированный паттерн и блокирует его.<br>
+Предполагаю, что DPI от ТСПУ, от РКН, но возможно и на стороне самого Билайна, т.к. у них тоже свои DPI. Остаётся пока ещё загадкой кто блокирует именно.</p></td><td>2024-09-12T19:01:09.501Z</td></tr><tr><td>0ka(0ka)</td><td><p>хз вы писали или нет, но до отката форума из бекапа тут уже была такая тема про билайн и ssh</p>
+<p>//val: да</p></td><td>2024-09-12T19:24:40.828Z</td></tr><tr><td>Kiduvago</td><td><p>Я пытался воспроизвести данный HTTP пакет. Пакет отправляется, но клиент не пытается разорвать сессию.<br>
+Вот таким python скриптом мне удаётся отправлять пакет:</p>
+<pre><code class="lang-auto">from scapy.all import *
+
+ether = Ether(src="00:00:00:00:00:11", dst="00:00:00:00:00:22")
+ip = IP(src="192.168.1.120", dst="192.168.1.2")
+tcp = TCP(sport=11000, dport=24050, flags="FPA", seq=2506070044, ack=2444551231)
+http_response = (
+    "HTTP/1.1 307 Temporary Redirect\r\n"
+    "Location: http://blackhole.beeline.ru\r\n\r\n"
+)
+pkt = ether/ip/tcp/http_response
+sendp(pkt, iface="re0")
+</code></pre>
+<p>Кто понимает такие детали, объясните пожалуйста почему клиент инициирует разрыв в оригинальном случае и почему у меня не получается воспроизвести этот разрыв со стороны клиента с моим скриптом?</p>
+<p>============<br>
+Добавляю после восстановления сообщения: на проблему с воспроизведением пакета уже забил, поэтому не актуально.</p></td><td>2024-09-12T19:53:36.052Z</td></tr><tr><td>Dhohbr</td><td><p>Надо смотреть пакет RST,ASK, скорее всего он инвалидный. Это обычное дело, провайдер подменяет src.ip и присылает фейковый RST пакет для разрыва соединения, а потом вам присылает страницу-заглушку.<br>
+Попробуйте в вашем фаерволе заблокировать входящие инвалидные пакеты.<br>
+iptables -I INPUT -m state --state INVALID -j DROP</p></td><td>2024-09-12T19:53:47.060Z</td></tr><tr><td>Kiduvago</td><td><aside class="quote no-group" data-username="Dhohbr" data-post="5" data-topic="10037">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> Dhohbr:</div>
+<blockquote>
+<p>Надо смотреть пакет RST,ASK, скорее всего он инвалидный.</p>
+</blockquote>
+</aside>
+<p>Т.к. запись трафика велась на моём компьютере, а RST,ASK пакет исходящий, то этот пакет инициировал мой SSH клиент, а не провайдер.</p>
+<p>INVALID пакеты блокируются на стороне моего роутера, через цепочку FORWARD. Поэтому до меня доходят только правильные пакеты.</p></td><td>2024-09-12T19:55:17.411Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Наблюдаются у T2 Сибирь ~ года, но в трансграничном направлении.<br>
+SSH сессия с VPS не живет и 10 минут, происходит гарантированный разрыв.</p></td><td>2024-09-12T19:56:15.864Z</td></tr><tr><td>ValdikSS</td><td><p>Частично восстановил топик.</p>
+<aside class="quote no-group" data-username="Kiduvago" data-post="1" data-topic="10037">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/8dc957/48.png" class="avatar"> Kiduvago:</div>
+<blockquote>
+<p>Решил начать записывать трафик и о чудо, я обнаруживаю HTTP пакет (с редиректом на <a href="http://blackhole.beeline.ru">blackhole.beeline.ru</a>) среди SSH соединения, с флагами “FIN, PSH, ACK” после чего мой ssh клиент инициирует завершение соединения пакетом “FIN, ACK”.</p>
+</blockquote>
+</aside>
+<p>Можете сделать pcap?</p></td><td>2024-09-12T19:58:58.449Z</td></tr><tr><td>Kiduvago</td><td><aside class="quote no-group" data-username="Dhohbr" data-post="5" data-topic="10037">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> Dhohbr:</div>
+<blockquote>
+<p>iptables -I INPUT -m state --state INVALID -j DROP</p>
+</blockquote>
+</aside>
+<p>INVALID пакеты блокируются на стороне моего роутера, через цепочку FORWARD. Поэтому до меня доходят только правильные пакеты.</p></td><td>2024-09-12T20:08:03.155Z</td></tr><tr><td>Kiduvago</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="8" data-topic="10037">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Можете сделать pcap?</p>
+</blockquote>
+</aside>
+<p>Выложил 2 скриншота с трафиком на сервере и на клиенте. Забыл изначально добавить в 1й пост <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-09-12T20:09:05.150Z</td></tr><tr><td>ValdikSS</td><td><p>Скриншоты не подойдут</p></td><td>2024-09-12T22:04:38.077Z</td></tr><tr><td>Kiduvago</td><td><aside class="quote no-group" data-username="Anonimno" data-post="7" data-topic="10037" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a88e57/48.png" class="avatar"> Anonimno:</div>
+<blockquote>
+<p>Наблюдаются у T2 Сибирь ~ года, но в трансграничном направлении.<br>
+SSH сессия с VPS не живет и 10 минут, происходит гарантированный разрыв.</p>
+</blockquote>
+</aside>
+<p>А на записе трафика как это выглядит? Вы где нибудь описывали данный случай, скриншоты может какие? Если нет, то можете сделать запись трафика на клиенте и сервере, как я сделал и выложить скриншоты.</p></td><td>2024-09-13T05:27:38.185Z</td></tr><tr><td>Kiduvago</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="11" data-topic="10037" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Скриншоты не подойдут</p>
+</blockquote>
+</aside>
+<p>13 сентября в ЛС отправил 3 разных SSH сессии. Подтвердите пожалуйста прочтение.</p></td><td>2024-09-14T16:53:14.462Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="Dhohbr" data-post="5" data-topic="10037">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> Dhohbr:</div>
+<blockquote>
+<p>iptables -I INPUT -m state --state INVALID -j DROP</p>
+</blockquote>
+</aside>
+<p>Не прокатит. DPI активный. После http redirect ничего от сервера больше не идет, а клиент шлет ретрансмиссии FIN,ACK до тех пор, пока ему это не надоедает, и он отсылает RST</p></td><td>2024-09-14T19:44:35.195Z</td></tr><tr><td>TheAndromar(Andrey Markaryan)</td><td><p>Подтвержаю, такая же проблема и точно такую картину наблюдаю через Wireshark. Домашний интернет Ростелеком (МО, Красногорск) и режут трафик ShadowSocks (без надстроек). На мобильных операторах все стабильно работает и SSH и SS.</p></td><td>2024-09-18T12:41:43.507Z</td></tr><tr><td>Kiduvago</td><td><aside class="quote no-group" data-username="TheAndromar" data-post="15" data-topic="10037">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/theandromar/48/8661_2.png" class="avatar"> TheAndromar:</div>
+<blockquote>
+<p>Подтвержаю, такая же проблема и точно такую картину наблюдаю через Wireshark</p>
+</blockquote>
+</aside>
+<p>Можете скиншот выложить, где в SSH соединении подменяется keepAlive пакет и приходит HTTP пакет или пакет с флагами “FIN, PSH, ACK” (когда он не HTTP).</p></td><td>2024-09-19T14:36:39.537Z</td></tr><tr><td>Kiduvago</td><td><p>Если посмотреть внимательно на скриншотах в 1 сообщении, то можно заметить что SEQ и ACK поля разные у отправляемых и получаемых TCP пакетов.<br>
+Разве они не должны быть одинаковыми?</p>
+<p>Или это признак активного DPI, который прям проксирует через себя TCP соединение?<br>
+Не углублялся так глубоко, поэтому не знаю таких деталей.</p></td><td>2024-09-19T14:41:30.527Z</td></tr><tr><td>Kiduvago</td><td><p>Спустя месяц после подачи заявки в техподдержку Билайна проблема была решена.<br>
+Сейчас разрывов в SSH нет.</p></td><td>2024-10-21T15:21:03.094Z</td></tr><tr><td>praniguroiqua</td><td><p>Техподдержку кого, хостера или провайдера? А то непонятно.</p></td><td>2024-10-22T12:45:57.807Z</td></tr><tr><td>Kiduvago</td><td><aside class="quote no-group" data-username="praniguroiqua" data-post="19" data-topic="10037" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/p/ecb155/48.png" class="avatar"> praniguroiqua:</div>
+<blockquote>
+<p>Техподдержку кого, хостера или провайдера? А то непонятно.</p>
+</blockquote>
+</aside>
+<p>Билайна</p></td><td>2024-10-22T14:45:53.270Z</td></tr><tr><td>praniguroiqua</td><td><p>Спасибо.</p></td><td>2024-10-22T15:07:02.124Z</td></tr>
+    </table>
+      </body>
+    </html>

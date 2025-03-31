@@ -1,0 +1,64 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>win11-wireguard-есть-ли-способ-заставить-отдельные-приложения-работать-через-белый-ip</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>newbie</td><td><p>Здравствуйте! Пользуюсь VPN (Wireguard), просто стоит клиент, который подключается к известному в узких кругах  VPN (njal.la). Всё работает через  него. Мне необходимо как-то 1 приложение заставить работать через  мой обычный российский IP. Скажите,  возможно ли это, и если да,  куда копать?</p></td><td>2024-04-09T13:21:26.271Z</td></tr><tr><td>0ka(0ka)</td><td><p>WireSock обещает <strong>Selective Application Tunneling</strong><br>
+я его не пробовал. если не подойдёт, то можно сделать конфиг для sing-box</p></td><td>2024-04-09T13:52:41.876Z</td></tr><tr><td>serj888</td><td><p>То есть всё работает через впн ? А почему всё ? Попробуйте в сетевом адаптере прописать второй ип адрес, ну к примеру у вас 192.168.1.10, а можно ещё добавить второй, прописав ип и маску в том же адаптере к примеру 192.168.1.20 и будет у вас 2 ип адреса и через один пустить одно, а через другой другое как вариант</p></td><td>2024-04-09T13:56:02.411Z</td></tr><tr><td>newbie</td><td><p>И браузер, и все приложения. Т.е. вообще всё идёт через VPN. Мне просто нужно как-то одно приложение запускать с российского ip. А как это сделать в виндовс понятия не имею. На линуксах было бы куда проще.</p></td><td>2024-04-09T14:20:01.434Z</td></tr><tr><td>serj888</td><td><p>А вот мне наоборот, о винде я знаю практически всё, а вот с линуксом немного напряг )<br>
+Бывает выношу мозг интеллекту, когда идей совсем нет, он редко помогает, но идея потом приходит сама по себе когда перебираешь кучу вариантов, зато когда боролся неделю и даже месяц и победил, вот тогда приходит классное чувство победы, то есть не сдался и руки не опустил, в любом случаи решение есть всегда, главное уметь его увидеть и если к этому идти, то всегда найдёшь, даже лучше чем кто то подсказал получится )</p></td><td>2024-04-09T15:37:17.082Z</td></tr><tr><td>ValdikSS</td><td><p>Если приложение, которое вы хотите запустить, поддерживает bind к определённому адресу, то достаточно иметь два маршрута по умолчанию в таблице маршрутизации (через провайдера, с метрикой выше, и через VPN, в метрикой ниже), а в приложении указать нужный адрес.</p>
+<p>Если приложение не поддерживает, его можно заставить: <a href="https://r1ch.net/projects/forcebindip" class="inline-onebox">ForceBindIP | r1ch.net</a></p>
+<p>Альтернативный вариант — клиент <a href="https://windscribe.com/download/">Windscribe</a>, в нём есть настройки маршрутизации отдельных приложений, также он позволяет подключаться к любым серверам, не только Windscribe.<br>
+Еще, вроде бы, у Mullvad также есть подобная функция.</p></td><td>2024-04-09T17:03:36.485Z</td></tr><tr><td>newbie</td><td><p>а как узнать, поддерживает ли приложение Bind к адресу?</p></td><td>2024-04-10T10:18:09.942Z</td></tr><tr><td>Xunlei</td><td><p>Подобная тема с ответами:</p><aside class="quote quote-modified" data-post="1" data-topic="6247">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/rofliex/48/3929_2.png" class="avatar">
+    <a href="https://ntc.party/t/openvpn-proxy/6247">Openvpn -&gt; proxy</a> 
+  </div>
+  <blockquote>
+    Привет, ищу способ конвертации openvpn соединения в proxy. 
+Цель: анонимизация конкретных приложений а не всей системы. 
+Пробовал вот эти решения: 
+
+<a href="https://hub.docker.com/r/kizzx2/openvpn-client-socks/" class="inline-onebox" rel="noopener nofollow ugc">Docker</a>
+<a href="https://github.com/haugene/docker-transmission-openvpn" class="inline-onebox" rel="noopener nofollow ugc">GitHub - haugene/docker-transmission-openvpn: Docker container running Transmission torrent client with WebUI over an OpenVPN tunnel</a> , но к сожалению не разобрался в чем проблема ( либо я где-то ошибся, либо ошибка в чем-то другом) Скрин docker-compose: <a href="https://i.imgur.com/ODP2fn4.png" rel="noopener nofollow ugc">https://i.imgur.com/ODP2fn4.png</a>
+
+Доп инфа: 
+VPN провайдер - SurfShark. Была проблема с кон…
+  </blockquote>
+</aside>
+</td><td>2024-04-10T10:24:36.428Z</td></tr><tr><td>newbie</td><td><p>О, спасибо большое. Нашёл там элегантное решение)</p></td><td>2024-04-10T10:30:55.136Z</td></tr><tr><td>boltor</td><td><p>Для Windows есть кастомный клиент <a href="https://github.com/TunnlTo/desktop-app" rel="noopener nofollow ugc">TunnlTo</a> со встроенным Wiresock. Splittunneling по блэк или вайтлисту идёт по пути до файла или папки, можно указывать несколько путей.</p></td><td>2024-04-22T06:45:34.375Z</td></tr><tr><td>newbie</td><td><p>спасибо,  то что надо</p></td><td>2024-10-27T16:01:18.026Z</td></tr>
+    </table>
+      </body>
+    </html>

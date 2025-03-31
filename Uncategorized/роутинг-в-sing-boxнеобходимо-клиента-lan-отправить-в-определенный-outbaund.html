@@ -1,0 +1,73 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>роутинг-в-sing-boxнеобходимо-клиента-lan-отправить-в-определенный-outbaund</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Nikot</td><td><p>Исходный данные:<br>
+Есть локальная сеть с выходом в интернет через роутер с openwrt. Ha роутере установлен sing-box, в качестве inbound настроен tun. Также на роутере настроен интерфейс awg который определен в качестве outbound “bind_interfece”. Задача заключается в том, что бы одного клиента lan направить в этот outbaund.Попытка сделать это с помощью “source_ip_cidr” не увенчались успехом.</p></td><td>2024-11-21T07:33:53.703Z</td></tr><tr><td>0ka(0ka)</td><td><p>И где лог? В debug режиме, чистый и читабельный. И конфига сингбокса нет, и awg конфига тоже нет…</p></td><td>2024-11-21T17:08:45.579Z</td></tr><tr><td>Nikot</td><td><p>Если это поможет в решении вопроса, вот конфиги и log<br>
+<a class="attachment" href="роутинг-в-sing-boxнеобходимо-клиента-lan-отправить-в-определенный-outbaund/1Ecwv8MSMV6yNLP0I3q08KDkgXV.awg_warp">conf.awg_warp</a> (612 байтов)<br>
+<a class="attachment" href="роутинг-в-sing-boxнеобходимо-клиента-lan-отправить-в-определенный-outbaund/8JwowkiUlYqNwV4IEHt7RANrKAU">log_debug</a> (32,8 КБ)<br>
+<a class="attachment" href="роутинг-в-sing-boxнеобходимо-клиента-lan-отправить-в-определенный-outbaund/sjh0gbm7Z3OFZy6THOcUpkUpSvy.json">sing-box_config.json</a> (4,8 КБ)</p></td><td>2024-11-22T05:10:35.216Z</td></tr><tr><td>0ka(0ka)</td><td><p>лог далеко не чистый, и вообще начинается с середины… в любом случае вижу что у вас включен маскарадинг на singbox tun, его нужно выключить, сингбокс видит адрес со своего же интерфейса (172.16.250.1) а не с домашней сети (192.168.х.х)</p></td><td>2024-11-22T11:23:53.143Z</td></tr><tr><td>Nikot</td><td><aside class="quote no-group" data-username="0ka" data-post="4" data-topic="13274">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>вас включен маскарадинг на singbox tun, его нужно выключить</p>
+</blockquote>
+</aside>
+<p>Я так понимаю что добавление в /etc/config/firewall как раз и включает маскардинг?</p>
+<p>config zone<br>
+option name ‘tun’<br>
+option forward ‘REJECT’<br>
+option output ‘ACCEPT’<br>
+option input ‘REJECT’<br>
+option masq ‘1’<br>
+option mtu_fix ‘1’<br>
+option device ‘tun0’<br>
+option family ‘ipv4’</p>
+<p>config forwarding<br>
+option name ‘lan-tun’<br>
+option dest ‘tun’<br>
+option src ‘lan’<br>
+option family ‘ipv4’</p></td><td>2024-11-22T12:21:45.747Z</td></tr><tr><td>0ka(0ka)</td><td><p>это настройки firewall в openwrt. я не пользуюсь openwrt, но на сколько я знаю, нужно создать новую зону и поместить в неё интерфейс tun</p></td><td>2024-11-22T12:32:05.438Z</td></tr><tr><td>Nikot</td><td><p>Поправил предыдущее сообщение.</p>
+<p>option masq ‘1’</p></td><td>2024-11-22T12:34:46.999Z</td></tr><tr><td>0ka(0ka)</td><td><p>повторяю что его нужно выключить, а не включить.<br>
+в логе должны быть такие сообщения (ip lan)<br>
+<code>inbound/tun[0]: inbound connection from 192.168.1.3:43434</code><br>
+а у вас (ip tun singbox)<br>
+<code>inbound/tun[0]: inbound connection from 172.16.250.1:47916</code></p></td><td>2024-11-22T12:36:16.518Z</td></tr><tr><td>Nikot</td><td><p>Спасибо вам большое, Вы оказались правы во всем виной включенный маскардинг.После того как я его отключил, все заработало согласно route.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="роутинг-в-sing-boxнеобходимо-клиента-lan-отправить-в-определенный-outbaund/28f1e82094cfa3b096ec6d73c19704dd8d8f30fe.jpeg" data-download-href="https://ntc.party/uploads/default/28f1e82094cfa3b096ec6d73c19704dd8d8f30fe" title="IMG_20241122_173013_843"><img src="роутинг-в-sing-boxнеобходимо-клиента-lan-отправить-в-определенный-outbaund/28f1e82094cfa3b096ec6d73c19704dd8d8f30fe_2_690x431.jpeg" alt="IMG_20241122_173013_843" data-base62-sha1="5QdnEZVUU4Ojy2ZjQsz8C9BsST4" width="690" height="431" srcset="роутинг-в-sing-boxнеобходимо-клиента-lan-отправить-в-определенный-outbaund/28f1e82094cfa3b096ec6d73c19704dd8d8f30fe_2_690x431.jpeg, роутинг-в-sing-boxнеобходимо-клиента-lan-отправить-в-определенный-outbaund/28f1e82094cfa3b096ec6d73c19704dd8d8f30fe_2_1035x646.jpeg 1.5x, роутинг-в-sing-boxнеобходимо-клиента-lan-отправить-в-определенный-outbaund/28f1e82094cfa3b096ec6d73c19704dd8d8f30fe.jpeg 2x" data-dominant-color="3A3A3D"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">IMG_20241122_173013_843</span><span class="informations">1280×800 120 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-11-22T14:31:18.732Z</td></tr>
+    </table>
+      </body>
+    </html>

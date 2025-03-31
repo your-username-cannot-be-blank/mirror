@@ -1,0 +1,58 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>tor-relay-tls-clienthello-sni-fingerprinting</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>Iranian <a href="https://parsonline.net">ParsOnline</a> ISP has a regexp filter for the domain generation algorithm used in Tor for ClientHello SNI field.<br>
+<code>www\.[a-z]{4,25}\.com</code></p>
+<p><a href="https://gitweb.torproject.org/tor.git/tree/src/lib/tls/tortls_openssl.c?h=maint-0.4.7&amp;id=21b3397f9b0803134bc458b83cd161de259887fd#n1082" class="onebox" target="_blank" rel="noopener">https://gitweb.torproject.org/tor.git/tree/src/lib/tls/tortls_openssl.c?h=maint-0.4.7&amp;id=21b3397f9b0803134bc458b83cd161de259887fd#n1082</a></p>
+<p>You can connect to the majority of Tor relays, but the connection would freeze if this type of SNI is used along with ClientHello size &lt;= 256 bytes.<br>
+Changing the domain name even slightly, like <code>.com</code> to <code>.org</code> allows to connect to Tor Relay.<br>
+This filter seem to be applied only to known Relays IP addresses in Tor network.</p></td><td>2023-03-03T10:38:13.192Z</td></tr><tr><td>tango</td><td><p>I thought that the client SNI encoded some signification information for the Tor handshake, but I was mistaken. By my reading of the spec, there are no restrictions on the SNI, and so the name generation algorithm could be changed by a single client compatibly.</p>
+<p>What I was thinking of, relating to the name being significant, is actually in the server certificate. A commonName ending in <code>.net</code> indicates a v2 handshake; any other TLD is for a v3 handshake. For backward compatibility, some conventional implementation details of the v2 handshake were selected to be markers of v2 when v3 was introduced.</p>
+<p><a href="https://gitweb.torproject.org/torspec.git/tree/tor-spec.txt?id=4234d9325913a0c2ab54a86f2108b3fe99551035#n330" class="onebox" target="_blank" rel="noopener">https://gitweb.torproject.org/torspec.git/tree/tor-spec.txt?id=4234d9325913a0c2ab54a86f2108b3fe99551035#n330</a></p>
+<blockquote>
+<p>In “in-protocol” (a.k.a. “the v3 handshake”), the initiator sends no certificates, and the responder sends a single connection certificate.  The choice of ciphersuites must be as in a “renegotiation” handshake.  There are additionally a set of constraints on the connection certificate, which the initiator can use to learn that the in-protocol handshake is in use.  Specifically, at least one of these properties must be true of the certificate:</p>
+<ul>
+<li>The certificate is self-signed</li>
+<li>Some component other than “commonName” is set in the subject or issuer DN of the certificate.</li>
+<li>The commonName of the subject or issuer of the certificate ends with a suffix other than “.net”.</li>
+<li>The certificate’s public key modulus is longer than 1024 bits.</li>
+</ul>
+</blockquote>
+<p>More info: <a href="https://gitweb.torproject.org/torspec.git/tree/proposals/176-revising-handshake.txt?id=0b9fbb893c7cd395887a9e297febfa88cab068ab">Proposal 176: Proposed version-3 link handshake for Tor</a>.</p></td><td>2023-03-03T20:06:41.496Z</td></tr><tr><td>ValdikSS</td><td><p>5 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-tor-arti-rust-%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F/4912">Обсуждение Tor Arti (Rust-версия)</a></p></td><td>2023-10-12T02:13:42.198Z</td></tr>
+    </table>
+      </body>
+    </html>

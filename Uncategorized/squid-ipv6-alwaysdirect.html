@@ -1,0 +1,65 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>squid-ipv6-alwaysdirect</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>LeonMskRu(Leon MskRu)</td><td><p>есть squid 3.5.28</p>
+<p>dns_v4_first off<br>
+acl to_ipv4 dst ipv4<br>
+acl to_ipv6 dst ipv6</p>
+<p>http_access allow to_ipv4 !all<br>
+http_access allow to_ipv6 !all</p>
+<p>always_direct allow to_ipv6 C0NNECT<br>
+always_direct deny to_ipv6 !C0NNECT<br>
+never_direct allow to_ipv6 !C0NNECT<br>
+never_direct deny to_ipv6 C0NNECT</p>
+<p>dns прописанный в конфиге отдает нормально и A и AAAA<br>
+но часть доменов где есть и IPv6 и IPv4 почемуто соединяется по IPv4<br>
+TCP_TUNNEL/200 HIER_DIRECT/update.jdownloader.org\136.243.5.58<br>
+TCP_TUNNEL/200 HIER_DIRECT/egress.yandex.net\87.250.251.42</p>
+<p>хотя по старым логам<br>
+HIER_DIRECT/update.jdownloader.org\2a01:4f8:211:1e8d::2<br>
+HIER_DIRECT/egress.yandex.net\2a02:6b8::299</p>
+<p>пытался добавить<br>
+tcp_outgoing_address 192.168.1.111 to_ipv4<br>
+tcp_outgoing_address 192.168.1.111 !to_ipv6</p>
+<p>не помогло</p></td><td>2024-08-08T00:30:23.815Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>удивительное рядом. не знаю помогло ли реально или временно “как надо” заработало. пока что в HIER_DIRECT только IPv6 адреса серверов как и задумывалось</p>
+<p>стало<br>
+dns_nameservers ::1 fe80::111</p>
+<p>было<br>
+dns_nameservers 127.0.0.1 ::1 192.168.1.111 fe80::111</p></td><td>2024-08-08T14:44:23.519Z</td></tr>
+    </table>
+      </body>
+    </html>

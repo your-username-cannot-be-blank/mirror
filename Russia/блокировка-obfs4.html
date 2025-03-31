@@ -1,0 +1,82 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-obfs4</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>hash23</td><td><p>В последнее время МегаФон стал блокировать obfs4 мосты с <a href="http://bridges.torproject.org" rel="noopener nofollow ugc">bridges.torproject.org</a>. Прогресс бутстрапа тора останавливается на 25% Retrieving network status. Очень редко попадается хороший мост obfs4. Работают meek и vanilla.</p></td><td>2024-06-28T10:12:12.869Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>нашел 394 рабочих OBFS4 из списка 5700+ (найдено на github.)<br>
+и это я еще выкидывал некоторые страны (типа Австралии/етк)<br>
+и версии сервера оставлял только 0.4.8.* (а то там не только 0.4.7. а еще древней бывают)<br>
+          <a href="https://imagizer.imageshack.com/a/img923/3451/xJKTkk.png" target="_blank" rel="noopener nofollow ugc" class="onebox">
+            <img src="блокировка-obfs4/cc98b77d965f73d8a87c99c610f5a80fc67e17c7.png" data-dominant-color="DBE0E5" width="663" height="500">
+          </a>
+</p>
+<p>про ванилу вообще смешно. многие провайдеры вообще последнее время банят практически все IPv4 Guard relay. правда через какое то время блокировку снимают ненадолго</p></td><td>2024-06-28T12:49:25.058Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Есть три типа около-рабочих obfs4 мостов. Первый: часть мостов используют старый obfs4proxy. В результате  хэндшейк может ломаться. Клиент умеет повторять попытки, но не бесконечно, и вместе с другими случаями такие мосты зачастую записывают в блокируемые. Второй: РКН автоматизированно собирает адреса в сети, проверяет (sic!) и блокирует их. Причем из-за особенности раздачи и конечности мостов РКН имеет все шансы отслеживать большую часть мостов. Поскольку диагностика блокировки у проекта не автоматизирована, мосты продолжают раздавать в блокируемые регионы. Даже если часть будет доступна, шанс получить рабочий без создания своей локальной системы учета – невелик. Добавление мостов для подключения сотнями не решает проблему, но создает новый вектор утечек. Третий: попадание под определение “протокола” SS,VMESS,OBFS4,etc.</p>
+<blockquote>
+<p>Retrieving network status</p>
+</blockquote>
+<p>OBFS4 и TLS хэндшейки прошли успешно, и это похоже на третий тип нерабочего моста. Но возможно это просто проблемы самого моста. Сделайте статистику по последним строчкам из лога хотя бы для 10 разных мостов, и сравните.</p>
+<blockquote>
+<p>хороший мост obfs4</p>
+</blockquote>
+<p>Это противоречит заголовку. “Хотели бы заблокировать – заблокировали”, возможно не каждое подключение, поскольку статистика дает вероятность, а не гарантию блокировки, но “хороший” мост работал бы у вас от случая к случаю.</p></td><td>2024-06-28T13:21:23.769Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>ИМХО никто ничего не банит по заголовкам покрайней мере постоянно</p>
+<p>ТОР relays спокойно берутся на <a href="https://metrics.torproject.org/rs.html#aggregate/ascc/running:true%20" class="inline-onebox">Relay Search</a> (ну не там. это GUI)<br>
+и даже их пересканивают раз в 3-6 часов и банят “новое”. ну когда вообще что то банят (вот сейчас нифига не блокируют.)<br>
+ALIVE это отвечающие по IPv4 с последнего сканирования (раз в 3и часа у меня)<br>
+<a href="http://imageshack.com/a/img922/9164/owClN9.png">http://imageshack.com/a/img922/9164/owClN9.png</a></p>
+<p>а OBFS4 банят сразу именно те что отдает сайт/почта. многие годами работают без блокировки не засвеченные на <a href="https://bridges.torproject.org/options/">https://bridges.torproject.org/options/</a></p></td><td>2024-06-28T14:06:15.558Z</td></tr><tr><td>Xunlei</td><td><p>Вот статистика у меня за последний месяц:<br>
+Новых мостов в выгрузках – 35<br>
+Из них рабочие – 18<br>
+Из них рабочие в РФ – 2<br>
+Итого за несколько лет использования всего к 5% мостам мог подключатся.</p></td><td>2024-06-28T16:21:40.904Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>зависит от провайдера. у меня вот сейчас по IPv4 ТОР не забанен. хотя обычно блочат почти все<br>
+в том числе у меня например честный IPv6 (не тередо)<br>
+из ~400 насканеных и рабочих obfs4 по IPv4 где то 200+ из них отвечают по IPv6<br>
+что то вроде</p>
+<p>причем даже из 500 мостов выложенные ДВА года назад находил рабочие (уже не помню сколько.) bridges-obfs4-guards в github ищется …</p>
+<pre><code class="lang-auto">obfs4 [2a02:898:62:f6::84]:8088 135C158527AA9FE9A2F26EC515EB6999D813D347 cert=wTUz0/5FhAZRkitil5MprGbSF3JzjxjxI1kAmxAdSeDy98NgcLr11f/qUXWDC76Y97RiSg iat-mode=0
+
+obfs4 [2a10:1fc0:1::cb5d:932f]:8443 452A83FF134115E8D2B0E99143CC87BD5F66898C cert=g0P+BWw8gvBNXCiZOffIVoRi68bUTOjXEbVPymwaQiuNMtWwggerWnwviOIGol2PFRwbJA iat-mode=0
+</code></pre>
+<p>          <a href="https://imagizer.imageshack.com/a/img923/3451/xJKTkk.png" target="_blank" rel="noopener nofollow ugc" class="onebox">
+            <img src="блокировка-obfs4/cc98b77d965f73d8a87c99c610f5a80fc67e17c7.png" data-dominant-color="DBE0E5" width="663" height="500">
+          </a>
+</p></td><td>2024-06-28T16:53:31.581Z</td></tr><tr><td>anon9001(anon)</td><td><p>del</p></td><td>2024-06-29T05:45:40.951Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Забудьте про тор как способ обхода блокировок, когда он сам под блокировкой. Во первых это оверкилл, что особенно заметно в периоды обострения у борцов с луковичными сайтами. Во вторых проект не достаточно оперативный, чтобы за всеми сиюминутными бзиками в щитхолях поспевать. Там нет шифропанков.</p>
+<p>С мостами происходит трагедия общин. 2/3 всех мостов доступны без капчи и смс. Спасибо дятлам.</p></td><td>2024-06-29T09:20:50.018Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>под засвечеными имеются ввиду сайты типа самого ТОРа отдающего в json почти все relay/bridge (vanilla)<br>
+и емайл/сайт/бот которые отдают “по одному” мосту но все это утекает в те же телеграмы и прочие “сборки”<br>
+если бы банили по сигнатурам не было вообще <a href="https://torscan-ru.ntc.party/">https://torscan-ru.ntc.party/</a> и его же сканера<br>
+опять же любой ламер может взять сканер и получить все “работающие” тор ноды. после чего ВСЕ банится просто на ура</p></td><td>2024-06-29T12:30:43.491Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>WebTunnel-бриджи отлично работают</p></td><td>2024-07-01T06:00:41.787Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Тема не про них.</p>
+<p>Bсего 120 мостов. РКН еще не блокировал их как webtunnel.</p></td><td>2024-07-01T11:43:30.857Z</td></tr>
+    </table>
+      </body>
+    </html>

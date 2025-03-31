@@ -1,0 +1,1452 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>cron(Cron)</td><td><p><strong>Обсуждение <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/8809" class="inline-onebox">Обход замедления YouTube и блокировок на прошивке Keenetic с помощью nfqws / tpws (zapret)</a></strong></p>
+<hr>
+<p>Спасибо за причесывание и улучшение! Но по непонятной причине не работает ни ваше решение, ни из оригинала <a href="https://habr.com/ru/articles/833564/" class="inline-onebox" rel="noopener nofollow ugc">Чиним замедление YouTube на уровне роутера / Хабр</a><br>
+S51tpws start успешно отрабатывает и висит в процессах, но скорость ютуба никак не улучшается…</p>
+<pre><code class="lang-auto">$ curl --connect-to ::speedtest.selectel.ru https://manifest.googlevideo.com/100MB -k -o/dev/null
+</code></pre>
+<p>показывает практически 0<br>
+Можете подсказать куда и как копать?</p></td><td>2024-08-04T02:25:23.161Z</td></tr><tr><td>kobzev-dmitriy(Kobzev Dmitriy)</td><td><aside class="quote no-group" data-username="dartraiden" data-post="1" data-topic="8809">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"><a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/8809/1">Обход замедления YouTube и блокировок на прошивке Keenetic с помощью nfqws / tpws (zapret)</a></div>
+<blockquote>
+<p><code>--split-pos=2</code></p>
+</blockquote>
+</aside>
+<p>Я так понимаю надо искать свои параметры, которые меняются в зависимости от провайдера. У меня к слову тоже не работает. Автору спасибо, ждем улучшений</p></td><td>2024-08-04T05:56:04.262Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Это вопросы к автору исходного поста.</p>
+<p>Попробуйте строку, начинающуюся с <code>ARGS=</code>, привести к виду</p>
+<pre><code class="lang-auto">ARGS="--daemon --bind-addr 192.168.1.1 --port 999 --dpi-desync=split2 --tlsrec=sni --pidfile $PIDFILE"
+</code></pre>
+<p>Разумеется, сперва стоит остановить TPWS</p>
+<pre><code class="lang-auto">/opt/etc/init.d/S51tpws stop
+</code></pre>
+<p>И не забыть его запустить после изменений</p></td><td>2024-08-04T06:08:33.419Z</td></tr><tr><td>kobzev-dmitriy(Kobzev Dmitriy)</td><td><p>/opt/usr/bin/tpws: unrecognized option: dpi-desync=split2</p></td><td>2024-08-04T06:18:08.238Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Значит, у TPWS и NFQWS разные опции…</p>
+<p>Тогда только подбирать.</p></td><td>2024-08-04T06:18:50.960Z</td></tr><tr><td>kobzev-dmitriy(Kobzev Dmitriy)</td><td><p>проверял на windows-chrome, если выключить в chrome quic, то все работает отлично</p></td><td>2024-08-04T06:46:24.164Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>У меня Пикабу отваливается после старта TPWS. Может, из-за QUIC как раз (я его не отключал).</p></td><td>2024-08-04T07:07:29.482Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Реализовано ограничение по домену, теперь дурение трафика работает лишь для ютуба, не затрагивая прочие ресурсы.</p></td><td>2024-08-04T08:31:40.562Z</td></tr><tr><td>elijah0107(Elijah0107)</td><td><p>У меня с hostlist снова плохо ютуб стал грузить. Как будто и не работает zapret</p></td><td>2024-08-04T11:48:11.930Z</td></tr><tr><td>art3m(83Ns5u3nN!!)</td><td><p>У меня также, но не для всех видео. Некоторые работают, а некоторые нет</p></td><td>2024-08-04T12:10:41.687Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Без hostlist, как я уже писал, проблемы с приложениями на смартфоне, а в приложениях QUIC не выключишь…</p>
+<p>Возможно, кому-то поможет <a href="https://telegra.ph/Nastrojka-zapret-ot-bol-van-na-Keentic-04-27">nfqws</a>. Там только при установке нужно в отличие от написанного выбрать стратегию <code>--dpi-desync=split2</code> , отказаться от поддержки HTTP, выбрать режим <code>hostlist</code> и добавить в <code>/opt/zapret/ipset/zapret-hosts-user.txt</code> домен <code>googlevideo.com</code></p>
+<p>Обо всём этом установщик спрашивает в процессе, так что это будет несложно.</p></td><td>2024-08-04T13:26:02.992Z</td></tr><tr><td>fouk</td><td><p>Отличная инструкция! Огромное Вам спасибо! Обычному юзеру, кем я являюсь, всё понятно написано! Ютуб на компьютере заработал, а вот на телевизорах всё таки работает не ахти(( есть ли решение этой проблемы?</p></td><td>2024-08-04T15:43:31.240Z</td></tr><tr><td>elijah0107(Elijah0107)</td><td><p>Присоединяюсь, инструкция крутая. Насколько я понимаю по тв проблема остается открытой. Еще если   будет возможность, без добавления хоста у меня загружается превью на моб устройствах в ютубе, а с хостом нет, возможно там хост другой надо внести, но вот непонятно какой</p></td><td>2024-08-04T17:38:34.370Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="elijah0107" data-post="13" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/elijah0107/48/6030_2.png" class="avatar"> elijah0107:</div>
+<blockquote>
+<p>непонятно какой</p>
+</blockquote>
+</aside>
+<p><code>yt3.ggpht.com</code></p>
+<p>Но при работающем АнтиЗапрете этот домен проксируется, проблем с ним быть не должно.</p></td><td>2024-08-04T17:50:17.804Z</td></tr><tr><td>Anexaev(Anexaev)</td><td><p>А можно, пожалуйста, немножно подробнее( Полная строчка должна выглядеть вот так?</p>
+<p>–dpi-desync=fake,disorder2 --dpi-desync=split2 --dpi-desync-fooling=badsum</p>
+<p>Соответственно меняем параметры только в графе NFQWS_OPT_DESYNC?</p></td><td>2024-08-04T20:32:47.741Z</td></tr><tr><td>LimiteR</td><td><p>Привет! Спасибо за инструкцию! Настроил на Keenetic Giga SE (KN-2410), YouTube работает. Были проблемы с приложением ютуба не телевизоре. Предположил, что оно может использовать QUIC-протокол, и добавил дроп UDP-пакетов по 443 порту.</p>
+<pre><code class="lang-auto">iptables -I FORWARD -i br0 -p udp --dport 443 -j DROP
+</code></pre>
+<p>(И не один я так предположил: <a href="https://4pda.to/forum/index.php?showtopic=883101&amp;st=21200#entry131553825" rel="noopener nofollow ugc">https://4pda.to/forum/index.php?showtopic=883101&amp;st=21200#entry131553825</a>)</p>
+<p>Ютуб на телевизоре вроде бы стал работать. Конечно, иногда ему нужно несколько секунд (возможно, пытается тыкаться в QUIC), но потом видео воспроизводится и перематывается нормально.</p>
+<p>PS: На Android использую Vanced, всё работает. Не могу сказать, были ли проблемы до добавления дропа UDP-пакетов на 443, не тестировал.</p></td><td>2024-08-04T21:35:20.113Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Полная строчка должна выглядеть как <code>--dpi-desync=split2</code></p>
+<blockquote>
+<p>Соответственно меняем параметры только в графе NFQWS_OPT_DESYNC?</p>
+</blockquote>
+<p>Да. И на следующих вопросах обязательно отказываемся от поддержки HTTP (на поддержку HTTPS, разумеется, соглашаемся), а также выбираем режим работы <code>hostlist</code>, когда предложат выбор.</p>
+<p>Такие рекомендации даёт сам разработчик утилиты.</p>
+<p>После ответа на все вопросы и завершения установки, у вас в <code>/opt/zapret/config</code> должно получиться <a href="https://github.com/bol-van/zapret/discussions/200">так</a></p></td><td>2024-08-04T22:34:34.618Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Немного двигаемся вперёд:</p>
+<ul>
+<li>убрана работа с 80 портом (бессмысленно, HTTP ютубом не поддерживается уже очень давно)</li>
+<li>исправлен баг в 100-tpws.sh, из-за которого правила не добавлялись</li>
+<li>в планы добавлена блокировка QUIC (нужно сделать отдельный скрипт для <code>netfilter.d</code>)</li>
+</ul></td><td>2024-08-05T00:06:55.032Z</td></tr><tr><td>elijah0107(Elijah0107)</td><td><p>Добавил в хостлист <a href="http://ggpht.com" rel="noopener nofollow ugc">ggpht.com</a> и превью стал грузиться, спасибо</p></td><td>2024-08-05T02:43:45.468Z</td></tr><tr><td>fouk</td><td><aside class="quote no-group" data-username="LimiteR" data-post="16" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/l/c5a1d2/48.png" class="avatar"> LimiteR:</div>
+<blockquote>
+<p>(И не один я так предположил: <a href="https://4pda.to/forum/index.php?showtopic=883101&amp;st=21200#entry131553825" rel="noopener nofollow ugc">https://4pda.to/forum/index.php?showtopic=883101&amp;st=21200#entry131553825 </a>)</p>
+</blockquote>
+</aside>
+<p>Добавил скрипт, как описано в посте, и YouTube на ТВ и телефоне полетел! Спасибо!</p></td><td>2024-08-05T03:55:45.966Z</td></tr><tr><td>Kelin</td><td><p>Все сделал по инструкции <strong>dartraiden</strong> и работает только один раз так сказать. Второй раз ютуб не заводится и при остановке выдает ошибку:</p>
+<p>iptables: No chain/target/match by that name.</p>
+<p>В системном журнале роутера:</p>
+<p>Opkg::Manager: /opt/etc/ndm/netfilter.d/100-tpws.sh: exit code 2.</p>
+<p>Что не так? Как поправить?</p></td><td>2024-08-05T05:35:55.237Z</td></tr><tr><td>mr.rob0t</td><td><aside class="quote no-group" data-username="Kelin" data-post="21" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/13edae/48.png" class="avatar"> Kelin:</div>
+<blockquote>
+<p>Opkg::Manager: /opt/etc/ndm/netfilter.d/100-tpws.sh: exit code 2.</p>
+</blockquote>
+</aside>
+<p>Покажите вывод команды:<br>
+<code>ls /opt/etc/ndm/netfilter.d/100-tpws.sh</code></p></td><td>2024-08-05T06:04:40.465Z</td></tr><tr><td>Kelin</td><td><p>Там кроме одного файла ничего нет, вот:</p>
+<p>~ # ls /opt/etc/ndm/netfilter.d/100-tpws.sh<br>
+/opt/etc/ndm/netfilter.d/100-tpws.sh</p></td><td>2024-08-05T06:16:50.034Z</td></tr><tr><td>DadFlint</td><td><aside class="quote no-group quote-modified" data-username="dartraiden" data-post="1" data-topic="8809">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"><a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/8809/1">Обход замедления YouTube и блокировок на прошивке Keenetic с помощью nfqws / tpws (zapret)</a></div>
+<blockquote>
+<p>Если вы хоите всё удалить и вернуть как было, то выдерните внешний накопитель (если устанавливали на него), либо см. команды в конце статьи, по которой разворачивали Entware на внешний накопитель. И после этого перезагрузитесь.</p>
+</blockquote>
+</aside>
+<p>Приветствую. Интересен момент. Если я выдерну флешку из роутера, а потом вставлю,или например перебои с электричеством, достаточно в терминале опять ввести эту команду ```<br>
+/opt/etc/init.d/S51tpws start</p>
+<pre><code class="lang-auto"></code></pre></td><td>2024-08-05T07:25:33.746Z</td></tr><tr><td>DadFlint</td><td><p>С этими костылями для youtube перестали открываться некоторые сайты, в частности <a href="https://nnmclub.to" rel="noopener nofollow ugc">https://nnmclub.to</a> и этот сайт тоже  ))</p></td><td>2024-08-05T07:32:48.610Z</td></tr><tr><td>filkint(Filkint)</td><td><p>У меня открывается.<br>
+Ой, извините, не прочитал что речь идет о разблокировке youtube.  <img src="https://ntc.party/images/emoji/twitter/shushing_face.png?v=12" title=":shushing_face:" class="emoji" alt=":shushing_face:" loading="lazy" width="20" height="20"></p></td><td>2024-08-05T08:16:58.452Z</td></tr><tr><td>Niner(Tim Niner)</td><td><p>После бута роутера всё работает, но по прошествии какого-то времени эффект пропадает. Помогает только ребут. Куда можно копнуть?</p></td><td>2024-08-05T14:26:08.805Z</td></tr><tr><td>Andrew-Shtein(Andrey)</td><td><p>Тоже добавил udp и всё полетело на android tv. Провайдер - ростелеком.</p></td><td>2024-08-05T15:38:33.511Z</td></tr><tr><td>art3m(83Ns5u3nN!!)</td><td><p>А можно поподробнее, куда и что добавили?</p></td><td>2024-08-05T16:54:48.043Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Я переписал этот момент в инструкции.</p>
+<p>Если у вас пропало электричество, то при его возобновлении роутер запустится и сам всё нужное запустит.</p></td><td>2024-08-05T18:14:06.489Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Очень странно, учитывая, что там стоит явное ограничение по домену и на другие ресурсы это влиять не должно.</p></td><td>2024-08-05T18:16:26.249Z</td></tr><tr><td>Anexaev(Anexaev)</td><td><p>Делюсь своим опытом, не знаю насколько правильно написал, писал по наитию)) Пока все работает.</p>
+<p>Вот в это правило дописываем 100-tpws.sh iptables -I FORWARD -i br0 -p udp --dport 443 -j DROP (поправьте, если не прав)</p>
+<p>Заходим в Entware,</p>
+<p>nano /opt/etc/ndm/netfilter.d/100-tpws.sh</p>
+<pre><code class="lang-auto">#!/bin/sh
+
+[ -z "$(pidof tpws 2&gt;/dev/null)" ] &amp;&amp; exit
+[ "$type" == "ip6tables" ] &amp;&amp; exit
+[ "$table" != "nat" ] &amp;&amp; exit
+
+if [ -z "$(iptables-save 2&gt;/dev/null | grep 999)" ]; then
+    iptables -t nat -A PREROUTING -i br0 -p tcp --dport 443 -j REDIRECT --to-po&gt;
+    iptables -I FORWARD -i br0 -p udp --dport 443 -j DROP
+fi
+
+
+
+
+</code></pre>
+<p>nano /opt/etc/zapret-hosts-user.txt</p>
+<p>Сюда дописываем домены</p>
+<pre><code class="lang-auto">googlevideo.com
+ggpht.com
+ytimg.com
+m.youtube.com
+</code></pre></td><td>2024-08-05T18:41:57.762Z</td></tr><tr><td>Anexaev(Anexaev)</td><td><p>Важное замечание,<br>
+в скрипте S51tpws поменяйте ip адрес роутера, если у вас стоит другое, не 192.168.1.1,  а 192.168.31.1 как у меня, к примеру</p></td><td>2024-08-05T18:47:45.300Z</td></tr><tr><td>and7ey</td><td><p>подскажите плз как на прошивке 3.7.4 доступ к ChatGPT сделать? там в настройках DNS-over-HTTPS только Имя сервера DNS, Формат, Сигнатура SPKI и Подключение.</p></td><td>2024-08-05T19:01:21.627Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Достаточно создать правило в настройках файерволла в веб-интерфейсе роутера (Межсетевой экран → Домашняя сеть).</p>
+<p>Если нужно заблокировать QUIC в других сегментах (например, в гостевой сети), то создать там аналогичные правила. Мне кажется, это проще, чем городить ещё один скрипт в netfilter.d</p></td><td>2024-08-05T21:55:12.050Z</td></tr><tr><td>DadFlint</td><td><aside class="quote no-group" data-username="dartraiden" data-post="31" data-topic="9426" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>Очень странно, учитывая, что там стоит явное ограничение по домену и на другие ресурсы это влиять не должно.</p>
+</blockquote>
+</aside>
+<p>У меня в Firefox есть расширение “Обход блокировок Рунета” , туда входит Антизапрет , Антицензорити. Это расширение я использовал для серфинга nnmclub.to и <a href="http://epidemz.net.co" rel="noopener nofollow ugc">epidemz.net.co</a> , сейчас после манипуляций в роутере с обходом youtube  оба этих ресурса мне не доступны, только когда исполнишь /opt/etc/init.d/S51tpws stop .либо включить сторонний VNP , в моем случае Outline. Но внезапно при подключении расширения “Обход блокировок Рунета” ntc.party заработал без стороннего VPN , Обход замедления YouTube на прошивке Keenetic тоже в это время работает,nnmclub.to и <a href="http://epidemz.net.co" rel="noopener nofollow ugc">epidemz.net.co</a> к сожалению все так же не доступны((</p></td><td>2024-08-06T04:33:22.807Z</td></tr><tr><td>DadFlint</td><td><aside class="quote no-group" data-username="Anexaev" data-post="32" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/anexaev/48/6161_2.png" class="avatar"> Anexaev:</div>
+<blockquote>
+<p>Сюда дописываем домены</p>
+<pre><code class="lang-auto">googlevideo.com
+ggpht.com
+ytimg.com
+m.youtube.com
+</code></pre>
+</blockquote>
+</aside>
+<p>Интересно, есть ли смысл дописать домены  russia-blacklist из goodbyedpi-0.2.3rc1 ? Или это масло-маслянное))</p></td><td>2024-08-06T04:36:44.187Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Тогда придётся подбирать стретегию дурения (аргументы в <code>ARGS=</code>), потому что часть ресурсов блокируется оборудованием РКН, а часть - оборудованием провайдера. И эта стратегия будет отличаться от провайдера к провайдеру, т.е. конкретного универсального рецепта не получится, нужно подбирать под своего провайдера (как и с GoodbyeDPI).</p></td><td>2024-08-06T05:23:20.593Z</td></tr><tr><td>DadFlint</td><td><p>Я дописал домены и теперь zapret-hosts-user.txt выглядит так:<br>
+nano /opt/etc/zapret-hosts-user.txt</p>
+<pre><code class="lang-auto">googlevideo.com
+nnm.club
+nnm-club.me
+nnm-club-me.ru
+nnm-club.name
+nnmclub.ro
+nnmclub.to
+nnm-club.ws
+nnm.me
+nn-mod.top
+nnm.ovh
+nnmp3.org
+nnm.photos
+epidems.org
+epidemz.com
+epidemz.me
+epidemz.net.co
+epidperm.ru
+ntc.party
+</code></pre>
+<p>И все эти ресурсы теперь открываются без проблем. Пока что хреновничает YT на самртТВ, разбираюсь.<br>
+Если дописать эти домены YT вообше перестает работать на смартТВ</p>
+<pre><code class="lang-auto">ggpht.com
+ytimg.com
+m.youtube.com
+youtu.be
+youtube.com
+
+</code></pre></td><td>2024-08-06T06:14:14.176Z</td></tr><tr><td>Anexaev(Anexaev)</td><td><p>Уберите два последних домена, у меня с ними тоже почему-то не открывалось</p></td><td>2024-08-06T06:38:17.006Z</td></tr><tr><td>blastoma(Vladimir)</td><td><p>А на Apple TV у кого-то удалось завести решение?<br>
+Блокировка UDP 443 не помогает, но компьютере всё отлично отрабатывает</p></td><td>2024-08-06T07:13:36.945Z</td></tr><tr><td>art3m(83Ns5u3nN!!)</td><td><p>Некий аноним с хабра сделал пакет по той статье  <a href="https://github.com/Anonym-tsk/tpws-keenetic" rel="noopener nofollow ugc">туц</a>, конечно без доработок отсюда, но уже неплохо, можно по образу сделать</p></td><td>2024-08-06T15:04:43.291Z</td></tr><tr><td>Szen</td><td><aside class="quote no-group" data-username="dartraiden" data-post="1" data-topic="8809">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"><a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/8809/1">Обход замедления YouTube и блокировок на прошивке Keenetic с помощью nfqws / tpws (zapret)</a></div>
+<blockquote>
+<p>Потестировать не только ручной, но и автоматический запуск при запуске роутера</p>
+</blockquote>
+</aside>
+<p>Несколько раз перезагружал роутер. Команду на запуск сервиса не выполнял. По команде /opt/etc/init.d/S51tpws status сервис выдаёт, что работает.</p></td><td>2024-08-06T16:08:34.128Z</td></tr><tr><td>vepsan</td><td><p>спасибо большое за инструкцию. всё работает, за исключением того, что при включении сервиса перестают назначаться отдельные политики доступа для клиентов - всегда используется дефолтная и при включенном сервисе указанная в настройках клиента политика игнорируется (это легко проверить, т.к. у меня отдельной политикой стоит vpn соединение). добавлю, что одновременно с этим использую Bird4Static для выборочного обхода, возможно это создает какой-то конфликт. это у меня локальная проблема или у всех так?</p></td><td>2024-08-06T20:36:59.218Z</td></tr><tr><td>molex(molex)</td><td><p>Вы какой роутер используете? Возможно нехватка памяти, столкнулся с такой же проблемой. Как решение просто удалить ненужные компоненты.</p></td><td>2024-08-07T04:57:30.985Z</td></tr><tr><td>DadFlint</td><td><p>Решение еще проще развернуть Entware на флешке</p></td><td>2024-08-07T08:44:52.030Z</td></tr><tr><td>molex(molex)</td><td><p>Даже если используется внешний USB накопитель для хранения OPKG Entware, то выполнение пакетов и скриптов все равно происходит на самом роутере. Если удалить лишние и неиспользуемые службы или компоненты, то это увеличит кол-во свободной оперативной памяти, которой там и так крайне мало.</p></td><td>2024-08-07T09:10:35.549Z</td></tr><tr><td>KMKZ</td><td><p>Присоединяюсь, хватает только на 1 ночь.<br>
+Условия идентичны.</p>
+<p>~ # ls /opt/etc/ndm/netfilter.d/100-tpws.sh<br>
+/opt/etc/ndm/netfilter.d/100-tpws.sh<br>
+~ #</p></td><td>2024-08-07T10:03:45.149Z</td></tr><tr><td>SPIRITUFA(SPIRIT)</td><td><p>С</p>
+<ul>
+<li><a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a></li>
+<li><a href="http://ggpht.com" rel="noopener nofollow ugc">ggpht.com</a></li>
+<li><a href="http://ytimg.com" rel="noopener nofollow ugc">ytimg.com</a></li>
+<li><a href="http://m.youtube.com" rel="noopener nofollow ugc">m.youtube.com</a></li>
+</ul>
+<p>ютуб на смарт тв и андройд тв так же тупит, на пк работает. Как победить?</p></td><td>2024-08-07T10:41:11.238Z</td></tr><tr><td>art3m(83Ns5u3nN!!)</td><td><p>п. 8 инструкции выполнили?</p></td><td>2024-08-07T10:58:08.882Z</td></tr><tr><td>SPIRITUFA(SPIRIT)</td><td><p>Обязательно<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/bdac16001bd74cffb4e4bf982d236e7eeb33f952.jpeg" data-download-href="https://ntc.party/uploads/default/bdac16001bd74cffb4e4bf982d236e7eeb33f952" title="IMG_2746"><img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/bdac16001bd74cffb4e4bf982d236e7eeb33f952_2_246x500.jpeg" alt="IMG_2746" data-base62-sha1="r3UVVBaUdlhPqM09cyJXjAG79t0" width="246" height="500" srcset="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/bdac16001bd74cffb4e4bf982d236e7eeb33f952_2_246x500.jpeg, обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/bdac16001bd74cffb4e4bf982d236e7eeb33f952_2_369x750.jpeg 1.5x, обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/bdac16001bd74cffb4e4bf982d236e7eeb33f952_2_492x1000.jpeg 2x" data-dominant-color="F7F9FA"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">IMG_2746</span><span class="informations">1290×2619 219 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-08-07T11:22:02.188Z</td></tr><tr><td>art3m(83Ns5u3nN!!)</td><td><p>Тогда параметры надо подбирать. Попробуйте как описано выше <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-tpws/8809/12">пост</a></p></td><td>2024-08-07T11:35:56.432Z</td></tr><tr><td>electrifying</td><td><p>А в чем отличие этой инструкции от этой? Кроме того, что тут просто описан другой подход по развертыванию все того же zapret, но с дополнением по блокировке quic для работы на смартфонах и тв?</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://telegra.ph/Nastrojka-zapret-ot-bol-van-na-Keentic-04-27">
+  <header class="source">
+      <img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/5ac67b223f8529946b4cf2d14f7fa92c1793504e.png" class="site-icon" data-dominant-color="DBDBDB" width="32" height="32">
+
+      <a href="https://telegra.ph/Nastrojka-zapret-ot-bol-van-na-Keentic-04-27" target="_blank" rel="noopener nofollow ugc" title="12:16AM - 27 April 2022">Telegraph – 27 Apr 22</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://telegra.ph/Nastrojka-zapret-ot-bol-van-na-Keentic-04-27" target="_blank" rel="noopener nofollow ugc">Настройка zapret от bol-van на Keentic</a></h3>
+
+  <p>Разворачивание OPKG Entware я упущу.Подключаем по SSH к роутеру, по умолчанию порт 222.
+Устанавливаем пакеты:</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Так же в вашу инструкцию не помешает добавить в самое начало то, что нужно зайти в админку роутера, перейти в параметры системы,изменить набор компонентов и в разделе opkg установить Модули ядра подсистемы Netfilter, иначе в журнале будет возникать ошибка</p>
+<blockquote>
+<p>iptables: No chain/target/match by that name.</p>
+</blockquote></td><td>2024-08-07T11:51:27.504Z</td></tr><tr><td>DadFlint</td><td><aside class="quote no-group" data-username="dartraiden" data-post="1" data-topic="8809">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"><a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/8809/1">Обход замедления YouTube и блокировок на прошивке Keenetic с помощью nfqws / tpws (zapret)</a></div>
+<blockquote>
+<p>Потестировать не только ручной, но и автоматический запуск при запуске роутера</p>
+</blockquote>
+</aside>
+<p>Сегодня два раза за день выключал роутер и оба раза настройки применялись автоматом. Так что вроде работает.</p></td><td>2024-08-07T13:49:19.102Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><blockquote>
+<p>в чём отличие</p>
+</blockquote>
+<p>Как минимум, занимает меньше места на накопителе. И заточена исключительно на YouTube.</p>
+<p>Но вопрос лучше адресовать автору исходника с <a href="https://habr.com/articles/833564/">хабры</a>.</p>
+<blockquote>
+<p>установить Модули ядра подсистемы Netfilter</p>
+</blockquote>
+<p>Добавил, благодарю.</p></td><td>2024-08-07T14:16:07.578Z</td></tr><tr><td>blastoma(Vladimir)</td><td><p>Не, оно не помогает</p></td><td>2024-08-07T14:18:49.508Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Каких доработок отсюда не хватает?</p></td><td>2024-08-07T14:32:49.611Z</td></tr><tr><td>dad(Dmitry a D)</td><td><p>Спасибо, у меня все более-менее получилось на Keenetic Ultra (KN-1810, прошивка 4.1.7), все ставил на внутр. накопитель, параметры ARGS у меня свои только(брал от tpws, который раньше настроил на ноутбуке с ubuntu). Единственное неудобство - пока не получилось победить обход остальных блокировок, нужных мне, а вот YT на смартТВ (LG) как будто нормально заработал…</p></td><td>2024-08-07T14:36:41.484Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>С виду всё хорошо, даже в каких-то моментах сделано лучше (поддержка нескольких интерфейсов и прочее). Добавлю это как предпочтительный вариант.</p></td><td>2024-08-07T14:37:21.616Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="dad" data-post="58" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dad/48/6285_2.png" class="avatar"> dad:</div>
+<blockquote>
+<p>Единственное неудобство - пока не получилось победить обход остальных блокировок, нужных мне</p>
+</blockquote>
+</aside>
+<p>Для обхода блокировок можно применять <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-%D0%B0%D0%BD%D1%82%D0%B8%D0%B7%D0%B0%D0%BF%D1%80%D0%B5%D1%82-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic/">АнтиЗапрет</a>.</p></td><td>2024-08-07T15:01:36.079Z</td></tr><tr><td>art3m(83Ns5u3nN!!)</td><td><p>Отличный скрипт. Я прежде всеко про 80 порт имел ввиду и строка</p>
+<blockquote>
+<p>-A PREROUTING -i br0 -p udp -m udp --dport 443 -j REDIRECT --to-ports 999</p>
+</blockquote>
+<p>перенаправляет запрос. У меня в таком варианте не заработало на android tv. Когда запретил quip пошло все сразу.</p></td><td>2024-08-07T15:18:53.094Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Не хотелось бы запрещать 443/udp совсем. Кроме ютуба есть множество сайтов, которые уже используют HTTP/3</p></td><td>2024-08-07T15:26:56.963Z</td></tr><tr><td>art3m(83Ns5u3nN!!)</td><td><p>согласен. Но допустим вариант со строчкой в скрипте</p>
+<blockquote>
+<p>iptables -I FORWARD -i br0 -p udp --dport 443 -j DROP</p>
+</blockquote>
+<p>должен же по идее только для сайтов, которые внесены сработать? Тогда по-идее проблема должна уйти с другими использующие QUIC</p></td><td>2024-08-07T15:34:26.699Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Нет, эта команда запрещает QUIC вообще.<br>
+Она буквально гласит “дропать всё для интерфейса br0 (локалка) по протоколу UDP на 443 порт”. То есть, дропать трафик QUIC.</p>
+<p>Это полностью аналогично созданию правила, запрещающего QUIC в веб-интерфейсе.</p>
+<p>iptables не может запретить QUIC для конкретного домена, потому что iptables оперирует IP-адресами, а не доменными именами.</p>
+<p>Теоретически, конечно, можно наговнокодить скрипт, который будет резолвить <a href="http://googlevideo.com">googlevideo.com</a> (определять его IP-адрес) и создавать правила iptables, которое дропает трафик QUIC лишь для этого адреса. Но это же гугл, у него балансировка трафика в полный рост, домен может резолвиться сейчас в один IP-адрес, а через пару минут уже в другой.</p></td><td>2024-08-07T15:39:53.029Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Нет, оно дропнет все пакеты udp/443 на интерфейсе br0</p></td><td>2024-08-07T15:49:17.833Z</td></tr><tr><td>art3m(83Ns5u3nN!!)</td><td><p>Спасибо понял. Но проблем пока не испытывал с запрещением протокола. Но пока с ютубом такая котовасия потерпеть можно</p></td><td>2024-08-07T16:13:49.361Z</td></tr><tr><td>dad(Dmitry a D)</td><td><p>Интересно, кстати, обязательно ли запрещать QUIC для работы приложения YT на смартТВ? У меня например LG/WebOS - так на него похоже это не повлияло никак, но на всякий случай запретил. Надо будет еще перепроверить, может быть и не надо…А вот отключение QUIC в хроме очень даже помогло, YT стал работать быстрее, чем до того…</p></td><td>2024-08-07T20:37:01.162Z</td></tr><tr><td>HamonTeacher(Hamon Teacher)</td><td><p>У меня при добавлении всей этой темы просто перестают грузиться сайты, запрещенные в РФ, то есть настроенный антизапрет не работает.<br>
+Keeenetic Ultra KN-1811</p>
+<p>~ # /opt/etc/init.d/S51tpws status<br>
+Service TPWS is stopped<br>
+~ # /opt/etc/init.d/S51tpws start<br>
+Bind to local interface: br0<br>
+Bind to local interface: nwg0<br>
+/opt/usr/bin/tpws: line 3: syntax error: unexpected “)”<br>
+Started TPWS service<br>
+~ #</p></td><td>2024-08-07T20:47:17.433Z</td></tr><tr><td>HamonTeacher(Hamon Teacher)</td><td><p>да я даже больше скажу - тупо полинтернета отваливается, ни гитхаб, ни даже стандартный магазин приложений в федоре не открывает ни одну страницу. Ну его пока не допилят. Лучше бы совсем ютуб заблочили, чтобы он через антизапрет спокойно работал, чем такие “замедления”. Походу более безболезненного способа, кроме VPN пока нет.</p></td><td>2024-08-07T21:04:06.052Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>У вас, похоже, tpws не стартует, а правила iptables, заворачивающие на него трафик, добавляются. Логично, что если трафик завернуть туда, где его никто не ждёт, то ничего открываться не будет.</p>
+<p>Перепроверьте, что вы скачали бинарник для своей архитектуры, а не перепутали, например, mips и mipsel.</p></td><td>2024-08-07T21:17:09.203Z</td></tr><tr><td>HamonTeacher(Hamon Teacher)</td><td><p>Скачал как было указано в инструкции - aarch64.</p></td><td>2024-08-07T21:37:15.432Z</td></tr><tr><td>DadFlint</td><td><p>сегодня ни с того ни сего ютуб загнулся и на ПК на СмартТВ, работает только либо через VPN либо через googbyedpi с  /opt/etc/init.d/S51tpws stop</p></td><td>2024-08-08T07:04:14.733Z</td></tr><tr><td>dad(Dmitry a D)</td><td><p>У меня тоже: вместо интерфейса в приложении смартТВ черный экран, стали блокировать сам <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a> как будто, пришлось добавить в список хостов для tpws, после этого все опять работает.(с запущенным tpws)</p></td><td>2024-08-08T07:29:00.818Z</td></tr><tr><td>kkalugin(Kkalugin)</td><td><p>Мне еще пришлось добавить <a href="http://youtubei.googleapis.com" rel="noopener nofollow ugc">youtubei.googleapis.com</a>, чтобы заработало на портативных устройствах. Кажется, этот хост тоже блокируют. Отдельно не проверял. После включения в хостлист просто заработало. После выключения просто перестало работать <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-08-08T08:51:17.742Z</td></tr><tr><td>filkint(Filkint)</td><td><p>На LG не заработало.</p></td><td>2024-08-08T09:09:31.474Z</td></tr><tr><td>DadFlint</td><td><p>установил сегодня "Автоматический tpws " YT на ПК заработал, заблокированные сайты тоже. Мучения еще те конечно, нужно раз по 5 страницу с блок сайтом обновить пока она автоматический добавится. На СмартТВ еще не проверял</p></td><td>2024-08-08T09:33:57.470Z</td></tr><tr><td>DadFlint</td><td><p>Почему то на команды:</p>
+<pre><code class="lang-auto">/opt/etc/tpws/tpws.conf
+/opt/etc/tpws/user.list
+/opt/etc/tpws/auto.list
+
+мне выдает : Permission denied   -  Доступ запрещен</code></pre></td><td>2024-08-08T09:39:52.986Z</td></tr><tr><td>filkint(Filkint)</td><td><p>А если nano /opt/etc/tpws/tpws.conf</p></td><td>2024-08-08T09:52:50.801Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Кажется, сегодня кроме <a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a> стал тупить еще и домен <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a></p></td><td>2024-08-08T10:03:39.960Z</td></tr><tr><td>DadFlint</td><td><p>Не помогло</p>
+<p>СмартТВ YT не работаает от слова совсем, пишет нет подключения к сети. На ПК работает отлично</p></td><td>2024-08-08T10:10:30.773Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Не ту архитектуру кажется выбрали при установке</p></td><td>2024-08-08T10:12:09.867Z</td></tr><tr><td>Moreover404(Moreover404)</td><td><p><img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/13460dd7248a9398b551290b07a98f36fcc2de2f.png" alt="image" data-base62-sha1="2Kva31RGtZCILBmMuO6nB6N6f4r" width="646" height="112"><br>
+Keenetic Giga (KN-1011)<br>
+Не запускается автоматическая установка, в чем может быть причина?</p></td><td>2024-08-08T10:44:56.773Z</td></tr><tr><td>HamonTeacher(Hamon Teacher)</td><td><p>Как не ту? В инструкции указано aarch64 для Keenetic Ultra KN-1811, я ее и выбрал.</p></td><td>2024-08-08T10:52:02.113Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Кажется, оно не заработало. Не ошиблись с моделью роутера?<br>
+Попробуйте переустановить сервис</p></td><td>2024-08-08T11:40:47.512Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Попробуйте<br>
+opkg update<br>
+opkg upgrade busybox<br>
+opkg install curl<br>
+и еще раз установку</p></td><td>2024-08-08T11:41:51.950Z</td></tr><tr><td>Moreover404(Moreover404)</td><td><p>Попробовал, ошибка таже.<br>
+Пробовал ручную установку, там другая ошибка:<br>
+<img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/3706e9f4789f06ceb39daf0ba92f14bd75152e71.png" alt="image" data-base62-sha1="7QN4zIBxojRt8M1bFh5uKRCcAcp" width="626" height="46"></p></td><td>2024-08-08T11:55:34.391Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Optware на внутренней памяти? Точно для mipsel установили?</p></td><td>2024-08-08T12:03:37.600Z</td></tr><tr><td>DadFlint</td><td><p>Вообщем я ХЗ чего наши там намутили, но на телеках YT отказывается работать, уже всю голову сломал</p></td><td>2024-08-08T12:05:43.518Z</td></tr><tr><td>Moreover404(Moreover404)</td><td><p>Установлено на флешке, точно mipsel. Стоит qbittorent, он работает исправно</p></td><td>2024-08-08T12:08:24.211Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>curl -V что показывает?</p></td><td>2024-08-08T12:56:08.028Z</td></tr><tr><td>Moreover404(Moreover404)</td><td><p>Вот такую штуку:<br>
+<img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/eb08055b7c870e845a82af3bc0f8dbd0b6c0708e.png" alt="image" data-base62-sha1="xxbocmtKMosCJtApNTMm4euzdCu" width="651" height="174"></p></td><td>2024-08-08T13:04:19.422Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>У вас явно сломан optware, рекомендую переустановить</p></td><td>2024-08-08T13:11:59.948Z</td></tr><tr><td>Moreover404(Moreover404)</td><td><p>Благодарю! Буду пробовать переустанавливать</p></td><td>2024-08-08T13:30:33.308Z</td></tr><tr><td>fouk</td><td><p>Совсем не пойму почему не работает youtube на смарт ТВ… Сделал по инструкции “автоматическая установка”, на ПК и телефоне все отлично работает, на ТВ черный экран, а потом “подключиться снова”. QUIC пробовал блокировать, не помогло. Самое интересное то, что если я раздам интернет с телефона (Теле2) на ТВ напрямую, то youtube начинает работать, даже если я отключу раздачу, всё равно продолжит до тех пор, пока я не остановлю приложение и не войду по новой. А если я раздаю интернет с телефона на роутер, ТВ не работает, всё тот же черный экран.</p></td><td>2024-08-08T15:10:30.604Z</td></tr><tr><td>kirill</td><td><p>так что, господа, есть исчерпывающий список доменов, чтобы работало и в смартфоне через родное приложение, и в браузере, и на смарт-тв?</p></td><td>2024-08-08T15:45:44.010Z</td></tr><tr><td>felix.xiii</td><td><p>вот эти добавил, на смарте заработал, может и вам поможет</p>
+<pre><code class="lang-auto">googleapis.com
+googlevideo.com
+i.ytimg.com
+i9.ytimg.com
+yt3.ggpht.com
+yt3.googleusercontent.com
+youtube.com
+youtu.be
+</code></pre></td><td>2024-08-08T16:02:06.935Z</td></tr><tr><td>kirill</td><td><p>ну у меня, в принципе, если не вдаваться в остальные подробности, добавлено так же, только по доменам второго уровня</p>
+<pre><code class="lang-auto">googleapis.com
+googlevideo.com
+ytimg.com
+ggpht.com
+googleusercontent.com
+youtube.com
+youtu.be
+</code></pre>
+<p>пока всё ок, но<br>
+жаль, что не смог сегодня протестировать/проверить, когда днём блокировали,<br>
+сейчас-то и так всё ок</p></td><td>2024-08-08T16:24:27.548Z</td></tr><tr><td>lehuspohus(lehuspohus)</td><td><p>Аналогично. А какой у вас ТВ?<br>
+У меня с Samsung (с TizenOS) <strong>в Youtube-приложении не работает</strong>, но на том же ТВ <strong>в браузере Youtube работает</strong> даже без блокирования UDP 443.</p></td><td>2024-08-08T17:07:11.716Z</td></tr><tr><td>Land08(Land08)</td><td><p>В смарттв приложения не заходит из-за добавленной строки <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a>. Смотрел трафик с включенным запретом - после запроса к <a href="http://www.youtube.com" rel="noopener nofollow ugc">www.youtube.com</a> прерывается подключение. Еще не понял почему с запретом протокол TLSv1, а без него - TLSv1.2. Для себя пока решил перед входом в приложение останавливать запрет, потом запускать - работает до следующего входа.</p></td><td>2024-08-08T17:29:17.384Z</td></tr><tr><td>fouk</td><td><p>У меня телевизоры Xiaomi, часть на android TV, часть на Google TV, но они схожи на 99%.</p>
+<aside class="quote no-group" data-username="Land08" data-post="100" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/land08/48/6400_2.png" class="avatar"> Land08:</div>
+<blockquote>
+<p>В смарттв приложения не заходит из-за добавленной строки <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a></p>
+</blockquote>
+</aside>
+<p>Действительно убрал из листа строчку <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a> и ТВ заработали, но, естественно, на ПК обратная реакция.</p></td><td>2024-08-08T17:48:17.906Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Убрал строку, все равно не работает на LG TV, а на компе работает итак и так.</p>
+<pre><code class="lang-auto">googleapis.com
+googlevideo.com
+i.ytimg.com
+i9.ytimg.com
+yt3.ggpht.com
+yt3.googleusercontent.com
+youtubei.googleapis.com
+gvt1.com
+google.com
+ggpht.com
+ytimg.com
+play.google.com
+yt4.ggpht.com
+yt4.googleusercontent.com
+youtu.be
+gvt1.com
+gstatic.com
+
+</code></pre>
+<p>А через браузер на том же телеке все работает.</p></td><td>2024-08-08T18:06:33.811Z</td></tr><tr><td>DadFlint</td><td><p>Я думаю SmartTV только вот это спасет. И то есть свой минус<br>
+Наберите поиске YT  <code>Убираем ограничение скорости на Youtube с помощью VPN и роутера Keenetic</code>   , а то тут ссылки блочатся прямые</p></td><td>2024-08-08T18:09:19.633Z</td></tr><tr><td>phenixer</td><td><p>Аналогичная ситуация - на тв с lg webos не загружается youtube нивкакую, на тв с googletv все прекрасно запускается (домены добавлены аналогичные, пробовал с отключенным/включенным антизапретом).</p></td><td>2024-08-08T18:48:24.003Z</td></tr><tr><td>cron(Cron)</td><td><p>Телевизор Samsung Smart TV тоже никак не могу заставить работать. Ничего не помогает. Со строкой <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a> в листе приложение на нем вообще не открывается. Если строку убрать то запускается, но ни одно видео не воспроизводится.</p></td><td>2024-08-08T18:58:24.040Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Говорила мне бабушка что надо TCL покупать. <img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"> <img src="https://ntc.party/images/emoji/twitter/shushing_face.png?v=12" title=":shushing_face:" class="emoji" alt=":shushing_face:" loading="lazy" width="20" height="20"> <img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"></p></td><td>2024-08-08T19:31:44.614Z</td></tr><tr><td>DadFlint</td><td><p>У  меня TCL 50C647 с GoogleTV в зале висит, и ситуация  была аналогичная, весь день youtube не работал. Если добавить домен <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a> - вообще нет соединения. К вечеру на 1080Р начал тянуть кое как.</p></td><td>2024-08-08T20:20:36.750Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Где то прочитал что youtube vanced работает. То есть дело в хитро сделанных офф. приложениях.</p></td><td>2024-08-08T20:33:42.831Z</td></tr><tr><td>dad(Dmitry a D)</td><td><p>Не знаю, у меня с утра работал только с tpws(без него даже интерфейс не грузился), ближе к вечеру стало и так работать, но медленно 2-5 Мбит на видосах. С tpws скорость растет до десятков мбит. Телевизор LG OLED.</p></td><td>2024-08-08T20:38:35.494Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Что с утра, что сейчас, что tpws, что без черный экран на лыжнике, тв с андроидом нет, но на смартфоне и на ноуте все работает с tpws.</p></td><td>2024-08-08T21:06:37.058Z</td></tr><tr><td>KMKZ</td><td><p>сам спросил, сам отвечаю - на другой флешке, которая поживее - ошибки " Opkg::Manager: /opt/etc/ndm/netfilter.d/100-tpws.sh: exit code 2. " нет</p></td><td>2024-08-09T07:37:00.030Z</td></tr><tr><td>KMKZ</td><td><p>на другой флешке, которая поживее - ошибки " Opkg::Manager: /opt/etc/ndm/netfilter.d/100-tpws.sh: exit code 2. " нет</p></td><td>2024-08-09T07:40:18.086Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Мне помогло: <a href="https://help.keenetic.com/hc/ru/articles/115005875145-%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D1%84%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BE%D0%B9-%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B-EXT4-%D0%BD%D0%B0-USB-%D0%BD%D0%B0%D0%BA%D0%BE%D0%BF%D0%B8%D1%82%D0%B5%D0%BB%D1%8F%D1%85" rel="noopener nofollow ugc">https://help.keenetic.com/hc/ru/articles/115005875145-Использование-файловой-системы-EXT4-на-USB-накопителях</a></p></td><td>2024-08-09T07:46:22.580Z</td></tr><tr><td>KMKZ</td><td><p>эта ошибка и была на ext4 у меня</p></td><td>2024-08-09T07:57:33.036Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Я имел ввиду вот этот пункт:</p>
+<p>Драйвер EXT4 до версии KeeneticOS 2.15 не поддерживает функциональную опцию <a href="https://ext4.wiki.kernel.org/index.php/Ext4_Metadata_Checksums" rel="noopener nofollow ugc">metadata_csum</a> (400), которую добавляет новая версия программы GParted при создании раздела. В таком случае рекомендуется создать раздел в Linux-утилите <strong>mkfs.ext4</strong> и выполнить консольную команду без поддержки опции: <em>sudo mkfs.ext4 -O^metadata_csum -b 4096 -m0 -L MYLABEL /dev/sdc3</em> , где -L MYLABEL — название раздела диска; /dev/sdc3 — путь до раздела.</p></td><td>2024-08-09T08:57:17.228Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Для тех у кого не работает tpws, сделал nfqws. У меня работает получше. Вместе лучше не запускать.</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/Anonym-tsk/nfqws-keenetic">
+  <header class="source">
+
+      <a href="https://github.com/Anonym-tsk/nfqws-keenetic" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/07eb0cd0205dcab48e33674ae8d9606f1262e750_2_690x344.png" class="thumbnail" data-dominant-color="EBECE8">
+
+  <h3><a href="https://github.com/Anonym-tsk/nfqws-keenetic" target="_blank" rel="noopener nofollow ugc">GitHub - Anonym-tsk/nfqws-keenetic</a></h3>
+
+    <p><span class="github-repo-description">Contribute to Anonym-tsk/nfqws-keenetic development by creating an account on GitHub.</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-08-09T21:10:35.502Z</td></tr><tr><td>3MMM</td><td><p>А как это запустить на роутере Xiaomi Mi Router 3G с OpenWrt 22.03.5?<br>
+Там нет iptables<br>
+Там nft</p></td><td>2024-08-10T01:30:40.720Z</td></tr><tr><td>fouk</td><td><p>Спасибо! Попробуем, потестим!</p></td><td>2024-08-10T03:29:16.474Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Не работает, не на тв не в браузере.</p></td><td>2024-08-10T06:57:44.602Z</td></tr><tr><td>k200r87</td><td><p>Тоже не заработало ни на одном из устройств.<br>
+tpws работало на телефонах. На смарт-тв и в браузере компьютера tpws не помогало</p></td><td>2024-08-10T07:44:53.880Z</td></tr><tr><td>filkint(Filkint)</td><td><aside class="quote no-group" data-username="k200r87" data-post="120" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/8edcca/48.png" class="avatar"> k200r87:</div>
+<blockquote>
+<p>На смарт-тв и в браузере компьютера tpws не помогало</p>
+</blockquote>
+</aside>
+<p>Как раз twps в браузере работает и в браузере на телике тоже, так и смотрю, секс тот еще, тормозит не по детски.<br>
+А вот nfqws не пошел, мало того пытался поставить на роутере с padavan так роутер повис.</p></td><td>2024-08-10T10:44:17.143Z</td></tr><tr><td>AndrS</td><td><p>Всё вроде хорошо, кроме оф приложения ютюба не телике, если убираю <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a> из файлика,то он отваливается на пк, но на телике кое как начинает работать, благо есть smarttube, он работает</p></td><td>2024-08-10T14:28:00.432Z</td></tr><tr><td>eecscorpion(Eecscorpion)</td><td><p>Работает отлично, только нужно отключить IPv6 в подключении интернета.</p></td><td>2024-08-10T16:18:35.810Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>В OpenWrt был пакет, добавляющий совместимость с правилами iptables. Название не помню.</p></td><td>2024-08-10T16:50:06.969Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Может, лучше добавить аналогичные правила для IPv6 с помощью ip6tables?</p></td><td>2024-08-10T17:00:13.010Z</td></tr><tr><td>KMKZ</td><td><p>добавлял все эти адреса, но яндекс модуль с тв и старый tizen самсунг всё равно блокируются, видимо какими то дополнительными своими адресами(какими?), а если этот файл очистить и включить “дурение” всего трафика - то начинают работать</p></td><td>2024-08-10T17:00:41.255Z</td></tr><tr><td>filkint(Filkint)</td><td><aside class="quote no-group" data-username="KMKZ" data-post="126" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kmkz/48/6272_2.png" class="avatar"> KMKZ:</div>
+<blockquote>
+<p>tizen самсунг</p>
+</blockquote>
+</aside>
+<p>У меня lg tv.</p></td><td>2024-08-10T20:04:20.769Z</td></tr><tr><td>vitaLL-77(Vita Ll 77)</td><td><p>Keenetic Hopper (KN-3810) - Apple TV, LG TV, iPhones - YT работает. СПАСИБО! Сначала на tpws, сейчас на nfqws.</p></td><td>2024-08-11T05:12:34.086Z</td></tr><tr><td>filkint(Filkint)</td><td><p>У меня получилось запустить только через msx.</p></td><td>2024-08-11T06:55:28.139Z</td></tr><tr><td>dcttly(Dcttly)</td><td><p>А правила для ip6tables будут выглядеть так же, или что-то менять в них придется?</p></td><td>2024-08-11T09:10:37.916Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Ничего не менял, все по инструкции. Только в user.list напихал:</p>
+<pre><code class="lang-auto">cat /opt/etc/tpws/user.list
+googleapis.com
+googlevideo.com
+i.ytimg.com
+i9.ytimg.com
+yt3.ggpht.com
+youtubei.googleapis.com
+gvt1.com
+ggpht.com
+ytimg.com
+play.google.com
+yt4.ggpht.com
+yt4.googleusercontent.com
+gvt1.com
+gstatic.com
+yt3.googleusercontent.com
+l.google.com
+youtube.com
+play.google.com
+googleusercontent.com
+nhacmp3youtube.com
+youtu.be
+you.tube
+yt.be
+gstatic.com
+yt3.ggpht.com
+ytimg.l.google.com
+
+lgtvonline.lge.com
+ngfts.lge.com
+lgtvsdp.com
+lgeapi.com
+lgsmartad.com
+lgappstv.com
+aws-prd.net
+lgtvcommon.com
+
+</code></pre></td><td>2024-08-11T10:23:01.084Z</td></tr><tr><td>Scopang(Scopang)</td><td><p>TPRW: Короче вообще ничего не работало, всю голову сломал, пока не дописал аналогичные правила блокировки для ipv6. На заметку</p></td><td>2024-08-11T11:32:13.532Z</td></tr><tr><td>filkint(Filkint)</td><td><p>У меня на роутере еще антизапрет поднят, он блокирует ipv6.</p></td><td>2024-08-11T11:56:43.092Z</td></tr><tr><td>antonius</td><td><p>После установки YouTube перестал открываться на PS4. PSN в целом не работает - подключения нет. В хосты пробовал добавить <a href="http://playstation.net" rel="noopener nofollow ugc">playstation.net</a> - безрезультатно. Блокировка udp на 443 тоже не помогла.<br>
+Кто-нибудь знает, что еще можно сделать?</p></td><td>2024-08-11T13:05:44.001Z</td></tr><tr><td>dkozenkov(DK)</td><td><p>Не подскажите, где можно взять аналогичный пул-адресов для ТВ Samsung?</p></td><td>2024-08-11T16:10:41.585Z</td></tr><tr><td>eecscorpion(Eecscorpion)</td><td><p>Точно также, работает и с ip6 теперь.</p></td><td>2024-08-11T16:45:29.570Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Наверно на каком нибудь профильном форуме samsung tizen os, я для lg нашел на <a href="http://webos-forum.ru" rel="noopener nofollow ugc">webos-forum.ru</a></p></td><td>2024-08-11T18:03:19.255Z</td></tr><tr><td>dcttly(Dcttly)</td><td><p>Попробовал продублировать первое правило (которое для 443 порта) для ip6tables. Да, после этого ютуб на лыжеТВ стал работать и при включенном IPv6, но на андроидофоне почему-то стало подолгу подгружаться видео (при этом стартует все так же быстро, но в какой-то момент затыкается). Отключил IPv6 - снова все махом перематывается. В общем, подожду пока гуру разберутся.</p></td><td>2024-08-11T18:35:27.037Z</td></tr><tr><td>eecscorpion(Eecscorpion)</td><td><p>Там же по 2 правила в 2 абзацах, я такие же для ip6tables поставил. ATV, ПК и телефоны работают.</p></td><td>2024-08-11T18:49:56.600Z</td></tr><tr><td>fouk</td><td><p>А можно по подробнее, для ламеров, куда Вы добавляете правила?</p></td><td>2024-08-11T18:53:25.824Z</td></tr><tr><td>dcttly(Dcttly)</td><td><p>Да, но выше проскакивал тезис о том, что ютуб по http уже давно не работает, поэтому строчку с 80 портом можно убрать. Я добавлял в оба места строчку с ip6tables и 443 портом, но чет хоть и работало, но похуже, чем вообще без ipv6. Разбираться в чем дело было лень, я просто откатился.</p></td><td>2024-08-11T18:58:38.642Z</td></tr><tr><td>dcttly(Dcttly)</td><td><p>/opt/etc/init.d/S51nfqws<br>
+или<br>
+/opt/etc/init.d/S51tpws<br>
+в зависимости от того, какой вариант вы себе установили.</p></td><td>2024-08-11T19:00:49.635Z</td></tr><tr><td>eecscorpion(Eecscorpion)</td><td><p>в <strong>etc/init.d/S51nfqws</strong>.<br>
+есть 4 правила iptables, которые без # (комментирования) начинаются.<br>
+Естественно остановить, изменить, запустить.</p></td><td>2024-08-11T19:02:21.203Z</td></tr><tr><td>fouk</td><td><p>У меня tpws, я далёк от прописания кода, если не затруднит можете сюда выложить содержимое файла S51tpws с правилами для ip6tables?</p></td><td>2024-08-11T19:11:44.235Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><pre><code class="lang-auto">nano /opt/etc/init.d/S51tpws
+</code></pre>
+<p>Или подключившись через WinSCP открываете этот файл текстовым редактором</p>
+<p>Находите там все команды, начинающиеся с <code>iptables -t </code> (сейчас их 6 штук)<br>
+После кажлой команды следующей строкой дублируете её, заменив <code>iptables</code> на <code>ip6tables</code></p>
+<p>Например, было</p>
+<pre><code class="lang-auto">iptables -t nat -A PREROUTING -i $IFACE -p tcp --dport 80 -j REDIRECT --to-port $BIND_PORT
+iptables -t nat -A PREROUTING -i $IFACE -p tcp --dport 443 -j REDIRECT --to-port $BIND_PORT
+iptables -t nat -A PREROUTING -i $IFACE -p udp --dport 443 -j REDIRECT --to-port $BIND_PORT
+</code></pre>
+<p>стало</p>
+<pre><code class="lang-auto">iptables -t nat -A PREROUTING -i $IFACE -p tcp --dport 80 -j REDIRECT --to-port $BIND_PORT
+ipt6ables -t nat -A PREROUTING -i $IFACE -p tcp --dport 80 -j REDIRECT --to-port $BIND_PORT
+
+iptables -t nat -A PREROUTING -i $IFACE -p tcp --dport 443 -j REDIRECT --to-port $BIND_PORT
+ip6tables -t nat -A PREROUTING -i $IFACE -p tcp --dport 443 -j REDIRECT --to-port $BIND_PORT
+
+iptables -t nat -A PREROUTING -i $IFACE -p udp --dport 443 -j REDIRECT --to-port $BIND_PORT
+ip6tables -t nat -A PREROUTING -i $IFACE -p udp --dport 443 -j REDIRECT --to-port $BIND_PORT
+</code></pre>
+<p>То есть, каждой команде добавили её двойника с <code>ip6tables</code></p>
+<p>После этого следует перезапустить скрипт</p>
+<pre><code class="lang-auto">/opt/etc/init.d/S51tpws restart
+</code></pre>
+<p>чтобы новые правила создались</p></td><td>2024-08-11T19:23:21.445Z</td></tr><tr><td>fouk</td><td><p>Принял, благодарю!</p></td><td>2024-08-11T19:25:02.393Z</td></tr><tr><td>Kotangens89(Kotangens89)</td><td><p>Всем доброго времени сток. Поясните что предпочтительней nfqws или tpws. Или можно использовать одновременно?? В данный момент использую Антизапрет + tpws. Всё хорошо но наблюдаються задержки в работе + очень некорректная работа ютуба на ПК. Есть ли смысл пробовать nfqws ?? Какие в них отличия??</p></td><td>2024-08-12T15:04:01.994Z</td></tr><tr><td>Kotangens89(Kotangens89)</td><td><p>Сам отвечу на свой вопрос. Удалил tpws и поставил nfqws. Всё стало просто летать. Для полного кайфа осталось решить одну задачу. Подключаю телефон по SSTP к роутеру. Сервак поднимаеться но вот антизапрет через SSTP не работает. Информации найти не смог. Может сталкивался кто?</p></td><td>2024-08-12T18:55:00.324Z</td></tr><tr><td>kolek15(kolek15)</td><td><p>Поделитесь пожалуйста подробной инструкцией, что и куда нужно прописать, чтобы заработал youtube на тв samsung с tizen? Установил tpws, на смартфонах и пк норм работает, а на тв - серый экран.</p></td><td>2024-08-12T19:16:48.966Z</td></tr><tr><td>Kotangens89(Kotangens89)</td><td><aside class="quote no-group" data-username="Kotangens89" data-post="148" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kotangens89/48/6660_2.png" class="avatar"> Kotangens89:</div>
+<blockquote>
+<p>nfqws</p>
+</blockquote>
+</aside>
+<p>Снёс tpws и поставил nfqws + антизапрет. Больше ничего не делал. Всё ок</p></td><td>2024-08-12T19:36:43.586Z</td></tr><tr><td>l8l</td><td><p>Повсеместно в теме упоминается nfqws и tpws. Стоит обозначить что это и в чём их различие, для простых людей.</p></td><td>2024-08-12T20:33:27.751Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Я добавил в первое сообщение упоминание о том, что nfqws предпочтительнее. В принципе, это всё, что нужно знать о различиях простому человеку (простой человек по определению не знает, что такое NFQUEUE).</p>
+<p>Также добавлена ссылка на родительский проект, где в ридми подробно описано, что это и как работает.</p></td><td>2024-08-13T00:05:09.858Z</td></tr><tr><td>Scopang(Scopang)</td><td><p>Прошу прощения, а не подскажет кто-нибудь где взять актуальный список доменов для обхода блокировки Twitter?</p></td><td>2024-08-13T13:52:04.704Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Потому что <a href="http://playstation.com" rel="noopener nofollow ugc">playstation.com</a></p></td><td>2024-08-13T14:57:25.441Z</td></tr><tr><td>nozzap(Nozzap)</td><td><p>поставил nfqws на Zyxel Keenect Ultra, ни одно устройство от вай фай не показывает ютюб.  Подскажите антизапрет это что за приложение и где его взять?</p></td><td>2024-08-13T17:31:05.665Z</td></tr><tr><td>AndrS</td><td><p>Вариант с nfqws у меня вообще не работает, tpws всё замечательно. А теперь вопрос, подключаюсь к vpn серверу роутера( ikev2 либо openconnect) с телефона, как сделать так, чтоб обход блокировок работал и на это подключение? В инет то через этот впн выходит, но блокировки на телефоне сохраняются.</p></td><td>2024-08-13T19:25:41.850Z</td></tr><tr><td>nozzap(Nozzap)</td><td><p>попробуйте при установке ставить не eth3, там во время установки вы увидите свое название у меня например было eth2.2 вот только после этого все заработало, конечно еще ip6 отключил в роутере для провайдера</p></td><td>2024-08-13T19:54:00.066Z</td></tr><tr><td>AndrS</td><td><p>У меня там есть выборе wg и ovpn, через них наверно будет работать, но я ими не пользуюсь</p></td><td>2024-08-13T20:20:17.444Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="nozzap" data-post="155" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/nozzap/48/6717_2.png" class="avatar"> nozzap:</div>
+<blockquote>
+<p>Подскажите антизапрет это что за приложение и где его взять?</p>
+</blockquote>
+</aside>
+<p><a href="https://bitbucket.org/anticensority/antizapret-vpn-container/" class="onebox" target="_blank" rel="noopener">https://bitbucket.org/anticensority/antizapret-vpn-container/</a></p>
+<aside class="quote no-group quote-post-not-found" data-username="nozzap" data-post="159" data-topic="8809">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/nozzap/48/6717_2.png" class="avatar"><a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/8809/159">Обход замедления YouTube и блокировок на прошивке Keenetic с помощью nfqws / tpws (zapret)</a></div>
+<blockquote>
+<p>конечно еще ip6 отключил в роутере для провайдера</p>
+</blockquote>
+</aside>
+<p>Отключать IPv6 уже не обязательно.</p>
+<aside class="quote no-group quote-post-not-found" data-username="nozzap" data-post="159" data-topic="8809">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/nozzap/48/6717_2.png" class="avatar"><a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/8809/159">Обход замедления YouTube и блокировок на прошивке Keenetic с помощью nfqws / tpws (zapret)</a></div>
+<blockquote>
+<p>ни одно устройство от вай фай не показывает ютюб</p>
+</blockquote>
+</aside>
+<p>Если все они мобильные устройства, то см. раздел про блокировку QUIC.</p></td><td>2024-08-13T20:46:00.963Z</td></tr><tr><td>AndrS</td><td><p>Разобрался, просто надо было устанавливать tpws при активном соединении с openconnect сервером на роутере, тогда при установке появляется выбор сетевого интерфейса этого сервера, теперь и на телефоне всё хорошо открывается</p></td><td>2024-08-13T21:09:27.040Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="Kotangens89" data-post="148" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kotangens89/48/6660_2.png" class="avatar"> Kotangens89:</div>
+<blockquote>
+<p>Для полного кайфа осталось решить одну задачу. Подключаю телефон по SSTP к роутеру. Сервак поднимаеться но вот антизапрет через SSTP не работает. Информации найти не смог. Может сталкивался кто?</p>
+</blockquote>
+</aside>
+<p>Пожалуйста, не нужно оффтопить, настройка АнтиЗапрета обсуждается в другой теме.</p><aside class="quote" data-post="98" data-topic="7768">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-%D0%B0%D0%BD%D1%82%D0%B8%D0%B7%D0%B0%D0%BF%D1%80%D0%B5%D1%82-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic/7768/98">Обход блокировок в России через АнтиЗапрет на прошивке Keenetic</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/help-me/40"><span data-category-id="40" style="--category-badge-color: #A461EF; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #8C6238;" data-parent-category-id="5" data-drop-close="true" class="badge-category --has-parent" title="Инструкции по настройке маршрутизаторов, просьбы о помощи — сюда"><span class="badge-category__name">Помощь с настройкой</span></span></a>
+  </div>
+  <blockquote>
+    В инструкцию для прошивок 3.8+ внесены изменения. Благодаря им, обход блокировок теперь будет работать не только для локальных клиентов, но и для удалённых (например, если на роутере поднят VPN-сервер и клиенты подключаются к роутеру через интернет).
+  </blockquote>
+</aside>
+</td><td>2024-08-13T22:08:45.544Z</td></tr><tr><td>iggypoper(Iggypoper)</td><td><p>Пытаюсь установить <code>nfqws</code> на флешку с Entware.<br>
+Keenetic Viva (KN-1910).<br>
+Использую команды для автоматической установки:</p>
+<pre><code class="lang-auto">opkg install curl
+/bin/sh -c "$(curl -fsSL https://github.com/Anonym-tsk/nfqws-keenetic/raw/master/netinstall.sh)"
+</code></pre>
+<p>В процессе установки устанавливается Курл, а вот скрипт прерывает установку без указания причин.</p>
+<p>Что это может быть и как победить?</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/54c9f5513b7294ebc0e4fde49c10926a8cf3e606.jpeg" data-download-href="https://ntc.party/uploads/default/54c9f5513b7294ebc0e4fde49c10926a8cf3e606" title="Скриншот-0016"><img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/54c9f5513b7294ebc0e4fde49c10926a8cf3e606_2_690x333.jpeg" alt="Скриншот-0016" data-base62-sha1="c64NFuFGXyWaf7sIPd8oE8k3d6S" width="690" height="333" srcset="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/54c9f5513b7294ebc0e4fde49c10926a8cf3e606_2_690x333.jpeg, обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/54c9f5513b7294ebc0e4fde49c10926a8cf3e606.jpeg 1.5x, обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/54c9f5513b7294ebc0e4fde49c10926a8cf3e606.jpeg 2x" data-dominant-color="151515"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Скриншот-0016</span><span class="informations">953×461 237 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-08-14T04:53:13.732Z</td></tr><tr><td>KMKZ</td><td><p>Столкнулся с такой же проблемой, если отвечать “у” быстро (за секунду или 2), то всё работает как надо, а если  запускать команду и идти пить чай то ломается что-то.</p></td><td>2024-08-14T12:33:03.686Z</td></tr><tr><td>TouSeN</td><td><p>Можно ли как-то обновить данный проект с гитхаба? (чтобы применить изменения в проекте на сайте)<br>
+Или только переустановкой?</p></td><td>2024-08-14T14:19:32.672Z</td></tr><tr><td>filkint(Filkint)</td><td><aside class="quote no-group" data-username="TouSeN" data-post="164" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/54ee81/48.png" class="avatar"> TouSeN:</div>
+<blockquote>
+<p>Или только переустановкой?</p>
+</blockquote>
+</aside>
+<p>Запускаете установку заново и он обновится.</p></td><td>2024-08-14T18:36:07.145Z</td></tr><tr><td>yobobon</td><td><p>Господа tpws  в принципе нормально работает, на телефоне все грузится моментально, а вот на смарт ТВ и список видео загружается 5-10 секунд, и само видео так же долго открывается, потом работает без нареканий. Что нибудь можно сделать? Может какие домены добавить в user.list?</p></td><td>2024-08-14T18:45:00.986Z</td></tr><tr><td>AndrS</td><td><p>Если андроид тв, то просто можно выкинуть обычный клиент ютюба и установить SmartTube, он не капризничает с этим софтом, в отличии от гугловского</p></td><td>2024-08-14T20:18:02.866Z</td></tr><tr><td>Ergert</td><td><p>Установил nfqws на Keenetic Omni, Ютуб стал работать “как раньше”, спасибо! Но в журнале админки роутера постоянно сыплет сообщениями</p>
+<pre><code class="lang-auto">----
+Opkg::Manager: /opt/etc/ndm/netfilter.d/100-nfqws.sh: ip6tables: No chain/target/match by that name.
+----
+Opkg::Manager: /opt/etc/ndm/netfilter.d/100-nfqws.sh: exit code 1.
+</code></pre>
+<p>Как это можно исправить? в сетях не силен. Видимо, что-то связанное с IPv6? Но у меня от провайдера только IPv4.<br>
+ps. компонент Протокол IPv6 установлен.</p></td><td>2024-08-14T20:19:41.842Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Можно попробовать удалить компонент, если он не нужен.</p>
+<p>Или забить.</p></td><td>2024-08-15T00:26:33.861Z</td></tr><tr><td>Ergert</td><td><p>Оказалось, компонент нельзя удалить, от него зависят другие. Ну и ладно, буду забивать.</p></td><td>2024-08-15T05:45:35.134Z</td></tr><tr><td>iggypoper(Iggypoper)</td><td><p>Вы знаете, я постарался быть максимально быстрым и неистовым )))<br>
+У меня в процессе вот этих линий прогресса “######### 100%” вся консоль была помечена буквами YYYY…<br>
+Но это не помогло. Много раз. К сожалению я не радист и не владею сверхскоростными навыками набора азбуки морзе с ее точками и тире…</p>
+<p>В общем, это не нормально.И метод “попытайся угадать когда надо нажать Y” - тоже не нормальный Что-то не так. И как это можно выяснить?</p>
+<p>В журнале роутера все хорошо.</p></td><td>2024-08-15T10:58:39.110Z</td></tr><tr><td>yobobon</td><td><p>На smarttube аналогично.</p></td><td>2024-08-15T11:27:40.971Z</td></tr><tr><td>KMKZ</td><td><aside class="quote no-group" data-username="iggypoper" data-post="171" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/iggypoper/48/6689_2.png" class="avatar"> iggypoper:</div>
+<blockquote>
+<p>вся консоль была помечена буквами YYYY…</p>
+</blockquote>
+</aside>
+<p>всего один “y” и один “энтер”</p></td><td>2024-08-15T13:10:06.017Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Компонент Netfilter установите</p></td><td>2024-08-15T13:55:36.023Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Потому что вы скопировали команду уже с переносом строки, соответственно, Enter вы нажимаете как-бы второй раз и он прерывает установку.<br>
+Нажмите стрелочку вверх на клавиатуре (появится последняя введенная команда) и один раз Enter</p></td><td>2024-08-15T13:59:14.079Z</td></tr><tr><td>Ergert</td><td><p>Так уже был установлен.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/8db231127b51084e1275eead89b5422f303ce847.png" data-download-href="https://ntc.party/uploads/default/8db231127b51084e1275eead89b5422f303ce847" title="comps"><img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/8db231127b51084e1275eead89b5422f303ce847_2_690x330.png" alt="comps" data-base62-sha1="kdv61STHMFTviJaLgruHxW3Azhd" width="690" height="330" srcset="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/8db231127b51084e1275eead89b5422f303ce847_2_690x330.png, обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/8db231127b51084e1275eead89b5422f303ce847_2_1035x495.png 1.5x, обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/8db231127b51084e1275eead89b5422f303ce847.png 2x" data-dominant-color="F4F6F7"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">comps</span><span class="informations">1051×504 25.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-08-15T14:37:57.803Z</td></tr><tr><td>Anonym(Anonym)</td><td><p>Обновите скрипты<br>
+Остановите сервис<br>
+В конфиге исправьте IPV6_ENABLED=0 и запустите снова</p></td><td>2024-08-15T15:19:59.184Z</td></tr><tr><td>toka(Anton)</td><td><p>У меня сработало. Журнал чистый(KN-1811). Спасибо!</p></td><td>2024-08-15T16:12:12.986Z</td></tr><tr><td>Ergert</td><td><p>Все сделал, подтверждаю, сообщения пропали. Кланяюсь!</p></td><td>2024-08-15T16:14:54.938Z</td></tr><tr><td>AndrS</td><td><p>Перестали видео с ютюб грузиться, работало несколько дней хорошо, другие сайты заблоченные открываются, может поменяли чего?</p></td><td>2024-08-15T17:40:02.946Z</td></tr><tr><td>AndrS</td><td><p>Мде, у меня теперь даж приложения через гугл плей не скачиваются и не обновляются вообще что на телефоне что на телике, походу решили вообще всё переблочить</p></td><td>2024-08-15T22:19:31.663Z</td></tr><tr><td>saitlait</td><td><p>А можно ли как-то сохранить работу nfqws с работающим Open VPN?</p>
+<p>Для доступа к ресурсам на работе используется Open VPN, да и на этапе установки nfqws, когда выбирается сетевой интерфейс, на всякий случай прописывал ovpn_br0. При этом ovpn не мешает обходу блокировок, только с YT дружить не могут.</p>
+<p>Может как-то можно хотя бы исключение в файл конфига ovpn добавить? Если да, то какие строчки туда вписать?</p></td><td>2024-08-16T07:30:30.950Z</td></tr><tr><td>Elranon(Elranon)</td><td><p>Коллеги, инструкция супер. А можно ли подобную для роутера Asus AX58U или другого с офф прошивкой?</p></td><td>2024-08-17T15:24:33.986Z</td></tr><tr><td>SuperUser</td><td><p>см. <a href="https://github.com/bol-van/zapret/discussions/200#discussioncomment-10344137" class="inline-onebox" rel="noopener nofollow ugc">Обход замедления youtube в России · bol-van/zapret · Discussion #200 · GitHub</a></p></td><td>2024-08-17T17:26:41.816Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>А мог бы кто нибудь написать полную инструкцию аля <a href="https://telegra.ph/Nastrojka-zapret-ot-bol-van-na-Keentic-04-27" rel="noopener nofollow ugc">вот так</a> для прошивки Asus Merlin чтобы у ламеров, вроде меня, получилось завести nfqws? <img src="https://ntc.party/images/emoji/twitter/pray.png?v=12" title=":pray:" class="emoji" alt=":pray:" loading="lazy" width="20" height="20"> Весь день пытался завести, не получилось… <img src="https://ntc.party/images/emoji/twitter/sleepy.png?v=12" title=":sleepy:" class="emoji" alt=":sleepy:" loading="lazy" width="20" height="20"></p></td><td>2024-08-17T19:39:01.990Z</td></tr><tr><td>Elranon(Elranon)</td><td><p>Я присоединяюсь к вопросу… очень сложно, я не смог… не настолько хорошо знаю линукс. у меня даже с разворачиванием entware на флешку возникли сложности…</p></td><td>2024-08-17T20:20:11.546Z</td></tr><tr><td>SuperUser</td><td><p>Зайдите в профильную тему роутера на 4pda, там есть описание процесса установки entware (или вам помогут).</p></td><td>2024-08-17T22:04:12.391Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>Я произвел установку entware на usb флешку через amtm, мне осталось разобраться с Zapretом.<br>
+Очень не хватает аналога скрипта как у Keenetic nfqws, где всё заводится почти гарантированно. Устанавливал на днях себе поэтому знаю. Сейчас родителям попытался сделать на роутере Asus с прошивкой от Merlin.<br>
+Без помощи извне на вашем сайте уже вряд ли не разберусь)</p>
+<p>Такое сейчас на 4pda вроде обсуждать нельзя.</p></td><td>2024-08-18T00:23:40.776Z</td></tr><tr><td>Xassewi(Xassewi)</td><td><p>вроде все получилось, ютуб, рутрекер работают. плеймаркет должен не работат? или я что то пропустил?</p></td><td>2024-08-18T13:28:37.178Z</td></tr><tr><td>bigmaniak(Bigmaniak)</td><td><p>Добрый день!<br>
+не стартует скрипт, выдает такое:<br>
+xt_multiport.ko loaded<br>
+xt_connbytes.ko loaded<br>
+xt_NFQUEUE.ko loaded<br>
+/opt/etc/init.d/S51nfqws: line 41: /opt/usr/bin/nfqws: not found<br>
+iptables: No chain/target/match by that name.<br>
+iptables: No chain/target/match by that name.<br>
+iptables: No chain/target/match by that name.<br>
+Started NFQWS service<br>
+что делать?</p></td><td>2024-08-18T20:33:17.133Z</td></tr><tr><td>BlackkkMaster</td><td><p>Здравствуйте. На Keenetic Ultra (KN-1810) всё работает прекрасно. Настраивал другому человеку Zyxel Omni II - все процессы пройдены, на самом последнем шаге (запуск)<br>
+Cannot find xt_multiport.ko kernel module, aborting<br>
+Если закомментировать (в этом if закомментил exit 1) в скрипте, то<br>
+Cannot find xt_NFQUEUE.ko kernel module, aborting<br>
+Тоже закомментировал.<br>
+Дальше идёт но с ошибками, ютуб и остальное не работает.<br>
+Список библиотек ниже. Искал команды установки этих модулей в инете - не нашёл.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/08cd4a7732d4e56a51f30d8c0a8b4bdad628ed30.png" data-download-href="https://ntc.party/uploads/default/08cd4a7732d4e56a51f30d8c0a8b4bdad628ed30" title="2024-08-20_14-42-17"><img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/08cd4a7732d4e56a51f30d8c0a8b4bdad628ed30_2_184x499.png" alt="2024-08-20_14-42-17" data-base62-sha1="1fREvR2fHXREeMnD74o3ypdwskU" width="184" height="499" srcset="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/08cd4a7732d4e56a51f30d8c0a8b4bdad628ed30_2_184x499.png, обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/08cd4a7732d4e56a51f30d8c0a8b4bdad628ed30_2_276x748.png 1.5x, обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/08cd4a7732d4e56a51f30d8c0a8b4bdad628ed30_2_368x998.png 2x" data-dominant-color="080808"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">2024-08-20_14-42-17</span><span class="informations">615×1666 27.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-08-20T19:32:29.169Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>В <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/8809">инструкции</a> есть раздел, посвященный решению проблем с ошибками iptables. Установка компонента не помогает?</p></td><td>2024-08-20T23:11:31.060Z</td></tr><tr><td>BlackkkMaster</td><td><p>ну из-за того что роутер староват, в компонентах нету отдельного пункта<br>
+<img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/0d961131b1c881c75d25c8714821eb90f8ad5673.png" alt="image" data-base62-sha1="1WbIV6vh3FwpXOQL4tAruoCYlUf" width="358" height="54"><br>
+как на новых роутерах<br>
+А так всё установлено, даже переустанавливал</p></td><td>2024-08-21T06:15:22.165Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Последняя официальная версия прошивки для этого роутера - 2.08. Модули Netfilter <a href="https://forum.keenetic.com/topic/1514-%D0%B6%D1%83%D1%80%D0%BD%D0%B0%D0%BB-%D0%B8%D0%B7%D0%BC%D0%B5%D0%BD%D0%B5%D0%BD%D0%B8%D0%B9-209/#comment-23993">добавлены в версии 2.09</a>, поэтому <a href="https://forum.keenetic.com/announcement/5-%D0%B3%D0%B4%D0%B5-%D0%B2%D0%B7%D1%8F%D1%82%D1%8C-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B5-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B8/">переходите на канал обновлений legacy или draft</a>, где доступны <a href="https://forum.keenetic.com/topic/7321-%D0%B6%D1%83%D1%80%D0%BD%D0%B0%D0%BB-%D0%B8%D0%B7%D0%BC%D0%B5%D0%BD%D0%B5%D0%BD%D0%B8%D0%B9-216-legacy/">неофициальные прошивки</a> 2.11 и 2.16 соответственно.</p></td><td>2024-08-21T13:54:56.819Z</td></tr><tr><td>BlackkkMaster</td><td><p>спасибо</p></td><td>2024-08-21T17:31:45.882Z</td></tr><tr><td>Elranon(Elranon)</td><td><p>Друзья, помогите пож с установкой и настройкой zapret на роутере ASUS с офф прошивкой ASUS WRT<br>
+entware установлен, а дальше что?</p></td><td>2024-08-21T19:32:59.427Z</td></tr><tr><td>elijah0107(Elijah0107)</td><td><p>У кого-то есть еще такое? Весь день работает отлично. Но под вечер начинает зависать видео на ютубе. Установлен nfqws</p></td><td>2024-08-22T15:09:34.895Z</td></tr><tr><td>igorc(Igor)</td><td><p>Здравствуйте! Установил на KN-1810, сначала nfqws+tpws. Все работает отлично, включая LG-телики и телефоны (провайдер Ростелеком). Но через какое-то время (несколько дней) маршрутизатор начинает виснуть (особенно быстро проявлется при запуске торрента и включенном intelliqos). Обнаружил, что драматически заканчивается DRAM. Убрал tpws, убрал классификацию трафика в маршрутизаторе, убрал вообще все, что не используется вот-прямо-сейчас. Но увы, память постоянно заканчивается. Вот последние данные - перегружал 5 дней назад, было занято 36%, сегодня уже 56% (вчера было 53). Какой то memory leak от использования opkg+nfqws, раньше такого не было, не перегружал годами.<br>
+Возможно, кто-нибудь подскажет?</p></td><td>2024-08-22T16:20:48.209Z</td></tr><tr><td>cjmaxik(CJMAXiK)</td><td><aside class="quote" data-post="143" data-topic="61">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar">
+    <a href="https://ntc.party/t/zapret-whats-new/61/143">Zapret: what's new</a> <a class="badge-category__wrapper " href="/c/community-software/zapret-antidpi/20"><span data-category-id="20" style="--category-badge-color: #9EB83B; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #BF1E2E;" data-parent-category-id="27" data-drop-close="true" class="badge-category --has-parent" title="Zapret Deep Packet Inspection (DPI) circumvention software discussion and official support forum"><span class="badge-category__name">Zapret</span></span></a>
+  </div>
+  <blockquote>
+    Оказалось, что утечки памяти ядра и падения кинетика при использовании nfqws к zapret отношения не имеют. Кинетик использует старое ядро с багом, который давно пофиксили, но в кинетике непатченная версия. Разрабы собираются выкатывать патч в новых прошивках
+  </blockquote>
+</aside>
+</td><td>2024-08-22T16:22:39.210Z</td></tr><tr><td>wigeance(Wigeance)</td><td><p>Или ждите патч или пользуйтесь tpws там такого вроде нет</p></td><td>2024-08-22T16:23:58.544Z</td></tr><tr><td>igorc(Igor)</td><td><p>Спасибо!</p></td><td>2024-08-22T16:32:33.301Z</td></tr><tr><td>igorc(Igor)</td><td><p>большое спасибо, tpws я пробовал довольно давно и он работал заметно хуже в моих условиях. попробую снова, все таки перегрузка раз в неделю - не очень то и решение.<br>
+а идет речь именно о обновлении “прошивки”? я перешел с основного канала обновлений на предварительный, но лучше не стало.</p></td><td>2024-08-22T16:36:26.065Z</td></tr><tr><td>wigeance(Wigeance)</td><td><p>Еще не вышло, вроде в 4.2 beta 3 обещали</p></td><td>2024-08-22T16:42:29.289Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="igorc" data-post="202" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/i/e274bd/48.png" class="avatar"> igorc:</div>
+<blockquote>
+<p>а идет речь именно о обновлении “прошивки”?</p>
+</blockquote>
+</aside>
+<p>Да. Отслеживать выход новых версий можно, например, <a href="https://t.me/keenetic_firmware">в их телеграм-канале</a>.</p></td><td>2024-08-22T16:55:57.343Z</td></tr><tr><td>Jasdero</td><td><p>Всем доброй ночи!<br>
+Подскажите пожалуйста, решил починить ютуб на телевизоре Samsung с помощью “nfqws”. Проверяя на компьютере, ютуб по прежнему грузится бесконечно, а некоторые другие сайты так же недоступны. Затем решил попробовать метод “tpws”, с ним ютуб на компьютере стал летать и многие другие сайты заработали (включая этот <img src="https://ntc.party/images/emoji/twitter/smiley.png?v=12" title=":smiley:" class="emoji" alt=":smiley:" loading="lazy" width="20" height="20"> ), но когда пробую подключать телевизор, то на нем интернет вообще теперь не работает, ни по Wi Fi, ни при прямом подключении к роутеру.<br>
+Но стоит удалить tpws с помощью команды:</p>
+<pre><code class="lang-auto">/bin/sh -c "$(curl -fsSL https://github.com/Anonym-tsk/tpws-keenetic/raw/master/netuninstall.sh)"
+</code></pre>
+<p>как интернет на телевизоре тут же появляется.</p>
+<p>Куда стоит копать? На компьютере мне не важно как работает ютуб, ибо использую goodbyeDPI (а роутер к нему даже не подключен), главное что бы на телевизоре заработало.</p></td><td>2024-08-25T23:14:16.911Z</td></tr><tr><td>Jasdero</td><td><p>Совсем нет никаких идей, из-за чего это может быть? Могу лишь добавить, что роутер Keenetic Extra II, версия ОС 3.5. Телевизор, как уже писал, Samsung. На компьютере через tpws всё работает, заблокированные сайты открываются, ютуб работает без задержек, но на телевизоре доступ к интернету пропадает полностью, ни на какой сайт не заходит, приложения не работают, при проверки связи с интернетом - связи нет. Может надо в телевизоре что-то прописать, я не знаю … пробовал в нем отключать/включать IPv6, подключался по WiFi и напрямую - ничего не помогает. Все остальное делал как в инструкции по установке tpws, вроде как) теперь уже ни в чем не уверен. Хотя пробовал все переустанавливать и делать с нуля - не помогает.</p></td><td>2024-08-28T15:43:44.862Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Можно ради интереса обновить прошивку</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://forum.keenetic.com/announcement/5-%D0%B3%D0%B4%D0%B5-%D0%B2%D0%B7%D1%8F%D1%82%D1%8C-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B5-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B8/">
+  <header class="source">
+      <img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/73a78128e7ab8ae506284ed1ec7a36d536035ac9.png" class="site-icon" data-dominant-color="26A6E1" width="16" height="16">
+
+      <a href="https://forum.keenetic.com/announcement/5-%D0%B3%D0%B4%D0%B5-%D0%B2%D0%B7%D1%8F%D1%82%D1%8C-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B5-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B8/" target="_blank" rel="noopener">Keenetic Community</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:400/300;"><img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/9009ebcae4e2f0973724db5eb4d7b587d539c8ae.png" class="thumbnail" data-dominant-color="1384C4" width="400" height="300"></div>
+
+<h3><a href="https://forum.keenetic.com/announcement/5-%D0%B3%D0%B4%D0%B5-%D0%B2%D0%B7%D1%8F%D1%82%D1%8C-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B5-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B8/" target="_blank" rel="noopener">Где взять тестовые сборки</a></h3>
+
+  <p>Официальная техническая поддержка осуществляется только для актуальных моделей и только для ПО из каналов Релиз и Предварительная (отмечены черным и зеленым в таблице). Существуют также неофициальные Тестовые сборки ПО в неофициальных каналах draft,...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-08-28T17:08:26.216Z</td></tr><tr><td>Jasdero</td><td><p>Я пробовал ставить тестовую прошивку, но писало что не хватает памяти, даже когда удалял почти все компоненты в роутере. Полагаете, что отсутствие интернета, при установленном tpws, может быть связано с прошивкой роутера? На компьютере ведь работает, только на телевизоре так.<br>
+Если честно, я полагал будут идеи что-то изменить в самом tpws, раз только из-за него интернет на телевизоре пропадает или в крайноем случае в самом телике, но про прошивку роутера даже не подумал бы <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"><br>
+Ради интереса я бы конечно попробовал воспользоваться тестовой прошкой, но как быть с памятью? Может можно как-то через флешку установить прошивку? Имеется ввиду в нее закачать что надо и из нее же установить в роутер. Или если пишет не хватает памяти, то это уже никак не фиксится?</p></td><td>2024-08-28T18:49:25.347Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>“Не хватает памяти” означает, что не хватает объёма внутренней памяти роутера, флешкой это никак не исправить. Даже при обновлении на 3.9 не хватает?</p>
+<p>Я не знаю, поможет или нет, но обновиться никогда не повредит. К тому же, где-то между 3.6 и 3.9, как я помню, были серьёзные изменения в сетевой подсистеме, возможно, это положительно скажется на nfqws.</p></td><td>2024-08-28T19:49:22.922Z</td></tr><tr><td>Jasdero</td><td><p>Насчет 3.9 даже не знаю. Я в настройках роутера менял “рекомендуемую” версию системы на “тестовую” и он сразу 4.1 показывал.</p>
+<aside class="quote no-group" data-username="dartraiden" data-post="209" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>где-то между 3.6 и 3.9, как я помню, были серьёзные изменения в сетевой подсистеме, возможно, это положительно скажется на nfqws.</p>
+</blockquote>
+</aside>
+<p>Оу, тогда возможно это хорошая идея, но я не знаю, как роутеру указать конкретно на 3.9 версию.</p>
+<aside class="quote no-group" data-username="dartraiden" data-post="209" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>Я не знаю, поможет или нет, но обновиться никогда не повредит.</p>
+</blockquote>
+</aside>
+<p>Меня немного пугает, что это “тестовая” система <img src="https://ntc.party/images/emoji/twitter/smiley.png?v=12" title=":smiley:" class="emoji" alt=":smiley:" loading="lazy" width="20" height="20"></p></td><td>2024-08-28T21:27:46.930Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><pre><code class="lang-auto">components list delta
+components commit
+</code></pre>
+<p>Тестовые они в том смысле, что техническая поддержка по ним не оказывается.</p></td><td>2024-08-28T21:35:53.413Z</td></tr><tr><td>Jasdero</td><td><p>Понял.<br>
+Ну я тогда еще раз щас попробую, только на этот раз кучу компонентов поудаляю <img src="https://ntc.party/images/emoji/twitter/smiley.png?v=12" title=":smiley:" class="emoji" alt=":smiley:" loading="lazy" width="20" height="20"> заранее сохранив копию системы роутера с набором компонентов - на пк. Если все равно памяти не будет хватать, то я не знаю …</p></td><td>2024-08-28T21:40:29.060Z</td></tr><tr><td>Jasdero</td><td><p>Боже, я такой … кхм, додик <img src="https://ntc.party/images/emoji/twitter/confused.png?v=12" title=":confused:" class="emoji" alt=":confused:" loading="lazy" width="20" height="20"> просто нет слов … В общем рассказываю.<br>
+Я таки смог заставить роутер установить тестовую версию системы. К слову версия 4.2 beta 2, а до этого я почему-то говорил 4.1, но не суть. Нажал на “минимальный набор компонентов”, из-за чего огромный список компонентов был удален, после этого снова запустил установку тестовой ОС и все получилось, памяти хватило! А после установки уже выбрал “Рекомендуемый набор компонентов” на всякий случай и все поставилось без проблем, роутер можно сказать готов к работе. Затем с нуля начал закачивать всякие OPGK, Entware и прочее, подготовил флешку … в общем начал устанавливать nfqws.</p>
+<p>Все готово. Первым делом как всегда проверяю ютуб на компьютере ииии … ничего не работает, ОПЯТЬ. То есть установка 4.2 версии системы не помогла. Но я не спешил расстраиваться, решил посмотреть, какие еще есть варианты во время установки nfqws. И проблема была вот в чем. После того, когда выбираешь архитектуру маршрутизатора, он спрашивает про сетевой интерфейс провайдера. Я не понимал что это такое и каждый раз выбирал как по гайду, то есть при установке nfqws написано, что обычно это eth3, а при установке tpws - br0, так я и делал, но все же внимательно еще раз посмотрел на варианты, которые предлагает программа. И вот тут-то я заметил, что там есть айпи адрес, который как оказалось 1 в 1 совпадает с IPv4 адресом моего интернета в роутере, я даже удивился, что он полностью совпадает. Собственно я еще раз устанавливаю nfqws и в моменте сетевого интерфейса ввожу те буквы, которые указаны перед этим айпи адресом. И вуаля! Ютуб на компьютере тут же заработал, но самое главное, что на телевизоре он тоже стал работать! Причем там он теперь открывается молниеносно, как будто без какой-либо загрузки, сразу хоп и все на экране открыто, не то что было с VPN. Я даже и забыл, что когда-то так было.</p>
+<p>В общем косяк мой был в том, что я все делал слепо по гайду и не включал свою голову <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20"><br>
+Теперь ради интереса хочу попробовать обратно поставить “рекомендуемую” версию ОС, т.к. скорей всего и там все заработает, ведь до этого я совершал ту же ошибку во время установки nfqws. Кстати и во время установки tpws получается тоже не то вводил, странно что ютуб на компьютере открывался даже, хотя вот интернет на телевизоре как раз отказывался работать, возможно по причине ошибочной установки, ну или реально с tpws какой-то конфликт и тогда стоит лучше остаться на nfqws. В общем ради интереса потом попробую вернуть стабильную версию ОС и еще раз потестю оба варианта.</p>
+<p>Спасибо большое, вы мне очень помогли! Ведь если бы не вы, я бы уже не стал вновь все это в 10-ый раз устанавливать и тогда бы не нашел верного решения ))</p></td><td>2024-08-29T00:03:49.408Z</td></tr><tr><td>Jasdero</td><td><p>В общем вернулся на релизную версию ОС 3.5.10, которая соответствует моему роутеру. Решил сначала попробовать метод tpws, а то у вас в шапке сказано, что nfqws имеет утечку памяти на роутерах, с системой ниже 4.2 beta 3, поэтому ее оставил на потом. Короче перепробовал все варианты сетевых интерфейсов, которые предлагает программа. Результат такой же как и всегда, на телевизоре интернет не работает, а на компьютере все нормально, ютуб тоже показывает, либо пробовал другой интерфейс (который как раз верный, как я сегодня узнал), на телевизоре интернет теперь есть, но ютуб по прежнему не грузит, но и на компьютере теперь тоже ютуб отвалился. В общем tpws вариант никак не хочет работать в моем случае, удалил его и попробовал nfqws, но на этот раз с “правильной” установкой, а как не как обычно. И все заработало, и на компьютере, и на телевизоре ютуб летает. Так что версия системы 3.5 так же подходит, главное не накосячить с сетевым интерфейсом <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-08-29T01:17:11.186Z</td></tr><tr><td>saitlait</td><td><p>Для тех, у кого перестал работать <a href="https://github.com/Anonym-tsk/nfqws-keenetic" rel="noopener nofollow ugc">NFQWS</a>:</p>
+<ol>
+<li>Вышла новая версия скрипта</li>
+<li>Есть <a href="https://github.com/Anonym-tsk/nfqws-keenetic/issues/38#issuecomment-2346536002" rel="noopener nofollow ugc">совет</a> изменить аргумент <code>NFQWS_ARGS</code> конфиг файла <code>/opt/etc/nfqws/nfqws.conf</code>, убрав оттуда <code>fake</code></li>
+</ol></td><td>2024-09-12T20:55:44.334Z</td></tr><tr><td>cron(Cron)</td><td><p>Убрал fake из NFQWS_ARGS Везде заработало кроме Smart TV, там ни в какую. Перебрал кучу параметров. Либо ютуб вообще не загружается, либо загружается но видео не играет. При разных параметрах по разному.</p></td><td>2024-09-13T13:30:59.887Z</td></tr><tr><td>filkint(Filkint)</td><td><p><a href="https://webos-forums.ru/post180757.html#p180757" class="onebox" target="_blank" rel="noopener nofollow ugc">https://webos-forums.ru/post180757.html#p180757</a></p></td><td>2024-09-13T16:35:51.827Z</td></tr><tr><td>vitaLL-77(Vita Ll 77)</td><td><p>А можно сюда содержимое, там нужно регистрироваться.</p></td><td>2024-09-14T09:29:26.327Z</td></tr><tr><td>newb1e</td><td><p><a href="https://ntc.party/t/zapret-%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5/726/498">Тут</a> человек нашел рабочую (у его провайдера) стратегию на кинетике, возможно поможет кому-то.</p></td><td>2024-09-14T09:59:19.907Z</td></tr><tr><td>filkint(Filkint)</td><td><p>WebOS у меня заработал YT после экспериментов с tpws и nfqws. Роутер Keenetic Giga KN 1010, провайдер Ростелеком, МСК.</p>
+<p>С tpws действительно всё работало какое-то время, но потом вырубило, итого nfqws заработал и даже шустрее, как мне показалось. Страница проекта: <a href="https://webos-forums.ru/away.htm?https://github.com/Anonym-tsk/nfqws-keenetic" rel="noopener nofollow ugc">https://github.com/Anonym-tsk/nfqws-keenetic</a> - тут же простая инструкция для установки. Первоначальное нужно установить entware по инструкции на сайте keenetic.</p>
+<p>Мой конфиг, ничего не менял (только при установке выбрал фильтровать по user list:</p>
+<p>/opt/etc/nfqws/nfqws.conf</p>
+<h1><a name="p-39774-provider-network-interface-egeth3-1" class="anchor" href="#p-39774-provider-network-interface-egeth3-1"></a>Provider network interface, e.g.eth3</h1>
+<h1><a name="p-39774-you-can-specify-multiple-interfaces-separated-by-space-egisp_interfaceeth3-nwg1-2" class="anchor" href="#p-39774-you-can-specify-multiple-interfaces-separated-by-space-egisp_interfaceeth3-nwg1-2"></a>You can specify multiple interfaces separated by space, e.g.ISP_INTERFACE=“eth3 nwg1”</h1>
+<p>ISP_INTERFACE=“eth3”</p>
+<h1><a name="p-39774-all-arguments-here-httpsgithubcombol-vanzaprethttpswebos-forumsruawayhtmhttpsgithubcombol-vanzapret-search-for-nfqws-on-the-page-3" class="anchor" href="#p-39774-all-arguments-here-httpsgithubcombol-vanzaprethttpswebos-forumsruawayhtmhttpsgithubcombol-vanzapret-search-for-nfqws-on-the-page-3"></a>All arguments here: <a href="https://webos-forums.ru/away.htm?https://github.com/bol-van/zapret" rel="noopener nofollow ugc">https://github.com/bol-van/zapret</a> (search for <code>nfqws</code> on the page)</h1>
+<h1><a name="p-39774-try-different-variants-4" class="anchor" href="#p-39774-try-different-variants-4"></a>Try different variants</h1>
+<p>NFQWS_ARGS=“–dpi-desync=fake, disorder2 --dpi-desync-split-pos=1 --dpi-desync-ttl=6 --dpi-desync-fooling=md5sig, badsum”<br>
+#NFQWS_ARGS=“–dpi-desync=fake, split2 --dpi-desync-ttl=0 --dpi-desync-fooling=md5sig”<br>
+#NFQWS_ARGS=“–disorder --tlsrec=sni --split-pos=2”<br>
+#NFQWS_ARGS=“–dpi-desync=fake, split --dpi-desync-ttl=7 --dpi-desync-fooling=md5sig”<br>
+NFQWS_EXTRA_ARGS=“–hostlist=/opt/etc/nfqws/user.list”</p>
+<p>NFQUEUE_NUM=200<br>
+IPV6_ENABLED=0<br>
+PIDFILE=/opt/var/run/nfqws.pid</p>
+<p>Вам нужен также подставить адрес Вашего интерфейса, который смотрит на оператора, у меня это “eth3”, проверить можно командой: ifconfig | awk -v ip=$ (ip route get 1.2.3.4 | awk ‘{print $7}’) ‘/<sup class="footnote-ref"><a href="#footnote-39774-1" id="footnote-ref-39774-1">[1]</a></sup>/{iface=$1} $0 ~ ip{print iface, $0}’.</p>
+<p>Такке подправил файл /opt/etc/nfqws/user.list:</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://www.youtube.com/">
+  <header class="source">
+      <img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/2ff8041ab342982800fbf05a4c8e34e109dad624.png" class="site-icon" data-dominant-color="FF1010" width="16" height="16">
+
+      <a href="https://www.youtube.com/" target="_blank" rel="noopener nofollow ugc">youtube.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="500" height="500" src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/41163d7511ee55959ac91feadb1ded31bd218773.png" class="thumbnail onebox-avatar" data-dominant-color="F4E7E7">
+
+<h3><a href="https://www.youtube.com/" target="_blank" rel="noopener nofollow ugc">YouTube</a></h3>
+
+  <p>Auf YouTube findest du die angesagtesten Videos und Tracks. Außerdem kannst du eigene Inhalte hochladen und mit Freunden oder gleich der ganzen Welt teilen.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+youtu.be<br>
+yt.be<br>
+<a href="http://googleapis.com" class="onebox" target="_blank" rel="noopener nofollow ugc">googleapis.com</a></p><aside class="onebox allowlistedgeneric" data-onebox-src="http://video.google.com/">
+  <header class="source">
+
+      <a href="http://video.google.com/" target="_blank" rel="noopener nofollow ugc">video.google.com</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="http://video.google.com/" target="_blank" rel="noopener nofollow ugc">Google Videos</a></h3>
+
+  <p>Suche im gesamten Web nach Millionen von Videos.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p><a href="http://i.ytimg.com" class="onebox" target="_blank" rel="noopener nofollow ugc">i.ytimg.com</a><br>
+<a href="http://i9.ytimg.com" class="onebox" target="_blank" rel="noopener nofollow ugc">i9.ytimg.com</a><br>
+<a href="http://yt3.ggpht.com" target="_blank" rel="noopener nofollow ugc">yt3.ggpht.com</a><br>
+<a href="http://yt3.googleusercontent.com" target="_blank" rel="noopener nofollow ugc">yt3.googleusercontent.com</a><br>
+<a href="http://yt4.ggpht.com" target="_blank" rel="noopener nofollow ugc">yt4.ggpht.com</a><br>
+<a href="http://yt4.googleusercontent.com" target="_blank" rel="noopener nofollow ugc">yt4.googleusercontent.com</a><br>
+<a href="http://gvt1.com" target="_blank" rel="noopener nofollow ugc">gvt1.com</a><br>
+<a href="http://gstatic.com" target="_blank" rel="noopener nofollow ugc">gstatic.com</a><br>
+<a href="http://youtubei.googleapis.com" target="_blank" rel="noopener nofollow ugc">youtubei.googleapis.com</a><br>
+<a href="http://youtube-ui.l.google.com" target="_blank" rel="noopener nofollow ugc">youtube-ui.l.google.com</a><br>
+<a href="http://ytimg.l.google.com" target="_blank" rel="noopener nofollow ugc">ytimg.l.google.com</a><br>
+<a href="http://ytstatic.l.google.com" target="_blank" rel="noopener nofollow ugc">ytstatic.l.google.com</a><br>
+<a href="http://lgtvonline.lge.com" target="_blank" rel="noopener nofollow ugc">lgtvonline.lge.com</a><br>
+<a href="http://ngfts.lge.com" target="_blank" rel="noopener nofollow ugc">ngfts.lge.com</a><br>
+<a href="http://lgtvsdp.com" target="_blank" rel="noopener nofollow ugc">lgtvsdp.com</a><br>
+<a href="http://lgeapi.com" target="_blank" rel="noopener nofollow ugc">lgeapi.com</a><br>
+<a href="http://lgsmartad.com" target="_blank" rel="noopener nofollow ugc">lgsmartad.com</a><br>
+<a href="http://lgappstv.com" target="_blank" rel="noopener nofollow ugc">lgappstv.com</a><br>
+<a href="http://aws-prd.net" target="_blank" rel="noopener nofollow ugc">aws-prd.net</a><br>
+<a href="http://lgtvcommon.com" target="_blank" rel="noopener nofollow ugc">lgtvcommon.com</a><br>
+<a href="http://lgtvonline-lge-com-gslb.aws-prd.net" target="_blank" rel="noopener nofollow ugc">lgtvonline-lge-com-gslb.aws-prd.net</a><br>
+<a href="http://e6114.e21.akamaiedge.net" target="_blank" rel="noopener nofollow ugc">e6114.e21.akamaiedge.net</a></p>
+<p>Далее, просто стартуем сервис: /opt/etc/init.d/S51nfqws start</p>
+<p>И я заблокировал QUIC через интерфейс Keenetic - “Сетевые правила” → “Межсетевой экран”, поставил Запретить все по протоколу UDP на порт 443 и порт 80 в интерфейсе “Домашняя сеть” (т. е. всего два правила).</p>
+<hr>
+<p>За это сообщение автора <a href="https://webos-forums.ru/timotheos-u25511.html?sid=a7b61a68c5e39d2a9e71e21a6af64e05" rel="noopener nofollow ugc">timotheos</a> поблагодарил:<br>
+<a href="https://webos-forums.ru/filkint-u18295.html?sid=a7b61a68c5e39d2a9e71e21a6af64e05" rel="noopener nofollow ugc">filkint</a> (12 сен 2024, 05:53)</p>
+<p><a href="https://webos-forums.ru/#postform" rel="noopener nofollow ugc">timotheos</a></p>
+<p><a href="https://webos-forums.ru/#postform" rel="noopener nofollow ugc">Цитата</a><br>
+<strong>Сообщения:</strong> 2<br>
+<strong>Зарегистрирован:</strong> 10 сен 2024, 19:53<br>
+<strong>Благодарил (а):</strong> 0 раз.<br>
+<strong>Поблагодарили:</strong> <a href="https://webos-forums.ru/thankslist.php?mode=givens&amp;author_id=25511&amp;give=false&amp;sid=a7b61a68c5e39d2a9e71e21a6af64e05" rel="noopener nofollow ugc">1</a> раз.</p>
+<hr class="footnotes-sep">
+
+<ol class="footnotes-list">
+<li id="footnote-39774-1" class="footnote-item"><p>a-zA-Z <a href="#footnote-ref-39774-1" class="footnote-backref">↩︎</a></p>
+</li>
+</ol></td><td>2024-09-14T11:25:45.157Z</td></tr><tr><td>vitaLL-77(Vita Ll 77)</td><td><p>Спасибо!</p></td><td>2024-09-14T11:51:48.170Z</td></tr><tr><td>fouk</td><td><p>Всем доброго утра! Установлен NFQWS последней версии, вчера вечером перестали грузиться ролики на ютубе, я один такой? есть решение?</p></td><td>2024-09-19T06:38:02.192Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Есть <a href="https://github.com/Anonym-tsk/nfqws-keenetic/discussions/1" class="inline-onebox" rel="noopener nofollow ugc">Проверено на роутерах · Anonym-tsk/nfqws-keenetic · Discussion #1 · GitHub</a></p></td><td>2024-09-19T07:24:51.365Z</td></tr><tr><td>Zapir124(Zapir124)</td><td><p>Всех приветствую. Прошу подсказать, по ссылке <strong>автоматическая установка</strong> заходим и выполняем пункты 1-3 и на этом всё? То что до этих пунктов выполняем это без вопросов. Просто дальше там есть обновление, удаление…. Потом настройка стратегии и тп. нужно ли там что то делать или хватает выполнить пункты 1-3? Благодарю заранее</p></td><td>2024-09-25T09:57:21.989Z</td></tr><tr><td>The4ce</td><td><p>Как можно настроить nfqws, чтобы он не весь траффик до провайдера обрабатывал, а только от одного или нескольких сегментов сети (например wi-fi и гостевой wi-fi), а от других сегментов сети нет (например еще одна wi-fi сеть)?</p>
+<p>–На tpws таким образом и устроено. В конфиге пишешь br0 и br1, и все как надо. При этом br2 пропускает “чистый траффик”–</p>
+<p>Тут какая-то магия с Iptables требуется, да? Простите за необразованность, но никак не могу эту гору в своей жизни одолеть. Подскажите хотя бы, если не готовое решение, то в какую сторону копать. Спасибо.</p></td><td>2024-09-25T16:35:47.196Z</td></tr><tr><td>LimiteR</td><td><p>Донастройка для работы Discord (включая голосовые каналы). Может, пригодится кому.</p>
+<p>Добавлено в хосты следующее:</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">discord.gg
+discord.com
+discordapp.com
+discord.media
+discordapp.net
+discordcdn.com
+discord.dev
+discord.new
+discord.gift
+discordstatus.com
+dis.gd
+discord.co
+discordsays.com
+discord.design
+discord.gifts
+discord.store
+discord.tools
+discordmerch.com
+discordpartygames.com
+discord-activities.com
+discordactivities.com
+zendesk.com
+</code></pre>
+</details>
+<p>В etc/nfqws/nfqws.conf изменена стратегия для QUIC:</p>
+<pre><code class="lang-auto">NFQWS_ARGS_QUIC="--dpi-desync=fake,tamper --dpi-desync-repeats=6 --dpi-desync-cutoff=d4 --dpi-desync-fooling=badsum --dpi-desync-any-protocol"
+</code></pre>
+<p>Вероятно, работает благодаря --dpi-desync-any-protocol.</p>
+<p>В файле скрипта (etc/init.d/S51nqqws) для QUIC изменены порты с 443 на рендж 443:65535.</p>
+<pre><code class="lang-auto">RULE_QUIC="-t mangle -p udp --dport 443:65535 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:8 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num $NFQUEUE_NUM_QUIC --queue-bypass"
+</code></pre>
+<p>Разумеется, можно сообразить более элегантное решение. Вроде как по UDP портам достаточно обрабатывать 50000:65535. Но пока как-то так.</p>
+<p>Инфа взята отсюда:</p><aside class="onebox githubissue" data-onebox-src="https://github.com/bol-van/zapret/issues/455">
+  <header class="source">
+
+      <a href="https://github.com/bol-van/zapret/issues/455" target="_blank" rel="noopener nofollow ugc">github.com/bol-van/zapret</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row">
+  <div class="github-icon-container" title="Issue" data-github-private-repo="false">
+	  <svg width="60" height="60" class="github-icon" viewBox="0 0 14 16" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+  </div>
+
+  <div class="github-info-container">
+    <h4>
+      <a href="https://github.com/bol-van/zapret/issues/455" target="_blank" rel="noopener nofollow ugc">как починить RTC в дискорде?</a>
+    </h4>
+
+    <div class="github-info">
+      <div class="date">
+        opened <span class="discourse-local-date" data-format="ll" data-date="2024-10-08" data-time="11:50:58" data-timezone="UTC">11:50AM - 08 Oct 24 UTC</span>
+      </div>
+
+        <div class="date">
+          closed <span class="discourse-local-date" data-format="ll" data-date="2024-10-08" data-time="18:21:29" data-timezone="UTC">06:21PM - 08 Oct 24 UTC</span>
+        </div>
+
+      <div class="user">
+        <a href="https://github.com/ThisIsNoTa2acc" target="_blank" rel="noopener nofollow ugc">
+          <img alt="ThisIsNoTa2acc" src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/a30831d32838a1cfdca404a0ebb884cc3b071bf9.png" class="onebox-avatar-inline" width="20" height="20" data-dominant-color="EBE9DA">
+          ThisIsNoTa2acc
+        </a>
+      </div>
+    </div>
+
+    <div class="labels">
+    </div>
+  </div>
+</div>
+
+  <div class="github-row">
+    <p class="github-body-container">Было всё прекрасно до сегодняшнего дня, теперь сам дискорд пашет, но голосовой у<span class="show-more-container"><a href="" rel="noopener" class="show-more">…</a></span><span class="excerpt hidden">мер
+вот мой список доменов и конфиг на всякий:
+P.S. Опять же настроено ето всё на keenetic роутер
+```ggpht.com
+rutracker.cc
+googleapis.com
+googleusercontent.com
+googlevideo.com
+gstatic.com
+nhacmp3youtube.com
+www.youtube.com
+youtu.be
+youtube.com
+youtubei.googleapis.com
+yt4.ggpht.com
+ytimg.com
+ytimg.l.google.com
+x.com
+twimg.com
+t.co
+twitter.com
+rutor.info
+rutracker.org
+instagram.com
+cdninstagram.com
+ig.me
+donmai.us
+facebook.com
+fbcdn.net
+facebook.net
+fbsbx.com
+fbpigeon.com
+fb.com
+fb.gg
+discord.com
+gateway.discord.gg
+cdn.discordapp.com
+discordapp.net
+discordapp.com
+discord.gg
+media.discordapp.net
+images-ext-1.discordapp.net
+www.discord.com
+www.discord.app
+discord.app
+*.discord.com
+*.discord.gg
+*.discordapp.com
+*.discordapp.net
+discord.media
+*.discord.media
+discordcdn.com
+discord.dev
+discord.new
+discord.gift
+discordstatus.com
+dis.gd
+discord.co```
+
+```# this file is included from init scripts
+# change values here
+
+# can help in case /tmp has not enough space
+#TMPDIR=/opt/zapret/tmp
+
+# redefine user for zapret daemons. required on Keenetic
+WS_USER=nobody
+
+# override firewall type : iptables,nftables,ipfw
+FWTYPE=iptables
+
+# options for ipsets
+# maximum number of elements in sets. also used for nft sets
+SET_MAXELEM=522288
+# too low hashsize can cause memory allocation errors on low RAM systems , even if RAM is enough
+# too large hashsize will waste lots of RAM
+IPSET_OPT="hashsize 262144 maxelem $SET_MAXELEM"
+# dynamically generate additional ip. $1 = ipset/nfset/table name
+#IPSET_HOOK="/etc/zapret.ipset.hook"
+
+# options for ip2net. "-4" or "-6" auto added by ipset create script
+IP2NET_OPT4="--prefix-length=22-30 --v4-threshold=3/4"
+IP2NET_OPT6="--prefix-length=56-64 --v6-threshold=5"
+# options for auto hostlist
+AUTOHOSTLIST_RETRANS_THRESHOLD=3
+AUTOHOSTLIST_FAIL_THRESHOLD=3
+AUTOHOSTLIST_FAIL_TIME=60
+# 1 = debug autohostlist positives to ipset/zapret-hosts-auto-debug.log
+AUTOHOSTLIST_DEBUGLOG=0
+
+# number of parallel threads for domain list resolves
+MDIG_THREADS=30
+
+# ipset/*.sh can compress large lists
+GZIP_LISTS=1
+# command to reload ip/host lists after update
+# comment or leave empty for auto backend selection : ipset or ipfw if present
+# on BSD systems with PF no auto reloading happens. you must provide your own command
+# set to "-" to disable reload
+#LISTS_RELOAD="pfctl -f /etc/pf.conf"
+
+# override ports
+#HTTP_PORTS=80-81,85
+#HTTPS_PORTS=443,500-501
+#QUIC_PORTS=443,444
+
+# CHOOSE OPERATION MODE
+# MODE : nfqws,tpws,tpws-socks,filter,custom
+# nfqws : nfqws for dpi desync
+# tpws : tpws transparent mode
+# tpws-socks : tpws socks mode
+# filter : no daemon, just create ipset or download hostlist
+# custom : custom mode. should modify custom init script and add your own code
+MODE=nfqws
+# apply fooling to http
+MODE_HTTP=1
+# for nfqws only. support http keep alives. enable only if DPI checks for http request in any outgoing packet
+MODE_HTTP_KEEPALIVE=0
+# apply fooling to https
+MODE_HTTPS=1
+# apply fooling to quic
+MODE_QUIC=1
+# none,ipset,hostlist,autohostlist
+MODE_FILTER=autohostlist
+
+# CHOOSE NFQWS DAEMON OPTIONS for DPI desync mode. run "nfq/nfqws --help" for option list
+DESYNC_MARK=0x40000000
+DESYNC_MARK_POSTNAT=0x20000000
+NFQWS_OPT_DESYNC="--dpi-desync=fake,disorder2 --dpi-desync-split-pos=1 --dpi-desync-ttl=0 --dpi-desync-fooling=md5sig,badsum --dpi-desync-repeats=6 --dpi-desync-any-protocol --dpi-desync-cutoff=d4 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin" 
+#NFQWS_OPT_DESYNC_HTTP=
+#NFQWS_OPT_DESYNC_HTTPS=
+#NFQWS_OPT_DESYNC_HTTP6=
+#NFQWS_OPT_DESYNC_HTTPS6=
+NFQWS_OPT_DESYNC_QUIC="--dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-ttl=0  --dpi-desync-any-protocol --dpi-desync-cutoff=d4 --dpi-desync-fooling=md5sig,badsum --dpi-desync-fake-quic=/opt/zapret/files/fake/quic_initial_www_google_com.bin"
+#NFQWS_OPT_DESYNC_QUIC6=
+
+# CHOOSE TPWS DAEMON OPTIONS. run "tpws/tpws --help" for option list
+TPWS_OPT="--hostspell=HOST --tlsrec=sni --split-pos=1 --oob --disorder"
+
+# openwrt only : donttouch,none,software,hardware
+FLOWOFFLOAD=donttouch
+
+# openwrt: specify networks to be treated as LAN. default is "lan"
+#OPENWRT_LAN="lan lan2 lan3"
+# openwrt: specify networks to be treated as WAN. default wans are interfaces with default route
+#OPENWRT_WAN4="wan vpn"
+#OPENWRT_WAN6="wan6 vpn6"
+
+# for routers based on desktop linux and macos. has no effect in openwrt.
+# CHOOSE LAN and optinally WAN/WAN6 NETWORK INTERFACES
+# or leave them commented if its not router
+# it's possible to specify multiple interfaces like this : IFACE_LAN="eth0 eth1 eth2"
+# if IFACE_WAN6 is not defined it take the value of IFACE_WAN
+#IFACE_LAN=eth0
+IFACE_WAN=ppp0
+#IFACE_WAN6="ipsec0 wireguard0 he_net"
+
+# should start/stop command of init scripts apply firewall rules ?
+# not applicable to openwrt with firewall3+iptables
+INIT_APPLY_FW=1
+# firewall apply hooks
+#INIT_FW_PRE_UP_HOOK="/etc/firewall.zapret.hook.pre_up"
+#INIT_FW_POST_UP_HOOK="/etc/firewall.zapret.hook.post_up"
+#INIT_FW_PRE_DOWN_HOOK="/etc/firewall.zapret.hook.pre_down"
+#INIT_FW_POST_DOWN_HOOK="/etc/firewall.zapret.hook.post_down"
+
+# do not work with ipv4
+#DISABLE_IPV4=1
+# do not work with ipv6
+DISABLE_IPV6=0
+
+# select which init script will be used to get ip or host list
+# possible values : get_user.sh get_antizapret.sh get_combined.sh get_reestr.sh get_hostlist.sh
+# comment if not required
+GETLIST=```</span></p>
+  </div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://github.com/bol-van/zapret/discussions/456#discussioncomment-10883880">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/b/bad3e5f9ad67c1ddf145107ce7032ac1d7b22563.svg" class="site-icon" data-dominant-color="" width="32" height="32">
+
+      <a href="https://github.com/bol-van/zapret/discussions/456#discussioncomment-10883880" target="_blank" rel="noopener nofollow ugc">GitHub</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/344;"><img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/211c1a95f5a93103b15acf70135089291e59f4f3_2_690x345.png" class="thumbnail" data-dominant-color="F3F5F5" width="690" height="345"></div>
+
+<h3><a href="https://github.com/bol-van/zapret/discussions/456#discussioncomment-10883880" target="_blank" rel="noopener nofollow ugc">Discord UDP · bol-van/zapret · Discussion #456</a></h3>
+
+  <p>Новая проблема. Discord заблокировали. В нем используется UDP пакеты, я так понимаю с UDP есть некие нюансы. Кто уже пробовал?</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-10-08T23:49:58.805Z</td></tr><tr><td>Jasdero</td><td><p>Добрый вечер.<br>
+Смотрю ютуб с телевизора Samsung. С некоторых пор (около 2 недель назад, может больше) ролики ютуба на старте на старте стали запускаться по 5-7 секунд, просто черный квадрат с кружочком в центре, это первый момент. И второй момент, если видео было запущено в первый раз, то почти всегда оно бесконечно грузится на 19 секунде. Нужно второй раз его же запустить и такого больше не происходит на протяжении всего просмотра этого ролика. И так с каждым новым видео: после первой загрузки оно на 19 секунде зависает, но после повторной загрузки - все ок (при этом начальные запуски роликов по 5-7 сек никуда не деваются). Правда зависания на 19 секунде не всегда происходят, но примерно в 90% случаях.<br>
+Пробовал обновлять nfqws на роутере, результатов не дало. Так же удалял nfqws и ставил tpws - тоже самое.</p>
+<p>Подскажите пожалуйста, куда копать в такой ситуации? Пробую разные стратегии в \opt\etc\nfqws\nfqws.conf, некоторые на компьютере работают идеально, видео на ютубе открываются сразу, но на телевизоре по прежнему грузит по 7 секунд вначале запуска. А от зависаний на 19 секунде избавиться так и не удалось, даже на пк они иногда бывают.<br>
+Даже примерно не знаю, какие стратегии стоит пробовать или может дело вообще не в них … Очень тяжело понять в чем причина и какие стратегии пробовать, когда на ПК работают почти любые, а на телевизоре всё без изменений.</p></td><td>2024-10-15T20:45:54.406Z</td></tr><tr><td>sliver</td><td><p>Подскажите почему по кабелю на компе открывается вообще все (в том числе инста и этот сайт), по вайфай на компе открываются некоторые сайты (этот работает, инста нет), а с телефона не открывается даже данный сайт? ютуб при этом работает везде нормально. антизапрет не ставил, только nfqws со списком из гудбайдпи.</p></td><td>2024-10-17T05:15:44.565Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>На роутере вместо DNS провайдера используется DoH/DoT? Рекомендуется использовать.</p>
+<p>Если не используется, то, возможно, причина в этом: на ПК браузер использует встроенный в браузер DoH, а на мобильном устройстве нет, поэтому все запросы к заблокированным ресурсам помирают ещё на этапе резолва, до того, как в бой вступает nfqws.</p>
+<p>А поскольку YT не заблокирован по домену, то nfqws отрабатывает и эффект виден.</p></td><td>2024-10-17T05:47:29.297Z</td></tr><tr><td>sliver</td><td><p>Спасибо, прописал дохи, помогло, правда частично, стали открываться заблокированные сайты типа инсты, не особо нужные мне, но вот данный сайт так и не открывается, ведет на страницу, что ресурс заблокирован РКН.</p></td><td>2024-10-17T06:28:43.481Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Перезагрузите клиентское устройство, чтобы очистился кэш DNS на нем.</p></td><td>2024-10-17T06:37:00.369Z</td></tr><tr><td>cron(Cron)</td><td><p>При запущенном nfqws на роутере заметил, что если включаю на компе vpn (например outline) то инет вообще отваливается. Если остановить nfqws то vpn нормально работает. Почему так и как исправить?</p></td><td>2024-10-19T03:37:08.939Z</td></tr><tr><td>cage10tr(cage10tr)</td><td><p>Подскажите пожалуйста насчет установки компонента “Модули ядра подсистемы Netfilter”. У меня KeeneticOS 4.2.1 на роутере Beeline SmartBox Giga, на этой версии кнопка “Показать компоненты” неактивна.</p>
+<p>В таком случае пропускать этот пункт? Или есть какой-то другой способ установить?<br>
+<img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/6f9ebd3984f93954eade17625aa34c97bed7fc12.png" alt="image" data-base62-sha1="fVr5YaPkc5AqWuJGPhfo6VXaxwe" width="571" height="291"></p></td><td>2024-10-26T19:22:24.598Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>На “пиратских” кинетиках все компоненты уже установлены, так что это пропускаем.</p></td><td>2024-10-26T19:34:46.484Z</td></tr><tr><td>cage10tr(cage10tr)</td><td><p>Спасибо за подсказку, не знал об этом</p></td><td>2024-10-26T19:39:41.860Z</td></tr><tr><td>cage10tr(cage10tr)</td><td><p>Можно еще узнать насчет Entware?<br>
+как быть с ним если там нужно выбирать исходя из модели роутера<br>
+<img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/892029270bd20f6ed1c8e8ef6d85d297d1e8eea1.png" alt="image" data-base62-sha1="jz4jGDRBzx6ca2MMNQhLK09X1st" width="587" height="487"></p></td><td>2024-10-26T22:26:43.189Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>А что у вас написано в веб-админке на главной странице в графе “Модель”?</p></td><td>2024-10-26T23:08:30.975Z</td></tr><tr><td>cage10tr(cage10tr)</td><td><p>SmartBox Giga (KN-1010) RU<br>
+<img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/5de29a819eea7e60cbc528fd57b5f9268e13637f.png" alt="image" data-base62-sha1="doxTPTH2YRnAlLZRLCBONjcTyt9" width="407" height="80"></p></td><td>2024-10-27T11:37:19.715Z</td></tr><tr><td>cage10tr(cage10tr)</td><td><p>mipsel получается подойдет?</p></td><td>2024-10-27T11:38:47.456Z</td></tr><tr><td>azat_b</td><td><p>так точно.</p></td><td>2024-10-27T11:50:37.677Z</td></tr><tr><td>cage10tr(cage10tr)</td><td><aside class="quote no-group" data-username="LimiteR" data-post="228" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/l/c5a1d2/48.png" class="avatar"> LimiteR:</div>
+<blockquote>
+<p>В файле скрипта (etc/init.d/S51nqqws) для QUIC изменены порты с 443 на рендж 443:65535.</p>
+<pre><code class="lang-auto">RULE_QUIC="-t mangle -p udp --dport 443:65535 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:8 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num $NFQUEUE_NUM_QUIC --queue-bypass"
+</code></pre>
+<p>Разумеется, можно сообразить более элегантное решение. Вроде как по UDP портам достаточно обрабатывать 50000:65535. Но пока как-то так.</p>
+</blockquote>
+</aside>
+<p>Спасибо за помощь, все получилось.</p>
+<p>Последний вопрос остался, насчет дискорда. У меня почему-то нету файла S51nqqws, есть с похожим названием S51nfqws, но в нем нету строки RULE_QUIC чтобы изменить ее.</p>
+<p>Что с этим можно сделать чтобы дискорд заработал?</p></td><td>2024-10-27T12:38:52.611Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Это, вроде, уже неактуально и было исправлено. Discord должен работать без каких-либо ручных правок.</p></td><td>2024-10-27T14:16:11.779Z</td></tr><tr><td>cage10tr(cage10tr)</td><td><p>А реально, все работает по умолчанию. Это я сам и сломал когда начал менять параметры)</p>
+<p>Спасибо что помог разобраться <img src="https://ntc.party/images/emoji/twitter/handshake.png?v=12" title=":handshake:" class="emoji" alt=":handshake:" loading="lazy" width="20" height="20"></p></td><td>2024-10-27T14:31:29.340Z</td></tr><tr><td>kotik.neko</td><td><p>Та же самая проблема, причем при работе запрета на Кинетике, так и на роутере с OpenWRT. Телевизор Xiaomi с AndroidTV. Тоже загружает ролик на первые 7-12 секунд и намертво виснет. Закроешь/откроешь заново ролик - отлично воспроизводит. Хз, как это вылечить, тоже разные настройки nfqws и tpws пробовал</p></td><td>2024-11-02T16:18:49.860Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>а если “на пальцах” чем отличаются opkg от “пакетов” которые ставятся\удаляются галочками в стоковом кинетике без entware?</p>
+<p>и что или как можно сделать чтоб opkg-nfqws “превратить” в “полноценный” пакет?</p>
+<p>ведь через cli даже на стоке вроде можно менять “канал” откуда пакеты брать т.е. и без entware</p></td><td>2024-11-06T21:41:34.460Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>В стоковом кинетике нет пакетов. При установке компонента сервер вкомпиливает его в прошивку, присылает роутеру и производится перепрошивка роутера. Каждая установка/удаление компонента KeeneticOS = перепрошивка роутера. Отсюда и постоянные вопросы кинетиководов типа “а можно установить компонент, но чтобы прошивка при этом не обновлялась до последней версии”? (нельзя, по описанным выше причинам).</p>
+<p>Entware позволяет ставить и удалять пакеты, как в OpenWrt и прочих линуксах.</p>
+<aside class="quote no-group" data-username="Quqas" data-post="248" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>как можно сделать чтоб opkg-nfqws “превратить” в “полноценный” пакет?</p>
+</blockquote>
+</aside>
+<p>Разобрать прошивку с помощью <a href="https://github.com/keenetic/keenetic-sdk">SDK</a>, положить все нужные файлы из пакета nfqws (исполняемый файл, заранее настроенный конфиг (потому что файлы внутри прошивки вы после того, как вшили прошивку, редактировать не можете), правила файерволла) по нужным путям с нужными правами, собрать прошивку, прошить. При следующем обновлении прошивки или добавлении нового компонента, процесс придётся повторить, т.к. все ваши добавки, разумеется, будут затёрты.</p>
+<p>Подробнее вам подскажут на оф. форуме.</p></td><td>2024-11-06T21:43:14.967Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>ясно<br>
+а то эти утырки <img src="https://ntc.party/images/emoji/twitter/face_with_symbols_over_mouth.png?v=12" title=":face_with_symbols_over_mouth:" class="emoji" alt=":face_with_symbols_over_mouth:" loading="lazy" width="20" height="20"> за теже бабки новую extra 1714 лишили usb для флэшек. только момеды</p></td><td>2024-11-06T21:53:47.606Z</td></tr><tr><td>crosby_k(crosby_k)</td><td><p>Добрый день. Кто знает как решить проблему с ошибкой в системном журнале:<br>
+Opkg::Manager: /opt/etc/ndm/netfilter.d/000-zapret.sh: exit code 1.</p>
+<p>Может ли с этой ошибкой быть связана проблема, что ютуб работает примерно минуту, а потом перестает до следующего перезапуска zapret? или это надо копать конфиг со стратегиями?</p></td><td>2024-11-07T18:18:26.017Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Похоже, это ошмёток от какой-то другой установки zapret.</p>
+<p>Я бы на вашем месте удалил Entware и развернул <a href="https://github.com/Anonym-tsk/nfqws-keenetic">всё с нуля</a>.</p></td><td>2024-11-07T23:28:01.776Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>про openwrt вопрос, nftables это часть firewall4?<br>
+на этапе сборки самой openwrt нашёл где убрать firewall4 но такого же 3 там рядом нет<br>
++nftables и iptables по отдельности также не наблюдается хотя вроде везде смотрел<br>
+достаточно отключить fw4 чтоб  после пакет встал?</p>
+<p>речь про крайнюю 23ю wrt</p></td><td>2024-11-17T22:17:51.031Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="Quqas" data-post="253" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>nftables это часть firewall4</p>
+</blockquote>
+</aside>
+<p>firewall4 это файерволл, который под капотом использует nftables.</p>
+<p>Сама по себе nftables это подсистема ядра Linux, Это не какой-то отдельный пакет или программа.</p></td><td>2024-11-18T07:48:06.430Z</td></tr><tr><td>Quqas(Quqas)</td><td><p><span class="bbcode-s">отсюда вывод что на новых openwrt вообще не взлетит? или только уже установив “основу” можно как-то iptables вернуть? (видимо путём fw3)</span><br>
+понял. надо ориг  скрипт от самого запрета юзать чтоб nftables не удалять.<br>
+изначально думал этот скрипт пока не понял что раз не родной entwareкинетик а openwrt то и смысл теряется</p></td><td>2024-11-18T08:40:55.951Z</td></tr><tr><td>and7ey</td><td><blockquote>
+<p><strong>Если у роутера Keenetic нет USB-порта, то инструкция вам не подойдёт.</strong><br>
+(долбите техподдержку Keenetic, чтобы они реализовали возможность развернуть Entware на внутренней памяти при отсутствии USB-порта)</p>
+</blockquote>
+<p>подскажите, плз, это ограничение еще актуально с учетом <a href="https://help.keenetic.com/hc/ru/articles/360021888880" rel="noopener nofollow ugc">https://help.keenetic.com/hc/ru/articles/360021888880</a>?<br>
+и дружит ли это решение с <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-%D0%B0%D0%BD%D1%82%D0%B8%D0%B7%D0%B0%D0%BF%D1%80%D0%B5%D1%82-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic/7768" class="inline-onebox">Обход блокировок в России через АнтиЗапрет на прошивке Keenetic</a>?</p></td><td>2025-01-14T16:25:06.334Z</td></tr><tr><td>azat_b</td><td><p>Да, актуально. Пока нет возможности установить на внутреннюю память при отсутствии USB-порта.</p></td><td>2025-01-14T16:37:34.883Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="and7ey" data-post="256" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/and7ey/48/6154_2.png" class="avatar"> and7ey:</div>
+<blockquote>
+<p>ограничение еще актуально с учетом</p>
+</blockquote>
+</aside>
+<p>В начале указанной вами статьи в базе знаний Keenetic перечислены роутеры, для которых это актуально.</p>
+<aside class="quote no-group" data-username="and7ey" data-post="256" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/and7ey/48/6154_2.png" class="avatar"> and7ey:</div>
+<blockquote>
+<p>и дружит ли это решение с <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-%D0%B0%D0%BD%D1%82%D0%B8%D0%B7%D0%B0%D0%BF%D1%80%D0%B5%D1%82-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic/7768">Обход блокировок в России через АнтиЗапрет на прошивке Keenetic</a></p>
+</blockquote>
+</aside>
+<p>А смысл? Если вы можете установить nfqws, то его и используйте для обхода блокировок. Зачем вам ДВА способа одновременно?</p></td><td>2025-01-14T16:47:35.280Z</td></tr><tr><td>and7ey</td><td><p>у меня ax3000t, прошитый в кинетик KN-3812, в нем нет usb-порта - не могу понять сработает ли</p>
+<p>списка роутеров чего-то не вижу, только <a href="https://github.com/Anonym-tsk/nfqws-keenetic/discussions/1" class="inline-onebox" rel="noopener nofollow ugc">Проверено на роутерах · Anonym-tsk/nfqws-keenetic · Discussion #1 · GitHub</a> это нашел<br>
+upd. вы правите свой пост, что-то я уже запутался)) если у меня нет usb-порта, но я могу поставить entware, то все должно работать?</p>
+<p>про антизапрет понял, спасибо</p></td><td>2025-01-14T16:51:50.596Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="and7ey" data-post="259" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/and7ey/48/6154_2.png" class="avatar"> and7ey:</div>
+<blockquote>
+<p>прошитый в кинетик KN-3812</p>
+</blockquote>
+</aside>
+<p>Если в начале статьи (на жёлтом фоне) не упомянут этот роутер, то Entware вы не развернёте. Если упомянут, то развернёте.</p>
+<p>При условии, что в портированной прошивке есть компонент OPKG.</p>
+<p>Т.е. для неродных кинетиков нужно ориентироваться на то, установлен ли компонент сборщиком прошивки (в свою очередь на то, может ли сборщик это сделать, влияет то, есть ли USB-порт у Keenetic, с которого портирована прошивка).</p></td><td>2025-01-14T16:54:14.103Z</td></tr><tr><td>and7ey</td><td><p>В общем, поставил - работает. Буду наблюдать.<br>
+PS. Заняло ~15 Мб из 48 доступных. Веб-интерфейс заработал только после перезагрузки роутера.</p></td><td>2025-01-14T17:59:19.871Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>добрался таки до “кинетика” но всё упёрлось в невозможность выбора компонентов… отсюда вопрос - а сам этот netfiter ядра через opkg можно доставить или не судьба?</p>
+<p>тут <a href="http://bin.entware.net/mipselsf-k3.4/Packages.html" class="inline-onebox" rel="noopener nofollow ugc">Packages list</a> с netfilter тьма, а вот с kmod уже капли и похожего нету</p></td><td>2025-01-16T07:05:54.031Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>На “пиратских” кинетиках всё уже установлено. На родных нужно ставить именно через выбор компонентов.</p></td><td>2025-01-16T11:43:57.010Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>если бы… ни одной прошивки чтоб там был нетфильтр не подобрал.  как это “по кинетиковски” называется х.з. ибо список то не показывает  – но при рестарте запрета лог что нету *queue.ko</p></td><td>2025-01-16T20:19:31.564Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>А версия прошивки-то какая?</p></td><td>2025-01-16T20:47:32.088Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>самая последняя что есть 2.16 или 2.07 с opkg же</p>
+<p>речь про omni\omni ii он же dlink-620</p>
+<p>знаю что работает у людей</p>
+<p>Policy ‘nfqws’ not found. All traffic will be processed.<br>
+Cannot find nfnetlink_queue.ko module<br>
+Cannot find xt_multiport.ko module<br>
+Cannot find xt_connbytes.ko module<br>
+Cannot find xt_NFQUEUE.ko module</p>
+<p>видать изза отсутствия модуля</p></td><td>2025-01-16T20:51:06.756Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>В 2.16 должно быть</p><aside class="quote" data-post="194" data-topic="9426">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/9426/194">Обсуждение: Обход замедления YouTube и блокировок на прошивке Keenetic с помощью nfqws / tpws (zapret)</a> <a class="badge-category__wrapper " href="/c/manuals/42"><span data-category-id="42" style="--category-badge-color: #F7941D; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="VPN/Proxy installation and configuration instructions, censorship circumvention software tips and tricks"><span class="badge-category__name">Manuals and How-Tos</span></span></a>
+  </div>
+  <blockquote>
+    Последняя официальная версия прошивки для этого роутера - 2.08. Модули Netfilter <a href="https://forum.keenetic.com/topic/1514-%D0%B6%D1%83%D1%80%D0%BD%D0%B0%D0%BB-%D0%B8%D0%B7%D0%BC%D0%B5%D0%BD%D0%B5%D0%BD%D0%B8%D0%B9-209/#comment-23993">добавлены в версии 2.09</a>, поэтому <a href="https://forum.keenetic.com/announcement/5-%D0%B3%D0%B4%D0%B5-%D0%B2%D0%B7%D1%8F%D1%82%D1%8C-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B5-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B8/">переходите на канал обновлений legacy или draft</a>, где доступны <a href="https://forum.keenetic.com/topic/7321-%D0%B6%D1%83%D1%80%D0%BD%D0%B0%D0%BB-%D0%B8%D0%B7%D0%BC%D0%B5%D0%BD%D0%B5%D0%BD%D0%B8%D0%B9-216-legacy/">неофициальные прошивки</a> 2.11 и 2.16 соответственно.
+  </blockquote>
+</aside>
+
+<p>Возможно, их нет именно для Omni, по какой-то причине не собрали.</p></td><td>2025-01-16T21:00:28.452Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>На Omni II модулей тоже нет, как отдельного компонента, но они упомянуты в качестве зависимостей OPKG. Проверять это экспериментально нет возможности, могу лишь смотреть</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/bd646d0f24f0000385320b12374cb503f2752874.png" data-download-href="https://ntc.party/uploads/default/bd646d0f24f0000385320b12374cb503f2752874" title="firefox_g25j7VsnMV"><img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/bd646d0f24f0000385320b12374cb503f2752874.png" alt="firefox_g25j7VsnMV" data-base62-sha1="r1rp1E2Q0WOPwGqrIQHXjX9czwo" width="547" height="500" data-dominant-color="EFEFF0"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">firefox_g25j7VsnMV</span><span class="informations">613×560 42.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2025-01-16T21:07:41.473Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>всё правильно только канал delta и 2.16 последняя для сабжа. и видать не врёт скрин… просто в тех что выложены opkg есть а нетфильтр включать надо а никак…</p>
+<p>суть что через opkg никак его (нефильтр) не добавить?</p>
+<p>остаётся на 4пда выпрашивать чтоб собрали как надо и поделились…</p></td><td>2025-01-16T21:08:48.895Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>В Entware их, вроде, нет.</p>
+<p>А собрать прошивку с модулями, если их по какой-то причине для этих роутеров вообще не выложили на сервере, может лишь сама компания Keenetic</p></td><td>2025-01-16T21:09:56.864Z</td></tr><tr><td>Quqas(Quqas)</td><td><aside class="quote no-group" data-username="dartraiden" data-post="270" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>Omni II</p>
+</blockquote>
+</aside>
+<p>видать не зависимости, а именно как доп.пакеты. которые вкл\выкл можно</p>
+<p>ибо в той что юзал тотже ntfs\fat пропал из поддержки - т.е. вырезали чтоб меньше размер</p></td><td>2025-01-16T21:12:23.152Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Я не очень понимаю. Если у вас оригинальный Omni, вы можете сами ставить какие угодно пакеты. Должны быть доступны все. Другое дело, что все не влезут.</p></td><td>2025-01-16T21:13:29.138Z</td></tr><tr><td>Quqas(Quqas)</td><td><aside class="quote no-group" data-username="dartraiden" data-post="272" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>лишь сама компания Keenetic</p>
+</blockquote>
+</aside>
+<p>отнюдь<br>
+имеется ввиду ты в своём роутере галки раставил как захотел и через вебморду сгенерённый firmware скачал</p></td><td>2025-01-16T21:14:15.018Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="Quqas" data-post="275" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>имеется ввиду ты в своём роутере галки раставил как захотел и через вебморду сгенерённый firmware скачал</p>
+</blockquote>
+</aside>
+<p>И если по какой-то причине сервер в прошивку эти модули не вставляет, об чём я и говорил, то… помочь может лишь сама компания</p></td><td>2025-01-16T21:15:03.647Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>именно</p>
+<p>только он “не настоящий” а взаимодействие с владельцами настоящих пока не наладить</p></td><td>2025-01-16T21:15:20.329Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Ага, теперь понятее; ну вот, если он не настоящий, то обращаться надо к тому, кто собирал эту прошивку. Видимо, он решил пожертвовать модулями, чтобы уместить что-то более нужное.</p></td><td>2025-01-16T21:16:01.490Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Дописал в <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/8809">инструкцию</a> небольшой грустный текст для “неоригинальных кинетиков”.</p>
+<p>Вообще, модулей Netfilter нет как отдельного компонента уже даже в 4.2 (и пользователи будут напрасно их искать в списке). Но, так как они идут зависимостью к OPKG, то проще написать “нужны OPKG и IPv6”, а эта парочка (на оригинальных кинетиках) всяко притащит с собой и модули… ну а на неоригинальных могут быть всякие чудеса, что там сборщик накосячил.</p></td><td>2025-01-16T21:24:57.701Z</td></tr><tr><td>1unknown(Unknown)</td><td><aside class="quote no-group" data-username="Quqas" data-post="266" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>Policy ‘nfqws’ not found. All traffic will be processed.<br>
+Cannot find nfnetlink_queue.ko module<br>
+Cannot find xt_multiport.ko module<br>
+Cannot find xt_connbytes.ko module<br>
+Cannot find xt_NFQUEUE.ko module</p>
+</blockquote>
+</aside>
+<p>Стоит на Asus RT-AX86U и при каждом запуске пишет тоже самое, но всё работает.<br>
+Проверяйте, возможно всё работает. Если нет, то попробуйте другую конфигурацию, может быть это поможет.</p></td><td>2025-01-16T23:35:33.105Z</td></tr><tr><td>Quqas(Quqas)</td><td><aside class="quote no-group" data-username="dartraiden" data-post="279" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>уже даже в 4.2</p>
+</blockquote>
+</aside>
+<p>а в старых прошивках не знаешь как этот компонент в терминах кинетика завётся?<br>
+&amp;component=***  если через cli?</p>
+<p>нашёл почти чела готового собрать - но ему строку надо а на галки он лениться</p>
+<p>в cli если components list сделать авось можно найти (на рутере где прожат модульядра netfilter)</p>
+<p>если проша до 4.1 ессно</p></td><td>2025-01-17T00:25:47.690Z</td></tr><tr><td>Quqas(Quqas)</td><td><aside class="quote no-group" data-username="1unknown" data-post="280" data-topic="9426">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>пишет тоже самое</p>
+</blockquote>
+</aside>
+<p>ну х.з. я заведомо рабочие параметры в конфиг вписывал -рестартовал и нифига. заглушки нет но и сайты не открывает. блоченные.</p></td><td>2025-01-17T00:27:34.017Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Без понятия, у меня все роутеры уже на 4 версии прошивки.</p></td><td>2025-01-17T07:11:21.481Z</td></tr><tr><td>KaznilkaRUS(Kaznilka Rus)</td><td><p>Тыкните пожалуйста пальцем, где в конфиге NQFWS прописать аргумент, например Auto, чтобы все работало без антизапрета. Вроде все делаю правильно, но ничего не работает</p></td><td>2025-01-17T15:32:17.752Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="onebox githubrepo" data-onebox-src="https://github.com/Anonym-tsk/nfqws-keenetic?tab=readme-ov-file#%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B8">
+  <header class="source">
+
+      <a href="https://github.com/Anonym-tsk/nfqws-keenetic?tab=readme-ov-file#%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B8" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/d74b0d9e8e544b94cd58dd387604472b1e19b216_2_690x344.png" class="thumbnail" data-dominant-color="EBEAE9">
+
+  <h3><a href="https://github.com/Anonym-tsk/nfqws-keenetic?tab=readme-ov-file#%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B8" target="_blank" rel="noopener">GitHub - Anonym-tsk/nfqws-keenetic</a></h3>
+
+    <p><span class="github-repo-description">Contribute to Anonym-tsk/nfqws-keenetic development by creating an account on GitHub.</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<pre><code class="lang-auto"># Режим работы (auto, list, all)
+NFQWS_EXTRA_ARGS="..."
+</code></pre>
+<p>Для начала можно попробовать <code>all</code> и подобрать рабочую стратегию. Затем уже переключить на <code>auto</code>.</p></td><td>2025-01-17T15:38:46.648Z</td></tr><tr><td>KaznilkaRUS(Kaznilka Rus)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/5515d113a2c6f154199333679d9e3331d6dfbf25.png" data-download-href="https://ntc.party/uploads/default/5515d113a2c6f154199333679d9e3331d6dfbf25" title="Снимок экрана 2025-01-17 205601"><img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/5515d113a2c6f154199333679d9e3331d6dfbf25.png" alt="Снимок экрана 2025-01-17 205601" data-base62-sha1="c8HkheJbsWNWFuGUfyCXPoiqKfX" width="689" height="102" data-dominant-color="FBFBFB"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Снимок экрана 2025-01-17 205601</span><span class="informations">1371×204 7.68 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Как я понимаю, чтобы атрибут заработал, нужно оставить его в конфиге один, остальные убрать ?<br>
+То есть вот это</p>
+<h1><a name="p-80007-all-applies-rules-to-all-traffic-except-domains-from-excludelist-1" class="anchor" href="#p-80007-all-applies-rules-to-all-traffic-except-domains-from-excludelist-1"></a>all  - applies rules to all traffic except domains from exclude.list</h1>
+<p>#NFQWS_EXTRA_ARGS=“–hostlist-exclude=/opt/etc/nfqws/exclude.list”<br>
+я в конфиге оставляю, остальные сношу из конфига ?</p></td><td>2025-01-17T15:58:41.147Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><pre><code class="lang-auto"># auto - automatically detects blocked resources and adds them to the auto.list
+NFQWS_EXTRA_ARGS="--hostlist=/opt/etc/nfqws/user.list --hostlist-auto=/opt/etc/nfqws/auto.list --hostlist-auto-debug=/opt/var/log/nfqws.log --hostlist-exclude=/opt/etc/nfqws/exclude.list"
+
+# list - applies rules only to domains in the user.list
+#NFQWS_EXTRA_ARGS="--hostlist=/opt/etc/nfqws/user.list"
+
+# all  - applies rules to all traffic except domains from exclude.list
+#NFQWS_EXTRA_ARGS="--hostlist-exclude=/opt/etc/nfqws/exclude.list"
+</code></pre>
+<p>То, что с решёткой игнорируется. Соответственно по умолчанию используется первый вариант (соответствует auto). Если вы хотите режим all, то вам надо первую строку <code>NFQWS_EXTRA_ARGS</code> законнментировать (вписав символ решётки перед <code>NFQWS_EXTRA_ARGS</code>), а последнюю строку расскомментировать:</p>
+<pre><code class="lang-auto"># auto - automatically detects blocked resources and adds them to the auto.list
+#NFQWS_EXTRA_ARGS="--hostlist=/opt/etc/nfqws/user.list --hostlist-auto=/opt/etc/nfqws/auto.list --hostlist-auto-debug=/opt/var/log/nfqws.log --hostlist-exclude=/opt/etc/nfqws/exclude.list"
+
+# list - applies rules only to domains in the user.list
+#NFQWS_EXTRA_ARGS="--hostlist=/opt/etc/nfqws/user.list"
+
+# all  - applies rules to all traffic except domains from exclude.list
+NFQWS_EXTRA_ARGS="--hostlist-exclude=/opt/etc/nfqws/exclude.list"
+</code></pre>
+<p>После этого весь трафик будет пропускаться через nfqws и дальше нужно отыскать такое сочетание правил коверкарья трафика, которое будет пролезать через блокировки конкретно у вашего провайдера.</p></td><td>2025-01-17T18:07:02.263Z</td></tr><tr><td>Bashta(Vladsssssss)</td><td><p>А есть какие либо примеры правил “коверканья” трафика? Что за что отвечает итд</p>
+<pre><code class="lang-auto">!!!!! AVAILABLE !!!!!
+
+!!!!! curl_test_https_tls12: working strategy found for ipv4 rutracker.org : nfqws --dpi-desync=multidisorder --dpi-desync-split-pos=2 !!!!!
+
+clearing nfqws redirection
+
+* SUMMARY
+ipv4 rutracker.org curl_test_http : nfqws --methodeol
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=multidisorder --dpi-desync-split-pos=midsld
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=fakedsplit --dpi-desync-ttl=5 --dpi-desync-split-pos=method+2
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=fakedsplit --dpi-desync-fooling=datanoack --dpi-desync-split-pos=method+2
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=fakedsplit --dpi-desync-fooling=md5sig --dpi-desync-split-pos=method+2
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=fake,multisplit --dpi-desync-ttl=5 --dpi-desync-split-pos=method+2
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=fake,multisplit --dpi-desync-fooling=datanoack --dpi-desync-split-pos=method+2
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=fake,multisplit --dpi-desync-fooling=md5sig --dpi-desync-split-pos=method+2
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=multisplit --dpi-desync-split-pos=method+2 --dpi-desync-split-seqovl=1
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=fakedsplit --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=method+2
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=fake,multisplit --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=method+2
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=fake,multisplit --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=midsld --dpi-desync-fake-http=0x00000000
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=fake,multisplit --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=method+2
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=syndata,multisplit --dpi-desync-split-pos=method+2
+ipv4 rutracker.org curl_test_http : nfqws --dpi-desync=syndata,multisplit --dpi-desync-fake-syndata=/opt/tmp/nfqws-keenetic/strategy/zapret/zapret-v69.9/files/fake/http_iana_org.bin --dpi-desync-split-pos=method+2
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=multidisorder --dpi-desync-split-pos=2
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=fakedsplit --dpi-desync-ttl=5 --dpi-desync-split-pos=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=fakedsplit --dpi-desync-fooling=badseq --dpi-desync-split-pos=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=fakedsplit --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=fakedsplit --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=fake,multisplit --dpi-desync-ttl=5 --dpi-desync-split-pos=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=fake,multisplit --dpi-desync-fooling=badseq --dpi-desync-split-pos=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=fake,multisplit --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=fake,multisplit --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=multisplit --dpi-desync-split-pos=10 --dpi-desync-split-seqovl=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=multisplit --dpi-desync-split-pos=10,sniext+1 --dpi-desync-split-seqovl=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=multisplit --dpi-desync-split-pos=10,sniext+4 --dpi-desync-split-seqovl=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=multisplit --dpi-desync-split-pos=10,midsld --dpi-desync-split-seqovl=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=multisplit --dpi-desync-split-pos=2 --dpi-desync-split-seqovl=336 --dpi-desync-split-seqovl-pattern=/opt/tmp/nfqws-keenetic/strategy/zapret/zapret-v69.9/files/fake/tls_clienthello_iana_org.bin
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=fakedsplit --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=fake,multisplit --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=midsld
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=fake,multisplit --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=midsld
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=syndata,multisplit --dpi-desync-split-pos=1
+ipv4 rutracker.org curl_test_https_tls12 : nfqws --dpi-desync=syndata,multisplit --dpi-desync-fake-syndata=/opt/tmp/nfqws-keenetic/strategy/zapret/zapret-v69.9/files/fake/tls_clienthello_iana_org.bin --dpi-desync-split-pos=1
+
+Please note this SUMMARY does not guarantee a magic pill for you to copy/paste and be happy.
+Understanding how strategies work is very desirable.
+This knowledge allows to understand better which strategies to prefer and which to avoid if possible, how to combine strategies.
+Blockcheck does it's best to prioritize good strategies but it's not bullet-proof.
+It was designed not as magic pill maker but as a DPI bypass test tool.
+
+press enter to continue
+</code></pre>
+<p>Не совсем понимаю как отредактировать мой конфиг основываясь на проведённый тест<br>
+Ниже мой стандартный конфиг после установки на кинетик</p>
+<pre><code class="lang-auto"># Provider network interface, e.g. eth3
+# You can specify multiple interfaces separated by space, e.g. ISP_INTERFACE="eth3 nwg1"
+ISP_INTERFACE="eth3"
+
+# All arguments here: https://github.com/bol-van/zapret (search for `nfqws` on the page)
+# HTTP(S) strategy
+NFQWS_ARGS="--dpi-desync=fake,multisplit --dpi-desync-split-pos=1,midsld --dpi-desync-ttl=0 --dpi-desync-repeats=16 --dpi-desync-fooling=badseq,md5sig --dpi-desync-fake-tls=/opt/etc/nfqws/tls_clienthello.bin"
+
+# QUIC strategy
+NFQWS_ARGS_QUIC="--filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=11 --dpi-desync-fake-quic=/opt/etc/nfqws/quic_initial.bin"
+
+# UDP strategy (doesn't use lists from NFQWS_EXTRA_ARGS)
+NFQWS_ARGS_UDP="--filter-udp=50000-50099 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-repeats=6 --dpi-desync-cutoff=n2"
+
+# auto - automatically detects blocked resources and adds them to the auto.list
+NFQWS_EXTRA_ARGS="--hostlist=/opt/etc/nfqws/user.list --hostlist-auto=/opt/etc/nfqws/auto.list --hostlist-auto-debug=/opt/var/log/nfqws.log --hostlist-exclude=/opt/etc/nfqws/exclude.list"
+
+# list - applies rules only to domains in the user.list
+#NFQWS_EXTRA_ARGS="--hostlist=/opt/etc/nfqws/user.list"
+
+# all  - applies rules to all traffic except domains from exclude.list
+#NFQWS_EXTRA_ARGS="--hostlist-exclude=/opt/etc/nfqws/exclude.list"
+
+# IPv6 support
+IPV6_ENABLED=0
+
+# TCP ports for iptables rules
+TCP_PORTS=443
+
+# UDP ports for iptables rules
+UDP_PORTS=443,50000:50099
+
+# Keenetic policy name
+POLICY_NAME="nfqws"
+
+# Syslog logging level (0 - silent, 1 - debug)
+LOG_LEVEL=0
+
+NFQUEUE_NUM=200
+USER=nobody
+CONFIG_VERSION=5
+
+</code></pre></td><td>2025-01-17T19:47:34.238Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>это заняло кучу времени чтоб сделали нужную прошу…<br>
+на всякий случай названья компонентов:</p>
+<pre><code class="lang-auto">opkg-kmod-netfilter
+opkg-kmod-netfilter-addons
+</code></pre>
+<p>чтоб не только в вебморде (ip6 тоже нужен компонент так и зовётся)</p>
+<p>и только после этого даже на этом старье взлетело - кол-во ненайденных  <strong>.ko</strong>   сократилось до 1 и он якобы вовонутре ядра</p>
+<p>печаль только что скопированные стратегии с компа в лоб хер взлетели… надо подбирать</p>
+<p>дефолтные тоже мимо. тем паче что 80 порт и вовсе не охвачен</p></td><td>2025-01-18T10:28:43.735Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>а теперь пытаюсь с политикой разобраться<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/75c30edc5e81f8e71ed0094ea6b0949e5d1ab5ee.png" data-download-href="https://ntc.party/uploads/default/75c30edc5e81f8e71ed0094ea6b0949e5d1ab5ee" title="image"><img src="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/75c30edc5e81f8e71ed0094ea6b0949e5d1ab5ee_2_690x330.png" alt="image" data-base62-sha1="gNLLZcShvMQ8ws6vzthi1V3UyEC" width="690" height="330" srcset="обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/75c30edc5e81f8e71ed0094ea6b0949e5d1ab5ee_2_690x330.png, обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/75c30edc5e81f8e71ed0094ea6b0949e5d1ab5ee.png 1.5x, обсуждение-обход-замедления-youtube-и-блокировок-на-прошивке-keenetic-с-помощью-nfqws-tpws-zapret/75c30edc5e81f8e71ed0094ea6b0949e5d1ab5ee.png 2x" data-dominant-color="EFF1F2"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1029×493 40.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>т.е. на момент установки скрипт правильно нашёл ISP_INTERFACE=</p>
+<p>было подключено по проводу - заработало после поправки стратегий</p>
+<p>а дальше я добавил момед (и допустим могу другой потом добавить  т.е. с новым cdc-br)  - единственный способ это конфиг править и в ISP_INTERFACE= через пробел добавить новое или политика какраз для этого и нужна?  т.е. сможет ли она фильтровать если в ISP_INTERFACE= только eth2.2 а инет щас через cdc0 ?</p>
+<p>или неправильно понял и наоборот логика? т.е. не все что в isp указаны будут обрабатываться если в политике меньше?</p>
+<p>p.s.<br>
+<em>ваще шляпа если политос включать… сначала неработало потомучто кинетиковый iptables не хавает порты через дефис - нужно двоеточие.  потом когда разобрался и оба инета в isp добавил всё заработало, но опять вернулся к созданью политики и напрочь перестало.совсем. пока назад политос не удалил и не рестартнул. кароче нужен пример от автора что имелось в виду про политику…</em></p>
+<p>p.p.s с политикой разобрался - это не про провайдеров а про клиентов которых ещё и регать на кинетике надо чтоб появились в gui = почему бы и нет…</p>
+<p>а вот предложенье про конфиг - заслуживает внимания - у самого уже 3 варика прописал : провод, момед и вайвай клиент</p></td><td>2025-01-18T14:01:16.880Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>и ещё мысль в плане конфига - ладно я ещё соображаю как новый интерфейс и куда вписать…<br>
+а для тупых надо (рац.предложение) добавить команду в ssh и кнопку на вебморде - “обновить конфиг” в 2х вариантах <strong>целиком</strong> - если какойто васян намудрил в нём до неработоспособности и <strong>частично</strong> в плане обновить только часть ISP_INTERFACE= я проверял скрипт  правильно прописывает и момед и провод - другое дело для этого целиком надо удалить оба пакета и заного поставить. а команда обновленья конфиг не трогает</p></td><td>2025-01-18T20:31:52.097Z</td></tr><tr><td>drive33</td><td><p>Здравствуйте!<br>
+Подскажите, если все сделал по инструкции <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/8809">Запрет</a>, то нужно ли оставлять опенвпн подключение к <a href="https://ntc.party/t/%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BD%D0%B0-zyxel-keenetic-ultra/698/10">Антизапрету</a>?</p>
+<p>Спасибо за обратную связь!</p></td><td>2025-01-23T20:06:50.317Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Нетрудно проверить:</p>
+<ol>
+<li>Добавьте в Системный профиль DNS какой-нибудь DoH-сервер. Например, <code>https://dns.google/dns-query</code></li>
+<li>Отключите OpenVPN-подключение АнтиЗапрета на роутере</li>
+<li>Перезагрузите своё клиентское устройство (компьютер, смартфон), чтобы сбросился кэш DNS.</li>
+</ol>
+<p>Если после этого обход блокировок на этом устройстве будет работать нормально, то АнтиЗапрет не нужен.<br>
+Вернуть всё обратно несложно: просто откатите обратно то, что сделали в 1-2, и снова перезагрузите.</p></td><td>2025-01-23T22:39:00.672Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>никогда ни vpn ни прокси не пользовался. для обхода.</p>
+<p>исключение di.fm и holavpn но это про другое. там геоблок.</p>
+<p>если настроить норм.стратегию без листов - в впн смыслу не вижу. тем более сами vpn постоянно пытаются детектить и рубить =&gt; нужен обфусикатор - а с ним и блок обходится. правда утырки чебурнетные всё чаще по ip стали блочить - и тут либо альтернативные ip в hosts либо таки vpn</p></td><td>2025-01-23T22:54:51.832Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Пара наблюдений, без выводов</p>
+<ol>
+<li>
+<p>Xiaomi 3G, перешитый в Keenetic: при <code>POLICY_EXCLUDE=1</code> (и соответственно созданной политике, куда добавлены устройства, для которых обход блокировок применять не нужно) через несколько часов nfqws перестаёт оказывать эффект - он запущен, но блокировки работают в полную силу. С <code>0</code> (когда в политику добавляются устройства, которым нужен обход) такой проблемы нет.</p>
+</li>
+<li>
+<p>Телефон на Android, подключённый к этому роутеру, мобильный Firefox: эффекта вообще нет, заблокированные ресурсы недоступны. Из Chrome, установленном на этом же устройстве, всё доступно. В Firefox последовательно отключено вообще всё, что может влиять (HTTP/2, HTTP/3, ECH, Kyber) - пока эффекта ноль.</p>
+</li>
+</ol></td><td>2025-01-25T06:41:13.181Z</td></tr><tr><td>Shararamosh(Богдан Падалко)</td><td><p>У кого-нибудь было такое, что во время проверки стратегий происходит внезапное отключение от узла? При этом каждый раз на разных стратегиях и без вывода результата.</p>
+<pre><code class="lang-auto">- checking nfqws --dpi-desync=fakedsplit --dpi-desync-ttl=10 --dpi-desync-split-pos=midsld
+seccomp: Invalid argument
+seccomp: this can be safely ignored if kernel does not support seccomp
+nfq_create_queue(): Operation not permitted
+
+
+Подключение к узлу утеряно.
+</code></pre></td><td>2025-03-16T08:09:24.433Z</td></tr>
+    </table>
+      </body>
+    </html>

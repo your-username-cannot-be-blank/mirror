@@ -1,0 +1,72 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>консультация-по-не-заблокированным-vpn</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0human</td><td><p>Приветствую.<br>
+Мне нужна реализация VPN(именно VPN, не прокси), которую не блокируют в РФ. Скорость при этом особо не важна. Слышал, что существуют какие-то патчи для OpenVPN, помогают ли они обходить блокировки на данный момент, не теряются ли при их использовании преимущества протокола?</p>
+<p>У Amnezi’и есть OpenVPN over SS. Можете рассказать чуть подробнее про это? Shadowsocks играет роль транспорта? По сути это прокси? В чём тогда смысл?</p>
+<p>Существуют ли какие-то другие протоколы VPN, которые не блокируются? Рассмотрю все варианты</p></td><td>2023-10-20T21:14:21.257Z</td></tr><tr><td>0ka(0ka)</td><td><p>пробуйте ovpn over http/socks proxy</p></td><td>2023-10-20T23:26:25.329Z</td></tr><tr><td>AmneziaVPN</td><td><p>Здравствуйте!</p>
+<p>Помимо OpenVPN over Shadowsocks (здесь OpenVPN трафик заворачивается в Shadowsocks для того, чтобы скрыть факт использования OpenVPN и сделать трафик похожим на обычный HTTPS трафик, то есть обфусцировать его) у нас есть OpenVPN over Cloak (OpenVPN завернутый в <a href="https://github.com/cbeuw/Cloak" rel="noopener nofollow ugc"><strong>Cloak</strong></a>, который также обфусцирует трафик + добавляет защиту от Active Probing) и относительно недавно мы еще выпустили собственную реализацию WireGuard - AmneziaWG (обфусцированный WireGuard, в котором много чего можно будет настраивать, но об этом мы расскажем немного позже на этой же площадке <img src="https://ntc.party/images/emoji/twitter/smiley.png?v=12" title=":smiley:" class="emoji" alt=":smiley:" loading="lazy" width="20" height="20"> ).</p>
+<p>Еще есть такие протоколы как - OpenConnect в котором есть SSL VPN (+недавно они выпустили патч с защитой от Active Probing) и SoftEther (у которого также есть SSL VPN, а еще VPN over DNS и VPN over ICMP).</p></td><td>2023-10-20T23:56:18.132Z</td></tr><tr><td>0human</td><td><p>Каким образом shadowsocks сделает трафик похожим на HTTPS? Насколько мне известно, SS “делает трафик не похожим ни на что”.<br>
+Так и не понял в чём отличия OpenVPN over SS от обычного SS?</p>
+<p>У cloak много ограничений, и разве он умеет “пропускать” весь трафик, со всех портов?</p>
+<p>Про AmneziaWG буду ждать подробностей, про OpenConnect и SoftEther обязательно почитаю.</p></td><td>2023-10-21T09:25:24.421Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="0human" data-post="5" data-topic="6037">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/838e76/48.png" class="avatar"> 0human:</div>
+<blockquote>
+<p>Так и не понял в чём отличия OpenVPN over SS от обычного SS?</p>
+</blockquote>
+</aside>
+<p>В том, что после OpenVPN over SS будет полноценный OpenVPN, через который автоматически пойдёт весь трафик приложений, в том числе UDP, ICMP. Надо только в OpenVPN задать исключение для IP SS, чтобы не было рекурсии. А OpenVPN будет ходить через вышестоящий локальный прокси SS для маскировки провайдеру. Да, трафик SS не похож ни на что, это не HTTPS для провайдера. Ну и что такого?</p>
+<p>Если хотите, чтобы было похоже на HTTPS с полноценным VPN, можно использовать OpenVPN TCP over V2Ray/Trojan.</p></td><td>2023-10-21T09:33:13.469Z</td></tr><tr><td>0human</td><td><p>Вот теперь понятно, спасибо.</p>
+<p>Остаётся найти и надеяться, что существует готовое решение по OVPN over v2ray/trojan(если ещё и с веб-интерфейсом – тогда вообще огонь), или хотя бы SS. Amnezia использовать не хочу, но подожду инфу про AWG</p></td><td>2023-10-21T09:46:52.130Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Можно и <a href="https://habr.com/articles/731608/">так</a> замаскироваться под HTTPS. Там готовый конфиг для сервера. И на роутере завернуть весь трафик туда. Под OpenWrt есть готовые пакеты: установил, включил, поехали. А в Keenetic достаточно установить системный компонент “прокси” и указать ему, где висит SOCKS-прокси XRay. После чего политиками можно завернуть трафик всех клиентов или определенных туда.</p></td><td>2023-10-21T14:05:15.374Z</td></tr><tr><td>0human</td><td><p>Слышал, что в прокси с Reality не получается завернуть другие протоколы. Это не так?</p></td><td>2023-10-21T14:15:48.522Z</td></tr><tr><td>0ka(0ka)</td><td><p>всё получается, только через reality/tcp/ws вы потеряете скорость на любом udp протоколе т.к. v2ray делает udp over tcp. В Wireguard очень сильно теряется скорость вплоть до 20мбит/сек, хотя нагрузка на цп низкая</p></td><td>2023-10-21T14:59:18.125Z</td></tr><tr><td>0human</td><td><p>del</p></td><td>2023-10-21T19:26:09.820Z</td></tr><tr><td>0human</td><td><p>Погуглил и наконец разобрался, всем спасибо!</p></td><td>2023-10-21T19:40:12.515Z</td></tr><tr><td>AmneziaVPN</td><td><p><a class="mention" href="/u/0human">@0human</a> , если ваше желание изучить AmneziaWG протокол все еще актуально &gt;</p><aside class="quote quote-modified" data-post="1" data-topic="6081">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/amneziavpn/48/3789_2.png" class="avatar">
+    <a href="https://ntc.party/t/call-the-testers-amneziawg-protocol/6081">Call the testers: AmneziaWG protocol</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/10"><span data-category-id="10" style="--category-badge-color: #0088CC; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Discussion of technical, political and economical aspects of internet censorship in different countries"><span class="badge-category__name">Internet censorship all around the world</span></span></a>
+  </div>
+  <blockquote>
+    Всем привет! 
+Во время недавних блокировок OpenVPN и WireGuard команда Amnezia VPN задумалась над созданием собственного протокола, который сможет помочь пользователям обходить блокировки при этом сильно не снижая скорость (так как OpenVPN over Cloak, который мы рекомендовали к установке - скоростью не радовал по понятным причинам). 
+Представляем вам нашу реализацию протокола WireGuard - <a href="https://github.com/amnezia-vpn/amnezia-wg" rel="noopener nofollow ugc">AmneziaWG</a>. 
+AmneziaWG (AmneziaWireGuard) - это форк обычного WireGuard-Go с добавлением функций для обхода бл…
+  </blockquote>
+</aside>
+</td><td>2023-10-24T14:43:00.075Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,89 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>adtvae-не-правильно-локализуются-cdn-itpv-сервера-9931</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Cybersim</td><td><p>Здравствуйте. VPN Антизапрет настроен на роутере, не правильно отдаётся адрес CDN iptv сервиса. ближайший к антизапрету, а не ко мне.<br>
+Вот трассировка с участием Антизапрета, поток чаще буферизирует либо вообще не открывается.</p>
+<pre><code class="lang-auto">tracert vo-live-media.cdb.cdn.orange.com
+
+Трассировка маршрута к zssryckd.srv.maps.cdn.orange.com [80.15.253.0]
+с максимальным числом прыжков 30:
+
+  1    &lt;1 мс    &lt;1 мс    &lt;1 мс  RT-AX59U-1360 [192.168.50.1]
+  2     2 ms     2 ms     2 ms  msk-b25-e3.ti.ru [212.1.254.209]
+  3     2 ms     2 ms     2 ms  212.1.243.152
+  4     2 ms     3 ms     2 ms  212.1.251.32
+  5     2 ms     2 ms     2 ms  178.176.150.29
+  6     *      115 ms     *     80.15.253.0
+  7     *        *        *     Превышен интервал ожидания для запроса.
+  8     *        *      111 ms  80.15.253.0
+
+Трассировка завершена.
+</code></pre>
+<p>А вот с выключенным Антизапретом:</p>
+<pre><code class="lang-auto">tracert vo-live-media.cdb.cdn.orange.com
+
+Трассировка маршрута к cl-vo.maps.cdn.orange.com [92.223.124.62]
+с максимальным числом прыжков 30:
+
+  1    &lt;1 мс    &lt;1 мс     2 ms  RT-AX59U-1360 [192.168.50.1]
+  2     2 ms     2 ms     2 ms  msk-b25-e3.ti.ru [212.1.254.209]
+  3     2 ms     2 ms     2 ms  212.1.243.152
+  4     2 ms     5 ms     3 ms  212.1.251.32
+  5     2 ms     3 ms     2 ms  178.176.150.25
+  6    59 ms    59 ms    60 ms  92.223.124.62
+
+Трассировка завершена.
+</code></pre></td><td>2024-09-10T16:46:52.178Z</td></tr><tr><td>Xunlei</td><td><p>Приветствую. Как самый простой вариант — добавьте этот домен в файл hosts со вторым IP. Варианты посложнее — поднять локальный DNS stub resolver, отфорвардить эту зону на DNS вашего ISP, либо разрешить имя рекурсивно (послать на второй инстанс резолвера, работающиего в режиме рекурсивного); либо заполнить поле <a href="https://en.wikipedia.org/wiki/EDNS_Client_Subnet" rel="noopener nofollow ugc">ECS</a> в запросах, чтобы удалённый резолвер выдавал A записи для вашей подсети.</p></td><td>2024-09-10T17:48:56.194Z</td></tr><tr><td>ValdikSS</td><td><p>Настроил лукап <code>cdn.orange.com</code> через Yandex DNS, должно работать.</p></td><td>2024-09-15T11:01:56.831Z</td></tr><tr><td>kyseko(kyseko)</td><td><p>Доброго времени суток! А не подскажете как настроить на своём сервере антизапрета, что бы <a href="http://gosuslugi.ru" rel="noopener nofollow ugc">gosuslugi.ru</a> или какой-то другой ресурс, с проблемой как у человека из первого сообщения, работали через Yandex DNS?</p></td><td>2024-09-20T12:41:10.882Z</td></tr><tr><td>Aleksei</td><td><p>Поддержу вопрос. Мне тоже актуально.</p></td><td>2024-09-23T06:04:53.670Z</td></tr><tr><td>kyseko(kyseko)</td><td><p>В общем в kresd (nano /etc/knot-resolver/kresd.conf)<br>
+надо добавить следующие строки:</p>
+<pre><code class="lang-auto">-- Forwarding ru and su domains by Yandex DNS
+policy.add(
+    policy.suffix(
+        policy.FORWARD(
+            {'77.88.8.8', '77.88.8.1'}  -- Both Yandex DNS servers
+        ),
+        policy.todnames(
+            {'ru.', 'xn--p1ai.', 'su.'}
+        )
+    )
+)
+</code></pre>
+<p>После добавления сохранить обновленный kresd.conf<br>
+Перезапустить службу (systemctl restart kresd)<br>
+Тогда все ru, su, рф домены будут форвардиться через DNS яндекса</p></td><td>2024-10-19T10:15:43.560Z</td></tr>
+    </table>
+      </body>
+    </html>

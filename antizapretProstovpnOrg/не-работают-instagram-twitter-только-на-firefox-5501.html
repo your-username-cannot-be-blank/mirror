@@ -1,0 +1,98 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>не-работают-instagram-twitter-только-на-firefox-5501</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>gomi</td><td><ul>
+<li>Тип настройки: PAC-файл</li>
+<li>Тип проблемы: не работает конкретный сайт</li>
+<li>Что с сайтом: сайт открывается бесконечно долго</li>
+<li>Используемый браузер: Firefox 117.0 desktop windows</li>
+</ul>
+<h4><a name="h-1" class="anchor" href="#h-1"></a>Описание проблемы</h4>
+<p>Не работает instagram, twitter, но только в браузере Firefox. Висит минуту и падает с 408 request timeout.<br>
+Голый, без расширений (кроме прокси для PAC), без встроеных блокировщиков трекеров/кук/итд.<br>
+На этой же машине, в этой же сети, такой же голый Edge (кроме того же расширения прокси для PAC), всё открывается и работает.<br>
+Другие заблокированные сервисы открываются корректно и там, и там</p>
+<p>Проверил на мобилке (android, openVPN + PAC), тоже не открываются эти 2 в рамках этой сети. С симочного инета открываются.<br>
+Не могу понять, почему тогда работает только в Edge</p></td><td>2023-08-31T14:40:20.479Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><aside class="quote no-group" data-username="gomi" data-post="1" data-topic="5501">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/g/47e85d/48.png" class="avatar"> gomi:</div>
+<blockquote>
+<p>без расширений (кроме прокси для PAC)</p>
+</blockquote>
+</aside>
+<p>Какое расширение вы используете и как в нём организована загрузка PAC-скрипта? Надеюсь, не копивставкой из <a href="https://antizapret.prostovpn.org/proxy.pac">https://antizapret.prostovpn.org/proxy.pac</a>.</p></td><td>2023-08-31T15:04:59.197Z</td></tr><tr><td>gomi</td><td><p>Proxy SwitchyOmega, он подгруждает обновленный PAC каждый ~час. Поверх него использую дополнительный whitelist, но для целей этого поста я его отключал и подсоединялся напрямую через PAC</p></td><td>2023-08-31T15:39:08.476Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>проверить openvpn вариант + firefox ?<br>
+может еще сравнить настройки ДНС в браузерах. часто “безопасный” DoH добавляет больше проблем чем помощи. или наоборот тот же файрфокс использует ДНС провайдера а они почти все подменяют забаненые адреса</p></td><td>2023-08-31T19:22:43.585Z</td></tr><tr><td>gomi</td><td><blockquote>
+<p>проверить openvpn вариант + firefox ?</p>
+</blockquote>
+<p>Без изменений</p>
+<blockquote>
+<p>может еще сравнить настройки ДНС в браузерах</p>
+</blockquote>
+<p>В firefox есть такое, для теста отключил</p></td><td>2023-09-01T11:39:22.733Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="gomi" data-post="1" data-topic="5501">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/g/47e85d/48.png" class="avatar"> gomi:</div>
+<blockquote>
+<p>408 request timeout</p>
+</blockquote>
+</aside>
+<blockquote>
+<p>The client did not produce a request within the time that the server was prepared to wait.</p>
+</blockquote>
+<p>Похоже на проблему больших заголовков, нерабочего PMTU (фильтр ICMP) и отсутствие mssfix на путях, завышенного MTU на внешнем интерфейсе. OpenVPN при хэндшейке ограничивает размер своих фреймов, поэтому проблему в этот момент не видно.</p></td><td>2023-09-01T12:16:11.096Z</td></tr><tr><td>gomi</td><td><p>Провел больше тестов, обнаружил, что не открывается ряд сайтов, а не только twitter и instagram. В то время как другие открываются.</p>
+<p>Больше примеров не открывающихся (та же причина, что и в шапке)</p>
+<ul>
+<li><a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a></li>
+<li><a href="http://proton.me" rel="noopener nofollow ugc">proton.me</a></li>
+<li><a href="http://streamable.com" rel="noopener nofollow ugc">streamable.com</a></li>
+</ul>
+<p>Больше примеров тех, что открываются</p>
+<ul>
+<li><a href="http://quora.com" rel="noopener nofollow ugc">quora.com</a></li>
+<li><a href="http://pixiv.net" rel="noopener nofollow ugc">pixiv.net</a></li>
+<li><a href="http://soundcloud.com" rel="noopener nofollow ugc">soundcloud.com</a></li>
+</ul>
+<p>Тем временем все вышеперечисленные открываются в Edge.</p></td><td>2023-09-04T08:14:40.499Z</td></tr><tr><td>gomi</td><td><p>Дело оказалось в расширении <a href="https://github.com/FelisCatus/SwitchyOmega" rel="noopener nofollow ugc">Proxy SwitchyOmega</a></p>
+<blockquote>
+<p>NOTE: PAC Profiles DO NOT work on Firefox due to AMO review policies. We will see what we can do.</p>
+</blockquote>
+<p>Пока поставил рекомендуемое на сайте расширение “Обход блокировок рунета”.</p>
+<p>/thread</p></td><td>2023-09-04T08:21:07.203Z</td></tr>
+    </table>
+      </body>
+    </html>

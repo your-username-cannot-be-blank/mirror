@@ -1,0 +1,668 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>имеет-ли-смысл-использовать-dnscrypt</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Ngesso</td><td><p>В браузере ведь есть настройка DNS Over HTTPS. + На уровне системы тоже задан DNS 1.1.1.1<br>
+Будет-ли какой-то смысл в использовании DNSCrypt?</p></td><td>2025-01-10T10:14:51.717Z</td></tr><tr><td>bolvan</td><td><p>Если провайдер не перехватывает обращения к сторонним DNS, то разница вряд ли будет заметна.<br>
+Домру перехватывает, других таких я не знаю<br>
+Влиять  будет только на проги, в которых нет встроенной поддержки DoH</p></td><td>2025-01-10T10:16:55.245Z</td></tr><tr><td>Ngesso</td><td><p>Как узнать, перехватывает или нет?</p></td><td>2025-01-10T10:20:40.420Z</td></tr><tr><td>Xunlei</td><td><p>Даже если нет спуфинга от вашего ISP, то локальный DNS кэш уменьшит задержку перед отображением сайта (у меня, например, по статистике 60-70% запросов разрешаются из кэша). Ещё можно <a href="https://ntc.party/t/dns-vs-dnscrypt-proxy/7702/11">настроить</a> политики фильтрации.</p></td><td>2025-01-10T10:26:57.628Z</td></tr><tr><td>Ngesso</td><td><p>Вроде же кэш DNS и так существует в системе, или я что-то путаю?<br>
+Ну тот, который очищается на ipconfig /flushdns</p></td><td>2025-01-10T10:28:48.876Z</td></tr><tr><td>Xunlei</td><td><p>В системном нет <a href="https://datatracker.ietf.org/doc/rfc8767/" rel="noopener nofollow ugc">Serve Stale</a> (на клаудфлере и гугле он включен, но на резолвере ISP зачастую администраторы забывают включить и тогда можно получить ошибку разрешения при достижении <em>Query Rate Limit</em>). Если в браузере настроен DoH, то системный не используется. В DoH долгий RTT.</p></td><td>2025-01-10T10:31:52.698Z</td></tr><tr><td>Ngesso</td><td><aside class="quote no-group" data-username="Xunlei" data-post="6" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>В DoH долгий RTT</p>
+</blockquote>
+</aside>
+<p>В принципе на скорость загрузки сайтов не жалуюсь особо.</p></td><td>2025-01-10T10:37:35.708Z</td></tr><tr><td>bolvan</td><td><p>Лукапнуть парочку сайтов из запрещенки через 1.1.1.1<br>
+Если возвращается один и тот же адрес, значит есть перехват</p></td><td>2025-01-10T10:44:19.054Z</td></tr><tr><td>Ngesso</td><td><p>Как это сделать?</p></td><td>2025-01-10T10:45:22.240Z</td></tr><tr><td>Xunlei</td><td><p>Ещё удобно локальный резолвер использовать для различных политик выбора IPv4/IPv6:</p>
+<details>
+<summary>
+Пример конфигурации GOST</summary>
+<pre><code class="lang-auto">services:
+# SOCKS5 с предподчтением IPv4
+- name: service-direct-4
+  addr: "[::1]:1080"
+  interface: "LAN"
+  resolver: resolver-local-4
+  handler:
+    type: socks5
+    metadata:
+      bind: true
+      notls: true
+      udp: true
+      udpBufferSize: 4096
+  listener:
+    type: tcp
+# SOCKS5 с только IPv4
+- name: service-direct-4-only
+  addr: "[::1]:1081"
+  interface: "LAN"
+  resolver: resolver-local-4-only
+  handler:
+    type: socks5
+    metadata:
+      bind: true
+      notls: true
+      udp: true
+      udpBufferSize: 4096
+  listener:
+    type: tcp
+# SOCKS5 с предподчтением IPv6
+- name: service-direct-6
+  addr: "[::1]:1082"
+  interface: "OpenVPN DCO"
+  resolver: resolver-local-6
+  handler:
+    type: socks5
+    metadata:
+      bind: true
+      notls: true
+      udp: true
+      udpBufferSize: 4096
+  listener:
+    type: tcp
+# SOCKS5 с только IPv6
+- name: service-direct-6-only
+  addr: "[::1]:1083"
+  interface: "Tunnel 4to6"
+  resolver: resolver-local-6-only
+  handler:
+    type: socks5
+    metadata:
+      bind: true
+      notls: true
+      udp: true
+      udpBufferSize: 4096
+  listener:
+    type: tcp
+
+# DNS resolver
+resolvers:
+- name: resolver-local-4
+  nameservers:
+  - addr: "udp://[::1]:53"
+    ttl: -1
+    prefer: ipv4
+- name: resolver-local-4-only
+  nameservers:
+  - addr: "udp://[::1]:53"
+    ttl: -1
+    only: ipv4
+- name: resolver-local-6
+  nameservers:
+  - addr: "udp://[::1]:53"
+    ttl: -1
+    prefer: ipv6
+- name: resolver-local-6-only
+  nameservers:
+  - addr: "udp://[::1]:53"
+    ttl: -1
+    only: ipv6
+</code></pre>
+</details>
+<p>В браузерном расширении <em>ZeroOmega</em> можно настроить домены на разные прокси и получать необходимые эффекты.</p></td><td>2025-01-10T10:52:19.533Z</td></tr><tr><td>Ngesso</td><td><aside class="quote no-group" data-username="Xunlei" data-post="10" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>IPv6</p>
+</blockquote>
+</aside>
+<p>Не включили у нас</p></td><td>2025-01-10T10:54:26.854Z</td></tr><tr><td>Xunlei</td><td><p>У меня тоже нет, но получаю его на своих тунелях, варпе и проксях.</p></td><td>2025-01-10T10:55:52.959Z</td></tr><tr><td>Ngesso</td><td><p>А при использовании VPN DNSCrypt это вообще безопасно? Я включал DNSCrypt в связке с VPN и проверял у себя ситуацию на <a href="https://2ip.io/privacy/" class="inline-onebox" rel="noopener nofollow ugc">Anonymity check</a></p>
+<p>У меня писало что яко-бы утечка DNS.</p>
+<p>В DNSCrypt ничего не переделывал перед этим, на стандартных настройках было.</p></td><td>2025-01-10T10:57:20.423Z</td></tr><tr><td>Xunlei</td><td><p>Утечка не связана с тунелированием. В настройках ваших сетевых адаптеров нужно указать один локальный, все остальные убрать. Система использует все указанные резолверы параллельно. Можно даже 53 порт заблокировать в брандмауэре на всякий случай.</p></td><td>2025-01-10T11:02:28.503Z</td></tr><tr><td>Ngesso</td><td><p>Указывал 127.0.0.1</p>
+<p>Там у меня выдало какой-то один из DNS, которые эта программа автоматически загружает там с гитхаба откуда-то. Тоесть не мой DNS провайдера.<br>
+Но почему-то он был подписан как утечка.</p></td><td>2025-01-10T11:05:28.827Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Ngesso" data-post="15" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/ce7236/48.png" class="avatar"> Ngesso:</div>
+<blockquote>
+<p>Но почему-то он был подписан как утечка.</p>
+</blockquote>
+</aside>
+<p>Эти сервисы по проверке утечек подписывают всё как утечка по умолчанию кроме белого списка. На приписку можно забить.</p></td><td>2025-01-10T11:07:24.547Z</td></tr><tr><td>Ngesso</td><td><p>А реальная утечка получается это только когда DNS провайдера выпадает, всё остальное не утечка?</p></td><td>2025-01-10T11:08:08.797Z</td></tr><tr><td>Xunlei</td><td><p>Утечка то, что вы интерпретируете как утечку. Если там нет сетей вашего провайдера, значит скорее всего резолвятся имена не через вашего провайдера. Надёжнее будет посмотреть в снифер пакетов что у вас там бегает в открытую. Сайтов, которые ограничивают региональный доступ по утечке DNS я пока не встречал.</p></td><td>2025-01-10T11:11:29.919Z</td></tr><tr><td>Ngesso</td><td><aside class="quote no-group" data-username="Xunlei" data-post="18" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>Сайтов, которые ограничивают региональный доступ по утечке DNS я пока не встречал.</p>
+</blockquote>
+</aside>
+<p>Да сайтов то понятно. А что по поводу провайдера? Он видит какие у меня DNS???</p></td><td>2025-01-10T11:13:47.463Z</td></tr><tr><td>rkn-chan</td><td><p>для меня утечка это когда я вижу русские флаги, а по умолчанию в насторйке dnscrypt они будут, те сервера нужно убрать. в том числе и клаудфлер</p>
+<p>а вообще в последнее время я все чаще замечаю себя в прописывание любимых сайтов в хостс. в dnscrypt это можно через cloaking-rules</p></td><td>2025-01-10T11:13:50.386Z</td></tr><tr><td>Xunlei</td><td><p>Если видете вы у себя в снифере, то видит и ISP.</p></td><td>2025-01-10T11:15:32.350Z</td></tr><tr><td>Ngesso</td><td><aside class="quote no-group" data-username="rkn-chan" data-post="20" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/rkn-chan/48/13863_2.png" class="avatar"> rkn-chan:</div>
+<blockquote>
+<p>те сервера нужно убрать</p>
+</blockquote>
+</aside>
+<p>А как вы их убираете? Они же берутся откуда-то из интернета в готовом виде уже вся пачка.</p></td><td>2025-01-10T11:15:33.055Z</td></tr><tr><td>Ngesso</td><td><p>Где такой скачать?</p></td><td>2025-01-10T11:16:20.397Z</td></tr><tr><td>Xunlei</td><td><p>Можно <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-dns-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80%D0%B5/7656/27">так</a>.</p>
+<aside class="quote no-group" data-username="Ngesso" data-post="23" data-topic="14469" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/ce7236/48.png" class="avatar"> Ngesso:</div>
+<blockquote>
+<p>Где такой скачать?</p>
+</blockquote>
+</aside>
+<p><a href="https://www.wireshark.org/download.html" rel="noopener nofollow ugc">Wireshark</a></p></td><td>2025-01-10T11:16:25.460Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>в dnscrypt-proxy помимо прочего есть такая опция в .toml</p>
+<pre><code class="lang-auto"># p2 (randomly choose between the top 2 fastest servers)
+# ph (randomly choose between the top fastest half of all servers)
+lb_strategy = "ph"
+lb_estimator = true
+</code></pre>
+<details>
+<summary>
+Спойлер</summary>
+<p>[2025-01-10 15:39:35]   ::1     <a href="http://forum.nag.ru" rel="noopener nofollow ugc">forum.nag.ru</a>    A       PASS    135ms   dnscrypt.uk-ipv4<br>
+[2025-01-10 15:39:35]   ::1     <a href="http://forum.nag.ru" rel="noopener nofollow ugc">forum.nag.ru</a>    AAAA    PASS    242ms   dnscry.pt-chisinau-ipv4<br>
+[2025-01-10 15:39:36]   ::1     <a href="http://promo.nag.ru" rel="noopener nofollow ugc">promo.nag.ru</a>    A       PASS    216ms   scaleway-fr-ipv6<br>
+[2025-01-10 15:39:37]   ::1     <a href="http://promo.nag.ru" rel="noopener nofollow ugc">promo.nag.ru</a>    AAAA    PASS    898ms   dnscry.pt-phoenix-ipv6</p>
+</details>
+<p>что ИМХО лучше и надежней чем ломится в 1.1.1.1 ИЛИ 8.8.8.8 ну и т.п.<br>
+хотя бывают неожиданные результаты <img src="https://ntc.party/images/emoji/twitter/wink.png?v=12" title=":wink:" class="emoji" alt=":wink:" loading="lazy" width="20" height="20"> (один из серверов dnscrypt не ресолвит <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a>)</p>
+<p>p.s. для windows кто не хочет/умеет возиться с командной строкой есть GUI</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/instantsc/SimpleDnsCrypt">
+  <header class="source">
+
+      <a href="https://github.com/instantsc/SimpleDnsCrypt" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="имеет-ли-смысл-использовать-dnscrypt/764d350562541e6cff1e8719487cee6a80ea09b5_2_690x344.png" class="thumbnail" data-dominant-color="EEF1EE">
+
+  <h3><a href="https://github.com/instantsc/SimpleDnsCrypt" target="_blank" rel="noopener nofollow ugc">GitHub - instantsc/SimpleDnsCrypt: A simple management tool for dnscrypt-proxy</a></h3>
+
+    <p><span class="github-repo-description">A simple management tool for dnscrypt-proxy</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<details>
+<summary>
+Спойлер</summary>
+<p><a href="https://github.com/instantsc/SimpleDnsCrypt/blob/master/img/preview/mainmenu.png" class="inline-onebox" rel="noopener nofollow ugc">SimpleDnsCrypt/img/preview/mainmenu.png at master · instantsc/SimpleDnsCrypt · GitHub</a></p>
+</details></td><td>2025-01-10T12:45:05.942Z</td></tr><tr><td>Ngesso</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="имеет-ли-смысл-использовать-dnscrypt/8434d2be8d509f1ae20dda9fc1a9dbfa5201a60d.png" data-download-href="https://ntc.party/uploads/default/8434d2be8d509f1ae20dda9fc1a9dbfa5201a60d" title="1"><img src="имеет-ли-смысл-использовать-dnscrypt/8434d2be8d509f1ae20dda9fc1a9dbfa5201a60d.png" alt="1" data-base62-sha1="iRycmd3uey3paYgVoV0EtR4vhg1" width="690" height="171" data-dominant-color="282A2A"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">1</span><span class="informations">1260×313 19.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Почему с DNSCrypt пропала защита SNI???<br>
+Когда DoH в браузере включён, она есть.</p>
+<p>И посоветуйте какой режим лучше в DNSCrypt<br>
+Именно протокол DNSCrypt или DoH??<br>
+Ну тоесть сервера какие использовать?<br>
+Какой более надёжный??<br>
+Или оба варианта можно?</p></td><td>2025-01-10T13:45:39.608Z</td></tr><tr><td>Xunlei</td><td><p>ESNI пока работает через настроенный DoH в браузерах.</p></td><td>2025-01-10T13:51:49.464Z</td></tr><tr><td>Ngesso</td><td><p>Но если я запущу DoH в браузере тогда браузер будет в обход DNSCrypt работать. Я всё-равно не понимаю зачем это нужно в таком случаи. У меня кроме браузера тут особо другого траффика не идёт.</p></td><td>2025-01-10T13:52:51.358Z</td></tr><tr><td>Xunlei</td><td><p>Если нет пока понимания, тогда можно ничего не трогать.</p></td><td>2025-01-10T13:54:03.736Z</td></tr><tr><td>Ngesso</td><td><p>Нет, ну я хочу разобраться, ну если я включу DoH в браузере, тогда браузер мой будет в обход этого DNSCrypt работать. Правильно же?</p>
+<p>А если я выключаю DoH в браузере то пропадает защита SNI…</p></td><td>2025-01-10T13:55:03.846Z</td></tr><tr><td>Xunlei</td><td><p>Да. Видимо надо ждать поддержки со строны браузеров. А они этого не делают, потому что у большинства пользователей резолвер от ISP и смысла нет сертификат запрашивать через DNS в открытую для домена чтобы его спрятать потом в TLS хэндшейке.</p></td><td>2025-01-10T13:57:25.764Z</td></tr><tr><td>Ngesso</td><td><p>Ну у меня не резолвер от ISP я DNS провайдера не использую у меня даже на роутере 1.1.1.1. Вот я выключаю DoH если в браузере и выбираю DNS сервера себе в DNSCrypt, тогда по идее DNS-запросы пойдут через те сервера которые я выбрал, но при этом ECH не появляется в браузере. Почему? Простыми словами можно?</p></td><td>2025-01-10T14:00:16.121Z</td></tr><tr><td>Xunlei</td><td><p>ESNI придуман интернет-гигантами чтобы корпоративные файрволы не могли обрубать рекламу сотрудникам, фильтруя DNS запросы, HTTP, SNI в рукопожатиии TLS. ESNI поддерживается браузерами получая ключ для сокрытия SNI через DoH. Получать ключ через обычный DNS смысла нет, т.к. домен виден и возможно применение политики фильтрации. Поэтому разработчики браузеров не добавляют получение ключа по обычному DNS (либо им не заплатили интернет-гиганты).</p></td><td>2025-01-10T14:06:40.806Z</td></tr><tr><td>Ngesso</td><td><p>Понятно, ну тоесть а какие плюсы то по итогу от этого DNSCrypt???</p></td><td>2025-01-10T14:08:53.411Z</td></tr><tr><td>Xunlei</td><td><p>Выше писал, скорее больший плюс от использования локального резолвера для кэширования и фильтрации (винда например постоянно телеметрию дёргает), а DNScrypt позволяет исключить единую точку отказа (на форуме бывают сообщения о блокировках популярных DoH) и ускоряет получение результата ввиду отсутствия рукопожатия TCP/TLS (хотя в DNScrypt большие пакеты проверок DNSSEC всё равно идут через TCP).</p></td><td>2025-01-10T14:12:23.178Z</td></tr><tr><td>NgessoANTILIMIT</td><td><p>Чёртов сайт свои лимиты в 20 сообщений в день мне пихает, но не важно.</p>
+<p>Но на браузер кэширование DNS-запросов никак распространяться не будет получается если включённый DoH браузера держать. Загрузку страниц так не ускорить получается, это только отключать DoH браузера, а этого я делать не буду.</p>
+<p>И что в итоге<br>
+Ускорение телеметрии (???)<br>
+(Которую я кстати вырезал из своей винды прогой одной)</p></td><td>2025-01-10T14:18:28.237Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="NgessoANTILIMIT" data-post="36" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/da6949/48.png" class="avatar"> NgessoANTILIMIT:</div>
+<blockquote>
+<p>Но на браузер кэширование DNS-запросов никак распространяться не будет получается если включённый DoH браузера держать.</p>
+</blockquote>
+</aside>
+<p>В браузере свой кэш, но он почти не управляем.</p>
+<aside class="quote no-group" data-username="NgessoANTILIMIT" data-post="36" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/da6949/48.png" class="avatar"> NgessoANTILIMIT:</div>
+<blockquote>
+<p>Загрузку страниц так не ускорить получается, это только отключать DoH браузера, а этого я делать не буду.</p>
+</blockquote>
+</aside>
+<p>Да, общий кэш для локальной сети и системы не будет использован, только кэш браузера. В браузерах есть какие-то предзагрузки (dns-prefetch), которые могут нивелировать задержки.</p>
+<aside class="quote no-group" data-username="NgessoANTILIMIT" data-post="36" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/da6949/48.png" class="avatar"> NgessoANTILIMIT:</div>
+<blockquote>
+<p>Ускорение телеметрии (???)<br>
+(Которую я кстати вырезал из своей винды прогой одной)</p>
+</blockquote>
+</aside>
+<p>Я тоже вырезал всё что возможно, но всё равно фильтры срабатывают.</p>
+<aside class="quote no-group" data-username="NgessoANTILIMIT" data-post="36" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/da6949/48.png" class="avatar"> NgessoANTILIMIT:</div>
+<blockquote>
+<p>И что в итоге</p>
+</blockquote>
+</aside>
+<p>Работать будет без изменений настроек браузера. Но ввиду ужесточения цензуры полезно знать что можно сделать, если вдруг браузер перестанет открывать сайты.</p></td><td>2025-01-10T14:25:51.454Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>А если я выключаю DoH в браузере то пропадает защита SNI</p>
+</blockquote>
+<p>Браузеры могут работать с ECH даже без включенного DoH в них, но менее надёжно. Только в России ECH блочится, без zapret.</p></td><td>2025-01-10T15:02:32.065Z</td></tr><tr><td>NgessoANTILIMIT</td><td><p>Проверял и с Zapret. Тоже самое.</p></td><td>2025-01-10T15:05:48.509Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>В утилите можно установить определенный список избранных серверов.</p>
+<p>Есть ли где-то инструкция, как вообще утилиту идеально можно настроить?</p></td><td>2025-01-10T15:18:02.833Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Я вижу Вы специалист по утилите. Можете сюда или в личку скинуть свой dnscrypt-proxy.toml с настройками? Интересуют и настройки, и список избранных серверов.</p></td><td>2025-01-10T15:20:29.734Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>Проверял</p>
+</blockquote>
+<p>Забыл добавить. Проверять надо бы в Wireshark, виден ли там SNI. Сайт проверки это ненадёжно.</p></td><td>2025-01-10T15:25:06.975Z</td></tr><tr><td>Xunlei</td><td><p>Ссылку с <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-dns-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80%D0%B5/7656/27">примером</a> выше скидывал. Избранные сервера меняются со временем (я себе настроил от разных администраторов в разных странах). Все настройки с описаниями можно глянуть в <em>example-dnscrypt-proxy.toml</em> (его же можно и запустить без изменений).</p></td><td>2025-01-10T15:26:43.345Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>В утилите можно установить определенный список избранных серверов</p>
+</blockquote>
+<p>Конечно. Нужно в dnscrypt-proxy.toml указать их имена:<br>
+<code>server_names = ['cloudflare', 'google']</code><br>
+взятые из public-resolvers.md.</p></td><td>2025-01-10T15:29:00.367Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Прочитал, но так и не понял, как установить и настроить Technitium DNS Server и соединить с <em>dnscrypt-proxy</em>.</p></td><td>2025-01-10T15:44:27.023Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>у меня много браузеров (firefox, firefox ESR, brave, maxthon) для разных целей<br>
+поэтому лично мне проще/удобней dnscrypt-proxy (+как резерв Technitium DNS с 10 разными серверами)</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><a href="http://dns.quad9.net" rel="noopener nofollow ugc">dns.quad9.net</a> (9.9.9.9:853)<br>
+<a href="http://dns.quad9.net" rel="noopener nofollow ugc">dns.quad9.net</a> (149.112.112.112:853)<br>
+<a href="http://dns.adguard-dns.com" rel="noopener nofollow ugc">dns.adguard-dns.com</a> (94.140.14.14:853)<br>
+<a href="http://dns.adguard-dns.com" rel="noopener nofollow ugc">dns.adguard-dns.com</a> (94.140.15.15:853)<br>
+<a href="http://dns.opendns.com" rel="noopener nofollow ugc">dns.opendns.com</a> (208.67.222.222:853)<br>
+<a href="http://dns.opendns.com" rel="noopener nofollow ugc">dns.opendns.com</a> (208.67.220.220:853)<br>
+dns.google ([2001:4860:4860::8888]:853)<br>
+dns.google ([2001:4860:4860::8844]:853)<br>
+<a href="http://cloudflare-dns.com" rel="noopener nofollow ugc">cloudflare-dns.com</a> ([2606:4700:4700::1111]:853)<br>
+<a href="http://cloudflare-dns.com" rel="noopener nofollow ugc">cloudflare-dns.com</a> ([2606:4700:4700::1001]:853)</p>
+</details>
+<p>мне DoH не нравится</p>
+<ol>
+<li>1 “сервер”</li>
+<li>много блокировок по IP стало. банят сразу “сеть”/хостера</li>
+<li>у многих были проблемы с SNI. и как раз с ESNI cloudflare <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-ech-cloudflare/12732" class="inline-onebox">Обсуждение: Блокировка (замедление) ECH Cloudflare</a></li>
+</ol>
+<ol start="4">
+<li>если и есть кэш то работает только для 1 браузера</li>
+</ol>
+<p>p.s. в dnscrypt-proxy тоже встроено много DoH. хотя у меня обычно отключено по личным предпочтениям<br>
+ipv4_servers = true<br>
+ipv6_servers = true<br>
+doh_servers = false</p></td><td>2025-01-10T15:48:23.003Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Zanoni" data-post="45" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/e99b99/48.png" class="avatar"> Zanoni:</div>
+<blockquote>
+<p>как установить</p>
+</blockquote>
+</aside>
+<p><a href="https://download.technitium.com/dns/DnsServerSetup.zip" rel="noopener nofollow ugc">Скачать</a> с сайта архив, распаковать инсталятор и запустить его двойным кликом левой кнопки мыши. По умолчанию он будет работать как рекурсивный резолвер.</p>
+<aside class="quote no-group" data-username="Zanoni" data-post="45" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/e99b99/48.png" class="avatar"> Zanoni:</div>
+<blockquote>
+<p>и настроить</p>
+</blockquote>
+</aside>
+<p>Необходимо добавить форвардеры как написано в сообщении.</p></td><td>2025-01-10T15:52:38.315Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>про Technitium DNS<br>
+решает каждый сам.<br>
+но я включил<br>
++Enable Concurrent Forwarding<br>
++Forwarder Concurrency <strong>10</strong> (valid range 1-10; default 2)<br>
+p.s.<br>
+а еще<br>
++Forwarder Protocol <strong>DNS-over-TLS</strong> (это где по дефолту :853)<br>
+если уж Ростелеком будет блочить/перенаправлять все dns/53-udp<br>
+сейчас они вроде только AdGuard DNS блочат. по DoH/SNI или даже по IP гдето</p></td><td>2025-01-10T15:59:48.967Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>У меня нет в утилите тех кусков кода, которые Вы там скопировали. В общем, для новичка это темный лес. Нужна инструкция со скриншотами настройки и объединения двух утилит. Иначе лично у меня не получается настроить. Я не айтишник.</p></td><td>2025-01-10T16:32:34.063Z</td></tr><tr><td>sakontwist</td><td><p>Использую dnscrypt как запасной, основной - unbound с DoT-forwarders.<br>
+Конфигурация dnscrypt зависит от версии, даже при переходе 2.0.х и 2.1.х приходится править конфиги, тот же параметр bootstrap_resolvers вместо fallback_resolver.</p></td><td>2025-01-10T17:12:04.886Z</td></tr><tr><td>skyrunner(name)</td><td><p>Имеет, замени им клоудфлаер. А сам dnscrypt покрой tls</p></td><td>2025-01-10T17:22:52.294Z</td></tr><tr><td>jony</td><td><p>ECH врубал ток через конфиг файл. раньше использовал гуи, потом забил.</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>в файле  dnscrypt-proxy.toml раздел Local DoH server<br>
+и раскоментировать четыре строки<br>
+listen_addresses = [‘127.0.0.1:3000’]<br>
+path = ‘/dns-query’<br>
+cert_file = ‘localhost.pem’<br>
+cert_key_file = ‘localhost.pem’<br>
+локал doh будет вертеться на адресе <a href="https://127.0.0.1:3000/dns-query" rel="noopener nofollow ugc">https://127.0.0.1:3000/dns-query</a></p>
+</details>
+<p><img src="https://ntc.party/images/emoji/twitter/crazy_face.png?v=12" title=":crazy_face:" class="emoji only-emoji" alt=":crazy_face:" loading="lazy" width="20" height="20"></p></td><td>2025-01-10T17:51:39.028Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>На примере Дом.ру:</p>
+<p>Резолвим что-то заблокированное через публичный plain-text DNS:<br>
+<code>nslookup navalny.com 8.8.8.8</code></p>
+<p>Получаем IP-адрес. Пробиваем через WHOIS, кому он принадлежит. Он принадлежит Дом.ру.</p>
+<p>Либо сайт Навального хостится у Дом.ру, что неверноятно, либо Дом.ру просто берёт и весь трафик по 53 порту заворачивает на свой резолвер, который домены, к которым должен ограничиваться доступ, резолвит в “левый” адрес. Запрос до DNS Гугла даже не дошёл.</p>
+<p>В этом и заключается недостаток протокола DNS - спрашивали один резолвер, а вместо него ответил вообще другой. Позже для решения этой проблемы к протоколу прикрутили костыль в виде DNSSEC, но он не то, чтобы “взлетел”.</p>
+<p>Что касается DNSCrypt, то нужно разделять протокол и эталонный клиент (dnscrypt-proxy). Протокол использовать нет смысла. Он свою роль сыграл - это была первая ласточка в шифровании DNS. Затем пояаились DoH и DoT, которые получили статус стандартов. Кроме того, протокол DNSCrypt стороннему наблюдателю намного легче обнаружить и заблокироать, чем DoH.</p>
+<p>Клиент dnscrypt-proxy использовать, может, и имеет смысл (он поддерживает DoH/DoT в том числе), например, он позволяет прикручивать списки доменов, которые запрещено резолвить, тем самым, можно бороться с рекламой. Но с тем же успехом, например, можно использовать AdGuard Home. То есть, использовать если и имеет смысл, то именно ПО, а не протокол.</p>
+<p>Если просто нужно шифровать DNS-трафик. используйте DoH, поддержка которого есть и в браузерах, и в современных операционных системах.</p></td><td>2025-01-11T00:07:46.235Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>Протокол использовать нет смысла</p>
+</blockquote>
+<p>Разве что может быть меньше задержка, т.к. протокол dnscrypt по умолчанию использут udp, а DoH tcp (за исключением dns over quic, кстати dnscrypt клиент и такое поддерживает). Но это надо разбираться и насколько критична первая задержка (остальные запросы могут кэшироваться).</p>
+<blockquote>
+<p>протокол DNSCrypt стороннему наблюдателю намного легче обнаружить и заблокироать, чем DoH</p>
+</blockquote>
+<p>Ирония в том, что когда на йоте кончились деньги dnscrypt запросы проходили. Т.к. маленькие и udp (подтверждение протокола не требовали). Но тогда dnscrypt специально не блокировали. Впрочем, может и обычный dns работал, но DoH врядли.</p>
+<p>В общем, dnscrypt протокол вроде как нестандарт и легче детектится (например, в пакетах видны сертификаты dnscrypt серверов). DoH выглядит как https, но публичные сервисы у всех на виду и могут быть заблокированы по IP. Малопопулярные custom решения интересны в обоих случаях, разве что dnscrypt udp не переживёт белые списки протоколов.</p></td><td>2025-01-11T04:24:04.217Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="denium" data-post="54" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>но публичные сервисы у всех на виду и могут быть заблокированы по IP</p>
+</blockquote>
+</aside>
+<p>Это не аргумент против DoH, т.к. публичные сервисы DNSCrypt тоже у всех на виду и зачастую все эти публичные DNS <a href="https://adguard-dns.io/kb/ru/general/dns-providers/">лежат буквально на одной странице</a>.</p></td><td>2025-01-11T04:41:54.223Z</td></tr><tr><td>denium</td><td><p>DoH там тоже лежат.<br>
+Кстати, если dns сервисы заблокируют по SNI, может помочь zapret? Как с ECH.</p></td><td>2025-01-11T04:50:26.076Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Почему бы и нет, там же DNS-over-HTTPS, т.е. сначала устанавливается HTTPS-соединение, тут-то zapret и поможет.</p></td><td>2025-01-11T04:54:08.980Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>А есть смысл на ПК объединять как выше писали dnscrypt-proxy и Technitium DNS?  Или несколько серверов в dnscrypt-proxy вполне достаточно с Запретом?<br>
+Кстати, есть смысл вместо избранных серверов использовать ДНС штампы?</p></td><td>2025-01-11T06:01:59.835Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>может быть меньше задержка, т.к. протокол dnscrypt по умолчанию использует udp</p>
+</blockquote>
+<p>С другой стороны, есть ещё такая вещь, если вы постоянно пользуетесь udp based vpn, то udp over udp не очень хорошая идея, я так считаю, в плане скорости. Хотя, в dns размеры пакетов маленькие и может быть некритично. Но кстати, dnscrypt протокол может работать по tcp, вроде как.</p>
+<p>Чем мне не нравится DoH в браузере, судя по wireshark, браузер часто держит соединение с ним. У меня же Brave с отрезанными крыльями вообще молчит, это приятно. И DoH запросы выбиваются из этого блаженства. Впрочем, если у вас браузеры стучат налево и направо, как и <a href="https://habr.com/ru/news/872770/">система</a>, то вы тишину не оцените.</p></td><td>2025-01-11T06:05:56.169Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="denium" data-post="59" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>dnscrypt протокол может работать по tcp, вроде как</p>
+</blockquote>
+</aside>
+<p>Да, как и в обычном DNS если размер дейтаграммы превышает <code>MaxDNSUDPPacketSize</code> то подключение идёт по TCP, иначе дейтаграмма фрагментируется.</p>
+<aside class="quote no-group" data-username="denium" data-post="59" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>браузер часто держит соединение с ним</p>
+</blockquote>
+</aside>
+<p>Можно попробовать в аргументы командной строки запуска chromium-based браузера добавить <code>--disable-background-networking --disable-component-extensions-with-background-pages --dns-prefetch-disable</code>.</p></td><td>2025-01-11T06:11:46.149Z</td></tr><tr><td>denium</td><td><p>Поставил dnscrypt-proxy из репы. Чёто с ними столько гемора, как всегда.</p></td><td>2025-01-11T06:26:22.156Z</td></tr><tr><td>sakontwist</td><td><p>Проще взять свежий из гита, скачать в opt и запустить с ключом (не помню, install или service) на люнюксах он сам создаёт юнит и в пакете есть типовой конфиг, который можно немного подкрутить. Готовый конфиг под 2.1 могу кинуть. Единственный момент - из репы он идёт с поддержкой сокета и там listener пустой. С гита он идёт сам по себе и там надо указать адрес в listener.</p>
+<p>UPD: dnscrypt-proxy -service install</p></td><td>2025-01-11T07:37:40.453Z</td></tr><tr><td>rkn-chan</td><td><aside class="quote no-group" data-username="dartraiden" data-post="53" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>он позволяет прикручивать списки доменов, которые запрещено резолвить, тем самым, можно бороться с рекламой.</p>
+</blockquote>
+</aside>
+<p>одна из моих любимых фич. к этому можно прикрутить ежедневный скрипт-краулер для всего дерьма. еще одна из фич которая мне нравится это логгинг. очень полезно при диагностики всяких телевизоров и холодильников где вайршарка нету, а домены очень хочется посмотреть и заблочить локально</p></td><td>2025-01-11T07:54:46.224Z</td></tr><tr><td>denium</td><td><p>Да, это вроде просто. Я уже и подзабыл команды.</p></td><td>2025-01-11T11:41:22.786Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>ну там много удобных/полезных вещей</p>
+<details>
+<summary>
+forwarding-rules.txt</summary>
+<pre><code class="lang-auto">## Forward queries for .onion names to a local Tor client
+## Tor must be configured with the following in the torrc file:
+## DNSPort 9053
+## AutomapHostsOnResolve 1
+
+onion				127.0.4.1,127.0.2.1
+</code></pre>
+</details>
+<details>
+<summary>
+cloaking-rules.txt</summary>
+<pre><code class="lang-auto">www.google.*             forcesafesearch.google.com
+
+www.bing.com             strict.bing.com
+
+yandex.ru                familysearch.yandex.ru       # inline comments are allowed after a pound sign
+
+=duckduckgo.com          safe.duckduckgo.com
+
+www.youtube.com          restrictmoderate.youtube.com
+m.youtube.com            restrictmoderate.youtube.com
+</code></pre>
+</details></td><td>2025-01-11T11:42:06.485Z</td></tr><tr><td>Xunlei</td><td><p>Это можно настроить в любом DNS сервере. Наоборот, полную спецификацию рекомендаций из RFC по реализации резолвера не поддерживает, поэтому лучше перед ним ставить какой-нибудь bind9, unbound или TDNS с настройками форвардинга, добавив ещё TLD из <a href="http://opennic.org" rel="noopener nofollow ugc">opennic.org</a>.</p></td><td>2025-01-11T12:11:02.674Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Вопрос в том, как новичку все это настроить… Вчера попросил здесь скриншоты скинуть по объединению днскрипто-прокси и TDNS - никто не сподобился создать мини-инструкцию. Зато тратить время и умничать в темах - времени вагон…</p></td><td>2025-01-11T12:22:15.854Z</td></tr><tr><td>Xunlei</td><td><p>Так вы даже не пробовали, и вопросы уточняющие не задаёте.</p></td><td>2025-01-11T12:25:00.519Z</td></tr><tr><td>denium</td><td><p>Что-то уж больно большой overhead в dnscrypt tcp. В конфиге указано два резолвера:<br>
+scaleway-fr (212.47.228.136:443)<br>
+ams-dnscrypt-nl (89.38.131.38:4343)<br>
+Открываю сайт <code>ipecho.net</code> (34.160.111.145).</p>
+<details>
+<summary>
+dnscrypt tcp</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="имеет-ли-смысл-использовать-dnscrypt/54d8c14d3dc0b31b138084f7c390193dfb301648.png" data-download-href="https://ntc.party/uploads/default/54d8c14d3dc0b31b138084f7c390193dfb301648" title="dnscrypt"><img src="имеет-ли-смысл-использовать-dnscrypt/54d8c14d3dc0b31b138084f7c390193dfb301648_2_690x214.png" alt="dnscrypt" data-base62-sha1="c6Avc5Bo7qgn6mq55MzQDJxmk64" width="690" height="214" srcset="имеет-ли-смысл-использовать-dnscrypt/54d8c14d3dc0b31b138084f7c390193dfb301648_2_690x214.png, имеет-ли-смысл-использовать-dnscrypt/54d8c14d3dc0b31b138084f7c390193dfb301648_2_1035x321.png 1.5x, имеет-ли-смысл-использовать-dnscrypt/54d8c14d3dc0b31b138084f7c390193dfb301648.png 2x" data-dominant-color="B5B6C5"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">dnscrypt</span><span class="informations">1266×393 201 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<details>
+<summary>
+1.1.1.1 udp нешифрованный</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="имеет-ли-смысл-использовать-dnscrypt/46c9c0b7942c6e3ee8e7b804adeef38d2cb3e869.png" data-download-href="https://ntc.party/uploads/default/46c9c0b7942c6e3ee8e7b804adeef38d2cb3e869" title="dns"><img src="имеет-ли-смысл-использовать-dnscrypt/46c9c0b7942c6e3ee8e7b804adeef38d2cb3e869_2_690x69.png" alt="dns" data-base62-sha1="a6dFVKFAKkFZ4aXLMnUM6Wz9oZr" width="690" height="69" srcset="имеет-ли-смысл-использовать-dnscrypt/46c9c0b7942c6e3ee8e7b804adeef38d2cb3e869_2_690x69.png, имеет-ли-смысл-использовать-dnscrypt/46c9c0b7942c6e3ee8e7b804adeef38d2cb3e869_2_1035x103.png 1.5x, имеет-ли-смысл-использовать-dnscrypt/46c9c0b7942c6e3ee8e7b804adeef38d2cb3e869.png 2x" data-dominant-color="B9BBC6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">dns</span><span class="informations">1266×128 60.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>Как видите на первом скрине уже даже с сайтом коннект начал устанавливаться, а ответы от dnscrypt сервера всё летят. <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"><br>
+Попробую udp.</p></td><td>2025-01-11T12:27:02.845Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Я установил давно днскрипто-прокси и вчера TDNS. Все работает вместе или после отключения по отдельности. Что дальше делать, какая инструкция? Откуда мне взять 6 стабильных серверов и релеев? Какого вида они должны быть?</p></td><td>2025-01-11T12:27:10.661Z</td></tr><tr><td>Xunlei</td><td><p>Там по TCP гоняются подписи DNSSEC, если кэширование настроено на stub резолвере, то их количество минимально.</p></td><td>2025-01-11T12:30:15.558Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Zanoni" data-post="70" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/e99b99/48.png" class="avatar"> Zanoni:</div>
+<blockquote>
+<p>Откуда мне взять 6 стабильных серверов и релеев?</p>
+</blockquote>
+</aside>
+<p>Запускаете dnscrypt-proxy с конфигом <em>example-dnscrypt-proxy.toml</em> с опциями</p>
+<pre><code class="lang-auto">doh_servers = false
+odoh_servers = false
+require_dnssec = true
+require_nolog = true
+require_nofilter = true
+</code></pre>
+<p>В выводе консоли будет список рабочих серверов. Их штампы можно скопировать в отдельный конфигурационный файл. Релеи можно пока не настраивать. Со временем какие-то из них будут отваливаться, тогда нужно найти замену.</p>
+<p>Для простоты можно для начала настроить работу stub-резолвера на один экземпляр dnscrypt-proxy.</p>
+<aside class="quote no-group" data-username="Zanoni" data-post="70" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/e99b99/48.png" class="avatar"> Zanoni:</div>
+<blockquote>
+<p>Какого вида они должны быть?</p>
+</blockquote>
+</aside>
+<p>Работающего вида у вашего провайдера.</p></td><td>2025-01-11T12:40:22.669Z</td></tr><tr><td>denium</td><td><p>По udp запросов меньше, но они тоже жирные. Раз в 5 жирнее обычного dns. И чем больше резолверов указано, тем больше запросов.</p>
+<details>
+<summary>
+dnscrypt udp</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="имеет-ли-смысл-использовать-dnscrypt/076e00d3a89a5171c67ae77dc05b2a615db0417b.png" data-download-href="https://ntc.party/uploads/default/076e00d3a89a5171c67ae77dc05b2a615db0417b" title="udp"><img src="имеет-ли-смысл-использовать-dnscrypt/076e00d3a89a5171c67ae77dc05b2a615db0417b_2_690x51.png" alt="udp" data-base62-sha1="13J1qTvxmdJ43tMV266BVdPSIBR" width="690" height="51" srcset="имеет-ли-смысл-использовать-dnscrypt/076e00d3a89a5171c67ae77dc05b2a615db0417b_2_690x51.png, имеет-ли-смысл-использовать-dnscrypt/076e00d3a89a5171c67ae77dc05b2a615db0417b.png 1.5x, имеет-ли-смысл-использовать-dnscrypt/076e00d3a89a5171c67ae77dc05b2a615db0417b.png 2x" data-dominant-color="C2D3E0"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">udp</span><span class="informations">945×70 22.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2025-01-11T12:45:30.445Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>А что мне это даст, какие преимущества по сравнению с дефолтным запуском утилиты? Пока не понимаю.</p>
+<p>Конфигурацию сохранить в txt файл и рядом с утилитой сохранить? Сейчас утилита работает без вывода консоли.</p></td><td>2025-01-11T12:46:25.039Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Zanoni" data-post="74" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/e99b99/48.png" class="avatar"> Zanoni:</div>
+<blockquote>
+<p>какие преимущества по сравнению с дефолтным запуском утилиты</p>
+</blockquote>
+</aside>
+<p>Concurrency и как вследствие resiliency. Дополнительные настройки политик кэширования, блокировок. Если пока не понятно, то наверное, вам пока и не нужно.</p>
+<aside class="quote no-group" data-username="Zanoni" data-post="74" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/e99b99/48.png" class="avatar"> Zanoni:</div>
+<blockquote>
+<p>Сейчас утилита работает без вывода консоли</p>
+</blockquote>
+</aside>
+<p>Для запуска с конфигурационным файлом необходимо его указать в аргументах командной строки:</p>
+<pre><code class="lang-auto">dnscrypt-proxy.exe -config dnscrypt-proxy_1.toml
+</code></pre></td><td>2025-01-11T12:50:45.951Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Да, для меня это пока сложно. Нужна инструкция со всеми пунктами и скриншотами. Иначе не понимаю что делать. Я погуглил и не нашел на русском инструкций. Видимо, мало кто использует такие сложности комбинации двух утилит.</p></td><td>2025-01-11T12:55:32.980Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Zanoni" data-post="76" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/e99b99/48.png" class="avatar"> Zanoni:</div>
+<blockquote>
+<p>Нужна инструкция со всеми пунктами и скриншотами</p>
+</blockquote>
+</aside>
+<p>Моя рекомендация предполагала, что пользователь умеет пользоваться этими программами по отдельности. Скриншоты не понятно как делать, т.к. найдётся пользователь, который скриншоты не поймёт и нужно будет делать ещё.</p></td><td>2025-01-11T13:01:16.478Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Я днскрипто-прокси устанавливал первый раз <a href="https://hackware.ru/?p=13707" rel="noopener nofollow ugc">по инструкции</a> этого автора. Все написано подробно и понятно для любого новичка. У меня получилось с первого раза.<br>
+И утилита прекрасно работает.<br>
+А как объединить по Вашим сообщениям я не могу понять.</p>
+<p>К тому же по Вашей инструкции утилиту нужно пропатчить. Новичок не сможет все это сделать без подробной инструкции, как у автора выше.<br>
+Нужно Вам было скинуть на файлообменник пропатченную утилиту и конфигурации - только убрать свои данные и оставить поля пустыми для самостоятельного заполнения другими людьми.</p></td><td>2025-01-11T13:12:32.429Z</td></tr><tr><td>minecrafter(Minecrafter)</td><td><p>Смысл будет иметь, в случае, когда doh’и станут dohлые <img src="https://ntc.party/images/emoji/twitter/grinning.png?v=12" title=":grinning:" class="emoji" alt=":grinning:" loading="lazy" width="20" height="20"></p></td><td>2025-01-11T13:41:50.586Z</td></tr><tr><td>denium</td><td><p>Вроде бы здесь <a href="https://www.dnscheck.tools/">https://www.dnscheck.tools/</a> можно проверить задержку dns. Обычно она больше транспортной задержки, т.к. резолверу надо обработать ваш запрос, получить адреса. А может на сервере резолвера канал или проц перегружены и ваш запрос долго находится в очереди.</p></td><td>2025-01-11T13:43:27.141Z</td></tr><tr><td>sakontwist</td><td><p>Для решения проблемы долгого ответа как раз идеально подходит локальный unbound. Во-первых, кэш, во-вторых, у него есть замечательный prefetch, который сам освежает адреса перед их истечением.</p>
+<p>У меня сейчас в prefetch больше 8k записей, то есть фактически они запрашиваются заранее, а не в момент обращения.<br>
+<img src="имеет-ли-смысл-использовать-dnscrypt/639d64e10f02be9adbbdb5c96c63cab844e31518.png" alt="image" data-base62-sha1="edeu3xfjqcAfWJ0LcsdPZRqX7JK" width="328" height="278"></p></td><td>2025-01-11T13:58:05.440Z</td></tr><tr><td>sakontwist</td><td><p>Ну и соответственно, эффективность обращений высокая, практически 75% запросов разрешаются локально. Это с учетом того, что 6 дней назад был перезапуск и кэш+prefetch обнулялись…<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="имеет-ли-смысл-использовать-dnscrypt/8fffcedb2e63f582436cc7853f7213c5434ce0a3.png" data-download-href="https://ntc.party/uploads/default/8fffcedb2e63f582436cc7853f7213c5434ce0a3" title="image"><img src="имеет-ли-смысл-использовать-dnscrypt/8fffcedb2e63f582436cc7853f7213c5434ce0a3_2_517x103.png" alt="image" data-base62-sha1="kxSlm5gH1nLycQPO48vuJCRaLuz" width="517" height="103" srcset="имеет-ли-смысл-использовать-dnscrypt/8fffcedb2e63f582436cc7853f7213c5434ce0a3_2_517x103.png, имеет-ли-смысл-использовать-dnscrypt/8fffcedb2e63f582436cc7853f7213c5434ce0a3_2_775x154.png 1.5x, имеет-ли-смысл-использовать-dnscrypt/8fffcedb2e63f582436cc7853f7213c5434ce0a3_2_1034x206.png 2x" data-dominant-color="F3F3F2"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1632×328 29.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2025-01-11T14:04:18.902Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Zanoni" data-post="78" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/e99b99/48.png" class="avatar"> Zanoni:</div>
+<blockquote>
+<p>утилиту нужно пропатчить</p>
+</blockquote>
+</aside>
+<p>Это не необходимость, а рекомендация для снижения вероятности ошибки разрешения имени.</p>
+<aside class="quote no-group" data-username="Zanoni" data-post="78" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/e99b99/48.png" class="avatar"> Zanoni:</div>
+<blockquote>
+<p>Нужно Вам было скинуть на файлообменник пропатченную утилиту и конфигурации</p>
+</blockquote>
+</aside>
+<p><a class="attachment" href="имеет-ли-смысл-использовать-dnscrypt/gRrRH7FCztf9cvFPjsHTHHUhJUS.7z">jedisct1-bin.7z</a> (2.7 MB)<br>
+<a class="attachment" href="имеет-ли-смысл-использовать-dnscrypt/3RiMhsw5H5Ln1c8YE2EA8nsLWmw.7z">jedisct1-src.7z</a> (172.1 KB)</p>
+<p><em>dnscrypt-proxy</em> активно развивается и бинарники скоро потеряют актуальность.</p></td><td>2025-01-11T14:10:09.710Z</td></tr><tr><td>Xunlei</td><td><p>В TDNS, например, есть возможность сохранять кэш на диск (включена по умолчанию).</p></td><td>2025-01-11T14:14:34.247Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Утилита вчера была обновлена на Гитхабе. Пропатчена уже свежая версия?</p></td><td>2025-01-11T14:33:39.829Z</td></tr><tr><td>Xunlei</td><td><p>Конечно, только что произвёл слияние, компиляцию и накатывание на свой сервер для проверки. Тестовый конфиг тоже проверил несколько раз.</p></td><td>2025-01-11T14:35:03.961Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Если у моего провайдера только IPv4, а не 6, то мне в TDNS нужно прописывать форвардеры такого типа?:</p>
+<pre><code class="lang-auto">"127.0.0.1:1053",
+"127.0.0.1:1153",
+"127.0.0.1:1253",
+"127.0.0.1:1353",
+"127.0.0.1:1453",
+"127.0.0.1:1553"
+</code></pre></td><td>2025-01-11T14:43:36.481Z</td></tr><tr><td>Xunlei</td><td><p><code>[::1]</code> работает по умолчанию начиная с Windows Vista вне зависимости от поддержки провайдера. Для lookpback принципиальной разницы нет. Если у вас нет глобального IPv6 адреса то IPv6 сервера и релеи не будут для вас доступны.</p></td><td>2025-01-11T14:49:27.635Z</td></tr><tr><td>meadow_seed</td><td><aside class="quote no-group" data-username="Ngesso" data-post="1" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/ce7236/48.png" class="avatar"> Ngesso:</div>
+<blockquote>
+<p>Будет-ли какой-то смысл в использовании DNSCrypt?</p>
+</blockquote>
+</aside>
+<p>Если не используешь дополнительные функции вроде запрета определённых доменов, перенаправления определённых адресов (например личный кабинет провайдера интернета или локальный сайт) на днс провайдера, замены айпи для определённых адресов (например, для сервера картинок твиттера чтобы он пробивался гудбаем/баем/запретом), то особо нет.</p></td><td>2025-01-12T05:18:03.666Z</td></tr><tr><td>electrifying</td><td><p>А есть смысл ставить днс с самым малым временем ответа,например, в реальности при открытии сайтов будет видно разницу с днс который допустим отвечает за 30 МС, а другой за 50мс? Или все нивелирует кэширование браузера и всякие фишки типо предзагрузки страницы в хроме</p></td><td>2025-01-12T05:44:27.758Z</td></tr><tr><td>RapWolf</td><td><aside class="quote no-group" data-username="denium" data-post="56" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>Кстати, если dns сервисы заблокируют по SNI, может помочь zapret? Как с ECH.</p>
+</blockquote>
+</aside>
+<p>Да, mullvad’овский DoH заблочен, с zapret’ом работает в их браузере</p></td><td>2025-01-12T07:24:22.284Z</td></tr><tr><td>Xunlei</td><td><p>Вы, наверное, пишете про какую-то реализацию протокола, а не сам протокол. Протокол защищает клиента от спуфинга на стороне ISP.</p>
+<p><a href="https://dnscrypt.info/faq" rel="noopener nofollow ugc">FAQ</a></p></td><td>2025-01-12T07:57:26.770Z</td></tr><tr><td>meadow_seed</td><td><p>Я про дополнительный функционал DNSCrypt.<br>
+Как я понял, вопрос автора темы состоял в том, нужен ли ему DNSCrypt если у него в браузере уже есть опция включения защищённого днс.</p></td><td>2025-01-12T10:47:20.298Z</td></tr><tr><td>denium</td><td><p>Смысл есть, т.к. dnscrypt-proxy шифрует все системные запросы. Хотя, на новых виндах DoH тоже можно включить для системы, но не на линуксах.</p></td><td>2025-01-12T11:03:47.035Z</td></tr><tr><td>minecrafter(Minecrafter)</td><td><p>Враки <img src="https://ntc.party/images/emoji/twitter/rofl.png?v=12" title=":rofl:" class="emoji" alt=":rofl:" loading="lazy" width="20" height="20"> В арче уже сто лет есть пакет dns-over-https</p></td><td>2025-01-12T11:05:56.757Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>если я выключаю DoH в браузере то пропадает защита SNI</p>
+</blockquote>
+<p>Brave 1.61.120 (Chromium 120.0.6099.234) в Ubuntu 22.04. В chrome://flags <span class="hashtag-raw">#encrypted-client-hello</span> Enabled (в новых хромах нет этого флага, ECH включен по умолчанию и отключается другими способами). Безопасный dns резолвер в браузере отключен. Установлен dnscrypt-proxy 2.1.7 и в системе указан его dns (127.0.0.1). NL VPN.</p>
+<ol>
+<li>В Wireshark с фильтром <code>frame contains "rutracker"</code> тишина, т.е. ECH работает.</li>
+<li>Эти сайты показывают OK <a href="https://www.cloudflare.com/ssl/encrypted-sni/">https://www.cloudflare.com/ssl/encrypted-sni/</a> (только определение Secure DNS под вопросом, но оно secure)<br>
+<a href="https://tls-ech.dev/">https://tls-ech.dev/</a></li>
+<li>Этот не OK <a href="https://defo.ie/ech-check.php">https://defo.ie/ech-check.php</a></li>
+</ol>
+<p>Но как я сказал, это менее надёжно. Если DoH включен в браузере, браузер обязан использовать ECH и показывать ошибку в случае проблем. Хромобраузеры так себя и ведут, а лисобраузеры загружают без ECH (в случае, если ECH, блочится провайдером, например) после нескольких обновлений страницы.</p>
+<p>Если DoH в браузере отключен, браузер может не знать о наличии шифрования dns в других местах (на роутере, в проге dnscrypt-proxy), но всё равно пытается использовать ECH. И кстати, у него получится даже с plain text dns, не говоря о dnscrypt. Другое дело, что если ECH блочится провайдером, без включенного DoH в браузере, браузер перестанет использовать ECH для домена, т.е. не будет шифровать dns. В этом заключается ненадёжность стороннего шифрования dns. В России как известно ECH блочится провайдерами и нужен zapret. Если вы пользуетесь VPN (как я), ECH будет работать (и с dnscrypt-proxy и с plain text dns). И вы сможете спрятать домены (dns и sni) от владельца VPN при использовании dnscrypt. Но в основном только на сайтах с Cloudflare.</p></td><td>2025-01-12T11:19:21.498Z</td></tr><tr><td>denium</td><td><p>dnscrypt стал ожидаемо тупить. Переключил его на doh, не помогло. Кроме того, в doh overhead ещё больше, в разы и время реакции под 600 мс (cloudflare, google). Снёс.</p></td><td>2025-01-19T22:25:03.198Z</td></tr><tr><td>sakontwist</td><td><p>Топ серверов по времени отклика <img src="https://ntc.party/images/emoji/twitter/man_shrugging.png?v=12" title=":man_shrugging:" class="emoji" alt=":man_shrugging:" loading="lazy" width="20" height="20"></p>
+<pre><code class="lang-auto">[2025-01-20 08:52:50] [NOTICE] -     4ms dnscry.pt-moscow-ipv4
+[2025-01-20 08:52:50] [NOTICE] -     7ms cloudflare
+[2025-01-20 08:52:50] [NOTICE] -    17ms dnscry.pt-vilnius-ipv4
+[2025-01-20 08:52:50] [NOTICE] -    20ms cs-finland
+[2025-01-20 08:52:50] [NOTICE] -    22ms quad9-dnscrypt-ip4-nofilter-pri
+[2025-01-20 08:52:50] [NOTICE] -    22ms quad9-dnscrypt-ip4-nofilter-ecs-pri
+[2025-01-20 08:52:50] [NOTICE] -    22ms dnscry.pt-tallinn-ipv4
+[2025-01-20 08:52:50] [NOTICE] -    22ms quad9-doh-ip4-port443-nofilter-pri
+[2025-01-20 08:52:50] [NOTICE] -    22ms quad9-doh-ip4-port443-nofilter-ecs-pri
+[2025-01-20 08:52:50] [NOTICE] -    23ms dnscry.pt-warsaw02-ipv4
+[2025-01-20 08:52:50] [NOTICE] -    23ms nextdns
+[2025-01-20 08:52:50] [NOTICE] -    23ms dns0-unfiltered
+[2025-01-20 08:52:50] [NOTICE] -    24ms controld-uncensored
+[2025-01-20 08:52:50] [NOTICE] -    24ms nextdns-ultralow
+[2025-01-20 08:52:50] [NOTICE] -    24ms dnscry.pt-riga-ipv4
+</code></pre>
+<p>Первый запрос:</p>
+<pre><code class="lang-auto">dig @127.0.2.1 google.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.1-Ubuntu &lt;&lt;&gt;&gt; @127.0.2.1 google.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 4748
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;google.com.			IN	A
+
+;; ANSWER SECTION:
+google.com.		2400	IN	A	172.217.16.206
+
+;; Query time: 62 msec
+;; SERVER: 127.0.2.1#53(127.0.2.1) (UDP)
+;; WHEN: Mon Jan 20 09:16:34 MSK 2025
+;; MSG SIZE  rcvd: 55
+</code></pre>
+<p>Дальше конечно уже кэш и ответ мгновенный</p></td><td>2025-01-20T06:18:06.798Z</td></tr><tr><td>denium</td><td><p>Ну, не знаю. Лично видел в логе, что cloudflare и google doh в dnscrypt показывали 600 мс. Может, какой-то баг.<br>
+В первой таблице dnscrypt проверяет транспортный пинг, я так понял. А во втором логе это уже время на обработку. Кстати, как можете видеть, полная обработка запроса в 3 раза дольше (62 мс против 22 мс). А у меня только пинг до серверов 160 мс, т.к. я под VPN (Сибирь - Нидерланды и ещё сотовая связь 20 мс добавляет).</p>
+<p>Судя по wireshark, doh в dncrypt гоняет много трафика туда сюда. Т.е. 160 мс задержки складываются. Поэтому я и говорил об overhead. Вам в Москве до московского doh, конечно будет быстро.</p></td><td>2025-01-20T09:30:14.539Z</td></tr><tr><td>sakontwist</td><td><p>Ну это не москва, но ЦФО. Такие задержки мне не мешают, потому что у меня перед dns-ами стоит unbound, как я выше писал. Он сам обновляет записи через доступные ему способы (прямой Dot или dnscrypt), потому он задержки получает, а я уже нет.</p></td><td>2025-01-20T09:59:43.310Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>DoH и не может быть быстрым<br>
+в том числе потому что оно вначале делает DNS запрос сервера <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"><br>
+ну и сам HTTPS имхо далеко от даже TLS и тем более UDP/53</p>
+<p>doggo <span class="mention">@1.1.1.1</span> --time --color=false A AAAA HTTPS <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a><br>
+<a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>.  A 104.21.32.39 1.1.1.1:53       <strong>34ms</strong></p>
+<p>doggo <span class="mention">@tls</span>://1.1.1.1 --time  A AAAA HTTPS <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a><br>
+<a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>.  A 172.67.182.196 1.1.1.1:853      <strong>172ms</strong></p>
+<p>doggo @<a href="https://one.one.one.one/dns-query" rel="noopener nofollow ugc">https://one.one.one.one/dns-query</a> --time  A AAAA HTTPS <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a><br>
+<a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>.  A  172.67.182.196  <a href="https://one.one.one.one/dns-query" rel="noopener nofollow ugc">https://one.one.one.one/dns-query</a>        <strong>235ms</strong></p>
+<p>doggo <span class="mention">@quic</span>://dns.adguard-dns.com --time A AAAA <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a><br>
+<a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a>. A 87.240.137.164 <a href="http://dns.adguard-dns.com:853" rel="noopener nofollow ugc">dns.adguard-dns.com:853</a> <strong>2091ms</strong></p>
+<p>doggo @<a href="https://doh.opendns.com/dns-query" rel="noopener nofollow ugc">https://doh.opendns.com/dns-query</a> --time A AAAA <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a><br>
+<a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a>. A   87.240.129.133 <a href="https://doh.opendns.com/dns-query" rel="noopener nofollow ugc">https://doh.opendns.com/dns-query</a>       <strong>929ms</strong></p>
+<p>doggo <span class="mention">@tls</span>://dns.google --time A AAAA <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a><br>
+<a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a>. A 87.240.137.164 dns.google:853  <strong>160ms</strong></p>
+<details>
+<summary>
+dnscrypt roundrobin</summary>
+<p>[2025-01-20 14:47:34]   ::1     <a href="http://raw.githubusercontent.com" rel="noopener nofollow ugc">raw.githubusercontent.com</a>       A       PASS    101ms   dnscry.pt-oradea-ipv6<br>
+[2025-01-20 14:47:34]   ::1     <a href="http://raw.githubusercontent.com" rel="noopener nofollow ugc">raw.githubusercontent.com</a>       AAAA    PASS    143ms   dnscry.pt-tbilisi-ipv6<br>
+[2025-01-20 14:51:17]   ::1     <a href="http://antizapret.prostovpn.org" rel="noopener nofollow ugc">antizapret.prostovpn.org</a>        AAAA    PASS    64ms    dnscry.pt-hudiksvall-ipv4<br>
+[2025-01-20 14:51:17]   ::1     <a href="http://antizapret.prostovpn.org" rel="noopener nofollow ugc">antizapret.prostovpn.org</a>        A       PASS    257ms   dnscry.pt-allentown-ipv4</p>
+</details></td><td>2025-01-20T12:04:00.391Z</td></tr><tr><td>minecrafter(Minecrafter)</td><td><aside class="quote no-group" data-username="LeonMskRu" data-post="101" data-topic="14469">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/leonmskru/48/2810_2.png" class="avatar"> LeonMskRu:</div>
+<blockquote>
+<p>в том числе потому что оно <strong>вначале делает DNS запрос сервера</strong></p>
+</blockquote>
+</aside>
+<p>Я вам наверное открою заново америку, но домен в doh указывать вовсе необязательно, можно и голый айпишнег <img src="https://ntc.party/images/emoji/twitter/joy_cat.png?v=12" title=":joy_cat:" class="emoji" alt=":joy_cat:" loading="lazy" width="20" height="20"></p></td><td>2025-01-20T12:07:58.321Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>монопесуально.</p>
+<p>doggo @<a href="https://1.1.1.1/dns-query" rel="noopener nofollow ugc">https://1.1.1.1/dns-query</a> --time  A AAAA HTTPS <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a><br>
+<a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>.  A 172.67.182.196 <a href="https://1.1.1.1/dns-query" rel="noopener nofollow ugc">https://1.1.1.1/dns-query</a>        <strong>224ms</strong></p>
+<p>doggo @<a href="https://one.one.one.one/dns-query" rel="noopener nofollow ugc">https://one.one.one.one/dns-query</a> --time  A AAAA HTTPS <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a><br>
+<a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>.  A 172.67.182.196 <a href="https://one.one.one.one/dns-query" rel="noopener nofollow ugc">https://one.one.one.one/dns-query</a>        <strong>250ms</strong></p>
+<p>вот на TLS сразу заметно</p>
+<p>doggo <span class="mention">@tls</span>://one.one.one.one/dns-query --time  A AAAA HTTPS <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a><br>
+<a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>.  A 104.21.32.39  one.one.one.one:853      <strong>258ms</strong></p>
+<p>doggo <span class="mention">@tls</span>://1.1.1.1/dns-query --time  A AAAA HTTPS <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a><br>
+<a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>.  A  104.21.32.39 1.1.1.1:853      <strong>157ms</strong></p>
+<p>ps. если бы не РКН …<br>
+doggo <span class="mention">@1.1.1.1</span> --time  A AAAA HTTPS <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a><br>
+<a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>.  A  172.67.182.196   1.1.1.1:53       <strong>40ms</strong></p>
+<p>2   26.00 ms <a href="http://1.net-126.kaluga.ru" rel="noopener nofollow ugc">1.net-126.kaluga.ru</a> (95.107.126.1)<br>
+3   27.00 ms 213.59.232.180<br>
+4   …<br>
+5   30.00 ms 95.71.2.226<br>
+6   31.00 ms 172.68.8.51<br>
+7   32.00 ms one.one.one.one (1.1.1.1)</p></td><td>2025-01-20T12:18:12.056Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>из репы он идёт с поддержкой сокета и там listener пустой</p>
+</blockquote>
+<p>dnscrypt socket это вообще какая-то наркомания. Как и всякие systemd-resolved. Наплодили всякой фигни. Я теперь понимаю тех, кто ненавидит systemd.</p></td><td>2025-01-22T01:22:52.235Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,131 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>The Snowflake bridge was moved to a more powerful network server at 2022-03-16 16:51:35. This is the beginning of a plan to scale Snowflake to handle more users. If you notice Snowflake being faster in the past few days, this is why.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40110">
+  <header class="source">
+      <img src="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/0b567376826ff6cd5c8f37f411a2868671980912.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40110" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40110" target="_blank" rel="noopener">Move bridge to an interim faster server (#40110) · Issues · The Tor Project /...</a></h3>
+
+  <p>Background: [tor-project] More resources required for Snowflake bridge I have or have been offered access to a faster server for...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>However, I made a mistake when I migrated the bridge. The cause of the problem is <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40110#note_2788622">technical</a> (<a href="https://forum.torproject.net/t/tor-relays-how-to-reduce-tor-cpu-load-on-a-single-bridge/1483/14">more technical</a>), but the short explanation is that I installed the wrong <strong>onion keys</strong> on the new server. I noticed the error and fixed the onion keys at 2022-03-18 03:21:45 (about 34.5 hours later).</p>
+<p>The server having wrong onion keys does not create a security risk, but it may prevent you from connecting to the bridge. The symptom of the problem is that Tor Browser bootstraps to <strong>95%</strong> and then makes no further progress.</p>
+<ul>
+<li>If you used Snowflake <strong>before</strong> 2022-03-16 16:51:35, then you probably were not able to connect between 2022-03-16 16:51:35 and 2022-03-18 03:21:45, when the wrong onion keys were installed. It should work again now.</li>
+<li>On the other hand, if you used Snowflake <em>for the first time</em> <strong>after</strong> 2022-03-16 16:51:35 and <strong>before</strong> 2022-03-18 03:21:45, then your Tor Browser cached the wrong onion keys, and you will not be able to connect now.</li>
+</ul>
+<p>The error in the Tor log is:</p>
+<pre><code class="lang-plaintext">[WARN] Problem bootstrapping. Stuck at 95% (circuit_create): Establishing a Tor circuit. (DONE; DONE; count 2; recommendation warn; host 2B280B23E1107BB62ABFC40DDCC8824814F80A72 at 192.0.2.3:1)
+</code></pre>
+<p>If your Tor Browser is bootstrapping to only <strong>95%</strong> with Snowflake, you can fix the problem by deleting one file. The file to delete is:</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>platform</th>
+<th>path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>linux</td>
+<td>Browser/TorBrowser/Data/Tor/cached-descriptors</td>
+</tr>
+<tr>
+<td>windows</td>
+<td>Browser\TorBrowser\Data\Tor\cached-descriptors</td>
+</tr>
+<tr>
+<td>macosx</td>
+<td>Contents/Resources/TorBrowser/Tor/cached-descriptors</td>
+</tr>
+</tbody>
+</table>
+</div><p>Then restart Tor Browser. You can also re-download Tor Browser and start from a fresh installation; that will also work.</p></td><td>2022-03-18T04:04:42.788Z</td></tr><tr><td>tango</td><td><p>Here is a post that show the effect of the new faster bridge.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40110#note_2791036">
+  <header class="source">
+      <img src="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/c2f7ca4bfb03edc478481f72c20a6d0d016372d4.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40110#note_2791036" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40110#note_2791036" target="_blank" rel="noopener">Move bridge to an interim faster server (#40110) · Issues · The Tor Project /...</a></h3>
+
+  <p>Background: [tor-project] More resources required for Snowflake bridge I have or have been offered access to a faster server for...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>This is the raw bandwidth measurements of the old bridge and the new:</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/30091fa811221b8c5085cb266510466d375f8216.png" data-download-href="https://ntc.party/uploads/default/30091fa811221b8c5085cb266510466d375f8216" title="&quot;send&quot; and &quot;recv&quot; bytes / s on the old and new bridge"><img src="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/30091fa811221b8c5085cb266510466d375f8216_2_690x258.png" alt="&quot;send&quot; and &quot;recv&quot; bytes / s on the old and new bridge" data-base62-sha1="6QWsT1YoBlq18LXvodbJhhcQj4i" width="690" height="258" srcset="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/30091fa811221b8c5085cb266510466d375f8216_2_690x258.png, snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/30091fa811221b8c5085cb266510466d375f8216.png 1.5x, snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/30091fa811221b8c5085cb266510466d375f8216.png 2x" data-dominant-color="F3F9F9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">"send" and "recv" bytes / s on the old and new bridge</span><span class="informations">960×360 59.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>This is just the Tor bandwidth (exclusive of pluggable transport encoding overhead and other traffic on the host):</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/4285f9f55d30dbf91e1e6ebeff23f46b28d4d156.png" data-download-href="https://ntc.party/uploads/default/4285f9f55d30dbf91e1e6ebeff23f46b28d4d156" title="Snowflake bandwidth history, combined instances"><img src="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/4285f9f55d30dbf91e1e6ebeff23f46b28d4d156_2_690x414.png" alt="Snowflake bandwidth history, combined instances" data-base62-sha1="9uuytTh7fMV8yrpn9ktX5br7hhs" width="690" height="414" srcset="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/4285f9f55d30dbf91e1e6ebeff23f46b28d4d156_2_690x414.png, snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/4285f9f55d30dbf91e1e6ebeff23f46b28d4d156_2_1035x621.png 1.5x, snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/4285f9f55d30dbf91e1e6ebeff23f46b28d4d156_2_1380x828.png 2x" data-dominant-color="F8F8F7"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Snowflake bandwidth history, combined instances</span><span class="informations">1500×900 110 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>This is the estimated number of simultaneous users. About 75% of Snowflake users are from Russia, currently.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/b0ccdbd614ad41d78d191c27e12947ebcc9dc579.png" data-download-href="https://ntc.party/uploads/default/b0ccdbd614ad41d78d191c27e12947ebcc9dc579" title="Snowflake clients, combined instances"><img src="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/b0ccdbd614ad41d78d191c27e12947ebcc9dc579_2_690x414.png" alt="Snowflake clients, combined instances" data-base62-sha1="pe2WrpCNXfbgwaNcbxK92AxxRWh" width="690" height="414" srcset="snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/b0ccdbd614ad41d78d191c27e12947ebcc9dc579_2_690x414.png, snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/b0ccdbd614ad41d78d191c27e12947ebcc9dc579_2_1035x621.png 1.5x, snowflake-bridge-moved-to-a-faster-server-–-what-to-do-if-it-doesnt-connect/b0ccdbd614ad41d78d191c27e12947ebcc9dc579_2_1380x828.png 2x" data-dominant-color="F8F7F5"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Snowflake clients, combined instances</span><span class="informations">1500×900 108 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2022-03-28T01:24:00.521Z</td></tr>
+    </table>
+      </body>
+    </html>

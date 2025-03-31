@@ -1,0 +1,65 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проблемы-на-iosmacos-из-за-icloud-private-relay-2190</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>stek29(Viktor Oreshkin)</td><td><p>На системах от Apple периодически возникают проблемы из-за iCloud Private Relay и “Limit IP Address tracking”.</p>
+<p>В частности на macOS Big Sur опции “Limit IP Address Tracking” в настройках нет, а Safari 15 некорректно использует AZ при подключении его на уровне сети.</p>
+<p>Оказалось, что решение многочисленных проблем сводится к блокировке на DNS служебных доменов iCloud Private Relay согласно <a href="https://developer.apple.com/support/prepare-your-network-for-icloud-private-relay/" rel="noopener nofollow ugc">гайду от Apple</a></p>
+<p>конфиг для knot:</p>
+<pre data-code-wrap="lua"><code class="lang-nohighlight">policy.add(
+    policy.suffix(
+        policy.DENY,
+        policy.todnames({
+            'mask.icloud.com.',
+            'mask-h2.icloud.com.',
+        })
+    )
+)
+</code></pre></td><td>2022-04-06T11:08:57.730Z</td></tr><tr><td>User69</td><td><p>iCloud Private Relay в России недоступна. Какие конкретно проблемы возникают?<br>
+Опция <strong>Limit IP Address Tracking</strong> синхронизируется между девайсами Apple. Достаточно снять галку в настройках конкретной WiFi-сети в айфоне (если он есть, и с iOS 15), и настройка отключается в macOS 12. Предыдущие ОС это вообще не поддерживают.<br>
+Или это чисто баг Safari 15? Что такое AZ?</p></td><td>2022-04-06T12:47:08.317Z</td></tr><tr><td>ValdikSS</td><td><p>Еще есть <code>mask.apple-dns.net</code>.</p>
+<aside class="quote no-group" data-username="User69" data-post="2" data-topic="2190">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/user69/48/2306_2.png" class="avatar"> User69:</div>
+<blockquote>
+<p>Что такое AZ?</p>
+</blockquote>
+</aside>
+<p>АнтиЗапрет.</p></td><td>2022-04-16T11:15:23.379Z</td></tr>
+    </table>
+      </body>
+    </html>

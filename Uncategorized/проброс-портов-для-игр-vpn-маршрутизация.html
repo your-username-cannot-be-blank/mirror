@@ -1,0 +1,62 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проброс-портов-для-игр-vpn-маршрутизация</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>xtropi(Xtropi)</td><td><p>Настроил по гайду из ютуба VPS с 3X-UI и vless vpn через nekoray с прописанными доменами проксирования. Всё отлично работает, огонь.</p>
+<p>Дополнительно к этому хочу иметь возможность хостить сервер игры (напр. Factorio) потому что часто переезжаю и везде серый IP.</p>
+<p>Попытался настроить в конфиге Inbound, Outbound, Routing, но из за того что я недоразвитый фронтендер это не сработало.</p>
+<p>Когда то давно делал такой туннель с портами через OpenVPN но там была проблема что проксировался вообще весь трафик и у некоторых провайдеров OpenVPN быстро распознаётся и блокируется.</p>
+<p>Буду признателен если поможете это грамотно настроить.</p></td><td>2024-03-28T11:36:29.909Z</td></tr><tr><td>sakontwist</td><td><p>Вы хотите хостить игру реверсом через xray-туннель? Это будет негативный игровой опыт )</p></td><td>2024-03-28T13:13:23.377Z</td></tr><tr><td>xtropi(Xtropi)</td><td><p>Можно и через wireguard или как на ваш взгляд будет лучше.</p></td><td>2024-03-28T13:20:09.004Z</td></tr><tr><td>Xunlei</td><td><p>После установки любого IP тунеля можете использовать firewalld для настройки <a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-port_forwarding" rel="noopener nofollow ugc">port forwarding</a>.</p></td><td>2024-03-28T13:38:33.058Z</td></tr><tr><td>xtropi(Xtropi)</td><td><p>Чтобы перенаправить трафик портов надо указать куда его направить.<br>
+Командой ip link show у меня на VPS показывает только 2 интерфейса lo (loopback) и eth0.<br>
+Видимо потому что wireguard и vless не самостоятельно установлены а как часть xray, не знаю.<br>
+Ок, если нужно прописать iptables и там указать интерфейс и ip куда направлять то как это сделать c Xray?</p></td><td>2024-03-28T15:23:32.712Z</td></tr><tr><td>Xunlei</td><td><p>Перенаправлять его нужно на виртуальный IP интрефейса подключённого к тунелю клиента (который должен пинговатся с сервера). iptables не использую, мне достаточно высокоуровнего firewalld, где можно для зоны или полиси добавить правило nftables при необходимости. С xray не знаю, может быть и нельзя, это просто прокси, а нужен reverse proxy для этого.</p></td><td>2024-03-28T15:33:20.988Z</td></tr><tr><td>xtropi(Xtropi)</td><td><p>Если пробую пинговать IP который указан в клиенте Wireguard или IP внутренней сети моего компа то пакеты теряются.<br>
+Как найти этот виртуальный IP?<br>
+UPD:<br>
+Видимо действительно нельзя через xray так сделать. В таком случае может кто поможет reverse proxy настроить? Читаю гайд на хабре но в силу неопытности не могу понять и повторить так чтобы не сломать то что уже работает.</p></td><td>2024-03-28T15:41:01.264Z</td></tr><tr><td>Xunlei</td><td><p>Который указан в клиенте Wireguard по видимому. На клиенском компьютере ipconfig /all под виндой можно посмотреть все IP. Должен пинговатся, включите маскарадинг.<br>
+Реверс прокси не помогу, не настраивал, т.к. IP тунеля всегда хватало.<br>
+Чтобы не сломать используйте виртуальную машину с bridged сетью для опытов.</p></td><td>2024-03-28T15:46:45.770Z</td></tr><tr><td>xtropi(Xtropi)</td><td><p>Настроили связку Xray с OpenVPN.<br>
+В Xray ничего не трогали, оставили как есть.<br>
+OpenVPN пустили через локальный прокси который запускается вместе с nekoray на 127.0.0.1:2080 который после подключается к Xray.<br>
+На VPS настроили iptables для проброса портов.</p>
+<pre><code class="lang-auto">iptables -t nat -A PREROUTING -p udp --dport 3000 -j DNAT --to-destination 10.8.0.2:3000
+iptables -t nat -A PREROUTING -p tcp --dport 3000 -j DNAT --to-destination 10.8.0.2:3000 
+iptables -t nat -A POSTROUTING -j MASQUERADE 
+</code></pre>
+<p>И вуаля - любой прописаный порт работает. Проверили на веб сервере и игре.<br>
+Меня выручил 0ka =3</p></td><td>2024-03-28T19:03:28.938Z</td></tr>
+    </table>
+      </body>
+    </html>

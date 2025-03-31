@@ -1,0 +1,298 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>tor-expert-bundle-и-настройка-конфига-torrc</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>404kg(Max)</td><td><p>Как должен выглядеть конфиг для запуска бинарного Tor?<br>
+Сейчас у меня такой, сделал по инструкциям из сети т.к. документация не гуглится офицальная.</p>
+<pre><code class="lang-auto">ClientTransportPlugin obfs4 exec D:\Soft\Tor\Tor\PluggableTransports\obfs4proxy.exe
+Bridge obfs4 77.72.132.85:60942 108891B7875D12AADD0DDB06C88FBFED0DF48F91 cert=5T1zoNf9IvnUJ5PW8QrqvMs2FtTk5Zovxd4hPFFu8wSbo338e/yerVmH8bVGuREqZx/0CA iat-mode=0
+Bridge obfs4 84.113.179.53:9999 9429DA1EBF5C50112776350
+C4C0AF4ECC3D3E0F9 cert=DyGA0K+G8fax021WpttnsOgegCTk9Vc6xkgd/qK6wZg/0U7DawhsmNs+4HxiTDn1hkRoUg iat-mode=0
+UseBridges 1
+DataDirectory D:\Soft\Tor\Tor
+GeoIPFile D:\Soft\Tor\Data\Tor\geoip
+GeoIPv6File D:\Soft\Tor\Data\Tor\geoip6
+Log notice file D:\Soft\Tor\Tor\log.txt
+ExtORPort auto
+ContactInfo yourname@example.com
+Nickname PonteMilvio
+</code></pre>
+<p>После запуска командой tor.exe -f D:\Soft\Tor\Tor\torrc консоль молчит, нет соединения. должно быть bootstraped 100% done<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="tor-expert-bundle-и-настройка-конфига-torrc/dbec9c5ec68746ce6e25f51e45f396bd02acd50a.png" data-download-href="https://ntc.party/uploads/default/dbec9c5ec68746ce6e25f51e45f396bd02acd50a" title="cmd_vihCMbTo4c_2023-05-24_20-27-05"><img src="tor-expert-bundle-и-настройка-конфига-torrc/dbec9c5ec68746ce6e25f51e45f396bd02acd50a.png" alt="cmd_vihCMbTo4c_2023-05-24_20-27-05" data-base62-sha1="vnxv97XwV6jO1LDD5B22QhOqK0y" width="690" height="127" data-dominant-color="1A1A1A"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">cmd_vihCMbTo4c_2023-05-24_20-27-05</span><span class="informations">967×179 6.68 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Создавать и настраивать torrc приходится из-за того что Tor блокируется, bootstraped висит на 5%. Тут же просто мосты другие укажу которые работают.</p></td><td>2023-05-24T14:05:23.911Z</td></tr><tr><td>Xunlei</td><td><p>Вам конфигурация клиента через транспорт <em>obfs4</em> необходима?</p>
+<pre><code class="lang-auto">CacheDirectory ..\Data\Tor\cache
+DataDirectory ..\Data\Tor
+GeoIPFile ..\Data\Tor\geoip
+GeoIPv6File ..\Data\Tor\geoip6
+
+SafeLogging 0
+
+ClientOnly 1
+AutomapHostsOnResolve 1
+
+AvoidDiskWrites 1
+HardwareAccel 1
+
+ExcludeExitNodes {US},{RU},{BY}
+
+NewCircuitPeriod 300
+
+OutboundBindAddress 192.168.1.1
+SocksPort [::1]:9050
+DNSPort [::1]:9053
+
+UseBridges 1
+ClientTransportPlugin obfs4 exec ..\Tor\PluggableTransports\obfs4-client.exe
+
+# Мосты
+Bridge obfs4 …
+Bridge obfs4 …
+…
+</code></pre>
+<p>Сейчас актуальная версия 0.4.7.13, и похоже дальше переход будет на <em>arti</em>.</p></td><td>2023-05-24T15:02:37.275Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="404kg" data-post="1" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/404kg/48/2763_2.png" class="avatar"> 404kg:</div>
+<blockquote>
+<p>После запуска командой tor.exe -f D:\Soft\Tor\Tor\torrc консоль молчит, нет соединения. должно быть bootstraped 100% done</p>
+</blockquote>
+</aside>
+<p>Потому что лог выводится в D:\Soft\Tor\Tor\log.txt. Закомментируйте Log notice, чтобы выводило в консоль.</p></td><td>2023-05-24T17:45:54.934Z</td></tr><tr><td>MD5(MD5)</td><td><p>Поскольку в новых версиях нету obfs4-client.exe то в конфиге нужно заменить</p>
+<p>UseBridges 1<br>
+ClientTransportPlugin obfs4 exec …\Tor\PluggableTransports\obfs4-client.exe</p>
+<p>На<br>
+UseBridges 1<br>
+ClientTransportPlugin obfs4 exec …\Tor\PluggableTransports\lyrebird.exe</p>
+<p>Верно?</p></td><td>2024-09-15T09:18:14.301Z</td></tr><tr><td>Xunlei</td><td><p>Да, формат мостов старый, екзешник поменять и должно заработать (если мост разумеется не заблокирован).</p></td><td>2024-09-15T09:19:31.758Z</td></tr><tr><td>MD5(MD5)</td><td><p>Есть момент с конфигом:<br>
+UseBridges 1<br>
+ClientTransportPlugin obfs4 exec /path to lyrebird.exe/<br>
+перед адресом моста надо добавить Bridge иначе выкатывает ошибку конфига</p>
+<p>Какой аргумент для запуска tor.exe надо указывать для добавления нужного конфига ? по умолчанию он подхватывает из папки Roaming\ещк в Windows</p></td><td>2024-09-15T10:42:35.248Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="MD5" data-post="6" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/md5/48/7323_2.png" class="avatar"> MD5:</div>
+<blockquote>
+<p>перед адресом моста надо добавить Bridge</p>
+</blockquote>
+</aside>
+<p>Да, в примере так и написано.</p>
+<aside class="quote no-group" data-username="MD5" data-post="6" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/md5/48/7323_2.png" class="avatar"> MD5:</div>
+<blockquote>
+<p>Какой аргумент для запуска tor.exe надо указывать для добавления нужного конфига ?</p>
+</blockquote>
+</aside>
+<p>Что-то вроде такого в ярлыке должно быть:<br>
+<code>"C:\Program Files\tor-win64\Tor\tor.exe" -f "..\Data_Lyrebird\Tor\configuration.txt"</code></p>
+<p>Вот вам иконочка ещё: <a class="attachment" href="tor-expert-bundle-и-настройка-конфига-torrc/lUQfskVO3Px6bckWplQ9skSOY3b.xz">Tor.ico.xz</a> (50.0 KB)</p></td><td>2024-09-15T10:46:03.461Z</td></tr><tr><td>MD5(MD5)</td><td><p>Спасибо за ответ. Ещё один вопросик:<br>
+если в конфиге torrc не указана строка GeoIPv6File или указан правильный путь до файла geoip6 то запуск tor.exe останавливается после пункта Opened Socks и так висит. Но если указать неправильный путь до файла geoip6 в строке GeoIPv6File после сообщения [warn] Failed to open GeoIP file всё успешно работает. В связи с этим вопрос, как отключить в конфиге ipv6?</p></td><td>2024-09-16T11:59:23.692Z</td></tr><tr><td>Xunlei</td><td><p>В примере <code>OutboundBindAddress</code> адрес IPv4, этого достаточно, чтобы тор и мосты не лазили по IPv6 (по крайней мере, у себя не разу не видел IPv6 подключений). Этот параметр может быть объявлен несколько раз для перечисления возможных адресов для биндинга (в том числе и IPv6). Есть ещё опция <code>OutboundBindAddressPT</code> только для транспортных плагинов.</p>
+<p>Как ультимативное решение — разрешить в брандмауэре защитника Windows для транспорта подключение только по TCP к <code>0.0.0.0/0</code> (либо запретить <code>2000::/3</code>).</p></td><td>2024-09-16T12:32:14.840Z</td></tr><tr><td>Xunlei</td><td><p>Или вы спрашиваете, как сделать подключения на выходной ноде только через IPv4? Тогда используйте <code>ClientUseIPv6 0</code> и <code>AddressDisableIPv6 1</code>.</p></td><td>2024-09-16T12:44:35.933Z</td></tr><tr><td>MD5(MD5)</td><td><aside class="quote no-group" data-username="Xunlei" data-post="10" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p><code>ClientUseIPv6 0</code> и <code>AddressDisableIPv6 1</code>.</p>
+</blockquote>
+</aside>
+<p>Попробовал запускать с этими параметрами, но увы tor виснет так же на строке “Opened Socks listener connection (ready) on 127.0.0.1:9050”. И пока что выход это прописывать неверный путь в конфиге для GeoIPv6File</p></td><td>2024-09-19T08:50:01.643Z</td></tr><tr><td>Xunlei</td><td><p>Вроде стал понимать проблему, <s>пробуйте запустить тор прокси на виртуальной машине с вашим конфигом, если заработает — то это какая-то проблема с вашей ОС, в которой, возможно, поломан IPv6.<br>
+Должно быть в логах что-то вроде такого:</s></p><s>
+<pre><code class="lang-auto">[notice] Opening Socks listener on [::1]:9050
+[notice] Opened Socks listener connection (ready) on [::1]:9050
+[notice] Opening DNS listener on [::1]:9053
+[notice] Opened DNS listener connection (ready) on [::1]:9053
+</code></pre>
+</s>
+<p><a href="https://dist.torproject.org/torbrowser/14.0a5/tor-expert-bundle-windows-x86_64-14.0a5.tar.gz" rel="noopener nofollow ugc">Актуальная версия</a>.</p>
+<p>Посмотрел код функции <code>geoip_load_file</code>, да, сначала он открывает файл <code>tor_fopen_cloexec</code>, затем пишет в лог <code>Parsing GEOIP %s file %s.</code>, затем парсит. Похоже у вас зависает на <code>fopen</code>, можно попробовать удалить файл и заново его распаковать из архива, попробовать открыть, попробовать сократить длину пути каталога, попробовать использовать только латиницу в пути.</p></td><td>2024-09-19T11:42:38.020Z</td></tr><tr><td>MD5(MD5)</td><td><p>Попробовал на виртуалке Win 7 и Win 10 версии 13.5.3 и 14.0a5. С путями к исполняемым файлам вроде всё ок. И такой же залип на  “Opened Socks listener connection (ready) on 127.0.0.1:9050”</p></td><td>2024-09-20T14:01:55.197Z</td></tr><tr><td>Xunlei</td><td><p>Windows 7 вроде уже не должно работать начиная с какой-то версии.</p>
+<aside class="quote no-group" data-username="MD5" data-post="13" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/md5/48/7323_2.png" class="avatar"> MD5:</div>
+<blockquote>
+<p>И такой же залип на “Opened Socks listener connection (ready) on 127.0.0.1:9050”</p>
+</blockquote>
+</aside>
+<p>Так почитайте первое сообщение и третье, где написано, что нужно убрать <code>Log notice</code>.</p></td><td>2024-09-20T14:05:58.235Z</td></tr><tr><td>MD5(MD5)</td><td><p>На win 7 до сих пор запускается )))<br>
+Действительно, стоило закомментить строчку Log notice как GeoIPv6File успешно распарсился и tor запустился. Спасибо!<br>
+(Просто как то не уловил связь между логгированием и залипанием при открытии geoip6)</p></td><td>2024-09-20T14:22:16.141Z</td></tr><tr><td>denium</td><td><p>Потому что с Log notice лог идёт в файл. Но не совсем сразу, а на некотором этапе. Без Log notice лог будет в терминале. В обоих случаях тор работает.</p></td><td>2024-09-20T16:11:35.580Z</td></tr><tr><td>Verity-Freedom</td><td><p>А это вы первичный автор конфигурации или тоже её откуда-то взяли? В любом случае в отличие от того тролля, meeeeeh, полагаю вас хоть в кой-то степени профессионалом, а не диванным держателем двухста obfs 4.</p>
+<p>Я с ней работал. Из неё взяты SafeLogging 0, HardwareAccel 1, AutomapHostsOnResolve 1, ну и UseBridges 1. Пользу остального не совсем понял. Очень много работал применительно именно к Ютубу, как в общем-то в своей теме и сказал. Отсюда хорватские выходные ноды, ибо с множеством других кантринодов при просмотре Ютуба возникают ошибки. Что я собственно и на ntc когда-то вроде обсуждал. Поэтому я смотрел пользу параметров для стабилизации Ютуба. По итогу разницу чувствовал только от замены выходных нодов.</p>
+<p>ExcludeExitNodes {US},{RU},{BY} - не совсем имеет смысл, зачем исключать только {US} из западных стран? Чем {US} хуже чем например {DE}? По какой-то причине казахские ноды также на Ютуб давали те же геоблокировки, что и россиянам с белорусами. AvoidDiskWrites 1 убрал, ибо программа и так совсем немного весит. NewCircuitPeriod 300 тоже убрал, ибо не увидел на тот момент разницы с различными значениями с ним и без него. Оптимизировал конфиг для предельно конкретных вещей и на тот момент это был просмотр Ютуба. Я вам могу показать результаты и разницу, если получу стопроцентную воспроизводимость.</p></td><td>2024-09-21T19:04:36.541Z</td></tr><tr><td>Verity-Freedom</td><td><p>Возможно Ютуб стабильнее всего работает именно на хорватских выходных ибо они, как и сказал meeeeeh (после того как ему указали по лбу их существование), все в одной подсети находятся, и Ютуб не считает подозрительным такой трафик, а возможно дело всё же в их сравнительной непопулярности (до того как я повлиял на их использование россиянами для обхода замедления).</p></td><td>2024-09-21T19:11:01.933Z</td></tr><tr><td>Xunlei</td><td><p>Я открыл исходники тора, перечитал параметры в файле документации</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/core/tor/-/blob/main/doc/man/tor.1.txt?ref_type=heads">
+  <header class="source">
+      <img src="tor-expert-bundle-и-настройка-конфига-torrc/9a389edf7a01a79d8d508c866a73659212b5c5d0.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/core/tor/-/blob/main/doc/man/tor.1.txt?ref_type=heads" target="_blank" rel="noopener nofollow ugc">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="tor-expert-bundle-и-настройка-конфига-torrc/0314050800e4e3aea5469b147559d8bb12021fd7.png" class="thumbnail onebox-avatar" data-dominant-color="979087">
+
+<h3><a href="https://gitlab.torproject.org/tpo/core/tor/-/blob/main/doc/man/tor.1.txt?ref_type=heads" target="_blank" rel="noopener nofollow ugc">doc/man/tor.1.txt · main · The Tor Project / Core / Tor · GitLab</a></h3>
+
+  <p>Welcome to The Tor Project's Gitlab</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Что-то натяпляпил, что показалось важным, что-то видел у других, уже не помню (начал пользоваться на постоянку с 2013-ого года).</p>
+<aside class="quote no-group" data-username="Verity-Freedom" data-post="17" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/verity-freedom/48/7920_2.png" class="avatar"> Verity-Freedom:</div>
+<blockquote>
+<p>ExcludeExitNodes {US},{RU},{BY} - не совсем имеет смысл, зачем исключать только {US} из западных стран? Чем {US} хуже чем например {DE}?</p>
+</blockquote>
+</aside>
+<p>Не помню уже какую задачу решал, может в момент написания мне мешал региональный бан. Это всего лишь пример.</p>
+<aside class="quote no-group" data-username="Verity-Freedom" data-post="17" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/verity-freedom/48/7920_2.png" class="avatar"> Verity-Freedom:</div>
+<blockquote>
+<p>NewCircuitPeriod 300</p>
+</blockquote>
+</aside>
+<p>Эту рекомендацию где-то встречал для затруднения временной атаки, мне в принципе особой разницы нет.</p>
+<aside class="quote no-group" data-username="Verity-Freedom" data-post="18" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/verity-freedom/48/7920_2.png" class="avatar"> Verity-Freedom:</div>
+<blockquote>
+<p>и Ютуб не считает подозрительным такой трафик</p>
+</blockquote>
+</aside>
+<p>Уже больше года урлы <code>*.youtube.com</code> начал пускать в обход тора через  другую проксю по причине невыносимости ежедневного разгадывания светофоров, мне это было проще сделать, чем регулярно добавлять в исключение забаненые выходные ноды.</p></td><td>2024-09-22T00:01:49.992Z</td></tr><tr><td>Verity-Freedom</td><td><p><a class="mention" href="/u/xunlei">@Xunlei</a> сегодня несколько часов монтировал большое видео с ответами на всю высказанную критику, надеюсь посмотрите, скоро выложу его публично здесь.</p></td><td>2024-09-22T01:33:19.176Z</td></tr><tr><td>Xunlei</td><td><p>Как бы то оно не было, если не сегодня, то завтра тунели отвалятся и появятся новые. Придётся бегать смотреть работающие тунели (obfs4 у меня работает 5% от предлагаемых). Был бы инструмент по аналогии <code>https://torscan-ru.ntc.party/</code> для поиска незаблокированных тунелей — пользы будет больше (и вреда — РКН может просто начать парсить список).</p></td><td>2024-09-22T01:46:02.405Z</td></tr><tr><td>Verity-Freedom</td><td><p><a class="mention" href="/u/xunlei">@Xunlei</a> <a href="https://ntc.party/t/%D0%BE%D1%82%D0%B2%D0%B5%D1%82-%D1%80%D0%B0%D0%B7%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%87%D0%B8%D0%BA%D0%B0-%D0%BF%D0%BE%D1%80%D1%82%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%BE%D0%B3%D0%BE-%D1%82%D0%BE%D1%80%D0%B0-%D0%BD%D0%B0-%D0%BA%D1%80%D0%B8%D1%82%D0%B8%D0%BA%D1%83-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D1%81%D1%82%D0%B2%D0%B0-ntc/10541" class="inline-onebox">Ответ разработчика портативного Тора на критику сообщества NTC</a></p></td><td>2024-09-22T01:46:06.234Z</td></tr><tr><td>robin_blood</td><td><p>Хочу спросить, а можно как то настроить, чтобы средний и выходной ip стран отличались, в последнее время часто замечаю одинаковые страны. Знаю можно просто вручную прописать сюда - такие, туда - другие, но нуежели нельзя автоматически это настроить?</p></td><td>2024-10-01T05:05:07.754Z</td></tr><tr><td>Xunlei</td><td><p>Не знаю, предполагаю что и нельзя без модификиции (удобный недостаток для time атаки). Подобным вопросом задавался для выбора релеев для dnscrypt, по итогу просто маршруты захардкодил.</p></td><td>2024-10-01T09:12:19.429Z</td></tr><tr><td>robin_blood</td><td><p>Жаль, придется вручную собирать…спасибо за ответ. Насчет dncrypt не понят, там же другая система, есть ли смысл? Всегда выбираю один сервер, до которого меньше пинг и anon, до которого тоже пинг небольшой и все</p></td><td>2024-10-01T11:19:02.839Z</td></tr><tr><td>Xunlei</td><td><p>Если выбирать по пингу то смысла точно не будет, т. к. релей вероятнее попадётся от того же оператора, что и сервер. Для повышения resiliency <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-dns-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80%D0%B5/7656/27">настроил шесть серверов</a>.</p></td><td>2024-10-01T11:35:27.586Z</td></tr><tr><td>robin_blood</td><td><aside class="quote no-group" data-username="Xunlei" data-post="26" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>Если выбирать по пингу то смысла точно не будет, т. к. релей вероятнее попадётся от того же оператора, что и сервер.</p>
+</blockquote>
+</aside>
+<p>Или я чего то непонимаю, или мы о разных вещах говорим. Там же проименовано все. Запускаю по дефолту без выбранного сервера, он чекает и дает список по пингу, выбираю из первых один нужный оптимальный (не всегда самый первый и близкий), а потом выбираю близкий релей исходя из страны первого так как пинг суммируется. Это если я dncrypt сервера использую. Сейчас временно на DOH, а там с ODOH тяжко идет, так что без релея</p></td><td>2024-10-01T12:13:20.721Z</td></tr><tr><td>Verity-Freedom</td><td><p>Вот такая ошибка при просмотре Ютуба возникает:</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="tor-expert-bundle-и-настройка-конфига-torrc/8dca43bbb6441506a383bfd724503e3339f115db.png" data-download-href="https://ntc.party/uploads/default/8dca43bbb6441506a383bfd724503e3339f115db" title="image"><img src="tor-expert-bundle-и-настройка-конфига-torrc/8dca43bbb6441506a383bfd724503e3339f115db_2_690x147.png" alt="image" data-base62-sha1="kekFJNjRKfiKtLAYr3Vk8rprtBp" width="690" height="147" srcset="tor-expert-bundle-и-настройка-конфига-torrc/8dca43bbb6441506a383bfd724503e3339f115db_2_690x147.png, tor-expert-bundle-и-настройка-конфига-torrc/8dca43bbb6441506a383bfd724503e3339f115db_2_1035x220.png 1.5x, tor-expert-bundle-и-настройка-конфига-torrc/8dca43bbb6441506a383bfd724503e3339f115db.png 2x" data-dominant-color="313131"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1342×286 15.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Если использую больше одного ip-диапазона в экзитах за раз. То есть два экзита сами по себе (если сначала вписал один, потом удалил и вписал другой) не вызывают никаких проблем. Проблемы возникают если я использую их вместе. Также проблем не возникает если на одном диапазоне используется множество экзитов.</p>
+<p>Речь идёт о нидерландском 5.255.124.150 и хорватском 45.95.169.227, у них обоих пропускная способность в районе 20 mb/s (на практике по спидтесту получается выше, в районе 30-40 mb/s) и они сравнительно непопулярны. На вебтуннелях получается скорость приемлемая для просмотра 4К на Ютубе. На диапазоне 45.95.169.223/26 такой ошибки не возникает, но скорость там не всегда достаточная для просмотра видео в 4К (45.95.169.227 самый быстрый на этом диапазоне). Притом ошибка, как и вся борьба с Тором у Ютуба, возникает только на некоторых видеороликах. Я тестировал ту самую blue lagoon. Это если что вот.</p><div class="youtube-onebox lazy-video-container" data-video-id="LaZdzYlOxMo" data-video-title="Blue Lagoon" data-video-start-time="" data-provider-name="youtube">
+  <a href="https://www.youtube.com/watch?v=LaZdzYlOxMo" target="_blank" class="video-thumbnail" rel="noopener nofollow ugc">
+    <img class="youtube-thumbnail" src="tor-expert-bundle-и-настройка-конфига-torrc/98ff75fb69bf6de176b5dfacac9f26b53d442266.jpeg" title="Blue Lagoon" data-dominant-color="314B50" width="690" height="388">
+  </a>
+</div>
+
+<p>Может у кого есть идеи как это фиксить? КРОМЕ того чтобы захардкодить под ютуб только определённый экзит. Я автор портативного Тор Эксперта которым пользуется в районе 1000 человек, занимался оптимизацией под 4К, и выскочила эта проблема. Если использовать самые популярные торовские ip-шники, там вообще своеобразный блок на них стоит, с ошибкой “видео недоступно”, который не прорвать никак. А вот это я надеялся хоть как-то прорвать, никак не получается, защита Ютуба тригерится.</p></td><td>2024-10-26T13:45:18.767Z</td></tr><tr><td>Xunlei</td><td><p>Когда количество активных мостов в моей конфигурации превысило 64 начал получать <code>Bootstrapped 100% (done): Done</code> лишь через минут пять после запуска, чтобы вернуть скорость старта добавил параметр:</p>
+<pre><code class="lang-auto">MaxClientCircuitsPending 64
+</code></pre>
+<p>Ещё для snowflake и webtunnel мостов полезная опция для тех, у кого ISP не предоставляет IPv6:</p>
+<pre><code class="lang-auto">ClientPreferIPv6ORPort 0
+</code></pre></td><td>2024-12-19T17:27:20.315Z</td></tr><tr><td>0x7f</td><td><p>а зачем столько мостов? если они постоянно отваливаются можно скачать валдиковский чекер мостов, посадить его в папку <code>/etc/tor/</code> и запустить</p>
+<pre><code class="lang-auto">#!/bin/bash 
+        while true
+        do
+                rm -f /etc/tor/bridges.conf
+                python torparse.pyz --torrc --outfile /etc/tor/bridges.conf
+                systemctl restart tor
+                sleep 1h
+        done
+</code></pre>
+<p>и каждый час скрипт будет автоматически приносить свежие мосты которые будут точно работать, при желании можно без <code>sleep</code> обойтись, но мне неохота его в <code>cron</code> пихать.</p>
+<p>если винда то в принципе можно и батник сделать который делает по сути то же самое, не думаю что его сильно менять придётся.</p></td><td>2024-12-21T06:26:15.602Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>не все сидят на vanilla<br>
+у меня например резервный конфиг с 128+ webtunnel хотя бы часть работает и ладно</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><a href="https://photos.app.goo.gl/adnhgtgm4BD7fZHv7" rel="noopener nofollow ugc">https://photos.app.goo.gl/adnhgtgm4BD7fZHv7</a><br>
+<a href="https://photos.app.goo.gl/UadawdQZjjBN3kX5A" rel="noopener nofollow ugc">https://photos.app.goo.gl/UadawdQZjjBN3kX5A</a></p>
+</details></td><td>2024-12-21T11:48:36.701Z</td></tr><tr><td>MD5(MD5)</td><td><p>Вопрос знатокам:<br>
+как в конфиге тора задать опцию смену exit-node в определенный промежуток времени?<br>
+и<br>
+как настроить браузер Firefox на использование тора? никак не хочет ходить по ссылкам .onion, некоторые рекомендуют изменить в конфиге network.dns.blockDotOnion на false, но и это не помогает, хотя в TorBrowser (который с <a href="http://torproject.org" rel="noopener nofollow ugc">torproject.org</a>) иммеет network.dns.blockDotOnion = True, что как то вообще не логично (или я чего то недогоняю)</p></td><td>2024-12-21T14:43:01.710Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="MD5" data-post="32" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/md5/48/7323_2.png" class="avatar"> MD5:</div>
+<blockquote>
+<p>как в конфиге тора задать опцию смену exit-node в определенный промежуток времени?</p>
+</blockquote>
+</aside>
+<p>Конкретно exit-node не знаю, но полностью перестроить маршрут каждые 5 минут:</p>
+<pre><code class="lang-auto">NewCircuitPeriod 300
+</code></pre>
+<aside class="quote no-group" data-username="MD5" data-post="32" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/md5/48/7323_2.png" class="avatar"> MD5:</div>
+<blockquote>
+<p>это не помогает</p>
+</blockquote>
+</aside>
+<p>Помимо этого нужен чтобы файрфокс резолвил <code>.onion</code> имена. Это делается либо через включение опции <code>Proxy DNS when using SOCKS v5</code>, либо необходимо создать зону <code>.onion</code> на вашем DNS резолвере и отфорвардить на порт DNS тора, который задается <code>DNSPort</code> в torc (желательно отключив кэширование для этой зоны).</p></td><td>2024-12-21T14:52:16.681Z</td></tr><tr><td>denium</td><td><p>А network.proxy.socks_remote_dns вы включили? По умолчанию отключен.</p></td><td>2024-12-21T14:52:47.328Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>эти опции тоже надо?</p>
+<p>AutomapHostsOnResolve 1<br>
+AutomapHostsSuffixes .exit,.onion</p></td><td>2024-12-21T14:59:40.056Z</td></tr><tr><td>Xunlei</td><td><p>Нужно, если есть необходимость в резолвинге .onion зоны при DNS запросе. Если только браузер ходит передавая адрес через <code>Proxy DNS when using SOCKS v5</code>, то не обязательно.</p>
+<p><a class="mention" href="/u/leonmskru">@LeonMskRu</a> почитай ЛС</p></td><td>2024-12-21T15:02:44.030Z</td></tr><tr><td>MD5(MD5)</td><td><p>Спасибо!<br>
+с network.proxy.socks_remote_dns работает.<br>
+однако смысл опции network.dns.blockDotOnion остается загадкой.</p></td><td>2024-12-21T15:05:53.457Z</td></tr><tr><td>MD5(MD5)</td><td><p>Спасибо за ответ. Я правильно понимаю, что при использовании tor все DNS запросы идут через exit-node?</p></td><td>2024-12-21T15:08:55.325Z</td></tr><tr><td>Xunlei</td><td><p>Если настроен <code>Proxy DNS when using SOCKS v5</code> и проксификация через TOR, то да. Для избегания этого я настроил между тором и браузером менеджер тунелей <a href="https://gost.run/" rel="noopener nofollow ugc">GOST</a> для локального резолвинга с политиками блокировок и кешированием.</p></td><td>2024-12-21T15:11:32.129Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>смысл опции network.dns.blockDotOnion остается загадкой</p>
+</blockquote>
+<p>Настройка network.dns.blockDotOnion=true (именно true) нужна, чтобы если:</p>
+<ol>
+<li>network.proxy.socks_remote_dns=false (т.е. DNS идёт не через socks прокси, а напрямую) или</li>
+<li>Если прокси отключен<br>
+то чтобы dns запрос onion сайта не отправлялся на системный dns резолвер. Т.к. это лишено смысла и небезопасно:</li>
+<li>Системный dns резолвер не знает про onion.</li>
+<li>Нечего ему знать какие onion сайты запрашивает браузер.</li>
+</ol>
+<p>Так что network.dns.blockDotOnion=true это лисий дефолт, в том числе тор браузера.</p></td><td>2024-12-21T16:33:00.425Z</td></tr><tr><td>denium</td><td><p>Вот ещё полезная настройка network.http.referer.hideOnionSource=true<br>
+Отключает referer, когда onion сайты запрашивают контент из обычного веба или ссылаются на него. Чтобы веб ресурсы или сайты не знали что к ним обращаются с onion сайта. По умолчанию она вроде false, кроме тор браузера. А в Pale Moon и Basilisk её не портировали. Но есть такие:<br>
+network.http.referer.spoofSource=true (вроде при переходе на внешние домены отключает referer, любые домены, т.е. referer работает только в пределах сайта).<br>
+network.http.sendRefererHeader=0 (полностью отключает referer).</p></td><td>2024-12-21T16:39:51.124Z</td></tr><tr><td>MD5(MD5)</td><td><aside class="quote no-group" data-username="Xunlei" data-post="33" data-topic="4558">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p><code>NewCircuitPeriod 300</code></p>
+</blockquote>
+</aside>
+<p>При параметре NewCircuitPeriod маршрут перестраивается, но exit-node может оставаться тем же. Если кому будет полезно то это можно делать через включенный в конфиге ControlPort и какой нибудь питоно-скрипт или подобное <a href="https://stem.torproject.org/" rel="noopener nofollow ugc">https://stem.torproject.org/</a></p></td><td>2024-12-22T15:29:15.378Z</td></tr><tr><td>Xunlei</td><td><p>Да, он не обязан менятся, иначе случайное распределение будет уже не равномерным, а зависимым. Видимо без написания скрипта автоматизации не обойтись.</p></td><td>2024-12-22T15:35:05.466Z</td></tr>
+    </table>
+      </body>
+    </html>

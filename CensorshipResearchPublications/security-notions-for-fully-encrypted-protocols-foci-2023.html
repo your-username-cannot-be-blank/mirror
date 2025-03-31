@@ -1,0 +1,58 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>security-notions-for-fully-encrypted-protocols-foci-2023</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Security Notions for Fully Encrypted Protocols<br>
+Ellis Fenske, Aaron Johnson<br>
+<a href="https://censorbib.nymity.ch/#Fenske2023a">https://censorbib.nymity.ch/#Fenske2023a</a></p>
+<p>There’s an important class of censorship circumvention protocols that have sometimes been known as “look-like-nothing” or “randomized” protocols; examples are <a href="https://github.com/v2fly/v2fly-github-io/blob/0d21b77f062a92c4f5fd1cdede9d88a3368712b2/docs/en_US/developer/protocols/vmess.md">VMess</a>, <a href="https://shadowsocks.org/doc/aead.html">Shadowsocks</a>, and <a href="https://gitlab.com/yawning/obfs4/-/blob/obfs4proxy-0.0.14/doc/obfs4-spec.txt">obfs4</a>. Rather than imitate some other protocol, these protocols encrypt (or otherwise obfuscate) the entire data stream, such that every byte appears to be uniformly random. This paper gives a name to this class of protocols—<em>fully encrypted protocols</em> or <em>FEPs</em>—and starts to formalize what security properties we should expect of them.</p>
+<p>This paper considers a model of a stream-based (TCP-like) unidirectional FEP channel. The model builds on the <a href="https://link.springer.com/chapter/10.1007/978-3-662-48000-7_27">stream-based channel model of Fischlin et al.</a>, which is meant to represent how network protocols work: a stream is not a single, atomic message, but a sequence of discrete fragments (whose boundaries may change on the way from sender to receiver). There is an abstract <code>SEND</code> function that encrypts a plaintext fragment and pushes it onto the network, and a <code>RECV</code> function that decrypts a received ciphertext fragment and recovers the next piece of plaintext. The authors make some changes for the FEP setting. The <code>SEND</code> function takes an additional parameter <em>p</em> that controls how many bytes of output are produced, in order to support a property called <em>length shaping</em>, defined later. And the <code>RECV</code> function returns not only a fragment of plaintext, but also a “channel closure” flag, to reflect the fact that closing a network connection is observable even in the presence of encryption, and that predictable closures may serve as a distinguisher. As simplifying assumptions, the model assumes a preshared symmetric key and an underlying reliable stream protocol like TCP.</p>
+<p>The authors give definitions of FEP security against passive and active adversaries. In the passive setting, FEP-CPFA (Fully Encrypted Protocol under Chosen Plaintext-Fragment Attacks) gives the adversary a <code>SEND</code> oracle, with which it may encrypt a sequence of plaintext fragments; the adversary is challenged with distinguishing real protocol outputs from random byte strings of the same length. Some early FEPs, for instance <a href="https://github.com/brl/obfuscated-openssh">obfuscated OpenSSH</a> and <a href="https://web.archive.org/web/20200118095542/https://trac.torproject.org/projects/tor/wiki/doc/AChildsGardenOfPluggableTransports#obfs2">obfs2</a>, do not satisfy FEP-CPFA, because they have no secret key: a passive observer can decrypt the stream and undo the obfuscation. In the active setting, FEP-CCFA (Fully Encrypted Protocol under Chosen Ciphertext-Fragment Attacks) additionally gives the adversary a <code>RECV</code> oracle, which the adversary may supply with authentic <code>SEND</code> oracle outputs, its own crafted ciphertexts, or both. FEP-CCFA implies FEP-CPFA, but it is possible to satisfy FEP-CPFA without also satisfying FEP-CCFA; this is the case for obfs4, because of an <a href="https://bugs.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/40005">active attack on unauthenticated length fields</a> (which shows why modeling channel closure is important).</p>
+<p>In order to resist traffic analysis, FEPs should be able to control the size of the fragments they send, a property the authors call <em>length shaping</em>. The abstract <code>SEND</code> function, in addition to a message parameter <em>m</em>, takes an output length parameter <em>p</em>. <code>SEND</code> must always output exactly <em>p</em> bytes (except for a special case at the end of a connection), even if there are no “real” bytes immediately available to send, and even if <em>p</em> is less than the size of the encrypted message. This requirement implies that FEPs must be able to do two things: (1) they must be able to produce unlimited <em>padding</em> on demand, and (2) they must <em>buffer</em> any outgoing data that cannot immediately be sent. Existing FEP implementations are generally not equipped to do length shaping, even if the protocol they use may technically permit it.</p>
+<p>Finally, the paper gives a construction of a stream-based FEP that satisfies all the newly introduced security properties. The protocol resembles <a href="https://shadowsocks.org/doc/aead.html">Shadowsocks AEAD</a>, with 2-byte encrypted+authenticated length fields followed by an AEAD ciphertext of the specified length. The differences are that ciphertexts may contain encrypted padding, the receiver never closes the connection even after an authentication failure, and length shaping is implemented so that packet boundaries do not necessarily correspond to ciphertext boundaries. The <code>SEND</code> function has an input plaintext buffer <code>buf</code> and an output ciphertext buffer <code>obuf</code>. If there is enough in <code>obuf</code> to fill the <em>p</em> output length requirement, <code>SEND</code> removes that many bytes from <code>obuf</code> and returns them directly. Otherwise, <code>SEND</code> encrypts any data in <code>buf</code>, possibly with added padding, until at least <em>p</em> bytes are available.</p></td><td>2024-08-09T21:05:09.672Z</td></tr><tr><td>tango</td><td><p>This workshop paper from last year has been extended into a full paper that is now forthcoming. You can find a preprint here:</p>
+<p>Bytes to Schlep? Use a FEP: Hiding Protocol Metadata with Fully Encrypted Protocols<br>
+Ellis Fenske, Aaron Johnson<br>
+<a href="https://arxiv.org/abs/2405.13310">https://arxiv.org/abs/2405.13310</a></p>
+<p>The main changes and updates are:</p>
+<ul>
+<li>Extension to datagram protocols (UDP-like) in addition to stream protocols (TCP-like).</li>
+<li>Renaming length shaping to <em>Traffic Shaping</em>.</li>
+<li>A detailed investigation of channel closures and the definition of a <em>secure close function</em>.</li>
+<li>A survey of existing deployed FEPs and what security properties each one satisfies, including an investigation of each protocol implementation’s minimum message size.</li>
+</ul></td><td>2024-08-09T21:06:06.535Z</td></tr>
+    </table>
+      </body>
+    </html>

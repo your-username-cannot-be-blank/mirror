@@ -1,0 +1,395 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>понять-moat</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>anonymous11(anonymous11)</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/wikis/Moat">
+  <header class="source">
+      <img src="понять-moat/fab783b55b2159c74ce12a915ed79067126591d0.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/wikis/Moat" target="_blank" rel="noopener nofollow ugc">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="понять-moat/cda56ab2883c7e0136bd799a133c849ee1f9f0ca.jpeg" class="thumbnail onebox-avatar" data-dominant-color="D5D5D5">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/wikis/Moat" target="_blank" rel="noopener nofollow ugc">Moat · Wiki · The Tor Project / Anti-censorship / BridgeDB · GitLab</a></h3>
+
+  <p>Automated Tor bridge distribution system.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Судя по описанию, у Moat дистрибьютера нет возможности получить адрес клиента, передаваемый CDN. Meek сервер отбросит эти данные.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/meek/-/blob/HEAD/meek-server/meek-server.go">
+  <header class="source">
+      <img src="понять-moat/fab783b55b2159c74ce12a915ed79067126591d0.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/meek/-/blob/HEAD/meek-server/meek-server.go" target="_blank" rel="noopener nofollow ugc">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="понять-moat/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/meek/-/blob/HEAD/meek-server/meek-server.go" target="_blank" rel="noopener nofollow ugc">meek-server/meek-server.go · HEAD · The Tor Project / Anti-censorship /...</a></h3>
+
+  <p>HTTPS transport</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<pre><code class="lang-auto">or, err := pt.DialOr(&amp;ptInfo, getUseraddr(req), ptMethodName)
+</code></pre>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib/-/blob/HEAD/pt.go">
+  <header class="source">
+      <img src="понять-moat/fab783b55b2159c74ce12a915ed79067126591d0.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib/-/blob/HEAD/pt.go" target="_blank" rel="noopener nofollow ugc">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="понять-moat/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib/-/blob/HEAD/pt.go" target="_blank" rel="noopener nofollow ugc">pt.go · HEAD · The Tor Project / Anti-censorship / Pluggable Transports /...</a></h3>
+
+  <p>Go pluggable transports library</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<pre><code class="lang-auto">// Dial info.ExtendedOrAddr if defined, or else info.OrAddr, and return an open
+// *net.TCPConn. If connecting to the extended OR port, extended OR port
+// authentication à la 217-ext-orport-auth.txt is done before returning; an
+// error is returned if authentication fails.
+//
+// The addr and methodName arguments are put in USERADDR and TRANSPORT ExtOrPort
+// commands, respectively. If either is "", the corresponding command is not
+// sent.
+func DialOr(info *ServerInfo, addr, methodName string) (*net.TCPConn, error) {
+	if info.ExtendedOrAddr == nil || info.AuthCookiePath == "" {
+		return net.DialTCP("tcp", nil, info.OrAddr)
+	}
+
+	s, err := net.DialTCP("tcp", nil, info.ExtendedOrAddr)
+	if err != nil {
+		return nil, err
+	}
+	err = extOrPortSetup(s, 5*time.Second, info, addr, methodName)
+	if err != nil {
+		s.Close()
+		return nil, err
+	}
+
+	return s, nil
+}
+</code></pre>
+<p>Для получения адреса нужно настроить TOR_PT_EXTENDED_SERVER_PORT для Meek сервера и уметь в ExtOrPort commands на стороне Moat дистрибьютера.</p>
+<p>Описание не отражает работоспособную конфигурацию? Или для Moat действительно все клиенты неразличимы?</p>
+<p>Что пропущено?</p></td><td>2022-01-05T12:54:28.449Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="anonymous11" data-post="1" data-topic="1604">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/f1d935/48.png" class="avatar"> anonymous11:</div>
+<blockquote>
+<p>Для получения адреса нужно настроить TOR_PT_EXTENDED_SERVER_PORT для Meek сервера и уметь в ExtOrPort commands на стороне Moat дистрибьютера.</p>
+<p>Описание не отражает работоспособную конфигурацию? Или для Moat действительно все клиенты неразличимы?</p>
+</blockquote>
+</aside>
+<p>That is an astute question. I think the documentation on the Moat wiki page is simply out of date. In fact TOR_PT_EXTENDED_SERVER_PORT is set and there is a special “shim” component that interprets the ExtORPort commands and converts them into an <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For">X-Forwarded-For</a> header so the web server can know the client’s IP address.</p>
+<p>This is the main development discussion:</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/issues/32276">
+  <header class="source">
+      <img src="понять-moat/5474da433813df16dad68f0b325cf7a875c89fc9.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/issues/32276" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="понять-moat/cda56ab2883c7e0136bd799a133c849ee1f9f0ca.jpeg" class="thumbnail onebox-avatar" data-dominant-color="D5D5D5">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/issues/32276" target="_blank" rel="noopener">Help BridgeDB see client IP addresses of moat requests (#32276) · Issues ·...</a></h3>
+
+  <p>BridgeDB sees the following HTTP headers for incoming moat requests:  Content-Length: ['504']</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>In short, there are two layers of HTTPS in Moat: an outer layer with the CDN (for blocking resistance) and an inner end-to-end layer with the BridgeDB (for confidentiality and integrity, so the CDN cannot tamper with BridgeDB responses). The CDN adds an X-Forwarded-For header (this is a standard feature of CDNs). meek-server receives and decrypts this outer layer, so meek-server knows the client IP address. meek-server dials the ExtORPort of <a href="https://gitlab.torproject.org/cohosh/moat-shim">moat-shim</a> (in the README here you can see TOR_PT_EXTENDED_SERVER_PORT being set) and sends the client IP address as USERADDR. moat-shim decrypts the inner HTTPS layer that has been de-serialized by meek-server, and re-adds the client IP address as an X-Forwarded-For header before forwarding plain HTTP to the BridgeDB Apache.</p></td><td>2022-01-05T15:26:40.613Z</td></tr><tr><td>anonymous11(anonymous11)</td><td><p>Thank you!</p></td><td>2022-01-05T16:02:28.439Z</td></tr><tr><td>anonymous11(anonymous11)</td><td><p>Есть такая точка зрения на сбор адресов бриджей.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/rdsys/-/issues/69">
+  <header class="source">
+      <img src="понять-moat/3149f5ffe9b32f25b0ad8ee363f42453eaf66d69.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/rdsys/-/issues/69" target="_blank" rel="noopener nofollow ugc">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="понять-moat/a347dd2052239d924f4accb8d183931ca60ca8ee_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="8E8F8F">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/rdsys/-/issues/69" target="_blank" rel="noopener nofollow ugc">Do we want to take into account the requester IP address? (#69) · Issues ·...</a></h3>
+
+  <p>AFAIK the existing BridgeDB https and moat distributors do take into account the requester IP address, it does have bridgerings for different IP ranges so we only provide...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<blockquote>
+<p>It looks like in the real world this protection hasn’t stopped big attackers from listing all the bridges, and the effort might not be worth it.</p>
+</blockquote>
+<p>Но Moat (в отличии от HTTPS) делает сбор совсем простым. Можно подключаться напрямую к Meek серверу (/meek), Moat дистрибьютеру (/moat) с ложными заголовками Meek-IP (изображая CDN), X-Forwarded-For (изображая moat-shim).</p>
+<p>Возможно ТСПУ действительно big attacker, но что если они просто читеры?</p></td><td>2022-01-05T17:28:47.346Z</td></tr><tr><td>anonymous12(anonymous12)</td><td><p>Небольшой скрипт (Moat клиент) для проверки возможности собрать “китайские” бриджи из москвы.<br>
+<a href="https://paste.debian.net/plainh/a8658889" class="onebox" target="_blank" rel="noopener nofollow ugc">https://paste.debian.net/plainh/a8658889</a><br>
+Это работает.</p></td><td>2022-01-06T19:40:21.557Z</td></tr><tr><td>ValdikSS</td><td><p>Если вы это делаете для использования бриджей по прямому назначению, то гораздо проще, удобней и надёжней использовать обычные relay’и в качестве бриджей. На сегодняшний день более 1400 релеев остаются доступными на провайдерах с ТСПУ, и их либо не так активно блокируют, либо не блокируют вовсе.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/community/support/-/issues/40050#note_2768161">
+  <header class="source">
+      <img src="понять-moat/711665d679ffcd8752b26b8c566e2e7cec2e6c1f.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/community/support/-/issues/40050#note_2768161" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="понять-moat/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/community/support/-/issues/40050#note_2768161" target="_blank" rel="noopener">[Russia] Some ISPs are blocking Tor (#40050) · Issues · The Tor Project /...</a></h3>
+
+  <p>[Anomaly detected in Russia] built-in bridges + dir auths blocked in some ISPs: https://explorer.ooni.org/search?until=2021-12-03&amp;since=2021-11-29&amp;probe_cc=RU&amp;test_name=tor...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Вот вам 10 случайных рабочих relay’ев:</p>
+<pre><code class="lang-plaintext">Bridge 160.119.249.24:443 801EF80845848E685C4534A2408D32D5443187DF
+Bridge 139.162.161.211:12355 6ACD584F2FAA75D95ECCF54CA504422BAE78A549
+Bridge 43.251.170.52:443 49000EA5D4368F7F3943425F06AE86F3DF2CCF42
+Bridge 109.70.100.67:443 A4F0F516C83DE11B290384B9B4A4C928A78ED3A5
+Bridge 144.76.108.49:9001 76BAB224055F8532288685BEA93F249FCEF05BF9
+Bridge 45.15.16.207:9001 A377E632580AE4A20E447E5DA153AAEC346DA20A
+Bridge 70.120.126.172:443 BF3E9B97D3CE4099F73AA4BD70CA14B635FA3CEA
+Bridge 91.150.101.29:9001 4BA47DC1C3C1778CC78DDD4E33036DB98CC421E9
+Bridge 91.67.169.183:9001 3DD8B251728B1C284DFB0FD169BA07400FFCA0FA
+Bridge 218.41.17.40:9001 7173FDE91FFA2415DDD96FDB5C318405B287BB41
+</code></pre></td><td>2022-01-06T19:56:14.192Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="anonymous11" data-post="4" data-topic="1604">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/f1d935/48.png" class="avatar"> anonymous11:</div>
+<blockquote>
+<p>Но Moat (в отличии от HTTPS) делает сбор совсем простым. Можно подключаться напрямую к Meek серверу (/meek), Moat дистрибьютеру (/moat) с ложными заголовками Meek-IP (изображая CDN), X-Forwarded-For (изображая moat-shim).</p>
+</blockquote>
+</aside>
+<blockquote>
+<p><em>But Moat (as opposed to HTTPS) makes gathering quite simple. You can connect directly to a Meek server (/meek), a Moat distributor (/moat) with false headers Meek-IP (impersonating CDN), X-Forwarded-For (impersonating moat-shim).</em></p>
+</blockquote>
+<p>Hmm, you may be right. If a request reaches the /meek endpoint after being forwarded through /moat, it will have a trustworthy X-Forwarded-For, but not necessarily if a connection arrives directly to the /meek endpoint. I have opened an issue for this.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/rdsys/-/issues/80">
+  <header class="source">
+      <img src="понять-moat/c62a1db5f048417a3aec580d5f00199868573d45.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/rdsys/-/issues/80" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="понять-moat/a347dd2052239d924f4accb8d183931ca60ca8ee_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="8E8F8F">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/rdsys/-/issues/80" target="_blank" rel="noopener">Limit access to Moat's /meek endpoint to a trusted CDN (#80) · Issues · The...</a></h3>
+
+  <p>The Moat setup has both a /meek and a /moat endpoint. External requests are supposed to arrive at /meek, which adds an X-Forwarded-For header via</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2022-01-06T20:00:42.295Z</td></tr><tr><td>tango</td><td><blockquote>
+<p><code>-x socks5h://127.0.0.1:9150</code></p>
+</blockquote>
+<p>If the system is working correctly, I think this strategy will get only a subset of available bridges. BridgeDB has different “bridgerings” or “hashrings” of available bridges. All requests that come from a Tor exit or from another known proxy are supposed to be limited to a subset of the available bridges. See for example:</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/blob/4fe1034287a788eeba9e316962d128c55f54581f/bridgedb/distributors/moat/distributor.py#L52-56">
+  <header class="source">
+      <img src="понять-moat/94951d3938ad3b8e35cae6c68d123646f21da2b4.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/blob/4fe1034287a788eeba9e316962d128c55f54581f/bridgedb/distributors/moat/distributor.py#L52-56" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="понять-moat/cda56ab2883c7e0136bd799a133c849ee1f9f0ca.jpeg" class="thumbnail onebox-avatar" data-dominant-color="D5D5D5">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/blob/4fe1034287a788eeba9e316962d128c55f54581f/bridgedb/distributors/moat/distributor.py#L52-56" target="_blank" rel="noopener">bridgedb/distributors/moat/distributor.py ·...</a></h3>
+
+  <p>Automated Tor bridge distribution system.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<pre><code class="lang-plaintext">:param proxies: A :class:`bridgedb.proxy.ProxySet` containing known
+    Tor Exit relays and other known proxies.  These will constitute
+    the extra cluster, and any client requesting bridges from one of
+    these **proxies** will be distributed bridges from a separate
+    subhashring that is specific to Tor/proxy users.
+</code></pre>
+<p>But I don’t know how well this defense really works in practice.</p>
+<p>There was another problem with BridgeDB/Moat, which is that there were only a few (10K) static captchas, and they had not been regenerated in a long time. An adversary may have been simply reusing known answers to solved captchas. The captchas have recently been regenerated and there are more of them now.</p>
+<p><a href="https://lists.torproject.org/pipermail/anti-censorship-team/2021-December/000208.html" class="onebox" target="_blank" rel="noopener">https://lists.torproject.org/pipermail/anti-censorship-team/2021-December/000208.html</a></p><aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/issues/40038">
+  <header class="source">
+      <img src="понять-moat/94951d3938ad3b8e35cae6c68d123646f21da2b4.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/issues/40038" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="понять-moat/cda56ab2883c7e0136bd799a133c849ee1f9f0ca.jpeg" class="thumbnail onebox-avatar" data-dominant-color="D5D5D5">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/bridgedb/-/issues/40038" target="_blank" rel="noopener">regnerate the captchas (#40038) · Issues · The Tor Project / Anti-censorship...</a></h3>
+
+  <p>The existing captchas are over</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2022-01-06T20:15:46.921Z</td></tr><tr><td>anonymous12(anonymous12)</td><td><aside class="quote no-group" data-username="tango" data-post="8" data-topic="1604">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"> tango:</div>
+<blockquote>
+<p>All requests that come from a Tor exit or from another known proxy are supposed to be limited to a subset of the available bridges.</p>
+</blockquote>
+</aside>
+<p>Это хорошо и для тестов этого достаточно, поскольку это подмножество тоже делится на подсети.</p></td><td>2022-01-06T20:39:48.339Z</td></tr><tr><td>anonymous12(anonymous12)</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/team/-/issues/47#note_2765643">
+  <header class="source">
+      <img src="понять-moat/0b89e2ab6a20716bc49cd637585b52b88d647409.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/team/-/issues/47#note_2765643" target="_blank" rel="noopener nofollow ugc">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="понять-moat/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/team/-/issues/47#note_2765643" target="_blank" rel="noopener nofollow ugc">remove old bridges from moat for russia (#47) · Issues · The Tor Project /...</a></h3>
+
+  <p>All old moat bridges in Russia are blocked, but they don't seem to refresh the list so often. We can use bridgedbs COUNTRY_BLOCK_FILE config to provide the...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<blockquote>
+<p>some spikes in Moat</p>
+</blockquote>
+<p>Было бы интересно сравнить эти цифры со статистикой запросов к CDN.</p>
+<blockquote>
+<p>2021-11-16,moat,66900</p>
+</blockquote></td><td>2022-01-07T15:53:34.265Z</td></tr><tr><td>anonymous14(anonymous14)</td><td><blockquote>
+<p>2021-11-15,moat,22870<br>
+2021-11-16,moat,66900</p>
+</blockquote>
+<blockquote>
+<p>2022-01-10,moat,57345<br>
+2022-01-11,moat,98775<br>
+2022-01-12,moat,98235</p>
+</blockquote>
+<p>Рота курсантов работает cо вторника. По ~40К запросов. Стабильность.</p></td><td>2022-01-13T16:52:09.655Z</td></tr>
+    </table>
+      </body>
+    </html>

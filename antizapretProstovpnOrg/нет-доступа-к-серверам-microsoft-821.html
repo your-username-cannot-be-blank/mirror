@@ -1,0 +1,58 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>нет-доступа-к-серверам-microsoft-821</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>MVP(Михаил)</td><td><p>Настроен обход блокировок через vpn на роутере mi router 3G, прошивка Padavan. Примерно с конца октября OneDrive на ПК не синхронизировал файлы. Когда начал разбираться, выяснил, что и время на Windows не синхронизировалось, не было доступа к форуму Майков (answer.microsoft). В хром выдавало сообщение о dns, в настройках соединения вводил dns Гугла и доступ к форуму появлялся, но всё так же не работал Microsoft Store , one drive и т.д. Как только отключил vpn на роутере, появился доступ к вышеупомянутым ресурсам.<br>
+На одном известном форуме предложили писать Вам, т.к. проблема именно с антизапретом.</p></td><td>2021-01-03T06:29:44.946Z</td></tr><tr><td>ValdikSS</td><td><p>VPN АнтиЗапрета не работает, если вы подключились к нему, но не используете DNS внутри VPN-туннеля. Он, конечно, присылает клиенту еще 8 маршрутов, но они состоят из сетей Blackberry и Line, больше никаких нет. Если у вас наблюдаются проблемы, когда вы подключаете VPN АнтиЗапрета, но используете сторонний DNS, то, возможно, причиной неправильные настройки на вашем маршрутизаторе.</p>
+<p>В данный момент не вижу, чтобы какие-либо хосты Microsoft (<a href="http://answers.microsoft.com">answers.microsoft.com</a>, <a href="http://time.windows.com">time.windows.com</a>) маршрутизировались. На всякий случай проверил с компьютера на Windows 10 — и <a href="http://answers.microsoft.com">answers.microsoft.com</a> открывается, и время синхронизируется, и магазин работает.</p>
+<p>Пожалуйста, сделайте дамп трафика, и предоставьте его мне для анализа:</p>
+<ul>
+<li>Скачать и установить <a href="https://www.wireshark.org/">Wireshark</a>. Нужна полная версия, портативная не подойдет.</li>
+<li>Выбрать сетевой интерфейс, ввести в поле “…using this filter” строку: <code>port 53</code>
+</li>
+<li>Зайти на неработающие сайты, открыть неработающие программы</li>
+<li>Остановить захват трафика кнопкой с иконкой красного квадрата на панели. Нажать file → save as, сохранить в файл.</li>
+<li>Отправить мне на <a href="mailto:iam@valdikss.org.ru">iam@valdikss.org.ru</a>
+</li>
+</ul></td><td>2021-01-03T11:17:08.179Z</td></tr><tr><td>MVP(Михаил)</td><td><p>Спасибо за отклик.<br>
+Направил письмо по указанному адресу.</p></td><td>2021-01-04T12:37:18.925Z</td></tr><tr><td>ValdikSS</td><td><p>Из файла видно, что у вас работает какой-то перехватчик DNS-запросов: ваш компьютер отправляет запрос на <code>8.8.8.8</code>, а ему тут же, через 0.5 мс, приходит ответ с несуществующим IP-адресом <code>0.0.0.0</code>. Запросы не доходят ни до серверов АнтиЗапрета, ни до <code>8.8.8.8</code>.<br>
+Если, по вашим словам, отключение VPN помогает, то перехват осуществляется на маршрутизаторе. Проблема на стороне маршрутизатора, проверяйте настройки DNS и маршрутизации, дополнительные опции DNS, если они включены.</p>
+<p>Вы, случаем, не по UDP пытаетесь подключиться? Убедитесь, что подключаетесь по TCP, иначе будет конфликт адресов (у вас используется сеть <code>192.168.100.0/24</code>, как и на UDP-сервере).</p></td><td>2021-01-04T12:59:18.029Z</td></tr><tr><td>MVP(Михаил)</td><td><p>Понял, что проблема не с антизапретом.<br>
+Если не затруднит помогите разобраться с проблемой до конца. Верно понимаю, что нужно изменить параметр “аппаратное ускорение Nat” с tcp/udp на tcp? (См. Скриншот)</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="нет-доступа-к-серверам-microsoft-821/52706fd01a06a83b9252bc3da05cc2ea6d07ad71.jpeg" data-download-href="https://ntc.party/uploads/default/52706fd01a06a83b9252bc3da05cc2ea6d07ad71" title="IMG_20210104_165733.jpg"><img src="нет-доступа-к-серверам-microsoft-821/52706fd01a06a83b9252bc3da05cc2ea6d07ad71_2_225x500.jpeg" alt="IMG_20210104_165733.jpg" data-base62-sha1="bLi2VBuBu0haFFsSLzGHmNdXPEt" width="225" height="500" srcset="нет-доступа-к-серверам-microsoft-821/52706fd01a06a83b9252bc3da05cc2ea6d07ad71_2_225x500.jpeg, нет-доступа-к-серверам-microsoft-821/52706fd01a06a83b9252bc3da05cc2ea6d07ad71_2_337x750.jpeg 1.5x, нет-доступа-к-серверам-microsoft-821/52706fd01a06a83b9252bc3da05cc2ea6d07ad71_2_450x1000.jpeg 2x" data-dominant-color="C9CCCE"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">IMG_20210104_165733.jpg</span><span class="informations">1080×2400 303 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2021-01-04T14:01:09.000Z</td></tr><tr><td>ValdikSS</td><td><p>Не думаю, что аппаратное ускорение NAT что-то изменит, но попробуйте его выключить. Смотрите опции DNS, возможно, включены какие-то дополнительные перенаправляющие функции, вроде как иногда в роутере можно включить Яндекс.ДНС (или другой фильтрующий, «семейный»), одной опцией — мне кажется, это оно.</p></td><td>2021-01-04T20:39:58.612Z</td></tr><tr><td>MVP(Михаил)</td><td><p>Использую ddns, для доступа из вне к transmission. Но ранее проблем не было, завтра проверю отключив его.</p></td><td>2021-01-04T21:16:05.000Z</td></tr>
+    </table>
+      </body>
+    </html>

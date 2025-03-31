@@ -1,0 +1,140 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>rtc-не-работает-в-связке-vlessopenwrt</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Greeg0ry(Greeg0ry)</td><td><p>Настроил 3x-ui на VPS, в качестве клиента использую роутер с openWRT. Пробрасываются только некоторые ресурсы через dnsmasq. Около месяца все работало, но вчера отвалился дискорд (именно RTC, тобишь голосовуха), понимаю что видимо не проходят UDT пакеты через прокси. Получается провайдер раньше не резал их? Я попробовал сам модифицировать конфиг, но с моими правками он работать отказывается. В интернетах пишут что по умолчанию всегда включен xudp и UDP поверх TCP должен идти, но видимо на клиенте (роутере) это нужно включить в конфиге? Или какие еще варианты есть?<br>
+Дополню что попытался поставить Zapret на роутере, все установилось, но маршрутизация не работает, ресурсы недоступны остаются.</p>
+<details>
+<summary>
+конфиг xray на роутере</summary>
+<p>inbounds:</p>
+<ul>
+<li>listen: 192.168.3.1<br>
+tag: all-in<br>
+port: 1083<br>
+protocol: dokodemo-door<br>
+settings:<br>
+network: tcp,udp<br>
+followRedirect: true<br>
+streamSettings:<br>
+sockopt:<br>
+tproxy: tproxy<br>
+sniffing:<br>
+enabled: true<br>
+metadataOnly: false<br>
+destOverride:<br>
+- fakedns</li>
+<li>listen: 127.0.0.1<br>
+tag: dns-in<br>
+port: 5353<br>
+protocol: dokodemo-door<br>
+settings:<br>
+address: 192.168.3.1<br>
+network: tcp,udp</li>
+</ul>
+<p>routing:<br>
+domainStrategy: AsIs<br>
+domainMatcher: hybrid<br>
+rules:<br>
+- type: field<br>
+inboundTag:<br>
+- dns-in<br>
+port: 5353<br>
+outboundTag: dns-out<br>
+- type: field<br>
+inboundTag:<br>
+- all-in<br>
+outboundTag: vless-reality</p>
+<p>outbounds:</p>
+<ul>
+<li>protocol: dns<br>
+tag: dns-out<br>
+streamSettings:<br>
+sockopt:<br>
+mark: 2</li>
+<li>protocol: vless<br>
+tag: vless-reality<br>
+settings:<br>
+vnext:<br>
+- address: {}<br>
+port: 443<br>
+users:<br>
+- id: {}<br>
+flow: “”<br>
+encryption: none<br>
+level: 0<br>
+streamSettings:<br>
+network: tcp<br>
+security: reality<br>
+realitySettings:<br>
+publicKey: {}<br>
+fingerprint: chrome<br>
+serverName: <a href="http://microsoft.com" rel="noopener nofollow ugc">microsoft.com</a><br>
+shortId: 8b18<br>
+spiderX: “/”</li>
+<li>tag: direct<br>
+protocol: freedom</li>
+<li>tag: block<br>
+protocol: blackhole<br>
+settings:<br>
+response:<br>
+type: http</li>
+</ul>
+<p>dns:<br>
+servers:<br>
+- fakedns<br>
+- address: fakedns<br>
+skipFallback: true<br>
+queryStrategy: UseIPv4</p>
+<p>fakedns:<br>
+ipPool: 100.64.0.0/10<br>
+poolSize: 65535</p>
+</details></td><td>2025-03-09T10:56:10.000Z</td></tr><tr><td>0ka(0ka)</td><td><p>сервера для голоса не резолвятся через днс, нужно вручную прокинуть их в туннель <a href="https://pastebin.com/pvbtD1WY" class="inline-onebox">34.0.48.0/2134.0.56.0/2334.0.59.0/2434.0.60.0/2434.0.62.0/2334.0.64.0/ - Pastebin.com</a></p></td><td>2025-03-09T11:33:28.173Z</td></tr><tr><td>Verity-Freedom</td><td><p>Как же не разбирающиеся люди любят максимально сложным образом делать максимально простые вещи.</p>
+<p>Разработчики ядра xray 3x-ui не рекомендуют использовать категорически, для udp достаточно обхода максимально простого, ибо его толком резать не умеют. На пк стоит drover, работает как часики, 0 потерь пакетов.</p></td><td>2025-03-10T04:39:43.880Z</td></tr><tr><td>lucretia(lucretia)</td><td><aside class="quote no-group" data-username="Verity-Freedom" data-post="3" data-topic="15048">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/verity-freedom/48/7920_2.png" class="avatar"> Verity-Freedom:</div>
+<blockquote>
+<p>3x-ui не рекомендуют использовать категорически,</p>
+</blockquote>
+</aside>
+<p>Ну вы хотя бы почитали почему не рекомендуют  Изучив их претензии, я не могу сказать,что я с ними согласен. 3x-ui наименее захламленная и одна из самых “чистых” панелей (смотрю на панель  hiddify, которую эти разрабы рекомендуют и которая более багованная )</p></td><td>2025-03-10T07:43:22.565Z</td></tr><tr><td>Greeg0ry(Greeg0ry)</td><td><p>как же сразу стать знающим…</p></td><td>2025-03-10T13:57:18.701Z</td></tr><tr><td>Greeg0ry(Greeg0ry)</td><td><p>Попытался их воткнуть<br>
+nft ‘add set xray proxy_ip { type ipv4_addr; flags interval; }’<br>
+nft ‘add element xray proxy_ip { 100.64.0.0/10, 91.108.56.0/22, 91.108.4.0/22 }’<br>
+но почему-то не применяется список (довольно большой)</p></td><td>2025-03-10T13:58:02.298Z</td></tr><tr><td>Greeg0ry(Greeg0ry)</td><td><p>Спасибо за drover. В режиме директ все работает отлично!</p></td><td>2025-03-10T14:56:44.381Z</td></tr>
+    </table>
+      </body>
+    </html>

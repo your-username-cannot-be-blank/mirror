@@ -1,0 +1,164 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>theinsru-2056</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>User69</td><td><p>Что-то subj перестал работать с Antizapret.<br>
+curl такой же, как наверху.<br>
+Всё остальное работает нормально.<br>
+В чём может быть причина?</p></td><td>2022-03-22T15:13:25.228Z</td></tr><tr><td>ValdikSS</td><td><p>Сайт доступен со всех прокси-серверов.</p></td><td>2022-03-22T17:20:49.673Z</td></tr><tr><td>User69</td><td><p>Да. Но наблюдаю такую картину:<br>
+VPN на роутере — страница не открывается в браузере.<br>
+Перезапускаю браузер — если быстро попробовать открыть, открывается, но через несколько секунд страница уже не перезагружается.<br>
+Попробовал запустить OVPN прямо на компьютере — то же самое. То есть, это не проблема настройки роутера. Настройки OVPN-клиента дефолтные.</p>
+<p>Другой браузер в комбинации с Antizapret роутер/ПК — то же самое. То есть, это не проблема с браузером. Incognito не помогает.</p>
+<p>Подключаюсь через любой другой VPN — сайт везде работает без проблем сколько угодно долго.</p>
+<p>Вот curl с Antizapret:</p>
+<pre><code class="lang-auto"> % curl -v theins.ru
+ * Trying 172.67.21.173:80...
+ * Connected to theins.ru (172.67.21.173) port 80 (#0)
+ &gt; GET / HTTP/1.1
+ &gt; Host: theins.ru
+ &gt; User-Agent: curl/7.79.1
+ &gt; Accept: */*
+ &gt;
+ * Recv failure: Connection reset by peer
+ * Closing connection 0
+ curl: (56) Recv failure: Connection reset by peer
+</code></pre>
+<p>Вот через Outline, например:</p>
+<pre><code class="lang-auto">% curl -v theins.ru
+* Trying 172.67.21.173:80...
+* Connected to theins.ru (172.67.21.173) port 80 (#0)
+&gt; GET / HTTP/1.1
+&gt; Host: theins.ru
+&gt; User-Agent: curl/7.79.1
+&gt; Accept: */*
+&gt;
+* Mark bundle as not supporting multiuser
+&lt; HTTP/1.1 301 Moved Permanently
+&lt; Date: Wed, 23 Mar 2022 07:04:06 GMT
+&lt; Transfer-Encoding: chunked
+&lt; Connection: keep-alive
+&lt; Cache-Control: max-age=3600
+&lt; Expires: Wed, 23 Mar 2022 08:04:06 GMT
+&lt; Location: https://theins.ru/
+&lt; Server: cloudflare
+&lt; CF-RAY: 6f054fa23a34f294-WAW
+&lt;
+* Connection #0 to host theins.ru left intact
+</code></pre></td><td>2022-03-23T07:17:41.468Z</td></tr><tr><td>zxmi</td><td><p>Не подтверждаю. У меня тоже не открывается и достаточно давно (с пару недель по ощущениям). Браузер выдаёт PR_CONNECT_RESET_ERROR.</p>
+<pre data-code-wrap="sh"><code class="lang-nohighlight">$ curl -v theins.ru
+* Rebuilt URL to: theins.ru/
+*   Trying 172.67.21.173...
+* TCP_NODELAY set
+* Connected to theins.ru (172.67.21.173) port 80 (#0)
+&gt; GET / HTTP/1.1
+&gt; Host: theins.ru
+&gt; User-Agent: curl/7.52.1
+&gt; Accept: */*
+&gt;
+* Recv failure: Connection was reset
+* Curl_http_done: called premature == 1
+* stopped the pause stream!
+* Closing connection 0
+curl: (56) Recv failure: Connection was reset
+
+$ curl -v theins.ru --connect-to ::yandex.ru
+* Rebuilt URL to: theins.ru/
+* Connecting to hostname: yandex.ru
+*   Trying 77.88.55.77...
+* TCP_NODELAY set
+* Connected to theins.ru (77.88.55.77) port 80 (#0)
+&gt; GET / HTTP/1.1
+&gt; Host: theins.ru
+&gt; User-Agent: curl/7.52.1
+&gt; Accept: */*
+&gt;
+&lt; HTTP/1.1 406 Not acceptable
+&lt; Connection: Close
+&lt; Content-Length: 0
+&lt;
+* Curl_http_done: called premature == 0
+* Closing connection 0
+
+$ curl -v theins.ru -H "Host: test.com"
+* Rebuilt URL to: theins.ru/
+*   Trying 172.67.21.173...
+* TCP_NODELAY set
+* Connected to theins.ru (172.67.21.173) port 80 (#0)
+&gt; GET / HTTP/1.1
+&gt; Host: test.com
+&gt; User-Agent: curl/7.52.1
+&gt; Accept: */*
+&gt;
+&lt; HTTP/1.1 409 Conflict
+&lt; Date: Wed, 23 Mar 2022 13:00:54 GMT
+&lt; Content-Type: text/plain; charset=UTF-8
+&lt; Content-Length: 16
+&lt; Connection: close
+&lt; X-Frame-Options: SAMEORIGIN
+&lt; Referrer-Policy: same-origin
+&lt; Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+&lt; Expires: Thu, 01 Jan 1970 00:00:01 GMT
+&lt; Server: cloudflare
+&lt; CF-RAY: 6f075a468c2d95fc-ARN
+&lt;
+error code: 1001* Curl_http_done: called premature == 0
+* Closing connection 0
+
+$ curl --version
+curl 7.52.1 (i386-pc-win32) libcurl/7.52.1 OpenSSL/1.0.2k zlib/1.2.8 nghttp2/1.19.0
+Protocols: dict file ftp ftps gopher http https imap imaps ldap pop3 pop3s rtsp smb smbs smtp smtps telnet tftp
+Features: AsynchDNS IPv6 Largefile NTLM SSL libz HTTP2 HTTPS-proxy
+</code></pre>
+<p>От провайдера, похоже не зависит, пробовал проводной Ростелеком и мобильный Теле2.</p>
+<p>Как определить, не ресетит ли это сам сайт?</p></td><td>2022-03-23T13:09:46.667Z</td></tr><tr><td>zxmi</td><td><p>Похоже, это связано с тем, что имя сайта резолвится в настоящие IP, и,  в результате, соединение идёт через провайдера, а не VPN.</p>
+<pre data-code-wrap="sh"><code class="lang-nohighlight">$ nslookup theins.ru
+╤хЁтхЁ:  UnKnown
+Address:  192.168.104.1
+
+Не заслуживающий доверия ответ:
+╚ь :     theins.ru
+Addresses:  2606:4700:10::ac43:15ad
+          2606:4700:10::6816:2e68
+          2606:4700:10::6816:2f68
+          104.22.47.104
+          172.67.21.173
+          104.22.46.104
+</code></pre></td><td>2022-03-23T13:43:30.736Z</td></tr><tr><td>User69</td><td><p>Да, есть такое.</p></td><td>2022-03-23T21:33:51.125Z</td></tr><tr><td>zxmi</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a> <a class="mention" href="/u/ilyaigpetrov">@ilyaigpetrov</a><br>
+Можно с этим что-то сделать? Или, т.к. блокировка на ТСПУ, а не по спискам, то ничего не поделать и искать другие решения?</p></td><td>2022-03-24T11:36:09.366Z</td></tr><tr><td>ValdikSS</td><td><p>Исправлено.</p></td><td>2022-03-24T14:04:00.347Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,52 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>sing-box-tproxy-vs-tun</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Nocturnal-ru(Roman)</td><td><p>Хотел бы попросить поделиться ссылками на сравнение режимов tun и tpoxy для sing-box клиента, установленного на openwrt (подходят и англоязычные источники). Из того, что читал на форуме и наблюдал у себя, судя по всему tun более требователен к производительности роутера, на своем ax3000t больше 100-120 Мбит не удавалось увидеть.<br>
+Но с точки зрения надёжности маршрутизации, всяких утечек ip, dns и так далее, какие ещё отличия?<br>
+Просто некоторые гайды и тот же itdog в своих инструментах переходят именно на tproxy теперь. Хотелось бы понять какие в этом преимущества?</p></td><td>2024-10-23T07:12:15.678Z</td></tr><tr><td>0ka(0ka)</td><td><p>маршрутизация и зависит только от того как вы её настроите</p></td><td>2024-10-23T07:48:09.618Z</td></tr><tr><td>Nocturnal-ru(Roman)</td><td><p>Те в каком-то из вариантов сложнее или проще настроить? Ну и если про tun вариант плюс минус я понимаю как оно устроено, itdog хорошо описал, то для варианта с tproxy такого подробного описания мне найти не удалось.</p></td><td>2024-10-23T10:39:00.533Z</td></tr><tr><td>xofamim548</td><td><p>Да, было бы интересно почитать понятное описание работы с tproxy, если оно где-то есть. Пытался нагуглить, но ничего вразумительного не нашёл, везде попадаются какие-то простыни конфигов без нормального объяснения происходящего.</p></td><td>2024-10-23T10:59:15.569Z</td></tr><tr><td>MasterYoba</td><td><p>Если очень кратко, то в этом режиме sing-box работает как transparent proxy, слушает трафик на определенном порту tcp/udp. А пакеты туда должны быть завернуты с помощью правил iptables или nftables, которые в свою очередь используют модуль ядра линукса tproxy ( <a href="http://lxr.linux.no/linux+v3.10/Documentation/networking/tproxy.txt" class="inline-onebox" rel="noopener nofollow ugc">LXR linux/Documentation/networking/tproxy.txt</a> ), который может маркировать пакеты особым образом, и заворачивать их на нужный ip:port</p>
+<p>Сомневаюсь, что от такого объяснения стало сильно понятнее. Простое и одновременно внятное объяснение происходящего тут вряд ли возможно. На мой взгляд, тут требуются хотя бы основы знаний по сетевке, понимание протоколов ip, tcp, udp, структуры пакетов и сегментов, желательно изучить хотя бы главы 0, 2 и 3 из курса СДСМ ( <a href="https://linkmeup.gitbook.io/sdsm" class="inline-onebox" rel="noopener nofollow ugc">Сети для самых маленьких | Сети Для Самых Маленьких</a> ), затем хотя бы обзорно изучить iptables/nftables и netfilter, ну и наконец изучить концепцию transparent proxy. Это огромный объем специфической технической информации. Надо ли оно вам? Не знаю, обычному пользователю, который просто хочет обходить блокировки, скорее нет, чем да. Решайте сами. Но это те кирпичики, из которых складывается работа утилиты.</p></td><td>2024-10-23T12:35:47.018Z</td></tr><tr><td>xofamim548</td><td><aside class="quote no-group" data-username="MasterYoba" data-post="5" data-topic="12194">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/masteryoba/48/6182_2.png" class="avatar"> MasterYoba:</div>
+<blockquote>
+<p>которые в свою очередь используют модуль ядра линукса tproxy ( <a href="http://lxr.linux.no/linux+v3.10/Documentation/networking/tproxy.txt" rel="noopener nofollow ugc">LXR linux/Documentation/networking/tproxy.txt</a> ), который может маркировать пакеты особым образом, и заворачивать их на нужный ip:port</p>
+</blockquote>
+</aside>
+<p>А, вот оно что. Спасибо, на самом деле это многое проясняет.</p></td><td>2024-10-23T13:11:31.335Z</td></tr>
+    </table>
+      </body>
+    </html>

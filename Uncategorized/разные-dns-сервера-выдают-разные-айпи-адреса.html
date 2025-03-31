@@ -1,0 +1,84 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>разные-dns-сервера-выдают-разные-айпи-адреса</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0ka(0ka)</td><td><p>Так ведут себя не все домены, но вот пример <a href="http://maxcdn.bootstrapcdn.com">maxcdn.bootstrapcdn.com</a> выдает<br>
+8.8.8.8 - 104.18.11.207 и 104.18.10.207<br>
+1.1.1.1 - 188.114.99.224 и 188.114.98.224<br>
+9.9.9.9 - как и 8.8.8.8<br>
+но на некоторых доменах все 3 днса выдают разные айпи</p>
+<p>не могу нагуглить как это называется и почему происходит, и есть ли способ получить сразу все айпи адреса</p></td><td>2023-09-20T04:18:22.609Z</td></tr><tr><td>favicon</td><td><p>Ваш домен привязан к cloudflare, это cdn, он будет выдавать ближайший айпишник по доступности и гео</p></td><td>2023-09-20T05:08:17.778Z</td></tr><tr><td>ValdikSS</td><td><p>Это геобалансировка. Адреса выдаются в зависимости от географического положения, как правило, пользователя, а определяется оно по EDNS Client Subnet.</p></td><td>2023-09-20T06:20:00.959Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="3" data-topic="5720">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>EDNS Client Subnet.</p>
+</blockquote>
+</aside>
+<p>Даже с 1 IP адреса со временем начинают ресолвиться другие адреса.<br>
+Не только гео</p></td><td>2023-09-20T06:23:38.917Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>Since June 2014, Google Public DNS automatically detects nameservers that support <a href="https://en.wikipedia.org/wiki/EDNS_Client_Subnet" rel="noopener nofollow ugc">EDNS Client Subnet</a> (ECS) options as defined in the IETF draft (by probing name servers at a low rate with ECS queries and caching the ECS capability), and will send queries with ECS options to such <a href="https://en.wikipedia.org/wiki/Name_server" rel="noopener nofollow ugc">name servers</a> automatically.<a href="https://en.wikipedia.org/wiki/Google_Public_DNS#cite_note-20" rel="noopener nofollow ugc">[20]</a></p></td><td>2023-09-20T09:55:19.533Z</td></tr><tr><td>0ka(0ka)</td><td><p>спасибо за ответы, т.е. получить все айпи получается довольно сложно? Пытаюсь понять на сколько выгодно цензору проверять принадлежность домена к айпи, т.е. чтобы подключения типа<br>
+ip 1.1.1.1 sni one.one.one.one проходили, а ip 5.6.7.8 sni one.one.one.one не проходили т.к. one.one.one.one не резолвится на 5.6.7.8</p></td><td>2023-09-20T14:20:58.188Z</td></tr><tr><td>Snawoot</td><td><p>Довольно сложно, общего решения нет. Есть, к примеру, всякие сканеры, которые запоминают где сертификат для этого домена засветился и такие IP-адреса сохраняют. Но это всё косвенные пути, прямого нет.</p>
+<p>Что касается цензора, то если бы это встало проблемой, то я бы поступил так:</p>
+<ol>
+<li>Принудил бы всех клиентов использовать мои DNS-серверы, а доступ к чужим обрезал бы.</li>
+<li>На каждый DNS-запрос от клиента отвечал бы каким-то IP-адресом из своей сетки.</li>
+<li>При приходе соединения от конкретного клиента на этот адрес из “маскировочной” сети, прозрачно проксировал бы соединение по настоящему адресу назначения (какой домен известно априори из сопоставленного адреса).</li>
+</ol>
+<p>Я даже реализовал такую связку из DNS-сервера и прозрачного прокси: <a href="https://github.com/Snawoot/dns44" class="inline-onebox" rel="noopener nofollow ugc">GitHub - Snawoot/dns44: IPv4 to IPv4 mapping DNS server</a></p>
+<p>Например: приходит DNS-запрос адреса <a href="http://google.com" rel="noopener nofollow ugc">google.com</a>. DNS ответит на него свободным случайным ИП-адресом 172.24.3.15 и запомнит, что назвал такой адрес для домена гугла. Потом, когда на порт прозрачного прокси придёт сессия на адрес 172.24.3.15, то сразу будет понятно, что настоящий запрошенный домен был гугловый и присоединиться нужно к нему на такой же порт.</p>
+<p>А зная все домены, которые являются настоящей причиной подключений к конкретному ИП-адресу, можно фильтровать, не взирая на то, что там в SNI.</p></td><td>2023-09-20T18:49:20.379Z</td></tr><tr><td>0ka(0ka)</td><td><p>ну это жестко… глобально надеюсь такое нигде не поставят</p></td><td>2023-09-20T22:36:23.608Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="Snawoot" data-post="7" data-topic="5720">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/f08c70/48.png" class="avatar"> Snawoot:</div>
+<blockquote>
+<p>Принудил бы всех клиентов использовать мои DNS-серверы, а доступ к чужим обрезал бы.</p>
+</blockquote>
+</aside>
+<p>Новые броузеры по умолчанию используют DoH.<br>
+Некоторые DNS ресолверы могут проверять dnssec.<br>
+В рамках обьема трафика провайдеров слишком затратно проксировать все соединения. Разве что выборочно на отдельные домены</p></td><td>2023-09-21T06:21:12.732Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="Snawoot" data-post="7" data-topic="5720">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/f08c70/48.png" class="avatar"> Snawoot:</div>
+<blockquote>
+<p>Принудил бы всех клиентов использовать мои DNS-серверы, а доступ к чужим обрезал бы.</p>
+</blockquote>
+</aside>
+<p>Крупные провайдеры типа дом.ру так и делают. Там ничего “обрезать” не нужно, достаточно заворачивать весь трафик по 53 порту на свой резолвер.</p>
+<p>Соответственно, DNS провайдера резолвит “запрещённые” домены в IP-адрес, на котором висит заглушка провайдера “Доступ заблокирован, вот посмотрите вместо этого нашу рекламу”. Это “первая линия” блокировок, позволяющая облегчать нагрузку на DPI: раз соединение не устанавливается (пользователя отправили смотреть заглушку), то и инспектировать его не нужно.</p></td><td>2023-09-21T13:48:57.782Z</td></tr><tr><td>anon94384997</td><td><p>Yota так не делает. Резолвит как есть. Только на facebook и instagram отвечает 127.0.0.1. Видимо, потому что признаны экстремистскими сайтами.</p></td><td>2023-09-21T15:58:53.952Z</td></tr>
+    </table>
+      </body>
+    </html>

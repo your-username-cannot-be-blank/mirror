@@ -1,0 +1,147 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>странная-поломка-сайта-chatgpt-в-firefox-esr-виноват-cloudflare</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>bxynue</td><td><p><span class="bbcode-u"><span class="bbcode-b">Суть в двух словах:</span></span> С 20 сентября в Firefox ESR на сайте ChatGPT не работают никакие скрипты - не нажимается даже кнопка Log In. Смутно подозреваю “непрогруз” из-за CloudFlare (?). Прошу советов, как разобраться в настоящей причине.</p>
+<p><span class="bbcode-u">Признаюсь сразу: я не думаю, что здесь дело в блокировках “изнутри”</span>, и не знаю наверняка, что дело в блокировках “снаружи” (со стороны сайта). Тем не менее, по некоторым причинам (ниже) я подозреваю, что какой-то непрогруз все же есть. Поэтому публикую тему в разделе “Uncategorized”, где, как я вижу, обсуждаются и темы, не связанные напрямую с деятельностью РКН.</p>
+<hr>
+<p>Дано: ChatGPT в виде <span class="bbcode-u">сайта</span> <a href="http://chatgpt.com" rel="noopener nofollow ugc">chatgpt.com</a> , не приложения. Он не пускает с российских IP, поэтому все время работа с ним была при включенном VPN, конец которого выходит в другой стране. Браузер - Firefox на ПК. Причем Firefox ESR, версии 115 (увы, старая винда).</p>
+<p>19 сентября все было нормально. А 20 сентября <em>сам сайт как таковой</em> сломался в Firefox.</p>
+<p>Загружается “костяк” сайта - те элементы страницы, которые на ней статичны и есть на ней прямо с первой же миллисекунды при нормальной работе сайта. А вот всё то, что подгружается плавными анимациями в следующие пару секунд - очевидно, подтягиваясь с серверов скриптами - не грузится вообще.</p>
+<p>Скрины объяснят лучше (все ссылки - png картинки):</p>
+<ul>
+<li><a href="https://i.imgur.com/ACOO0y1.png" data-bbcode="true" rel="noopener nofollow ugc">Главная страница для <em>европейского</em> айпишника в <span class="bbcode-u">Chrome</span></a>. Слева анимация с “разными идеями”. Кнопки Log In и Sign Up нажимаются.</li>
+<li><a href="https://i.imgur.com/P3X26Tz.png" data-bbcode="true" rel="noopener nofollow ugc">Главная страница для <em>европейского</em> айпишника в <span class="bbcode-u">Firefox</span></a>. Слева ничего не анимировано. Кнопки не нажимаются.</li>
+<li><a href="https://i.imgur.com/MdTfdIw.png" data-bbcode="true" rel="noopener nofollow ugc">Главная страница для <em>американского</em> айпишника в <span class="bbcode-u">Chrome</span></a>. Загружены плашки с “разными идеями”. Можно спросить что-нибудь без логина. Кнопки работают.</li>
+<li><a href="https://i.imgur.com/LTmEXf1.png" data-bbcode="true" rel="noopener nofollow ugc">Главная страница для <em>американского</em> айпишника в <span class="bbcode-u">Firefox</span></a>. Никакие плашки не загрузились. Отправка текста не делает ничего. Кнопки log in и sign up вообще не загрузились.</li>
+<li><a href="https://i.imgur.com/OWiPq5q.png" data-bbcode="true" rel="noopener nofollow ugc">Основное окно залогиненного пользователя в <span class="bbcode-u">Chrome</span></a>. Все загружается, нажимается, свистит.</li>
+<li><a href="https://i.imgur.com/PrjXk1G.png" data-bbcode="true" rel="noopener nofollow ugc">Основное окно залогиненного пользователя в <span class="bbcode-u">Firefox</span></a>. Ничего не загрузилось, только статичные элементы страницы. На момент обнаружения бага я был залогинен в приватном окне, и это выглядело вот так. Закрыл приватное окно - потерял сессию - залогиниться для скринов уже не могу, т.к. Log in сломался (см выше).</li>
+</ul>
+<p>Мне кажется очевидным, что “сломались” скрипты, тянущие контент с серверов. Я быстро обнаружил, что точно такая же проблема наблюдалась <span class="bbcode-u">и в мобильном</span> Firefox. Верстка главного экрана для мобилок другая, но тоже не нажимались Log in и Sign up. Сначала я подумал, что они сломали поддержку Firefox целиком. Но потом я обновил мобильный Firefox на последнюю версию (по-моему, в последний раз обновлял летом 2023)… и в мобильном Firefox проблема исчезла.</p>
+<p>Поэтому, моя <span class="bbcode-u"><strong>теория №1</strong></span>: ChatGPT обновил фронтенд на сайте, и теперь не поддерживаются старые браузеры вроде Firefox ESR.</p>
+<ul>
+<li>критика теории: почему сломался также мобильный Firefox <em>всего-то 1.5-летней давности</em>? Насколько супер-новейшие веб-технологии теперь якобы используются на сайте, что браузер из 2023 уже не годится? И почему при этом же продолжает работать десктопный Chrome ESR, который вообще-то старее?</li>
+</ul>
+<p>С тех пор я успел пару раз словить точно такое же <a href="https://i.imgur.com/PrjXk1G.png" rel="noopener nofollow ugc">“пустое основное окно”</a> с непрогрузом и в Chrome тоже, причем каждый раз это было в первое открытие сайта в новой сессии браузера. Но в Chrome это решилось очень просто: Ctrl+F5, и вместо сайта я получил <span class="bbcode-u"><strong>капчу Cloudflare</strong></span>. Решил ее - и сайт прогрузился корректно.</p>
+<p>Поэтому моя <span class="bbcode-u"><strong>теория №2</strong></span>: CloudFlare что-то не нравится в запросах именно от моего десктопного Firefox из-под VPN (???), и именно это не дает загрузиться скриптам или данным с серверов. По какой-то причине не помогает повторное обновление страницы с Ctrl+F5 (должно ли вообще помочь, или с Хромом счастливая случайность - не знаю).</p>
+<ul>
+<li>критика теории: а почему тогда устаревающая версия мобильного Firefox 1.5-летней давности была тоже сломана с точно такими же симптомами, а свежая версия мобильного Firefox работает?</li>
+</ul>
+<hr>
+<p>Я не силен в дебаге проблем со страницами. Я не веб-разработчик. Но по F12 я вижу, что даже в Firefox прогружаются разные .js с кодом 200 (то есть успешно). Но эти скрипты, судя по всему, тупо не отрабатывают, или не могут подтянуть данные с бэкэнда. Это лишь мое предположение происходящих процессов.</p>
+<p>Все общение с сайтом происходит через VPN в разных странах. Пробовал разные, разницы нет.</p>
+<p>Наугад попробовал взять ссылку страницы логина из Chrome и “пересадить” ее в Firefox. Ссылка выглядит так: <a href="https://auth.openai.com/authorize?%D0%BE%D1%87%D0%B5%D0%BD%D1%8C=%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE&amp;GET=%D0%BF%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%D0%BE%D0%B2" rel="noopener nofollow ugc">https://auth.openai.com/authorize?очень=много&amp;GET=параметров</a>. Результат: сама страница ввода логина-пароля успешно открылась в Firefox, на ней всё жмякается, но сайт не дал успешно залогиниться, т.к. ссылка явно уникальна для клиента (в параметрах GET-запроса это хорошо видно).</p>
+<p>Отключал uBlock и Антизапрет в Firefox. Отключал GoodbyeDPI. Удалял кэш и куки сайта, проверял в приватном/инкогнито окне. Никакого эффекта.</p>
+<p><span class="bbcode-u">Прошу советов, как бы вы на моем месте пытались докопаться до сути проблемы.</span></p></td><td>2024-09-21T19:45:31.545Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote" data-post="31" data-topic="5889">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/6de8d8/48.png" class="avatar">
+    <a href="https://ntc.party/t/chatgpt/5889/31">ChatGPT</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/az-self-hosted/38"><span data-category-id="38" style="--category-badge-color: #0088CC; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #8C6238;" data-parent-category-id="5" data-drop-close="true" class="badge-category --has-parent" title="Вопросы и особенности работы контейнера VPN АнтиЗапрета на своих серверах"><span class="badge-category__name">АнтиЗапрет на собственном сервере (self-hosted)</span></span></a>
+  </div>
+  <blockquote>
+    Да, было такое, сейчас тоже можно добиться появления чекбокса Cloudflare, но после него тишина. На мобильном FF такая же проблема, на Chrome работает. Вероятно, когда видит сомнительные диапазоны IP запускает какую-то доп. проверку, которая перестала отрабатывать в FF.
+  </blockquote>
+</aside>
+</td><td>2024-09-21T20:01:54.957Z</td></tr><tr><td>Ori</td><td><p>Подтверждаю. В librewolf (на базе ff 130) - всё норм. В mercury (на базе ff 123) - не грузит. Попробовал чистый профиль, попробовал покрутить туда-сюда ech/kyber/http3 - 0 эффекта. Тестил через прокси в Латвии. Не думаю что эта проблема относится к средствам обхода, выглядит скорее как проблема какой-то новой технологии, которой нет в старых версиях браузера.</p></td><td>2024-09-21T20:15:50.883Z</td></tr><tr><td>bxynue</td><td><p>О, спасибо большое. Если честно, я был настолько уверен, что столкнулся с эзотерической проблемой, которая была бы “только у меня” (вчера уже гуглил в других местах интернета, никто об этом не писал), что даже не подумал поискать по существующим постам здесь.</p>
+<aside class="quote no-group" data-username="Ori" data-post="3" data-topic="10496">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>В librewolf (на базе ff 130)</p>
+</blockquote>
+</aside>
+<p>Спасибо! Попробую его.</p></td><td>2024-09-21T21:10:30.532Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Разберись с начала в базовых вещах, скорее всего банально у тя DoH в браузерах висит, который пересекается со всем этим делом или может где-то dns вписал и забыл про них.</p></td><td>2024-09-23T15:56:56.633Z</td></tr><tr><td>bxynue</td><td><aside class="quote no-group" data-username="bunkerfox" data-post="5" data-topic="10496">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/bunkerfox/48/8622_2.png" class="avatar"> bunkerfox:</div>
+<blockquote>
+<p>скорее всего банально у тя DoH в браузерах висит</p>
+</blockquote>
+</aside>
+<p>Не висит.</p>
+<aside class="quote no-group" data-username="bunkerfox" data-post="5" data-topic="10496">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/bunkerfox/48/8622_2.png" class="avatar"> bunkerfox:</div>
+<blockquote>
+<p>Разберись с начала в базовых вещах</p>
+</blockquote>
+</aside>
+<p>Но почему же в свою очередь вы не озаботились такой базовой вещью, как прочтение остальных трех очень коротких сообщений в треде? В них написано, что источник проблемы нашелся, это действительно обновление сайта, из-за которого отвалилась поддержка всех версий Firefox старее апреля 2024.</p></td><td>2024-09-24T15:40:28.775Z</td></tr><tr><td>atz</td><td><p>Да, это разработчики ChatGPT забили на совместимость, но в принципе есть решение:</p><aside class="onebox discoursetopic" data-onebox-src="https://community.openai.com/t/cant-login-error-with-intl-segmenter-in-firefox-unresponsive-buttons/948428/10">
+  <header class="source">
+      <img src="странная-поломка-сайта-chatgpt-в-firefox-esr-виноват-cloudflare/2ba4662d568d467b01cfa2fc2b6509d9125fd211.png" class="site-icon" data-dominant-color="69ABDF" width="32" height="32">
+
+      <a href="https://community.openai.com/t/cant-login-error-with-intl-segmenter-in-firefox-unresponsive-buttons/948428/10" target="_blank" rel="noopener nofollow ugc" title="12:48PM - 20 September 2024">OpenAI Developer Forum – 20 Sep 24</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/362;"><img src="странная-поломка-сайта-chatgpt-в-firefox-esr-виноват-cloudflare/3ed8307fffa33b773ac17cedf142fc3c1577b0c0.png" class="thumbnail" width="690" height="362" data-dominant-color="4294D7"></div>
+
+<div class="title-wrapper">
+  <h3><a href="https://community.openai.com/t/cant-login-error-with-intl-segmenter-in-firefox-unresponsive-buttons/948428/10" target="_blank" rel="noopener nofollow ugc">Can't login! Error with Intl.Segmenter in Firefox - Unresponsive Buttons</a></h3>
+  <div class="topic-category">
+      <span class="badge-wrapper bullet">
+        <span class="badge-category-bg" style="background-color: #5436DA;"></span>
+        <span class="badge-category clear-badge">
+          <span class="category-name">ChatGPT</span>
+        </span>
+      </span>
+      <span class="badge-wrapper bullet">
+        <span class="badge-category-bg" style="background-color: #0088CC;"></span>
+        <span class="badge-category clear-badge">
+          <span class="category-name">Bugs</span>
+        </span>
+      </span>
+  </div>
+</div>
+
+  <p>As a workaround, use this Tampermonkey script:  // ==UserScript== // @name         Intl.Segmenter Polyfill for ChatGPT // @namespace    http://tampermonkey.net/ // @version      0.1 // @description  Fix missing Intl.Segmenter in Firefox ESR //...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-09-24T19:22:44.025Z</td></tr>
+    </table>
+      </body>
+    </html>

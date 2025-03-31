@@ -1,0 +1,123 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>free-public-interest-shadowsocks-servers</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>computerscot(computerscot)</td><td><p>Some people need a quick and free way to access a Shadowsocks server.</p>
+<p>At the same time, other people are willing to provide free Shadowsocks servers, if they are in the public interest.</p>
+<p>One thing that puts people off from providing free Shadowsocks servers is that you are effectively acting as an exit node. Whatever anyone does on your server can be blamed on you.</p>
+<p>The architecture in this post addresses this problem. It makes it safer for anyone to offer free public-interest Shadowsocks servers.</p>
+<pre><code class="lang-auto">+-------------+        +--------+--------+
+| SS          |        | SS     | Tor    |
+| Client      +-------&gt;+ Server + Client +------&gt; TOR NETWORK
+|             |        |        |        |
++-------------+        +--------+--------+
+</code></pre>
+<p>The free server accepts SS traffic, but forces it into the Tor network. The risk is shunted to the knowledgeable and well-resourced organizations who host Tor exit nodes.</p>
+<p>Also, since Tor will be slower than a commercial VPN, your server will not be exploited by cheap people who want a VPN but want someone else to pay for it.</p>
+<p>Here is how to set up such a server.</p>
+<h2><a name="set-up-tor-client-1" class="anchor" href="#set-up-tor-client-1"></a>Set Up Tor Client</h2>
+<p>Install the prerequisite package to access the Tor repositories:</p>
+<pre><code class="lang-auto">apt install -y apt-transport-https
+</code></pre>
+<p>Create <code>/etc/apt/sources.list.d/tor.list</code> like the example below (the distribution here is Ubuntu 22.04 also known as <code>jammy</code>):</p>
+<pre><code class="lang-auto">deb [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org jammy main
+deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org jammy main
+</code></pre>
+<p>Get the Tor signing key:</p>
+<pre><code class="lang-auto">wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | tee /usr/share/keyrings/tor-archive-keyring.gpg &gt;/dev/null
+</code></pre>
+<p>Install Tor:</p>
+<pre><code class="lang-auto">apt update &amp;&amp; apt install -y tor deb.torproject.org-keyring
+</code></pre>
+<p>By default, Tor listens for SOCKS traffic on port <code>9050</code>:</p>
+<pre><code class="lang-auto">systemctl status tor@default
+</code></pre>
+<pre><code class="lang-auto">ss -tulpn | grep 9050
+</code></pre>
+<h2><a name="ss-server-2" class="anchor" href="#ss-server-2"></a>SS Server</h2>
+<p>Choose a port:</p>
+<pre><code class="lang-auto">echo $((1024 + $RANDOM))
+</code></pre>
+<p>Choose a password:</p>
+<pre><code class="lang-auto">&lt; /dev/urandom tr -dc A-Z-a-z-0-9 | head -c${1:-24};echo;
+</code></pre>
+<p>Install the latest version of Xray to host your SS server:</p>
+<pre><code class="lang-auto">bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install --beta -u root
+</code></pre>
+<p>Edit the Xray configuration file <code>/usr/local/etc/xray/config.json</code>. Make it look like this. Note that Tor handles TCP only, and therefore the SS input must also be TCP only. (Firefox has a feature to send DNS queries through a SOCKS tunnel.)</p>
+<pre><code class="lang-auto">{
+    "inbounds": [
+        {
+            "port": &lt;PORT-NUMBER&gt;,
+            "protocol": "shadowsocks",
+            "settings": {
+                "clients": [
+                    {
+                        "password": "&lt;PASSWORD&gt;",
+                        "method": "chacha20-poly1305"
+                    }
+                ],
+                "network": "tcp"
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "socks",
+            "settings": {
+                "servers": [
+                    {
+                        "address": "127.0.0.1",
+                        "port": 9050
+                    }
+                ]
+             }
+        }
+    ]
+}
+</code></pre>
+<p>Restart Xray with your configuration:</p>
+<pre><code class="lang-auto">systemctl restart xray &amp;&amp; systemctl status xray
+</code></pre>
+<h2><a name="communicate-shadowsocks-parameters-3" class="anchor" href="#communicate-shadowsocks-parameters-3"></a>Communicate Shadowsocks Parameters</h2>
+<p>Supply the server IP address, port, password, and encryption method to the public. You can also supply them as a URL-style <code>ss://</code> link or as a QR code. Most SS clients can import server parameters from a URL or on-screen QR code.</p></td><td>2023-09-21T18:57:32.270Z</td></tr><tr><td>Snawoot</td><td><p>It’s a bad idea in general to provide public shadowsocks service because this protocol is not designed for that. Password is used as a key material for encryption, therefore sharing it publicly will allow to decrypt all shadowsocks sessions. There is already some VPN provider called nthLink which uses shadowsocks for all users and has such fatal flaw:</p>
+<ol>
+<li>[EN] <a href="https://snawoot.github.io/stripping_nthlink_vpn_encryption/" class="inline-onebox" rel="noopener nofollow ugc">Stripping nthLink VPN encryption | Snawoot.github.io</a></li>
+<li>[RU] <a href="https://habr.com/ru/articles/684676/" class="inline-onebox" rel="noopener nofollow ugc">Снимаем шифрование nthLink VPN / Хабр</a></li>
+</ol></td><td>2023-09-21T19:17:41.715Z</td></tr>
+    </table>
+      </body>
+    </html>

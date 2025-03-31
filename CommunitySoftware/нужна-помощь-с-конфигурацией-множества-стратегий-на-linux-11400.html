@@ -1,0 +1,79 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>нужна-помощь-с-конфигурацией-множества-стратегий-на-linux-11400</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>xroman</td><td><p>Здравствуйте. Не смог разобраться как настроить множество стратегий под линукс, в т.ч. с udp. (в /opt/zapret/config) Документацию читал.</p>
+<pre><code class="lang-auto">start "zapret: http,https,quic" /min "%~dp0winws.exe" ^
+--wf-l3=ipv4,ipv6 --wf-tcp=443 --wf-udp=443,50000-65535 ^
+--filter-udp=443 --hostlist="%~dp0list-youtube.txt" --dpi-desync=fake --dpi-desync-repeats=11 --dpi-desync-fake-quic="%~dp0quic_initial_www_google_com.bin" --new ^
+--filter-tcp=443 --hostlist="%~dp0list-youtube.txt" --dpi-desync=fake,split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --dpi-desync-fake-tls="%~dp0tls_clienthello_www_google_com.bin" --dpi-desync-ttl=4 --new ^
+ --filter-udp=443 --hostlist="%~dp0list-discord.txt" --dpi-desync=fake --dpi-desync-udplen-increment=10 --dpi-desync-repeats=6 --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic="%~dp0quic_initial_www_google_com.bin" --new ^
+--filter-udp=50000-65535 --dpi-desync=fake,tamper --dpi-desync-any-protocol --dpi-desync-fake-quic="%~dp0quic_initial_www_google_com.bin" --new ^
+--filter-tcp=443 --hostlist="%~dp0list-discord.txt" --dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls="%~dp0tls_clienthello_www_google_com.bin"
+
+</code></pre>
+<p>Пытался переделать данный конфиг под линукс. Пробовал и QUIC_PORTS, и через --new и --filter-udp/tcp, но ничего не вышло. Буду рад помощи.</p></td><td>2024-10-10T00:59:27.016Z</td></tr><tr><td>lxpcfc</td><td><p>Кроме дискорда всё у тебя сейчас работает же?</p>
+<p>Убери QUIC_PORTS и замени строчку</p>
+<blockquote>
+<p>–filter-udp=50000-65535 --dpi-desync=fake,tamper --dpi-desync-any-protocol --dpi-desync-fake-quic=“%~dp0quic_initial_www_google_com.bin” --new ^</p>
+</blockquote>
+<p>на</p>
+<blockquote>
+<p>–filter-udp=50000-65535 --dpi-desync=fake --dpi-desync-cutoff=d4 --dpi-desync-repeats=6 --dpi-desync-any-protocol --new ^</p>
+</blockquote></td><td>2024-10-10T03:12:38.800Z</td></tr><tr><td>bolvan</td><td><p>отмечаю ТРЭШ c флудом из-за отсутствия cutoff<br>
+отмечаю ТРЭШ попытку завернуть конфиг в QUIC. сова на глобус натянута</p></td><td>2024-10-10T05:42:00.415Z</td></tr><tr><td>zzr</td><td><p>this<br>
+виндовый конфиг ваще не понятн нихерамба как там чё прописывать в линуксе там прост друк за другом идёт через два минуса в одну сроку а тут целый array какойто <img src="https://ntc.party/images/emoji/twitter/exploding_head.png?v=12" title=":exploding_head:" class="emoji" alt=":exploding_head:" loading="lazy" width="20" height="20"></p></td><td>2024-10-10T15:21:47.913Z</td></tr><tr><td>bolvan</td><td><p>^ в конце строки лишь для удобства чтения<br>
+перенос команды на следующую строку<br>
+в linux это делается через \</p>
+<p>можно все и в одну строку написать, но она будет очень длинной</p></td><td>2024-10-10T15:55:52.498Z</td></tr><tr><td>bolvan</td><td><p>Тут сделал возможные кастомы для дискорда</p><aside class="quote quote-modified" data-post="157" data-topic="61">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar">
+    <a href="https://ntc.party/t/zapret-whats-new/61/157">Zapret: what's new</a> <a class="badge-category__wrapper " href="/c/community-software/zapret-antidpi/20"><span data-category-id="20" style="--category-badge-color: #9EB83B; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #BF1E2E;" data-parent-category-id="27" data-drop-close="true" class="badge-category --has-parent" title="Zapret Deep Packet Inspection (DPI) circumvention software discussion and official support forum"><span class="badge-category__name">Zapret</span></span></a>
+  </div>
+  <blockquote>
+    Написал custom script для распространившейся в сети десинхронизации портов 50000-65535 дискорда. 
+Я не изучал блокировку discord. Гарантий обхода не даю. 
+Добавил к распространившейся стратегии учет подсетей discord, чтобы не травить все остальное. Опять же за достоверность не ручаюсь. Но это настраивается. 
+Итак, custom script для систем запуска sysv (традиционный linux, возможно кинетик) 
+<details><summary>Спойлер</summary># this custom script in addition to MODE=nfqws runs desync of some udp packets to discord subnet
+# …</details>
+  </blockquote>
+</aside>
+</td><td>2024-10-10T15:57:38.067Z</td></tr><tr><td>zzr</td><td><p>спасиб о за информацию <img src="https://ntc.party/images/emoji/twitter/pray.png?v=12" title=":pray:" class="emoji" alt=":pray:" loading="lazy" width="20" height="20"></p></td><td>2024-10-10T17:04:47.734Z</td></tr>
+    </table>
+      </body>
+    </html>

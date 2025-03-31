@@ -1,0 +1,68 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>провайдер-мтс-и-работа-dns</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>electrifying</td><td><p>И так у меня вопрос к тем, кто пользуется домашним интернетом от МТС или МГТС, у вас в последние время не наблюдается проблема что если отключены провайдерские днс, а используются какие-либо другие,например, от cloudflare то на некоторых сайтах возникает ошибка<br>
+ERR_CONNECTION_TIMED_OUT если поставить только провайдерские днс, то все ок с чем это может быть связано?</p>
+<p>В данный момент например упорно не открывается сайт <a href="https://shazoo.ru/">https://shazoo.ru/</a> если днс не провайдерские. Хотелось бы услышать, у вас всё ок или тоже проблемы имеются?</p></td><td>2025-01-11T18:57:04.761Z</td></tr><tr><td>0ka(0ka)</td><td><p><s>что выдаёт <code>curl -v https://shazoo.ru</code> в cmd?</s><br>
+не важно, сайт в примере на hetzner а не cloudflare, у него один и тот же ip независимо от dns. но похожую проблему видел у друга с гугл сервисами (sheets, docs, store,…)</p></td><td>2025-01-11T20:11:29.003Z</td></tr><tr><td>easyone11</td><td><p>у меня нормально сайт открывается, cloudflare юзаю<br>
+мгтс мск</p></td><td>2025-01-11T20:12:57.818Z</td></tr><tr><td>electrifying</td><td><aside class="quote no-group" data-username="0ka" data-post="2" data-topic="14511">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>на hetzner</p>
+</blockquote>
+</aside>
+<p>А, тогда все понятно у меня все сайты теперь на этом хостинге недоступны</p></td><td>2025-01-11T20:27:38.551Z</td></tr><tr><td>armdyn</td><td><p>Да, проблема действительно есть. Появилась в районе НГ плюс-минус. Но у меня немного другая ситуация.<br>
+К главному роутеру от МГТС подключён кинетик в режиме сетевого моста, на кинетике я блокировал dns провайдера и там у меня работали DoT и DoH от AdGuard в качестве системных резолверах. Но для хостов в домашней сети я использую OPKG с установленным на нём DNSCrypt-Proxy, поэтому у меня всё работало и заметил я эту проблему не сразу.<br>
+Когда не так давно была какая-то авария и МГТС отвалился, после перезагрузки роутера я увидел в логе, что если не указаны какие-либо plain dns на интерфейсе провайдера, то системные DoH и DoT не могут отрезолвиться нормально. Весь лог был засран сообщениями</p>
+<details>
+<summary>
+Summary</summary>
+<p>Dns::Manager: updating DNS-over-HTTPS servers addresses.<br>
+Dns::Secure:<img src="https://ntc.party/images/emoji/twitter/tools.png?v=12" title=":tools:" class="emoji" alt=":tools:" loading="lazy" width="20" height="20"> unable to obtain addresses for “<a href="http://dns.adguard-dns.com" rel="noopener nofollow ugc">dns.adguard-dns.com</a>”.<br>
+Dns::Secure::DohConfigurator: “System”: skip service “<a href="https://dns.adguard-dns.com/dns-query" rel="noopener nofollow ugc">https://dns.adguard-dns.com/dns-query</a>”, wait for bootstrap.<br>
+Dns::Manager: updating DNS-over-TLS servers addresses.<br>
+Dns::Secure:<img src="https://ntc.party/images/emoji/twitter/tools.png?v=12" title=":tools:" class="emoji" alt=":tools:" loading="lazy" width="20" height="20"> unable to obtain addresses for “<a href="http://dns.adguard-dns.com" rel="noopener nofollow ugc">dns.adguard-dns.com</a>”.<br>
+Dns::Secure::DotConfigurator: “System”: skip service “<a href="http://dns.adguard-dns.com:853" rel="noopener nofollow ugc">dns.adguard-dns.com:853</a>”, wait for bootstrap.</p>
+</details>
+<p>И так до бесконечности. Сначала думал, что это проблема кинетика, уже хотел им в поддержку писать.<br>
+Но потом понял, если в настройках интерфейса на кинетике разрешить dns провайдера, то тогда сразу проблема уходит, но мне очень не хотелось это делать. Поэтому просто написал обычный dns AdGuard 94.140.14.14. Во всяком случае пока так тоже работает.</p></td><td>2025-01-12T10:56:07.448Z</td></tr><tr><td>0ka(0ka)</td><td><p>я не понял вашей проблемы. зачем именно блокировать днс от МГТС и что это вообще значит? для работы DoH/DoT нужен уже рабочий днс чтобы адреса серверов зарезолвились, если у вас в wan указаны днс от мгтс которые вы специально заблокировали (не написали как, полагаю через firewall), то естественно dot/doh работать не будут</p></td><td>2025-01-12T11:03:47.821Z</td></tr><tr><td>armdyn</td><td><p>Ещё как будет, каким образом тогда раньше-то работало? Я не первый год же с такими настройками сижу. Кроме того, у меня есть другой кинетик с абсолютно идентичными настройками, только уже там другой провайдер. Так же заблочены dns на интерфейсе и до сих пор на нём всё работает как раньше. Это только на мгтс так стало вот дней 10 уже.<br>
+Кроме того на обоих кинетиках настроен и запущен keendns. Отлично всё работало и без провайдерских dns.</p></td><td>2025-01-12T11:09:20.148Z</td></tr><tr><td>ani917(ani)</td><td><p>мне кажется в хиддифай tls tricks в таких случаях поможет</p></td><td>2025-01-12T11:11:18.502Z</td></tr><tr><td>0ka(0ka)</td><td><p>так видимо есть какой-то fallback dns который сломался, но зачем вы на него вообще опираетесь? вы оставляете галку ISP DNS в wan, затем в firewall блокируете isp dns ip и поверх этого включаете doh. Когда можно убрать галку isp dns, прописать туда что хотите (напр 1.1.1.1) и включить doh который уже будет резолвиться через 1.1.1.1</p></td><td>2025-01-12T11:13:43.239Z</td></tr><tr><td>armdyn</td><td><p>Ну я об этом и говорю, убрал галку и всё. Может не так выразился. Ни о каком файрволле речи ни шло. Есть настройка “игнорить dns провайдера”, вот её и использовал. При загрузке через keendns отлично всё резолвилось. Теперь на мгтс так перестало работать, на втором кинетике работает как раньше.</p></td><td>2025-01-12T11:20:48.118Z</td></tr>
+    </table>
+      </body>
+    </html>

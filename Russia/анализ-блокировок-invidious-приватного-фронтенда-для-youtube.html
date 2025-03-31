@@ -1,0 +1,375 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>анализ-блокировок-invidious-приватного-фронтенда-для-youtube</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>kotletussy(Котлета)</td><td><p>Не так давно начали отваливаться один за другим инстансы Invidious. Чтобы оценить масштаб блокировок, был на скорую руку написан скрипт. Помогли апишки <a href="https://reestr.rublacklist.net/ru/article/api/" rel="noopener nofollow ugc">Роскомсвободы</a> и <a href="https://api.invidious.io/" rel="noopener nofollow ugc">Invidious Instances</a>.</p>
+<details>
+<summary>
+Вывод скрипта</summary>
+<pre data-code-wrap="sh"><code class="lang-sh">$ python iv-rkn.py
+Of 28 public clearweb Invidious instances:
+22 (78.57%) blocked
+ 
+Of 49 Invidious IPs:
+33 (67.35%) blocked
+</code></pre>
+</details>
+<p>Пусть публичных инстансов немного, но всего 6 из них избежали попадания в реестр. Моя первая гипотеза была в игнорировании геоблока.</p>
+<p>После долгих мучений с выгрузкой реестра и YouTube Data API v3 получились два файлика:</p>
+<details>
+<summary>
+videos.json</summary>
+<blockquote>
+<p><em>Легенда</em></p>
+<p><strong>channelTitle</strong>: название канала<br>
+<strong>geoblock</strong>: true, если YouTube блокирует контент для показа из России<br>
+<strong>id</strong>: ID соответствующего видео на YouTube<br>
+<strong>onlyInvidious</strong>: true, если соответствующая ссылка на YouTube не внесена в реестр<br>
+<strong>serversBlocked</strong>: количество инстансов Invidious, которые были заблокированы за это видео<br>
+<strong>title</strong>: заголовок видео</p>
+</blockquote>
+<pre data-code-wrap="json"><code class="lang-json">[
+    {
+        "channelTitle": "Алексей Навальный",
+        "geoblock": false,
+        "id": "gWZiYdRkgoU",
+        "onlyInvidious": true,
+        "serversBlocked": 15,
+        "title": "Полдень против Путина. 17 марта"
+    },
+    {
+        "channelTitle": "REST",
+        "geoblock": true,
+        "id": "NR57D2UVqm4",
+        "onlyInvidious": true,
+        "serversBlocked": 7,
+        "title": "ЛСП — Номера"
+    },
+    {
+        "channelTitle": "УКРАИНА СЕГОДНЯ - ГРОШІ ",
+        "geoblock": false,
+        "id": "8laeGG0IjM8",
+        "onlyInvidious": true,
+        "serversBlocked": 3,
+        "title": "Хто насправді бійці полку Азов"
+    },
+    {
+        "channelTitle": "MILITARIST",
+        "geoblock": false,
+        "id": "8hqXINaq5KA",
+        "onlyInvidious": true,
+        "serversBlocked": 3,
+        "title": "Полк АЗОВ.Воины. ГЕРОИ Украины.POLK AZOV !!!"
+    },
+    {
+        "channelTitle": " Elena Vasiljeva",
+        "geoblock": false,
+        "id": "pvP8_2FfCy0",
+        "onlyInvidious": true,
+        "serversBlocked": 3,
+        "title": "Кто такие полк \"Азов\"? Давайте разбираться - кто нацисты"
+    },
+    {
+        "channelTitle": "Македонский Ваня",
+        "geoblock": false,
+        "id": "KIsn76zAzZo",
+        "onlyInvidious": true,
+        "serversBlocked": 3,
+        "title": "Македонский Ваня - Азов \"Героям Слава!\" 2022"
+    },
+    {
+        "channelTitle": "Mr. Freeman (Русский)",
+        "geoblock": false,
+        "id": "3JKkd_WTAZg",
+        "onlyInvidious": true,
+        "serversBlocked": 2,
+        "title": "Лигалайз (D.O.B.) &amp; Mr. Freeman, \"МИР!! ВАШЕМУ!! ДОМУ!!\""
+    },
+    {
+        "channelTitle": "Oleksii Moiseienko",
+        "geoblock": false,
+        "id": "iCot0hubEck",
+        "onlyInvidious": true,
+        "serversBlocked": 1,
+        "title": "Невзоров про АЗОВ (Фрагмент Невзоровcкие среды. Невзоров - Гордон.)"
+    },
+    {
+        "channelTitle": "КОРИСПОНДЕНТ",
+        "geoblock": false,
+        "id": "zJr0cvIwexo",
+        "onlyInvidious": true,
+        "serversBlocked": 1,
+        "title": "Азов герої - Невзоров."
+    }
+]
+</code></pre>
+</details>
+<details>
+<summary>
+channels.json</summary>
+<blockquote>
+<p><em>Легенда</em></p>
+<p><strong>id</strong>: ID соответствующего канала на YouTube<br>
+<strong>onlyInvidious</strong>: true, если соответствующая ссылка на YouTube не внесена в реестр (<span class="spoiler">без учёта ссылок вида <a href="https://www.youtube.com/user/Name" rel="noopener nofollow ugc">https://www.youtube.com/user/Name</a>, так что могут быть неточности!</span>)<br>
+<strong>serversBlocked</strong>: количество инстансов Invidious, которые были заблокированы за этот канал<br>
+<strong>title</strong>: видимое название канала</p>
+<p>Данных по геоблоку каналов официальное API не предоставляет.</p>
+</blockquote>
+<pre data-code-wrap="json"><code class="lang-json">[
+    {
+        "id": "UC1QLYxn3iiejeZMIKzNjXCQ",
+        "onlyInvidious": true,
+        "serversBlocked": 6,
+        "title": "Легион \"Свобода России\""
+    },
+    {
+        "id": "UCewl92lzIMDO8QiAYOQ2d8w",
+        "onlyInvidious": false,
+        "serversBlocked": 5,
+        "title": "АЗОВ"
+    },
+    {
+        "id": "UCc7wxcjvX5UxDZ4JZqJWH8A",
+        "onlyInvidious": true,
+        "serversBlocked": 5,
+        "title": "АЗОВ 4308"
+    },
+    {
+        "id": "UCzcG-cghSkykmRUJ5xK-SGg",
+        "onlyInvidious": false,
+        "serversBlocked": 5,
+        "title": "ПРАВИЙ СЕКТОР"
+    },
+    {
+        "id": "UC1uvzGyPy8pxp3zwcCsSnmQ",
+        "onlyInvidious": true,
+        "serversBlocked": 4,
+        "title": "Добровольчий Рух ОУН"
+    },
+    {
+        "id": "UCvDQDc7GA1heLKQvdiMgW0w",
+        "onlyInvidious": true,
+        "serversBlocked": 4,
+        "title": "Добровольчий Батальйон ОУН"
+    },
+    {
+        "id": "UC3EBjh4GJrPN6dnWLeaEs3A",
+        "onlyInvidious": true,
+        "serversBlocked": 4,
+        "title": "Добровольчий Батальйон ОУН"
+    },
+    {
+        "id": "UCu9A95X4LEYb0bWRTj-xFDg",
+        "onlyInvidious": true,
+        "serversBlocked": 4,
+        "title": "Чорний Комітет"
+    },
+    {
+        "id": "UC111NXlcDs0VGfyre6EiPmA",
+        "onlyInvidious": true,
+        "serversBlocked": 2,
+        "title": "Олег Жданов"
+    },
+    {
+        "id": "UCJB0aPCDT2jvzhR3CXpxF9g",
+        "onlyInvidious": true,
+        "serversBlocked": 1,
+        "title": "Ищи своих"
+    },
+    {
+        "id": "UCTlTfHhcn44XdLn_arCsaig",
+        "onlyInvidious": true,
+        "serversBlocked": 1,
+        "title": "Apostle Dmytro Karpenko"
+    },
+    {
+        "id": "UC8juxfcRfSm9Af90S4mZE1Q",
+        "onlyInvidious": true,
+        "serversBlocked": 1,
+        "title": "Volodymyr Zolkin"
+    },
+    {
+        "id": "UC6lxTKpx615Ih8E3BJiCauA",
+        "onlyInvidious": true,
+        "serversBlocked": 1,
+        "title": "Azov One"
+    },
+    {
+        "id": "UCusHTwON8F-kc3OiWXxUgyA",
+        "onlyInvidious": true,
+        "serversBlocked": 1,
+        "title": "Дождь слез"
+    }
+]
+</code></pre>
+</details>
+<p>Итого:</p>
+<ul>
+<li>Из 9 видео на <strong>одном</strong> был геоблок</li>
+<li>Из 14 каналов <strong>два</strong> совпадают с записями в реестре на домене <a href="http://www.youtube.com" rel="noopener nofollow ugc">www.youtube.com</a></li>
+<li>С большим отрывом побеждает видео “Полдень против Путина”, на которое сослались при блокировке <strong>15</strong> серверов</li>
+</ul>
+<p>Всё вышеперечисленное не указывает на целенаправленную блокировку Invidious, скорее всего кто-то сидит и набивает палки.</p></td><td>2024-04-16T23:15:39.507Z</td></tr><tr><td>operarulez(Opera Rulez)</td><td><p>Уже года два блокируют некоторые инстансы Invidious и Nitter. После того, как Маск что-то нашаманил в API, Nitter перестал работать, поэтому блокировка Ниттера теперь погоды не делает, а вот обход блокировки Invidious актуален.</p>
+<p>Блокируют по SNI.</p></td><td>2024-04-17T07:49:20.608Z</td></tr><tr><td>Toshik</td><td><aside class="quote no-group" data-username="operarulez" data-post="2" data-topic="7695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/operarulez/48/2714_2.png" class="avatar"> operarulez:</div>
+<blockquote>
+<p>После того, как Маск что-то нашаманил в API, Nitter перестал работать</p>
+</blockquote>
+</aside>
+<p>Закрыли доступ к api, и когда последние токены просрочились, <a href="https://www.opennet.ru/opennews/art.shtml?num=60673" rel="noopener nofollow ugc">всё остановилось</a>.</p>
+<blockquote>
+<p>31 января была прекращена выдача токенов, используемых в Nitter для организации доступа к контенту в <a href="http://X.com" rel="noopener nofollow ugc">X.com</a>. 26 февраля истекло время жизни последних из ранее выданных токенов, что привело к полной остановке работы Nitter.</p>
+</blockquote>
+<aside class="quote no-group" data-username="operarulez" data-post="2" data-topic="7695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/operarulez/48/2714_2.png" class="avatar"> operarulez:</div>
+<blockquote>
+<p>а вот обход блокировки Invidious актуален.</p>
+</blockquote>
+</aside>
+<p>Возможно гугл теперь будет делать также, начав активную борьбу против ПО блокирующего показ рекламы и использующее их api.</p>
+<p><a href="https://support.google.com/youtube/thread/269521462?hl=en" class="onebox" target="_blank" rel="noopener nofollow ugc">https://support.google.com/youtube/thread/269521462?hl=en</a></p></td><td>2024-04-18T13:26:23.762Z</td></tr><tr><td>operarulez(Opera Rulez)</td><td><p>Спасибо, интересная статья.</p>
+<p>К слову, упомянутый в статье Bibliogram перестал работать несколько лет назад, когда в Инстаграме затянули гайки.</p></td><td>2024-04-18T20:18:12.454Z</td></tr><tr><td>kotletussy(Котлета)</td><td><p>Оффтопик, но пока работает мост из Instagram в Fediverse: <a href="https://kilogram.makeup/" rel="noopener nofollow ugc">https://kilogram.makeup/</a></p></td><td>2024-04-19T09:50:34.736Z</td></tr><tr><td>Toshik</td><td><p>У меня при вводе любого имени пользователя (IG) сервис выдаёт ошибку “504 Gateway Time-out”</p></td><td>2024-04-19T10:29:04.699Z</td></tr><tr><td>quantalFox</td><td><p>У меня из списка на сегодня не заблокирован был только один домен. Ниже все заблокировано, что-то буквально на днях:</p>
+<pre><code class="lang-auto">invidious.fdn.fr
+vid.puffyan.us
+invidious.io.lol
+inv.tux.pizza
+invidious.projectsegfau.lt
+yt.artemislena.eu
+invidious.protokolla.fi
+iv.ggtyler.dev
+iv.nboeck.de
+inv.in.projectsegfau.lt
+invidious.private.coffee
+invidious.drgns.space
+inv.us.projectsegfau.lt
+yt.cdaut.de
+yewtu.be
+iv.melmac.space
+invidious.privacydev.net
+invidious.perennialte.ch
+invidious.einfachzocken.eu
+</code></pre>
+<p>Интересно, что кто-то заблокирован по требованию Роспотребнадзора (из-за какой-нибудь песни ЛСП), кто-то по ссылке (на недоступное видео), некоторым повезло больше - они забанены сразу по домену или даже маске. Последний вариант обычно встречается, когда “госорган не указан”, что соответствует говноедам из Генпрокуратуры</p></td><td>2024-06-13T12:58:20.624Z</td></tr><tr><td>User0</td><td><p>У меня не заблокировано четыре домена.</p></td><td>2024-06-14T03:02:39.855Z</td></tr><tr><td>operarulez(Opera Rulez)</td><td><p>Обнаружен действующий экземпляр Ниттера:<br>
+<a href="https://elon.cucked.me/" class="onebox" target="_blank" rel="noopener nofollow ugc">https://elon.cucked.me/</a></p></td><td>2024-06-15T00:36:03.661Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://video.belet.tm/ru/">
+  <header class="source">
+      <img src="анализ-блокировок-invidious-приватного-фронтенда-для-youtube/6f62f6109054a592935f4a80fed2c2b15ee8a72a.png" class="site-icon" data-dominant-color="FA4800" width="32" height="37">
+
+      <a href="https://video.belet.tm/ru/" target="_blank" rel="noopener">Belet Video</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:192/221;"><img src="анализ-блокировок-invidious-приватного-фронтенда-для-youtube/567012f5bc0ac41749938b65ffe2f7781be40c6a.png" class="thumbnail" data-dominant-color="FA4900" width="192" height="221"></div>
+
+<h3><a href="https://video.belet.tm/ru/" target="_blank" rel="noopener">Belet Video</a></h3>
+
+  <p>Смотрите любимые видео, слушайте любимые песни, загружайте собственные ролики и делитесь ими с друзьями, близкими и целым миром c Belet Video.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+а что это за фронтенд? почти полная копия ютуба (но только отборные видео или каналы), с Invidious даже близко не стоит</p></td><td>2024-06-16T08:35:05.157Z</td></tr><tr><td>Xunlei</td><td><p>Поковырял апкашку — какой-то туркменский кастом.</p></td><td>2024-06-16T13:27:23.148Z</td></tr><tr><td>kotletussy(Котлета)</td><td><p>Публичные инстансы переблокировали, поэтому теперь из приватных фронтендов остаются Piped и непубличные инстансы Invidious.</p>
+<p>Вопрос ещё в том, как находят “запрещёнку”: сидит товарищ майор и вбивает название видео в поисковик (тогда достаточно отключить индексацию и не светиться в списках), или это автоматизированные системы?</p></td><td>2024-06-17T13:00:27.798Z</td></tr><tr><td>quantalFox</td><td><p>Кстати, раз уж многие заблокированы по требованию Генпрокуратуры, никто не знает, насколько реально добиться от них разблокировки? Понимаю, что это может быть только временно, но и это не так плохо.</p>
+<aside class="quote no-group" data-username="kotletussy" data-post="12" data-topic="7695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/da6949/48.png" class="avatar"> kotletussy:</div>
+<blockquote>
+<p>Вопрос ещё в том, как находят “запрещёнку”: сидит товарищ майор и вбивает название видео в поисковик (тогда достаточно отключить индексацию и не светиться в списках), или это автоматизированные системы?</p>
+</blockquote>
+</aside>
+<p>Думаю, что ручками все же.</p></td><td>2024-06-17T13:51:40.502Z</td></tr><tr><td>tealjordana</td><td><p>Всем привет. Перестал открываться инстанс iv.datura.network (заблокирован в прошлом месяце, но я использую zapret от bol-van), хотя буквально пару часов назад он открывался (опять же, с zapret’ом). Остальные заблоченные инстансы как работали так и работают (например yewtu.be). Написал в чат где сидят админы инстанса, у них всё открывается, указали на возможную причастность моего провайдера. Кто может проверить у кого работает? Провайдер билайн<br>
+PS: Забыл добавить, через VPN сайт конечно же работает</p></td><td>2024-06-17T16:46:10.046Z</td></tr><tr><td>kotletussy(Котлета)</td><td><aside class="quote no-group" data-username="tealjordana" data-post="14" data-topic="7695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/59ef9b/48.png" class="avatar"> tealjordana:</div>
+<blockquote>
+<p>Кто может проверить у кого работает?</p>
+</blockquote>
+</aside>
+<p>У меня ICMP и UDP-пакеты доходят, а TCP теряются у провайдера. При этом в реестре инстанс указан как разблокированный.</p></td><td>2024-07-06T10:31:45.612Z</td></tr><tr><td>tealjordana1</td><td><p>Спасибо за ответ.<br>
+Написал в Билайн с <a href="https://0x0.st/XM71.png" rel="noopener nofollow ugc">доказательством</a> того что сайт не блокирует россиян и что в реестре заблокированных сайтов <a href="https://0x0.st/XM7U.png" rel="noopener nofollow ugc">сайта нет</a>, а они как об стенку горох “со стороны билайн никаких ограничений не выявлено”. Видимо тут замешан РосКомПозор, раз на других провайдерах (по крайней мере на Мегафоне) тоже не открывается.</p>
+<p><strong>UPD</strong>: вот ещё инстансы которые не работают даже с обходом DPI:</p>
+<ul>
+<li><a href="https://invidious.lunar.icu/" rel="noopener nofollow ugc">invidious.lunar.icu</a></li>
+<li><a href="https://yt.drgnz.club/" rel="noopener nofollow ugc">yt.drgnz.club</a></li>
+</ul></td><td>2024-07-13T09:41:56.923Z</td></tr><tr><td>Toshik</td><td><aside class="quote no-group quote-modified" data-username="tealjordana1" data-post="16" data-topic="7695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/bcef8e/48.png" class="avatar"> tealjordana1:</div>
+<blockquote>
+<p>Видимо тут замешан РосКомНадзор, раз на других провайдерах (по крайней мере на Мегафоне) тоже не открывается.</p>
+</blockquote>
+</aside>
+<p>Так и есть, см. ниже.</p>
+<aside class="quote no-group" data-username="kotletussy" data-post="5" data-topic="8074">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/da6949/48.png" class="avatar"><a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-youtube-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/8074/5">Обсуждение: Замедление YouTube в России</a></div>
+<blockquote>
+<p>В пользу того, что замедление готовилось заранее, говорит в краткие сроки осуществлённая блокировка всех публичных инстансов Invidious - приватного фронтенда для YouTube, который может проксировать через себя трафик <a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com </a></p>
+</blockquote>
+</aside></td><td>2024-07-13T09:56:02.065Z</td></tr><tr><td>unge-kins</td><td><p>Invidious - абсолютно костыльное решение, которое, к тому же, по умолчанию не проксирует трафик. piped.video инстансы работают в разы стабильнее и до сих пор не блокируются.</p></td><td>2024-07-16T08:02:44.643Z</td></tr><tr><td>artenox</td><td><aside class="quote no-group" data-username="unge-kins" data-post="18" data-topic="7695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/ecb155/48.png" class="avatar"> unge-kins:</div>
+<blockquote>
+<p>piped.video инстансы работают в разы стабильнее</p>
+</blockquote>
+</aside>
+<p>Стабильнее, хотя интерфейс современнее, не такой простой. С качеством надо только разобраться. 720p тормозит там даже под VPN (Warp).</p></td><td>2024-07-16T08:24:43.326Z</td></tr><tr><td>quantalFox</td><td><p>Судя по всему, все подобные фронтенды на сегодня в России уже не работают нормально: ни invidious, ни piped, ни какие-то еще. Ютуб еще еле-еле видео подгружает (сам сайт не грузится).</p></td><td>2024-08-19T11:36:16.172Z</td></tr><tr><td>artenox</td><td><p>Invidious и сам по себе никогда не работал нормально, даже под чистым интернетом (VPN). Сколько я намучился с ним. Piped получше.</p></td><td>2024-08-19T11:46:12.709Z</td></tr><tr><td>yatolkosprosit</td><td><p>Я попробовал вчера piped. Несколько зеркал. Там после регистрации я не смог посмотреть ни одного видео - появляется требование залогинмться, чтобы доказать что я не бот. Ну логиниться конечно негде. Погуглив понял, что проблема массовая.</p></td><td>2024-08-19T13:03:09.399Z</td></tr><tr><td>artenox</td><td><aside class="quote no-group" data-username="yatolkosprosit" data-post="22" data-topic="7695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/y/aca169/48.png" class="avatar"> yatolkosprosit:</div>
+<blockquote>
+<p>Я попробовал вчера piped. Несколько зеркал. Там после регистрации я не смог посмотреть ни одного видео - появляется требование залогинмться, чтобы доказать что я не бот. Ну логиниться конечно негде.</p>
+</blockquote>
+</aside>
+<p>Piped RIP. Раньше работал.</p></td><td>2024-08-19T18:01:15.562Z</td></tr>
+    </table>
+      </body>
+    </html>

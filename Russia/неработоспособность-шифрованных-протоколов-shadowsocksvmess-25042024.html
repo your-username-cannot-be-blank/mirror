@@ -1,0 +1,981 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>Блокируют по размеру пакетов, возможно, не по абсолютным цифрам, а по соотношению размера отправляемого к принимаемому.</p>
+<p>HTTPS-соединения устанавливаются 1 раз из 6-7 (в дампе все неудачные), а HTTP устанавливаются всегда (у них другие размеры пакетов).</p>
+<p><a class="attachment" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/8SbQl4WHcryICuLtHpwfqB0QQYx.pcapng">shadowsocks-block-tele2-29.04.2024.pcapng</a> (44.7 KB)</p>
+<p>Очень похоже на <a href="https://ntc.party/t/%D1%81%D0%BB%D1%83%D1%87%D0%B0%D0%B9%D0%BD%D0%B0%D1%8F-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8%D0%B3%D1%80%D1%8B-scp-secret-laboratory-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-%D0%BF%D0%BE-udp-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D1%83/7681/28" class="inline-onebox">Случайная блокировка игры SCP Secret Laboratory на ТСПУ по UDP протоколу - #28 by ValdikSS</a></p>
+<p><strong>Без обсуждений.</strong><br>
+Обсуждение в <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142" class="inline-onebox">Обсуждение: неработоспособность ShadowSocks (30.10.2023+)</a></p></td><td>2024-04-28T22:20:36.211Z</td></tr><tr><td>ValdikSS</td><td><p>Нашел как минимум один шаблон блокировки (для TCP):</p>
+<ol>
+<li>Клиент отсылает три пакета, каждый из которых содержит 411+ случайных байт</li>
+<li>Сервер отсылает произвольное количество любых байт <em>чаще, чем клиент отправляет свои пакеты</em></li>
+</ol>
+<p><a class="attachment" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/nUC7oyo3VOg9d5iuDMPxjKcAjBc.pcapng">shadowsocks-test1-tele2-29.04.2024.pcapng</a> (3.1 KB)</p></td><td>2024-04-29T01:06:13.361Z</td></tr><tr><td>fortuna</td><td><p>Where was your test network?</p>
+<h2><a name="remote-testing-with-the-outline-sdk-1" class="anchor" href="#remote-testing-with-the-outline-sdk-1"></a>Remote Testing with the Outline SDK</h2>
+<p>You can use the <a href="https://github.com/Jigsaw-Code/outline-sdk/tree/main?tab=readme-ov-file#command-line-tools">Outline SDK Tools</a> to test different strategies remotely.</p>
+<p>Here I test a fetch from Bee Line:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "$SERVER_BEELINE"  https://ipinfo.io/org
+AS16345 PJSC "Vimpelcom"
+</code></pre>
+<p><code>$SERVER_BEELINE</code> is a <code>socks5://...</code> url pointing to a SOCKS5 server running on Bee Line.</p>
+<p>Here is a blocked website:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "$SERVER_BEELINE|override:host=cloudflare.net" -method HEAD -v https://meduza.io
+2024/04/29 15:49:50 HTTP request failed: Head "https://meduza.io": EOF
+</code></pre>
+<p>(I’m using <code>override</code> to bypass DNS blocking)</p>
+<p>TLS Record fragmentation bypasses blocking:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "$SERVER_BEELINE|override:host=cloudflare.net|tlsfrag:1" -method HEAD -v https://meduza.io
+[DEBUG] 2024/04/29 15:50:35.534519 main.go:106: Expires: [Mon, 29 Apr 2024 19:51:05 GMT]
+[DEBUG] 2024/04/29 15:50:35.535194 main.go:106: Alt-Svc: [h3=":443"; ma=86400]
+[DEBUG] 2024/04/29 15:50:35.535205 main.go:106: Cache-Control: [public, max-age=30]
+[DEBUG] 2024/04/29 15:50:35.535211 main.go:106: Last-Modified: [Mon, 29 Apr 2024 19:25:15 GMT]
+[DEBUG] 2024/04/29 15:50:35.535215 main.go:106: Cf-Cache-Status: [HIT]
+[DEBUG] 2024/04/29 15:50:35.535220 main.go:106: X-Content-Type-Options: [nosniff]
+[DEBUG] 2024/04/29 15:50:35.535225 main.go:106: Date: [Mon, 29 Apr 2024 19:50:35 GMT]
+[DEBUG] 2024/04/29 15:50:35.535229 main.go:106: X-Cg-Cache-Status: [HIT]
+[DEBUG] 2024/04/29 15:50:35.535233 main.go:106: Age: [168]
+[DEBUG] 2024/04/29 15:50:35.535237 main.go:106: Strict-Transport-Security: [max-age=31536000; includeSubDomains; preload]
+[DEBUG] 2024/04/29 15:50:35.535243 main.go:106: Server: [cloudflare]
+[DEBUG] 2024/04/29 15:50:35.535247 main.go:106: Cf-Ray: [87c1d2664d33614a-KJA]
+[DEBUG] 2024/04/29 15:50:35.535250 main.go:106: Content-Type: [text/html; charset=utf-8]
+[DEBUG] 2024/04/29 15:50:35.535311 main.go:106: Connection: [keep-alive]
+</code></pre>
+<h2><a name="testing-shadowsocks-2" class="anchor" href="#testing-shadowsocks-2"></a>Testing Shadowsocks</h2>
+<p>To fetch with Shadowsocks:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "$OUTLINE_SERVER" https://ipinfo.io/org
+AS14061 DigitalOcean, LLC
+</code></pre>
+<p>Where <code>$OUTLINE_SERVER</code> is a <code>ss://</code> Shadowsocks key.</p>
+<p>Now we can do a two-hop test by piping the transports. Here we connect to Bee Line, then fetch <a href="http://ipinfo.io">ipinfo.io</a> via the Outline Server. We seem to get timeouts for HTTP:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "$SERVER_BEELINE|$OUTLINE_SERVER" http://ipinfo.io/org
+2024/04/29 15:58:02 HTTP request failed: Get "http://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+</code></pre>
+<p>And HTTPS:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "$SERVER_BEELINE|$OUTLINE_SERVER" https://ipinfo.io/org
+2024/04/29 16:00:07 HTTP request failed: Get "https://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+</code></pre>
+<p>When I use a prefix that simulates a TLS Handshake Record the HTTP fetch succeeds:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">$ go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "$SERVER_BEELINE|$OUTLINE_SERVER?prefix=%16%03%01" http://ipinfo.io/org
+AS14061 DigitalOcean, LLC
+
+$ go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "$SERVER_BEELINE|$OUTLINE_SERVER?prefix=%16%03%01" https://ipinfo.io/org
+AS14061 DigitalOcean, LLC
+</code></pre>
+<p>Note that my Outline Server is running on port 443.</p>
+<p>I was able to get 10 successes in a row:</p>
+<pre><code class="lang-auto">for i in $(seq 1 10); do echo -n "Test $i: "; go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "$SERVER_BEELINE|$OUTLINE_SERVER?prefix=%16%03%01" https://ipinfo.io/org; done
+Test 1: AS14061 DigitalOcean, LLC
+
+Test 2: AS14061 DigitalOcean, LLC
+
+Test 3: AS14061 DigitalOcean, LLC
+
+Test 4: AS14061 DigitalOcean, LLC
+
+Test 5: AS14061 DigitalOcean, LLC
+
+Test 6: AS14061 DigitalOcean, LLC
+
+Test 7: AS14061 DigitalOcean, LLC
+
+Test 8: AS14061 DigitalOcean, LLC
+
+Test 9: AS14061 DigitalOcean, LLC
+
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre>
+<p>But it’s not always successful. I don’t know if that’s an issue with my Bee Line being slow or if it’s inconsistent blocking:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">$ for i in $(seq 1 10); do echo -n "Test $i: "; go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "$SERVER_BEELINE|$OUTLINE_SERVER?prefix=%16%03%01" https://ipinfo.io/org; done
+Test 1: 2024/04/29 16:10:14 HTTP request failed: Get "https://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 2: 2024/04/29 16:10:20 HTTP request failed: Get "https://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 3: 2024/04/29 16:10:26 HTTP request failed: Get "https://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 4: AS14061 DigitalOcean, LLC
+
+Test 5: AS14061 DigitalOcean, LLC
+
+Test 6: AS14061 DigitalOcean, LLC
+
+Test 7: AS14061 DigitalOcean, LLC
+
+Test 8: 2024/04/29 16:10:41 HTTP request failed: Get "https://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 9: 2024/04/29 16:10:47 HTTP request failed: Get "https://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre>
+<p>I’ll see if I can test in more networks. but it would be great if others could test too.</p></td><td>2024-04-29T20:11:33.118Z</td></tr><tr><td>fortuna</td><td><p>Did some testing on Megafon:</p>
+<pre><code class="lang-auto">$ go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "socks5://$SERVER_MEGAFON"  https://ipinfo.io/org
+AS31224 PJSC MegaFon
+</code></pre>
+<p>It’s not completely clear to me if the timeouts are blocking, or just slowness. I’ll need to change the code to configure that.</p>
+<h2><a name="https-no-prefix-port-443-1" class="anchor" href="#https-no-prefix-port-443-1"></a>HTTPS, no prefix, port 443</h2>
+<pre><code class="lang-auto">for i in $(seq 1 10); do echo -n "Test $i: "; go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "socks5://$SERVER_MEGAFON|$OUTLINE_SERVER" https://ipinfo.io/org; done
+Test 1: AS14061 DigitalOcean, LLC
+
+Test 2: 2024/04/29 16:16:13 HTTP request failed: Get "https://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 3: AS14061 DigitalOcean, LLC
+
+Test 4: AS14061 DigitalOcean, LLC
+
+Test 5: 2024/04/29 16:16:23 HTTP request failed: Get "https://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 6: AS14061 DigitalOcean, LLC
+
+Test 7: 2024/04/29 16:16:34 HTTP request failed: Get "https://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 8: AS14061 DigitalOcean, LLC
+
+Test 9: 2024/04/29 16:16:42 HTTP request failed: Get "https://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre>
+<h2><a name="http-no-prefix-port-443-2" class="anchor" href="#http-no-prefix-port-443-2"></a>HTTP, no prefix, port 443</h2>
+<pre><code class="lang-auto">for i in $(seq 1 10); do echo -n "Test $i: "; go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "socks5://$SERVER_MEGAFON|$OUTLINE_SERVER" http://ipinfo.io/org; done
+Test 1: AS14061 DigitalOcean, LLC
+
+Test 2: AS14061 DigitalOcean, LLC
+
+Test 3: AS14061 DigitalOcean, LLC
+
+Test 4: 2024/04/29 16:17:04 HTTP request failed: Get "http://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 5: AS14061 DigitalOcean, LLC
+
+Test 6: AS14061 DigitalOcean, LLC
+
+Test 7: AS14061 DigitalOcean, LLC
+
+Test 8: AS14061 DigitalOcean, LLC
+
+Test 9: AS14061 DigitalOcean, LLC
+
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre>
+<h2><a name="https-tls-prefix-port-443-3" class="anchor" href="#https-tls-prefix-port-443-3"></a>HTTPS, TLS prefix, port 443</h2>
+<pre><code class="lang-auto">for i in $(seq 1 10); do echo -n "Test $i: "; go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "socks5://$SERVER_MEGAFON|$OUTLINE_SERVER?prefix=%16%03%01" https://ipinfo.io/org; done
+Test 1: AS14061 DigitalOcean, LLC
+
+Test 2: AS14061 DigitalOcean, LLC
+
+Test 3: AS14061 DigitalOcean, LLC
+
+Test 4: AS14061 DigitalOcean, LLC
+
+Test 5: AS14061 DigitalOcean, LLC
+
+Test 6: AS14061 DigitalOcean, LLC
+
+Test 7: AS14061 DigitalOcean, LLC
+
+Test 8: AS14061 DigitalOcean, LLC
+
+Test 9: AS14061 DigitalOcean, LLC
+
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre>
+<h2><a name="http-tls-prefix-port-443-4" class="anchor" href="#http-tls-prefix-port-443-4"></a>HTTP, TLS Prefix, Port 443</h2>
+<pre><code class="lang-auto">$ for i in $(seq 1 10); do echo -n "Test $i: "; go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport "socks5://$SERVER_MEGAFON|$OUTLINE_SERVER?prefix=%16%03%01" http://ipinfo.io/org; done
+Test 1: AS14061 DigitalOcean, LLC
+
+Test 2: AS14061 DigitalOcean, LLC
+
+Test 3: AS14061 DigitalOcean, LLC
+
+Test 4: 2024/04/29 16:20:20 HTTP request failed: Get "http://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 5: AS14061 DigitalOcean, LLC
+
+Test 6: 2024/04/29 16:20:32 HTTP request failed: Get "http://ipinfo.io/org": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+exit status 1
+Test 7: AS14061 DigitalOcean, LLC
+
+Test 8: AS14061 DigitalOcean, LLC
+
+Test 9: AS14061 DigitalOcean, LLC
+
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre></td><td>2024-04-29T20:20:54.658Z</td></tr><tr><td>fortuna</td><td><p>While the <code>fetch</code> tool doesn’t have a timeout option, you can use our <code>http2transport</code> proxy + <code>curl</code>. I’m now getting more consistent results. I’m not seeing consistent blocking in either Bee Line or Megafon, so I think the timeouts were issues with my remote proxy. Again, it would be great to see direct measurements.</p>
+<p>Run the local proxy:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">go run github.com/Jigsaw-Code/outline-sdk/x/examples/http2transport@latest -transport "$SERVER_BEELINE|$OUTLINE_SERVER"
+2024/04/29 16:42:08 Proxy listening on 127.0.0.1:1080
+</code></pre>
+<p>Then use curl.</p>
+<h1><a name="bee-line-1" class="anchor" href="#bee-line-1"></a>Bee Line</h1>
+<h2><a name="http-2" class="anchor" href="#http-2"></a>HTTP</h2>
+<pre data-code-wrap="sh"><code class="lang-sh">$ for i in $(seq 1 10); do echo -n "Test $i: "; curl -p -x http://localhost:1080 -sS http://ipinfo.io/org; done
+Test 1: AS14061 DigitalOcean, LLC
+Test 2: AS14061 DigitalOcean, LLC
+Test 3: AS14061 DigitalOcean, LLC
+Test 4: AS14061 DigitalOcean, LLC
+Test 5: AS14061 DigitalOcean, LLC
+Test 6: AS14061 DigitalOcean, LLC
+Test 7: curl: (52) Empty reply from server
+Test 8: curl: (52) Empty reply from server
+Test 9: AS14061 DigitalOcean, LLC
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre>
+<h2><a name="https-3" class="anchor" href="#https-3"></a>HTTPS</h2>
+<pre data-code-wrap="sh"><code class="lang-sh">for i in $(seq 1 10); do echo -n "Test $i: "; curl -p -x http://localhost:1080 -sS https://ipinfo.io/org; done
+Test 1: AS14061 DigitalOcean, LLC
+Test 2: AS14061 DigitalOcean, LLC
+Test 3: AS14061 DigitalOcean, LLC
+Test 4: AS14061 DigitalOcean, LLC
+Test 5: AS14061 DigitalOcean, LLC
+Test 6: AS14061 DigitalOcean, LLC
+Test 7: AS14061 DigitalOcean, LLC
+Test 8: AS14061 DigitalOcean, LLC
+Test 9: AS14061 DigitalOcean, LLC
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre>
+<h1><a name="megafon-4" class="anchor" href="#megafon-4"></a>Megafon</h1>
+<pre data-code-wrap="sh"><code class="lang-sh">$ go run github.com/Jigsaw-Code/outline-sdk/x/examples/http2transport@latest -transport "socks5://$SERVER_MEGAFON|$OUTLINE_SERVER"
+2024/04/29 16:47:08 Proxy listening on 127.0.0.1:1080
+</code></pre>
+<h2><a name="http-5" class="anchor" href="#http-5"></a>HTTP</h2>
+<pre data-code-wrap="sh"><code class="lang-sh">$ for i in $(seq 1 10); do echo -n "Test $i: "; curl -p -x http://localhost:1080 -sS http://ipinfo.io/org; done
+Test 1: AS14061 DigitalOcean, LLC
+Test 2: AS14061 DigitalOcean, LLC
+Test 3: AS14061 DigitalOcean, LLC
+Test 4: AS14061 DigitalOcean, LLC
+Test 5: AS14061 DigitalOcean, LLC
+Test 6: AS14061 DigitalOcean, LLC
+Test 7: AS14061 DigitalOcean, LLC
+Test 8: AS14061 DigitalOcean, LLC
+Test 9: AS14061 DigitalOcean, LLC
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre>
+<h2><a name="https-6" class="anchor" href="#https-6"></a>HTTPS</h2>
+<pre data-code-wrap="sh"><code class="lang-sh">$ for i in $(seq 1 10); do echo -n "Test $i: "; curl -p -x http://localhost:1080 -sS https://ipinfo.io/org; done
+Test 1: AS14061 DigitalOcean, LLC
+Test 2: AS14061 DigitalOcean, LLC
+Test 3: AS14061 DigitalOcean, LLC
+Test 4: AS14061 DigitalOcean, LLC
+Test 5: AS14061 DigitalOcean, LLC
+Test 6: AS14061 DigitalOcean, LLC
+Test 7: AS14061 DigitalOcean, LLC
+Test 8: AS14061 DigitalOcean, LLC
+Test 9: AS14061 DigitalOcean, LLC
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre>
+<h1><a name="mts-7" class="anchor" href="#mts-7"></a>MTS</h1>
+<pre data-code-wrap="sh"><code class="lang-sh">go run github.com/Jigsaw-Code/outline-sdk/x/examples/http2transport@latest -transport "socks5://$SERVER_MTS|$OUTLINE_SERVER"
+2024/04/29 16:59:14 Proxy listening on 127.0.0.1:1080
+</code></pre>
+<h2><a name="http-8" class="anchor" href="#http-8"></a>HTTP</h2>
+<pre data-code-wrap="sh"><code class="lang-sh">$ for i in $(seq 1 10); do echo -n "Test $i: "; curl -p -x http://localhost:1080 -sS http://ipinfo.io/org; done
+Test 1: AS14061 DigitalOcean, LLC
+Test 2: AS14061 DigitalOcean, LLC
+Test 3: AS14061 DigitalOcean, LLC
+Test 4: AS14061 DigitalOcean, LLC
+Test 5: AS14061 DigitalOcean, LLC
+Test 6: AS14061 DigitalOcean, LLC
+Test 7: AS14061 DigitalOcean, LLC
+Test 8: AS14061 DigitalOcean, LLC
+Test 9: AS14061 DigitalOcean, LLC
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre>
+<h2><a name="https-9" class="anchor" href="#https-9"></a>HTTPS</h2>
+<pre data-code-wrap="sh"><code class="lang-sh">$ for i in $(seq 1 10); do echo -n "Test $i: "; curl -p -x http://localhost:1080 -sS https://ipinfo.io/org; done
+Test 1: AS14061 DigitalOcean, LLC
+Test 2: AS14061 DigitalOcean, LLC
+Test 3: AS14061 DigitalOcean, LLC
+Test 4: AS14061 DigitalOcean, LLC
+Test 5: curl: (56) Failure when receiving data from the peer
+Test 6: AS14061 DigitalOcean, LLC
+Test 7: AS14061 DigitalOcean, LLC
+Test 8: curl: (56) Recv failure: Connection reset by peer
+Test 9: AS14061 DigitalOcean, LLC
+Test 10: AS14061 DigitalOcean, LLC
+</code></pre>
+<p>Note: Shadowsocks doesn’t communicate TCP resets, so those resets are from the proxy in Russia, not the target website.</p></td><td>2024-04-29T20:51:11.167Z</td></tr><tr><td>anon57137390</td><td><aside class="quote no-group" data-username="fortuna" data-post="3" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/fortuna/48/150_2.png" class="avatar"> fortuna:</div>
+<blockquote>
+<p>But it’s not always successful. I don’t know if that’s an issue with my Bee Line being slow or if it’s inconsistent blocking</p>
+</blockquote>
+</aside>
+<p>Для многочисленных тестов с подключением к одному dest_addr:dest_port возможен выбор src_addr:src_port из уже блокируемой 4-tuple (src_addr, src_port, dest_addr, dest_port). Новое подключение не отменяет блокировку.</p></td><td>2024-04-30T15:28:58.599Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="fortuna" data-post="3" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/fortuna/48/150_2.png" class="avatar"> fortuna:</div>
+<blockquote>
+<p>Where was your test network?</p>
+</blockquote>
+</aside>
+<p>It’s Tele2 cellular, Saint Petersburg.<br>
+I’ve also tested Beeline, MTS, Megafon and Yota @ Saint Petersburg, all are blocked.</p>
+<p>You need to absolutely make sure that your ClientHello is large enough, as curl with mbedtls for example does not add padding extension and it does not hit 411 bytes length needed to trigger the block.</p></td><td>2024-05-01T15:56:44.314Z</td></tr><tr><td>murka(Danil Shaymurzin)</td><td><p><a class="attachment" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/gFFybveuYOGyEbzEmh8Eclk9I9K.pcapng">shadowsocks-notblock-yota-28.04.2024.pcapng</a> (105,4 КБ)</p>
+<p>Прикрепляю дамп с удачным подключением к серверу Hetzner из Уфы (Yota), подключение к Outline 162.55.42.178:24475 без префикса.</p>
+<p>Блокировки прекратились с 30-го апреля на территории Башкортостана и Татарстана по всем провайдерам. Есть клиенты, которые жалуются на подключение с Билайна из Пензы, при этом чистый SS-блочится, а Outline с префиксом ClientHello не блокируется.</p></td><td>2024-05-01T17:34:12.900Z</td></tr><tr><td>fortuna</td><td><p>This is Outline traffic from opt-in metrics. You can see a gradual decline, supporting a partial block, and then it starts to go back up, aligning with <a class="mention" href="/u/murka">@murka</a>’s statement that blocking stopped on April 30.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/3ab3b7fff8837d977c3e387167d39ea0f860aa7a.png" data-download-href="https://ntc.party/uploads/default/3ab3b7fff8837d977c3e387167d39ea0f860aa7a" title="image"><img src="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/3ab3b7fff8837d977c3e387167d39ea0f860aa7a_2_690x478.png" alt="image" data-base62-sha1="8niJOrYZsKzgoWpBZaF36ZedBFw" width="690" height="478" srcset="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/3ab3b7fff8837d977c3e387167d39ea0f860aa7a_2_690x478.png, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/3ab3b7fff8837d977c3e387167d39ea0f860aa7a_2_1035x717.png 1.5x, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/3ab3b7fff8837d977c3e387167d39ea0f860aa7a.png 2x" data-dominant-color="FCFCFD"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1352×938 30.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-05-02T15:20:20.136Z</td></tr><tr><td>fortuna</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="2" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Нашел как минимум один шаблон блокировки (для TCP):</p>
+<ol>
+<li>Клиент отсылает три</li>
+</ol>
+</blockquote>
+</aside>
+<p>Oh, I missed that the 411 bytes was required. With the Outline SDK, we can add a split to the Shadowsocks stream. The Outline Client doesn’t support that yet, but we want to move towards that. Perhaps the client can automatically try different splits if the connection fails.</p></td><td>2024-05-02T15:28:59.451Z</td></tr><tr><td>ValdikSS</td><td><p>На <span data-date="2024-05-05" data-time="20:54:00" class="discourse-local-date" data-timezone="Europe/Moscow" data-email-preview="2024-05-05T17:54:00Z UTC">2024-05-05T17:54:00Z</span> блокировки полностью шифрованных протоколов сохраняются на мобильных Теле2, Мегафон, МТС, Билайн и Йота Санкт-Петербург.</p>
+<p>Проверял на Shadowsocks, VMESS и собственном генераторе пакетов. Фильтруются все зарубежные направления (Россию не проверял).</p></td><td>2024-05-05T17:55:33.881Z</td></tr><tr><td>Dhohbr</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="12" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Фильтруются все зарубежные направления (Россию не проверял).</p>
+</blockquote>
+</aside>
+<p>Для эксперимента, развернул на московском vps shadowsocks. С мобильного Билайна не работает.</p></td><td>2024-05-06T17:04:17.614Z</td></tr><tr><td>artenox</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="12" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>блокировки полностью шифрованных протоколов сохраняются</p>
+</blockquote>
+</aside>
+<p>TCP. А UDP проверяли какие-нибудь для интереса?</p></td><td>2024-05-06T17:37:10.666Z</td></tr><tr><td>fortuna</td><td><p>How did you test Shadowsocks?</p>
+<p>I tested Outline Shadowsocks on Tele2, Megafon, MTS and Beeline in St Petersburg, and was not able to observe blocking.</p>
+<p>I tested using <a href="http://soax.com">soax.com</a>, an Outline Server, and the Outline SDK fetch tool. I tried both fetching a HTTPS page and a HTTP page. The HTTPS fetch doesn’t trigger the 411 bytes in the first packet, but the HTTP fetch was done with padding headers to force over 800 bytes in the first packet, and I still couldn’t trigger the block.</p></td><td>2024-05-07T16:05:17.093Z</td></tr><tr><td>ValdikSS</td><td><p>5 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142/93">Обсуждение: неработоспособность ShadowSocks (30.10.2023 +)</a></p></td><td>2024-05-08T12:24:43.340Z</td></tr><tr><td>ValdikSS</td><td><p>A post was merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142/98">Обсуждение: неработоспособность ShadowSocks (30.10.2023 +)</a></p></td><td>2024-05-08T12:28:29.653Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="fortuna" data-post="16" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/fortuna/48/150_2.png" class="avatar"> fortuna:</div>
+<blockquote>
+<p>How did you test Shadowsocks?</p>
+</blockquote>
+</aside>
+<p>I’m using proxies on a probe (you have access to it) with v2fly configured with shadowsocks over probe’s proxy as an upstream, and sending the requests with regular curl (built with openssl) to HTTPS websites.</p>
+<p>HTTP websites indeed do not trigger the block because the filter <em>expects at least two client-server packets with sufficient amount of data</em> (first is ClientHello, second is HTTP request), and HTTP has only one.</p>
+<p>Check the PCAP in the top post.</p></td><td>2024-05-08T12:55:54.414Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="artenox" data-post="15" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>TCP. А UDP проверяли какие-нибудь для интереса?</p>
+</blockquote>
+</aside>
+<p>Проверил QUIC (HTTPS-запросами) через Shadowsocks, на этих же каналах (Теле2, Билайн, МТС, Мегафон Санкт-Петербург) блокировки не вижу.</p></td><td>2024-05-08T15:08:41.903Z</td></tr><tr><td>artenox</td><td><p>А фильтр проверяет только первые несколько пакетов (как при wireguard блокировках было) или все время за потоком данных следит?</p></td><td>2024-05-08T16:04:43.508Z</td></tr><tr><td>ValdikSS</td><td><p>4 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142/111">Обсуждение: неработоспособность ShadowSocks (30.10.2023 +)</a></p></td><td>2024-05-12T20:17:49.861Z</td></tr><tr><td>ValdikSS</td><td><p>Вроде только начало сессии. Первый (+ возможно, второй) пакет от клиента и как минимум 2 ответных пакета.</p></td><td>2024-05-15T17:38:05.453Z</td></tr><tr><td>fortuna</td><td><aside class="quote no-group quote-modified" data-username="ValdikSS" data-post="19" data-topic="7776" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>I’m using proxies on a probe (you have access to it) with v2fly configured with shadowsocks over probe’s proxy as an upstream, and sending the requests with regular curl (built with openssl) to HTTPS websites.<br>
+…<br>
+Check the PCAP in the top post.</p>
+</blockquote>
+</aside>
+<p>I think that pcap was for your random packet generator, given the two packets with exactly 411 bytes.<br>
+It would be helpful to see the packets with the Shadowsocks set up.</p>
+<p>Whether it triggers is heavily dependent on the implementation, and I have no idea what your set up is doing.</p>
+<p>Some implementations will send IV, connect request and application data as 3 separate packets. Some will merge the first two, and some, such as Outline, will merge the 3 of them.</p>
+<p>I don’t think the IV+connect reaches 411 bytes, so it shouldn’t trigger the block. Is the pattern detected after the first packet?</p>
+<p>It would be really nice to reproduce the blocking with Outline code. I wasn’t able to.</p></td><td>2024-05-16T18:27:49.555Z</td></tr><tr><td>fortuna</td><td><p>I think the blocking may also be affected by the port number. The servers I tried were on ports 80 and 443, so they may not be affected by this blocking.</p></td><td>2024-05-16T18:29:57.704Z</td></tr><tr><td>ValdikSS</td><td><p>The dump in the first message is a real ShadowSocks. V2fly on both server and client.</p><aside class="quote quote-modified" data-post="1" data-topic="7776">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-%D1%88%D0%B8%D1%84%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%BD%D1%8B%D1%85-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-shadowsocksvmess-25042024/7776">Неработоспособность шифрованных протоколов (ShadowSocks/VMESS) (25.04.2024 +)</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Блокируют по размеру пакетов, возможно, не по абсолютным цифрам, а по соотношению размера отправляемого к принимаемому. 
+HTTPS-соединения устанавливаются 1 раз из 6-7 (в дампе все неудачные), а HTTP устанавливаются всегда (у них другие размеры пакетов). 
+<a class="attachment" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/8SbQl4WHcryICuLtHpwfqB0QQYx.pcapng">shadowsocks-block-tele2-29.04.2024.pcapng</a> (44.7 KB) 
+Очень похоже на <a href="https://ntc.party/t/%D1%81%D0%BB%D1%83%D1%87%D0%B0%D0%B9%D0%BD%D0%B0%D1%8F-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8%D0%B3%D1%80%D1%8B-scp-secret-laboratory-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-%D0%BF%D0%BE-udp-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D1%83/7681/28" class="inline-onebox-loading">https://ntc.party/t/случайная-блокировка-игры-scp-secret-laboratory-на-тспу-по-udp-протоколу/7681/28</a> 
+Без обсуждений. 
+Обсуждение в <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142" class="inline-onebox-loading">https://ntc.party/t/обсуждение-неработоспосо…</a>
+  </blockquote>
+</aside>
+</td><td>2024-05-16T18:58:33.591Z</td></tr><tr><td>fortuna</td><td><p>I ran some tests with the Outline SDK, which may work differently than other implementations. It looks like the <strong>blocking depends on the location of the server</strong>. It also depends on the <strong>port number</strong>. I was also able to confirm that <strong>the initial packet size makes a difference</strong>, but only in some ISPs.</p>
+<ul>
+<li>Bee Line seems to be the only one considering the packet size, but only for the Vultr server, not DigitalOcean.</li>
+<li>MTS blocked Shadowsocks access to a server on DigitalOcean, but not Vultr. They are likely using the IP address.</li>
+<li>Blocking on DigitalOcean only happened for the key on port 443. No blocking for the key on the same server, but on port 5555.</li>
+<li>MegaFon blocked Shadowsocks access to a server on Vultr, but not on DigitalOcean. They are likely using the IP address as well.</li>
+<li>The packet size didn’t make a difference for MegaFon and MTS</li>
+<li>Tele2 is not blocking.</li>
+</ul>
+<h1><a name="p-25743-tests-1" class="anchor" href="#p-25743-tests-1"></a>Tests</h1>
+<p>The tests used port 443 for the DigitalOcean server and port 20888 for the Vultr server.</p>
+<p>I was not able to reproduce blocking on Tele2. Results for Bee Line depended on the initial packet. Results for MTS and Megafon depended on where the server was.</p>
+<p><strong>With a DigitalOcean server and large initial packet (over 800 bytes):</strong></p>
+<ul>
+<li><img src="https://ntc.party/images/emoji/twitter/x.png?v=12" title=":x:" class="emoji" alt=":x:" loading="lazy" width="20" height="20"> MTS was consistently timing out</li>
+<li><img src="https://ntc.party/images/emoji/twitter/warning.png?v=12" title=":warning:" class="emoji" alt=":warning:" loading="lazy" width="20" height="20"> MegaFon worked most times, with some timeouts. Inconsistent.</li>
+<li><img src="https://ntc.party/images/emoji/twitter/white_check_mark.png?v=12" title=":white_check_mark:" class="emoji" alt=":white_check_mark:" loading="lazy" width="20" height="20"> Tele2 was consistently working</li>
+<li><img src="https://ntc.party/images/emoji/twitter/white_check_mark.png?v=12" title=":white_check_mark:" class="emoji" alt=":white_check_mark:" loading="lazy" width="20" height="20"> Bee Line was consistently working</li>
+</ul>
+<p>Example:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/eb2342635320d78c574045696101c81d84258194.png" data-download-href="https://ntc.party/uploads/default/eb2342635320d78c574045696101c81d84258194" title="image"><img src="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/eb2342635320d78c574045696101c81d84258194_2_690x297.png" alt="image" data-base62-sha1="xy7Kox1eDFhhOS3sShiTeRV0Kos" width="690" height="297" srcset="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/eb2342635320d78c574045696101c81d84258194_2_690x297.png, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/eb2342635320d78c574045696101c81d84258194_2_1035x445.png 1.5x, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/eb2342635320d78c574045696101c81d84258194_2_1380x594.png 2x" data-dominant-color="1D1D1D"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1547×668 116 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Using a smaller initial packet didn’t seem to make a difference.</p>
+<p>However, when using a key on a different port, 5555, on the same DigitalOcean server, I could consistently connect to the server on all ISPs:</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/d167d1503de15ee5662733293cb22a9183a25289.png" data-download-href="https://ntc.party/uploads/default/d167d1503de15ee5662733293cb22a9183a25289" title="image"><img src="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/d167d1503de15ee5662733293cb22a9183a25289_2_690x317.png" alt="image" data-base62-sha1="tSudC24OVXJSxEzHvVj4JhpeHDH" width="690" height="317" srcset="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/d167d1503de15ee5662733293cb22a9183a25289_2_690x317.png, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/d167d1503de15ee5662733293cb22a9183a25289_2_1035x475.png 1.5x, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/d167d1503de15ee5662733293cb22a9183a25289_2_1380x634.png 2x" data-dominant-color="1C1C1C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1617×744 141 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>I was also able to connect to the management API on that server, on another high port number.</p>
+<p><strong>With a Vultr server and large initial packet:</strong></p>
+<ul>
+<li><img src="https://ntc.party/images/emoji/twitter/white_check_mark.png?v=12" title=":white_check_mark:" class="emoji" alt=":white_check_mark:" loading="lazy" width="20" height="20"> MTS was consistently working</li>
+<li><img src="https://ntc.party/images/emoji/twitter/x.png?v=12" title=":x:" class="emoji" alt=":x:" loading="lazy" width="20" height="20"> MegaFon was consistently blocked. Not a timeout. I was getting an EOF from the SOCKS5 service I was using, so the Shadowsocks client probably got a FIN or a RESET.</li>
+<li><img src="https://ntc.party/images/emoji/twitter/white_check_mark.png?v=12" title=":white_check_mark:" class="emoji" alt=":white_check_mark:" loading="lazy" width="20" height="20"> Tele2 was consistently working</li>
+<li><img src="https://ntc.party/images/emoji/twitter/x.png?v=12" title=":x:" class="emoji" alt=":x:" loading="lazy" width="20" height="20"> Bee Line was consistently timing out</li>
+</ul>
+<p>Example:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/09f49fa0f0bd3e0c419f1c2aec8ec64be9f75876.png" data-download-href="https://ntc.party/uploads/default/09f49fa0f0bd3e0c419f1c2aec8ec64be9f75876" title="image"><img src="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/09f49fa0f0bd3e0c419f1c2aec8ec64be9f75876_2_690x285.png" alt="image" data-base62-sha1="1q4oQz7ykFkANM6nFWlPaaOUWLc" width="690" height="285" srcset="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/09f49fa0f0bd3e0c419f1c2aec8ec64be9f75876_2_690x285.png, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/09f49fa0f0bd3e0c419f1c2aec8ec64be9f75876_2_1035x427.png 1.5x, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/09f49fa0f0bd3e0c419f1c2aec8ec64be9f75876_2_1380x570.png 2x" data-dominant-color="1D1D1D"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1617×668 120 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p><strong>With a Vultr server and small initial packet (300 bytes):</strong></p>
+<ul>
+<li><img src="https://ntc.party/images/emoji/twitter/white_check_mark.png?v=12" title=":white_check_mark:" class="emoji" alt=":white_check_mark:" loading="lazy" width="20" height="20"> MTS was consistently working</li>
+<li><img src="https://ntc.party/images/emoji/twitter/x.png?v=12" title=":x:" class="emoji" alt=":x:" loading="lazy" width="20" height="20"> MegaFon was consistently blocked. Not a timeout. I was getting an EOF from the SOCKS5 service I was using, so the Shadowsocks client probably got a FIN or a RESET.</li>
+<li><img src="https://ntc.party/images/emoji/twitter/white_check_mark.png?v=12" title=":white_check_mark:" class="emoji" alt=":white_check_mark:" loading="lazy" width="20" height="20"> Tele2 was consistently working</li>
+<li><img src="https://ntc.party/images/emoji/twitter/white_check_mark.png?v=12" title=":white_check_mark:" class="emoji" alt=":white_check_mark:" loading="lazy" width="20" height="20"> Bee Line was consistently working</li>
+</ul>
+<p>Example:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/0c9620547d1668a4fb761e48ea1ab6ed6f289c2d.png" data-download-href="https://ntc.party/uploads/default/0c9620547d1668a4fb761e48ea1ab6ed6f289c2d" title="image"><img src="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/0c9620547d1668a4fb761e48ea1ab6ed6f289c2d_2_690x285.png" alt="image" data-base62-sha1="1NlnaDThKxUGMkgK8xidN9oNsO9" width="690" height="285" srcset="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/0c9620547d1668a4fb761e48ea1ab6ed6f289c2d_2_690x285.png, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/0c9620547d1668a4fb761e48ea1ab6ed6f289c2d_2_1035x427.png 1.5x, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/0c9620547d1668a4fb761e48ea1ab6ed6f289c2d_2_1380x570.png 2x" data-dominant-color="1C1C1C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1617×668 115 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>ISPs are targeting specific cloud providers, as <a href="https://www.intellinews.com/russia-cracks-down-on-foreign-hosting-providers-321690/">reported in April</a>.</p>
+<p>I was able to demonstrate that <code>www.digitalocean.com</code>, which runs on Cloudflare, is blocked by SNI. You observe timeouts:</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/bdd9d8f91da390cdc1d06ef60dc3025f0da1317a.png" data-download-href="https://ntc.party/uploads/default/bdd9d8f91da390cdc1d06ef60dc3025f0da1317a" title="image"><img src="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/bdd9d8f91da390cdc1d06ef60dc3025f0da1317a_2_690x341.png" alt="image" data-base62-sha1="r5uYDYkzMWxcDT8hsEaWjn1welY" width="690" height="341" srcset="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/bdd9d8f91da390cdc1d06ef60dc3025f0da1317a_2_690x341.png, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/bdd9d8f91da390cdc1d06ef60dc3025f0da1317a_2_1035x511.png 1.5x, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/bdd9d8f91da390cdc1d06ef60dc3025f0da1317a_2_1380x682.png 2x" data-dominant-color="1B1B1B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1617×801 144 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>I did manage to successfully fetch the page on Tele2 once.</p>
+<p>If you use TLS Record Fragmentation, you can successfully, and consistently fetch the page:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/8b80cabdb87487edc732001dc3f0d5b1b4835629.png" data-download-href="https://ntc.party/uploads/default/8b80cabdb87487edc732001dc3f0d5b1b4835629" title="image"><img src="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/8b80cabdb87487edc732001dc3f0d5b1b4835629_2_690x276.png" alt="image" data-base62-sha1="jU6iQ99s0n3hc9Mj2t3Q0QucQKR" width="690" height="276" srcset="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/8b80cabdb87487edc732001dc3f0d5b1b4835629_2_690x276.png, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/8b80cabdb87487edc732001dc3f0d5b1b4835629_2_1035x414.png 1.5x, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/8b80cabdb87487edc732001dc3f0d5b1b4835629_2_1380x552.png 2x" data-dominant-color="1F1F1F"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1617×649 123 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-05-17T20:47:40.367Z</td></tr><tr><td>ValdikSS</td><td><p>3 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142/124">Обсуждение: неработоспособность ShadowSocks (30.10.2023 +)</a></p></td><td>2024-05-18T16:19:28.160Z</td></tr><tr><td>ValdikSS</td><td><p>Outline SDK <code>fetch</code> tool produces small TLS ClientHello of 329 bytes, the first encrypted Shadowsocks packet is less than 411 bytes, that’s why you don’t see the block.</p>
+<aside class="quote no-group quote-modified" data-username="ValdikSS" data-post="2" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Found at least one blocking pattern (for TCP):</p>
+<ol>
+<li>The client sends three packets, each containing 411+ random bytes</li>
+</ol>
+</blockquote>
+</aside>
+<p><code>$ go run github.com/Jigsaw-Code/outline-sdk/x/examples/fetch@latest -transport 'socks5://127.0.0.1:33333|ss://xxx…' https://ifconfig.co</code></p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/c1c29f6b736a4a6946e8963015c06a9800d01232.png" data-download-href="https://ntc.party/uploads/default/c1c29f6b736a4a6946e8963015c06a9800d01232" title="Screenshot_20240518_194603-fs8"><img src="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/c1c29f6b736a4a6946e8963015c06a9800d01232_2_690x204.png" alt="Screenshot_20240518_194603-fs8" data-base62-sha1="rE580bjp1b0dJWku6aKB9vqLZtM" width="690" height="204" srcset="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/c1c29f6b736a4a6946e8963015c06a9800d01232_2_690x204.png, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/c1c29f6b736a4a6946e8963015c06a9800d01232_2_1035x306.png 1.5x, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/c1c29f6b736a4a6946e8963015c06a9800d01232_2_1380x408.png 2x" data-dominant-color="CBC6D5"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20240518_194603-fs8</span><span class="informations">1518×450 78 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>You can use your http2transport + curl to trigger the block.</p>
+<pre><code class="lang-auto">$ go run github.com/Jigsaw-Code/outline-sdk/x/examples/http2transport@latest -transport 'socks5://127.0.0.1:33333|ss://xxx…' -localAddr 127.0.0.1:44111 &amp;
+
+$ curl -x 127.0.0.1:44111 https://ifconfig.co
+curl: (56) Failure when receiving data from the peer
+</code></pre>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/f0b99e70a0ba87dcf5c91a899bc1f2bb78ec2632.png" data-download-href="https://ntc.party/uploads/default/f0b99e70a0ba87dcf5c91a899bc1f2bb78ec2632" title="Screenshot_20240518_195026-fs8"><img src="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/f0b99e70a0ba87dcf5c91a899bc1f2bb78ec2632_2_690x201.png" alt="Screenshot_20240518_195026-fs8" data-base62-sha1="ylyhkHIBTlQIn00uAijqMtehmFQ" width="690" height="201" srcset="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/f0b99e70a0ba87dcf5c91a899bc1f2bb78ec2632_2_690x201.png, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/f0b99e70a0ba87dcf5c91a899bc1f2bb78ec2632_2_1035x301.png 1.5x, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/f0b99e70a0ba87dcf5c91a899bc1f2bb78ec2632_2_1380x402.png 2x" data-dominant-color="C9C5D4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20240518_195026-fs8</span><span class="informations">1466×428 77.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-05-18T16:51:55.097Z</td></tr><tr><td>fortuna</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="29" data-topic="7776" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Outline SDK <code>fetch</code> tool produces small TLS ClientHello of 329 bytes, the first encrypted Shadowsocks packet is less than 411 bytes, that’s why you don’t see the block.</p>
+</blockquote>
+</aside>
+<p>Note that in my tests I was actually fetching HTTP with a padding header to make the first packet larger with <code>-H "Padding: $(printf %800s | tr ' ' 'X')"</code>.</p>
+<p>I need to check the fetch tool again to make sure the first packet is indeed large. I tested it before with the http2proxy tool and that trick to make the first packet bigger worked after I made a fix to the code (some issue with the HTTP client buffering).</p></td><td>2024-05-18T17:12:57.656Z</td></tr><tr><td>fortuna</td><td><p>I was actually able to reproduce this same blocking on MTS above. Did you find any inconsistency with my findings?</p></td><td>2024-05-18T17:18:43.176Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="fortuna" data-post="30" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/fortuna/48/150_2.png" class="avatar"> fortuna:</div>
+<blockquote>
+<p>Note that in my tests I was actually fetching HTTP with a padding header</p>
+</blockquote>
+</aside>
+<p>That doesn’t work, the censor also expects the replies to be of ServerHello/Certificate template based on packet sizes and amount of reply packets.<br>
+There should be at least two reply packets for one request packet, and also another request packet.<br>
+In other words, the filter expects:</p>
+<ol>
+<li>Client→Server packet with 411+ bytes length (ClientHello)</li>
+<li>Server→Client packet (ServerHello, 100+ bytes of length AFAIK, don’t have notes on hand)</li>
+<li>Another Server→Client packet (Certificate + ServerKeyExchange continuation)</li>
+<li>Client→Server packet (HTTP GET)</li>
+</ol>
+<aside class="quote no-group" data-username="fortuna" data-post="31" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/fortuna/48/150_2.png" class="avatar"> fortuna:</div>
+<blockquote>
+<p>Did you find any inconsistency with my findings?</p>
+</blockquote>
+</aside>
+<p>Yes — the block is enabled on all cellular operators and all ports.</p></td><td>2024-05-18T17:20:07.966Z</td></tr><tr><td>ValdikSS</td><td><p>A post was merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142/127">Обсуждение: неработоспособность ShadowSocks (30.10.2023 +)</a></p></td><td>2024-05-18T22:04:04.884Z</td></tr><tr><td>fortuna</td><td><p>So it’s not only the first packet. That is helpful.<br>
+I still don’t fully understand the pattern though.</p>
+<p>I was able to reproduce the blocking with HTTPS. However, it doesn’t not always happen. DO port 5555 worked on Bee Line and DO port 443 worked on Tele2.</p>
+<p>Here are my results:</p>
+<pre data-code-wrap="txt"><code class="lang-txt">socks_port  client_isp      url                    server_net      port   exit_code  ok    output
+33333       MTS PJSC        http://ipinfo.io/org   Digital Ocean   443    28         ❌    curl: (28) Operation timed out after 10002 milliseconds with 0 bytes received
+33334       PJSC MegaFon    http://ipinfo.io/org   Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33335       Tele2 Russia    http://ipinfo.io/org   Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  http://ipinfo.io/org   Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33333       MTS PJSC        http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33334       PJSC MegaFon    http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33335       Tele2 Russia    http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33333       MTS PJSC        http://ipinfo.io/org   Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33334       PJSC MegaFon    http://ipinfo.io/org   Hetzner Online  58987  52         ❌    curl: (52) Empty reply from server
+33335       Tele2 Russia    http://ipinfo.io/org   Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33336       Bee Line Cable  http://ipinfo.io/org   Hetzner Online  58987  28         ❌    curl: (28) Operation timed out after 10006 milliseconds with 0 bytes received
+33333       MTS PJSC        http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33334       PJSC MegaFon    http://ipinfo.io/org   Vultr           20888  52         ❌    curl: (52) Empty reply from server
+33335       Tele2 Russia    http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33336       Bee Line Cable  http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33333       MTS PJSC        https://ipinfo.io/org  Digital Ocean   443    28         ❌    curl: (28) Connection timed out after 10005 milliseconds
+33334       PJSC MegaFon    https://ipinfo.io/org  Digital Ocean   443    28         ❌    curl: (28) Connection timed out after 10005 milliseconds
+33335       Tele2 Russia    https://ipinfo.io/org  Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  https://ipinfo.io/org  Digital Ocean   443    56         ❌    curl: (56) Failure when receiving data from the peer
+33333       MTS PJSC        https://ipinfo.io/org  Digital Ocean   5555   56         ❌    curl: (56) Failure when receiving data from the peer
+33334       PJSC MegaFon    https://ipinfo.io/org  Digital Ocean   5555   56         ❌    curl: (56) Recv failure: Connection reset by peer
+33335       Tele2 Russia    https://ipinfo.io/org  Digital Ocean   5555   56         ❌    curl: (56) Failure when receiving data from the peer
+33336       Bee Line Cable  https://ipinfo.io/org  Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33333       MTS PJSC        https://ipinfo.io/org  Hetzner Online  58987  56         ❌    curl: (56) Failure when receiving data from the peer
+33334       PJSC MegaFon    https://ipinfo.io/org  Hetzner Online  58987  35         ❌    curl: (35) LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to ipinfo.io:443 
+33335       Tele2 Russia    https://ipinfo.io/org  Hetzner Online  58987  56         ❌    curl: (56) Recv failure: Connection reset by peer
+33336       Bee Line Cable  https://ipinfo.io/org  Hetzner Online  58987  28         ❌    curl: (28) Connection timed out after 10003 milliseconds
+33333       MTS PJSC        https://ipinfo.io/org  Vultr           20888  56         ❌    curl: (56) Failure when receiving data from the peer
+33334       PJSC MegaFon    https://ipinfo.io/org  Vultr           20888  35         ❌    curl: (35) LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to ipinfo.io:443 
+33335       Tele2 Russia    https://ipinfo.io/org  Vultr           20888  56         ❌    curl: (56) Recv failure: Connection reset by peer
+33336       Bee Line Cable  https://ipinfo.io/org  Vultr           20888  56         ❌    curl: (56) Failure when receiving data from the peer
+</code></pre>
+<details>
+<summary>
+Here is the script</summary>
+<pre data-code-wrap="bash"><code class="lang-bash">for socks_port in 33333 33334 33335 33336; do
+  isp="$(curl -s --show-error -p -x 127.0.0.1:1080 --max-time 10 --proxy-header "Transport: socks5://127.0.0.1:$socks_port" https://checker.soax.com/api/ipinfo | jq -r .data.isp)"
+  for url in http://ipinfo.io/org https://ipinfo.io/org; do
+    for key in $KEY $KEY5555 $KEY_HETZNER $KEY_VULTR; do
+      server_net="$(curl -s --show-error -p -x 127.0.0.1:1080 --max-time 10 --proxy-header "Transport: $key" https://checker.soax.com/api/ipinfo | jq -r .data.isp)"
+      server_port=$(sed -En 's|.*:([0-9]+).*|\1|p'&lt;&lt;&lt; "$key")
+      output="$(curl -s --show-error -p -x 127.0.0.1:1080 --max-time 10 --proxy-header "Transport: socks5://127.0.0.1:$socks_port|$key" "$url" 2&gt;&amp;1)"
+      exit_code=$?
+      if [[ $exit_code == 0 ]]; then
+        img="✅"
+      else
+        img="❌"
+      fi
+      echo "$socks_port\t$isp\t$url\t$server_net\t$server_port\t$exit_code\t$img\t$output" 
+    done
+  done
+done | tee table.txt
+
+echo "socks_port\tclient_isp\tserver_net\tserver_port\turl\texit_code\tok\toutput\n$(sort -s -k 3,5 -k 1n -t $'\t' &lt; table.txt)" | column -t -s $'\t'
+</code></pre>
+<p>Note that you can pass the transport to the http2proxy via a HTTP header, so you don’t need to restart it for different transports. I started it with</p>
+<pre><code>go run github.com/Jigsaw-Code/outline-sdk/x/examples/http2transport@latest
+</code></pre>
+</details></td><td>2024-05-19T06:56:42.986Z</td></tr><tr><td>fortuna</td><td><p>If I use a simple TCP split on byte 5 (<code>split:5</code>), results are mostly the same, except that a couple more cases are successful with HTTPS (4 vs 2 without the split).</p>
+<pre><code class="lang-plaintext">socks_port  client_isp      url                    server_net      port   exit_code  ok    output
+33333       MTS PJSC        http://ipinfo.io/org   Digital Ocean   443    28         ❌    curl: (28) Operation timed out after 10005 milliseconds with 0 bytes received
+33334       PJSC MegaFon    http://ipinfo.io/org   Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33335       Tele2 Russia    http://ipinfo.io/org   Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  http://ipinfo.io/org   Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33333       MTS PJSC        http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33334       PJSC MegaFon    http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33335       Tele2 Russia    http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33333       MTS PJSC        http://ipinfo.io/org   Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33334       PJSC MegaFon    http://ipinfo.io/org   Hetzner Online  58987  52         ❌    curl: (52) Empty reply from server
+33335       Tele2 Russia    http://ipinfo.io/org   Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33336       Bee Line Cable  http://ipinfo.io/org   Hetzner Online  58987  28         ❌    curl: (28) Operation timed out after 10005 milliseconds with 0 bytes received
+33333       MTS PJSC        http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33334       PJSC MegaFon    http://ipinfo.io/org   Vultr           20888  52         ❌    curl: (52) Empty reply from server
+33335       Tele2 Russia    http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33336       Bee Line Cable  http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33333       MTS PJSC        https://ipinfo.io/org  Digital Ocean   443    28         ❌    curl: (28) Connection timed out after 10006 milliseconds
+33334       PJSC MegaFon    https://ipinfo.io/org  Digital Ocean   443    56         ❌    curl: (56) Failure when receiving data from the peer
+33335       Tele2 Russia    https://ipinfo.io/org  Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  https://ipinfo.io/org  Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33333       MTS PJSC        https://ipinfo.io/org  Digital Ocean   5555   56         ❌    curl: (56) Failure when receiving data from the peer
+33334       PJSC MegaFon    https://ipinfo.io/org  Digital Ocean   5555   56         ❌    curl: (56) Failure when receiving data from the peer
+33335       Tele2 Russia    https://ipinfo.io/org  Digital Ocean   5555   56         ❌    curl: (56) Failure when receiving data from the peer
+33336       Bee Line Cable  https://ipinfo.io/org  Digital Ocean   5555   56         ❌    curl: (56) Recv failure: Connection reset by peer
+33333       MTS PJSC        https://ipinfo.io/org  Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33334       PJSC MegaFon    https://ipinfo.io/org  Hetzner Online  58987  35         ❌    curl: (35) LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to ipinfo.io:443 
+33335       Tele2 Russia    https://ipinfo.io/org  Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33336       Bee Line Cable  https://ipinfo.io/org  Hetzner Online  58987  28         ❌    curl: (28) Connection timed out after 10003 milliseconds
+33333       MTS PJSC        https://ipinfo.io/org  Vultr           20888  56         ❌    curl: (56) Failure when receiving data from the peer
+33334       PJSC MegaFon    https://ipinfo.io/org  Vultr           20888  35         ❌    curl: (35) LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to ipinfo.io:443 
+33335       Tele2 Russia    https://ipinfo.io/org  Vultr           20888  56         ❌    curl: (56) Failure when receiving data from the peer
+33336       Bee Line Cable  https://ipinfo.io/org  Vultr           20888  56         ❌    curl: (56) Recv failure: Connection reset by peer
+</code></pre></td><td>2024-05-19T07:16:12.377Z</td></tr><tr><td>fortuna</td><td><p><a href="https://www.reddit.com/r/outlinevpn/wiki/index/prefixing/">Prefixes</a> seem to really help.</p>
+<p>Using  <code>POST%20</code>, almost all connections succeeded. Tele2 was completely successful. Megafon had only one HTTP timeout with DigitalOcean 443. On MTS, HTTP and HTTPS timed out with DigitalOcean 443. On Bee Line HTTP and HTTP timed out on Hetzner.</p>
+<p>This reinforces that the blocking is based on random-looking traffic.</p>
+<p>Results, sorted by ISP, server network and port:</p>
+<pre><code class="lang-plaintext">socks_port  client_isp      url                    server_net      port   exit_code  ok    output
+33333       MTS PJSC        http://ipinfo.io/org   Digital Ocean   443    28         ❌    curl: (28) Operation timed out after 10006 milliseconds with 0 bytes received
+33333       MTS PJSC        https://ipinfo.io/org  Digital Ocean   443    28         ❌    curl: (28) Connection timed out after 10005 milliseconds
+33333       MTS PJSC        http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33333       MTS PJSC        https://ipinfo.io/org  Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33333       MTS PJSC        http://ipinfo.io/org   Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33333       MTS PJSC        https://ipinfo.io/org  Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33333       MTS PJSC        http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33333       MTS PJSC        https://ipinfo.io/org  Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33334       PJSC MegaFon    http://ipinfo.io/org   Digital Ocean   443    28         ❌    curl: (28) Operation timed out after 10003 milliseconds with 0 bytes received
+33334       PJSC MegaFon    https://ipinfo.io/org  Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33334       PJSC MegaFon    http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33334       PJSC MegaFon    https://ipinfo.io/org  Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33334       PJSC MegaFon    http://ipinfo.io/org   Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33334       PJSC MegaFon    https://ipinfo.io/org  Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33334       PJSC MegaFon    http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33334       PJSC MegaFon    https://ipinfo.io/org  Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33335       Tele2 Russia    http://ipinfo.io/org   Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33335       Tele2 Russia    https://ipinfo.io/org  Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33335       Tele2 Russia    http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33335       Tele2 Russia    https://ipinfo.io/org  Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33335       Tele2 Russia    http://ipinfo.io/org   Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33335       Tele2 Russia    https://ipinfo.io/org  Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33335       Tele2 Russia    http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33335       Tele2 Russia    https://ipinfo.io/org  Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33336       Bee Line Cable  http://ipinfo.io/org   Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  https://ipinfo.io/org  Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  https://ipinfo.io/org  Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  http://ipinfo.io/org   Hetzner Online  58987  28         ❌    curl: (28) Operation timed out after 10003 milliseconds with 0 bytes received
+33336       Bee Line Cable  https://ipinfo.io/org  Hetzner Online  58987  28         ❌    curl: (28) Connection timed out after 10003 milliseconds
+33336       Bee Line Cable  http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33336       Bee Line Cable  https://ipinfo.io/org  Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+</code></pre>
+<p>I got the exact same results when using a TLS prefix that looks like a fragmented record (<code>	%16%03%01%00%C2%A8%01%01</code>).</p>
+<p>When using the DNS over TCP prefix (<code>%05%C3%9C_%C3%A0%01%20</code>), the results were worse, but still better than no prefix. It seems it triggered the HTTPS blocking in some cases, but not all cases. This can help figure out the detection rules.</p>
+<p>Results:</p>
+<pre><code class="lang-plaintext">socks_port  client_isp      url                    server_net      port   exit_code  ok    output
+33333       MTS PJSC        http://ipinfo.io/org   Digital Ocean   443    28         ❌    curl: (28) Operation timed out after 10005 milliseconds with 0 bytes received
+33333       MTS PJSC        https://ipinfo.io/org  Digital Ocean   443    28         ❌    curl: (28) Connection timed out after 10004 milliseconds
+33333       MTS PJSC        http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33333       MTS PJSC        https://ipinfo.io/org  Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33333       MTS PJSC        http://ipinfo.io/org   Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33333       MTS PJSC        https://ipinfo.io/org  Hetzner Online  58987  56         ❌    curl: (56) Failure when receiving data from the peer
+33333       MTS PJSC        http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33333       MTS PJSC        https://ipinfo.io/org  Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33334       PJSC MegaFon    http://ipinfo.io/org   Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33334       PJSC MegaFon    https://ipinfo.io/org  Digital Ocean   443    56         ❌    curl: (56) Failure when receiving data from the peer
+33334       PJSC MegaFon    http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33334       PJSC MegaFon    https://ipinfo.io/org  Digital Ocean   5555   56         ❌    curl: (56) Recv failure: Connection reset by peer
+33334       PJSC MegaFon    http://ipinfo.io/org   Hetzner Online  58987  52         ❌    curl: (52) Empty reply from server
+33334       PJSC MegaFon    https://ipinfo.io/org  Hetzner Online  58987  35         ❌    curl: (35) LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to ipinfo.io:443 
+33334       PJSC MegaFon    http://ipinfo.io/org   Vultr           20888  52         ❌    curl: (52) Empty reply from server
+33334       PJSC MegaFon    https://ipinfo.io/org  Vultr           20888  35         ❌    curl: (35) LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to ipinfo.io:443 
+33335       Tele2 Russia    http://ipinfo.io/org   Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33335       Tele2 Russia    https://ipinfo.io/org  Digital Ocean   443    56         ❌    curl: (56) Failure when receiving data from the peer
+33335       Tele2 Russia    http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33335       Tele2 Russia    https://ipinfo.io/org  Digital Ocean   5555   56         ❌    curl: (56) Failure when receiving data from the peer
+33335       Tele2 Russia    http://ipinfo.io/org   Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33335       Tele2 Russia    https://ipinfo.io/org  Hetzner Online  58987  0          ✅    AS24940 Hetzner Online GmbH
+33335       Tele2 Russia    http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33335       Tele2 Russia    https://ipinfo.io/org  Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33336       Bee Line Cable  http://ipinfo.io/org   Digital Ocean   443    0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  https://ipinfo.io/org  Digital Ocean   443    56         ❌    curl: (56) Failure when receiving data from the peer
+33336       Bee Line Cable  http://ipinfo.io/org   Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  https://ipinfo.io/org  Digital Ocean   5555   0          ✅    AS14061 DigitalOcean, LLC
+33336       Bee Line Cable  http://ipinfo.io/org   Hetzner Online  58987  28         ❌    curl: (28) Operation timed out after 10001 milliseconds with 0 bytes received
+33336       Bee Line Cable  https://ipinfo.io/org  Hetzner Online  58987  28         ❌    curl: (28) Connection timed out after 10002 milliseconds
+33336       Bee Line Cable  http://ipinfo.io/org   Vultr           20888  0          ✅    AS20473 The Constant Company, LLC
+33336       Bee Line Cable  https://ipinfo.io/org  Vultr           20888  56         ❌    curl: (56) Failure when receiving data from the peer
+</code></pre></td><td>2024-05-19T07:44:38.144Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>I also tried using the <code>POST%20</code> prefix and it worked. ISP: Tattelecom.</p></td><td>2024-05-19T15:21:52.170Z</td></tr><tr><td>fortuna</td><td><p>FY, I put the results on the following Gist, which allow you to more easily see all the results and filter by ISP, server network, HTTPS, etc:</p><aside class="onebox githubgist" data-onebox-src="https://gist.github.com/fortuna/4bec28d1e4fe17d8a7428a0f6f3b99fc">
+  <header class="source">
+
+      <a href="https://gist.github.com/fortuna/4bec28d1e4fe17d8a7428a0f6f3b99fc" target="_blank" rel="noopener">gist.github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://gist.github.com/fortuna/4bec28d1e4fe17d8a7428a0f6f3b99fc" target="_blank" rel="noopener">https://gist.github.com/fortuna/4bec28d1e4fe17d8a7428a0f6f3b99fc</a></h4>
+
+  <h5>$key.tsv</h5>
+  <pre><code class="TSV">socks_port	client_isp	url	server_net	server_port	exit_code	ok	output
+33333	MTS PJSC	http://ipinfo.io/org	Digital Ocean	443	28	❌	curl: (28) Operation timed out after 10004 milliseconds with 0 bytes received
+33333	MTS PJSC	https://ipinfo.io/org	Digital Ocean	443	56	❌	curl: (56) Failure when receiving data from the peer
+33334	PJSC MegaFon	http://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33334	PJSC MegaFon	https://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33335	Tele2 Russia	http://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33335	Tele2 Russia	https://ipinfo.io/org	Digital Ocean	443	56	❌	curl: (56) Failure when receiving data from the peer
+33336	Bee Line Cable	http://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33336	Bee Line Cable	https://ipinfo.io/org	Digital Ocean	443	56	❌	curl: (56) Failure when receiving data from the peer
+33333	MTS PJSC	http://ipinfo.io/org	Digital Ocean	5555	0	✅	AS14061 DigitalOcean, LLC</code></pre>
+   This file has been truncated. <a href="https://gist.github.com/fortuna/4bec28d1e4fe17d8a7428a0f6f3b99fc" target="_blank" rel="noopener">show original</a>
+  <h5>$key?prefix=%13%03%03%3F.tsv</h5>
+  <pre><code class="TSV">socks_port	client_isp	url	server_net	server_port	exit_code	ok	output
+33333	MTS PJSC	http://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33333	MTS PJSC	https://ipinfo.io/org	Digital Ocean	443	28	❌	curl: (28) Connection timed out after 10002 milliseconds
+33334	PJSC MegaFon	http://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33334	PJSC MegaFon	https://ipinfo.io/org	Digital Ocean	443	56	❌	curl: (56) Failure when receiving data from the peer
+33335	Tele2 Russia	http://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33335	Tele2 Russia	https://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33336	Bee Line Cable	http://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33336	Bee Line Cable	https://ipinfo.io/org	Digital Ocean	443	56	❌	curl: (56) Failure when receiving data from the peer
+33333	MTS PJSC	http://ipinfo.io/org	Digital Ocean	5555	0	✅	AS14061 DigitalOcean, LLC</code></pre>
+   This file has been truncated. <a href="https://gist.github.com/fortuna/4bec28d1e4fe17d8a7428a0f6f3b99fc" target="_blank" rel="noopener">show original</a>
+  <h5>$key?prefix=%16%03%01%00%C2%A8%01%01.tsv</h5>
+  <pre><code class="TSV">socks_port	client_isp	url	server_net	server_port	exit_code	ok	output
+33333	MTS PJSC	http://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33333	MTS PJSC	https://ipinfo.io/org	Digital Ocean	443	28	❌	curl: (28) Connection timed out after 10004 milliseconds
+33334	PJSC MegaFon	http://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33334	PJSC MegaFon	https://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33335	Tele2 Russia	http://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33335	Tele2 Russia	https://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33336	Bee Line Cable	http://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33336	Bee Line Cable	https://ipinfo.io/org	Digital Ocean	443	0	✅	AS14061 DigitalOcean, LLC
+33333	MTS PJSC	http://ipinfo.io/org	Digital Ocean	5555	0	✅	AS14061 DigitalOcean, LLC</code></pre>
+   This file has been truncated. <a href="https://gist.github.com/fortuna/4bec28d1e4fe17d8a7428a0f6f3b99fc" target="_blank" rel="noopener">show original</a>
+
+<p>
+    There are more than three files. <a href="https://gist.github.com/fortuna/4bec28d1e4fe17d8a7428a0f6f3b99fc" target="_blank" rel="noopener">show original</a>
+</p>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p><div class="lightbox-wrapper"><a class="lightbox" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/874b9023d7ced004bdbf7a3a9c177e00fe5bb818.png" data-download-href="https://ntc.party/uploads/default/874b9023d7ced004bdbf7a3a9c177e00fe5bb818" title="image"><img src="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/874b9023d7ced004bdbf7a3a9c177e00fe5bb818_2_453x500.png" alt="image" data-base62-sha1="jiSlNwdD5eFeO1wv9tdcXL26X9K" width="453" height="500" srcset="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/874b9023d7ced004bdbf7a3a9c177e00fe5bb818_2_453x500.png, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/874b9023d7ced004bdbf7a3a9c177e00fe5bb818_2_679x750.png 1.5x, неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/874b9023d7ced004bdbf7a3a9c177e00fe5bb818_2_906x1000.png 2x" data-dominant-color="F2F3F4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1352×1490 404 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-05-19T16:01:44.325Z</td></tr><tr><td>qwelias(Ilia Baryshnikov)</td><td><p>had similar symptoms on Tele2 about a month ago, fixed by enabling v2ray plugin</p></td><td>2024-05-20T02:52:31.543Z</td></tr><tr><td>fortuna</td><td><p>Here is a better dataset with all the measurements in one table:</p><aside class="onebox githubgist" data-onebox-src="https://gist.github.com/fortuna/41848697f0be93b2c2e222cd83096fcb">
+  <header class="source">
+
+      <a href="https://gist.github.com/fortuna/41848697f0be93b2c2e222cd83096fcb" target="_blank" rel="noopener">gist.github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://gist.github.com/fortuna/41848697f0be93b2c2e222cd83096fcb" target="_blank" rel="noopener">https://gist.github.com/fortuna/41848697f0be93b2c2e222cd83096fcb</a></h4>
+
+  <h5>merge_results.tsv</h5>
+  <pre><code class="TSV">strategy	server_net	server_port	isp	url_scheme	exit_code	img	error
+$key	Digital Ocean	443	Bee Line Cable	http	0	✅	
+$key	Digital Ocean	443	Bee Line Cable	https	0	✅	
+$key	Digital Ocean	443	MTS PJSC	http	28	❌	curl: (28) Operation timed out after 10006 milliseconds with 0 bytes received
+$key	Digital Ocean	443	MTS PJSC	https	28	❌	curl: (28) Connection timed out after 10005 milliseconds
+$key	Digital Ocean	443	PJSC MegaFon	http	0	✅	
+$key	Digital Ocean	443	PJSC MegaFon	https	56	❌	curl: (56) Failure when receiving data from the peer
+$key	Digital Ocean	443	Tele2 Russia	http	0	✅	
+$key	Digital Ocean	443	Tele2 Russia	https	0	✅	
+$key	Digital Ocean	5555	Bee Line Cable	http	0	✅	</code></pre>
+   This file has been truncated. <a href="https://gist.github.com/fortuna/41848697f0be93b2c2e222cd83096fcb" target="_blank" rel="noopener">show original</a>
+  <h5>test.sh</h5>
+  <pre><code class="Shell">strategies=(
+'$key'
+'$key?prefix=%13%03%03%3F'
+'$key?prefix=%16%03%01%00%C2%A8%01%01'
+'$key?prefix=FOOBAR%20'
+'$key?prefix=POST%20'
+'split:300|$key'
+'split:5|$key'
+'split:5|split:300|$key'
+)</code></pre>
+   This file has been truncated. <a href="https://gist.github.com/fortuna/41848697f0be93b2c2e222cd83096fcb" target="_blank" rel="noopener">show original</a>
+
+<p>
+</p>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>And here is the decision tree based on that dataset that characterizes the blocking (open in a new tab):</p>
+<p><img src="https://ntc.party/uploads/default/original/2X/7/7b20181ba743224e32b9f0249dcafaa579f13e64.svg" alt="decision_tree_comparison_optimized_multiline_no_prefix" data-base62-sha1="hzduoKXRBCJwee4UYUS6VwNKHwo" width="690" height="101"></p></td><td>2024-05-21T00:55:00.472Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Судя по</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://dpidetector.org/ru/">
+  <header class="source">
+      <img src="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/5bdeef829d15e6817b2a593b8ef3b8cdff7e7c9d.png" class="site-icon" data-dominant-color="14F32B" width="500" height="500">
+
+      <a href="https://dpidetector.org/ru/" target="_blank" rel="noopener">dpidetector.org</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://dpidetector.org/ru/" target="_blank" rel="noopener">DPI detector</a></h3>
+
+  <p>DPI detector - это инструмент для исследования интернет цензуры, который позволяет отслеживать блокировку тех или иных протоколов и инструментов.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>блок мешающий работе SS откатили. На T2 так же работает, подтверждаю</p></td><td>2024-05-22T09:31:33.903Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="Anonimno" data-post="41" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a88e57/48.png" class="avatar"> Anonimno:</div>
+<blockquote>
+<p>блок мешающий работе SS откатили.</p>
+</blockquote>
+</aside>
+<p>И снова включили, поведение аналогичное, с N-го раза ресурсы открываются.</p></td><td>2024-05-28T12:45:37.523Z</td></tr><tr><td>altea(Ирина)</td><td><p>Сегодня днем проявилось на проводном ЭрТелеком, сайты открываются с четвертого-пятого пинка. В telegram текстовые сообщения идут без проблем, но тормозит загрузка медиа.<br>
+Перешла на VLESS пока, с ним все хорошо.</p></td><td>2024-05-28T14:03:19.939Z</td></tr><tr><td>ValdikSS</td><td><p>На мобильных операторах у меня не проявляется, но теперь проявляется на:</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>ISP</th>
+<th>AS</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Orenburg</td>
+</tr>
+<tr>
+<td>JSC Ufanet</td>
+<td>AS60095</td>
+<td>Nizhny Novgorod</td>
+</tr>
+<tr>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Perm region</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2024-05-28T16:34:28.683Z</td></tr><tr><td>ValdikSS</td><td><p>A post was merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142/135">Обсуждение: неработоспособность ShadowSocks (30.10.2023 +)</a></p></td><td>2024-05-28T17:07:20.735Z</td></tr><tr><td>altea(Ирина)</td><td><p>Днем на проводном эртелеком: SS и SS2022, nekoray под windows, hiddify next на дебиане и hiddify next на андроид (через вайфай) - до двух разных серверов на digital ocean (мой и коллеги). На серверах xray, поднятый по инструкции с хабра. Взяла первый попавшийся рабочий носок с 4пда - та же картина, вроде работает, но через три раза на четвертый, так что вроде блок не по хостингу только.</p>
+<p>Вечером на проводном Ростелеком: те же клиенты, тот же сервак (уже только мой). SS не пашет, VLESS (xtls-REALITY) нормально.<br>
+Регион Нижний Новгород</p>
+<p>Да, на мобильных SS на высоких портах продолжал работать все это время</p></td><td>2024-05-28T16:45:55.767Z</td></tr><tr><td>ValdikSS</td><td><p>A post was merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142/136">Обсуждение: неработоспособность ShadowSocks (30.10.2023 +)</a></p></td><td>2024-05-28T17:07:41.251Z</td></tr><tr><td>basososas</td><td><div class="md-table">
+<table>
+<thead>
+<tr>
+<th>ISP</th>
+<th>AS</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JSC Ufanet</td>
+<td>AS24955</td>
+<td>Republic of Bashkortostan</td>
+</tr>
+</tbody>
+</table>
+</div><p>Начали блокировать сегодня. При чем пытаются дропать соединение присылая в ответ <code>[RST, ACK]</code>. Но и настоящий ответ при этом не приходит. Тип шифра кажется значения не имеет.</p>
+<p>Dpidetector в принципе эту информацию подтверждает. Соединение пока что пробивается с нескольких попыток.</p></td><td>2024-05-28T17:38:46.484Z</td></tr><tr><td>ash</td><td><p>Здравствуйте)<br>
+Кемерово, МТС, замедлен до неработоспособности чистый SS-2022, телега тоже, ощущение, что начали “замедлять” все, что не могут распознать. Xtls-reality c VLESS на той же впске работает отлично.</p></td><td>2024-07-26T08:21:54.612Z</td></tr><tr><td>initial_void</td><td><p>Существует и применяется 2 техники блокировок/замедлений разных протоколов и vpn:</p>
+<ol>
+<li>распознавание на лету и принятие решения</li>
+<li>то, что быстро не распозналось на лету как обычные протоколы - попадает в список, откуда потом производится сканирование ендпоинта, куда раньше ходили - и если распознается какой либо вид vpn или протокол на той стороне - сразу блочится ip или port.</li>
+</ol>
+<p>вторая  - самая неприятная блокировка. к ней все и движется. отсюда вы наблюдаете “начало работать” “перестало работать”. То есть они просто обходят ваши vpn ендпоинты потом и блочат.</p>
+<p>В виду всех этих тенденций нужно приступать к разработке обертки протокола vpn с полной эмуляцией другого легитимного протокола. Скажем outline на 443 нужно научить работать как обычный веб сервер ДО определенных кондиций со второны клиента. Например: после 3го get запроса 4й должен быть определенным и тогда сервер перейдет от эмуляции nginx на shadowsocks.<br>
+тоже самое с другими протоколами.<br>
+иными словами, приближается время когда нужно будет заканчивать борьбу за нераспознаваемость протоколов, и начинать борьбу за ложную распознаваемость, мимикрию. потому что они перейдут к тактике “замедлять всё что не можем распознать”. Нужно делать так что бы распознали.</p></td><td>2024-10-01T18:32:37.907Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>Мегафон. Блокируют ноды obfs4<br>
+<a class="attachment" href="неработоспособность-шифрованных-протоколов-shadowsocksvmess-25042024/5JYeADmAlx0OcB49gMRtXste7Pw.pcapng">obfs4_block.pcapng</a> (757,9 КБ)</p></td><td>2024-11-11T09:02:12.963Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>не по ip а конкретно протокол</p></td><td>2024-11-11T09:06:19.481Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>snowflake тоже не работает. Все также проходят несколько пакетов DTLS и зависание</p></td><td>2024-11-11T09:11:37.332Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="tor_master" data-post="52" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/90ced4/48.png" class="avatar"> tor_master:</div>
+<blockquote>
+<p>Мегафон. Блокируют ноды obfs4</p>
+</blockquote>
+</aside>
+<p>Ничего удивительного. obfs4 выглядит как random, так же как shadowsocks, который давно режут на мобильном интернете. И раньше obfs4 покашливал в лог.<br>
+Могу посоветовать забутстрапить tor через чистый интернет и быстро переключиться на obsf4 (чтобы был горячий запуск). Т.к. по наблюдениям секут только bootstrap по размерам пакетов openssl.</p></td><td>2024-11-11T10:36:30.977Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>и чтото с этим планируется делать?. obfs4 позиционировали себя как супер-пупер протокол который никогда не заблокируют. А теперь оказывается у фашистких режимов есть вполне действующие средства.</p></td><td>2024-11-11T10:45:13.166Z</td></tr><tr><td>denium</td><td><p>obfs4 слабенький протокол, режется белым списком протоколов. Попробуйте другие более современные, которые маскируются под разрешённые.</p></td><td>2024-11-11T10:46:42.655Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>какой snowflake так же не работает</p></td><td>2024-11-11T10:47:25.527Z</td></tr><tr><td>denium</td><td><p>webtunnel попробуйте.</p></td><td>2024-11-11T10:48:18.981Z</td></tr><tr><td>anon9001(anon)</td><td><p>Ему уже 10 лет. Тогда он был расчитан на то что неизвестный и до того как цензоры в китае научились блочить нойз. Это сам факт нойза. “Не правильно ведешь себя в тюрьме, слишком вызывающе ходишь. Зэки тебя нагнут если не наденешь ватник.”</p>
+<p>Сам разраб сказал что obfs4 говно. Даже ванильные мосты сейчас лучше работают.</p></td><td>2024-11-11T10:49:44.658Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>ванильные мосты работают ровно 1 час. Они их блочат по ip</p></td><td>2024-11-11T10:51:42.008Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>webtunnel вообще не работает</p></td><td>2024-11-11T10:53:04.939Z</td></tr><tr><td>anon9001(anon)</td><td><p>Сам фронт мог войти в оффлайн, донеры же не будут гонять эти мосты постоянно (и слава богу) там ротация может быть, особенно если они видят что траффик больше не идет = заблочились. Ты дигом и курлом проверь домен сначала.</p></td><td>2024-11-11T10:57:46.950Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>На проводных провайдерах ничего не блокируют. блокировка конкретно тор идет с мегафона и мтс</p></td><td>2024-11-11T11:00:40.718Z</td></tr><tr><td>denium</td><td><p>Да, серьёзно за tor взялись. Но оно и понятно, в голове тех, кто затевает блокировки, это самый популярный шпионский инструмент <img src="https://ntc.party/images/emoji/twitter/grin.png?v=12" title=":grin:" class="emoji" alt=":grin:" loading="lazy" width="20" height="20">. Ну, попробуйте yggdrasil мосты.</p></td><td>2024-11-11T11:00:56.419Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>у меня симки мтс мегафон</p></td><td>2024-11-11T11:01:49.438Z</td></tr><tr><td>anon9001(anon)</td><td><p>На мобильных очень не любят webrtc из-за разговорного траффика. Тор тут не причем. Тариф при том</p></td><td>2024-11-11T11:02:46.927Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>тоесть о тупо рубят webrtc трафик?</p></td><td>2024-11-11T11:03:42.836Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>но obfs4 работают по другому протоколу</p></td><td>2024-11-11T11:04:28.665Z</td></tr><tr><td>anon9001(anon)</td><td><p>Могут как и битторрент. Для них траффик как золото, они на нем выгоду везде ищут. Даже с безлимитами будут тебя замедлять</p></td><td>2024-11-11T11:04:37.055Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>здесь уже ответили что obfs4 это говно</p></td><td>2024-11-11T11:07:47.365Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>фашисткие режимы нам не дадут свободно общатся</p></td><td>2024-11-11T11:08:59.754Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="tor_master" data-post="61" data-topic="7776" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/90ced4/48.png" class="avatar"> tor_master:</div>
+<blockquote>
+<p>ванильные мосты работают ровно 1 час. Они их блочат по ip</p>
+</blockquote>
+</aside>
+<p>Мосты как блокируются, так и разблокируются - постоянно. Я пользуюсь на паре инсталляций tor-relay-scanner, который раз в час-два подкидывает три десятка свежих обычных доступных релеев в конфиг torrc на маршрутизаторе. Работает с 2022-го года без каких-либо телодвижений, буквально zero maintenance.</p>
+<aside class="quote no-group" data-username="tor_master" data-post="62" data-topic="7776" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/90ced4/48.png" class="avatar"> tor_master:</div>
+<blockquote>
+<p>webtunnel вообще не работает</p>
+</blockquote>
+</aside>
+<p>webtunnel отлично работает - другое дело, что мосты достаточно быстро мрут, и их в целом немного. У меня на мобиле работает без каких-либо проблем, и бутстрапится исключительно быстро. В конфиг насыпано ~10 разных мостов.</p></td><td>2024-11-11T11:23:01.034Z</td></tr><tr><td>denium</td><td><p>В некоторых странах, например Саудовской Аравии, ОАЭ тоже режут webrtc, чтобы звонили через оператора или с разрешённых платных местных сервисов.</p></td><td>2024-11-11T11:23:54.304Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>конфирурацию для webtunnel сообщи я попробую</p></td><td>2024-11-11T11:28:51.713Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>torrc</p></td><td>2024-11-11T11:29:29.335Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="tor_master" data-post="76" data-topic="7776" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/90ced4/48.png" class="avatar"> tor_master:</div>
+<blockquote>
+<p>конфирурацию для webtunnel сообщи я попробую</p>
+</blockquote>
+</aside>
+<p><a href="https://bridges.torproject.org/options" rel="noopener nofollow ugc">https://bridges.torproject.org/options</a> или <a href="http://yq5jjvr7drkjrelzhut7kgclfuro65jjlivyzfmxiq2kyv5lickrl4qd.onion/options" rel="noopener nofollow ugc">http://yq5jjvr7drkjrelzhut7kgclfuro65jjlivyzfmxiq2kyv5lickrl4qd.onion/options</a> в помощь.</p>
+<p>Выбираете там вариант “webtunnel” в ниспадающем списке, забираете два моста, вставляете в список мостов в мобильном или десктопном приложении.</p>
+<p>На десктопе: Settings → Connection → Bridges → Add new bridges<br>
+На андроиде: Configure connection → Config Bridge → Use a Bridge → Provide a Bridge I know</p>
+<p>CLI-клиент:</p>
+<blockquote>
+<p>UseBridges 1<br>
+ClientTransportPlugin webtunnel exec &lt;абсолютный путь до бинарника client&gt;<br>
+Bridge &lt;строка с адресом и параметрами моста, как есть с <a href="http://bridges.torproject.org" rel="noopener nofollow ugc">bridges.torproject.org</a> для варианта webtunnel&gt;</p>
+</blockquote>
+<p>На каждый мост - новая строка “Bridge”.</p></td><td>2024-11-11T11:31:47.286Z</td></tr><tr><td>tor_master(tor_master)</td><td><p>вы мне предлогаете ipv6. IPv6 он есть но там очень серьзные тормоза. там весь травфик идет через брокера</p></td><td>2024-11-11T11:37:08.187Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="tor_master" data-post="79" data-topic="7776" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/90ced4/48.png" class="avatar"> tor_master:</div>
+<blockquote>
+<p>вы мне предлогаете ipv6. IPv6 он есть но там очень серьзные тормоза. там весь травфик идет через брокера</p>
+</blockquote>
+</aside>
+<p>Нет. Эти мосты абсолютно нормально работают через IPv4.</p></td><td>2024-11-11T11:38:06.674Z</td></tr><tr><td>odyxz</td><td><p>Yota. Snowflake перестал работать где-то пару дней назад. Клиент посылает оферы без ответа. Перенастроил на использование AMP cache – работает как и прежде. На торовском форуме не нашёл новости что брокер не работает, возможно какие-то блокировки в сторону <a href="http://cdn77.com" rel="noopener nofollow ugc">cdn77.com</a>.</p></td><td>2024-11-11T12:32:49.035Z</td></tr><tr><td>anon9001(anon)</td><td><p>Похоже со сноуфлейком действительно что-то не то. <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40407" class="inline-onebox" rel="noopener nofollow ugc">Snowflake partially blocked in Russia 2024-11 (#40407) · Issues · The Tor Project / Anti-censorship / Pluggable Transports / Snowflake · GitLab</a></p>
+<p>Сегодня ночью в логе моего демона так же обнажил что целый час демон давал stale connections.</p>
+<details>
+<summary>
+log</summary>
+<p>offer created<br>
+broker rendezvous peer received<br>
+connected<br>
+через ровно 20 секунд<br>
+trying a new proxy: no messages received, closing stale connection</p>
+</details>
+<p>Но мне кажется они добъют тор не этим, а убив брокеров после запрета всех сдн.</p></td><td>2024-11-12T12:32:03.348Z</td></tr><tr><td>denium</td><td><aside class="quote no-group quote-modified" data-username="tor_master" data-post="52" data-topic="7776">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/90ced4/48.png" class="avatar"> tor_master:</div>
+<blockquote>
+<p>Мегафон. Блокируют ноды obfs4 по протоколу.</p>
+</blockquote>
+</aside>
+<p>Йота. Много ретрансмиссий, но всё-же соединяется неспеша.</p></td><td>2024-11-12T14:09:24.746Z</td></tr><tr><td>q1LLa(Vladimir)</td><td><p>Есть у кого-нибудь свежая информация по рабочим префиксам + портам на ShadowSocks (Outline VPN) ?</p></td><td>2024-11-24T20:00:33.034Z</td></tr>
+    </table>
+      </body>
+    </html>

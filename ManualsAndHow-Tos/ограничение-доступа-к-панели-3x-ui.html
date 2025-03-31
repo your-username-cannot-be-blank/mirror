@@ -1,0 +1,109 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>ограничение-доступа-к-панели-3x-ui</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>allula</td><td><p>Решил написать небольшую инструкцию по ограничению доступа к панели 3X-UI. Мне запрещено создавать темы в категории <a href="https://ntc.party/c/manuals/42">Manuals and How-Tos</a>, поэтому выложу сюда. Если модераторы посчитают нужным, то перенесут тему куда надо.</p>
+<p>Понимаю, что досконально описать каждый шаг трудно, поэтому не ставлю перед собой подобной цели. Третий пункт описан чуть подробнее, потому что только он вызвал у меня проблемы.</p>
+<p>Глобально вижу три варианта.</p>
+<details>
+<summary>
+1. Доступ с любого устройства (используется по умолчанию).</summary>
+<p>Панель торчит в сеть, поэтому доступна с любого устройства. Если панель устанавливается через Docker, то имеет следующие настройки:</p>
+<ul>
+<li>логин: <mark><code>admin</code></mark>;</li>
+<li>пароль: <mark><code>admin</code></mark>;</li>
+<li>порт: <mark><code>2053</code></mark>.</li>
+</ul>
+<p>Если панель устанавливается не через Docker, то эти параметры генерируются случайно. Вариант с Docker особо опасен, поэтому обязательно нужно (некоторые из пунктов касаются и случая без Docker):</p>
+<ul>
+<li>поменять <mark>логин</mark> и <mark>пароль</mark>;</li>
+<li>подключить <mark>сертификат</mark> (хватит и самозаверенного);</li>
+<li>поменять <mark>порт</mark> (далее <mark><code>port</code></mark>);</li>
+<li>придумать или сгенерировать случайный <mark>путь</mark> в адресе панели (далее <mark><code>path</code></mark>).</li>
+</ul>
+<p>Если всё сделано правильно, то зайти в панель можно так, где вместо <mark><code>vps_ip</code></mark> нужно подставить адрес вашего сервера:<br>
+<code>https://</code><mark><code>vps_ip</code></mark><code>:</code><mark><code>port</code></mark><code>/</code><mark><code>path</code></mark><code>/panel</code>.</p>
+<p>Чтобы безопасно настроить панель в первый раз, можно:</p>
+<ul>
+<li>воспользоваться следующим пунктом (в этом случае не нужно ограничивать адрес, на котором слушает панель);</li>
+<li>использовать команду <code>x-ui</code> (не работает, если установка была в Docker);</li>
+<li>найти файл <code>x-ui.db</code> и отредактировать руками:<br>
+<code># sqlite3 /etc/x-ui/x-ui.db</code>.<br>
+Возможное расположение файла:
+<ul>
+<li><code>/etc/x-ui/x-ui.db</code> по умолчанию;</li>
+<li><code>/db/x-ui.db</code>, если установка была через Docker и использовалась команда <code>sudo</code> без дополнительных параметров;</li>
+<li><code>.../3x-ui/db/x-ui.db</code>, если установка была через Docker без <code>sudo</code> (вместо троеточия нужно подставить путь до места, куда вы клонировали репозиторий).</li>
+</ul>
+</li>
+</ul>
+</details>
+<details>
+<summary>
+2. Доступ через ssh.</summary>
+<p>Панель слушает только на адресе <mark><code>127.0.0.1</code></mark>, поэтому подключаться нужно через проброс порта по ssh. В этом случае шаги, необходимые в предыдущем пункте, можно не выполнять. Сперва вам нужно выбрать локальный порт (далее <mark><code>local_port</code></mark>), к которому вы будете обращаться.</p>
+<p>Чтобы пробросить порт до панели, нужно использовать соответствующий флаг:<br>
+<code>$ ssh -L </code><mark><code>local_port</code></mark><code>:localhost:</code><mark><code>port</code></mark><code> ...</code>;<br>
+либо, если используете файл <code>~/.ssh/config</code>, добавить в раздел <code>Host</code>:<br>
+<code>LocalForward </code><mark><code>local_port</code></mark><code> localhost:</code><mark><code>port</code></mark>.</p>
+<p>В этом случае зайти в панель можно так:<br>
+<code>localhost:</code><mark><code>local_port</code></mark><code>/panel</code>;<br>
+либо, если вы подключили сертификат и поменяли путь в адресе, так:<br>
+<code>https://localhost:</code><mark><code>local_port</code></mark><code>/</code><mark><code>path</code></mark><code>/panel</code>.</p>
+</details>
+<details>
+<summary>
+3. Доступ через ssh или прокси.</summary>
+<p>Панель слушает частный адрес, поэтому подключаться нужно либо через проброс порта по ssh, либо с включённым прокси. Компромиссный вариант, но советую всё равно поменять настройки по умолчанию, особенно если делаете не только для себя. Этот пункт требует особой настройки.</p>
+<ul>
+<li>Выберите частный адрес (далее <mark><code>private_ip</code></mark>), который вы хотите использовать (список есть тут: <a href="https://ru.wikipedia.org/wiki/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9_IP-%D0%B0%D0%B4%D1%80%D0%B5%D1%81" rel="noopener nofollow ugc">Частный IP-адрес</a>).</li>
+<li>Убедитесь, что он ещё не используется в системе (например, Docker создаёт мост с частным адресом):<br>
+<code>$ ip -color=auto a</code>.</li>
+<li>Добавьте выбранный адрес на интерфейс <code>lo</code> через менеджер сети, который используете, либо вручную (будет работать до перезагрузки):<br>
+<code># ip addr add </code><mark><code>private_ip</code></mark><code>/32 dev lo scope host</code>.</li>
+<li>Уберите блокировку с <code>Private IPs</code> в настройках панели. Возможно, потребуется ещё добавить <mark><code>private_ip</code></mark> в маршрутизацию на стороне клиента.</li>
+<li>Настройте панель слушать только <mark><code>private_ip</code></mark>.</li>
+</ul>
+<p>Теперь зайти в панель можно так, если включён прокси:<br>
+<code>https://</code><mark><code>private_ip</code></mark><code>:</code><mark><code>port</code></mark><code>/</code><mark><code>path</code></mark><code>/panel</code>.</p>
+<p>Чтобы зайти в панель не через прокси, а через ssh, нужно пробросить порт:<br>
+<code>$ ssh -L </code><mark><code>local_port</code></mark><code>:</code><mark><code>private_ip</code></mark><code>:</code><mark><code>port</code></mark><code> ...</code>.<br>
+После этого можно зайти по адресу:<br>
+<code>https://localhost:</code><mark><code>local_port</code></mark><code>/</code><mark><code>path</code></mark><code>/panel</code>.</p>
+</details></td><td>2024-12-25T21:07:49.248Z</td></tr>
+    </table>
+      </body>
+    </html>

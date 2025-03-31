@@ -1,0 +1,99 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-meteor-cryptographically-secure-steganography-for-realistic-distributions-ccs-2021</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Meteor: Cryptographically Secure Steganography for Realistic Distributions<br>
+Gabriel Kaptchuk, Tushar M. Jois, Matthew Green, Aviel D. Rubin<br>
+<a href="https://censorbib.nymity.ch/#Kaptchuk2021a">https://censorbib.nymity.ch/#Kaptchuk2021a</a><br>
+<a href="https://meteorfrom.space/">https://meteorfrom.space/</a></p>
+<p>Meteor is a symmetric-key steganography protocol. A sender and receiver, who share a secret key, can exchange messages that conform to a certain text generation model, and that also encode another, hidden message. An observer that does not know the secret key cannot distinguish the steganographically encoded messages from any other output of the text generation model, even if the observer knows the model. Meteor naturally adapts its encoding rate according to the local entropy of the text generation model, which is an advantage over past schemes that can fail when starved of entropy. The authors show how to use Meteor with sophisticated generative models of natural language text, like <a href="https://en.wikipedia.org/wiki/GPT-2">GPT-2</a>, to provide realistic covertexts.</p>
+<p>The text generation models that are compatible with Meteor produce text one word at a time. Given a context of words that have been output so far, the model finds a probability distribution of candidates for the next word; i.e., a set of words with associated weights, where the weights sum to 1.0. The model then makes a weighted random selection from among the candidates. Suppose, at a certain point in text generation, the probability distribution for the next word is 40% <strong>little</strong>, 20% <strong>gray</strong>, 20% <strong>happy</strong>, and 20% <strong>nimble</strong>. Stack up those probabilities, in some defined order, to assign each word an interval of the numbers between 0.0 and 1.0. Sample a random number <em>r</em> between 0.0 and 1.0, and output the word whose interval contains <em>r</em>. In this case, for example, if the random number generator produced <em>r</em> = 0.626, the model would output the word <strong>happy</strong>; if <em>r</em> = 0.187, it would output <strong>little</strong>.</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>word</th>
+<th>interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>little</strong></td>
+<td>0.0 ≤ <em>r</em> &lt; 0.4</td>
+</tr>
+<tr>
+<td><strong>gray</strong></td>
+<td>0.4 ≤ <em>r</em> &lt; 0.6</td>
+</tr>
+<tr>
+<td><strong>happy</strong></td>
+<td>0.6 ≤ <em>r</em> &lt; 0.8</td>
+</tr>
+<tr>
+<td><strong>nimble</strong></td>
+<td>0.8 ≤ <em>r</em> &lt; 1.0</td>
+</tr>
+</tbody>
+</table>
+</div><p>Meteor replaces the text generation model’s usual random number generator with pseudorandom bits from a ciphertext of the message. Instead of an interval of real numbers, assign each candidate word a range of consecutive bit strings, in proportion to its probability:</p>
+<pre><code class="lang-plaintext">0000 little
+0001 little
+0010 little
+0011 little
+0100 little
+0101 little
+0110 gray
+0111 gray
+1000 gray
+1001 happy
+1010 happy
+1011 happy
+1100 nimble
+1101 nimble
+1110 nimble
+1111 nimble
+</code></pre>
+<p>The length of the bit strings is a parameter, <em>β</em>. In this example, <em>β</em> = 4; the authors report using <em>β</em> = 32 in practice. Suppose the sender wants to steganographically encode the message <code>01011000</code>. The sender and receiver share a symmetric key that they use to produce a pseudorandom bitstream, for example <code>0110011011...</code>, which we will call the <em>mask</em>. The sender takes <em>β</em> bits from the message (<code>0101</code>) and <em>β</em> bits from the mask (<code>0110</code>), and XORs them together (in the manner of a <a href="https://en.wikipedia.org/wiki/Stream_cipher">stream cipher</a>) to produce a bit string <em>r</em> = <code>0011</code>. The sender consults the probability table, sees that <code>0011</code> maps to <strong>little</strong>, and therefore appends <strong>little</strong> to the encoded message.</p>
+<p>When the receiver observes the word <strong>little</strong>, it does a reverse lookup in the probability table, to find out what values of <em>r</em> could have mapped to that word. In this case, <em>r</em> might have been any of the six values from <code>0000</code> to <code>0101</code>. The receiver cannot know exactly which of these values the sender used, but what it does know is that the first bit of <em>r</em> must have been <code>0</code>. This is because <code>0</code> is the longest <em>common prefix</em> of all the possible <em>r</em> values for <strong>little</strong>. The receiver XORs that known prefix of <em>r</em> (<code>0</code>) with the first bit of its locally computed mask (<code>0</code>) to get one bit of the decoded message, <code>0</code>.</p>
+<p>The common prefix is not always one bit long. If the word had been <strong>happy</strong>, for example, the common prefix would have been <code>10</code>, and the receiver would have been able to decode two bits of the message. On the other hand, the word <strong>gray</strong> would not encode any bits: some of its <em>r</em> values begin with <code>0</code> and some begin with <code>1</code>, so their common prefix is empty. This is an example of Meteor’s natural adaptation to varying entropy: low-probability words map to few bit strings, and a long common prefix; high-probability words map to many bit strings, and a short (or empty) common prefix.</p>
+<p>Because the sender and the receiver have the same text model, the sender also knows the range of possible <em>r</em> values for the word it has just output, and therefore the sender knows how many bits the receiver will have decoded from <strong>little</strong>. In this case it’s one bit. So the sender strips one bit from its message buffer, leaving <code>1011000</code> as the remaining message still to be encoded. The sender also discards the <em>β</em> used bits of the mask, leaving <code>011011...</code>. The value of <em>r</em> for the next word to be output (which will be chosen from a different set of words, with a different probability distribution) will be <code>1011</code> XOR <code>0110</code> = <code>1101</code>. The process repeats until all message bits have been encoded.</p>
+<p>English text is not the only possible source of covertexts. Anything that satisfies the token-at-a-time generation model can be used—conceivably even things like network protocols. Besides GPT-2, which is word-oriented, the authors applied Meteor to character-oriented models trained on Wikipedia articles and HTTP headers. There is a comparison of the space and time costs of encoding in <a href="https://www.cs.jhu.edu/~gkaptch1/publications/ccs21_meteor.pdf#page=13">Table 3</a>. You can see examples of Meteor stegotexts in <a href="https://www.cs.jhu.edu/~gkaptch1/publications/ccs21_meteor.pdf#page=18">Appendix C</a>. The GPT-2 model encodes 160 message bytes into about 300–350 words, not counting the initial context. The following is an example of Meteor encoding using GPT-2:</p>
+<blockquote>
+<p>The picture in The Pale I HCR scientists’ discussion now spans three dimensions. The first importance of the Yucatan Peninsula is demonstrated with the following conclusion: the Pliocene Earth has lost about seven times as much vegetation as the Jurassic in regular parts of the globe…</p>
+</blockquote></td><td>2022-02-09T19:54:21.624Z</td></tr>
+    </table>
+      </body>
+    </html>

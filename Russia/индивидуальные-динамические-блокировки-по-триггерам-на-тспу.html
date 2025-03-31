@@ -1,0 +1,98 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>индивидуальные-динамические-блокировки-по-триггерам-на-тспу</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>Примерно с середины января 2024 обнаружил блокировки, срабатывающие после определённых действий на определённое время, только для IP-адреса, с которого они производились.</p>
+<p>При обращении:</p>
+<ul>
+<li>По HTTPS со SNI <code>(api|checkip|assets).windscribe.com</code> (и других доменов сервиса Windscribe) на порт 443</li>
+<li>(или) по TCP SYN на один из известных IP-адресов VPN-серверов сервиса и порт 443, 587, 21, 22, 80, 123, 143, 3306, 8080, 54783, 1194 (например, <code>149.88.108.1</code>)</li>
+<li>(или) по UDP к VPN-протоколу OpenVPN или WireGuard на эти же порты</li>
+</ul>
+<p>происходит блокировка на 5 минут:</p>
+<ul>
+<li>SNI по regexp <code>(api|checkip|assets)\.[0-9a-f]{40}\.com</code>, но при условии, что в имени зоны содержится хотя бы 5 цифр и 4 буквы.<br>
+Т.е. <code>https://api.abcdef0123456789abcdef012345678900000000.com</code> заблокируется, но <code>https://api.abc0000123456789222222012345678900000000.com</code> — нет</li>
+</ul>
+<p>Возможно, метод с триггерами используется в том числе для выявления новых VPN-серверов: если пользователь обратился на <code>(api|checkip|assets).windscribe.com</code> или на regexp-домен после его блокировки, а затем в течение 5 минут подключается по OpenVPN или WireGuard к какому-то неизвестному IP-адресу, то это, скорее всего, сервер Windscribe. Если это и происходит, то не в автоматическом режиме.</p>
+<p>По IPv6 regexp-домены заблокированы всегда.</p></td><td>2024-02-28T15:35:47.571Z</td></tr><tr><td>anon57137390</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="1" data-topic="7318">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>{40}</p>
+</blockquote>
+</aside>
+<p>Если интересно, это 20 байт SHA1 в base16 (hex) кодировке<br>
+<a href="https://github.com/Windscribe/Desktop-App/blob/master/client/common/utils/hardcodedsettings.cpp#L42" rel="noopener nofollow ugc">Источник</a> (Пароль для хэша скрыт в блобе, загружаемом под видом либы из интернета при компиляции. Им это не помогло, на проводе это бесполезно. Впрочем, в коде есть еще динамические домены подгружаемые через DNS записи)</p></td><td>2024-02-29T18:22:17.415Z</td></tr><tr><td>Fleymorx</td><td><p>Поможет ли вот этот скрипт <a href="https://github.com/Feriman22/portscan-protection" class="inline-onebox" rel="noopener nofollow ugc">GitHub - Feriman22/portscan-protection: This script helps to avoid portscanning on Linux systems.</a> уберечь от данных сканирований?</p></td><td>2024-02-29T19:15:25.845Z</td></tr><tr><td>ValdikSS</td><td><p>О каком сканировании речь? Здесь ничего не сканировалось.</p></td><td>2024-02-29T19:21:47.427Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://t.me/ru_tech_talk/486:">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/6/60a0dd1195aa91677b6f00e7a4eb29555e45506b.svg" class="site-icon" data-dominant-color="" width="16" height="16">
+
+      <a href="https://t.me/ru_tech_talk/486:" target="_blank" rel="noopener">Telegram</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="320" height="320" src="индивидуальные-динамические-блокировки-по-триггерам-на-тспу/4575b64005b896b29af7136953040ee118510d48.jpeg" class="thumbnail onebox-avatar" data-dominant-color="7034E4">
+
+<h3><a href="https://t.me/ru_tech_talk/486:" target="_blank" rel="noopener">Tech Talk</a></h3>
+
+  <p>Сбой в работе рунета 27 февраля, когда многие юзеры не могли зайти на какой-либо сайт/воспользоваться мессенеджром или подключиться к VPN на своем сервере, мог произойти из-за массового тестирования Active Probing, который уже много лет успешно...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<blockquote>
+<p>При этом, в своей заметке на ресурсе ntc.party (<a href="https://ntc.party/t/%D0%B8%D0%BD%D0%B4%D0%B8%D0%B2%D0%B8%D0%B4%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B5-%D0%B4%D0%B8%D0%BD%D0%B0%D0%BC%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8-%D0%BF%D0%BE-%D1%82%D1%80%D0%B8%D0%B3%D0%B3%D0%B5%D1%80%D0%B0%D0%BC-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83/7318" class="inline-onebox">Индивидуальные динамические блокировки по триггерам на ТСПУ</a>) пишет о сканировании и ValdikSS[…]</p>
+</blockquote></td><td>2024-02-29T19:30:06.608Z</td></tr><tr><td>Fleymorx</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="5" data-topic="7318" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>О каком сканировании речь? Здесь ничего не сканировалось.</p>
+</blockquote>
+</aside>
+<p>Вот выше прислали ссылку. Описывают как Active Probing.</p></td><td>2024-02-29T20:18:39.694Z</td></tr><tr><td>invictus(invictus)</td><td><p>ЗаТелеком в телеге у себя навыкладывал пачку конфигов, чтобы дропать всю эту любопытствующую плесень, плюс там пара ссылок на гитхаб, где уже люди покумекали заблаговременно.</p></td><td>2024-02-29T20:34:50.161Z</td></tr><tr><td>ValdikSS</td><td><p>Может эти события и связаны по времени, но не по принципу.</p></td><td>2024-02-29T21:23:41.712Z</td></tr>
+    </table>
+      </body>
+    </html>

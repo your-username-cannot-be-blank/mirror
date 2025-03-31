@@ -1,0 +1,2673 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>raspberry-pi-xray-между-роутером-и-телевизором</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>xofamim548</td><td><p>Есть VPS с настроенным vless reality.<br>
+В доме стоит <strong>роутер</strong>, на который openwrt встанет со скрипом, и уж точно без поддержки проксирования через vless.<br>
+Есть <strong>телевизор Samsung</strong>, на котором хочется смотреть youtube.<br>
+И есть лежащая без дела <strong>Raspberry Pi</strong> ранних ревизий, к которой есть парочка совместимых <strong>wifi usb адаптеров</strong>.</p>
+<p>Напрашивается такая схема:<br>
+Роутер --(ethernet)-- Raspberry Pi --(usb wifi)-- Телевизор</p>
+<p>Попробовал накатить последнюю Raspbian, подключил к роутеру кабелем (wifi пока не трогал), установил xray-core в режиме клиента для vless, в inbound listen прописал 0.0.0.0:1080. То есть xray-core создаёт прокси-сервер на порту 1080, всё что к нему подключается — заворачивается в vless. Потестировал с компа через FoxyProxy — работает на удивление неплохо, 4K поток тянет без проблем, особо не греется даже.</p>
+<p>Но дальше я не понимаю, как настроить связку с телевизором. Подключил usb wifi адаптер к малине. <em>Не прошло и года, как</em> поднял точку доступа на wlan0 через NetworkManager, прописал</p>
+<pre><code class="lang-auto">sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+</code></pre>
+<p>и нормально, устройства подключаются к малине по wifi и получают доступ в интернет. Но у меня вообще никак не получается завернуть трафик в прокси, вот совсем. Гуглом ничего подходящего не нашёл, chatgpt говорит что-то про redsocks и/или разные правила в iptables — в лучшем случае эти предложения ничего не делают, а в худшем ломают подключение.</p>
+<p>Может, кто-то посоветует, как лучше сделать? Может, кто-то уже делал подобное? Ещё видел, что для малины есть openwrt - не будет ли проще использовать этот вариант? (Никогда не пользовался openwrt и не знаю, позволит ли она реализовать задуманное.)</p></td><td>2024-08-05T20:22:18.020Z</td></tr><tr><td>gfqwdgecewgcdw</td><td><p><a href="https://kubuntu.ru/nat-iptables" class="onebox" target="_blank" rel="noopener nofollow ugc">https://kubuntu.ru/nat-iptables</a></p></td><td>2024-08-05T20:56:44.371Z</td></tr><tr><td>xofamim548</td><td><p>Возможно туплю, поправьте если так. Но по ссылке вроде говорится о том, что у меня уже работает, а именно раздача интернета на другие устройства, которые подключаются к wi-fi точке доступа (ну, в моём случае к ней). <code>POSTROUTING </code> в iptables прописан, <code>net.ipv4.ip_forward = 1</code> тоже включил. Интернет раздаётся, всё окей.</p>
+<p>Только я не могу понять, как мне вот этот раздаваемый интернет завернуть в socks5 на порту 1080. Есть ощущение, что вот так напрямую это нельзя сделать, но я не понимаю, как можно и куда смотреть. Пробовал поменять на http и прописать системный прокси для http и https через raspi-config. После этого curl с малины начинает работать через vless, но подключенные устройства по-прежнему работают в обход прокси. Не понимаю, как этот момент настроить.</p>
+<p>Возможно, мой подход вообще ошибочный, и мне не нужно создавать никакой прокси-сервер, а нужно заворачивать трафик в vless как-то иначе. Но я пока не понимаю, как это сделать.</p></td><td>2024-08-05T21:10:53.681Z</td></tr><tr><td>Texsis</td><td><p>Может лучше поднять вместо x-ray поставить sing-box. Он может поднимать интерфейс, а не как прокси работать. И уже между ними пересылку делать.</p></td><td>2024-08-05T21:19:48.777Z</td></tr><tr><td>xofamim548</td><td><p>Об этом не думал, спасибо, завтра будет время почитаю об этом подробнее. Но думаю вы правы, что мой подход с xray-core и прокси изначально дурацкий <img src="https://ntc.party/images/emoji/twitter/grinning.png?v=12" title=":grinning:" class="emoji" alt=":grinning:" loading="lazy" width="20" height="20"></p></td><td>2024-08-05T21:21:26.418Z</td></tr><tr><td>Dhohbr</td><td><p>Наверно проще использовать какой-нибудь VPN.<br>
+Если прям xray нужен, можно через tun2socks завернуть его в tun интерфейс, и с ним уже настраивать маршрутизацию.</p></td><td>2024-08-05T22:09:33.319Z</td></tr><tr><td>souvao</td><td><p>Тебе нужно маркировать весь трафик и заворачивать его часть с помощью tproxy на inbound dokodemo-door в xray.<br>
+Почитать про это можно здесь, на русском <a href="https://xtls.github.io/Xray-docs-next/ru/document/level-2/tproxy_ipv4_and_ipv6.html" class="inline-onebox" rel="noopener nofollow ugc">Прозрачное проксирование TProxy (ipv4 и ipv6) | Project X</a> и здесь, на китайском <a href="https://guide.v2fly.org/app/tproxy.html#%E5%BC%80%E6%9C%BA%E8%87%AA%E5%8A%A8%E8%BF%90%E8%A1%8C%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E8%A7%84%E5%88%99" class="inline-onebox" rel="noopener nofollow ugc">透明代理(TPROXY) | 新 V2Ray 白话文指南</a></p></td><td>2024-08-06T03:55:07.053Z</td></tr><tr><td>MasterYoba</td><td><p>Честно говоря, ваша схема подключения довольно странная. Я решительно не понимаю, зачем тут usb wifi адаптер, и зачем подключать телевизор именно <strong>физически</strong> <strong>через</strong> Raspberry? Все ведь решается простыми сетевыми настройками на уровне L3.<br>
+Я бы сделал так: Raspberry подключен к роутер по ethernet, телевизор тоже подключен к роутеру любым способом (ethernet/wifi). Далее пошагово:</p>
+<ol>
+<li>Сносите с Raspberry xray-core и ставите sing-box. Это гораздо более производительный клиент/сервер, и обладает очень богатым функционалом. И что немаловажно, имеет качественную документацию на английском языке (<a href="https://sing-box.sagernet.org/manual/proxy/client/" class="inline-onebox" rel="noopener nofollow ugc">Client - sing-box</a>).</li>
+<li>Настраиваете конфиг sing-box. В интернете полно примеров, можно гуглить sing-box example config, если настраивали xray-core думаю разберётесь. В Inbounds создаёте инбаунд типа tun, обязательно с опцией <strong>“auto_route”: true</strong>. В outbounds ваш конфиг vless reality по сути такой же, как в xray. В Route создаёте правила, что именно вы хотите завернуть в туннель, например для телевизора рекомендую завернуть только “domain_suffix” = “.googlevideo.com”. Этого будет достаточно, чтобы вылечить ютуб. Но можно завернуть и весь трафик, только будьте осторожны с российскими стриминговыми сервисами, если пользуетесь ими! И обязательно опцию <strong>“auto_detect_interface”: true</strong>, без неё работать не будет у вас!</li>
+<li>В настройках телевизора вы ставите шлюз по умолчанию = ip адрес Raspberry.<br>
+Итог: трафик с телевизора роутится на Raspberry, попадает на tun интерфейс, далее либо заворачивается sing-boxом в vless туннель и идёт на роутер и далее в интернет, либо просто сразу на роутер и в интернет напрямую, в зависимости от правил в разделе Routes.</li>
+</ol>
+<p>У меня в целом похожая схема дома реализована, только вместо Raspberry классическая x86 платформа, и заворачиваю я туда трафик с избранных устройств не через шлюз по умолчанию, а отдельным маршрутом на маршрутизаторе. А в sing-box я использую список всех заблоченных РКН доменов, то есть проксирую только “запрещенку”. Если интересно, могу потом рассказать подробнее.</p></td><td>2024-08-06T07:22:48.230Z</td></tr><tr><td>cimon357(Elena)</td><td><aside class="quote no-group" data-username="MasterYoba" data-post="8" data-topic="8804">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/masteryoba/48/6182_2.png" class="avatar"> MasterYoba:</div>
+<blockquote>
+<p>Если интересно, могу потом рассказать подробнее.</p>
+</blockquote>
+</aside>
+<p>Интересно, может быть, сделаете отдельную подробную статью?</p></td><td>2024-08-06T07:35:29.840Z</td></tr><tr><td>MasterYoba</td><td><p>Думал об этом уже, только пока не знаю, на какой ресурс лучше выкладывать. Сюда или на какой-то пока рабочий в рф ресурс, вроде гитхаба.</p></td><td>2024-08-06T08:22:02.577Z</td></tr><tr><td>ValdikSS</td><td><p><strong>На телевизоре есть поддержка прокси</strong> ⇒ настроить HTTP-прокси-сервер на компьютере/Raspberry (xray input), настроить прокси на телевизоре.</p>
+<p><strong>На телевизоре нет поддержки прокси, хочется обойтись только отдельными программами</strong> ⇒</p>
+<ol>
+<li>настроить беспротокольный прокси-порт (в v2ray называется dokodemo-door) на компьютере/Raspberry на портах 80 и 443, в нём настроить sniffing трафика (определение домена/IP-адреса из содержимого запроса, а не из метаданных подключения)</li>
+<li>настроить DNS-сервер на компьютере/raspberry с отдачей IP-адреса компьютера/raspberry для доменов, которые необходимо проксировать (возможно, DNS можно поднять и средствами xray/v2ray, но не уверен)</li>
+<li>указать IP-адрес компьютера/rasbperry в качестве DNS-сервера на телевизоре</li>
+</ol>
+<p>// <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8-youtube-%D0%B4%D0%BB%D1%8F-%D0%BB%D1%8E%D0%B1%D1%8B%D1%85-smart-tv-%D1%81-goodbyedpi-v2ray-maradns/9415" class="inline-onebox">Обход блокировки YouTube для любых Smart TV с GoodbyeDPI + V2ray + MaraDNS</a></p>
+<p><strong>На телевизоре нет поддержки прокси и VPN</strong> ⇒ настраивать компьютер/raspberry как шлюз, как пишет <a class="mention" href="/u/masteryoba">@MasterYoba</a>. Можно сделать на компьютере в виртуальной машине с Linux, отдельное устройство не обязательно.</p>
+<p><strong>На телевизоре нет поддержки прокси, есть поддержка VPN (любого протокола)</strong> ⇒</p>
+<ol>
+<li>настроить VPN-сервер для этого протокола на компьютере/raspberry</li>
+<li>настроить перенаправление трафика на беспротокольный прокси-порт (dokodemo-door) v2ray/xray с VPN-интерфейса</li>
+<li>настроить телевизор на VPN-подключение к компьютеру/raspberry</li>
+</ol>
+<p>Преимущество перед настройкой шлюзом (способ выше) только в удобстве настройки/соединения/разъединения VPN-подключения.</p></td><td>2024-08-06T09:09:30.178Z</td></tr><tr><td>ValdikSS</td><td><p>См. описание реализации VPN-подхода: <a href="https://github.com/ValdikSS/hoogmoon-testing/blob/master/TECH.md#user-traffic-redirection" class="inline-onebox">hoogmoon-testing/TECH.md at master · ValdikSS/hoogmoon-testing · GitHub</a><br>
+Файлы: <a href="https://github.com/ValdikSS/hoogmoon-testing/tree/master/build/files/etc/v2ray" class="inline-onebox">hoogmoon-testing/build/files/etc/v2ray at master · ValdikSS/hoogmoon-testing · GitHub</a> — там много всего дополнительного, но как пример подобной настройки, надеюсь, будет полезно.</p></td><td>2024-08-06T09:17:56.751Z</td></tr><tr><td>xofamim548</td><td><p>Приветствую <a class="mention" href="/u/valdikss">@ValdikSS</a> и <a class="mention" href="/u/masteryoba">@MasterYoba</a> , благодарю за подробные ответы!</p>
+<p>На всякий случай уточню, что телевизор не поддерживает VPN и вот это всё. Настройки ограничены вот этим списком (картинка из интернета, но у меня так же).<br>
+<img src="raspberry-pi-xray-между-роутером-и-телевизором/56c6f7d0a60e3b7172dec0877450a38e72ee53ee.jpeg" alt="samsung-ip-settings" data-base62-sha1="cnFlFrBoSqqSaYHs978nC8Ae58q" width="400" height="267"></p>
+<p>Если я правильно понял идею, нужно просто подключить Raspberry Pi кабелем к роутеру и не городить из него точку доступа, а использовать малину как шлюз в настройках телевизора. Это дельная мысль, она не пришла мне в голову потому что я нуб и всегда всё усложняю <img src="https://ntc.party/images/emoji/twitter/grinning.png?v=12" title=":grinning:" class="emoji" alt=":grinning:" loading="lazy" width="20" height="20"> Вечером попробую настроить sing-box под это дело.</p></td><td>2024-08-06T10:05:27.733Z</td></tr><tr><td>xofamim548</td><td><p>Окей, вот я на свежей raspbian os прописал <code>net.ipv4.ip_forward=1</code>, телевизор нормально использует малину в качестве шлюза и ходит в интернет. Больше ничего не делал.</p>
+<p>sing-box поставил, правда не без приключений. Raspberry Pi 1B это armv6, а в репозитории sagernet видимо только для v7. Долго думал, почему процесс вылетает со <code>status=4/ILL</code> сразу после запуска, но в итоге собрал из исходников, всё запускается.</p>
+<p>Сейчас проблема в том, что сразу после <code>sudo systemctl start sing-box</code> я теряю связь с малиной по SSH, и как шлюз она тоже отваливается на подключенных устройствах. Пробовал добавлять direct маршруты в routes для локальных IP или для 22 порта, но то ли я неправильно добавляю, то ли дело не в маршрутах. При log level=“debug” в логе только это (в systemd тоже ничего интересного):</p>
+<pre><code class="lang-auto">+0300 2024-08-06 22:45:09 INFO router: updated default interface eth0, index 2
++0300 2024-08-06 22:45:09 INFO inbound/tun[tun-in]: started at tun0
++0300 2024-08-06 22:45:09 INFO sing-box started (0.100s)
+</code></pre>
+<p>Вопросы:</p>
+<ol>
+<li>Всё ли верно в конфиге из того, что заполнено помимо routes?</li>
+<li>Что прописывать в routes для базового тестирования? Я имею в виду, пусть он вообще всё, кроме локальных маршрутов, заворачивает в туннель, для наглядности. Если заработает, то пропишу для отдельных доменов.</li>
+<li>Что-то ещё нужно делать, помимо конфигурации sing-box?</li>
+</ol>
+<pre><code class="lang-auto">{
+	"log": {
+		"disabled": false,
+		"level": "warn",
+		"output": "/tmp/sing-box.log",
+		"timestamp": true
+	},
+	"dns": {
+		"servers": [
+			{
+				"tag": "google",
+				"address": "tls://8.8.8.8"
+			},
+			{
+			"tag": "block",
+			"address": "rcode://success"
+			}
+		],
+		"final": "google",
+		"strategy": "ipv4_only"
+	},
+	"inbounds": [
+		{
+			"type": "tun",
+			"tag": "tun-in",
+			"interface_name": "tun0",
+			"stack": "system",
+			"inet4_address": "172.19.16.1/30",
+			"auto_route": true,
+			"strict_route": true,
+			"sniff": true
+		}
+	],
+	"outbounds": [
+		{
+			"type": "vless",
+			"tag": "vless-out",
+			"server": "IP_ADDR",
+			"server_port": 443,
+			"uuid": "UUID",
+			"flow": "xtls-rprx-vision",
+			"network": "tcp",
+			"tls": {
+				"enabled": true,
+				"server_name": "DOMAIN_NAME",
+				"alpn": ["h2"],
+				"utls": {
+					"enabled": true,
+					"fingerprint": "chrome"
+				},
+				"reality": {
+					"enabled": true,
+					"public_key": "PUBLIC_KEY",
+					"short_id": "SHORT_ID"
+				}
+			},
+			"packet_encoding": "xudp"
+		},
+		{
+			"type": "direct",
+			"tag": "direct"
+		},
+		{
+			"type": "block",
+			"tag": "block"
+		},
+			{
+			"type": "dns",
+			"tag": "dns-out"
+		}
+	],
+	"route": {
+		"rules": [
+			{
+				"protocol": "dns",
+				"outbound": "dns-out"
+			}
+		],
+	"auto_detect_interface": true
+	}
+}
+</code></pre></td><td>2024-08-06T20:34:00.700Z</td></tr><tr><td>Texsis</td><td><p>Я брал конфиг из этой статьи и все взлетело <a href="https://itdog.info/podnimaem-na-openwrt-klient-proksi-vless-shadowsocks-shadowsocks2022-nastrojka-sing-box-i-tun2socks/#sing-box" class="inline-onebox" rel="noopener nofollow ugc">Поднимаем на OpenWrt клиент прокси VLESS, Shadowsocks, Shadowsocks2022. Настройка sing-box и tun2socks | ITDog.info</a></p></td><td>2024-08-06T22:00:09.623Z</td></tr><tr><td>0ka(0ka)</td><td><p>Отключите авто роутинг в конфиге и работайте с отдельной таблицей маршрутов (rt_tables), добавьте в неё вручную default route dev singbox_tun, и затем ip rule add from tv_ip/32 table second_route_table</p>
+<p>Пример команд после запуска singbox<br>
+ip route add default tun0 table 100<br>
+ip rule add from 192.168.1.100/32 table 100</p></td><td>2024-08-06T22:05:27.561Z</td></tr><tr><td>xofamim548</td><td><p>Можно попробовать, но в свете последних тестов не уверен, что в этом есть смысл, вроде бы можно настроить и через sing-box. Слегка измененный минималистичный конфиг по ссылкам от <a class="mention" href="/u/texsis">@Texsis</a> действительно работает, хотя и своеобразно. Некоторые сайты показывают удалённый IP, а некоторые домашний.</p>
+<pre><code class="lang-auto">{
+  "log": {
+    "disabled": false,
+    "level": "debug",
+    "output": "/tmp/sing-box.log",
+    "timestamp": true
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "interface_name": "tun0",
+      "domain_strategy": "ipv4_only",
+      "inet4_address": "172.16.250.1/30",
+      "auto_route": true,
+      "strict_route": false,
+      "sniff": true
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "vless",
+      "tag": "vless-out",
+      "server": "IP_ADDR",
+      "server_port": 443,
+      "uuid": "UUID",
+      "flow": "xtls-rprx-vision",
+      "network": "tcp",
+      "tls": {
+        "enabled": true,
+        "server_name": "DOMAIN",
+        "alpn": [
+          "h2"
+        ],
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "PUBLIC_KEY",
+          "short_id": "SHORT_ID"
+        }
+      },
+      "packet_encoding": "xudp"
+    }
+  ],
+  "route": {
+    "auto_detect_interface": true
+  }
+}
+</code></pre>
+<p>Опытным путём выяснил, что всё падает, если задать <code>"strict_route": true</code>. Буду разбираться дальше.</p></td><td>2024-08-06T22:28:45.416Z</td></tr><tr><td>0ka(0ka)</td><td><p>Перезагрузите тв, возможно в кеше остался старый маршрут для некоторых айпи адресов</p></td><td>2024-08-06T22:31:12.818Z</td></tr><tr><td>xofamim548</td><td><p>Попробую, вероятно вы правы, иногда обновление страницы меняет отображаемый айпишник, хоть и не всегда.</p>
+<p>По поводу strict_route не особо понимаю, насколько нужна эта опция. В справке вижу вот это:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="raspberry-pi-xray-между-роутером-и-телевизором/c322c3fd7981caf262617bbade764fc8273adaef.jpeg" data-download-href="https://ntc.party/uploads/default/c322c3fd7981caf262617bbade764fc8273adaef" title="2024-08-07 01_30_45-Tun - sing-box — Mozilla Firefox"><img src="raspberry-pi-xray-между-роутером-и-телевизором/c322c3fd7981caf262617bbade764fc8273adaef_2_690x461.jpeg" alt="2024-08-07 01_30_45-Tun - sing-box — Mozilla Firefox" data-base62-sha1="rQfAGlRZI8Y5sT9PHqXv0kOgVuD" width="690" height="461" srcset="raspberry-pi-xray-между-роутером-и-телевизором/c322c3fd7981caf262617bbade764fc8273adaef_2_690x461.jpeg, raspberry-pi-xray-между-роутером-и-телевизором/c322c3fd7981caf262617bbade764fc8273adaef.jpeg 1.5x, raspberry-pi-xray-между-роутером-и-телевизором/c322c3fd7981caf262617bbade764fc8273adaef.jpeg 2x" data-dominant-color="F5F5F6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">2024-08-07 01_30_45-Tun - sing-box — Mozilla Firefox</span><span class="informations">739×494 50.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Всё равно не понимаю <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> Это описание того, что оно делает, или описание того, что я должен сделать, чтобы оно работало? И насколько вообще нужно включать эту опцию? Под Windows для всех клиентов обычно советуют включать, но здесь не знаю. <code>auto_route</code> у меня таки включен.</p></td><td>2024-08-06T22:35:16.438Z</td></tr><tr><td>MasterYoba</td><td><p>Сейчас у вас всё идёт по умолчанию в первый по списку outbound - vless-out. Добавьте в rules такое правило, чтобы направить локальный трафик мимо прокси:</p>
+<pre><code class="lang-auto">            {
+                "ip_is_private": true,
+                "outbound": "direct"
+            }
+</code></pre>
+<p>auto_route отключать не обязательно, на машине с одним интерфейсом, вроде той же малины, с ним будет прекрасно работать. Его отключают обычно, когда настраивают sing-box на роутере, чтобы не мешать работе маршрутизации на нём.</p></td><td>2024-08-07T05:07:20.490Z</td></tr><tr><td>MasterYoba</td><td><p>Вы правильно сделали, что отключили “strict_route”, про нее мало информации в документации, в моём понимании она нужна в тех случаях, когда sing-box используется в качестве клиента на конечных устройствах типа Android для предотвращения утечек IP. Когда sing-box выступает в роли шлюза для других хостов, её нужно отключать, иначе ничего работать не будет.</p></td><td>2024-08-07T08:04:25.909Z</td></tr><tr><td>xofamim548</td><td><p>Окей, спасибо <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> <code>ip_is_private</code> установил да. Ещё почитаю подробнее справку по sing-box на тему маршрутов и DNS, всё руки не доходили, видимо пора.</p></td><td>2024-08-07T19:25:05.339Z</td></tr><tr><td>xofamim548</td><td><p>It works! <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p>
+<p>Если кому интересно, на доисторической Raspberry Pi 1B все это работает далеко от идеала, но работает. Железо в ней очень слабое, и если в режиме прокси в sing-box все выглядит пристойно, то более тяжелый tun просаживает скорость по speedtest до 6,5 - 8 Mbps, и даже банальный веб-серфинг становится довольно тормозным. Но потом вспомнил, что можно активировать разгон через <code>sudo raspi-config</code>. В режиме Turbo тормоза уходят, а speedtest выдает уже 12,5 Mbps. Youtube в статистике для сисадминов почему-то показывает чуть более высокую скорость и работает хорошо вплоть до 1440p@60fps (но 4K уже нет). Температура не поднимается выше 55 градусов (без радиатора).</p>
+<p>В /etc/sysctl.conf прописал:</p>
+<pre><code class="lang-auto">net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv4.ip_forward = 1
+</code></pre>
+<p>Конфиг для sing-box в итоге такой (домены для обхода блокировок взял из файла russia-youtube.txt в архиве с GoodbyeDPI). Логи отключил, чтобы лишний раз не дергать карту памяти.</p>
+<pre><code class="lang-auto">{
+	"log": {
+		"disabled": true,
+		"level": "warn",
+		"output": "/tmp/sing-box.log",
+		"timestamp": true
+	},
+	"dns": {
+		"servers": [
+			{
+				"tag": "google",
+				"address": "https://8.8.8.8/dns-query"
+			},
+			{
+				"tag": "local",
+				"address": "192.168.1.1",
+				"detour": "direct"
+			},
+			{
+			"tag": "block",
+			"address": "rcode://success"
+			}
+		],
+		"strategy": "ipv4_only"
+	},
+	"inbounds": [
+		{
+			"type": "tun",
+			"interface_name": "tun0",
+			"domain_strategy": "ipv4_only",
+			"inet4_address": "172.16.250.1/30",
+			"mtu": 9000,
+			"auto_route": true,
+			"strict_route": false,
+			"sniff": true,
+			"sniff_override_destination": true
+		}
+	],
+	"outbounds": [
+		{
+			"type": "vless",
+			"tag": "vless-out",
+			"server": "IP_ADDRESS",
+			"server_port": 443,
+			"uuid": "UUID",
+			"flow": "xtls-rprx-vision",
+			"network": "tcp",
+			"tls": {
+				"enabled": true,
+				"server_name": "DOMAIN",
+				"alpn": ["h2"],
+				"utls": {
+					"enabled": true,
+					"fingerprint": "chrome"
+				},
+				"reality": {
+					"enabled": true,
+					"public_key": "PUBLIC_KEY",
+					"short_id": "SHORT_ID"
+				}
+			},
+			"packet_encoding": "xudp"
+		},
+		{
+			"type": "direct",
+			"tag": "direct"
+		},
+		{
+			"type": "block",
+			"tag": "block"
+		},
+			{
+			"type": "dns",
+			"tag": "dns-out"
+		}
+	],
+	"route": {
+		"rules": [
+			{
+				"protocol": "dns",
+				"outbound": "dns-out"
+			},
+			{
+                "ip_is_private": true,
+                "outbound": "direct"
+            },
+			{
+                "domain_suffix": ".youtube.com",
+                "outbound": "vless-out"
+            },
+			{
+                "domain_suffix": ".youtu.be",
+                "outbound": "vless-out"
+            },
+			{
+                "domain_suffix": ".ytimg.com",
+                "outbound": "vless-out"
+            },
+			{
+                "domain_suffix": ".googlevideo.com",
+                "outbound": "vless-out"
+            }
+		],
+	"final": "direct",
+	"auto_detect_interface": true
+	}
+}
+</code></pre>
+<p>Обращу внимание на директиву <code>"final": "direct"</code> в секции route, без нее весь трафик пойдет на удаленный сервер, а нам это не нужно. Еще я пытался вынести домены в отдельный файл, чтобы не вводить для каждого новую секцию в конфиге (хотя вот сейчас дошло, что секцию можно оставить одну, а суффиксы вписать массивом, но все равно хотелось бы вынести их из конфига в отдельный файл). И я даже успешно создал srs файл через</p>
+<pre><code class="lang-auto">sing-box rule-set compile [--output &lt;file-name&gt;.srs] &lt;file-name&gt;.json
+</code></pre>
+<p>Но пока так и не понял, как этот srs файл подключить в конфиг. Пытался через rule_set, но видимо неправильно, потому что sing-box наотрез отказывается запускаться, и в логах почему-то пусто (хотя были включены). Если кто-то знает, пожалуйста подскажите.</p></td><td>2024-08-08T15:14:09.832Z</td></tr><tr><td>0ka(0ka)</td><td><p>для большей производительности добавь в tun</p>
+<pre><code class="lang-auto">"gso": true
+</code></pre>
+<p>или можно перейти на iptables redirect, сделать его нетрудно:</p>
+<pre><code class="lang-auto">{
+  "type": "redirect",
+  "tag": "redirect-in",
+  "listen": "0.0.0.0",
+  "listen_port": 100
+}
+</code></pre>
+<pre><code class="lang-auto">iptables -t nat -A PREROUTING -s tv_ip/32 -p tcp -j REDIRECT --to-port 100
+</code></pre></td><td>2024-08-08T15:52:24.526Z</td></tr><tr><td>MasterYoba</td><td><p>Правильно будет вот так:<br>
+Содержимое youtube.json файла с правилами:</p>
+<pre><code class="lang-auto">{
+    "version": 1,
+    "rules": [
+        {
+            "domain_suffix": [
+                ".googlevideo.com",
+                ".youtube.com",
+                ".ggpht.com",
+                ".ytimg.com",
+                ".googleapis.com",
+                ".youtu.be"
+            ]
+        }
+    ]
+}
+</code></pre>
+<p>Подключение его в правилах конфига:</p>
+<pre><code class="lang-auto">    "route": {
+        "auto_detect_interface": true,
+        "final": "direct",
+        "rules": [
+            {
+                "protocol": "dns",
+                "outbound": "dns-out"
+            },
+            {
+                "ip_is_private": true,
+                "outbound": "direct"
+            },
+            {
+                "rule_set": "youtube",
+                "outbound": "vless-out"
+            }
+        ],
+        "rule_set": [
+            {
+                "tag": "youtube",
+                "type": "local",
+                "format": "source",
+                "path": "/etc/sing-box/rule-set/youtube.json"
+            }
+        ]
+</code></pre>
+<p>Если сконвертили в .srs через <code>sing-box rule-set compile</code>, то тогда <code>"format": "binary"</code><br>
+Правда .srs скорее нужно для оптимизации огромных наборов правил, вроде списков antizapret с миллионом строк, как у этого товарища - <a href="https://github.com/savely-krasovsky/antizapret-sing-box" class="inline-onebox" rel="noopener nofollow ugc">GitHub - savely-krasovsky/antizapret-sing-box: Пример конфига</a></p></td><td>2024-08-08T16:01:34.552Z</td></tr><tr><td>xofamim548</td><td><p><a class="mention" href="/u/masteryoba">@MasterYoba</a> а, значит я просто одно лишнее правило добавлял. Попробую как вы сказали, спасибо.</p>
+<aside class="quote no-group" data-username="0ka" data-post="24" data-topic="8804">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p><code>"gso": true</code></p>
+</blockquote>
+</aside>
+<p>Это кстати пробовал, но заметных изменений не дало. Возможно, потому что <code>ethtool -k eth0</code> выдаёт <code>generic-segmentation-offload: off [requested on]</code>, принудительно включить не удалось.</p>
+<aside class="quote no-group" data-username="0ka" data-post="24" data-topic="8804">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>или можно перейти на iptables redirect</p>
+</blockquote>
+</aside>
+<p>Вообще любопытно. Если правильно понял, inbound типа redirect слушает на 100 порту, на который мы переводим запросы с ТВ. Спасибо, попробую так сделать.</p></td><td>2024-08-08T16:04:32.201Z</td></tr><tr><td>lawsonshelby(Shelby)</td><td><p>Здравствуйте! А подскажите может есть успешные кейсы с Docker контейнером?</p>
+<p>У меня есть хост докера, у него есть macvlan я этому контейнеру прописываю статический айпишник в локальной сети:<br>
+versi</p>
+<pre><code class="lang-auto">on: "3.8"
+services:
+  sing-box:
+    image: ghcr.io/sagernet/sing-box
+    container_name: sing-box
+    restart: always
+    volumes:
+      - $PWD/:/etc/sing-box/
+    command: -D /var/lib/sing-box -C /etc/sing-box/ run
+    networks:
+      macnet8:
+        ipv4_address: 192.168.50.6
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+networks:
+  macnet8:
+    external: true
+</code></pre>
+<p>Конфиг уже использую практически полностью такой же как финальный у <a href="https://ntc.party/u/xofamim548">xofamim548</a></p>
+<p>Вроде всё запускается, в логах чисто:</p>
+<pre><code class="lang-auto">+0000 2024-08-08 17:03:01 INFO router: updated default interface eth0, index 406
++0000 2024-08-08 17:03:01 INFO inbound/tun[0]: started at tun0
++0000 2024-08-08 17:03:01 INFO sing-box started (0.00s)
+</code></pre>
+<p>Но когда у себя указываю в качестве дефолт гейтвея этот контейнер, то у меня всё умирает, никакого интернета нет. Что-то уже не знаю куда копать)) Собираюсь доставать физическую распбери уже))</p></td><td>2024-08-08T17:20:51.646Z</td></tr><tr><td>0ka(0ka)</td><td><p>попробуйте</p>
+<pre><code class="lang-auto">sysctl -w net.ipv4.conf.default.rp_filter=0
+sysctl -w net.ipv4.conf.all.rp_filter=0
+sysctl -w net.ipv4.ip_forward=1
+</code></pre></td><td>2024-08-08T17:37:02.292Z</td></tr><tr><td>lawsonshelby(Shelby)</td><td><p>Поменял, запустил контейнер в привилегированном режиме, но картина та же. В логах пустота…</p></td><td>2024-08-08T18:07:21.917Z</td></tr><tr><td>MasterYoba</td><td><p>У меня такого опыта именно с docker macvlan не было, если команды <a class="mention" href="/u/0ka">@0ka</a> не помогут, я бы попробовал посмотреть через <code>tcpdump -v</code>, что происходит с трафиком внутри контейнера, что он не попадает в петлю и не дропается например. Как вариант, попробовать добавить в контейнер второй интерфейс с маршрутом default, чтобы трафик от устройств заходил в один интерфейс (который будет их шлюзом), а выходил в интернет через другой.</p></td><td>2024-08-08T18:10:35.402Z</td></tr><tr><td>lawsonshelby(Shelby)</td><td><p>Бросил докер, убил на него уже часов 5, достал распберри 4, но не могу даже простой роутинг что-то настроить, или туплю или там ещё что-то нужно сделать кроме как включить:<br>
+net.ipv4.ip_forward = 1</p>
+<p>Чтобы просто без впн через него трафик хотя бы начал ходить?</p></td><td>2024-08-08T18:41:41.427Z</td></tr><tr><td>xofamim548</td><td><p>После этого выполнить (если ещё не)<br>
+<code>sudo sysctl -p</code><br>
+и возможно<br>
+<code>sudo systemctl restart NetworkManager</code>.</p>
+<p>По идее больше ничего. После этого указываете малину как шлюз, в качестве DNS роутер или 8.8.8.8. У меня работает так.</p></td><td>2024-08-08T19:37:49.700Z</td></tr><tr><td>lawsonshelby(Shelby)</td><td><p>Странно но дело было в DNS. Но теперь ютуб просто какими-то скачками работает))) как буто супер ускоренный</p></td><td>2024-08-08T20:01:04.273Z</td></tr><tr><td>xofamim548</td><td><p>Скачками это в смысле немного потормозит и резко раздупляется?) На youtube включите статистику для сисадминов, посмотрите что там с буферизацией происходит. И на малине посмотрите что происходит в htop. По идее в качестве шлюза она вообще без проблем должна работать.</p></td><td>2024-08-08T20:07:34.583Z</td></tr><tr><td>lawsonshelby(Shelby)</td><td><p>На телевизоре нормально показывает в 4к, на компе что-то стало с буферизацией как будто сразу на несколько секунд вперед прыгает, но я ещё изучу! Спасибо всем за помощь! Кстати, в докере тоже заработало, когда DNS прописал. Но блин когда я просто пинговать пробовал по адресу, а не по имени никакого пинга не проходило. На компе от браузера зависит, в хроме большой дроп кадров, в сафари нет звука, при этом на телеке нормально и изображение и звук<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="raspberry-pi-xray-между-роутером-и-телевизором/8ae1806c755b30bb6d86249f5b533c08ee6fceff.png" data-download-href="https://ntc.party/uploads/default/8ae1806c755b30bb6d86249f5b533c08ee6fceff" title="screen"><img src="raspberry-pi-xray-между-роутером-и-телевизором/8ae1806c755b30bb6d86249f5b533c08ee6fceff_2_690x216.png" alt="screen" data-base62-sha1="jOB1BU1t6kmy4CtiHyhb34Rcm87" width="690" height="216" srcset="raspberry-pi-xray-между-роутером-и-телевизором/8ae1806c755b30bb6d86249f5b533c08ee6fceff_2_690x216.png, raspberry-pi-xray-между-роутером-и-телевизором/8ae1806c755b30bb6d86249f5b533c08ee6fceff.png 1.5x, raspberry-pi-xray-между-роутером-и-телевизором/8ae1806c755b30bb6d86249f5b533c08ee6fceff.png 2x" data-dominant-color="353936"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">screen</span><span class="informations">982×308 63.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-08-08T20:35:52.752Z</td></tr><tr><td>xofamim548</td><td><aside class="quote no-group" data-username="0ka" data-post="24" data-topic="8804">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>или можно перейти на iptables redirect, сделать его нетрудно:</p>
+<pre><code class="lang-auto">{
+  "type": "redirect",
+  "tag": "redirect-in",
+  "listen": "0.0.0.0",
+  "listen_port": 100
+}
+</code></pre>
+<p><code>iptables -t nat -A PREROUTING -s tv_ip/32 -p tcp -j REDIRECT --to-port 100</code></p>
+</blockquote>
+</aside>
+<p>Бегло потестировал с ПК - работает! Нагрузка значительно меньше, чем в режиме tun, видео в 4k летают. Прямо вау.</p></td><td>2024-08-08T20:57:08.936Z</td></tr><tr><td>lawsonshelby(Shelby)</td><td><p>Чот какой-то был глюк уже на замученном компе походу с ютубом. Сейчас перезагрузился и через докер нормально показывает 4к!</p></td><td>2024-08-08T20:58:09.124Z</td></tr><tr><td>lawsonshelby(Shelby)</td><td><p>Эх… сколько нам открытий чудных) Здорово! Надо будет тоже попробовать</p></td><td>2024-08-08T20:59:55.333Z</td></tr><tr><td>0ka(0ka)</td><td><p>Я выше оставил в команде только tcp, и если вы убрали tun, то udp трафик (quic) будет идти напрямую. Но можно заблокировать udp (reject) на 443 порту чтобы не работал quic, тогда будет еще меньше нагрузка на железо</p></td><td>2024-08-08T22:07:00.073Z</td></tr><tr><td>xofamim548</td><td><aside class="quote no-group" data-username="MasterYoba" data-post="25" data-topic="8804">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/masteryoba/48/6182_2.png" class="avatar"> MasterYoba:</div>
+<blockquote>
+<p>Правильно будет вот так:</p>
+</blockquote>
+</aside>
+<p>Все работает, большое спасибо!</p></td><td>2024-08-09T09:54:34.142Z</td></tr><tr><td>xofamim548</td><td><aside class="quote no-group" data-username="0ka" data-post="39" data-topic="8804" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>Я выше оставил в команде только tcp, и если вы убрали tun, то udp трафик (quic) будет идти напрямую. Но можно заблокировать udp (reject) на 443 порту чтобы не работал quic, тогда будет еще меньше нагрузка на железо</p>
+</blockquote>
+</aside>
+<p>Если честно, не до конца понимаю, что происходит и почему так.</p>
+<p>Создал inbound redirect в sing-box, прописал вот это для ip адресов ПК и телевизора:</p>
+<pre><code class="lang-auto">iptables -t nat -A PREROUTING -s tv_ip/32 -p tcp -j REDIRECT --to-port 100
+</code></pre>
+<p>С ПК все работает замечательно, а вот с телевизора начинаются проблемы. Если так и оставить, то youtube на ТВ упирается в 11 - 12 Mbps. Если я правильно понимаю, телевизор пытается работать через quic напрямую, потому что если в sing-box сделать вот так:</p>
+<pre><code class="lang-auto">{
+ "protocol": "quic",
+ "outbound": "block"
+}
+</code></pre>
+<p>то youtube на ТВ перестаёт работать совсем.</p>
+<p>Попробовал прописать как вы сказали:</p>
+<pre><code class="lang-auto">iptables -A INPUT -s 192.168.1.36/32 -p udp --dport 443 -j REJECT
+</code></pre>
+<p>Но и в этом случае youtube на ТВ просто не работает.</p></td><td>2024-08-09T10:00:54.553Z</td></tr><tr><td>0ka(0ka)</td><td><p>вы tun оставили или убрали после добавления redirect?<br>
+у себя quic блокировал так</p>
+<pre><code class="lang-auto">iptables -A FORWARD -p udp --dport 443 -j REJECT
+</code></pre></td><td>2024-08-09T10:04:49.859Z</td></tr><tr><td>xofamim548</td><td><p>tun убрал, оставил только это (привожу секции inbounds и route, параметры dns и outbounds не менял):</p>
+<pre><code class="lang-auto">"inbounds": [
+		{
+			"type": "redirect",
+			"tag": "redirect-in",
+			"listen": "0.0.0.0",
+			"listen_port": 100
+		}
+	],
+...
+"route": {
+		"rules": [
+			{
+				"protocol": "dns",
+				"outbound": "dns-out"
+			},
+			{
+				"ip_is_private": true,
+				"outbound": "direct"
+			},
+			{
+				"rule_set": "youtube",
+				"outbound": "vless-out"
+			}
+        ],
+	"rule_set": [
+		{
+			"tag": "youtube",
+			"type": "local",
+			"format": "source",
+			"path": "/etc/sing-box/rule-set/youtube.json"
+		}
+	],
+	"final": "direct"
+	}
+</code></pre>
+<p>В iptables сейчас два правила:</p>
+<pre><code class="lang-auto">Chain PREROUTING (policy ACCEPT)
+target     prot opt source               destination
+REDIRECT   tcp  --  192.168.1.36         anywhere             redir ports 100
+
+-A FORWARD -p udp -m udp --dport 443 -j REJECT --reject-with icmp-port-unreachable
+</code></pre>
+<p>Почему-то после этого приложение youtube просто зависает с серым экраном при открытии. НО если поставить final: “vless-out”, то youtube снова начинает работать <img src="https://ntc.party/images/emoji/twitter/frowning_with_open_mouth.png?v=12" title=":frowning_with_open_mouth:" class="emoji" alt=":frowning_with_open_mouth:" loading="lazy" width="20" height="20"> Это странно, потому что для tun набор правил route был точно такой же, только убрал <code>auto_detect_interface</code>. Посмотрел<br>
+<code>sudo tcpdump -n -i any udp and src 192.168.1.36</code><br>
+никаких UDP кроме бродкаста на :15600 там нет. Насколько я понимаю, tcpdump показывает трафик ещё до фильтров iptables.</p>
+<p>Но если честно, я вообще не понимаю, что происходит. Прописал такой же редирект в iptables для ПК, вписал шлюз в настройки подключения, UDP на малине режектятся для всех устройств по вашему правилу, в route прописал final vless-out. В итоге получаю какую-то шизу:</p>
+<ul>
+<li><a href="http://speedtest.net" rel="noopener nofollow ugc">speedtest.net</a> на TV, sing-box и редиректы отключены: хорошая скорость, даже выше чем на ПК</li>
+<li><a href="http://speedtest.net" rel="noopener nofollow ugc">speedtest.net</a> на TV, sing-box и редиректы включены: 12,5 Mbps в обе стороны</li>
+<li><a href="http://speedtest.net" rel="noopener nofollow ugc">speedtest.net</a> на ПК, <strong>в обоих случаях</strong> хорошая скорость.</li>
+</ul>
+<p>Айпишники во всех случаях speedtest показывает как должно быть, да и по малине в htop сразу видна нагрузка. Ерунда какая-то.</p>
+<p>Попробую как-нибудь позже посмотреть на свежую голову, может я чего-то упускаю.</p></td><td>2024-08-09T12:13:11.394Z</td></tr><tr><td>0ka(0ka)</td><td><p>пробуй этот конф (добавил sniff, domain_strategy)</p>
+<pre><code class="lang-auto">{
+    "dns": {
+        "servers": [
+            {
+                "address": "udp://1.1.1.1"
+            }
+        ],
+        "strategy": "ipv4_only"
+    },
+    "inbounds": [
+        {
+            "domain_strategy": "ipv4_only",
+            "listen": "0.0.0.0",
+            "listen_port": 100,
+            "sniff": true,
+            "tag": "redirect-in",
+            "type": "redirect"
+        },
+        {
+            "auto_route": true,
+            "domain_strategy": "ipv4_only",
+            "gso": true,
+            "inet4_address": "198.18.0.1/30",
+            "interface_name": "singtun",
+            "mtu": 1500,
+            "sniff": true,
+            "tag": "tun-in",
+            "type": "tun"
+        },
+        {
+            "listen": "0.0.0.0",
+            "listen_port": 53,
+            "sniff": true,
+            "tag": "dns-cache",
+            "type": "direct"
+        }
+    ],
+    "log": {
+        "level": "info"
+    },
+    "outbounds": [
+        {
+			#vless
+        },
+        {
+            "tag": "dns-out",
+            "type": "dns"
+        },
+        {
+            "tag": "direct",
+            "type": "direct"
+        },
+        {
+            "tag": "block",
+            "type": "block"
+        }
+    ],
+    "route": {
+        "auto_detect_interface": true,
+        "final": "direct",
+        "rule_set": [
+            {
+                "format": "source",
+                "path": "/etc/sing-box/rule-set/youtube.json",
+                "tag": "youtube",
+                "type": "local"
+            }
+        ],
+        "rules": [
+            {
+                "outbound": "dns-out",
+                "protocol": "dns"
+            },
+            {
+                "outbound": "vless-out",
+                "rule_set": "youtube"
+            }
+        ]
+    }
+}
+</code></pre>
+<pre><code class="lang-auto">iptables -A FORWARD -p udp --dport 443 -j REJECT
+iptables -t nat -A PREROUTING -s tv_ip/32 -p tcp -j REDIRECT --to-port 100
+</code></pre>
+<p>редирект вроде бы не может в udp поэтому tun остаётся на всякий случай для udp трафика.<br>
+устройства перезагрузить после запуска сервиса и применения правил, или если винда, то можно выполнить</p>
+<pre><code class="lang-auto">netsh interface ip delete destinationcache
+</code></pre></td><td>2024-08-09T12:33:40.779Z</td></tr><tr><td>xofamim548</td><td><p>Окей, большое спасибо, попробую на выходных. Про перезагрузки кстати, тоже думал, что может какой-то мусор остаётся, и малину перезагружал и телевизор от питания отключал, но нет. Попробую этот конфиг, посмотрим что получится.</p></td><td>2024-08-09T12:40:38.894Z</td></tr><tr><td>xofamim548</td><td><p>Чтобы лишний раз не отнимать чужое время, уточню сразу: в принципе я добился того, что мне нужно, и текущая ситуация (с учётом нулевых затрат) меня вполне устраивает. Тем не менее, рассказываю, что в итоге получилось (спойлер: получилось странное) с ноткой некоторого недоумения.</p>
+<p>В iptables следующее:</p>
+<pre><code class="lang-auto">sudo iptables -t nat -A PREROUTING -s 192.168.1.36/32 -p tcp -j REDIRECT --to-port 100
+sudo iptables -A FORWARD -p udp --dport 443 -j DROP
+</code></pre>
+<p>(Разницы между DROP и REJECT не увидел, да и дело по-моему совсем не в QUIC, я не вижу udp запросов с телевизора на 443 порт ни в логах, ни в tcpdump. Также прописал редиректы для ПК и смартфона, но об этом потом.)</p>
+<p>Ваш конфиг тоже не заработал, но вы подбросили мне идею: я действительно забыл про <code>sniff</code> в инбаунде redirect. Если добавить <code>sniff</code> и <code>sniff_override_destination</code>, то что-то слегка меняется, по крайней мере приложение начинает открываться, но по-прежнему как будто бы идет через РФ. К тому моменту я уже почитал тему о маркировке российских IP гуглом и от греха подальше решил перейти к обычной гео фильтрации, которой уже сто лет пользуюсь во всех клиентах. Ссылки на srs украл из hiddify:</p>
+<pre><code class="lang-auto">	"route": {
+		"rules": [
+			{
+				"protocol": "dns",
+				"outbound": "dns-out"
+			},
+			{
+                "ip_is_private": true,
+                "outbound": "direct"
+            },
+			{
+                "rule_set": [
+					"geoip-ru",
+					"geosite-ru"
+				],
+                "outbound": "direct"
+            }
+        ],
+	"rule_set": [
+		{
+			"type": "remote",
+			"tag": "geoip-ru",
+			"format": "binary",
+			"url": "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geoip-ru.srs"
+		},
+		{
+			"type": "remote",
+			"tag": "geosite-ru",
+			"format": "binary",
+			"url": "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geosite-category-ru.srs"
+		}
+	],
+	"final": "vless-out",
+	"auto_detect_interface": true
+	}
+</code></pre>
+<p>Но и это ничего не изменило.</p>
+<p>А потом я вспомнил, что во всех клиентах на ПК у меня всегда был прописан DoH без условий, да и в Firefox по вашему совету тоже. <strong>И наконец-то получил рабочий конфиг:</strong></p>
+<pre><code class="lang-auto">{
+	"log": {
+		"disabled": false,
+		"level": "debug",
+		"output": "/tmp/sing-box.log",
+		"timestamp": true
+	},
+	"dns": {
+		"servers": [
+			{
+				"tag": "google",
+				"address": "https://8.8.8.8/dns-query"
+			},
+			{
+			"tag": "block",
+			"address": "rcode://success"
+			}
+		],
+		"final": "google",
+		"strategy": "ipv4_only"
+	},
+	"inbounds": [
+		{
+			"type": "tun",
+			"interface_name": "tun0",
+			"domain_strategy": "ipv4_only",
+			"inet4_address": "172.16.250.1/30",
+			"mtu": 1500,
+			"auto_route": true,
+			"strict_route": false,
+			"sniff": true,
+			"sniff_override_destination": true
+		},
+		{
+			"type": "redirect",
+			"tag": "redirect-in",
+			"listen": "0.0.0.0",
+			"listen_port": 100,
+			"domain_strategy": "ipv4_only",
+			"sniff": true,
+			"sniff_override_destination": true
+		}
+	],
+	"outbounds": [
+		{
+			# vless-out
+		},
+		{
+			"type": "direct",
+			"tag": "direct"
+		},
+		{
+			"type": "block",
+			"tag": "block"
+		},
+			{
+			"type": "dns",
+			"tag": "dns-out"
+		}
+	],
+	"route": {
+		"rules": [
+			{
+				"protocol": "dns",
+				"outbound": "dns-out"
+			},
+			{
+                "ip_is_private": true,
+                "outbound": "direct"
+            },
+			{
+                "rule_set": [
+					"geoip-ru",
+					"geosite-ru"
+				],
+                "outbound": "direct"
+            }
+        ],
+	"rule_set": [
+		{
+			"type": "remote",
+			"tag": "geoip-ru",
+			"format": "binary",
+			"url": "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geoip-ru.srs"
+		},
+		{
+			"type": "remote",
+			"tag": "geosite-ru",
+			"format": "binary",
+			"url": "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geosite-category-ru.srs"
+		}
+	],
+	"final": "vless-out",
+	"auto_detect_interface": true
+	}
+}
+</code></pre>
+<p>Я не знаю, почему, но в отличие от всего остального оно работает.</p>
+<p>Веселье, брызги шампанского, тему можно закрывать? Не совсем <img src="https://ntc.party/images/emoji/twitter/upside_down_face.png?v=12" title=":upside_down_face:" class="emoji" alt=":upside_down_face:" loading="lazy" width="20" height="20"></p>
+<p>Осталась крайне загадочная проблема, корни которой я понять не могу. Скорость на ТВ действительно становится выше - ну, типа, с 8 - 9 Mbps по speedtest она вырастает до 13 - 14 Mbps (upload всегда на 1 - 2 мегабита выше, чем download, хотя в тестах без sing-box обычно наоборот). В приложении youtube изменения примерно такие же. В то же время на ПК с Windows 10 скорость становится <strong>намного</strong> выше, упираясь только в обычную ширину канала по wi-fi, а youtube без проблем открывает 4K 60 fps. Все тесты на speedtest делаются до одного и того же сервера, во всех случаях верно определяется удаленный IP-адрес.</p>
+<p>Аналогичную проблему вижу на смартфоне с Android, для которого я тоже прописал редирект в iptables: там скорость опять-таки бьется в потолок 13 - 14 Mbps, и youtube тоже не воспроизводит 4K.</p>
+<p>Что общего между смартфоном на Android и ТВ Samsung, чего нет у Windows - я понять не могу. Пробовал отключать в Firefox DoH и чистить кэш запросов, отключать http3 и даже http2, тестировать через Chrome, прописывать одни и те же dns-серверы на всех устройствах (8.8.8.8, или роутер, или малина) - и неизменно получаю высокую скорость на ПК, а на телевизоре и смартфоне неизменно упираюсь в 13 - 14 Mbps (с той же небольшой разницей в пользу upload). Единственная особенность ПК - то, что он подключен к Wi-Fi через Keenetic Start в режиме адаптера, но не уверен, что это как-то может влиять на ситуацию.</p></td><td>2024-08-12T12:14:47.413Z</td></tr><tr><td>0ka(0ka)</td><td><p>nload на rpi показывает ту же скорость что и пк при спидтесте?</p></td><td>2024-08-12T12:29:28.018Z</td></tr><tr><td>xofamim548</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="raspberry-pi-xray-между-роутером-и-телевизором/f14a48a685d451026774838a05e2654622875f5a.jpeg" data-download-href="https://ntc.party/uploads/default/f14a48a685d451026774838a05e2654622875f5a" title="2024-08-12 15_44_28-Window"><img src="raspberry-pi-xray-между-роутером-и-телевизором/f14a48a685d451026774838a05e2654622875f5a_2_690x234.jpeg" alt="2024-08-12 15_44_28-Window" data-base62-sha1="yqydNVC3mpPbj3Pw9HsPQpr9uFI" width="690" height="234" srcset="raspberry-pi-xray-между-роутером-и-телевизором/f14a48a685d451026774838a05e2654622875f5a_2_690x234.jpeg, raspberry-pi-xray-между-роутером-и-телевизором/f14a48a685d451026774838a05e2654622875f5a_2_1035x351.jpeg 1.5x, raspberry-pi-xray-между-роутером-и-телевизором/f14a48a685d451026774838a05e2654622875f5a.jpeg 2x" data-dominant-color="7F838B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">2024-08-12 15_44_28-Window</span><span class="informations">1379×469 108 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="raspberry-pi-xray-между-роутером-и-телевизором/49726efbdc7397bf181d71eb33419d69c370fede.jpeg" data-download-href="https://ntc.party/uploads/default/49726efbdc7397bf181d71eb33419d69c370fede" title="2024-08-12 16_06_23-The Hype Is Real - B7 Audi RS4 - YouTube — Mozilla Firefox"><img src="raspberry-pi-xray-между-роутером-и-телевизором/49726efbdc7397bf181d71eb33419d69c370fede_2_689x389.jpeg" alt="2024-08-12 16_06_23-The Hype Is Real - B7 Audi RS4 - YouTube — Mozilla Firefox" data-base62-sha1="atK1JPqinSC2ibYByjRixHCnFMi" width="689" height="389" srcset="raspberry-pi-xray-между-роутером-и-телевизором/49726efbdc7397bf181d71eb33419d69c370fede_2_689x389.jpeg, raspberry-pi-xray-между-роутером-и-телевизором/49726efbdc7397bf181d71eb33419d69c370fede_2_1033x583.jpeg 1.5x, raspberry-pi-xray-между-роутером-и-телевизором/49726efbdc7397bf181d71eb33419d69c370fede.jpeg 2x" data-dominant-color="858A91"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">2024-08-12 16_06_23-The Hype Is Real - B7 Audi RS4 - YouTube — Mozilla Firefox</span><span class="informations">1292×729 223 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p><img src="https://ntc.party/images/emoji/twitter/upside_down_face.png?v=12" title=":upside_down_face:" class="emoji only-emoji" alt=":upside_down_face:" loading="lazy" width="20" height="20"></p></td><td>2024-08-12T12:45:43.624Z</td></tr><tr><td>0ka(0ka)</td><td><p>а если включить bbr на rpi и сервере?</p></td><td>2024-08-12T13:17:41.712Z</td></tr><tr><td>xofamim548</td><td><p>На сервере включен, на rpi включил сейчас, но увы - ничего не меняется.</p>
+<p>Ладно, спасибо большое, думаю пора оставить это дело) Подумаю еще на досуге, может что-то придет в голову, должна же быть какая-то объяснимая разница между устройствами. Может еще с чего-нибудь потестирую.</p></td><td>2024-08-12T13:24:01.205Z</td></tr><tr><td>shimanov(Dmitriy)</td><td><p>Всем привет, столкнулся с такой же проблемой, что и автор, взял последний конфиг, но в секции outbounds заменил vless на socks</p>
+<pre><code class="lang-auto">{
+	"type": "socks",
+	"tag": "socks-out",
+	"server": "192.168.1.182",
+	"server_port": 1080,
+	"version": "5",
+	"network": "tcp",
+  	"udp_over_tcp": false
+}
+</code></pre>
+<p>Такая конфигурация отлично работает на винде, но вот на телеке Samsung не работает, после запуска ютуба серый экран или лого ютуба висит.<br>
+Судя по логу sing box запрос до сервера доходит нормально</p>
+<pre><code class="lang-auto">-0400 2024-08-13 06:50:55 DEBUG dns: exchange www.youtube.com. IN AAAA
+-0400 2024-08-13 06:50:55 DEBUG dns: exchange www.youtube.com. IN A
+-0400 2024-08-13 06:50:55 DEBUG dns: strategy rejected
+-0400 2024-08-13 06:50:55 DEBUG dns: exchanged www.youtube.com NOERROR 300
+-0400 2024-08-13 06:50:55 INFO dns: exchanged www.youtube.com CNAME www.youtube.com. 300 IN CNAME youtube-ui.l.google.com.
+-0400 2024-08-13 06:50:55 INFO dns: exchanged www.youtube.com CNAME youtube-ui.l.google.com. 300 IN CNAME wide-youtube.l.google.com.
+-0400 2024-08-13 06:50:55 INFO dns: exchanged www.youtube.com A wide-youtube.l.google.com. 300 IN A 142.251.1.198
+-0400 2024-08-13 06:50:55 INFO [1466161358 0ms] inbound/tun[0]: inbound connection from 192.168.1.10:59817
+-0400 2024-08-13 06:50:55 INFO [1466161358 0ms] inbound/tun[0]: inbound connection to 142.251.1.198:443
+-0400 2024-08-13 06:50:55 DEBUG [1466161358 29ms] router: sniffed protocol: tls, domain: www.youtube.com
+-0400 2024-08-13 06:50:55 DEBUG [1466161358 30ms] dns: resolved [142.251.1.198]
+-0400 2024-08-13 06:50:55 INFO [1466161358 30ms] outbound/socks[socks-out]: outbound connection to 142.251.1.198:443
+-0400 2024-08-13 06:50:56 INFO [4115249208 0ms] inbound/tun[0]: inbound packet connection from 192.168.1.10:53517
+-0400 2024-08-13 06:50:56 INFO [4115249208 0ms] inbound/tun[0]: inbound packet connection to 8.8.8.8:53
+-0400 2024-08-13 06:50:56 DEBUG [4115249208 0ms] router: sniffed packet protocol: dns
+-0400 2024-08-13 06:50:56 DEBUG [4115249208 0ms] router: match[0] protocol=dns =&gt; dns-out
+</code></pre>
+<p>Подскажите куда капнуть, в какую сторону посмотреть</p></td><td>2024-08-13T11:09:03.238Z</td></tr><tr><td>dorohovGeorge(George Dorohov)</td><td><p><a class="mention" href="/u/xofamim548">@xofamim548</a> добрый день, следил за вашим решением почти в прямом эфире. Возможно не до конца понимаю всех тонкостей. Я попробовал использовать ваше решение, но у меня какие то проблемы с geo-ip. Если можете подсказать буду крайне признателен. Проблема на скрине<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="raspberry-pi-xray-между-роутером-и-телевизором/1ae0c0d310879aeb0d2608862821a2f1edaf925f.jpeg" data-download-href="https://ntc.party/uploads/default/1ae0c0d310879aeb0d2608862821a2f1edaf925f" title="2024-08-13 14.58.31"><img src="raspberry-pi-xray-между-роутером-и-телевизором/1ae0c0d310879aeb0d2608862821a2f1edaf925f_2_679x499.jpeg" alt="2024-08-13 14.58.31" data-base62-sha1="3PLWDBhyKnkO9hPK5AjTWifITlt" width="679" height="499" srcset="raspberry-pi-xray-между-роутером-и-телевизором/1ae0c0d310879aeb0d2608862821a2f1edaf925f_2_679x499.jpeg, raspberry-pi-xray-между-роутером-и-телевизором/1ae0c0d310879aeb0d2608862821a2f1edaf925f.jpeg 1.5x, raspberry-pi-xray-между-роутером-и-телевизором/1ae0c0d310879aeb0d2608862821a2f1edaf925f.jpeg 2x" data-dominant-color="1B1C1D"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">2024-08-13 14.58.31</span><span class="informations">946×696 47.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-08-13T11:58:43.585Z</td></tr><tr><td>xofamim548</td><td><aside class="quote no-group" data-username="shimanov" data-post="51" data-topic="8804">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shimanov/48/6695_2.png" class="avatar"> shimanov:</div>
+<blockquote>
+<p>Всем привет, столкнулся с такой же проблемой, что и автор, взял последний конфиг, но в секции outbounds заменил vless на socks</p>
+</blockquote>
+</aside>
+<p>Верно ли я понимаю, что UDP-запросы идут вникуда? Мой опыт показал, что на самсунге без UDP работать не будет, блокировать можно только на 443 порту. Если UDP идут куда-то мимо удалённого сервера, то скорее всего тоже не будет.</p>
+<p>Всё хотел посмотреть, что там на UDP завязано, но малость устал всё это настраивать, так руки и не дошли.</p></td><td>2024-08-13T14:50:10.439Z</td></tr><tr><td>xofamim548</td><td><p>Честно сказать, я тоже до сих пор не понимаю всех тонкостей <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> Сбросьте сюда полный конфиг sing-box без чувствительных данных, возможно тег google где-то повторно используется не в тему. И заодно результат выполнения</p>
+<pre><code class="lang-auto">cat /etc/resolv.conf
+</code></pre></td><td>2024-08-13T15:00:07.809Z</td></tr><tr><td>shimanov(Dmitriy)</td><td><p>Т.е. UDP тоже надо пустить на удаленный сервер?<br>
+В iptables добавлял обе настройки как в вашем примере</p></td><td>2024-08-13T15:23:57.288Z</td></tr><tr><td>xofamim548</td><td><p>Да, верно, UDP надо пропускать на удалённый. В соседней теме <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-youtube-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/8074/608">обсуждали</a> проблему с Samsung и (Good)byeDPI, там тоже у людей странности, телевизор куда-то ещё обращается помимо доменов youtube. Подозреваю, что по UDP, хотя повторюсь, не проверял.</p>
+<p>В iptables у меня два правила, это верно (дропы для udp :443 и редирект tcp на 100-й порт).</p>
+<p>Сейчас вот попробовал зарезать весь UDP через iptables, та же ситуация, сразу перестает работать и серый экран. Выше по теме можно найти, когда я пускал в редирект только tcp и не делал tun интерфейс для udp (то есть udp шел напрямую), опять же было лого youtube или серый экран.</p></td><td>2024-08-13T15:32:23.914Z</td></tr><tr><td>shimanov(Dmitriy)</td><td><p>Спасибо огромное, в итоге ваш конфиг с небольшим изменением с vless на socks работает отлично!!!<br>
+Моя ошибка была в том, что я не сохранил изменения в iptables, поэтому ничего не работало.</p></td><td>2024-08-13T17:32:59.428Z</td></tr><tr><td>shimanov(Dmitriy)</td><td><p>Рано радовался, выключил телек, включил и снова приложение ютуба не работает</p></td><td>2024-08-13T17:57:35.900Z</td></tr><tr><td>xofamim548</td><td><p>Если UDP настроили, попробуйте на телевизоре вписать DNS 8.8.8.8.</p>
+<p>Вообще опять-таки слабо понимаю, как ходят DNS-запросы в моей последней конфигурации, <a class="mention" href="/u/0ka">@0ka</a> не подскажете? Вот этот DoH гугла вообще используется или нет? Потому что я сейчас попробовал позахватывать UDP трафик, и у меня такое чувство, что нет.</p>
+<p><a class="attachment" href="raspberry-pi-xray-между-роутером-и-телевизором/egs626Bu6gTNzsJjZ28VWrn4fjI.pcap">capture-udp.pcap</a> (57,2 КБ)</p></td><td>2024-08-13T18:02:46.797Z</td></tr><tr><td>shimanov(Dmitriy)</td><td><p>Поменял DNS на 8.8.8.8, результат тот же.<br>
+Для полной картины вот мой конфиг:</p>
+<pre><code class="lang-auto">{
+	"log": {
+		"disabled": false,
+		"level": "trace",
+		"output": "/etc/sing-box/sing-box.log",
+		"timestamp": true
+	},
+	"dns": {
+		"servers": [
+			{
+				"tag": "google",
+				"address": "https://8.8.8.8/dns-query"
+			},
+			{
+				"tag": "local",
+				"address": "192.168.1.1",
+				"detour": "direct"
+			},
+			{
+			"tag": "block",
+			"address": "rcode://success"
+			}
+		],
+		"strategy": "ipv4_only"
+	},
+	"inbounds": [
+		{
+			"type": "tun",
+			"interface_name": "tun0",
+			"domain_strategy": "ipv4_only",
+			"inet4_address": "172.16.250.1/30",
+			"mtu": 9000,
+			"auto_route": true,
+			"strict_route": false,
+			"sniff": true,
+			"sniff_override_destination": true
+		},
+		{
+			"type": "redirect",
+			"tag": "redirect-in",
+			"listen": "0.0.0.0",
+			"listen_port": 100,
+			"domain_strategy": "ipv4_only",
+			"sniff": true,
+			"sniff_override_destination": true
+		}
+	],
+	"outbounds": [
+		{
+			"type": "socks",
+			"tag": "socks-out",
+			"server": "192.168.1.182",
+			"server_port": 1080,
+			"version": "5",
+			"network": "tcp",
+  			"udp_over_tcp": true
+		},
+		{
+			"type": "direct",
+			"tag": "direct"
+		},
+		{
+			"type": "block",
+			"tag": "block"
+		},
+			{
+			"type": "dns",
+			"tag": "dns-out"
+		}
+	],
+	"route": {
+		"rules": [
+			{
+				"protocol": "dns",
+				"outbound": "dns-out"
+			},
+			{
+                "ip_is_private": true,
+                "outbound": "direct"
+            },
+			{
+                "rule_set": [
+					"geoip-ru",
+					"geosite-ru"
+				],
+                "outbound": "direct"
+            }
+        ],
+	"rule_set": [
+		{
+			"type": "remote",
+			"tag": "geoip-ru",
+			"format": "binary",
+			"url": "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geoip-ru.srs"
+		},
+		{
+			"type": "remote",
+			"tag": "geosite-ru",
+			"format": "binary",
+			"url": "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geosite-category-ru.srs"
+		}
+	],
+	"final": "socks-out",
+	"auto_detect_interface": true
+	}
+}
+</code></pre></td><td>2024-08-13T18:15:19.920Z</td></tr><tr><td>xofamim548</td><td><p>Без этой секции пробовали?</p>
+<aside class="quote no-group" data-username="shimanov" data-post="60" data-topic="8804">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shimanov/48/6695_2.png" class="avatar"> shimanov:</div>
+<blockquote>
+<pre><code class="lang-auto">{
+				"tag": "local",
+				"address": "192.168.1.1",
+				"detour": "direct"
+			},
+</code></pre>
+</blockquote>
+</aside>
+<p>Мне она всё сильно портила почему-то. Пока не прописал тег google в качестве final, ничего не работало.</p>
+<p>P. S. Надо все-таки сесть и разобраться с dns запросами в sing-box, не понимаю, как там разные секции друг с другом связаны.</p></td><td>2024-08-13T18:18:06.738Z</td></tr><tr><td>xofamim548</td><td><p>Вообще я понял, что если я хочу всегда использовать DoH гугла (а я хочу), то конфиг можно упростить до такого состояния:</p>
+<pre><code class="lang-auto">{
+	"log": {
+		"disabled": true,
+		"level": "info",
+		"output": "/tmp/sing-box.log",
+		"timestamp": true
+	},
+	"dns": {
+		"servers": [
+			{
+				"tag": "google",
+				"address": "https://8.8.8.8/dns-query"
+			},
+			{
+			"tag": "block",
+			"address": "rcode://success"
+			}
+		],
+		"final": "google",
+		"strategy": "ipv4_only"
+	},
+	"inbounds": [
+		{
+			"type": "tun",
+			"interface_name": "tun0",
+			"domain_strategy": "ipv4_only",
+			"inet4_address": "172.16.250.1/30",
+			"mtu": 1500,
+			"auto_route": true,
+			"strict_route": false,
+			"sniff": true,
+			"sniff_override_destination": true
+		},
+		{
+			"type": "redirect",
+			"tag": "redirect-in",
+			"listen": "0.0.0.0",
+			"listen_port": 100,
+			"domain_strategy": "ipv4_only",
+			"sniff": true,
+			"sniff_override_destination": true
+		}
+	],
+	"outbounds": [
+		{
+			# vless-out
+		},
+		{
+			"type": "direct",
+			"tag": "direct"
+		},
+		{
+			"type": "block",
+			"tag": "block"
+		}
+	],
+	"route": {
+		"rules": [
+			{
+                "ip_is_private": true,
+                "outbound": "direct"
+            },
+			{
+                "rule_set": [
+					"geoip-ru",
+					"geosite-ru"
+				],
+                "outbound": "direct"
+            }
+        ],
+	"rule_set": [
+		{
+			"type": "remote",
+			"tag": "geoip-ru",
+			"format": "binary",
+			"url": "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geoip-ru.srs"
+		},
+		{
+			"type": "remote",
+			"tag": "geosite-ru",
+			"format": "binary",
+			"url": "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geosite-category-ru.srs"
+		}
+	],
+	"final": "vless-out",
+	"auto_detect_interface": true
+	}
+}
+</code></pre>
+<p>Примерное понимание работы DNS и правил дает вот этот пример: <a href="https://vpnrouter.homes/singbox-dns/" class="inline-onebox" rel="noopener nofollow ugc">Sing-Box DNS - VPN Router for Home Networks</a></p>
+<p>Я, правда, так до конца и не уверен, какие ответы от 8.8.8.8 на 53 порту в итоге отображает tcpdump. Если я корректно понимаю, телевизор пытается обращаться к 8.8.8.8 (установлен в настройках тв), sing-box перенаправляет запрос согласно правилам, а потом как бы возвращает ответ от 8.8.8.8. Но это если я правильно понял.</p></td><td>2024-08-13T19:16:16.244Z</td></tr><tr><td>xofamim548</td><td><p>Выкроил еще немного времени и протестировал кучу разных конфигов, в том числе те, которые у меня не работали. Тестировал с полной перезагрузкой телевизора с выключением из розетки на 30+ секунд. (Всем советую делать так же.)</p>
+<p>Во-первых, как я и предположил выше, UDP на 443 порту можно не блокировать (хотя возможно зависит от модельного года, но у меня QUIC не используется).</p>
+<p>Во-вторых, за эти дни что-то поменялось. Все конфиги с redirect+tun, которые у меня не работали <em>по причинам</em>, теперь работают. С локальными DNS, с удаленными DNS, с роутингом по geoip и geosite, с роутингом по файлику youtube.json - работают, и видео открываются, и поиск, и рекомендации, все как рукой сняло. Иногда проявляется странный нюанс: в тех конфигах, что раньше не работали, приложение youtube временами открывается со второго раза. В первый раз начинает загружаться, вылетает, и телевизор выдает сообщение “Произошла ошибка сети”. Снова открываешь youtube - работает. Но ошибка воспроизводится как-то нестабильно.</p>
+<p>В итоге оставил так:</p>
+<pre><code class="lang-auto">{
+	"log": {
+		"disabled": true,
+		"level": "info",
+		"output": "/tmp/sing-box.log",
+		"timestamp": true
+	},
+	"dns": {
+		"servers": [
+			{
+				"tag": "google",
+				"address": "https://8.8.8.8/dns-query"
+			},
+			{
+			"tag": "block",
+			"address": "rcode://success"
+			}
+		],
+		"final": "google",
+		"strategy": "ipv4_only"
+	},
+	"inbounds": [
+		{
+			"type": "tun",
+			"interface_name": "tun0",
+			"domain_strategy": "ipv4_only",
+			"inet4_address": "172.16.250.1/30",
+			"mtu": 1500,
+			"auto_route": true,
+			"strict_route": false,
+			"sniff": true,
+			"sniff_override_destination": true
+		},
+		{
+			"type": "redirect",
+			"tag": "redirect-in",
+			"listen": "0.0.0.0",
+			"listen_port": 100,
+			"domain_strategy": "ipv4_only",
+			"sniff": true,
+			"sniff_override_destination": true
+		}
+	],
+	"outbounds": [
+		{
+			"type": "vless",
+			"tag": "vless-out",
+			"server": "IP_ADDR_HERE",
+			"server_port": 443,
+			"uuid": "UUID_HERE",
+			"flow": "xtls-rprx-vision",
+			"network": "tcp",
+			"tls": {
+				"enabled": true,
+				"server_name": "DOMAIN_HERE",
+				"alpn": ["h2"],
+				"utls": {
+					"enabled": true,
+					"fingerprint": "chrome"
+				},
+				"reality": {
+					"enabled": true,
+					"public_key": "PUBLIC_KEY_HERE",
+					"short_id": "SHORT_ID_HERE"
+				}
+			},
+			"packet_encoding": "xudp"
+		},
+		{
+			"type": "direct",
+			"tag": "direct"
+		},
+		{
+			"type": "block",
+			"tag": "block"
+		}
+	],
+	"route": {
+		"rules": [
+			{
+                "ip_is_private": true,
+                "outbound": "direct"
+            },
+			{
+                "rule_set": [
+					"geoip-ru",
+					"geosite-ru"
+				],
+                "outbound": "direct"
+            }
+        ],
+	"rule_set": [
+		{
+			"type": "remote",
+			"tag": "geoip-ru",
+			"format": "binary",
+			"url": "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geoip-ru.srs"
+		},
+		{
+			"type": "remote",
+			"tag": "geosite-ru",
+			"format": "binary",
+			"url": "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geosite-category-ru.srs"
+		}
+	],
+	"final": "vless-out",
+	"auto_detect_interface": true
+	}
+}
+</code></pre>
+<p>Также если кому-то интересно, при роутинге по youtube.json сам файлик выглядел так:</p>
+<pre><code class="lang-auto">{
+    "version": 1,
+    "rules": [
+        {
+            "domain_suffix": [
+				".googlevideo.com",
+				".youtube.com",
+				".ggpht.com",
+				".ytimg.com",
+				".googleapis.com",
+				".youtu.be",
+				".google.com",
+				".yt.be",
+				".youtubekids.com",
+				".nhacmp3youtube.com",
+				".googleusercontent.com",
+				".gstatic.com"
+            ]
+        }
+    ]
+}
+</code></pre></td><td>2024-08-14T08:30:10.943Z</td></tr><tr><td>xofamim548</td><td><p>Еще пара мыслей для тех, у кого все работало, а потом перестало.</p>
+<ol>
+<li>Отключить ipv6, если не используете. Поначалу отключал так:</li>
+</ol>
+<pre><code class="lang-auto">sudo nano /etc/sysctl.conf
+Добавить в конец:
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv4.ip_forward=1
+и выполнить:
+sudo sysctl -p
+</code></pre>
+<p>Оно даже срабатывает, но после перезагрузки ipconfig почему-то снова показывает ipv6 адрес, что может создавать неприятности. Есть <a href="https://www.howtoraspberry.com/2020/04/disable-ipv6-on-raspberry-pi/" rel="noopener nofollow ugc">статья</a> по RPI, в которой написано, как надо:</p>
+<pre><code class="lang-auto">sudo nano /boot/firmware/cmdline.txt
+Добавить в конец строки: ipv6.disable=1
+</code></pre>
+<p>После этого сделать sudo reboot и выполнить ifconfig, чтобы убедиться, что ipv6 для eth0 больше не отображается.</p>
+<ol start="2">
+<li>Не забывать сохранять правила iptables, чтобы не слетали после перезагрузки.</li>
+</ol>
+<pre><code class="lang-auto">sudo iptables -t nat -A PREROUTING -s IP_ТЕЛЕВИЗОРА/32 -p tcp -j REDIRECT --to-port 100
+sudo apt-get install iptables-persistent
+sudo netfilter-persistent save
+sudo systemctl enable netfilter-persistent
+sudo systemctl start netfilter-persistent
+</code></pre>
+<ol start="3">
+<li>sing-box после перезагрузки может стартовать слишком рано. Если после ребута все перестало работать, проверить статус сервиса sing-box. Если он failed, хотя раньше запускался, то надо поправить конфиг sing-box.service примерно так (главным образом строку After):</li>
+</ol>
+<pre><code class="lang-auto">[Unit]
+Description=Sing-Box Service
+After=network.target nss-lookup.target network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/sing-box run -c /etc/sing-box/config.json
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p>Хотя по идее в репах должен быть правильный конфиг, но мало ли.</p></td><td>2024-08-14T11:35:01.270Z</td></tr><tr><td>omgiafs(omgiafs)</td><td><p>Поделюсь своим опытом настройки.</p>
+<h1><a name="p-34083-h-1" class="anchor" href="#p-34083-h-1"></a>Дано</h1>
+<ul>
+<li>SmartTV Samsung c TizenOS (т.е. не умеет в прокси и VPN),</li>
+<li>роутер с OpenWRT 23.05.0 с современным железом (поддержка WiFi 5 и выше),</li>
+<li>VPS на территории потанцевального противника</li>
+</ul>
+<h1><a name="p-34083-h-2" class="anchor" href="#p-34083-h-2"></a>Задача</h1>
+<p>Реализация желания смотреть Ютуб, злоумышленно эксплуатируя уязвимость в виде статьи 29 Конституции РФ.</p>
+<h1><a name="p-34083-h-3" class="anchor" href="#p-34083-h-3"></a>Решение</h1>
+<p>sing-box на роутере + пара правил nftables на нём же.</p>
+<h1><a name="p-34083-h-4" class="anchor" href="#p-34083-h-4"></a>Подробности:</h1>
+<h2><a name="p-34083-sing-box-5" class="anchor" href="#p-34083-sing-box-5"></a>Ставим sing-box</h2>
+<p><code>opkg update &amp;&amp; opkg install sing-box</code></p>
+<h2><a name="p-34083-sing-box-6" class="anchor" href="#p-34083-sing-box-6"></a>Конфиг sing-box</h2>
+<p><code>cat /etc/config/sing-box</code></p>
+<pre data-code-wrap="config"><code class="lang-config">config sing-box 'main'
+        option enabled '1'
+        option user 'sing-box'
+        option conffile '/etc/sing-box/config.json'
+        option workdir '/usr/share/sing-box'
+</code></pre>
+<p><code>cat /etc/sing-box/config.json</code></p>
+<pre data-code-wrap="YAML"><code class="lang-YAML">{
+  "log": {
+    "level": "warn",
+    "disabled": false
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "dns-google",
+        "address": "tls://8.8.8.8",
+        "detour": "vless-xtls-vision-out"
+      },
+      { //  в моём случае "address" не "local", т.к. на роутере крутится DNS-сервер для WAN и LAN сетей
+        //  и настроены разные view для локальных и внешних клиентов.
+        //  На интерфейсе 192.168.1.1 я гарантированно попадаю на view LAN и мой домен резолвится в его локальный IP, а не в белый.
+        "tag": "dns-local",
+        "address": "192.168.1.1", 
+        "detour": "direct-out"
+      }
+    ], //servers
+    "rules": [
+      {
+        "outbound": [
+          "direct-out"
+        ],
+        "server": "dns-local"
+      },
+      {
+        "domain_suffix": [
+          "local",
+          "home",
+          "isp.local.site"
+        ],
+        "server": "dns-local"
+      },
+      {
+        "outbound": [
+          "vless-xtls-vision-out"
+        ],
+        "server": "dns-google"
+      }
+    ]
+  }, // dns
+  "inbounds": [
+    {
+     "type": "redirect",
+     "tag": "redirect-in",
+     "listen": "192.168.1.1",
+     "listen_port": 3129,
+     "sniff": true,
+     "tcp_fast_open": true
+    },
+    {
+      "listen": "192.168.1.1",
+      "listen_port": 3130,
+      "tag": "vless-xtls-vision-mixed-in",
+      "type": "mixed"
+    }
+  ],
+  "outbounds": [
+    {
+      "flow": "xtls-rprx-vision",
+      "packet_encoding": "xudp",
+      "server": "REDACTED",
+      "server_port": 443,
+      "tag": "vless-xtls-vision-out",
+      "tls": {
+        "enabled": true,
+        "server_name": "REDACTED",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        }
+      },
+      "type": "vless",
+      "uuid": "REDACTED"
+    },
+    {
+      "type": "direct",
+      "tag": "direct-out"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    }
+  ],
+  "route": {
+    "rules": [
+      { // rule for connecting without proxy
+        "domain_suffix": [
+          "local",
+          "home",
+          "isp.local.site"
+          ],
+         "outbound": "direct-out"
+      },
+        { // Youtube for Samsung Smart TV
+          "inbound": "redirect-in",
+          "domain_suffix": [
+            "youtube.com",
+            "youtu.be",
+            "googlevideo.com",
+            "ytimg.com"
+          ],
+          "outbound": "vless-xtls-vision-out"
+        },
+       {
+         "rule_set": "antizapret",
+         "outbound": "vless-xtls-vision-out"
+       },
+       {
+         "protocol": "dns",
+         "outbound": "dns-out"
+        },
+        {
+          "inbound": "redirect-in",
+          "outbound": "direct-out"
+        },
+        {
+          "inbound": "vless-xtls-mixed-in",
+          "outbound": "vless-xtls-vision-out"
+        }
+    ], //rules
+    "rule_set": [
+      { // Remote rule-set will be cached if experimental.cache_file.enabled.
+        "tag": "antizapret",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/savely-krasovsky/antizapret-sing-box/releases/latest/download/antizapret.srs",
+        "download_detour": "vless-xtls-vision-out",
+        "update_interval": "1d"
+      }
+    ]
+  }
+}
+</code></pre>
+<h2><a name="p-34083-nftables-7" class="anchor" href="#p-34083-nftables-7"></a>Правила nftables</h2>
+<h3><a name="p-34083-uci-8" class="anchor" href="#p-34083-uci-8"></a>В формате UCI:</h3>
+<p><code>/etc/config/firewall</code></p>
+<pre><code class="lang-auto">config rule
+        option enabled          1
+        option name             SamsungTV-block-quick
+        option target           REJECT
+        option src              lan
+        option dest             wan
+        option proto            udp
+        option src_ip           'SMART.TV.IP.ADDRESS'
+        option dest_port        443
+        option family           ipv4
+
+config redirect
+        option enabled          1
+        option name             SamsungTV-redirect-HTTPS-to-sing-box
+        option target           DNAT
+        option src              lan
+        option dest             wan
+        option proto            tcp
+        option src_ip           'SMART.TV.IP.ADDRESS'
+        option src_dport        443
+        option dest_ip          '192.168.1.1'
+        option dest_port        3129 # port of 'redirect-in' sing-box inbound
+        option family           ipv4
+</code></pre>
+<h3><a name="p-34083-nftables-9" class="anchor" href="#p-34083-nftables-9"></a>В виде правил nftables:</h3>
+<p><code>fw4 print</code>:</p>
+<pre data-code-wrap="shell"><code class="lang-shell">        chain forward_lan {
+                ip saddr SMART.TV.IP.ADDRESS udp dport 443 counter jump reject_to_wan comment "!fw4: DNAT-SamsungTV-block-quick"
+        }
+        chain dstnat_lan {
+                ip saddr SMART.TV.IP.ADDRESS tcp dport 443 counter dnat 192.168.1.1:3129 comment "!fw4: DNAT-SamsungTV-redirect-HTTPS-to-sing-box"
+        }
+
+</code></pre>
+<p>В данном случае блочим QUICK (UDP/443) и редиректим только HTTPS (TCP/443). Можно редиректить и весь трафик Smart TV, но у меня и так прекрасно работает.</p>
+<h2><a name="p-34083-crontab-10" class="anchor" href="#p-34083-crontab-10"></a>Crontab</h2>
+<p><code>crontab -e</code></p>
+<pre data-code-wrap="cron"><code class="lang-cron"># restart sing-box every 2 hours to avoid high memory consumption and OOM-killer spawning
+0  */2 * * * /etc/init.d/sing-box restart
+
+</code></pre>
+<h1><a name="p-34083-h-11" class="anchor" href="#p-34083-h-11"></a>Итого</h1>
+<p>Редиректим HTTPS со смартТВ на “redirect”-вход sing-box и ходим на домены, имеющие отношение к YouTube, через прокси.<br>
+Также имеем HTTP/SOCKS прокси.<br>
+Маршрутизация несложная: сначала на локальные домены и на сайт провайдера лезем напрямую, затем правило для SmartTV, которое редиректит трафик Ютуба в прокси.<br>
+Далее бонусом идёт маршрутизация на основе правил Antizapret в новом формате (SRS).<br>
+Ещё далее - это скорее fallbacks, до них дело вряд ли дойдёт.</p>
+<p>Каждые два часа рестартим sing-box во избежание прихода OOM-killer.<br>
+Тут нужно заметить, что sing-box (как и xray) просто не запускается, если ограничить виртуальную память процесса до менее чем 800 МБ. На роутере, как вы понимаете, пока таких объёмов RAM нет. По умолчанию sing-box заявляет себе 1.2 ГБ виртуальной памяти а мы надеемся что ему не понадобится больше, чем у нас есть (у меня на роутере 256 МБ RAM). Поэтому на всякий случай рестартим sing-box каждые 2 часа. На современном роутере (WiFi 5+) это происходит моментально. Почему эти программы требуют (не потребляют!) так много виртуальной памяти - я не погромист, поэтому не знаю, в коде гошечки не колупался.</p>
+<p>Бегло протестировал - Ютуб на ТВ заработал как встарь. Пользуйтесь, друзья!<br>
+<a class="mention" href="/u/valdikss">@ValdikSS</a> , привет тебе из Гудлайновской сети!</p></td><td>2024-08-19T16:05:32.437Z</td></tr><tr><td>omgiafs(omgiafs)</td><td><p>Спустя некоторое время эксплуатации <code>sing-box</code> на <code>Openwrt</code> пришлось немного доработать напильником, чтобы это всё работало стабильно. Нестабильно это всё работало потому, что телевизор - не единственный клиент для <code>sing-box</code> на роутере, и коннектов довольно приличное количество круглосуточно.</p>
+<p>Доработки:</p>
+<ol>
+<li>
+<p>Блокировка IPv6-коннектов в sing-box. Если IPv6 нет, то делать это обязательно, т.к. неотключение <strong>обязательно</strong> влёчёт за собой наличие большого количества соединений в таймауте, и они забивают таблицу nf_conntrack. Просто потому, что по умолчанию <code>net.netfilter.nf_conntrack_tcp_timeout_close_wait = 60</code>.</p>
+</li>
+<li>
+<p>Увеличение количества открытых файлов для процесса sing-box</p>
+</li>
+<li>
+<p>В <code>/etc/sing-box/config.json</code> в секцию  <code>"dns"</code> добавить опцию <code>"strategy": "ipv4_only"</code>:</p>
+</li>
+</ol>
+<pre data-code-wrap="bash"><code class="lang-bash">  "dns": {
+    "strategy": "ipv4_only",
+    "servers": [
+      {
+        "tag": "dns-google",
+        ...
+</code></pre>
+<ol start="2">
+<li>в <code>/etc/init.d/sing-box</code> после строк</li>
+</ol>
+<pre data-code-wrap="bash"><code class="lang-bash">        procd_open_instance "$NAME.main"
+        procd_set_param command "$PROG" run -c "$conffile" -D "$workdir"
+</code></pre>
+<p>добавить</p>
+<pre data-code-wrap="bash"><code class="lang-bash">        procd_set_param limits nofile="65536 65536"
+</code></pre>
+<p><strong>ВАЖНО: Любое обновление пакета <code>sing-box</code> перезапишет файл <code>/etc/init.d/sing-box</code> на тот, который идёт с пакетом. Поэтому после каждого обновления <code>sing-box</code> нужно заново прописывать лимит.</strong></p>
+<ol start="3">
+<li>в <code>/etc/sysupgrade.conf</code> добавить строку<br>
+<code>/etc/init.d/sing-box</code>, если сохраняете конфиги.</li>
+</ol>
+<p>Без этих мер <code>sing-box</code> работал нестабильно и падал. Или не падал, но упирался в лимиты, спамил ошибками в лог и для меня как пользователя сервиса фактически сервис не предоставлялся. Сейчас <code>sing-box</code> не падает, в лимиты не упирается, спама ошибок нет, сервис работает вторые сутки стабильно.</p>
+<p><em>Возможно поможет только пункт №1, т.к. все упоры в лимиты происходили из-за него. Но я не тестировал. Просто привожу мой подход к решению проблемы.</em></p></td><td>2024-09-08T05:39:24.811Z</td></tr><tr><td>13GwKd33(13GwKd33)</td><td><p>Хочу настроить sing-box, чтобы только определенные подсети и домены шли к VPS-серверу, а все остальное шло через bypass. После тестирования своего конфига было вроде все ок, но имеется проблема с udp трафиком.<br>
+<img src="raspberry-pi-xray-между-роутером-и-телевизором/a535383a5569a7b0cfec73697f18d202ca7fd15f.png" alt="Untitled Diagram.drawio" data-base62-sha1="nzuNV6g0uhoz7Ax4tgwUV7gNbyv" width="427" height="370"></p>
+<p>На прокси сервере в локалке два правила для fw:</p>
+<pre><code class="lang-auto">iptables -t nat -A PREROUTING -s 192.168.13.0/25 -p udp -j REDIRECT --to-port 100
+iptables -t nat -A PREROUTING -s 192.168.13.0/25 -p tcp -j REDIRECT --to-port 100
+</code></pre>
+<p>Сам конфиг sing-box выглядит следующим образом:</p>
+<pre><code class="lang-auto">{
+  "dns": {
+    "independent_cache": true,
+    "rules": [
+      {
+        "domain": [
+          "2ip.ru",
+          "youtube.com",
+          "googlevideo.com",
+          "ytimg.com",
+          "youtu.be",
+          "ggpht.com",
+          "youtubei.googleapis.com",
+          "yt4.ggpht.com",
+          "ytimg.l.google.com",
+          "nhacmp3youtube.com",
+          "googleusercontent.com",
+          "googleapis.com",
+          "gstatic.com"
+        ],
+        "domain_keyword": [],
+        "domain_regex": [],
+        "domain_suffix": [],
+        "geosite": [],
+        "server": "dns-remote"
+      },
+      {
+        "query_type": [
+          32,
+          33
+        ],
+        "server": "dns-block"
+      },
+      {
+        "domain_suffix": ".lan",
+        "server": "dns-block"
+      }
+    ],
+    "servers": [
+      {
+        "address": "https://1.1.1.1/dns-query",
+        "address_resolver": "dns-local",
+        "detour": "proxy",
+        "strategy": "prefer_ipv4",
+        "tag": "dns-remote"
+      },
+      {
+        "address": "local",
+        "address_resolver": "dns-local",
+        "detour": "direct",
+        "strategy": "prefer_ipv4",
+        "tag": "dns-direct"
+      },
+      {
+        "address": "rcode://success",
+        "tag": "dns-block"
+      },
+      {
+        "address": "local",
+        "detour": "direct",
+        "tag": "dns-local"
+      }
+    ]
+  },
+   "inbounds": [{
+      "type": "redirect",
+      "tag": "redirect-in",
+      "sniff": true,
+      "listen": "0.0.0.0",
+      "listen_port": 100
+  }],
+  "log": {
+    "level": "info"
+  },
+  "outbounds": [
+    {
+      "domain_strategy": "",
+      "flow": "xtls-rprx-vision",
+      "packet_encoding": "",
+      "server": "111.111.111.111",
+      "server_port": 44444,
+      "tag": "proxy",
+      "tls": {
+        "enabled": true,
+        "reality": {
+          "enabled": true,
+          "public_key": "wwwwwwwwwwwwwwwwwwwwwwwwwww",
+          "short_id": "ccccccccc"
+        },
+        "server_name": "google.com",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "safari"
+        }
+      },
+      "type": "vless",
+      "uuid": "66666666666666666666"
+    },
+    {
+      "tag": "direct",
+      "type": "direct"
+    },
+    {
+      "tag": "bypass",
+      "type": "direct"
+    },
+    {
+      "tag": "block",
+      "type": "block"
+    },
+    {
+      "tag": "dns-out",
+      "type": "dns"
+    }
+  ],
+  "route": {
+    "final": "bypass",
+    "rules": [
+      {
+        "outbound": "dns-out",
+        "protocol": "dns"
+      },
+      {
+        "domain": [],
+        "domain_keyword": [],
+        "domain_regex": [],
+        "domain_suffix": [],
+        "geosite": [
+          "category-ads-all"
+        ],
+        "outbound": "block"
+      },
+      {
+        "domain": [
+          "2ip.ru",
+          "youtube.com",
+          "googlevideo.com",
+          "ytimg.com",
+          "youtu.be",
+          "ggpht.com",
+          "youtubei.googleapis.com",
+          "yt4.ggpht.com",
+          "ytimg.l.google.com",
+          "nhacmp3youtube.com",
+          "googleusercontent.com",
+          "googleapis.com",
+          "gstatic.com"
+        ],
+        "domain_keyword": [],
+        "domain_regex": [],
+        "domain_suffix": [],
+        "geosite": [],
+        "outbound": "proxy"
+      },
+      {
+        "geoip": [],
+        "ip_cidr": [
+          "147.75.208.0/20",
+          "185.89.216.0/22",
+          "31.13.24.0/21",
+          "31.13.64.0/19",
+          "31.13.96.0/19",
+          "45.64.40.0/22",
+          "66.220.144.0/20",
+          "69.63.176.0/20",
+          "69.171.224.0/19",
+          "74.119.76.0/22",
+          "102.132.96.0/20",
+          "103.4.96.0/22",
+          "129.134.0.0/16",
+          "157.240.0.0/16",
+          "173.252.64.0/18",
+          "179.60.192.0/22",
+          "185.60.216.0/22",
+          "204.15.20.0/22",
+          "102.221.188.0/22",
+          "163.114.128.0/20",
+          "164.163.191.64/26",
+          "199.201.64.0/22",
+          "64.233.160.0/19",
+          "66.102.0.0/20",
+          "66.249.64.0/18",
+          "72.14.192.0/18",
+          "74.125.0.0/16",
+          "209.85.128.0/17",
+          "216.239.32.0/19",
+          "64.18.0.0/20",
+          "108.177.8.0/21",
+          "172.217.0.0/19",
+          "173.194.0.0/16",
+          "207.126.144.0/20",
+          "216.58.192.0/19",
+          "3.2.40.0/25",
+          "3.4.3.0/24",
+          "3.4.4.0/24",
+          "3.4.6.0/24",
+          "3.5.76.0/22",
+          "3.5.80.0/21",
+          "13.34.14.128/26",
+          "13.34.23.96/27",
+          "13.34.23.128/25",
+          "13.34.24.96/27",
+          "13.34.24.128/26",
+          "13.34.24.192/27",
+          "13.34.25.64/26",
+          "13.34.25.128/26",
+          "13.34.26.0/25",
+          "13.34.28.0/24",
+          "13.34.42.128/26",
+          "13.34.54.96/27",
+          "13.34.54.128/25",
+          "13.34.55.0/27",
+          "13.34.57.0/26",
+          "13.34.61.192/26",
+          "13.34.67.64/26",
+          "13.34.67.128/25",
+          "13.34.68.0/26",
+          "13.34.70.64/26",
+          "13.34.79.64/26",
+          "13.34.82.64/26",
+          "13.34.82.128/25",
+          "13.34.85.64/26",
+          "13.34.86.192/26",
+          "13.34.88.192/26",
+          "13.34.93.128/26",
+          "13.248.112.0/24",
+          "15.177.80.0/24",
+          "15.181.0.0/19",
+          "15.181.64.0/20",
+          "15.181.116.0/22",
+          "15.181.128.0/20",
+          "15.181.245.0/24",
+          "15.181.248.0/24",
+          "15.181.250.0/23",
+          "15.181.252.0/23",
+          "15.193.7.0/24",
+          "15.220.0.0/19",
+          "15.220.32.0/21",
+          "15.220.40.0/22",
+          "15.220.200.0/21",
+          "15.220.208.128/26",
+          "15.220.224.0/23",
+          "15.220.226.0/24",
+          "15.220.252.0/22",
+          "15.221.1.0/24",
+          "15.221.7.0/24",
+          "15.221.148.0/23",
+          "15.230.67.192/26",
+          "15.230.68.0/25",
+          "15.230.92.0/24",
+          "15.230.240.0/24",
+          "15.230.247.0/24",
+          "15.248.40.0/22",
+          "15.248.80.0/20",
+          "15.253.0.0/16",
+          "15.254.0.0/16",
+          "18.34.48.0/20",
+          "18.34.244.0/22",
+          "18.88.128.0/18",
+          "18.236.0.0/15",
+          "18.246.0.0/16",
+          "34.208.0.0/12",
+          "35.71.64.0/22",
+          "35.80.0.0/12",
+          "35.155.0.0/16",
+          "35.160.0.0/13",
+          "44.224.0.0/11",
+          "50.112.0.0/16",
+          "52.10.0.0/15",
+          "52.12.0.0/15",
+          "52.24.0.0/14",
+          "52.32.0.0/13",
+          "52.40.0.0/14",
+          "52.46.180.0/22",
+          "52.46.216.0/22",
+          "52.46.249.0/24",
+          "52.75.0.0/16",
+          "52.88.0.0/15",
+          "52.92.128.0/17",
+          "52.93.12.12/31",
+          "52.93.14.18/31",
+          "52.93.20.0/24",
+          "52.93.120.179/32",
+          "52.93.122.218/32",
+          "52.93.240.146/31",
+          "52.93.240.148/31",
+          "52.93.240.152/29",
+          "52.93.240.160/27",
+          "52.93.240.192/29",
+          "52.93.240.200/30",
+          "52.93.240.204/31",
+          "52.94.10.0/24",
+          "52.94.28.0/23",
+          "52.94.76.0/22",
+          "52.94.116.0/22",
+          "52.94.120.0/22",
+          "52.94.128.0/22",
+          "52.94.176.0/20",
+          "52.94.197.0/24",
+          "52.94.208.0/21",
+          "52.94.248.96/28",
+          "52.94.249.64/28",
+          "52.95.40.0/24",
+          "52.95.230.0/24",
+          "52.95.247.0/24",
+          "52.95.255.112/28",
+          "52.119.160.0/20",
+          "52.119.252.0/22",
+          "52.144.194.64/26",
+          "52.144.194.128/26",
+          "52.144.197.128/25",
+          "52.218.128.0/17",
+          "54.68.0.0/14",
+          "54.148.0.0/15",
+          "54.184.0.0/13",
+          "54.200.0.0/14",
+          "54.212.0.0/15",
+          "54.214.0.0/16",
+          "54.218.0.0/16",
+          "54.239.0.32/28",
+          "54.239.2.0/23",
+          "54.239.48.0/22",
+          "54.240.230.0/23",
+          "54.240.248.0/21",
+          "54.244.0.0/15",
+          "64.252.65.0/24",
+          "64.252.70.0/23",
+          "64.252.72.0/23",
+          "70.224.192.0/18",
+          "99.77.130.0/24",
+          "99.77.152.0/24",
+          "99.77.186.0/24",
+          "99.77.232.0/24",
+          "99.77.253.0/24",
+          "99.78.196.0/22",
+          "99.150.56.0/21",
+          "99.151.186.0/23",
+          "100.20.0.0/14",
+          "108.166.224.0/21",
+          "108.166.240.0/21",
+          "142.4.160.16/29",
+          "142.4.160.32/29",
+          "142.4.160.56/29",
+          "142.4.160.64/29",
+          "142.4.160.96/28",
+          "142.4.160.224/29",
+          "150.222.15.132/31",
+          "150.222.74.0/23",
+          "150.222.102.0/24",
+          "150.222.176.0/22",
+          "150.222.180.0/24",
+          "150.222.196.0/24",
+          "150.222.214.0/24",
+          "151.148.33.0/24",
+          "162.222.148.0/22",
+          "176.32.125.0/25",
+          "176.32.125.128/26",
+          "184.32.0.0/12",
+          "205.251.232.0/22"
+        ],
+        "outbound": "proxy"
+      },
+      {
+        "network": "udp",
+        "outbound": "block",
+        "port": [
+          135,
+          137,
+          138,
+          139,
+          5353
+        ]
+      },
+      {
+        "ip_cidr": [
+          "224.0.0.0/3",
+          "ff00::/8"
+        ],
+        "outbound": "block"
+      },
+      {
+        "outbound": "block",
+        "source_ip_cidr": [
+          "224.0.0.0/3",
+          "ff00::/8"
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<p>Что нужно добавить или убавить чтобы с udp все было ок?</p></td><td>2024-09-15T21:59:19.862Z</td></tr><tr><td>0ka(0ka)</td><td><p>для udp надо использовать tproxy или tun. ну и правила у вас полная жесть</p></td><td>2024-09-16T14:01:48.091Z</td></tr><tr><td>Mayday</td><td><p>Парни! Не понимаю почему вы sing-box мучаете?  Имея Малинку можно домашний трафик не заворачивать в WG чтобы толкнуть его VLESS-ом (или shadowsocks) на свой VPS. Устанавливайте 3X-ui <strong>на VPS и Малину</strong>!  В панели 3X-ui Малины создайте HTTP-прокси (для домашних - без пароля), и делайте бридж на внешний VPS. В маршрутизации задаете правило и всё прекрасно работает. Настраивать довольно легко.<br>
+Дам пример, где человек тоже делает через WG. Можно пойти по его инструкциям, но… ещё раз - (наверное) достаточно HTTP-прокси для дома. В браузерах или в системе, указываете, что ходить в Интет нужно через прокси и… радуетесь! Если кто-то домашним биторентом пользуется, то можно добавить правило обхода в маршрутизации - direct - IP и порт, и поднять это правило над  созданным Inboud.<br>
+Не реклама: “<a href="https://deniom.ru/komandy-i-nastrojki/nastrojka-dvojnogo-vpn-cherez-3-x-ui/" rel="noopener nofollow ugc">Настройка двойного VPN через 3X-UI</a>”</p></td><td>2024-09-25T13:30:53.716Z</td></tr><tr><td>xofamim548</td><td><p>Если честно, по приведенной ссылке на скринах вообще ничего не видно. Поэтому я не совсем понял, в чем плюс конкретно 3x-ui, у которого под капотом все тот же xray (который делает то же что и sing-box).</p>
+<blockquote>
+<p>В браузерах или в системе, указываете, что ходить в Интет нужно через прокси</p>
+</blockquote>
+<p>Так а если в браузерах или системе нельзя указать, что нужно через прокси ходить?</p></td><td>2024-09-25T13:57:53.418Z</td></tr><tr><td>Mayday</td><td><p>Когда начнете панель настраивать, то всё будет видно: смотрите на свой экран и на картинку - мелкие детали ничего не дают. Да и другого примера я не видел нигде, а так бы поделился.<br>
+А на счет прокси… ну, может, на ТВ может и не быть, конечно. А так… про всё браузеры не знаю, а системы трудно представить без настроек прокси. Может пример приведете?<br>
+Обратите внимание на Slimjet - очень удобен для работы с прокси - позволяет использовать несколько профилей и быстро их переключать.</p></td><td>2024-09-25T15:25:55.964Z</td></tr><tr><td>xofamim548</td><td><p>Так я не спорю, по возможности всё надо делать наиболее простым способом. В теме как раз обсуждается проблема, при которой явное проксирование не вариант, потому что таких настроек на клиенте попросту нет.</p></td><td>2024-09-25T16:05:22.394Z</td></tr><tr><td>Yojimboz(Yojimboz)</td><td><p>Друзья, помогите разобраться, что не так с настройкой sing-box.</p>
+<p><strong>Дано:</strong></p>
+<ol>
+<li>
+<p>виртуалка с Ubuntu (192.168.1.148), на ней настроен sing-box, все работает. Используется как маршрутизатор.<br>
+Домашний роутер перенаправляет на нее трафик, адресованный определенным ip-адресам и подсетям. Оттуда через sing-box в VPS.</p>
+</li>
+<li>
+<p>вторая такая же виртуала с Ubuntu (192.168.1.75).<br>
+Настроена с нуля, точно так же, такой же конфиг sing-box, заменен только ip-адрес в конфиге.</p>
+</li>
+</ol>
+<p>На второй никак не работает. Сам sing-box работает, в логах чисто, но через curl ничего не отдает, виснет:</p>
+<pre><code class="lang-auto">curl --interface tun0 https://2ip.io
+curl: (28) Failed to connect to 2ip.io port 443 after 136133 ms: Couldn't connect to server
+</code></pre>
+<p>Мне кажется, что с маршрутизацией на уровне ОС.<br>
+Сравнил две машины, нашел только одно различие в выводе “ip route”</p>
+<p>На машине 192.168.1.148, где все работает:</p>
+<pre><code class="lang-auto"># ip route show
+default via 192.168.1.1 dev enp1s0 proto dhcp src 192.168.1.148 metric 100
+169.254.0.0/16 dev enp1s0 scope link metric 1000
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown
+192.168.1.0/24 dev enp1s0 proto kernel scope link src 192.168.1.148 metric 100
+192.168.1.148/30 dev tun0 proto kernel scope link src 192.168.1.148
+</code></pre>
+<p>На машине 192.168.1.75, где не работает:</p>
+<pre><code class="lang-auto"># ip route
+default via 192.168.1.1 dev enp1s0 proto dhcp src 192.168.1.75 metric 100
+192.168.1.0/24 dev enp1s0 proto kernel scope link src 192.168.1.75 metric 100
+192.168.1.1 dev enp1s0 proto dhcp scope link src 192.168.1.75 metric 100
+192.168.1.72/30 dev tun0 proto kernel scope link src 192.168.1.75
+</code></pre>
+<p>В последней строке маршрут, который добавляет сам sing-box. В первом случае он делает маршрут для адреса 192.168.1.148/30, где 192.168.1.148 - это и есть адрес виртуалки.</p>
+<p>Во втором случае он делает маршрут для адреса 192.168.1.72/30, при этом адрес виртуалки другой - 192.168.1.75</p>
+<p>Возможно, причина в этом? Но этот маршрут вручную поправить не могу. Удалить дает, а создать маршрут для “192.168.1.75/30” не дает, т.к. это некорректный адрес подсети.</p>
+<p>На всякий случай прикладываю конфиг:</p>
+<pre><code class="lang-auto">{
+  "log": {
+    "disabled": false,
+    "level": "debug",
+    "output": "/tmp/sing-box.log",
+    "timestamp": true
+  },
+  "dns": {
+    "servers": [
+      {
+        "address": "tls://8.8.8.8"
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "interface_name": "tun0",
+      "domain_strategy": "ipv4_only",
+      "inet4_address": "192.168.1.75/30",
+      "auto_route": true,
+      "strict_route": false,
+      "sniff": true
+   }
+  ],
+	"outbounds": [
+		{
+			"type": "vless",
+			"server": "xxx",
+			"server_port": 443,
+			"uuid": "xxx",
+			"flow": "xtls-rprx-vision",
+			"tls": {
+				"enabled": true,
+				"insecure": false,
+				"server_name": "microsoft.com",
+				"utls": {
+					"enabled": true,
+					"fingerprint": "chrome"
+				},
+				"reality": {
+					"enabled": true,
+					"public_key": "xxx",
+					"short_id": "xxx"
+				}
+			}
+		},
+		{
+			"type": "direct",
+			"tag": "direct"
+		},
+			{
+			"type": "dns",
+			"tag": "dns-out"
+			}
+	],
+  "route": {
+  	"rules": [
+			{
+				"protocol": "dns",
+				"outbound": "dns-out"
+			}
+			],
+
+    "auto_detect_interface": true
+  }
+}
+</code></pre></td><td>2024-09-26T14:46:30.405Z</td></tr><tr><td>0ka(0ka)</td><td><p>с постером выше решили в лс: inet4_address tun никак не связан с локальным ip устройства, там должно быть 172.19.0.1/30</p></td><td>2024-09-26T20:02:50.833Z</td></tr><tr><td>Yojimboz(Yojimboz)</td><td><p>Да, все заработало. Огромное спасибо за помощь!</p></td><td>2024-09-27T06:45:23.149Z</td></tr><tr><td>13GwKd33(13GwKd33)</td><td><p>если использовать tun, то что еще необходимо настроить помимо net.ipv4.conf.all.forwarding=1 ?</p>
+<p>конфигурация inbound следующая:</p>
+<pre><code class="lang-auto">  {
+         "auto_route":true,
+         "domain_strategy":"prefer_ipv4",
+         "endpoint_independent_nat":true,
+         "inet4_address":"172.19.0.1/28",
+         "interface_name":"nekoray-tun",
+         "mtu":1500,
+         "sniff":true,
+         "sniff_override_destination":false,
+         "stack":"gvisor",
+         "strict_route":false,
+         "tag":"tun-in",
+         "type":"tun"
+      }
+</code></pre></td><td>2024-10-18T22:03:58.250Z</td></tr><tr><td>KuzBass</td><td><p>Всем привет! Слежу за этой темой самого его появления и собсна по ней же и настраивал малинку для всех устройств дома. Схема такая:  Клиент - микротик - малина - микротик - мир. На днях обнаружил, что перестали скачиваться приложения с Google Play. Перепробовал уже кучу доменов исключать/добавлять. Не помогает. Есть у кого-нибудь соображения по этому поводу?</p>
+<p>Сейчас использую следующие домены:</p>
+<pre><code class="lang-auto">root@raspberrypi:/etc/sing-box# cat ./rule-set/youtube.json
+{
+    "version": 1,
+    "rules": [
+        {
+            "domain_suffix": [
+                                ".googlevideo.com",
+                                ".youtube.com",
+                                ".ggpht.com",
+                                ".ytimg.com",
+                                ".googleapis.com",
+                                ".youtu.be",
+                                ".google.com",
+                                ".yt.be",
+                                ".youtubekids.com",
+                                ".nhacmp3youtube.com",
+                                ".googleusercontent.com",
+                                ".gstatic.com"
+            ]
+        }
+    ]
+}
+root@raspberrypi:/etc/sing-box# cat ./rule-set/discord.json
+{
+    "version": 1,
+    "rules": [
+        {
+            "domain_suffix": [
+                                                        "dis.gd",
+                                                        "discord-activities.com",
+                                                        "discord.co",
+                                                        "discord.com",
+                                                        "discord.design",
+                                                        "discord.dev",
+                                                        "discord.gg",
+                                                        "discord.gift",
+                                                        "discord.gifts",
+                                                        "discord.media",
+                                                        "discord.new",
+                                                        "discord.store",
+                                                        "discord.tools",
+                                                        "discordactivities.com",
+                                                        "discordapp.com",
+                                                        "discordapp.net",
+                                                        "discordcdn.com",
+                                                        "discordmerch.com",
+                                                        "discordpartygames.com",
+                                                        "discordsays.com",
+                                                        "discordsez.com",
+                                                        "discordstatus.com"
+            ]
+        }
+    ]
+}
+
+</code></pre></td><td>2024-10-21T03:34:13.457Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="KuzBass" data-post="77" data-topic="8804">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/dbc845/48.png" class="avatar"> KuzBass:</div>
+<blockquote>
+<p>Есть у кого-нибудь соображения по этому поводу?</p>
+</blockquote>
+</aside>
+<p>пользуйтесь wireshark/tcpdump и смотрите на какие домены идут запросы</p></td><td>2024-10-21T11:12:36.444Z</td></tr><tr><td>KuzBass</td><td><aside class="quote no-group" data-username="KuzBass" data-post="77" data-topic="8804">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/dbc845/48.png" class="avatar"> KuzBass:</div>
+<blockquote>
+<p><code>.googleapis.com</code></p>
+</blockquote>
+</aside>
+<p>Проблема была конкретно в этом домене “.googleapis.com” . Пока без него ютюб работает нормально</p></td><td>2024-10-28T06:15:42.447Z</td></tr><tr><td>KuzBass</td><td><p>Мое итоговое решение. Возможно кому пригодится. Ну и будет для меня шпаргалкой на всякий случай <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"><br>
+<strong>Железо:</strong><br>
+Raspberri Pi 4b + Mikrotik rb2011uias-2hnd + keenetic voyager pro (в самой схеме она не участвует, просто жертва обстоятельств)<br>
+<strong>Задача:</strong><br>
+В квартире есть тв, планшет, 2 телефона и 2 ПК (ну и горстка “умных устройств”, но их мы лешим просмотра ютюба и посиделок в дискорде с друзьями). Необходимо сделать так, чтоб на всем этом работал Ютюб, дискорд и прочие выкидыши капиталистического загнивающего запада. <img src="https://ntc.party/images/emoji/twitter/upside_down_face.png?v=12" title=":upside_down_face:" class="emoji" alt=":upside_down_face:" loading="lazy" width="20" height="20"><br>
+Ну и желательно чтоб ничего на клиентах настраивать не пришлось. Мне лень.<br>
+<strong>Решение:</strong><br>
+Арендуем VPS. На ней поднимаем панель 3x-ui. Это делается в 2 команды. на этом заострять внимания не будем.<br>
+На малинке:</p>
+<ol>
+<li>Разрешаем форвардинг пакетов и отключаем ipv6</li>
+</ol>
+<pre><code class="lang-auto">sudo nano /etc/sysctl.conf
+Добавить в конец:
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv4.ip_forward=1
+и выполнить:
+sudo sysctl -p
+</code></pre>
+<ol start="2">
+<li>Маскарадим буквально все, что через нас пролетает.</li>
+</ol>
+<pre><code class="lang-auto">iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+Сохраняем правила:
+sudo apt-get install iptables-persistent
+sudo netfilter-persistent save
+sudo systemctl enable netfilter-persistent
+sudo systemctl start netfilter-persistent
+</code></pre>
+<ol start="3">
+<li>Качаем и настраиваем Sing-box</li>
+</ol>
+<pre><code class="lang-auto">bash &lt;(curl -fsSL https://sing-box.app/deb-install.sh)
+</code></pre>
+<p>Конфиг /etc/sing-box/config.json</p>
+<pre><code class="lang-auto">{
+"log": {
+    "disabled": false,
+    "level": "warn",
+    "output": "/tmp/sing-box.log",
+    "timestamp": true
+    },
+"dns": {
+	"strategy": "ipv4_only",
+	"servers": [
+	{
+	"tag": "google",
+	"address": "https://8.8.8.8/dns-query"
+	},
+	{
+	"tag": "local",
+	"address": "local",
+	"detour": "direct"
+	},
+	{
+		"tag": "block",
+	"address": "rcode://success"
+	}
+	],
+	"strategy": "ipv4_only"
+	},
+    "inbounds": [
+      {
+        "type": "tun",
+        "interface_name": "tun0",
+        "domain_strategy": "ipv4_only",
+        "inet4_address": "172.16.250.1/30",
+        "auto_route": true,
+        "strict_route": false,
+        "sniff": true,
+	"sniff_override_destination": true,
+	"gso": true
+     }
+    ],
+  "outbounds": [
+    {
+      "domain_strategy": "",
+      "flow": "xtls-rprx-vision",
+      "packet_encoding": "",
+      "server": "XXXXXXXX",
+      "server_port": 443,
+      "tag": "vless-out",
+      "tls": {
+        "enabled": true,
+        "reality": {
+          "enabled": true,
+          "public_key": "XXXXXXXX",
+          "short_id": "XXXXXXXX"
+        },
+        "server_name": "google.com",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "random"
+        }
+      },
+      "type": "vless",
+      "uuid": "XXXXXXXX"
+    },
+	{
+	"type": "dns",
+	"tag": "dns-out"
+	  },
+	{
+	"type": "direct",
+	"tag": "direct"
+	},
+	{
+	"type": "block",
+	"tag": "block"
+	}
+
+  ],
+   "route": {
+    "rules": [
+	{
+	"protocol": "dns",
+	"outbound": "dns-out"
+	},
+        {
+         "ip_is_private": true,
+        "outbound": "direct"
+        },
+		// Изгои не достойные смотреть синий трактор на ютюбе
+        {
+        "source_ip_cidr": [
+		"10.10.0.13",
+		"10.10.0.29",
+		"10.10.0.220",
+		"10.10.0.251"
+			],
+        "outbound": "direct"
+        },
+		// Исключаем Российские домены. Можно еще добавить GOV
+        {
+        "domain_suffix": [
+		".ru",
+		".su"
+			],
+        "outbound": "direct"
+        },
+	{
+	"domain_suffix": "ntc.party",
+	"outbound": "vless-out"
+	},
+        {
+        "domain_suffix": "weather.com",
+        "outbound": "vless-out"
+        },
+       {
+         "rule_set": "antizapret",
+         "outbound": "vless-out"
+       },
+       {
+          "rule_set": "youtube",
+          "outbound": "vless-out"
+        },
+       {
+          "rule_set": "discord",
+          "outbound": "vless-out"
+        },
+       {
+          "rule_set": "discordipset",
+          "outbound": "vless-out"
+        },
+       {
+          "rule_set": "insta",
+          "outbound": "vless-out"
+        },
+       {
+          "rule_set": "meta",
+          "outbound": "vless-out"
+        }
+	],
+	// Этот список работы еле как. Но чет местами открывает ну и пускай будет.
+"rule_set": [
+      { // Remote rule-set will be cached if experimental.cache_file.enabled.
+        "tag": "antizapret",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/savely-krasovsky/antizapret-sing-box/releases/latest/download/antizapret.srs",
+        "download_detour": "vless-out",
+        "update_interval": "1d"
+      },
+      {
+         "tag": "youtube",
+         "type": "local",
+         "format": "source",
+         "path": "/etc/sing-box/rule-set/youtube.json"
+      },
+      {
+         "tag": "discord",
+         "type": "local",
+         "format": "source",
+         "path": "/etc/sing-box/rule-set/discord.json"
+      },
+      {
+         "tag": "discordipset",
+         "type": "local",
+         "format": "source",
+         "path": "/etc/sing-box/rule-set/discordipset.json"
+      },
+      {
+         "tag": "insta",
+         "type": "local",
+         "format": "source",
+         "path": "/etc/sing-box/rule-set/instafasebook.json"
+      },
+      {
+         "tag": "meta",
+         "type": "local",
+         "format": "source",
+         "path": "/etc/sing-box/rule-set/meta.json"
+      }
+    ],
+
+	"final": "direct",
+	"auto_detect_interface": true
+    }
+  }
+
+</code></pre>
+<p>Пример правил /etc/sing-box/rule-set/youtube.json</p>
+<pre><code class="lang-auto">{
+    "version": 1,
+    "rules": [
+        {
+            "domain_suffix":[
+"1e100.net",
+"ggpht.com",
+"googleusercontent.com",
+"googlevideo.com",
+"gstatic.com",
+"gvt1.com",
+"l.google.com",
+"m.youtube.com",
+"nhacmp3youtube.com",
+"play.google.com",
+"wide-youtube.l.google.com",
+"www.youtube.com",
+"youtu.be",
+"youtube-nocookie.com",
+"youtube-studio.com",
+"youtube-ui.l.google.com",
+"youtube.be",
+"youtube.ca",
+"youtube.co",
+"youtube.co.in",
+"youtube.co.uk",
+"youtube.com",
+"youtube.com.au",
+"youtube.com.br",
+"youtube.com.mx",
+"youtube.com.tr",
+"youtube.com.ua",
+"youtube.de",
+"youtube.es",
+"youtube.fr",
+"youtube.googleapis.com",
+"youtube.jp",
+"youtube.nl",
+"youtube.pl",
+"youtube.pt",
+"youtube.ru",
+"youtubeapi.com",
+"youtubechildren.com",
+"youtubecommunity.com",
+"youtubecreators.com",
+"youtubeeducation.com",
+"youtubeembeddedplayer.googleapis.com",
+"youtubei.googleapis.com",
+"youtubekids.com",
+"yt-video-upload.l.google.com",
+"yt.be",
+"yt3.ggpht.com",
+"ytimg.com",
+"10tv.app",
+"7tv.app",
+"7tv.gg",
+"7tv.io",
+"api.7tv.app",
+"cdn.7tv.app",
+"cdn.7tv.gg",
+"emotes.7tv.app",
+"events.7tv.app",
+"static.7tv.app"
+]
+        }
+    ]
+}
+
+
+</code></pre>
+<p>Добавляем  автозагрузку sing-box</p>
+<pre><code class="lang-auto">systemctl enable sing-box.service
+</code></pre>
+<p>Ну и делаем автоматическую перезагрузку сервиса.</p>
+<aside class="quote no-group" data-username="omgiafs" data-post="65" data-topic="8804">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/o/c89c15/48.png" class="avatar"> omgiafs:</div>
+<blockquote>
+<h2>Crontab</h2>
+<p><code>crontab -e</code></p>
+<pre><code class="lang-auto"># restart sing-box every 2 hours to avoid high memory consumption and OOM-killer spawning
+0  */2 * * * /etc/init.d/sing-box restart
+</code></pre>
+</blockquote>
+</aside>
+<ol start="4">
+<li><strong>А ОТКУДА РОЖАТЬ ТАКИЕ RULES-SET??</strong><br>
+В тырнетах вы можете наткнуться на списки для zapret’a, но они лишь список.</li>
+</ol>
+<pre><code class="lang-auto">instagramm.com
+instagramn.com
+instagrampartners.com
+instagramphoto.com
+instagramq.com
+instagramsepeti.com
+instagramtakipcisatinal.net
+</code></pre>
+<p>Есть два пути. 1. Прогнать этот список через онлайн редакторы/преобразователи и тому подобное и собрать конструкцию уже на месте.<br>
+2.  Воспользоваться Python скриптом который изволил родить мне ChatGPT. Он ищет txt файлики в папке откуда его запустили и переделывает их в json c уже готовой конструкцией и даже определяет ip или домены вы добавляете.</p>
+<pre><code class="lang-auto">import json
+import ipaddress
+import os
+
+# Функция для чтения имен из текстового файла
+def read_names_from_txt(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        names = [line.strip() for line in file if line.strip()]
+    return names
+
+# Функция для проверки, является ли строка IP-адресом или подсетью
+def is_valid_ip_or_subnet(ip):
+    try:
+        ipaddress.ip_network(ip, strict=False)
+        return True
+    except ValueError:
+        return False
+
+# Функция для записи имен в JSON файл с нужной структурой
+def write_names_to_json(names, json_file_path):
+    data = {
+        "version": 1,
+        "rules": [
+            {
+                "ip_cidr": [],
+                "domain_suffix": []
+            }
+        ]
+    }
+
+    for name in names:
+        if is_valid_ip_or_subnet(name):
+            data["rules"][0]["ip_cidr"].append(name)
+        else:
+            data["rules"][0]["domain_suffix"].append(name)
+
+    with open(json_file_path, 'w', encoding='utf-8') as json_file:
+        json.dump(data, json_file, ensure_ascii=False, indent=4)
+
+# Основная программа
+def main():
+    current_directory = os.getcwd()  # Получаем текущую директорию
+
+    # Ищем все текстовые файлы в текущей директории
+    for filename in os.listdir(current_directory):
+        if filename.endswith('.txt'):
+            txt_file_path = os.path.join(current_directory, filename)
+            json_file_path = os.path.splitext(txt_file_path)[0] + '.json'  # Сохраняем с тем же именем, но в формате JSON
+
+            names = read_names_from_txt(txt_file_path)
+            write_names_to_json(names, json_file_path)
+
+            # Удаляем исходный текстовый файл
+            os.remove(txt_file_path)
+            print(f"Файл {txt_file_path} успешно преобразован в {json_file_path} и удалён.")
+
+if __name__ == "__main__":
+    main()
+
+</code></pre>
+<p>Где-то видел инфу, что сам sing-box что-то умеет, но я не разбирался. Мне лень <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p>
+<p>На этом моя настройка малинки закончена. Всем кто участвовал в обсуждении СПАСИБО, вы оказали огромную помощь в настройке и теперь я могу дальше деградировать. <img src="https://ntc.party/images/emoji/twitter/grinning.png?v=12" title=":grinning:" class="emoji" alt=":grinning:" loading="lazy" width="20" height="20"></p>
+<p><strong>Настройка Mikrotik</strong><br>
+Есть 3 пути.</p>
+<ol>
+<li>Mangle.<br>
+Изначально я выбрал именно этот путь. Но как показала практика это режет скорость тырнетов и если на скачивание это ±20%, то на выгрузку это 50%. Поэтому этот вариант отпадает. (Возможно, у вас стоит дикая тварь, которая может пережевать весь трафик без потерь. Но у меня точно нет)</li>
+<li>В DHCP сервере указать основным шлюзом малинку.<br>
+Это самый надежный способ в плане потери пропускной способности. Но если что-то произойдет с малиной то тырнетов вам дома не видать, пока вы не поменяете шлюз на DHCP сервере и аренда не обновится. Главное не забудьте задать статический ip на малине.</li>
+<li>В DHCP сервере указать основным шлюзом малинку. НО делаем автоматическую проверку жизни малины и скрипт для смены основного шлюза<br>
+1.Делаем привило Mangle на Output, метим все исходящие маршруты до адреса 4.2.2.2<br>
+2.Добавляем маршрут в ip-routes, что все маршруты с этой меткой идут через малину.<br>
+3. system-scripts добавляем скрипт, который при падении малины сам поменяет шлюз и перезагрузит все порты, а при восстановлении вернет все в зад.</li>
+</ol>
+<pre><code class="lang-auto">:local GATEWAY "4.2.2.2"
+:local COUNT "2"
+:local REPLY "1"
+:local STATUS  ([/ping $GATEWAY count=$COUNT]-$REPLY);
+:if ($STATUS&lt;0) do={
+/log error message="vless not check"
+/ip dhcp-server network set [find comment=main_server]  gateway=10.10.0.1
+/interface ethernet set ether2 disabled=yes
+/interface ethernet set ether3 disabled=yes
+/interface ethernet set ether5 disabled=yes
+/interface ethernet set ether6 disabled=yes
+/interface ethernet set ether7 disabled=yes
+/interface ethernet set ether8 disabled=yes
+/interface ethernet set ether9 disabled=yes
+:delay 3
+/interface ethernet set ether2 disabled=no
+/interface ethernet set ether3 disabled=no
+/interface ethernet set ether5 disabled=no
+/interface ethernet set ether6 disabled=no
+/interface ethernet set ether7 disabled=no
+/interface ethernet set ether8 disabled=no
+/interface ethernet set ether9 disabled=no
+} else {
+/ip dhcp-server network set [find comment=main_server]  gateway=10.10.0.10
+}
+</code></pre>
+<p>Малина имеет адрес 10.10.0.10, а сам микрот 10.10.0.1<br>
+Далее делаем задачу на запуск скрипта по времени ip-scheduler. Я запускаю скрипт каждые 30 сек.<br>
+При потери связи с малиной все пойдет через провайдера в течении 1 минуты максимум. А вот при восстановлении фильтрация появится в зависимости от срока аренды вашего DHCP сервера. Я поставил 5 мин.<br>
+Есть один минус - каждый раз будет в логи срать сообщениями о смене шлюза, но это мы переживем.<br>
+Ну и естественно не забываем про статику на малине и в лизесах залочить ip адрес малины</p>
+<p><strong>Итог:</strong><br>
+В итоге мы имеем довольно надежную схему, которая не режет трафик от провайдера и не ест трафик на VPS т.к. него летят лишь отфильтрованные домены. Схема без особого труда масштабируется и поднимается за час времени с поднятием vps и обновлением малины.<br>
+Жду ваши комментарии и предложения. А также рассказы где я накосячил <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"><br>
+З.Ы. Потратил на написание этого текста больше времени, чем на поднятие схемы</p></td><td>2024-11-02T04:04:04.805Z</td></tr><tr><td>Yojimboz(Yojimboz)</td><td><p>Спасибо, что собрали все в одном месте!</p>
+<p>У самого успешно работает схема с маршрутизацией нужных подсетей на виртуалку с sing-box (маршрутизирует сам Keenetic).<br>
+Но с доавблением новых сервисов схема становится все более громоздкой. Сначала мучался с поиском и добавлением подсетей youtube, потом discord…</p>
+<p>Возможно, проще сделать так же как у вас и пустить весь трафик на sing-box с правилами на основе доменных имен.</p>
+<p>Тоже переживаю по поводу надежности и отказоутойчивости схемы, поэтому отлично, что вы сделали у себя watchdog.</p>
+<p>Скажите, если делаю малину (или в моем случае виртуалку) шлюзом по-умолчанию, через нее же пойдет весь LAN-трафик тоже? опасаюсь просто, чтобы не стало узким местом всей домашей сети</p></td><td>2024-11-08T10:00:25.719Z</td></tr><tr><td>KuzBass</td><td><p>LAN траффик идет как правило не доходя до маршрутизатора вообще. В одной локальной сети устройства работают напрямую, а это значит используют arp таблицу свитча/роутера, так что нет. на производительность локальной сети схема не повлияет. Если конечно вы не юзаете VLANы. Тогда это уже другой разговор. Там учувствует маршрутизация и там могут быть затыки, но это будет не большое снижение скорости траффика, при условии, что sing-box настроен верно.</p></td><td>2024-11-13T01:12:10.654Z</td></tr><tr><td>Yojimboz(Yojimboz)</td><td><p>Спасибо, все сделал, как у вас. Отлично работает!</p>
+<p>Есть теперь только сложность с использованием VLESS-клиента на ПК.<br>
+Сейчас шлюзом по умолчанию стоит 192.168.1.65 - это виртуалка с поднятым sing-box, держит туннель VLESS (3X-UI) до VPS в Европе.</p>
+<p>Когда на ПК запускаю клиент Foxray и соединяюсь с тем же VPS, трафик перестает ходить.<br>
+Если указываю на ПК (192.168.1.165) обычный шлюз - 192.168.1.1 (домашний роутер), все работает.</p>
+<p>Насколько понимаю, проблема в том, что VLESS-трафик от клиента на ПК заворачивается повторно в тот же VLESS-туннель между шлюзом и VPS.</p>
+<p>Видимо, нужно какое-то правило в конфиге sing-box, чтобы и входящий, и исходящий трафик в сторону<br>
+89.40.xx.xx шел напрямую.</p>
+<pre><code class="lang-auto">+0300 2024-11-15 12:47:06 INFO [1162613644 0ms] inbound/tun[0]: inbound connection from 192.168.1.165:49977
++0300 2024-11-15 12:47:06 INFO [1162613644 0ms] inbound/tun[0]: inbound connection to 89.40.xx.xx:443
++0300 2024-11-15 12:47:06 DEBUG [1162613644 1ms] router: sniffed protocol: tls, domain: microsoft.com
++0300 2024-11-15 12:47:06 DEBUG [1162613644 2ms] dns: resolved [20.76.201.171 20.112.250.133 20.70.246.20 20.236.44.162 20.231.239.246]
++0300 2024-11-15 12:47:06 INFO [1162613644 2ms] outbound/direct[direct]: outbound connection to microsoft.com:443
++0300 2024-11-15 12:47:06 INFO [2452199677 0ms] inbound/tun[0]: inbound connection from 192.168.1.165:49978
++0300 2024-11-15 12:47:06 INFO [2452199677 0ms] inbound/tun[0]: inbound connection to 89.40.xx.xx:443
++0300 2024-11-15 12:47:06 DEBUG [2452199677 2ms] router: sniffed protocol: tls, domain: microsoft.com
+</code></pre>
+<p>Добавил в конфиг такое, но, похоже, это только для исходящего трафика. А VPN-сервер присылает и в обратную сторону.</p>
+<pre><code class="lang-auto">         {
+        "ip_cidr": "89.40.xx.xx",
+        "outbound": "direct"
+        },
+</code></pre>
+<p>Не подскажете, что можно сделать?</p></td><td>2024-11-15T10:07:47.885Z</td></tr><tr><td>KuzBass</td><td><p>Честно говоря, у меня с этим тоже затык был. Решил просто добавлением маршрута в винде “route add…” указал в качестве шлюза ip маршрутизатора и все.</p></td><td>2024-11-18T03:08:15.569Z</td></tr><tr><td>Yojimboz(Yojimboz)</td><td><p>Сам задал вопрос, сам отвечу)</p>
+<p>Нужно на машине, где sing-box добавить статический маршрут, чтобы она запросы в адрес европейского VPS перекидывала на шлюз роутера:</p>
+<p><code>ip route add 89.40.xx.xx via 192.168.1.1</code></p></td><td>2024-11-22T13:08:08.113Z</td></tr><tr><td>KuzBass</td><td><p>Мой актуальный конфиг для версии 1.11.4.</p>
+<pre><code class="lang-auto">{
+  "log": {
+    "disabled": false,
+    "level": "debug",
+    "output": "/tmp/sing-box.log",
+    "timestamp": true
+  },
+  "dns": {
+    "strategy": "ipv4_only",
+    "servers": [
+      {
+        "tag": "google",
+        "address": "https://8.8.8.8/dns-query",
+        "detour": "direct"
+      },
+      {
+        "tag": "cloudflare",
+        "address": "https://1.1.1.1/dns-query",
+        "detour": "direct"
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "interface_name": "tun0",
+      "domain_strategy": "ipv4_only",
+      "address": "172.16.250.1/30",
+      "auto_route": true,
+      "sniff": true,
+      "strict_route": false,
+      "sniff_override_destination": true
+    }
+  ],
+  "outbounds": [
+    {
+      "domain_strategy": "prefer_ipv4",
+      "flow": "xtls-rprx-vision",
+      "packet_encoding": "xudp",
+      "server": "XXXXXXXXXXXXX",
+      "server_port": 443,
+      "tag": "vless-out",
+      "tls": {
+        "enabled": true,
+        "reality": {
+          "enabled": true,
+          "public_key": "XXXXXXXXXXXXXX",
+          "short_id": "XXXXXXXXX"
+        },
+        "server_name": "google.com",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "random"
+        }
+      },
+      "type": "vless",
+      "uuid": "XXXXXXXXXXXX"
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "protocol": "dns",
+        "action": "hijack-dns"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      },
+    {
+        "rule_set": [
+          "antizapret",
+	  "discord"
+        ],
+        "outbound": "vless-out"
+      }
+    ],
+    "rule_set": [
+      {
+    "tag": "antizapret",
+    "type": "remote",
+    "format": "binary",
+    "url": "https://cdn.jsdelivr.net/gh/runetfreedom/russia-v2ray-rules-dat@release/sing-box/rule-set-geosite/geosite-ru-blocked.srs",
+    "download_detour": "vless-out",
+    "update_interval": "1d"
+  },
+      {
+         "tag": "discord",
+         "type": "local",
+         "format": "source",
+         "path": "/etc/sing-box/rule-set/discord.json"
+      }
+    ],
+    "final": "direct",
+    "auto_detect_interface": true
+  }
+}
+
+</code></pre></td><td>2025-03-12T02:24:28.937Z</td></tr>
+    </table>
+      </body>
+    </html>

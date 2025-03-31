@@ -1,0 +1,332 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>насколько-мессенджер-tox-защищён-от-блокировок-14139</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0x7f</td><td><p>Правильно ли я понял что если оба абонента скачали tox на андроид и сделали первичный бутстрап узлов то теперь их общению точно не помешает ркн из-за того что сообщения пойдут через dht? Или я неверно понял принцип работы tox?</p></td><td>2024-12-25T21:31:19.276Z</td></tr><tr><td>PatchDragon(Patch)</td><td><p>Tox довольно нестабилен, если хотите что то настолько серьезное - используйте simplex. Он стабилен и быстро работает. Поищите дополнительные сервера в сети. Многие их развернули - сообщения там не прочесть, а уровень безопасности повышается.</p>
+<p>Но звонки в РФ работают через одно место, я вас предупредил. Если нужны будут сервера для симплекса пишите в ЛС.</p>
+<p>Или deltachat - это тоже очень хороший вариант.</p></td><td>2024-12-25T22:08:27.378Z</td></tr><tr><td>0x7f</td><td><p>симплекс это серверное решение в котором сервер это единая точка отказа? если да то такое я не хочу.<br>
+я хочу именно бессерверное решение где один раз делается бутстрап а дальше клиенты регулярно выходят онлайн и им никак не помешать общаться пока не закроют весь рунет.</p>
+<p>смысл именно в том чтобы найти аналог вацапа/вайбера который в принципе устойчив к блокировкам любым серверов и не требует ни впнов ни запретов ни гудбаев.</p>
+<p>поэтому я и спрашиваю правильно ли я понял что tox полностью бессерверный и просто выкидывает зашифрованные открытым ключом сообщения в dht или я неверно понял документацию.</p></td><td>2024-12-25T22:31:40.721Z</td></tr><tr><td>PatchDragon(Patch)</td><td><p>Да tox безсерверный, я не ручаюсь что его нельзя заблокировать. Блокировка может быть не только по серверу но и по протоколу.</p></td><td>2024-12-25T22:51:38.357Z</td></tr><tr><td>denium</td><td><p>Не знаю исправили ли в Tox архитектурную <a href="https://lenta.ru/news/2023/05/26/tox/">уязвимость</a>, что неблагонадёжные друзья могли вредоносный код отправить. Но IP точно друзьям известен, если не использовать Tor.</p></td><td>2024-12-26T00:55:30.242Z</td></tr><tr><td>0x7f</td><td><p>это уязвимость в старом брошенном клиенте который два года не обновлялся. есть <a href="https://github.com/JFreegman/toxic" rel="noopener nofollow ugc">постоянно обновляемый клиент</a> у него правда интерфейс из 70-х, но минут за 10 можно в нём разобраться.</p></td><td>2024-12-26T07:32:06.926Z</td></tr><tr><td>0x7f</td><td><p>может быть, но в любом случае сейчас блокировка tox по протоколу это из области фантастики. а вот то что при отрезании рунета от интернета tox продолжит работу внутри рунета если регулярно выходить в сеть и обновлять список активных узлов - очень поможет на всякий случай. ну и в любом случае после блокировки вацапа и вайбера стало ясно что бессерверное решение лучше серверного, потому что один раз обойти блокировку при бутстрапе удобнее чем обходить её каждый раз при заходе в сеть.</p></td><td>2024-12-26T08:06:21.179Z</td></tr><tr><td>meeeeeh</td><td><p>Tox - это дырявое и кривое решето, которое никому не нужно настолько, что его развитие за 10 лет никуда особо и не продвинулось.</p>
+<p>По существу:</p>
+<ol>
+<li>
+<p>Вся криптография до сих пор самопальная, и с момента старта проекта ничего существенно не поменялось. На дырявый и кривой механизм хендшейка явно указывал ещё автор Wireguard лет так восемь назад. Последняя запись в блоге проекта от 2 марта 2023-го говорит о том, что PoC для решения этой проблемы уже существует, но с тех пор оно в ядре так и не появилось.</p>
+</li>
+<li>
+<p>Непотопляемость сети - миф. Трафик клиента и сервера выглядит очень характерно, а бутстрап происходит через DHT-ноды, список которых публично известнен и зашиты во все клиенты (примерно как в торрент-клиенты). Если клиенты двух собеседников будут подключены к двум разным нодам, которые не сидят при этом в одном сварме - ничего работать не будет. Да, есть возможность пользоваться всем этим добром вообще хоть в интранете - например, можно поднять ноду в городской локалке и отдать юзерам пересобранный клиент в который будет зашита эта нода (вспоминайте как работали retracker.local в городских сетях - идея та же) - но в принципе уйти от механизма бутстрапа здесь невозможно.</p>
+</li>
+<li>
+<p>Ноды нужны не только для того чтобы бутстрапить клиентов, но и для того чтоб проксировать войс- и видео-трафик. Если хотя бы один собеседник из двоих сидит за CGNAT - трафик поедет через ноду\ноды, даже несмотря на то что ядро типа как умеет в UDP hole punching.</p>
+</li>
+<li>
+<p>Нет нормальных клиентов под десктоп. Кое-как развивается только toxic, который сделан вокруг ncurses, плюс недавно кое-как реанимировали qTox (в виде очередного <a href="https://github.com/TokTok/qTox/" rel="noopener nofollow ugc">форка</a> от одного из авторов ядра, iphy; не путать с qTox Enhanced который делает какой-то левый васян). Есть ещё отечественный yat, но там уже девять месяцев тишина в репозитории. Вдобавок, его пишет какой-то странный и потенциально подментованный товарищ. В винду из них троих умеет только форк qTox.</p>
+</li>
+<li>
+<p>Под мобилу нормальных клиентов ещё меньше: Antox давно мёртв, TRifA никогда не работал нормально, и хоть как-то поддерживается только aTox. Под iOS нет вообще нихрена.</p>
+</li>
+<li>
+<p>Нет поддержки оффлайн-сообщений. Вообще. Выглядит это на деле примерно как во времена старого Skype: если один из собеседников оффлайн, то сообщение будет доставлено ему только тогда, когда он появится в сети - и только при условии, что отправитель тоже находится онлайн. Есть костыли, которые слегка маскируют эту проблему, но фундаментально это никак не исправить, не изменив архитектуру сети - поскольку это чистый P2P, то и хранить оффлайн-сообщения негде.</p>
+</li>
+</ol></td><td>2024-12-26T09:43:36.516Z</td></tr><tr><td>0x7f</td><td><p>блокировка бутстрапа не проблема, его надо сделать всего один раз. тут и бесплатный впн подойдёт и тор какими бы медленными они ни были.<br>
+к tox можно как-то прикрутить obfs4 из тора?</p>
+<p>в любом случае есть ли другой бессерверный мессенджер?</p></td><td>2024-12-26T10:27:34.110Z</td></tr><tr><td>meeeeeh</td><td><p>Бутстрап нужен более-менее всегда в случае с актуальными клиентами. Т.е. хотя бы одна нода на запуске должна соединить клиент со свармом.</p>
+<p>Что до Tor - использовать его можно в большинстве клиентов как обычный SOCKS-прокси, так что вопрос поддержки мостов следует относить скорее к той версии Tor которой вы пользуетесь. Более того, это плюс-минус необходимо, поскольку из коробки клиенту легко видны айпишники всех контактов со статусом “онлайн” в контакт-листе.</p>
+<p>Что до других проектов, то можно посмотреть на:</p>
+<ul>
+<li>KouChat (давно не разивавается)</li>
+<li>Chitchatter (строго браузерный, webtorrent)</li>
+<li>Mesh (форк заброшенного BitChat; давно не развивается)</li>
+<li>Cwtch (что-то самобытное, работает принципиально только поверх Tor и даже тащит с собой его бинари)</li>
+</ul></td><td>2024-12-26T10:39:53.292Z</td></tr><tr><td>0x7f</td><td><aside class="quote no-group" data-username="meeeeeh" data-post="10" data-topic="14139" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/73ab20/48.png" class="avatar"> meeeeeh:</div>
+<blockquote>
+<p>Бутстрап нужен более-менее всегда в случае с актуальными клиентами. Т.е. хотя бы одна нода на запуске должна соединить клиент со свармом.</p>
+</blockquote>
+</aside>
+<p>разве клиент не сохраняет список узлов? в торентах клиент берёт список узлов dht даже если бутстрап забанен или не работает - скачиваешь популярный торент, клиент спрашивает у пиров кто из них в dht и через них подключается к dht и после перезапуска подключается сразу к узлам dht минуя бутстрап. разве в tox не так?</p>
+<p>судя по списку альтернатив никаких альтернатив у tox нет.</p></td><td>2024-12-26T10:52:28.675Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="0x7f" data-post="11" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p>разве в tox не так?</p>
+</blockquote>
+</aside>
+<p>Не во всех случаях и не со всеми клиентами.</p>
+<aside class="quote no-group" data-username="0x7f" data-post="11" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p>судя по списку альтернатив никаких альтернатив у tox нет.</p>
+</blockquote>
+</aside>
+<p>Есть Cwtch как что-то умеренно современное и рабочее (почитал - оказалось, что это форк помершего Ricochet из 2010-х). Другое дело, что Tox решает проблему которой как таковой-то и нет. Потому он никуда и не взлетел.</p></td><td>2024-12-26T10:55:37.611Z</td></tr><tr><td>0x7f</td><td><aside class="quote no-group" data-username="meeeeeh" data-post="12" data-topic="14139" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/73ab20/48.png" class="avatar"> meeeeeh:</div>
+<blockquote>
+<p>Не во всех случаях и не со всеми клиентами.</p>
+</blockquote>
+</aside>
+<p>спросил у разработчика, по его словам всё сохраняется как в торент-клиентах<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="насколько-мессенджер-tox-защищён-от-блокировок-14139/2bc6abcb82b6150f380e4a80b1e528a6968ee54d.png" data-download-href="https://ntc.party/uploads/default/2bc6abcb82b6150f380e4a80b1e528a6968ee54d" title="image"><img src="насколько-мессенджер-tox-защищён-от-блокировок-14139/2bc6abcb82b6150f380e4a80b1e528a6968ee54d_2_690x111.png" alt="image" data-base62-sha1="6fgbhLObog5hlKxj7t6PvZNVvkh" width="690" height="111" srcset="насколько-мессенджер-tox-защищён-от-блокировок-14139/2bc6abcb82b6150f380e4a80b1e528a6968ee54d_2_690x111.png, насколько-мессенджер-tox-защищён-от-блокировок-14139/2bc6abcb82b6150f380e4a80b1e528a6968ee54d.png 1.5x, насколько-мессенджер-tox-защищён-от-блокировок-14139/2bc6abcb82b6150f380e4a80b1e528a6968ee54d.png 2x" data-dominant-color="2C2F31"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1019×165 23.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-12-26T11:14:58.102Z</td></tr><tr><td>meeeeeh</td><td><p>“Probably” - это именно “probably”. Ну и не факт что клиент выберет для подключения в этот раз доступную с именно этого линка ноду.</p>
+<p>Так или иначе, любой механизм бутстрапа - это автоматический расстрел любой идеи децентрализованного мессенджера.</p>
+<p><a href="https://docs.cwtch.im/docs/chat/introduction" class="inline-onebox" rel="noopener nofollow ugc">An Introduction to Cwtch P2P Chat | Cwtch</a> - рекомендовал бы ознакомиться. Выглядит интереснее и более стабильно чем Tox, честно говоря.</p></td><td>2024-12-26T11:16:49.811Z</td></tr><tr><td>0x7f</td><td><p>если будет хотя бы десяток релеев на всю рф с хорошим аптаймом то всё будет норм, они связность сети обеспечат. а учитывая системные требования для релея его можно на пентиуме4 запустить.</p>
+<p>механизм бутстрапа это вообще единственный способ обеспечить децентрализованное общение между узлами. тем более что тут как и в торентах/i2p бутстрап делается один раз и дальше узлы сами друг с другом свяжутся.</p></td><td>2024-12-26T11:21:48.336Z</td></tr><tr><td>0x7f</td><td><p>читаю про cwtch</p>
+<blockquote>
+<p><strong>Decentralized and Open</strong><br>
+Participants in Cwtch can host their own safe spaces, or lend their infrastructure to others seeking a safe space. There is no “Cwtch service” or “Cwtch network”. The Cwtch protocol is <a href="https://git.openprivacy.ca/cwtch.im/cwtch" rel="noopener nofollow ugc">open</a>, and anyone is free to <a href="https://git.openprivacy.ca/sarah/cwtchbot" rel="noopener nofollow ugc">build bots, services</a> and <a href="https://git.openprivacy.ca/cwtch.im/cwtch-ui" rel="noopener nofollow ugc">user interfaces</a>and integrate and interact with Cwtch.</p>
+</blockquote>
+<p>что это значит? тут надо свои сервера поднимать как в джаббере или децентрализованность работает как в торентах и tox?</p></td><td>2024-12-26T11:25:01.481Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="0x7f" data-post="15" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p>если будет хотя бы десяток релеев на всю рф с хорошим аптаймом то всё будет норм</p>
+</blockquote>
+</aside>
+<p><a href="https://nodes.tox.chat" rel="noopener nofollow ugc">https://nodes.tox.chat</a> - вот здесь есть публичный список всех живых и рабочих нод. На данный момент в России живых три.</p>
+<p>Аптайма, естественно, не гарантирует никто - ноды спокойно могут лежать в сорцах клиента и при этом быть мёртвыми годами. Это крайне распространённая ситуация.</p>
+<p>Ну и опять же - оператор ноды рискует своей задницей предоставляя сервис как таковой. В РФ почти невозможно арендовать сервер не показав паспорт, а дома под кроватью такое держать - вообще самоубийство.</p>
+<aside class="quote no-group" data-username="0x7f" data-post="16" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p>что это значит? тут надо свои сервера поднимать как в джаббере или децентрализованность работает как в торентах и tox?</p>
+</blockquote>
+</aside>
+<p>По дефолту оно работает как onion-сервис, и весь трафик идёт только в оверлее, в т.ч. передача файлов (её нужно отдельно включать в настройках как “эксперимент”). Из коробки само приложение умеет только в 1-на-1 чаты. Поддержки звонков - нет.</p>
+<p>Серверы - те да, хостятся отдельно, это отдельный компонент, который точно так же работает как onion-сервис.</p>
+<p>Из минусов которые приходят в голову - Orbot до сих пор из коробки не умеет в webtunnel, поэтому есть шанс сходить нафиг в случае недоступности obfs4-мостов или meek.</p></td><td>2024-12-26T11:29:41.300Z</td></tr><tr><td>0x7f</td><td><p>это не список нод всей сети, это даже не список релеев - это список бутстрапов добавленных вручную. более того можно сделать свой файл bootstrap.json и сунуть его в параметр запуска <code>--nodes path/to/file</code></p>
+<blockquote>
+<p>дома под кроватью такое держать - вообще самоубийство</p>
+</blockquote>
+<p>ну это страшилка из разряда поведут за торенты босиком на расстрел.</p>
+<blockquote>
+<p>Серверы - те да, хостятся отдельно</p>
+</blockquote>
+<p>это опять получается единая точка отказа, забанят как вацап с вайбером забанили. а в случае с токсом надо забанить все бутстрапы так чтобы не обошли, все появляющиеся бутстрапы которые можно распространять json-файлами, изъять все компы с релеями и расстрелять всех кто их держит и забанить протокол - в нынешних реалиях выглядит пока что совершенно нереалистично.</p></td><td>2024-12-26T11:45:22.780Z</td></tr><tr><td>abc555</td><td><p>На компе развернуть свой сервкак, чтоб без посредников было и звони между собой, пиши что хочешь, никто никогда не перехватит, делай просто не по стандарту, это наверно последнее самое безопасное что осталось. Но опять же, смотря с чего звонить, если с телефона, то он должен быть пустой, без всяких там приложений, включая все стандартные и саму прошивку, тогда да, а так, тогда нет смысла, ваш яндекс к примеру в телефоне сольёт всё кому надо, как и хром и все ваши приложения )) Вроде как приложение погода, а по факту имеет полный доступ к камере и микрофону, к месту положению, та ко всему что у вас в нём есть ) И не думайте что можно что то отключить галкой, нет конечно, галка это так, чтоб вы поверили что отключили, ну чтоб вы спали спокойней веря что вас никто не видит )<br>
+Я за своим телефоном просёк ещё в 15 году, в роуторе лазил, смотрю подключён к вафле мой телефон, взял в руки телефон, галка вафли отключена, а роутер передаёт что там, удалил саму вафлю из телефона, чтоб он больше не смог подключиться сам и пароль поменял на роуторе на всякий случай и с тех пор больше его к нэту не подключаю вообще )<br>
+Я так понял, чтоб подключать телефон к нэту, то сначала нужно поменять на нём прошивку, не знаю, какое нить wrt на него поставить с открытым исходным кодом и только тогда подключать к нэту, не ставить вражеские приложения, а только то что знаешь лично и доверяешь и тогда уже пользоватся, а так в противном случаи всё это бутафория, все эти телеграммы, вайберы, сигналы и прочая хрень ) И у собеседника должен быть такой же с такой же прошивкой, если у него стандартный, тогда всё это тоже не будет иметь значение</p></td><td>2024-12-26T11:49:36.378Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="0x7f" data-post="18" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p>это не список нод всей сети</p>
+</blockquote>
+</aside>
+<p>И именно эти ноды из этого списка как правило зашиваются внутрь клиентов.</p>
+<aside class="quote no-group" data-username="0x7f" data-post="18" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p>более того можно сделать свой файл bootstrap.json и сунуть его в параметр запуска</p>
+</blockquote>
+</aside>
+<p>Про это я уже говорил чуть ранее - с некоторыми клиентами так можно, да.</p>
+<aside class="quote no-group" data-username="0x7f" data-post="18" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p>в нынешних реалиях выглядит пока что совершенно нереалистично.</p>
+</blockquote>
+</aside>
+<p>Как я уже говорил, протокол Tox выглядит очень узнаваемо и характерно на дампах, и его будет крайне легко заблокировать как таковой.</p>
+<p>Авторы проекта не ставят целью сделать что-то, что нельзя будет заблокировать, а что-то, где юзера будет как можно более сложно соотнести с реальным человеком.</p>
+<aside class="quote no-group" data-username="0x7f" data-post="18" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p>ну это страшилка из разряда поведут за торенты босиком на расстрел.</p>
+</blockquote>
+</aside>
+<p>Напоминаю что одного не очень житейски умного математика, который решил держать дома exit-ноду Tor в своё время успешно посадили. С недавними изменениями в законодательстве это будет ещё легче.</p></td><td>2024-12-26T12:10:48.635Z</td></tr><tr><td>0x7f</td><td><p>разработчик мне обещался прикрутить обфускацию. в любом случае учитывая неповоротливость ркн пока заблокируют протокол не один год пройдёт.</p>
+<p>за выходную ноду тора посадили потому что через неё рассылали то ли цп то ли ещё что-то такое нелегальное напрямую в клирнет. здесь пересылается зашифрованный трафик в котором содержится неизвестно что, содержимое знает только тот у кого приватная часть ключа. с тем же успехом можно ждать посадок всех кто порнуху через торенты раздаёт - там хотя бы можно ханипот в рой встроить.</p></td><td>2024-12-26T12:29:28.872Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="0x7f" data-post="21" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p>разработчик мне обещался прикрутить обфускацию. в любом случае учитывая неповоротливость ркн пока заблокируют протокол не один год пройдёт.</p>
+</blockquote>
+</aside>
+<p>Разработчик клиента не может прикрутить что-то существенное в контексте обфускации протокола - это сломает обратную совместимость с большинством клиентов и обеими имплементациями ядра. Что до самого toxcore - их только за смертью посылать в контексте реализации фич. Групповые чаты переделывали пять лет.</p>
+<aside class="quote no-group" data-username="0x7f" data-post="21" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p>здесь пересылается зашифрованный трафик в котором содержится неизвестно что, содержимое знает только тот у кого приватная часть ключа.</p>
+</blockquote>
+</aside>
+<p>А это вы уже будете доказывать товарищу майору, который первым делом заберёт ваши железки с приватными ключами (но более вероятно - безликому ТСПУ, который просто дропнет незнакомый для него трафик).</p>
+<p>Плюс к тому, у Tox крайне плохая репутация - в силу его малой распространённости и относительной неизвестности его часто юзают для связи зловредов с командными серверами.</p>
+<p>Если вам настолько неймётся поиграть в шифропанка - пользуйтесь XMPP-over-Tor или Briar на худой конец. Полагаться на самодельную крипту проекта родом с 4chan - такое себе.</p></td><td>2024-12-26T12:41:45.686Z</td></tr><tr><td>denium</td><td><p>Если хотите децентрализованный мессенджер можно также попробовать RetroShare (можно без выхода в её сеть, а только для своих), но нужен белый IP. Кстати, слышал он работал при шатдауне в Казахстане.<br>
+Или I2P решения. Есть некий I2P messenger (на Qt), но очень недоделанный, даже историю не сохраняет принципиально. Я как-то игрался. И IRC.</p></td><td>2024-12-26T12:58:03.353Z</td></tr><tr><td>denium</td><td><p>Мы раньше с братом пользовались uTox. Полезно было, когда остальные мессенджеры лежали с проблемами или если мы затевали очередной переход на новый мессенджер. А пробовали мы даже польский Gadu-Gadu, кстати очень приятный мессенджер (на gecko, что интересно). К сожалению, достал рекламой, даже popup’ами. Хоть, она и была довольно прикольной.<br>
+Но потом у брата глюканула винда из-за электричества и файлик с локальной учёткой utox обнулился. Вот такая надёжность. С тех пор Tox как-то сошёл на нет. Немного пользовались и qTox для звонков.</p></td><td>2024-12-26T13:14:31.731Z</td></tr><tr><td>0x7f</td><td><aside class="quote no-group" data-username="denium" data-post="24" data-topic="14139" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>Но потом у брата глюканула винда из-за электричества и файлик с локальной учёткой utox обнулился. Вот такая надёжность.</p>
+</blockquote>
+</aside>
+<p>ну это неизбежное последствие децентрализации. в отсутствии централизованного сервера единственное место где хранится учётная запись это комп владельца этой учётки.</p></td><td>2024-12-26T18:24:59.884Z</td></tr><tr><td>0x7f</td><td><p>в любом случае я хочу потестировать как работают чаты, если кому-нибудь тоже интересно - попробуйте создать там учётку через <a href="https://github.com/TokTok/qTox/releases/tag/v1.18.0-rc.3" rel="noopener nofollow ugc">графический клиент</a> или <a href="https://github.com/JFreegman/toxic/releases/tag/v0.16.0" rel="noopener nofollow ugc">текстовый клиент</a> и зайти по команде</p>
+<pre><code class="lang-auto">join 3D1FEC667D7BD488D9EC53B11D18EB97C612121D4E2E1C5E8DEE6514EBAE6D55
+</code></pre>
+<p>или тыкнуть где-то в графическом клиенте и ввести туда строчку без <code>join</code> чтобы присоединиться к чату.<br>
+или можете добавить меня по строчке</p>
+<pre><code class="lang-auto">150C54F69A8DF00CDA18A5012ED327358B4F97E343EBB64F989BEBC85D73146E1B00807215B0
+</code></pre>
+<p>и мы попробуем потестировать приглашения людей в чаты и как вообще это работает.</p></td><td>2024-12-26T19:08:06.293Z</td></tr><tr><td>stiff(stiff)</td><td><p>Всем привет . Посмотрел  github , вроде все актуально по развитию, последняя версия 27 ноября 2024 года <a href="https://github.com/JFreegman/toxic" class="inline-onebox" rel="noopener nofollow ugc">GitHub - JFreegman/toxic: A Tox-based instant messaging and video chat client.</a></p>
+<p>На официальном сайте есть клиенты  для всех платформ <a href="https://tox.chat/download.html" class="inline-onebox" rel="noopener nofollow ugc">Download - Tox</a></p></td><td>2024-12-30T00:16:11.501Z</td></tr><tr><td>0x7f</td><td><p>к сожалению текстовые клиенты для большинства людей слишком сложные (и интерфейс там такой что его явно профессиональный программист делал), а в qtox нет поддержки групповых чатов и даже в старые конференции непонятно как зайти, причём разработчики прямо говорят что будут в обозримом будущем только баги править, а не фичи добавлять.</p></td><td>2024-12-30T05:42:00.253Z</td></tr><tr><td>stiff(stiff)</td><td><p>Если мы говорим про консольный  “Toxic” соглашусь это менее удобно обычному ( рядовому) пользователю чем GUI вариант, но этот клиент рабочий в стиле IRC  , можно установить на PC плюс TOR и поехали ))  А так наверное сейчас популярные это <strong>Session</strong> <a href="https://getsession.org/download" class="inline-onebox" rel="noopener nofollow ugc">Download - Session Private Messenger</a> и <strong>Simplex</strong>  <a href="https://simplex.chat/downloads/" class="inline-onebox" rel="noopener nofollow ugc">Download SimpleX apps</a> как вы писали…</p></td><td>2024-12-30T22:00:14.050Z</td></tr><tr><td>0x7f</td><td><p>симплекс насколько я понял гоняет трафик через какие-то сервера которые можно забанить, session это тоже клиент-сервеный мессенджер или там одноранговая сеть как в tox?</p></td><td>2024-12-31T05:44:17.181Z</td></tr><tr><td>rkn-chan</td><td><aside class="quote no-group" data-username="stiff" data-post="29" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/779978/48.png" class="avatar"> stiff:</div>
+<blockquote>
+<p>это менее удобно обычному</p>
+</blockquote>
+</aside>
+<p>не понятно почему. если он и правда как например irssi то это же ОЧЕНЬ удобно, потому что можно даже на роутере оставить 24/7 и забыть про него. а потом даже с телефона ру-ру к дому можно подключиться через termux к демону. я лично так и пользуюсь иркой в наше время</p></td><td>2024-12-31T07:19:50.676Z</td></tr><tr><td>souvenir</td><td><p>Собственно</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="насколько-мессенджер-tox-защищён-от-блокировок-14139/543b49f0b3d83e64b0904a89196bb8a7c10c6c9f.jpeg" data-download-href="https://ntc.party/uploads/default/543b49f0b3d83e64b0904a89196bb8a7c10c6c9f" title="image"><img src="насколько-мессенджер-tox-защищён-от-блокировок-14139/543b49f0b3d83e64b0904a89196bb8a7c10c6c9f_2_370x500.jpeg" alt="image" data-base62-sha1="c198gcLXJXjhAHHYhZXx4v9IxhJ" width="370" height="500" srcset="насколько-мессенджер-tox-защищён-от-блокировок-14139/543b49f0b3d83e64b0904a89196bb8a7c10c6c9f_2_370x500.jpeg, насколько-мессенджер-tox-защищён-от-блокировок-14139/543b49f0b3d83e64b0904a89196bb8a7c10c6c9f_2_555x750.jpeg 1.5x, насколько-мессенджер-tox-защищён-от-блокировок-14139/543b49f0b3d83e64b0904a89196bb8a7c10c6c9f_2_740x1000.jpeg 2x" data-dominant-color="DBDDDC"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">949×1280 88.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="насколько-мессенджер-tox-защищён-от-блокировок-14139/15f47be52f190bc429a281d29171e972d5fbf6a2.jpeg" data-download-href="https://ntc.party/uploads/default/15f47be52f190bc429a281d29171e972d5fbf6a2" title="image"><img src="насколько-мессенджер-tox-защищён-от-блокировок-14139/15f47be52f190bc429a281d29171e972d5fbf6a2_2_316x500.jpeg" alt="image" data-base62-sha1="38dPxKtbouMuc3cyQO7F4G7jgdA" width="316" height="500" srcset="насколько-мессенджер-tox-защищён-от-блокировок-14139/15f47be52f190bc429a281d29171e972d5fbf6a2_2_316x500.jpeg, насколько-мессенджер-tox-защищён-от-блокировок-14139/15f47be52f190bc429a281d29171e972d5fbf6a2_2_474x750.jpeg 1.5x, насколько-мессенджер-tox-защищён-от-блокировок-14139/15f47be52f190bc429a281d29171e972d5fbf6a2_2_632x1000.jpeg 2x" data-dominant-color="E1E2E1"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">811×1280 168 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="насколько-мессенджер-tox-защищён-от-блокировок-14139/e4bf26e90cab281aadf7229ce0d3495cd0e76f5a.jpeg" data-download-href="https://ntc.party/uploads/default/e4bf26e90cab281aadf7229ce0d3495cd0e76f5a" title="image"><img src="насколько-мессенджер-tox-защищён-от-блокировок-14139/e4bf26e90cab281aadf7229ce0d3495cd0e76f5a_2_396x500.jpeg" alt="image" data-base62-sha1="wDAp4YoiitCGaS2pLdmN54AHEPU" width="396" height="500" srcset="насколько-мессенджер-tox-защищён-от-блокировок-14139/e4bf26e90cab281aadf7229ce0d3495cd0e76f5a_2_396x500.jpeg, насколько-мессенджер-tox-защищён-от-блокировок-14139/e4bf26e90cab281aadf7229ce0d3495cd0e76f5a_2_594x750.jpeg 1.5x, насколько-мессенджер-tox-защищён-от-блокировок-14139/e4bf26e90cab281aadf7229ce0d3495cd0e76f5a_2_792x1000.jpeg 2x" data-dominant-color="D4D7D6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1016×1280 139 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>как это примерно выглядит</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="насколько-мессенджер-tox-защищён-от-блокировок-14139/17af91d78e42fb540fddbeffd6c833d97055d049.jpeg" data-download-href="https://ntc.party/uploads/default/17af91d78e42fb540fddbeffd6c833d97055d049" title="image"><img src="насколько-мессенджер-tox-защищён-от-блокировок-14139/17af91d78e42fb540fddbeffd6c833d97055d049_2_266x500.jpeg" alt="image" data-base62-sha1="3nx8z4SH9yFoiRUkvs5HFMHxuCR" width="266" height="500" srcset="насколько-мессенджер-tox-защищён-от-блокировок-14139/17af91d78e42fb540fddbeffd6c833d97055d049_2_266x500.jpeg, насколько-мессенджер-tox-защищён-от-блокировок-14139/17af91d78e42fb540fddbeffd6c833d97055d049_2_399x750.jpeg 1.5x, насколько-мессенджер-tox-защищён-от-блокировок-14139/17af91d78e42fb540fddbeffd6c833d97055d049_2_532x1000.jpeg 2x" data-dominant-color="292B38"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">682×1280 47.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2024-12-31T07:39:55.726Z</td></tr><tr><td>rkn-chan</td><td><p>интересно на сколько cutting-edge? написали будто он уникальный, а значит легко определелить и забанить без сопутствующего урона и вовсе не cutting-edge тогда, а крипто-скам игрушка.</p>
+<p>у них разве не lokinet? там было написано что даже свою ноду нельзя поднять для тру децентрализации, типа они хотят $17000 для этого и это как бы… централизированая нода выходит. это ПОЛНЫЙ НОНСЕНС.</p>
+<p>для сравнения, i2p это тру децентрализация, потому что ты становишься сервером автоматически и чем больше обычных юзуров тем сильнее сеть. у lokinet этого не чувствуется, не знаю, не приходилось юзать lokinet, может у кого есть лучше инфа?</p></td><td>2024-12-31T07:57:06.741Z</td></tr><tr><td>souvenir</td><td><p>Насколько я знаю Локи там номинально присутствуют-ли, и опять же изначально это был форк Сигнала, со всеми вытекающими, позже session свой протокол внедрили, опять же, со всеми вытекающими, если верить вики то получается что -</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="насколько-мессенджер-tox-защищён-от-блокировок-14139/bc3cf9cdd125a1072a7d9b30ccfcb3f0ff4c3fbf.png" data-download-href="https://ntc.party/uploads/default/bc3cf9cdd125a1072a7d9b30ccfcb3f0ff4c3fbf" title="image"><img src="насколько-мессенджер-tox-защищён-от-блокировок-14139/bc3cf9cdd125a1072a7d9b30ccfcb3f0ff4c3fbf.png" alt="image" data-base62-sha1="qRep4Qsjb0gH1wfOG4tV9SFraIT" width="690" height="69" data-dominant-color="EAEBEC"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1409×142 17.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>Но это даже ладно, может у меня с проблемами с сетью так, но ждать устойчивых показателей сигнала “Путь” иногда приходится долго, чаще индикация в желтой зоне, вместо стабильной зеленой. Хотя, у тех кто им пользуется в большинстве случаев подключение стабильное. В целом я продолжу им пользоваться, это уж точно лучше чем массмаркет, который в недалеком будущем вполне может приказать долго жить.</p></td><td>2024-12-31T08:29:36.413Z</td></tr><tr><td>rkn-chan</td><td><details>
+<summary>
+oof</summary>
+<p>In recent years, massive global outages have taken some of the most widely used messaging platforms offline for hours or even days. These outages can be caused by server overloads, technical failures, or even cyberattacks targeting centralised infrastructure. In a world that relies heavily on real-time communication, such downtime can have critical consequences.</p>
+<p>Decentralised messaging apps, by design, do not have a single point of failure. They operate across a distributed network of nodes, so even if one or several nodes go offline, the rest of the network can continue functioning as normal. A fire which broke out in an OVH data center—the largest provider of cloud servers to Sessions operators—once resulted in roughly 15% of the network going down.</p>
+</details>
+<p>полная шняга этот ваш session если вчитаться в то как они подают информацию. тут ни слова не сказано про усточивость от бана ип адресов</p>
+<blockquote>
+<p>offline for hours or even day</p>
+</blockquote>
+<p>а как насчет forever могли бы привести больше примеров и ссылки на всякие <span class="hashtag-raw">#keepiton</span> хэштаги или статьи борцов за права вроде hrw когда происходят блэкауты. но нет, у них явно приоритеты в крипто пирамидах, а сама система больше похожа на ваннаби тор, только вместо волонтеров с доброй волей на донатах, у них все построено корпоративно (за $17000). и что-то мне подсказывает что когда их входные ноды заблочат (как тор), то они не будут спешить разрабатывать всякие сноуфлейки или вебтуннели</p>
+<blockquote>
+<p>OVH data center—the largest provider of cloud servers to Sessions operators</p>
+</blockquote>
+<p>но вот это конечно самый большой OOF. я думаю мне не нужно цитировать почему это ужасно. достаточно глянуть на соседний тред про hetzner</p></td><td>2024-12-31T08:39:30.520Z</td></tr><tr><td>0x7f</td><td><p>не знаю, выглядит не очень. tox будет работать даже если полностью отрубят заграницу, можно будет подгрузить список местных узлов бутстрапа через <code>--nodes</code> и не будет сервера который можно изъять и наделать палок на васянах. в session я так понял узлы разделены на общающиеся клиенты и сервера (“сервисный узел” в их терминологии) через которые гоняют сообщения.</p></td><td>2024-12-31T10:16:08.895Z</td></tr><tr><td>souvenir</td><td><aside class="quote no-group" data-username="0x7f" data-post="36" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p>даже если полностью отрубят заграницу</p>
+</blockquote>
+</aside>
+<p>Если отрубят заграницу (если отрубят), то меньшее что нас будет беспокоить это общение в мессенджерах. В любых. Даже в тех, что используют голубиную почту, там столько “привходящих” появится, что мы не знаем еще во что это в итоге выльется.</p></td><td>2024-12-31T10:31:46.622Z</td></tr><tr><td>zzr</td><td><p><a href="https://ntc.party/t/%D0%BD%D0%B0%D1%81%D0%BA%D0%BE%D0%BB%D1%8C%D0%BA%D0%BE-%D0%BC%D0%B5%D1%81%D1%81%D0%B5%D0%BD%D0%B4%D0%B6%D0%B5%D1%80-tox-%D0%B7%D0%B0%D1%89%D0%B8%D1%89%D1%91%D0%BD-%D0%BE%D1%82-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA/14139/8">етот</a> дело говорит, я даж как то одно время хостил на арендованой впске ноду подымал вот по <a href="https://habr.com/ru/articles/273901/" rel="noopener nofollow ugc">етому</a> гайду (но сейчас уже как я понемаю етот гайд не актуален уже),<br>
+от блокировок защищён чуть менее чем никак)<br>
+но я тут как то на днях или раньше читал какую то статью на хабре про разоблочение <em>неких</em> RaaS групировки и какого же был мое удивление что они там использовали tox (казалось бы решето решетом but still gets the job done)</p>
+<details>
+<summary>
+Summary</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="насколько-мессенджер-tox-защищён-от-блокировок-14139/1c13a642041c76347e532ac26330ecbb3c3fe751.jpeg" data-download-href="https://ntc.party/uploads/default/1c13a642041c76347e532ac26330ecbb3c3fe751" title="Screenshot_20250108_201050"><img src="насколько-мессенджер-tox-защищён-от-блокировок-14139/1c13a642041c76347e532ac26330ecbb3c3fe751_2_690x137.jpeg" alt="Screenshot_20250108_201050" data-base62-sha1="40nt0EZNNZ9ZeZgtQ1vLYVMQx4l" width="690" height="137" srcset="насколько-мессенджер-tox-защищён-от-блокировок-14139/1c13a642041c76347e532ac26330ecbb3c3fe751_2_690x137.jpeg, насколько-мессенджер-tox-защищён-от-блокировок-14139/1c13a642041c76347e532ac26330ecbb3c3fe751.jpeg 1.5x, насколько-мессенджер-tox-защищён-от-блокировок-14139/1c13a642041c76347e532ac26330ecbb3c3fe751.jpeg 2x" data-dominant-color="28292B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20250108_201050</span><span class="informations">751×150 21.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="насколько-мессенджер-tox-защищён-от-блокировок-14139/411def9528741c3b8e4b7ebd94d44b17c2f35e16.jpeg" data-download-href="https://ntc.party/uploads/default/411def9528741c3b8e4b7ebd94d44b17c2f35e16" title="Screenshot_20250108_201121"><img src="насколько-мессенджер-tox-защищён-от-блокировок-14139/411def9528741c3b8e4b7ebd94d44b17c2f35e16.jpeg" alt="Screenshot_20250108_201121" data-base62-sha1="9i3aIza1h0HxQtcXBPlyhyEKlnw" width="690" height="50" data-dominant-color="2E2E2E"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20250108_201121</span><span class="informations">730×53 10.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="насколько-мессенджер-tox-защищён-от-блокировок-14139/12434d43c4ea50be026dd3944dd19f2eb5626a29.jpeg" data-download-href="https://ntc.party/uploads/default/12434d43c4ea50be026dd3944dd19f2eb5626a29" title="Screenshot_20250108_201138"><img src="насколько-мессенджер-tox-защищён-от-блокировок-14139/12434d43c4ea50be026dd3944dd19f2eb5626a29.jpeg" alt="Screenshot_20250108_201138" data-base62-sha1="2ByMQQJJuwMiB2OMwJNrZoSeKjD" width="690" height="88" data-dominant-color="2B2D2F"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20250108_201138</span><span class="informations">714×92 18.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>так же удивился почему то никто не упомянул Jami (GNU/Ring) тоже глюченое поделка но хотяб понт крылом фонда GNU</p></td><td>2025-01-08T17:32:26.258Z</td></tr><tr><td>abc555</td><td><p>Конечная цель не выключить интернет или заблокировать тор, это просто отвлекающий манёвр, называется сбить с толку, перевести внимание на что то другое. Цель это электронные бабки, убрать наличку, как они уже объявили с первого июля и типа плавный переход ))) И никто даже и не заметил, все в обходе ютуба и прочего, у всех другие проблемы, а главную почему то упустили. Всё что происходит, это цель только электронные бабки, а потом добрый вечер будет и вам уже будет пофиг, вот надо над чем задуматься. Это будет конец всему, это и нэт по паспортам и блин, лучше если не в курсе, то проживёте хотя бы пол года, как говорится счастье в неведении ))<br>
+Вы же видите кто там и что они исполняют, а только представьте, у них будут все рычаги, малейшее отступление, заблокировали счёт, а налички нет, это будет закат если они провернут это дело и к сожалению этого многие так и не поняли<br>
+Я пытался на сколько мог отложить весь этот процесс который может произойти, но люди втягивались в телефоны, перевод электронного бобла и всё должно было это произойти раньше намного эти электронные бабки. Мои некоторые знакомые присели на них, сказали это удобно и орали с меня, типа я лох пользуюсь только наличкой и говоришь им чем всё закончится, а они не верят и не то что не верят, а просто не хотят думать об этом, живут сегодняшним днём. Я хочу что бы вы в серъёз восприняли эту инфу, так как это не шутка к сожалению и если это у них прокатит, а всё к этому идёт, то потеряем многих нормальных пацанов</p></td><td>2025-01-08T17:50:39.745Z</td></tr><tr><td>minecrafter(Minecrafter)</td><td><p>На форуме не был давненько. Залипал в новинки игростроя. Как зашел…вроде еще не весна, но кукуха едет у некоторых как в палате номер 6, без обид <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20"></p>
+<aside class="quote no-group" data-username="abc555" data-post="39" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/abc555/48/9998_2.png" class="avatar"> abc555:</div>
+<blockquote>
+<p>Конечная цель не выключить интернет или заблокировать тор, это просто отвлекающий манёвр, называется сбить с толку, перевести внимание на что то другое. Цель это электронные бабки, убрать наличку</p>
+</blockquote>
+</aside>
+<p>Да они уже давно электронные, если имеете банковский счет.</p>
+<aside class="quote no-group" data-username="abc555" data-post="39" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/abc555/48/9998_2.png" class="avatar"> abc555:</div>
+<blockquote>
+<p>Это будет конец всему, это и нэт по паспортам и блин, лучше если не в курсе, то проживёте хотя бы пол года, как говорится счастье в неведении ))</p>
+</blockquote>
+</aside>
+<p>А сейчас не по паспортам? <img src="https://ntc.party/images/emoji/twitter/rofl.png?v=12" title=":rofl:" class="emoji" alt=":rofl:" loading="lazy" width="20" height="20"> Я помню йота-модем в первой половине 2011 покупал, уже даже тогда продавец с каменным лицом проревел: “Ваш паспорт, пожалуйста!”.</p>
+<aside class="quote no-group" data-username="abc555" data-post="39" data-topic="14139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/abc555/48/9998_2.png" class="avatar"> abc555:</div>
+<blockquote>
+<p>Мои некоторые знакомые присели на них, сказали это удобно и орали с меня, типа я лох пользуюсь только наличкой и говоришь им чем всё закончится, а они не верят и не то что не верят, а просто не хотят думать об этом, живут сегодняшним днём.</p>
+</blockquote>
+</aside>
+<p>Сейчас абсолютно в любом магазине, даже в глухой деревне, установлены камеры. И не только в магазине. Вы можете хоть бартерные сделки проводить, если надо - будет сразу видно кто, когда, сколько и зачем. Это я еще молчу о том, что любая мало-помальски крупная покупка сразу же попадает в базу налоговой и неважно как именно вы условную квартиру-машину приобрели.</p>
+<p>Пэтому надо перестать страдать хней, ведь от прогресса все-равно никуда не денешься, точно так же как и с планеты Земля <img src="https://ntc.party/images/emoji/twitter/smile.png?v=12" title=":smile:" class="emoji" alt=":smile:" loading="lazy" width="20" height="20"> Просто надо принять как факт. Расслабиться, и стараться (по возможности) получать удовольствие <img src="https://ntc.party/images/emoji/twitter/partying_face.png?v=12" title=":partying_face:" class="emoji" alt=":partying_face:" loading="lazy" width="20" height="20"></p></td><td>2025-01-08T20:55:04.447Z</td></tr><tr><td>abc555</td><td><p>Вот так все, в один голос, надо шагать в ногу. Да нифига, кто сказал что надо, покажите мне его, кто он такой. Ваше мнение сформулировано на просмотре общественных каналов и это мнение навязанное, ну или как второй вариант вы просто бот, других вариантов нет. Ваша цель, сформировать общественное мнение, ну типа вы большинство и надо думать так как вы сказали. Я могу продолжать дальше вашу мысль до бесконечности. Общественность возможно даже согласится с вами, хотя, если показать другую реальность. то скажут нафиг нужна ваша, где неизбежность, нужно принять, других вариантов нет )) Это всего лишь одна реальность из триллионов то что вы хотите рассказать и вы уверены что она реальна ?<img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"><br>
+Наверно вы думаете что смогли просчитать все реальности ? Ну да интеллект сказал будет так и что ? И не факт что будет именно так. Реальность создают люди, а это ни какой интеллект не сможет вычислить, ещё такого не придумали, шарящего ))</p></td><td>2025-01-08T21:12:00.128Z</td></tr><tr><td>minecrafter(Minecrafter)</td><td><p>Дело в том, что вы все-равно в цифровую эпоху ни от кого не спрячетесь. Можно долго лить слезы, но ситуация от того не изменится. Мне самому это все противно, но какой выход-то?<br>
+А самое главное, я так и не понял от кого вы пытаетесь спрятаться? От продавщицы, от участкового или от корпоратов? <img src="https://ntc.party/images/emoji/twitter/smile.png?v=12" title=":smile:" class="emoji" alt=":smile:" loading="lazy" width="20" height="20"><br>
+Поучается в итоге “назло кондуктору возьму билет и пойду по шпалам”.</p>
+<p>Можно конечно отказаться от смартфонов, уйти жить в лес, выкинуть карточку и ноут. Жечь костры. Но вопрос - кому хуже сделаете то <img src="https://ntc.party/images/emoji/twitter/joy.png?v=12" title=":joy:" class="emoji" alt=":joy:" loading="lazy" width="20" height="20"> И даже там к вам очень быстро придет в гости егерь и скажет - wtf?</p></td><td>2025-01-08T21:15:47.782Z</td></tr><tr><td>abc555</td><td><p>Егерь не придёт, вот вы можете пойти и спилить ёлку на новый год ? Думаю что нет, ведь у вас навязанные правила, не так ли, я ведь прав ?</p></td><td>2025-01-08T21:21:06.014Z</td></tr><tr><td>minecrafter(Minecrafter)</td><td><p>От спиливания отказался сам, еще задолго до того, как пластиковые елки стали мейнстримом. В экологических целях, какгрица <img src="https://ntc.party/images/emoji/twitter/sunglasses.png?v=12" title=":sunglasses:" class="emoji" alt=":sunglasses:" loading="lazy" width="20" height="20"></p></td><td>2025-01-08T21:22:35.435Z</td></tr><tr><td>abc555</td><td><p>Наверно выпившим за рулём тоже да кишка тонка ? Вот только представьте, вы осознаёте все действия, в случаи чего, вы будите виноваты и наверно скажете что это очень не хорошо и таких надо стирать в порошок, я прав ?</p></td><td>2025-01-08T21:25:14.777Z</td></tr><tr><td>abc555</td><td><p>Вы можете рассказывать дальше, курение это плохо. бухло это тоже, надо молится и смотреть телевизор. вот это правильно, а всё остальное нет )))</p></td><td>2025-01-08T21:29:19.851Z</td></tr><tr><td>minecrafter(Minecrafter)</td><td><p>Есть эффективные и неэффективные формы несогласия. Например, вы купили тухлое мясо у мелкого продавца. Эффективно - не покупать там больше и написать везде в соц сетях чем торгует этот товарищ, испортив ему репутацию. Неэффективно - взять биту и пойти крушить его лавку, при этом заработав кучу проблем.<br>
+Весь ваш монолог - это про второе, поэтому строить конструктивный диалог невозможно</p></td><td>2025-01-08T21:30:15.050Z</td></tr><tr><td>abc555</td><td><p>Вот тут вы не правы, мясо можно вернуть или поменять, причём не стуча на продавца и это будет правильное решение. А может он не приделах, а вы на него настучали, стукачество не приветствуется нигде<br>
+Для вас конструктивный диалог это стукануть, а для меня это не приемлемо<br>
+Есть у вас ещё вопросы ?</p></td><td>2025-01-08T21:33:09.114Z</td></tr><tr><td>abc555</td><td><p>Вы не умеете строить диалог, потому что у вас всего 2 варианта, как на примере мяса, но вариантов больше чем вы можете себе вообразить только, наверно даже и не сможете, вот в этом ваша ошибка и я не думаю что вы плохой человек, просто думаете так как вам сказали, а альтернативного мнения у вас просто нету. Вот только представьте, стуканули вы на продавца, а он не хозяин, просто продавец и наломаете ему, а у него семья и хлопнули его и полинял он на лавэ и вам это вернётся, а знаете почему ? Потому что он был не приделах, а вы своим стукачеством разрушили его семью и это только один из миллиардов вариантов которые вы не учитываете. Нельзя так думать как зомби )<br>
+Если вы не знаете или не уверены, лучше спросите или переспросите у разных людей, не может быть одного мнения у всех, если конечно они не под телевизором )</p></td><td>2025-01-08T21:56:52.552Z</td></tr>
+    </table>
+      </body>
+    </html>

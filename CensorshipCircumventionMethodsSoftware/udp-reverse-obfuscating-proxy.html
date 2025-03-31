@@ -1,0 +1,204 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>udp-reverse-obfuscating-proxy</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>jubilantWhiting1</td><td><p>Друзья, нужен реверсный прокси-сервер для UDP. То, что делает ssh-опция -R, только для UDP. Я как не старался, найти не смог.</p>
+<p>Дополнительным бонусом была бы возможность прикидываться каким-нибудь “легитимным” протоколом, например, dtls, ну, или хотя бы просто XOR с ключом. Ну, или “настоящий” dtls реверс-прокси.</p>
+<p>Именно реверс, а не прямой нужен из-за того, что целевая машина находится за NAT.</p></td><td>2022-07-01T10:39:25.135Z</td></tr><tr><td>vanyaindigo</td><td><p>Shadowsocks не подходит?</p></td><td>2022-07-01T16:32:34.477Z</td></tr><tr><td>jubilantWhiting1</td><td><p>Я не нашёл такого функционала в shadowsocks. Не подскажете, как именно это сделать?</p>
+<p>Ну, и вы же сами спрашивали два года назад, и выяснялось, что обфускации тоже нет:</p>
+<aside class="quote quote-modified" data-post="1" data-topic="533">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/testing-shadowsocks-udp-handling-with-obfuscation-enabled/533">Testing Shadowsocks UDP handling with obfuscation enabled</a> <a class="badge-category__wrapper " href="/c/censorship-research-publications/22"><span data-category-id="22" style="--category-badge-color: #231F20; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Academic papers, researches, blog posts with useful information"><span class="badge-category__name">Censorship research &amp; publications</span></span></a>
+  </div>
+  <blockquote>
+    Test of Shadowsocks UDP handling in obfuscation mode
+Software used: shadowsocks-libev 3.3.4 (TCP+UDP) on the server side, official Android Shadowsocks 5.0.5 client by Max Lv. 
+Without plugins
+
+Google DNS (8.8.8.8) over TCP is used by default. Shadowsocks converts DNS UDP queries to TCP.
+UDP data is transferred via proxy over UDP, without UDP-in-TCP incapsulation (this is expected, documented behavior).
+
+Simple-obfs
+Software: simple-obfs 0.0.5 on server, Simple Obfuscation by Max LV on Android, v…
+  </blockquote>
+</aside>
+</td><td>2022-07-02T07:26:32.816Z</td></tr><tr><td>vanyaindigo</td><td><p>Вам шашечки или ехать? С обфускацией UDP сейчас нигде нет вроде бы.</p></td><td>2022-07-02T07:59:45.603Z</td></tr><tr><td>jubilantWhiting1</td><td><p>Обфускация – это не шашечки, это иногда очень нужно.</p>
+<p>Но даже если считать её “шашечками”, всё равно shadowsocks не умеет обратное проксирование, только прямое.</p></td><td>2022-07-02T08:19:29.048Z</td></tr><tr><td>ValdikSS</td><td><p>Какую вы решаете задачу? Почему ищете именно реверс-прокси, а не хотите применить стандартные методы, вроде VPN?<br>
+VPN идеально подходит для вашей задачи.</p></td><td>2022-07-02T17:40:06.359Z</td></tr><tr><td>soloway(Solo Way)</td><td><p>Задача выглядит тривиальной. Это примерно уровень университетской лабораторной работы. Кажется будет проблемно найти готовое решение промышленного качества. Впрочем, несложно сделать самому или нанять кого-нибудь.</p>
+<p>Для простейшей обфускации перед отправкой добавляйте к полезной нагрузке каждой дейтаграммы несколько случайных байт в качестве ключа, затем этими же байтами проксорьте буфер. На принимающей стороне извлеките ключ из принятых данных и снова проксорьте отстальную часть. В конце не забудьте обрезать полезню нагрузку на длину ключа. Операция выполняется очень быстро. Издержки на работу сети обычно существенно выше.</p>
+<p>Не совсем понятно что вы понимаете под обратным прокси применительно к UDP. В соединениях UDP стороны практически равнозначны. Просто два узла попеременно шлют друг другу дейтаграммы. Нет состояний, рукопожатий и прочего. Конечно, для того чтобы временно открыть на прием порт через NAT необходимо чтобы самую первую дейтаграмму отправил узел за NAT. Так же стоит учитывать то, что NAT автоматически закроет порт через 1…2 минуты если в течение этого срока не будет получено входящих дейтаграм.</p>
+<p>Здесь можно найти нескольколько простых примеров работы через UDP: <a href="https://nodejs.org/api/dgram.html" class="inline-onebox" rel="noopener nofollow ugc">UDP/datagram sockets | Node.js v18.4.0 Documentation</a></p></td><td>2022-07-02T21:34:13.568Z</td></tr><tr><td>jubilantWhiting1</td><td><ol>
+<li>VPN и есть задача, которую я решаю.</li>
+<li>Мой VPN-сервер за NAT’ом, машина – это релей.</li>
+<li>Для прохождения NAT нужен реверс-прокси.</li>
+<li>Обфускация нужна, чтобы провайдер релея не забанил.</li>
+<li>UDP нужен, потому что TCP-VPN это дрянь.</li>
+</ol>
+<blockquote>
+<p>VPN идеально подходит для вашей задачи.</p>
+</blockquote>
+<p>Я не хочу гонять VPN-over-VPN, и я не хочу держать сервер VPN на релее.</p></td><td>2022-07-03T02:19:41.411Z</td></tr><tr><td>jubilantWhiting1</td><td><blockquote>
+<p>Задача выглядит тривиальной.</p>
+</blockquote>
+<p>Вы готовы за неё взяться? Сколько это будет стоить? Более конкретно, вы готовы добавить опцию -R и/или DTLS в UDPspeeder?</p></td><td>2022-07-03T02:23:29.156Z</td></tr><tr><td>szq4</td><td><p><a href="https://securesocketfunneling.github.io/ssf/" class="onebox" target="_blank" rel="noopener nofollow ugc">https://securesocketfunneling.github.io/ssf/</a></p></td><td>2022-07-03T05:45:56.162Z</td></tr><tr><td>jubilantWhiting1</td><td><p>ssf туннелирует через tls, а не dtls, то есть, через tcp. Не годится.</p></td><td>2022-07-03T05:48:50.147Z</td></tr><tr><td>soloway(Solo Way)</td><td><aside class="quote no-group" data-username="jubilantWhiting1" data-post="9" data-topic="2760">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/j/d9b06d/48.png" class="avatar"> jubilantWhiting1:</div>
+<blockquote>
+<p>Вы готовы за неё взяться?</p>
+</blockquote>
+</aside>
+<p>Вряд ли у нас что-то получится. Но если будут вопросы, конечно, обращайтесь.</p></td><td>2022-07-03T23:17:21.920Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="jubilantWhiting1" data-post="8" data-topic="2760">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/j/d9b06d/48.png" class="avatar"> jubilantWhiting1:</div>
+<blockquote>
+<p>Я не хочу гонять VPN-over-VPN, и я не хочу держать сервер VPN на релее.</p>
+</blockquote>
+</aside>
+<p>В таком случае, как вы представляете архитектуру реверс-прокси для UDP без установки какой-либо программы и на релее, и на сервере? Чем это принципиально отличается от установки какого-либо туннеля (хоть <a href="https://www.man7.org/linux/man-pages/man8/ip-fou.8.html">fou</a>) и на релее, и на сервере?</p>
+<p>Мне кажется, у вас проблема <a href="https://ru.wikipedia.org/wiki/%D0%9F%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_XY">проблема XY</a>: вы описываете не задачу, а ваше видение её решения.</p></td><td>2022-07-04T11:38:13.474Z</td></tr><tr><td>jubilantWhiting1</td><td><blockquote>
+<p>В таком случае, как вы представляете архитектуру реверс-прокси для UDP без установки какой-либо программы и на релее, и на сервере?</p>
+</blockquote>
+<p>Почему без установки? На релее устанавливается сервер udp-ssh-R и открывает два слушающих сокета (один для клиента udp-ssh-R, один для входящих соединений), на VPN-машине клиент udp-ssh-R, и раз в 2 минуты шлёт на релей keepalive. При подключении к сокету на релее, он принимает “коннект”, и пересылает пакет udp-ssh-R клиенту (за NAT), и тот уже подключается к слушающему сокету VPN-процесса.</p>
+<p>Естественно, нужен ещё и сервер прямого прокси на релее, например, тот же самый shadowsocks, который будет деобфусцировать входящее соединение с клиента.</p>
+<p>Что на релее <em>не</em> делается, это не создаётся нового VPN-интерфейса, не хранится ценных (более-менее) приватных ключей, и не производится лишних хопов маршрутизации. И с MTU меньше трудностей.</p>
+<blockquote>
+<p>Чем это принципиально отличается от установки какого-либо туннеля (хоть <a href="https://www.man7.org/linux/man-pages/man8/ip-fou.8.html" rel="noopener nofollow ugc">fou</a>) и на релее, и на сервере?</p>
+</blockquote>
+<p>Я не знаю, как работает fou. Спасибо за наводку, я почитаю. Хотя беглым взглядом я не вижу, как это должно работать.</p></td><td>2022-07-04T15:45:46.505Z</td></tr><tr><td>soloway(Solo Way)</td><td><aside class="quote no-group" data-username="jubilantWhiting1" data-post="14" data-topic="2760">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/j/d9b06d/48.png" class="avatar"> jubilantWhiting1:</div>
+<blockquote>
+<p>При подключении к сокету на релее, он принимает “коннект”, и пересылает пакет udp-ssh-R клиенту (за NAT), и тот уже подключается к слушающему сокету VPN-процесса.</p>
+</blockquote>
+</aside>
+<p>Но куда релей должен отправлять ответ сервера, если сервер не знает и, соответственно, не сообщает адрес клиента, а на релей, допустим, пришло пять клиентов? Все-таки нужен или VPN или в более общем виде программа-мультиплексор умеющая передавать несколько UDP-соединений через одно. VPN проще. Я бы попытался прикрутить wireguard. Там каждый узел может работать и как клиент и как сервер для разных подключений. Ваш серевер может установить соединение с релеем  как клиент, а уже через него принимать подключения клиентов (не раскрывая при этом ключи). Не пробовал такую схему, но вроде должно работать.</p>
+<aside class="quote no-group" data-username="jubilantWhiting1" data-post="14" data-topic="2760">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/j/d9b06d/48.png" class="avatar"> jubilantWhiting1:</div>
+<blockquote>
+<p>Естественно, нужен ещё и сервер прямого прокси на релее, например, тот же самый shadowsocks, который будет деобфусцировать входящее соединение с клиента.</p>
+</blockquote>
+</aside>
+<p>Если клиенты подклчаются через shadowsocks, то может быть проще проксировать необработанный shadowsocks через релей?</p></td><td>2022-07-05T22:01:45.153Z</td></tr><tr><td>jubilantWhiting1</td><td><blockquote>
+<p>Но куда релей должен отправлять ответ сервера, если сервер не знает и, соответственно, не сообщает адрес клиента, а на релей, допустим, пришло пять клиентов?</p>
+</blockquote>
+<p>У меня всего один клиент, мне достаточно одного.</p>
+<blockquote>
+<p>Все-таки нужен или VPN или в более общем виде программа-мультиплексор умеющая передавать несколько UDP-соединений через одно.</p>
+</blockquote>
+<p>Как ssh передаёт? Вот так же и передавать. Да, видимо, добавлять свой заголовок к пакету, а может быть, вообще если два маленьких пакета пришло, уложившись в буфер, упаковывать их в один UDP пакет, а на сервере распаковывать.</p>
+<blockquote>
+<p>VPN проще. Я бы попытался прикрутить wireguard. Там каждый узел может работать и как клиент и как сервер для разных подключений.</p>
+</blockquote>
+<p>Это не проще. Это VPN-over-VPN, лишний хоп маршрутизации, лишний интерфейс на сервере, лишние айпи в файрволе, проблемы с MTU. Собственно, сейчас оно так и работает, только VPN это ssh-VPN.</p>
+<blockquote>
+<p>Ваш серевер может установить соединение с релеем как клиент, а уже через него принимать подключения клиентов (не раскрывая при этом ключи). Не пробовал такую схему, но вроде должно работать.</p>
+</blockquote>
+<p>Работать будет, но хочется более прямолинейного решения. Собственно, таким решением мог бы являться socat, но socat не сохраняет границы пакетов, из-за чего половина пакетов не проходит.</p></td><td>2022-07-06T04:29:06.566Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="jubilantWhiting1" data-post="16" data-topic="2760">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/j/d9b06d/48.png" class="avatar"> jubilantWhiting1:</div>
+<blockquote>
+<p>У меня всего один клиент, мне достаточно одного.</p>
+</blockquote>
+</aside>
+<p>В таком случае, если IP-адреса клиента и сервера заранее известны (если у вас стационарный клиент) и NAT не симметричный, вы можете установить соединение без релея, отправляя UDP-пакеты в обе стороны с фиксированными портами. OpenVPN, например, можно настроить в таком режиме: задайте <code>port</code> и <code>lport</code> фиксированными и на клиенте, и на сервере.<br>
+Если адрес клиента или сервера заранее не известен, но клиент всё ещё стационарный и NAT не симметричный, можете использовать ваш релей-сервер для их согласования.</p>
+<p>Если у вас нет ограничений на ОС/протокол, то попробуйте, например, <a href="https://github.com/pojntfx/weron/">weron</a> — это VPN поверх WebRTC (DTLS), с «пробивом» NAT. Или, например, <a href="https://www.tinc-vpn.org/">tinc</a>, или <a href="https://www.zerotier.com/">zerotier</a>, или <a href="https://tailscale.com/">tailscale</a>.</p>
+<p>Софт для UDP reverse proxy мне неизвестен. Ближе всего в этому был бы v2fly, но он не поддерживает режим reverse proxy на UDP-порт, а только на TCP-сервисы (хоть и трафик туннелировать может через UDP, например, через QUIC).<br>
+Не зная, чего <em>в действительности</em> вы хотите добиться, посоветовать вам что-то обстоятельно не представляется возможности — вы не рассказываете о задаче.</p></td><td>2022-07-06T08:52:25.352Z</td></tr><tr><td>jubilantWhiting1</td><td><blockquote>
+<p>Не зная, чего <em>в действительности</em> вы хотите добиться, посоветовать вам что-то обстоятельно не представляется возможности — вы не рассказываете о задаче.</p>
+</blockquote>
+<p>Reverse UDP прокси, такой же как ssh -R, только для udp, сохраняющий границы пакетов при доставке.</p>
+<blockquote>
+<p><a href="https://github.com/pojntfx/weron/" rel="noopener nofollow ugc">weron</a>  <a href="https://www.tinc-vpn.org/" rel="noopener nofollow ugc">tinc</a> <a href="https://www.zerotier.com/" rel="noopener nofollow ugc">zerotier</a>, <a href="https://tailscale.com/" rel="noopener nofollow ugc">tailscale</a>.</p>
+</blockquote>
+<p>Я ещё раз поковыряюсь со всем этим, но для тупого проксирования UDP это все кажется оверкиллом.</p></td><td>2022-07-06T09:16:40.106Z</td></tr><tr><td>ValdikSS</td><td><p>Простой рабочий вариант для одного клиента, с OpenVPN.</p>
+<p>На стороне релея:</p>
+<ol>
+<li>Скомпилировать <a href="https://github.com/TLINDEN/udpxd" class="inline-onebox">GitHub - TLINDEN/udpxd: A general purpose UDP relay/port forwarder/proxy</a>
+</li>
+<li>Запустить: <code>./udpxd -l 0.0.0.0:1194 -b 0.0.0.0:12498 -t 1.1.1.1:1194</code>, где <code>1.1.1.1</code> — IP-адрес сервера.</li>
+</ol>
+<p>На стороне сервера (за несимметричным NAT):</p>
+<ol>
+<li>Запустить OpenVPN на порту 1194 UDP</li>
+<li>Запустить <code>sudo nping --udp -g 1194 -p 12498 2.2.2.2 -c1</code>, где <code>2.2.2.2</code> — IP-адрес relay-сервера.</li>
+</ol>
+<p>Готово. Клиент может подключаться к <code>2.2.2.2:1194</code>. Команду с nping нужно выполнять каждые пару минут при отсутствии клиента. Также в OpenVPN следует настроить keepalive на 30-40 секунд.<br>
+Обфускации в этом способе нет, установка дополнительного ПО на VPN-сервер не требуется.</p></td><td>2022-07-06T10:02:34.405Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="jubilantWhiting1" data-post="18" data-topic="2760">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/j/d9b06d/48.png" class="avatar"> jubilantWhiting1:</div>
+<blockquote>
+<p>Reverse UDP прокси, такой же как ssh -R, только для udp, сохраняющий границы пакетов при доставке.</p>
+</blockquote>
+</aside>
+<p>Это опять не похоже на задачу, а на ваше видение её решения. Ранее вы говорили о VPN. Вы хотите соеденить двух клиентов VPN, оба из которых находятся за NAT? В таком случае, рассмотрите VPN-решения, упомянутые выше, они позволят это сделать без промежуточного сервера.</p></td><td>2022-07-06T10:18:56.253Z</td></tr><tr><td>jubilantWhiting1</td><td><blockquote>
+<p>Это опять не похоже на задачу, а на ваше видение её решения.</p>
+</blockquote>
+<p>ssh -R – это тоже метод решения, а не проблема. Почему вас удивляет, что я хочу удочку, а не рыбу? Ну сегодня мне нужно пробрасывать VPN, завтра форварднуть порт для RTMP сервера для стримов, послезавтра пробросить QUIC.</p>
+<p>Зачем полагаться на отдельные костыли, которые в каждом конкретном случае могут и работать, но все вместе будут требовать ежедневного внимания, потому что будут постоянно ломаться? grep придуман в 70е годы, и будет работать пока существуют текстовые файлы. Wireguard послезавтра умрёт, потому что в chacha-poly найдут бэкдор от NSA, а OpenVPN Inc завтра разорится и перестанет выпускать свой продукт. А туннели UDP будут даже при повсеместном внедрении ipv6, потому что файрволы всё равно в том или ином виде будут.</p></td><td>2022-07-07T09:59:55.503Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="jubilantWhiting1" data-post="21" data-topic="2760">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/j/d9b06d/48.png" class="avatar"> jubilantWhiting1:</div>
+<blockquote>
+<p>Почему вас удивляет, что я хочу удочку, а не рыбу? Ну сегодня мне нужно пробрасывать VPN, завтра форварднуть порт для RTMP сервера для стримов, послезавтра пробросить QUIC.</p>
+</blockquote>
+</aside>
+<p>Меня это не удивляет: я бы и сам хотел видеть такую программу, потому что у неё есть применения, а описанные вами недостатки VPN-туннелей верны.<br>
+Только программа с такой функциональностью мне неизвестна, а поиск не выдаёт ничего подобного: встречаются реверс-прокси с поддержкой UDP, но без туннелирования сквозь NAT.</p>
+<p>Поэтому остаётся предлагать только альтернативные решения вашей задачи, предполагая, что она заключается в подключении к VPN-серверу за NAT.</p></td><td>2022-07-07T10:23:25.413Z</td></tr><tr><td>ValdikSS</td><td><p>Похоже, нашел программу, удовлетворяющую требованиям: это юзерспейсный клиент/сервер WireGuard: <a href="https://github.com/aramperes/onetun" class="inline-onebox">GitHub - aramperes/onetun: User space WireGuard proxy in Rust</a></p></td><td>2022-07-17T17:09:18.620Z</td></tr><tr><td>jubilantWhiting1</td><td><p>Спасибо, посмотрю.</p>
+<p>Хотя если кто-нибудь хочет сделать настоящий реверс-прокси для UDP, то предложение согласовать требования и заплатить всё ещё в силе.</p></td><td>2022-07-18T03:32:02.040Z</td></tr><tr><td>jubilantWhiting1</td><td><p>Кажется, я нашёл ещё более прямолинейное решение. <a href="https://github.com/2xsaiko/udptun" class="inline-onebox" rel="noopener nofollow ugc">GitHub - 2xsaiko/udptun: Multi-socket UDP tunnel</a></p>
+<p>На релее:</p>
+<pre><code class="lang-auto">udptun --listen 42.42.42.42:53 --entry 127.0.0.1:10000
+</code></pre>
+<p>На машине за NAT:</p>
+<pre><code class="lang-auto">udptun --remote 42.42.42.42:53 --target 127.0.0.1:10000
+
+</code></pre>
+<p>И, кажется, должно пробрасывать порт 10000 с релея на машину за NAT.<br>
+Минусы – нет ни  обфускации, ни шифрования, ни даже авторизации. То есть, man-in-the-middle может прикинуться машиной за NAT, и начать получать пакеты, предназначенные для сервиса за NAT. Также ничего не написано про keepalive.</p>
+<p>Но в любом случае, пример неплохой, мысли автора шли в нужном направлении. Быть может быть, добавить реализацию AEAD PSK не так и сложно окажется.</p></td><td>2022-11-20T13:46:26.912Z</td></tr>
+    </table>
+      </body>
+    </html>

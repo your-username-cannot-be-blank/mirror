@@ -1,0 +1,67 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>3x-ui-vless-3x-ui-ss-warp-не-работает</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ale</td><td><p>Текущая схема следующая:<br>
+VPS1 - Европа - 3x-ui v2.4.11 - VLESS - маскировка под собственный сайт - перенаправление всего трафика на второй VPS через SS<br>
+VPS2 - Европа - 3x-ui v2.4.11</p>
+<p>Все работает, IPv6 отключен на клиенте. Пока что спользую Nekoray, но в итоге схема должна работать на Keenetic с XKeen.</p>
+<p>Пытаюсь добавить WARP на VPS2, подписка WARP+ оплачена. Как только добавляю в outbound и маршрутизацию всего трафика с VPS1 по пользователю через WARP перестает работать совсем. Помогает только удаление маршрута и outbound. При этом в nekoray ошибки типа:<br>
+dns: lookup failed exchange4: reality verification failed | exchange6: context canceled | upstream: context deadline exceeded</p>
+<p>Что я делаю не так? Пробовал менять endpoint на IP адрес CF - не помогло, да я и не понимаю как это должно помочь…</p></td><td>2025-01-10T20:39:57.536Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Попробуйте пропустить трафик через обычный WARP (который бесплатный), если заработает, то что-то не так с импортом / работой ключа WARP+ (в 3x-ui вроде залочен один из параметров, client id или типа того)</p>
+<p>И да, вместо SS не проще ли использовать какой-нибудь WireGuard?</p>
+<p>В ЕС вроде никаких ограничений на WG нет, хотя если цель - повышение конфиденциальности, то почему бы и нет.</p></td><td>2025-01-11T00:26:51.620Z</td></tr><tr><td>ale</td><td><p>Через бесплатный пробовал изначально - не работает. Панель корректно (на мой взгляд) отрабатывает создание конфига WARP, корректно отображает статус учетной записи.</p>
+<p>При этом тремя месяцами ранее, когда тестировал WARP в этой же схеме (те же хостинги, только 3x-ui была старее на несколько ревизий), а ключ получал через известный бот-генератор, все заработало после того как сгенерировал (насколько помню бесплатно) персональный ключ. На ключах из общего канала, где их по 5 штук публикуют не работало, НЕ выдавало ошибку, но и статус аккаунта не менялся на unlimited. На персональном ключе сразу показало лимит трафика 2 ПБ и без дополнительных настроек точкой выхода стали адреса CF.</p>
+<p>Теперь ключ получал купив подписку через iPhone. В приложении 1.1.1.1 на телефоне показывает мое “устройство”. Только вот обратил внимание, что в панели 3x-ui статус аккаунта unlimited, а квоту трафика показывает 0.</p>
+<p>Бот теперь пишет, что с 1 ноября CF приостановил их реферальную программу. Ключ персональный сгенерировать дает, но именно купить внутри ТГ теперь нет возможности. На любых ключах из этого бота, что на старом 3-месячной давности, то на новом не работает. Как был аккаунт free так и не меняется какой ключ не подставляй.</p></td><td>2025-01-11T09:16:32.133Z</td></tr><tr><td>ale</td><td><p>Почитал советы из других тем со схожей проблемой… Не пойму все равно в чем дело. Пробовал подключаться через nekoray напрямую к VPS2, другие ошибки идут, тоже про DNS, тоже не работает:</p>
+<p>INFO[0028] outbound/shadowsocks[proxy]: outbound connection to 1.1.1.1:443<br>
+ERROR[0028] [3393654746 164ms] dns: lookup failed for <a href="http://download.windowsupdate.com" rel="noopener nofollow ugc">download.windowsupdate.com</a>: exchange6: EOF | exchange4: EOF</p>
+<p>У меня ping на <a href="http://engage.cloudflareclient.com" rel="noopener nofollow ugc">engage.cloudflareclient.com</a> идет, ответ по IPv6, в настройках endpoint по умолчанию <a href="http://engage.cloudflare.com:2048" rel="noopener nofollow ugc">engage.cloudflare.com:2048</a>. Может что-то нужно на IPv4 принудительно перевести или в DNS дело?</p>
+<p>UPD: замена endpoint на 162.159.192.1:2048 не решает проблему, ошибки в nekoray те же самые идут</p>
+<p>Ubuntu 22.04.5 на OpenVZ если это критично, настройки по умолчанию, 3x-ui установлена стандартным скриптом, кроме ufw allow для ssh и панели настройки не менял</p></td><td>2025-01-11T10:21:50.414Z</td></tr><tr><td>VVVVVV</td><td><p>Попробуй wireguard с мусорными пакетами через amneziaWG, инструкция тут:<br>
+<a href="https://telegra.ph/Ispolzuem-Cloudflare-WARP-v-WireGuard-dlya-obhoda-blokirovok-v-tom-chisle-obhoda-zamedleniya-YouTube-08-01" rel="noopener nofollow ugc">Используем Cloudflare WARP в AmneziaWG для обхода блокировок</a></p></td><td>2025-01-11T12:02:07.280Z</td></tr><tr><td>ale</td><td><p>Спасибо, но мне нужно именно следующую схему реализовать XKeen - VPS1 - VPS2 - CF</p>
+<p>Может еще следующий момент критчен: тестирую на ВМ с клиентом nekoray. Работает только если в настройках DNS nekoray указать Remote DNS <a href="https://one.one.one.one/dns-query" rel="noopener nofollow ugc">https://one.one.one.one/dns-query</a> и Direct DNS 119.29.29.29 или с <a href="https://8.8.8.8/dns-query" rel="noopener nofollow ugc">https://8.8.8.8/dns-query</a> и 8.8.8.8 или <a href="https://dns.quad9.net/dns-query" rel="noopener nofollow ugc">https://dns.quad9.net/dns-query</a> и 9.9.9.9 соответственно.</p></td><td>2025-01-11T13:16:33.867Z</td></tr><tr><td>ale</td><td><p>Получается, что, скорее всего, не в WARP дело. Как только добавляю в панели 3x-ui конфиг WARP в outbounds перестает открываться вообще все с ответом ERR_TIMED_OUT даже если routing вообще не трогать.</p></td><td>2025-01-11T18:59:00.490Z</td></tr><tr><td>ale</td><td><p>Ну такое себе от слова совсем… Откатил панель на версию 2.4.4 и все заработало как должно, все те же параметры WARP</p>
+<p>Может кому пригодится<br>
+Keenetic + XKeen<br>
+VPS1 европа KVM, канал 1 Гбит<br>
+VPS2 европа OpenVZ, 500 Мбит<br>
+CF WARP+<br>
+Спидтест 90/25 пинг 60 мс</p></td><td>2025-01-11T19:27:18.951Z</td></tr><tr><td>notcvnt</td><td><p>У меня подобная же схема, WARP я вручную через wgcf делал, не в панели.<br>
+WARP встроенный в 3x-ui не заработал не при каких условиях, зато вручную установленный на последей версии спокойно работает.</p>
+<p>Если до сих пор актуально то могу помочь</p></td><td>2025-01-15T18:43:34.196Z</td></tr>
+    </table>
+      </body>
+    </html>

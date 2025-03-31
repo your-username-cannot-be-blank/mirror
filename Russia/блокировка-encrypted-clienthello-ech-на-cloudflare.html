@@ -1,0 +1,48 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-encrypted-clienthello-ech-на-cloudflare</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p><strong>Только релевантная информация. Без обсуждений, мнений, оценочных суждений. Обсуждение: <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-ech-cloudflare/12732" class="inline-onebox">Обсуждение: Блокировка (замедление) ECH Cloudflare</a></strong></p>
+<p>5 ноября произошла блокировка соединений, использующих TLS Encrypted ClientHello (ECH).</p>
+<p>Cloudflare использует один и тот же внешний (скрывающий SNI) домен <code>cloudflare-ech.com</code> для всех сайтов, которые включили поддержку ECH.<br>
+Блокировка осуществляется, если в пакете ClientHello установлен SNI = <code>cloudflare-ech.com</code> и есть ECH extension<br>
+Только лишь SNI = <code>cloudflare-ech.com</code> без ECH extension не блокируется, как и ECH grease без SNI = <code>cloudflare-ech.com</code>.</p>
+<p>Фильтр применяется к HTTP2 (TCP) и HTTP3 (QUIC)-соединениям.</p>
+<p>ТСПУ «замораживает» соединение сразу после получения ClientHello, а не разрывает его на уровне TCP или каким-то более подходящим образом. Из-за этого браузер понимает, что соединение сломано, только спустя примерно минуту.</p>
+<p>Спецификация ECH вроде как <a href="https://github.com/net4people/bbs/issues/393#issuecomment-2462146603">запрещает</a> переустанавливать соединение с нешифрованным SNI в случае ошибок, но в Firefox 131 сайты с ECH открываются без ECH через минуту «загрузки» — открывается новое соединение с plain SNI, а старое закрывается. Причину не знаю, возможно, это из-за того, что у меня отключён DNS-over-HTTPS, но ECH всё равно используется.</p></td><td>2024-11-07T13:16:00.693Z</td></tr>
+    </table>
+      </body>
+    </html>

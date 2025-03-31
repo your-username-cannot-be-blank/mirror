@@ -1,0 +1,109 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>не-работает-wireguard-на-телефоне-провайдер-билайн</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Imkrutoy</td><td><p>Начнем с того что я не понимаю толком ничего. Проблема состоит в том что я арендовал сервер на сайте Veesp в Риги на WireGuard конфигурация wg0 (для меня это ничего не означает). делал все по гайду с ютуба(<a href="https://youtu.be/q4FIT_2dSXc?si=LtEmRDa7WRXddEzy" rel="noopener nofollow ugc">https://youtu.be/q4FIT_2dSXc?si=LtEmRDa7WRXddEzy</a>) установил WireGuard и тд но интернета нет. В WireGuarde пишет подключение 0 байт,с начало не работала только мобильная сеть с телефона но позже почему то на компе престал грузить и с роутера(на роуторе тоже билайн)</p>
+<p>есть ли способ это починить? Скажите пожалуйста понятными словами</p></td><td>2024-08-20T14:30:27.447Z</td></tr><tr><td>00x11(etwtwetwetwet)</td><td><p>Проблема заключается в том, что Роскомнадзор блокирует WireGuard по протоколу. Во время рукопожатия. Для того, чтобы успешно использовать VPN на вашем сервере в Риге, советую настроить VLESS OVER REALITY. Самым простым способом является настроить <a href="https://github.com/MHSanaei/3x-ui" rel="noopener nofollow ugc">3X-UI</a> для больше стабильности и пропускной способности советую также настроить <a href="https://sysadmin.pm/bbr-algo/" rel="noopener nofollow ugc">bbr</a> на сервере.  Вот небольшая инструкция как это сделать максимально быстро.</p>
+<p>Установщик 3x-ui на всякий случай:</p>
+<pre><code class="lang-auto">bash &lt;(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+</code></pre>
+<p>После чего следуйте инструкции:</p>
+<pre><code class="lang-auto">Инструкция по настройке VLESS внутри панели 3x-ui: [ссылка.](https://habr.com/ru/articles/785186/)
+</code></pre>
+<p>Настройка BBR: (4 команды)</p>
+<pre><code class="lang-auto">1) echo "net.core.default_qdisc=fq" &gt;&gt; /etc/sysctl.conf
+2) echo "net.ipv4.tcp_congestion_control=bbr" &gt;&gt; /etc/sysctl.conf
+
+3) cat &lt;&lt;EOL &gt;&gt; /etc/sysctl.conf
+net.core.rmem_max = 67108864
+net.core.wmem_max = 67108864
+net.core.netdev_max_backlog = 10000
+net.core.somaxconn = 4096
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.tcp_fin_timeout = 30
+net.ipv4.tcp_keepalive_time = 1200 
+net.ipv4.tcp_keepalive_probes = 5
+net.ipv4.tcp_keepalive_intvl = 30
+net.ipv4.tcp_max_syn_backlog = 8192
+net.ipv4.tcp_max_tw_buckets = 5000
+net.ipv4.tcp_fastopen = 3
+net.ipv4.tcp_mem = 25600 51200 102400
+net.ipv4.udp_mem = 25600 51200 102400
+net.ipv4.tcp_rmem = 4096 87380 67108864
+net.ipv4.tcp_wmem = 4096 65536 67108864
+net.ipv4.tcp_mtu_probing = 1 
+net.ipv4.tcp_slow_start_after_idle=0
+EOL
+
+4) sysctl -p
+</code></pre>
+<p>Вышеперечисленные инструкции я писал для Ubuntu 22.04.</p></td><td>2024-08-20T15:07:12.408Z</td></tr><tr><td>Imkrutoy</td><td><p>Сначала мне нужно установить 3X-UI а позже настроить командами ниже?</p></td><td>2024-08-20T15:16:19.366Z</td></tr><tr><td>Imkrutoy</td><td><p>написано что ubaunti 20.04.6</p></td><td>2024-08-20T15:26:51.679Z</td></tr><tr><td>00x11(etwtwetwetwet)</td><td><aside class="quote no-group" data-username="00x11" data-post="2" data-topic="9547">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/94ad74/48.png" class="avatar"> 00x11:</div>
+<blockquote>
+<p><code>https</code></p>
+</blockquote>
+</aside>
+<p>Отредактировал последовательно + написал в лс</p></td><td>2024-08-20T15:39:17.953Z</td></tr><tr><td>0ka(0ka)</td><td><p>очень много лишнего в sysctl напихали, некоторые параметры вообще не нужны</p></td><td>2024-08-20T17:09:58.760Z</td></tr><tr><td>00x11(etwtwetwetwet)</td><td><p>Опишите все то, что вы считаете лишним, а я отредактирую, если посчитаю выводы логичными.</p></td><td>2024-08-20T17:27:01.058Z</td></tr><tr><td>0ka(0ka)</td><td><p>ну вы пытаетесь всё выкрутить на максимум, до каких-то нереальных значений, и тут внезапно somaxconn = 4096, меньше чем по дефолту, и еще например tcp_syncookies = 1, он и так по дефолту такой. 67 мегабайт tcp буфера на каждое подключение это просто жесть… tcp_max_syn_backlog = 8192, ну просто зачем? вам реально всё это нужно или просто откуда-то скопировали?</p></td><td>2024-08-20T17:39:51.210Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Видимо, отсюда:</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://shadowsocks.org/doc/advanced.html">
+  <header class="source">
+
+      <a href="https://shadowsocks.org/doc/advanced.html" target="_blank" rel="noopener nofollow ugc">shadowsocks.org</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://shadowsocks.org/doc/advanced.html" target="_blank" rel="noopener nofollow ugc">Advanced configurations | Shadowsocks</a></h3>
+
+  <p>A fast tunnel proxy that helps you bypass firewalls.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-08-20T18:42:40.510Z</td></tr><tr><td>00x11(etwtwetwetwet)</td><td><p>Спасибо, исправлю конфиг, сделаю его более адекватным в свободное время!</p></td><td>2024-08-21T10:07:11.818Z</td></tr>
+    </table>
+      </body>
+    </html>

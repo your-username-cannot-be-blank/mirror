@@ -1,0 +1,243 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>openwrt-низкая-скорость-tun-режима-в-sing-box</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Obfs</td><td><p>Здравствуйте! Поставил себе на роутер (в моем случае это raspberry pi 4) singbox, настроил обход ру зоны, проксирование заблокированных сайтов, всё ок. Но я не могу получить выше 100 мбит в режиме обхода (скорость проксирования еще меньше, хотя с телефона всё ок), при замерах скорости процессор роутера нагружен только на 50%. При отключении singbox скорость поднимается до привычных 500 мбит. Кто-то знает как это исправить?</p></td><td>2024-10-14T18:29:09.768Z</td></tr><tr><td>rewhat</td><td><p>Как вариант настройки роутинга чекать, если там что-то большее чем фильтр по “.ru”, и так далее. Я когда пытался роутинг настраивать, то и интернет себе вырубал ими, то скорость в хлам сажал, тонкая тема походу. Сейчас вот такие юзаю, не знаю насколько адекватные:</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">{
+    "rules": [
+        {
+            "outbound": "direct",
+            "protocol": [
+                "bittorrent"
+            ]
+        },
+        {
+            "domain_suffix": [
+                ".ru",
+                ".su",
+                ".xn--p1ai"
+            ],
+            "outbound": "direct"
+        },
+        {
+            "geoip": [
+                "private",
+                "ru"
+            ],
+            "outbound": "direct"
+        },
+        {
+            "outbound": "direct",
+            "process_name": [
+                "GoogleDriveFS.exe",
+                "onedrive.exe",
+                "dropbox.exe",
+                "YandexDisk2.exe",
+                "qbittorrent.exe",
+                "steam.exe",
+                "steamservice.exe",
+                "steamwebhelper.exe",
+                "Code.exe",
+                "conhost.exe",
+                "wslservice.exe"
+            ]
+        },
+        {
+            "outbound": "direct",
+            "package_name": [
+                "com.google.android.apps.docs",
+                "ru.rostel",
+                "ru.sberbankmobile",
+                "ru.tinkoff.investing",
+                "ru.sberbank.investor",
+                "ru.ozon.app.android",
+                "ru.alfabank.mobile.android",
+                "com.vk.vkvideo",
+                "ru.rutube.app",
+                "com.uma.musicvk",
+                "ru.kinopoisk",
+                "ru.more.play",
+                "ru.mts.mtstv",
+                "com.zvooq.openplay",
+                "ru.rt.video.app.mobile",
+                "ru.vtb24.mobilebanking.android",
+                "com.avito.android",
+                "com.vkontakte.android",
+                "ru.yandex.music",
+                "ru.yandex.yandexmaps",
+                "ru.yandex.disk",
+                "com.octopod.russianpost.client.android",
+                "com.wildberries.ru",
+                "ru.foodfox.client",
+                "ru.yandex.taxi",
+                "ru.dodopizza.app",
+                "com.adguard.android",
+                "moe.nb4a",
+                "ru.nspk.mirpay",
+                "ru.dns.shop.android",
+                "ru.aliexpress.buyer",
+                "com.yandex.searchapp",
+                "ru.vk.store",
+                "org.fdroid.fdroid",
+                "com.android.vending"
+            ]
+        },
+        {
+            "geosite": [
+                "category-ads-all"
+            ],
+            "outbound": "block"
+        }
+    ]
+}
+
+</code></pre>
+</details>
+<p>p.s: не шарю в роутерах, использую nekoray на пк, увидел в заголовке “sing-box”, и думаю что там одинаковые конфиги.</p></td><td>2024-10-14T18:32:23.661Z</td></tr><tr><td>boltor</td><td><p>del</p></td><td>2024-10-14T18:45:43.012Z</td></tr><tr><td>0ka(0ka)</td><td><p>Через сокс столько же?</p></td><td>2024-10-14T19:51:48.665Z</td></tr><tr><td>Obfs</td><td><p>Извиняюсь за задержку. Похоже, после смены режима на TProxy проблема решилась, а проксирование UDP (Для дискорда) всё также работает. Не ясно тогда, зачем вообще был добавлен TUN, раз так сильно скорость режет. Через сокс также скорость нормальная</p></td><td>2024-10-19T06:51:44.715Z</td></tr><tr><td>Obfs</td><td><p>роуты никак по моим тестам не влияли на скорость, по крайней мере между правилами antizapret и refilter не заметил разницы (либо она была очень незначительная)</p></td><td>2024-10-19T06:54:52.258Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="Obfs" data-post="5" data-topic="11833">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/o/c77e96/48.png" class="avatar"> Obfs:</div>
+<blockquote>
+<p>зачем вообще был добавлен TUN</p>
+</blockquote>
+</aside>
+<p>для винды, для удобства настройки</p></td><td>2024-10-19T06:58:52.151Z</td></tr><tr><td>Obfs</td><td><p>а, точно <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-10-19T06:59:48.094Z</td></tr><tr><td>emo</td><td><p>Подскажите, пожалуйста, как должен выглядеть inbound с TProxy и нужно ли для его работы прописывать какие-либо правила в firewall и network в openwrt (помимо тех, что были прописаны для работы tun)?</p>
+<p>У меня сейчас сделан tun, и точно такая же проблема что у вас - упала скорость до 100 мбит.</p>
+<details>
+<summary>
+Мой текущий inbounds в sing-box</summary>
+<pre><code class="lang-auto">"inbounds": [
+                {
+                        "tag": "all-in",
+                        "type": "tun",
+                        "domain_strategy": "ipv4_only",
+                        "inet4_address": "172.16.0.1/30",
+                        "mtu": 9000,
+                        "stack": "system",
+                        "auto_route": true,
+                        "strict_route": false,
+                        "sniff": true,
+                        "sniff_override_destination": true
+                }
+        ],
+</code></pre>
+</details>
+<details>
+<summary>
+Правила, добавленные в network</summary>
+<pre><code class="lang-auto">config interface 'proxy'
+        option proto 'none'
+        option device 'tun0'
+        option defaultroute '0'
+        option delegate '0'
+        option peerdns '0'
+        option auto '1'
+</code></pre>
+</details>
+<details>
+<summary>
+Правила, добавленные в firewall</summary>
+<pre><code class="lang-auto">config zone
+        option name 'proxy'
+        option forward 'REJECT'
+        option output 'ACCEPT'
+        option input 'ACCEPT'
+        option masq '1'
+        option mtu_fix '1'
+        option device 'tun0'
+        option family 'ipv4'
+        list network 'tun0'
+
+config forwarding
+        option dest 'proxy'
+        option src 'lan'
+        option family 'ipv4'
+
+</code></pre>
+</details></td><td>2024-10-21T07:48:53.860Z</td></tr><tr><td>Obfs</td><td><p>inbound:</p>
+<pre><code class="lang-auto">        {
+            "type": "tproxy",
+            "tag": "tproxy-in",
+            "listen_port": 12345,
+            "sniff": true,
+            "tcp_fast_open": true
+        }
+</code></pre>
+<p>xray.nft (нашел в интернете, без понятия что делает, но работает):</p>
+<pre><code class="lang-auto">#!/usr/sbin/nft -f
+
+flush ruleset
+
+define RESERVED_IP = {
+    10.0.0.0/8,
+    100.64.0.0/10,
+    127.0.0.0/8,
+    169.254.0.0/16,
+    172.16.0.0/12,
+    192.0.0.0/24,
+    224.0.0.0/4,
+    240.0.0.0/4,
+    255.255.255.255/32
+}
+
+table ip xray {
+    chain prerouting {
+        type filter hook prerouting priority mangle; policy accept;
+        ip daddr $RESERVED_IP return
+        ip saddr $RESERVED_IP return
+        ip daddr 192.168.2.0/16 tcp dport != 53 return
+        ip daddr 192.168.2.0/16 udp dport != 53 return
+        ip protocol tcp tproxy to 127.0.0.1:12345 meta mark set 1
+        ip protocol udp tproxy to 127.0.0.1:12345 meta mark set 1
+    }
+    chain output {
+        type route hook output priority mangle; policy accept;
+        ip daddr $RESERVED_IP return
+        ip saddr $RESERVED_IP return
+        ip daddr 192.168.2.0/16 tcp dport != 53 return
+        ip daddr 192.168.2.0/16 udp dport != 53 return
+        meta mark 2 return
+        ip protocol tcp meta mark set 1
+        ip protocol udp meta mark set 1
+    }
+}
+</code></pre></td><td>2024-10-21T10:29:52.062Z</td></tr><tr><td>emo</td><td><p>Спасибо! Пока не до конца разобрался с TProxy, <a href="https://github.com/ampetelin/sing-box-examples/blob/master/openwrt-sing-box-fakeip.md" rel="noopener nofollow ugc">настроил FakeIP</a>, чтобы в tun заворачивался не весь трафик, а только нужные домены. Проблема решилась.</p></td><td>2024-10-22T17:42:22.451Z</td></tr>
+    </table>
+      </body>
+    </html>

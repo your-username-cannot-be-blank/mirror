@@ -1,0 +1,61 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>выборочный-обход-блокировок-1437</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Boomer(Алексей)</td><td><p>Здравствуйте.<br>
+Подскажите, есть ли возможность выборочного обхода блокировок на роутере через VPN Antizapret? Попробовал перенаправлять запросы на некоторые заблокированные сайты через VPN Antizapret, но они не открываются.<br>
+Или такой возможности нет и все DNS запросы нужно направлять на VPN?</p></td><td>2021-11-04T16:58:10.475Z</td></tr><tr><td>kstrmv</td><td><p>я в настройках интернет эксплорера в разделе настройки прокси указал ссылку на антизапретовский .PAC файл.<br>
+как я понимаю логику этого метода - все запросы попадающие под условия в .PAC файле проходят через антизапрет, а те, что не попадают проходят напрямую</p></td><td>2021-11-04T20:31:43.632Z</td></tr><tr><td>Boomer(Алексей)</td><td><p>Меня интересует способ через роутер, а там все запросы перенаправляются на DNS Антизапрета.</p></td><td>2021-11-05T12:04:44.232Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Boomer" data-post="1" data-topic="1437">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/b5e925/48.png" class="avatar"> Boomer:</div>
+<blockquote>
+<p>Или такой возможности нет и все DNS запросы нужно направлять на VPN?</p>
+</blockquote>
+</aside>
+<p>Такая возможность есть, но она требует установки и настройки собственного DNS-резолвера (или форвардера).<br>
+Например, в OpenWRT используется легковесный dns и dhcp-сервер <strong>dnsmasq</strong>, он позволяет перенаправить запросы к определенным доменам на заданный DNS-сервер, а остальные – на другой.</p></td><td>2021-11-06T19:41:14.611Z</td></tr><tr><td>Boomer(Алексей)</td><td><p>Спасибо.<br>
+Можете подсказать, пожалуйста, на какой IP адрес и порт следует отправлять запросы?<br>
+IP адрес 195.123.209.38 этот?</p></td><td>2021-11-06T23:50:04.591Z</td></tr><tr><td>ValdikSS</td><td><p>Отправлять нужно на 192.168.104.1, внутри VPN-подключения.</p></td><td>2021-11-07T05:26:51.296Z</td></tr><tr><td>Boomer(Алексей)</td><td><p>Понял, спасибо.</p></td><td>2021-11-07T13:54:35.659Z</td></tr><tr><td>rubberducky</td><td><p>Тоже хочу сделать так на роутере с прошивкой Padavan, в dnsmasq.conf прописываю к примеру server=/2ip.ru/192.168.104.1 но почему то этот сайт не заворачивается в впн</p></td><td>2022-03-20T09:31:54.075Z</td></tr><tr><td>ValdikSS</td><td><p>Этот сайт не заблокирован, он не должен маршрутизироваться через VPN.</p></td><td>2022-03-20T09:33:57.141Z</td></tr><tr><td>rubberducky</td><td><p>если сайт не заблокирован то нет возможности самому выборочно заворачивать в впн?</p></td><td>2022-03-20T09:36:20.179Z</td></tr><tr><td>ValdikSS</td><td><p>Через АнтиЗапрет маршрутизируются только заблокированные домены.</p></td><td>2022-03-20T09:37:49.447Z</td></tr><tr><td>rubberducky</td><td><p>Спасибо, а что если подниму антизапрет на собсвенном vps появится ли такая возможность маршрутизировать в впн выборочно не заблокированные сайты?</p></td><td>2022-03-20T09:43:58.375Z</td></tr><tr><td>ValdikSS</td><td><p>Вы можете маршрутизировать любые домены в любой VPN через dnsmasq <code>--ipset</code>, но это будет работать немного иначе, чем VPN АнтиЗапрета: в VPN будут маршрутизироваться все домены, использующие такие же IP-адреса, что и изначально запрашиваемый домен.</p>
+<pre><code class="lang-nohighlight">--ipset=/&lt;domain&gt;[/&lt;domain&gt;...]/&lt;ipset&gt;[,&lt;ipset&gt;...]
+        Places the resolved IP addresses of queries for one or more domains in the specified Netfilter IP set. If multiple setnames are
+        given, then the addresses are placed in each of them, subject to the limitations of an IP set (IPv4 addresses cannot be  stored
+        in  an  IPv6  IP set and vice versa).  Domains and subdomains are matched in the same way as --address.  These IP sets must al‐
+        ready exist. See ipset(8) for more details.
+</code></pre></td><td>2022-03-20T15:21:44.465Z</td></tr>
+    </table>
+      </body>
+    </html>

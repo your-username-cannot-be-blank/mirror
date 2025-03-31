@@ -1,0 +1,100 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>периодические-проблемы-с-доступом-к-reddit-при-полной-работоспособности-всего-остального</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>waterhouse</td><td><p>В последнее время возникла интересная проблема: периодически пропадает доступ к сайту <a href="http://reddit.com" rel="noopener nofollow ugc">reddit.com</a>. Примерно на пару часов в день он скатывается до состояния “5 минут (условно) работает - 5 минут (опять же условно) страница вечно грузит не кидая каких-либо ошибок - 5 минут работает”. Через пару часов на день-два отпускает и сайт работает нормально до следующей такой беды. Во время этих проблем не наблюдается никаких проблем с доступом к другим ресурсам.</p>
+<p>Доступ пропадает со всех устройств в сети подключенных к роутеру и по проводу, и по воздуху, но если переткнуться на VPN/мобильный интернет с другим провайдером - доступ появляется. Их мобильное приложение из той же сети при этом работает без проблем. Судя по их сайту redditstatus и downdetector каких-то глобальных проблем не наблюдается когда у меня все отваливается. Сайт пингом пингуется, трассировки трассируются, дропов через WinMTR не видать. Машина на другом конце города через того же провайдера во время проблем у меня спокойно на сайт заходит. Потыкал палочкой непосредственно провайдера, говорят проблема на моей стороне, но без конкретики.</p>
+<p>Непосредственно на роутере никаких средств обхода блокировок/vpn/прочих софтин способных что-то поломать не стоит. В месяцы предшествующие проблеме никакие изменения в настройки не вносились.</p>
+<p>Собственно вопрос: в какую сторону копать?</p></td><td>2024-10-15T14:08:11.025Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А вы пробовали смотреть curl ом ответ сервера в момент отвала?</p>
+<pre><code class="lang-auto">curl.exe -4vk --location https://www.reddit.com -o nul
+</code></pre></td><td>2024-10-15T16:44:59.055Z</td></tr><tr><td>waterhouse</td><td><aside class="quote no-group" data-username="TesterTi" data-post="2" data-topic="11874">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p><code>curl.exe -4vk --location https://www.reddit.com -o nul</code></p>
+</blockquote>
+</aside>
+<pre><code class="lang-auto">curl -4vk --location https://www.reddit.com -o nul
+* Rebuilt URL to: https://www.reddit.com/
+* Hostname was NOT found in DNS cache
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 199.232.189.140...
+* Connected to www.reddit.com (199.232.189.140) port 443 (#0)
+* successfully set certificate verify locations:
+*   CAfile: none
+  CApath: /etc/ssl/certs
+* SSLv3, TLS handshake, Client hello (1):
+} [data not shown]
+  0     0    0     0    0     0      0      0 --:--:--  0:00:21 --:--:--     0* Unknown SSL protocol error in connection to www.reddit.com:443 
+* Closing connection 0
+curl: (35) Unknown SSL protocol error in connection to www.reddit.com:443
+</code></pre>
+<p>Из интересного, отвал если и начинается, то примерно с 12 до 13 часов. Вчера его не было, сегодня снова вот это вот.</p></td><td>2024-10-17T09:14:55.928Z</td></tr><tr><td>waterhouse</td><td><p>Виндовый curl такое выдает</p>
+<pre><code class="lang-auto">curl.exe -4vk --location https://www.reddit.com -o nul
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host www.reddit.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 151.101.129.140, 151.101.193.140, 151.101.1.140, 151.101.65.140
+*   Trying 151.101.129.140:443...
+* Connected to www.reddit.com (151.101.129.140) port 443
+* schannel: disabled automatic use of client certificate
+* ALPN: curl offers http/1.1
+  0     0    0     0    0     0      0      0 --:--:--  0:00:19 --:--:--     0* Recv failure: Connection was reset
+* schannel: failed to receive handshake, SSL/TLS connection failed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:19 --:--:--     0
+* Closing connection
+* schannel: shutting down SSL/TLS connection with www.reddit.com port 443
+* Send failure: Connection was reset
+* schannel: failed to send close msg: Failed sending data to the peer (bytes written: -1)
+curl: (35) Recv failure: Connection was reset
+</code></pre></td><td>2024-10-17T11:24:43.681Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Очень странно. Как будто что-то с сертификатами в системе. Или пытается соединиться по неподдерживаемому протоколу tls. Но при этом периодически же сайт доступен…</p></td><td>2024-10-17T17:14:09.487Z</td></tr><tr><td>denium</td><td><p>Смените DNS, включите DoH в браузере, включите HTTP3/QUIC или наоборот отключите.<br>
+<a href="https://github.com/stunnel/static-curl/releases/latest" rel="noopener nofollow ugc">Вот этот</a> curl с поддержкой HTTP3 (ссылка <a href="https://curl.se/download.html#Linux" rel="noopener nofollow ugc">отсюда</a> из раздела Linux x86_64, но есть и под Windows). Только не знаю как с сертификатами под Windows.</p>
+<p><code>curl --http3-only --tlsv1.3 --doh-url https://cloudflare-dns.com/dns-query -4 -v https://www.reddit.com</code></p></td><td>2024-10-17T18:02:02.569Z</td></tr><tr><td>waterhouse</td><td><aside class="quote no-group" data-username="denium" data-post="6" data-topic="11874">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>Смените DNS, включите DoH в браузере, включите HTTP3/QUIC или наоборот отключите</p>
+</blockquote>
+</aside>
+<p>Пробовал во время предыдущих отвалов. DNS пробовал провайдерский, 8.8.8.8, 1.1.1.1, 9.9.9.9. DoH и QUIC перетыкал туда сюда, никакой разницы заметно к сожалению не было.</p></td><td>2024-10-17T18:46:59.382Z</td></tr><tr><td>denium</td><td><p>Reddit на fastly, может побочный блок какого-нибудь впна включается в это время. Попробуйте разрезать sni в goodbyedpi, чтобы узнать, что дело в sni.<br>
+К слову говоря, sni модифицировать может <a href="https://github.com/krlvm/PowerTunnel" rel="noopener nofollow ugc">PowerTunnel</a> (на Java).</p></td><td>2024-10-17T21:25:07.648Z</td></tr><tr><td>denium</td><td><p>Попробуйте ещё curl без https (по http). Интересно что выдаст.</p></td><td>2024-10-18T18:51:37.887Z</td></tr>
+    </table>
+      </body>
+    </html>

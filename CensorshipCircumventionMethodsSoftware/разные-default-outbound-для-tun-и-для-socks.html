@@ -1,0 +1,85 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>разные-default-outbound-для-tun-и-для-socks</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Hrpz(Vlad)</td><td><p>Приветствую.</p>
+<p>В браузере использую плагин Proxy SwitchyOmega, с его помощью я могу:</p>
+<ol>
+<li>В пару кликов добавить сайт с текущей вкладки в правила для открытия через Proxy.<br>
+При этом он показывает, какие еще ресурсы использует сайт и всех их можно добавить в правила для его корректного функционирования, этакий аналог geosite некобокса, очень удобно.</li>
+</ol>
+<p><img src="разные-default-outbound-для-tun-и-для-socks/f9323eecc7f8a835b736b85f4b8a57e5c7db9366.png" alt="image" data-base62-sha1="zyuxyEu5ibTVqWAoCzd7ehYVyt0" width="380" height="388"></p>
+<ol start="2">
+<li>
+<p>Переключаться между режимами Direct/Proxy (влияет на все вкладки браузера)</p>
+</li>
+<li>
+<p>Временно активировать режим Direct/Proxy для сайта с текущей вкладки (сбрасывается при перезапуске браузера). Это мне важно. Часто возникает необходимость разово заглянуть на какой-то сайт из поисковой выдачи, куда не пускает из России (забанена), и не нужно создавать/удалять правило под этот разовый визит.</p>
+</li>
+</ol>
+<p><img src="разные-default-outbound-для-tun-и-для-socks/c53bd2d8e1e59603be947426ede1c2ede0d7f1d3.png" alt="image" data-base62-sha1="s8OesppWDTLPaNVOeg1yi0UhosP" width="173" height="337"></p>
+<p>Такой вариант использования связки plugin+nekobox для меня был оптимален - проксируются только нужные ресурсы, а остальное идет напрямую.</p>
+<p>В плагине в качестве сокс прокси указан локалхост с портом 2080, который слушает nekobox. В самом nekobox установлен Default outbound - Proxy.</p>
+<p>И вот понадобилось пустить через прокси процесс дискорда. Выяснилось, что это возможно только в режиме Tun, а в этом режиме весь трафик системы идет через прокси из-за default outbound. Это нам не надо.</p>
+<p>Меняем default outbound на bypass и выясняется, что на сокс с 2080 порта это тоже действует. Плагин в браузере становится бесполезен.</p>
+<p>Была попытка подстроиться под это и перекинуть сайты из правил плагина в настройки роутинга приложения и отказаться от плагина. Это работает, но крайне <strong>неудобно</strong> постоянно лезть в конфиг nekobox для внесения в список сайтов “разового визита”, а потом их оттуда удалять или оставлять мусорной записью.</p>
+<p>Вариант при котором я делаю def. outbound: proxy и хожу везде без проблем, при этом пустив RU/РФ/SU ресурсы напрямую - мне не подходит. Я хочу проксировать, только то что мне нужно и не рисковать засветом своего хоста на ресурсах внутри России (тот же <a href="http://yastatic.net" rel="noopener nofollow ugc">yastatic.net</a> например).</p>
+<p>Пробовал вернуться к исходному варианту, а Дискорд проксировать через ProxyCap на порт 2080. Вариант рабочий, но не хочется держать сторонее ПО + ProxyCap для правила требует прямой путь к приложению, а у дискорда в названии папки содержится версия, и она меняется после обновления, из-за чего постоянно приходится указывать новую папку.</p>
+<p>И получается, что сценария плагин + Discord я могу достичь только разными outbound для локального Socks и для Tun. Это возможно как-то сделать? Правила там какие-то кастомные?</p>
+<p>Спасибо осилившим.</p></td><td>2024-11-01T23:21:44.625Z</td></tr><tr><td>boltor</td><td><p>Для Дискорда есть такая штука, и Tun не нужен, попробуйте:</p><aside class="quote quote-modified" data-post="1" data-topic="12044">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/h/41988e/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8-%D1%82%D0%BE%D0%BB%D1%8C%D0%BA%D0%BE-%D0%B4%D0%BB%D1%8F-discord-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-dll-%D0%BF%D0%BB%D1%8E%D1%81-%D0%B3%D0%BE%D0%BB%D0%BE%D1%81%D0%BE%D0%B2%D1%8B%D0%B5-%D0%B7%D0%B2%D0%BE%D0%BD%D0%BA%D0%B8-%D0%B1%D0%B5%D0%B7-%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8/12044">Настройка прокси только для Discord через DLL (плюс голосовые звонки без прокси)</a> <a class="badge-category__wrapper " href="/c/community-software/27"><span data-category-id="27" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Anti-censorship software of our community developers"><span class="badge-category__name">Community software</span></span></a>
+  </div>
+  <blockquote>
+    Мне пришлось искать альтернативу постоянному использованию TUN только для Discord, поэтому я разработал DLL, которая позволяет Discord использовать прокси-сервер без вмешательства в работу системы. Также удалось решить проблему с голосовыми звонками, чтобы они работали без использования прокси. Решил поделиться этой программой, возможно, кому-то пригодится. Написано на Delphi. 
+Эта программа заставляет Windows-версию Discord подключаться через указанный прокси-сервер (HTTPS или SOCKS5) для всех …
+  </blockquote>
+</aside>
+</td><td>2024-11-02T05:59:30.982Z</td></tr><tr><td>0ka(0ka)</td><td><p>в custom route добавь правило</p>
+<pre><code class="lang-auto">{
+ "inbound": "mixed-in",
+ "outbound": "proxy"
+}
+</code></pre></td><td>2024-11-02T09:21:53.185Z</td></tr><tr><td>Hrpz(Vlad)</td><td><p>Спасибо,для дискорда сгодилось бы, но в случае, если нужно еще что-то проксировать, мы возвращаемся к исходной проблеме.</p></td><td>2024-11-02T10:58:13.419Z</td></tr><tr><td>Hrpz(Vlad)</td><td><p>Насколько я понял, как раз “inbound: mixed-in” nekobox запускает на 2080, а этим правилом переопределяется его outbound. Это именно то что мне было нужно, все работает, спасибо <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p>
+<hr>
+<p>На случай, если кто-то с моим уровнем знаний и подобным запросом наткнется на эту тему, правило должно быть внутри блока rules:</p>
+<p><img src="разные-default-outbound-для-tun-и-для-socks/a423ca1a519822700ee5bad4cb33645f2f26c8f6.png" alt="image" data-base62-sha1="nq2YZrE50FcRYoGb85rUl182xRc" width="489" height="299"></p>
+<p>У меня в custom rules было пусто и я об этом не сразу вспомнил.</p></td><td>2024-11-02T11:10:51.044Z</td></tr>
+    </table>
+      </body>
+    </html>

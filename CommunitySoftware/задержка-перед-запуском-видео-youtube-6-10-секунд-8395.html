@@ -1,0 +1,811 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>задержка-перед-запуском-видео-youtube-6-10-секунд-8395</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>blanche.hermine(blanche.hermine)</td><td><p>Добрый день. Сегодня перестал работать Youtube. С выключенным Kyber в браузере перед почти каждым видео есть задержка 6-10 секунд, во время которой черный экран и кружок загрузки. После этого видео начинает очень медленно грузится.</p>
+<p>С включенным goodbyedpi-0.2.3rc1 (файл 1_russia_blacklist.cmd) скорость загрузки становится нормальной, но задержка 6-10 секунд перед видео осталась.</p>
+<p>Смотрел в Wireshark, там после открытия видео проходят те самые 6-10 секунд, только после этого приходит ClientHello на домен <a href="http://googlevideo.com">googlevideo.com</a> (без noDPI) и <a href="http://www.w3.org">www.w3.org</a> (с noDPI).</p>
+<p>Если пропускать весь трафик через VPN, то такой задержки нет.</p>
+<p>В чем может быть дело?</p>
+<p><a class="attachment" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/3TycJVlsxPuoQl47oOUB9ZFDgDK.pcapng">youtube_default.pcapng</a> (1.2 MB)<br>
+<a class="attachment" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/lwBzSyWxPGQpQnhKWw2KqJwgqBx.pcapng">youtube_no_dpi_mode9.pcapng</a> (1.0 MB)</p></td><td>2024-08-01T15:26:04.797Z</td></tr><tr><td>ValdikSS</td><td><p>Сервер GGC Таттелекома, к которому совершается первое подключение, не отвечает вовремя. Либо goodbyedpi не удаётся обойти замедление при запросах к нему, либо он сам замедлен таким же способом, поэтому не отвечает вовремя.</p>
+<p>Спустя какое-то время подключение устанавливается к серверам GGC Ростелекома, они уже быстро отдают видео.</p>
+<p>Можете, разве что, в hosts заблокировать домен <a href="http://rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com">rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com</a></p></td><td>2024-08-01T15:45:44.000Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Сделал так, чтобы через VPN шли домены:</p>
+<pre><code class="lang-auto">youtube.com
+you.tube
+yt.be
+ytimg.com
+</code></pre>
+<p>А <code>*.googlevideo.com</code> идет напрямую. В <code>russia-youtube.txt</code> оставил только <code>googlevideo.com</code>. Тогда нормально все работает с goodbyeDPI.</p></td><td>2024-08-01T16:03:48.949Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Нет, это тоже не работает. В таком случае сам Youtube блокирует, видимо, из-за того, что IP разные идут на сам youtube и на googlevideo. Нужно целиком все домены через VPN посылать, но тогда в goodbyeDPI нет смысла.</p>
+<p>В общем, такая проблема пока только на домашнем Таттелькоме. Добавление в hosts не помогает.</p>
+<p><a class="mention" href="/u/valdikss">@ValdikSS</a>, а как вы узнали, что не может подключиться к GGC таттелькома?  <a href="http://rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com" rel="noopener nofollow ugc">rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com</a> – это GGC таттелькома? Что-то не вижу его в дампе. Ищу по фильтру <code>tls.handshake.type == 1</code></p></td><td>2024-08-02T05:10:06.587Z</td></tr><tr><td>ValdikSS</td><td><p>Такого не должно быть, GoodbyeDPI не меняет IP-адрес. Однако, неоднократно отмечались какие-то странные аномалии:<br>
+<a href="https://habr.com/ru/news/833016/comments/#comment_27113306">https://habr.com/ru/news/833016/comments/#comment_27113306</a></p>
+<aside class="quote no-group" data-username="blanche.hermine" data-post="4" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar"> blanche.hermine:</div>
+<blockquote>
+<p>это GGC таттелькома</p>
+</blockquote>
+</aside>
+<p>Да.</p>
+<pre data-code-wrap="sh"><code class="lang-sh">valdikss@fedora:~$ host rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com
+rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com is an alias for rr1.sn-u5uuxaxjvhg0-ocje.googlevideo.com.
+rr1.sn-u5uuxaxjvhg0-ocje.googlevideo.com has address 217.118.183.12
+
+valdikss@fedora:~$ whois 217.118.183.12 | grep -E 'person:|mnt-by:'
+mnt-by:         TATTELECOM-MNT
+mnt-by:         GR10880-MNT
+person:         Service Provider PJSC Tattelecom
+mnt-by:         GR10880-MNT
+mnt-by:         TATTELECOM-MNT
+mnt-by:         GR10880-MNT
+</code></pre>
+<aside class="quote no-group" data-username="blanche.hermine" data-post="4" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar"> blanche.hermine:</div>
+<blockquote>
+<p>Что-то не вижу его в дампе. Ищу по фильтру <code>tls.handshake.type == 1</code></p>
+</blockquote>
+</aside>
+<p>Wireshark показывает SNI фейкового пакета, а реальный отображается ретрансмиссией.<br>
+См. <code>tcp.stream eq 7</code>, например, в <code>youtube_no_dpi_mode9.pcapng</code>.</p></td><td>2024-08-02T13:28:40.639Z</td></tr><tr><td>ValdikSS</td><td><p>А, через VPN. Да, так не сработает. Поиграйтесь с опциями, в частности, попробуйте только <code>--blacklist … -5 -e1 --reverse-frag</code>.</p></td><td>2024-08-02T13:29:04.822Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Позапускал различные видео и нашел все четыре таттельскомовские GGC:</p>
+<pre><code class="lang-auto">217.118.183.12  rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com
+217.118.183.13  rr2---sn-u5uuxaxjvhg0-ocje.googlevideo.com
+217.118.183.14  rr3---sn-u5uuxaxjvhg0-ocje.googlevideo.com
+217.118.183.15  rr4---sn-u5uuxaxjvhg0-ocje.googlevideo.com
+</code></pre>
+<p>Они также имеют названия:</p>
+<pre><code class="lang-auto"> r1.tattelecomru-nbc1.googlevideo.com
+ r2.tattelecomru-nbc1.googlevideo.com
+ r3.tattelecomru-nbc1.googlevideo.com
+ r4.tattelecomru-nbc1.googlevideo.com
+</code></pre>
+<p>В большинстве случаев (9 из 10) видео оттуда не грузится и через 5-6 секунд ютуб переключается на другой сервер, в основном ростелькомовский (иногда другого оператора). Редко встречал, что и ростелькомовский сервер отказываются грузится.</p>
+<p>Если прописать эти сервера в hosts файл Windows как</p>
+<pre><code class="lang-auto">127.0.0.1 rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com
+</code></pre>
+<p>это не помогает.</p>
+<p>Upd: помогает. Время уменьшилось с 5-6 секунд до 1-2 секунд. Причем эти домены больше не запрашиваются. Но через прокси быстрее получается.</p>
+<p>Потом прописал в настройках клиента VPN, чтобы эти четыре сервера шли не напрямую, а через прокси. Тогда работает: ютуб почему-то не обращается к этим серверам и сразу предлагает ростелькомовские. Иногда снова появляется затык, когда ростелькомовский не хочет грузится, но это бывает редко.</p>
+<p>Пока так.</p>
+<p><a class="mention" href="/u/valdikss">@ValdikSS</a> пробовал <code>-5 -e1 --reverse-frag</code>, но это не помогло.</p></td><td>2024-08-02T15:31:24.456Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>После того, как заблокировал таттелькомовские GGC, все видео загружаются через ближайшие ко мне ростелькомовские GGC:</p>
+<pre><code class="lang-auto">213.59.237.148	rr1---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.149	rr2---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.150	rr3---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.151	rr4---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.152	rr5---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.153	rr6---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.154	rr7---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.155	rr8---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.156	rr9---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.157	rr10---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.158	rr11---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.159	rr12---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.160	rr13---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.161	rr14---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.162	rr15---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.163	rr16---sn-gvnuxaxjvh-bvwz.googlevideo.com
+
+46.61.170.76	rr1---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.77	rr2---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.78	rr3---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.79	rr4---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.80	rr5---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.81	rr6---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.82	rr7---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.83	rr8---sn-gvnuxaxjvh-bvw6.googlevideo.com
+
+</code></pre>
+<p>У меня до них пинг 10-20 мс.<br>
+С ними пока никаких проблем нет.</p>
+<p>Ради интереса заблокировал их тоже. После этого видео начинает грузится с каких-то гугловских серверов с подсети <code>173.194.X.X</code>, <code>74.125.X.X</code>, до которых пинг 20-30.</p></td><td>2024-08-03T10:41:10.056Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="blanche.hermine" data-post="8" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar"> blanche.hermine:</div>
+<blockquote>
+<p><code>173.194.X.X</code></p>
+</blockquote>
+</aside>
+<p>У меня москва AS15169, не работает.</p>
+<aside class="quote no-group" data-username="blanche.hermine" data-post="8" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar"> blanche.hermine:</div>
+<blockquote>
+<p><code>74.125.X.X</code></p>
+</blockquote>
+</aside>
+<p>Амстердам, работает с byedpi.</p></td><td>2024-08-03T10:42:28.594Z</td></tr><tr><td>ValdikSS</td><td></td><td>2024-08-03T15:13:55.335Z</td></tr><tr><td>Alexniks</td><td><p>Приветствую, у меня такая же проблема как и у вас, можете объяснить, что нужно сделать, чтобы сразу ютуб всё грузил? Просто прописать в хост “127.0.0.1 <a href="http://rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com" rel="noopener nofollow ugc">rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com</a>” или что? Я в этом не особо разбираюсь</p></td><td>2024-08-04T08:37:50.911Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Я вот здесь примерно описал как можно делать:</p>
+<aside class="quote quote-modified" data-post="15" data-topic="8404">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BD%D0%B5-%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%D0%B5%D1%82-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-%D1%8E%D1%82%D1%83%D0%B1%D0%B0/8404/15">Не работает обход замедления ютуба</a> <a class="badge-category__wrapper " href="/c/community-software/goodbyedpi/8"><span data-category-id="8" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #BF1E2E;" data-parent-category-id="27" data-drop-close="true" class="badge-category --has-parent" title="GoodbyeDPI Deep Packet Inspection (DPI) circumvention software discussion and official support forum"><span class="badge-category__name">GoodbyeDPI</span></span></a>
+  </div>
+  <blockquote>
+    Запускаете видео. Если в начале черный экран с загрузкой, смотрите в хроме адрес <a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a> с ошибкой. В вашем случае rr2---sn-ubpouxgg5-n8ml.googlevideo.com. Дальше пингуете его, убеждаетесь, что пинг в районе 1 мс, то есть это GGC вашего оператора. Пингуете остальные демены, увеличивая номер после rr (начиная с 1) до тех пор, пока не перестанет пинговаться. В вашем случае все GGC вашего провайдера это: 
+rr1---sn-ubpouxgg5-n8ml.googlevideo.com
+rr2---sn-ubpouxgg5-n8ml.googlevideo.com
+rr3---…
+  </blockquote>
+</aside>
+
+<p>Но это не гарантирует, что будет работать. Это зависит от того, какой GGC вам гугл предложит, после того как вы заблокируете самые ближайшие к вам. На некоторых есть “замедление” (если это действительно замедление), на некоторых нет.</p></td><td>2024-08-04T08:47:37.886Z</td></tr><tr><td>SkiLeN(SkiLeNe)</td><td><p>Не понял, что за адрес с ошибкой и где его смотреть. Сейчас немного погодя все видео стали моментально грузиться</p></td><td>2024-08-04T09:08:16.813Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>В Хроме Ctrl-Shift-I, вкладка Network, ввести фильтр <code>googlevideo.com</code>, потом нажать на видео. Если в начале не грузится, то появится красная строка. Нажать на нее, справа будет ссылка на домен <a href="http://googlevideo.com">googlevideo.com</a>.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/11416169733f00b77b0e342ff47b149cf8951402.png" data-download-href="https://ntc.party/uploads/default/11416169733f00b77b0e342ff47b149cf8951402" title="image"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/11416169733f00b77b0e342ff47b149cf8951402_2_690x214.png" alt="image" data-base62-sha1="2sEc28NPVo7hpPpn6MjqjakDUj0" width="690" height="214" srcset="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/11416169733f00b77b0e342ff47b149cf8951402_2_690x214.png, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/11416169733f00b77b0e342ff47b149cf8951402_2_1035x321.png 1.5x, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/11416169733f00b77b0e342ff47b149cf8951402_2_1380x428.png 2x" data-dominant-color="F3F3F5"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1916×596 73.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Можно и через Wireshark все это посмотреть.</p></td><td>2024-08-04T09:29:30.376Z</td></tr><tr><td>SkiLeN(SkiLeNe)</td><td><p>Теперь кажется понял как это делать, спасибо</p></td><td>2024-08-04T10:14:21.480Z</td></tr><tr><td>FirefoxEnjoyer</td><td><p>Попробовал по вашему методу занести адреса проблемных серверов на Firefox, результат следующий:</p>
+<ol>
+<li>Нет ошибки о подключении к кэшу гугла. Первые несколько запросов на видео проходят без проблем, возвращая нормальный ответ. (возможно, огнелис помечает их ошибкой где-то в другом месте?)</li>
+<li>Последующие ответы приходят обрезанными,. <div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/650cc9067060a3f85cf48d459b3b01f6a6df1458.png" data-download-href="https://ntc.party/uploads/default/650cc9067060a3f85cf48d459b3b01f6a6df1458" title="slow"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/650cc9067060a3f85cf48d459b3b01f6a6df1458.png" alt="slow" data-base62-sha1="epVCeXWCIjji4aukH4Wva5iV7PG" width="690" height="263" data-dominant-color="2A2C31"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">slow</span><span class="informations">1365×522 49.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></li>
+<li>Видео перестаёт грузиться, показывая ошибку “что-то пошло не так”</li>
+</ol>
+<p>Пробую дальше заносить в хост адреса с обрезанными ответами, их уже около 10, но пока никаких позитивных изменений</p>
+<p>UPD: после внесения 20 адресов проблемных серверов - видео перестало грузиться вообще. Редиректа на другие сервера больше не происходит… С другими видео, запрашиваемыми не с этих серверов, проблем пока нет.</p></td><td>2024-08-04T13:00:29.986Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><pre><code class="lang-auto">74.125.111.41 rr4---sn-5go7ynl6.googlevideo.com 
+</code></pre>
+<p>В вашем примере это сервер гугла: <a href="https://www.whois.com/whois/74.125.111.41" class="inline-onebox" rel="noopener nofollow ugc">Whois IP 74.125.111.41</a></p>
+<p>Я блокировал/проксировал только GGC моего провайдера.</p></td><td>2024-08-04T14:25:39.786Z</td></tr><tr><td>Termahre</td><td><p>Добавил все адреса, которые были замечены от провайдера в hosts, перестали загружаться ролики(бесконечная загрузка).</p></td><td>2024-08-04T15:08:42.700Z</td></tr><tr><td>FirefoxEnjoyer</td><td><p>Проверьте, не добавили ли вы, как и я, адреса самого гугла, пробив их через whois</p>
+<p>По теме, пока получается, что с сервера гугла успевает загрузиться некоторый объём трафика, вне зависимости от того, на каком моменте начать просмотр.<br>
+Затем происходит замедление.</p></td><td>2024-08-04T15:11:32.674Z</td></tr><tr><td>Termahre</td><td><p>Я перед добавление все пропинговал, и проверил по ip что это мой провайдер.</p></td><td>2024-08-04T15:12:26.780Z</td></tr><tr><td>Rain</td><td><p>Здравствуйте, не могли бы вы помочь мне с настройкой, я готов заплатить.</p></td><td>2024-08-04T15:33:29.695Z</td></tr><tr><td>s0f0s</td><td><p>работоспособны ли символы маски фильтра (или как там это называется) <code>*</code> или <code>?</code> для адресов<br>
+в <code>russia-blacklist.txt</code>? например, <code>rr*---sn-n8v7?n*.googlevideo.com</code> для</p>
+<details>
+<summary>
+следующего списка</summary>
+<p><a href="http://rr13---sn-n8v7znzl.googlevideo.com" rel="noopener nofollow ugc">rr13---sn-n8v7znzl.googlevideo.com</a><br>
+<a href="http://rr13---sn-n8v7kne6.googlevideo.com" rel="noopener nofollow ugc">rr13---sn-n8v7kne6.googlevideo.com</a><br>
+<a href="http://rr12---sn-n8v7kn7z.googlevideo.com" rel="noopener nofollow ugc">rr12---sn-n8v7kn7z.googlevideo.com</a><br>
+<a href="http://rr11---sn-n8v7kne6.googlevideo.com" rel="noopener nofollow ugc">rr11---sn-n8v7kne6.googlevideo.com</a><br>
+<a href="http://rr10---sn-n8v7kne6.googlevideo.com" rel="noopener nofollow ugc">rr10---sn-n8v7kne6.googlevideo.com</a><br>
+<a href="http://rr10---sn-n8v7knel.googlevideo.com" rel="noopener nofollow ugc">rr10---sn-n8v7knel.googlevideo.com</a><br>
+<a href="http://rr9---sn-n8v7knel.googlevideo.com" rel="noopener nofollow ugc">rr9---sn-n8v7knel.googlevideo.com</a><br>
+<a href="http://rr8---sn-n8v7kn7k.googlevideo.com" rel="noopener nofollow ugc">rr8---sn-n8v7kn7k.googlevideo.com</a><br>
+<a href="http://rr6---sn-n8v7kne6.googlevideo.com" rel="noopener nofollow ugc">rr6---sn-n8v7kne6.googlevideo.com</a><br>
+<a href="http://rr6---sn-n8v7snl7.googlevideo.com" rel="noopener nofollow ugc">rr6---sn-n8v7snl7.googlevideo.com</a><br>
+<a href="http://rr4---sn-n8v7knee.googlevideo.com" rel="noopener nofollow ugc">rr4---sn-n8v7knee.googlevideo.com</a><br>
+<a href="http://rr3---sn-n8v7kne7.googlevideo.com" rel="noopener nofollow ugc">rr3---sn-n8v7kne7.googlevideo.com</a><br>
+<a href="http://rr1---sn-n8v7kn7k.googlevideo.com" rel="noopener nofollow ugc">rr1---sn-n8v7kn7k.googlevideo.com</a><br>
+<a href="http://rr1---sn-n8v7znly.googlevideo.com" rel="noopener nofollow ugc">rr1---sn-n8v7znly.googlevideo.com</a></p>
+</details></td><td>2024-08-04T16:15:23.174Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Их не надо добавлять в <code>russia-blacklist.txt</code> или <code>russia-youtube.txt</code>. Их надо добавлять в <code>hosts</code> (В Windows это <code>C:/Windows/system32/drivers/etc/hosts</code>). Например:</p>
+<pre><code class="lang-auto">127.0.0.1 rr13---sn-n8v7znzl.googlevideo.com
+</code></pre>
+<p>Там их надо каждую в отдельную строку добавлять.</p>
+<p>Можно их еще блокировать/проксировать в VPN-клиенте, если у вас есть.</p>
+<p>В <code>russia-youtube.txt</code> уже содержится <code>googlevideo.com</code></p>
+<p><a class="mention" href="/u/rain">@Rain</a> я далеко не эксперт в этом, а обычный пользователь. Просто поделился с тем, что мне в какой-то степени помогло на моем провайдере. Каждый провайдер, возможно, блокирует/замедляет ютуб по-разному.</p>
+<p>Ссылку на то как определить GGC провайдера я уже давал:</p>
+<aside class="quote quote-modified" data-post="15" data-topic="8404">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BD%D0%B5-%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%D0%B5%D1%82-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-%D1%8E%D1%82%D1%83%D0%B1%D0%B0/8404/15">Не работает обход замедления ютуба</a> <a class="badge-category__wrapper " href="/c/community-software/goodbyedpi/8"><span data-category-id="8" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #BF1E2E;" data-parent-category-id="27" data-drop-close="true" class="badge-category --has-parent" title="GoodbyeDPI Deep Packet Inspection (DPI) circumvention software discussion and official support forum"><span class="badge-category__name">GoodbyeDPI</span></span></a>
+  </div>
+  <blockquote>
+    Запускаете видео. Если в начале черный экран с загрузкой, смотрите в хроме адрес <a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a> с ошибкой. В вашем случае rr2---sn-ubpouxgg5-n8ml.googlevideo.com. Дальше пингуете его, убеждаетесь, что пинг в районе 1 мс, то есть это GGC вашего оператора. Пингуете остальные демены, увеличивая номер после rr (начиная с 1) до тех пор, пока не перестанет пинговаться. В вашем случае все GGC вашего провайдера это: 
+rr1---sn-ubpouxgg5-n8ml.googlevideo.com
+rr2---sn-ubpouxgg5-n8ml.googlevideo.com
+rr3---…
+  </blockquote>
+</aside>
+</td><td>2024-08-04T16:51:53.247Z</td></tr><tr><td>s0f0s</td><td><p>у меня вроде работает именно через <code>russia-blacklist.txt</code>, ибо тестил после перезапуска проги те же самые видосы, у которых изначально долгая загрузка с чёрного экрана. только вот добавлять эти адреса по одному долго, муторно, неудобно и неоптимально .) вот я и ищу способ автоматизировать ускорение ютуба</p></td><td>2024-08-04T17:00:42.656Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Если есть <code>googlevideo.com</code> в списке, то остальные добавлять нет смысла для работы goodbyeDPI. Смысл в том, что блокировать домены GGC, которые “замедлены”, чтобы ютуб сразу же предложил альтернативу.</p></td><td>2024-08-04T17:03:48.669Z</td></tr><tr><td>s0f0s</td><td><aside class="quote no-group" data-username="blanche.hermine" data-post="25" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar"> blanche.hermine:</div>
+<blockquote>
+<p>Если есть <code>googlevideo.com</code> в списке</p>
+</blockquote>
+</aside>
+<p>нету в russia-blacklist.txt. мы с тобой про разные файлы говорим</p></td><td>2024-08-04T17:27:19.962Z</td></tr><tr><td>FirefoxEnjoyer</td><td><p>У вас второй файл russia-youtube.txt не добавлен как чёрный список? Этот файл дополняет основной чёрный список, по функционалу они идентичны.</p>
+<details>
+<summary>
+В батнике оно примерно так выглядит:</summary>
+<p>start “” goodbyedpi.exe -6 --blacklist …\russia-blacklist.txt --blacklist …\russia-youtube.txt --allow-no-sni --frag-by-sni</p>
+</details></td><td>2024-08-04T17:28:43.938Z</td></tr><tr><td>Termahre</td><td><p>Как я понял, провайдер блочит любые запросы не от себя. Когда добавляю в hosts своего, то перестают грузиться ролики, прога (blacklist_dnsredir.cmd и russia_blacklist.cmd) не помогает (перепробовал все пресеты на обоих и различные флаги), только vpnы срабатывают.</p></td><td>2024-08-05T04:52:49.626Z</td></tr><tr><td>kyky</td><td><p>У меня проблема, как в этом посте “<a href="https://ntc.party/t/%D0%BD%D0%B5-%D0%B3%D1%80%D1%83%D0%B7%D0%B8%D1%82%D1%81%D1%8F-%D1%82%D0%BE%D0%BB%D1%8C%D0%BA%D0%BE-%D0%BD%D0%B5%D0%BA%D0%BE%D1%82%D0%BE%D1%80%D1%8B%D0%B5-%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE-%D0%BD%D0%B0-youtube/8595" class="inline-onebox">Не грузится только некоторые видео на youtube</a>” - но отфутболили сюда<br>
+Добавил в файл hosts все красные ссылки, что светились из консоли. Так 10 минут где-то делал, но в итоге видео, которое не загружалось(а другие загружались) не смогло воспроизвестись.(F5 нажимал)<br>
+Скачивал GoodbyeDPI 0.2.3rc1 - Launcher 8.0, копался на форуме по этой программе, пробовал разные настройки(2 country, dnsredir всякие, даже флажки добавлял после -9 из под разных постов, испробовал каждый “быстрый шаблон настроек”, service включал на фоне) , обновлял блеклист, добавлял/убирал из хостс ссылки - ничего не помогло. Провайдер ростелеком. Перезагружал пк, менял браузер, менял DNS сервера, включал/выключал флажки quic и kyber[пробовал по разному и вкл/выкл вкл/вкл выкл/выкл /выкл/вкл (я уже наверное попробовал всё, что можно было!) windows 11, на других устройствах похожая ситуация, где-то видео грузятся спокойно, а какие-то не загружаются. Могу ещё отметить, что до августа я пользовался программой 4k video downloader, которая скачивала видео с ютуба напрямую. Но после “урезаний” ютуба, 4kvideodownloader не загружает видео с ютуба. Мало того, другие программы тоже ничего делать не могут. Конечно можно скачивать онлайн через сайты, но там скорость не такая уж и большая, неудобный интерфейс и нельзя загружать плейлистами.<br>
+Словно чёрная дыра и ничего не помогает</p></td><td>2024-08-05T07:54:27.749Z</td></tr><tr><td>FirefoxEnjoyer</td><td><p>Попробуйте это <a href="https://youtu.be/YxsFNfIcVxs?feature=shared" rel="noopener nofollow ugc">видео</a> воспроизвести. У меня с ним стабильно грузится 1 минута, после чего пакеты возвращаются по 6 байтов. Провайдер Ростелеком, Липецк.</p>
+<p>Может кто подсказать, какой сайт указывать в дампе трафика для wireshark? Сам <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a>?</p>
+<p>upd: Если перезагружать страницу раз в минуту, продолжая просмотр с последней точки останова, можно посмотреть всё проблемное видео целиком.</p></td><td>2024-08-05T11:48:07.373Z</td></tr><tr><td>ratname</td><td><p>А есть ли вариант прям для чайников всё расписать что да как тыкать? Я просто вообще не разбираюсь в этой теме, и что такое пингануть, GGC, и надо ли это всё делать с открытым GoodByeDPI я не знаю. Вот как делал я (но это мне не помогло от слова совсем): Открыл файл “1_russia_blacklist.cmd” в GoodByeDPI, открыл браузер, а в нём ютуб, нажал Ctrl+Shift+I, открыл видео, выбрал строку с ошибкой скопировал адрес <a href="http://rr10---sn-n8v7kn7d.googlevideo.com" rel="noopener nofollow ugc">rr10---sn-n8v7kn7d.googlevideo.com</a>, прописал в CMD</p>
+<blockquote>
+<p>ping <a href="http://rr10---sn-n8v7kn7d.googlevideo.com" rel="noopener nofollow ugc">rr10---sn-n8v7kn7d.googlevideo.com</a></p>
+</blockquote>
+<p>мне вылез IP 173.194.176.220 и время приёма-передачи (2-4мс), далее я поступил также от rr1 до rr18, так как rr19 уже не находит, прописал их все в ряд в файл hosts, но проблема чёрного экрана продолжилась и ошибки продолжили сыпатся тоннами, так же я поступил со всеми ошибками, и прописал около 100 строчек, но проблема не то что не исчезла, как мне кажется она даже усугубилась</p></td><td>2024-08-05T11:58:26.508Z</td></tr><tr><td>FirefoxEnjoyer</td><td><aside class="quote no-group" data-username="ratname" data-post="31" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/e9a140/48.png" class="avatar"> ratname:</div>
+<blockquote>
+<p>проблема не то что не исчезла, как мне кажется она даже усугубилась</p>
+</blockquote>
+</aside>
+<p>Пинг проводится, чтобы местного провайдера исключить из загрузки, т.к. у него замедление на серверах стоит. Youtube даст альтернативные сервера, что увеличит скорость загрузки видео.<br>
+У Вас пинг до всех серверов с ошибками был в пределах 5ms?</p></td><td>2024-08-05T12:01:40.039Z</td></tr><tr><td>ratname</td><td><p>Сейчас удалил всю свою писанину из hosts’а, открыл GoodByeDPI, полазил по ютубу и действительно у большинства был пинг до 5мс, но среди них был один <a href="http://rr1---sn-ab5l6nrd.googlevideo.com" rel="noopener nofollow ugc">rr1---sn-ab5l6nrd.googlevideo.com</a> с откликом 119мс</p></td><td>2024-08-05T13:19:57.980Z</td></tr><tr><td>longyx(Hans)</td><td><p>Доброго времени. Не понимаю, в чем, собственно, здесь проблема. Не уверен, что зависит от провайдера, но могу ошибаться. Я использую версию 0.2.2! Мало того, что задержек никаких нет, при любом качестве, отдельное огромное спасибо разработчику, так при загрузке страницы звук и видео начинают загружаться быстрее самой страницы Ютуб. Это не шутка! С этой программой открываются, абсолютно все сайты, которые добавите в список, ну, кроме тех, которые блочат извне страны. P.S. Помимо Kyber, нужно отключить Quic.</p></td><td>2024-08-05T18:35:48.114Z</td></tr><tr><td>Xunlei</td><td><p>Это баг браузера файрфокс <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1900191" rel="noopener nofollow ugc">bug 1900191</a>, <a href="https://bugzilla.mozilla.org/1878510" rel="noopener nofollow ugc">bug 1878510</a></p>
+<p>Было ещё до блокировки, но тут автор писал, что в разных браузерах происходит:</p><aside class="quote quote-modified" data-post="1" data-topic="7898">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/f475e1/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%B5%D1%81%D0%BD%D0%BE%D0%B5-%D1%8F%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B0-%D0%B2%D0%B8%D0%BD-10/7898">Интересное явление на вин 10</a> 
+  </div>
+  <blockquote>
+    Знакомый смотрит ютуб через свой аккаунт на вин 10 и видео останавливается где то через минуту и идёт загрузка, причём на разных браузерах, если он смотрит просто без входа в аккаунт, то работает у него нормально, у его соседа тоже самое происходит, говорит жестко тупит, но я ради интереса, забил его аккаунт себе в браузер на вин 7 и нормально всё работает, что с аккаунтом что без. Возможности поюзать эту винду желания у меня нету, спрашиваю, может кто то сталкивался, потому что явно косяк не в …
+  </blockquote>
+</aside>
+<p>
+У меня лечится перезапуском браузера, в Chromium-based браузерах такой проблемы не ловил.</p></td><td>2024-08-05T18:58:17.059Z</td></tr><tr><td>FirefoxEnjoyer</td><td><p>Перезапуск не помогает, но за наводку - спасибо огромное! Я был уверен, что это Ркн так отдельные сервера блокирует)</p></td><td>2024-08-05T19:20:49.690Z</td></tr><tr><td>lightless</td><td><ol>
+<li>У меня наоборот гугловские кэширующийся сервера не работают(403, либо time out), но сервера местного провайдера(megafon) отдают видео нормально с включенным обходом. Что можно сделать?</li>
+<li>Ещё заметил что гугловские сервера почему то получают в параметре запроса с ip - не мой ip и возвращают 403, а сервера провайдера получают корректный ip. С чем это может быть связано и ошибка ли это?</li>
+</ol></td><td>2024-08-05T22:37:23.686Z</td></tr><tr><td>FirefoxEnjoyer</td><td><p>Проблему решил. Виновник - DNS-over-HTTPS. Его отключение помогает просмотреть видео без проблем, конкретно в Firefox.<br>
+Как временная мера, при включённом DoH, можно открыть видео во встроенном окне и тогда оно воспроизведётся без проблем.</p></td><td>2024-08-06T10:35:17.187Z</td></tr><tr><td>FirefoxEnjoyer</td><td><aside class="quote no-group" data-username="lightless" data-post="37" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/lightless/48/6283_2.png" class="avatar"> lightless:</div>
+<blockquote>
+<p>гугловские сервера почему то получают в параметре запроса с ip</p>
+</blockquote>
+</aside>
+<p>С каким пресетом запускаете обход? Dns redir пробовали? NextDNS включён в браузере в качестве DoH?</p></td><td>2024-08-06T10:36:38.910Z</td></tr><tr><td>User69</td><td><ol start="2">
+<li></li>
+</ol>
+<p>Да, есть такое<br>
+Иногда в запросах <code>videoplayback</code> появляются рандомные IP со всего света, и по ним ответ 403<br>
+Выше есть ссылка на habr:</p><aside class="quote quote-modified" data-post="5" data-topic="8395">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%B7%D0%B0%D0%B4%D0%B5%D1%80%D0%B6%D0%BA%D0%B0-%D0%BF%D0%B5%D1%80%D0%B5%D0%B4-%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA%D0%BE%D0%BC-%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE-youtube-6-10-%D1%81%D0%B5%D0%BA%D1%83%D0%BD%D0%B4/8395/5">Задержка перед запуском видео Youtube 6-10 секунд</a> <a class="badge-category__wrapper " href="/c/community-software/goodbyedpi/8"><span data-category-id="8" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #BF1E2E;" data-parent-category-id="27" data-drop-close="true" class="badge-category --has-parent" title="GoodbyeDPI Deep Packet Inspection (DPI) circumvention software discussion and official support forum"><span class="badge-category__name">GoodbyeDPI</span></span></a>
+  </div>
+  <blockquote>
+    Такого не должно быть, GoodbyeDPI не меняет IP-адрес. Однако, неоднократно отмечались какие-то странные аномалии: 
+<a href="https://habr.com/ru/news/833016/comments/#comment_27113306" rel="noopener nofollow ugc">https://habr.com/ru/news/833016/comments/#comment_27113306</a> 
+
+Да. 
+valdikss@fedora:~$ host rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com
+rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com is an alias for rr1.sn-u5uuxaxjvhg0-ocje.googlevideo.com.
+rr1.sn-u5uuxaxjvhg0-ocje.googlevideo.com has address 217.118.183.12
+
+valdikss@fedora:~$ whois 217.118.183.12 | grep -E 'person:|mnt-by:'
+mnt-by:       …
+  </blockquote>
+</aside>
+<p>
+Бывает так, что не проходит ни один запрос, тогда видео не работает совсем<br>
+Проходит само, возможно устаревает кеш, или еще что-то там</p></td><td>2024-08-06T14:57:49.309Z</td></tr><tr><td>MaxStoll</td><td><p>У меня тоже самое, без авторизации на ютубе трансляции работают нормально, с авторизацией от 30 сек до минуты и пишет Что то пошло не так…С обычными видосами проблем нет. Всегда запущен goodbaydpi -9. Пробовал разные параметры - результат всегда одинаковый.</p></td><td>2024-08-06T21:53:59.280Z</td></tr><tr><td>Dolphin</td><td><p>Перепробовал все что посоветовали, через hosts удалил провайдера, через впн прогнал домены, не помогает, не знаю что даже уже делать</p></td><td>2024-08-07T09:16:15.792Z</td></tr><tr><td>ivanixa333(Ivanixa333)</td><td><p>Вроде на Таттелеком отпустила. YouTube чётко работает</p></td><td>2024-08-07T09:35:54.531Z</td></tr><tr><td>ivanixa333(Ivanixa333)</td><td><p>За тупы пропали. Подвисание.Только скорость режут</p></td><td>2024-08-07T09:39:40.583Z</td></tr><tr><td>lightless</td><td><ol>
+<li>-5 --dns-addr 77.88.8.8 --dns-port 1253 --dnsv6-addr 2a02:6b8::feed:0ff --dnsv6-port 1253 --blacklist</li>
+<li>NextDns был включен, выключил - все также</li>
+</ol></td><td>2024-08-07T09:39:44.387Z</td></tr><tr><td>serpen(VL)</td><td><p>Если что я просто переключил новый билд программы на 8 профиль, без блокировки QUIC и видео перестали тормозить вовсе, скорость как без замедла. Видео грузятся так же мгновенно без 6 секундного ожидания. Может кому поможет. В итоге создал по каждому файлу копию с 8 профилем просто, получилось как то так. 9 не удалял потому что а фиг его знает что там надумают.</p>
+<p>Но за утилиту огромное спасибо <a class="mention" href="/u/valdikss">@ValdikSS</a> ты просто супер<br>
+<img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/c9cc73db17a2b6c65ba21202973a8f22e3a83db8.png" alt="image" data-base62-sha1="sNc0zbBkLr0tJMWwYjI5od1HZpu" width="377" height="385"></p></td><td>2024-08-07T12:06:33.518Z</td></tr><tr><td>vma6(Max V)</td><td><p>Перепробовал все сборки и все способы, на мгтс/мтс ничего не помогает. Однако если что-то параллельно скачивать одновременно с просмотром ютьюба, можно худо-бедно смотреть но это не вариант.</p></td><td>2024-08-07T12:59:24.195Z</td></tr><tr><td>serpen(VL)</td><td><p>попробуй почитать это для МГТС там есть параметры, попробуй их.</p><aside class="quote quote-modified" data-post="5" data-topic="8240">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D1%8B-%D0%BD%D0%B0-%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81%D1%8B/8240/5">Обход замедления YouTube в России + ответы на вопросы</a> <a class="badge-category__wrapper " href="/c/community-software/goodbyedpi/8"><span data-category-id="8" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #BF1E2E;" data-parent-category-id="27" data-drop-close="true" class="badge-category --has-parent" title="GoodbyeDPI Deep Packet Inspection (DPI) circumvention software discussion and official support forum"><span class="badge-category__name">GoodbyeDPI</span></span></a>
+  </div>
+  <blockquote>
+    <a name="p-29645-h-1" class="anchor" href="#p-29645-h-1"></a>Сборник самых популярных вопросов
+<a name="p-29645-h-2" class="anchor" href="#p-29645-h-2"></a><img width="20" height="20" src="https://ntc.party/images/emoji/twitter/grey_question.png?v=12" title="grey_question" alt="grey_question" class="emoji"> Как удалить программу?
+
+
+Закройте окно программы. Это всё. Если программа не запущена, она не работает. Программа никуда не устанавливается, не меняет настройки системы ни скрыто, ни явно (даже опция DNS-перенаправления). 
+
+
+Запустите service_remove.cmd от имени администратора. Если вы устанавливали программу как службу (сервис), это остановит и удалит её, а также удалит службу драйвера WinDivert. 
+
+
+Драйвер программы WinDivert.sys / WinDivert64.…
+  </blockquote>
+</aside>
+</td><td>2024-08-07T13:15:32.543Z</td></tr><tr><td>vma6(Max V)</td><td><p>Я же написал. Попробовал все вариации сборок, цифр и методов. Не только гудбай дипиай</p></td><td>2024-08-07T13:44:02.325Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><blockquote>
+<p>Вроде на Таттелеком отпустила. YouTube чётко работает</p>
+</blockquote>
+<p>Да, сегодня с утра стало нормально. GGC Таттелькома стали мгновенно видео отдавать. Скорость режут до 30 Мбит.</p></td><td>2024-08-07T13:45:32.195Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>На таттелькоме начали блокировать как-то по-другому. GDPI не справляется ни в каком режиме. Бесконечная загрузка в начале видео, очень редко после длительного времени все-таки начинает воспроизводить. Пытается грузить видео с локальных GGC, с региональных и гугловских.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/42d1040d9c106ea90f687bd336613b23f618cb6d.png" data-download-href="https://ntc.party/uploads/default/42d1040d9c106ea90f687bd336613b23f618cb6d" title="image"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/42d1040d9c106ea90f687bd336613b23f618cb6d.png" alt="image" data-base62-sha1="9x5kixYw4vSC8q7b67dB4K5oqnz" width="690" height="124" data-dominant-color="D9DEEC"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1295×233 26.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>С региональных поток выглядит так:</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/1647e62a0ffacef4e4318ac451411dc49ee59905.png" data-download-href="https://ntc.party/uploads/default/1647e62a0ffacef4e4318ac451411dc49ee59905" title="image"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/1647e62a0ffacef4e4318ac451411dc49ee59905_2_690x217.png" alt="image" data-base62-sha1="3b6xWgLQHpBTRhVGc1AHBiNQMuh" width="690" height="217" srcset="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/1647e62a0ffacef4e4318ac451411dc49ee59905_2_690x217.png, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/1647e62a0ffacef4e4318ac451411dc49ee59905_2_1035x325.png 1.5x, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/1647e62a0ffacef4e4318ac451411dc49ee59905_2_1380x434.png 2x" data-dominant-color="B1B1BF"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1793×564 84.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>С гугловских дело даже до Server Hello не доходит:</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/cba83962a2b98426b9e80ce96f278b3be7f2d2ac.png" data-download-href="https://ntc.party/uploads/default/cba83962a2b98426b9e80ce96f278b3be7f2d2ac" title="image"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/cba83962a2b98426b9e80ce96f278b3be7f2d2ac_2_690x151.png" alt="image" data-base62-sha1="t3DloA4wQj9Yk7JaG542h7SBSpK" width="690" height="151" srcset="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/cba83962a2b98426b9e80ce96f278b3be7f2d2ac_2_690x151.png, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/cba83962a2b98426b9e80ce96f278b3be7f2d2ac_2_1035x226.png 1.5x, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/cba83962a2b98426b9e80ce96f278b3be7f2d2ac_2_1380x302.png 2x" data-dominant-color="7D868D"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1815×398 57.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-08-08T15:42:43.285Z</td></tr><tr><td>SkiLeN(SkiLeNe)</td><td><p>Проблема возобновилась, у меня теперь никакие видео не грузят</p></td><td>2024-08-09T12:41:48.562Z</td></tr><tr><td>Pavel1(Pavel)</td><td><p>Подтверждаю, ничего не грузит от слова совсем.</p></td><td>2024-08-09T14:44:31.183Z</td></tr><tr><td>SkiLeN(SkiLeNe)</td><td><p>Что делать-то? Так и будем на VPN сидеть что ли?</p></td><td>2024-08-10T16:32:57.873Z</td></tr><tr><td>anon60595749</td><td><p>В перспективе все равно нужно готовится к VPN. Видно, что РФ движется по траектории Китая в плане ограничений. Способы обмана DPI, подобные тем, что применяет GDPI, там уже давно не работают - только изощренные VPN.</p></td><td>2024-08-10T16:41:27.651Z</td></tr><tr><td>Xunlei</td><td><p>В перспективе нужно готовится к замедлению до скорости dial-up на зарубежные сети. Запасайтесь накопителями.</p></td><td>2024-08-10T16:54:23.295Z</td></tr><tr><td>FirefoxEnjoyer</td><td><p>Туннели до впсок зарубежных тоже не спасут? Как с этим в Китае?</p></td><td>2024-08-10T17:33:17.069Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>Бесконечная загрузка ютуба сегодня</p></td><td>2024-08-10T20:18:05.020Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>Если оторбажается <strong>ТОЛЬКО</strong> плеер, а не интерфейс ютуба, то удаляйте <code>youtube.com</code> из всех текстовых документов списка доменов</p></td><td>2024-08-10T20:25:31.314Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>зависит от реальных $$$<br>
+ибо возможны варианты</p>
+<ol>
+<li>режут вообще всё “не РФ” IPv4/IPv6 == пофиг на SNI. AS. etc</li>
+<li>будут как сейчас банить/резать протоколы / SNI / конкретные “сети” (CDNы, хостинги)</li>
+</ol>
+<p>вот во втором случае есть шанс найти какие то не особо извествные/популярные хостинги</p>
+<p>p.s. опять же зависит от настроек и криворукости. мой ВПН смотрю подменяет SNI до своих серверов вне РФ на <a href="http://vk.com/mail.ru/etc">vk.com/mail.ru/etc</a>. уж не знаю помогает или они пока как неуловимый джо.<br>
+вон TOR relays например почти все по IPv4 банят</p></td><td>2024-08-10T20:53:14.632Z</td></tr><tr><td>Pavel1(Pavel)</td><td><p>Я вот что выяснил. Похоже что проблема в текстовике с ютубовскими адресами.  Возможно, что чего-то в нем не хватает.<br>
+Как только я в ВПН, обычный ВПН, вставляю наш список разрешенных сайтов, он точно так же ничего не грузит. Как только отключаю вообще весь белый список, то грузит отлично.</p>
+<p>Вот что у меня в списке:</p>
+<blockquote>
+<p><a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a><br>
+<a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a><br>
+youtu.be<br>
+<a href="http://ytimg.com" rel="noopener nofollow ugc">ytimg.com</a></p>
+</blockquote>
+<p>Дополнительно нашел такие адреса, у людей с ними работало, но сейчас уже перестало</p>
+<pre><code class="lang-auto">www.youtube.com
+i.ytimg.com
+yt3.ggpht.com
+nhacmp3youtube.com
+</code></pre></td><td>2024-08-11T01:14:37.229Z</td></tr><tr><td>MarkVobl</td><td><p>Вот тут вроде есть актуальный список.<br>
+<a href="https://gist.github.com/MashinaMashina/58eed9128ade2c8ff50a84d523ae97d1#file-youtube-blocked-hosts-in-russia-md" class="inline-onebox" rel="noopener nofollow ugc">YouTube Blocked hosts in Russia.md · GitHub</a></p></td><td>2024-08-11T12:25:00.138Z</td></tr><tr><td>ivanixa333(Ivanixa333)</td><td><p>на таттелекоме домашнем с гудбайдпай ограничение скорости обходится прекрасно а вот затыками некоторых видео не знаю как лечит даже стримы не все сразу заводятся пока не обновишь страницу</p></td><td>2024-08-11T19:58:35.609Z</td></tr><tr><td>yatolkosprosit</td><td><aside class="quote no-group" data-username="FirefoxEnjoyer" data-post="60" data-topic="8395" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/firefoxenjoyer/48/6038_2.png" class="avatar"> FirefoxEnjoyer:</div>
+<blockquote>
+<p>Туннели до впсок зарубежных тоже не спасут? Как с этим в Китае?</p>
+</blockquote>
+</aside>
+<p>В Китае работают обычные публичные ВПН, в том числе бесплатные.</p></td><td>2024-08-11T20:30:42.626Z</td></tr><tr><td>ValdikSS</td><td></td><td>2024-08-12T08:19:04.818Z</td></tr><tr><td>celllf(celllf)</td><td><p>Так как вы решили в итоге свою проблему? Как именно?<br>
+И еще: есть ли разница - блокировать ли проблемные домены через hosts или проксировать через отдельный vpn?</p></td><td>2024-08-12T18:14:55.358Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><blockquote>
+<p>Так как вы решили в итоге свою проблему?</p>
+</blockquote>
+<p>Никак, у меня сейчас это не работает. Теперь пропускаю весь ютуб трафик через прокси.</p>
+<blockquote>
+<p>И еще: есть ли разница - блокировать ли проблемные домены через hosts или проксировать через отдельный vpn?</p>
+</blockquote>
+<p>Когда это у меня работало, через прокси было быстрее. Через hosts была задержка 1-2 секунды перед началом видео, не знаю с чем связанная.</p></td><td>2024-08-13T12:21:03.975Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="blanche.hermine" data-post="70" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar"> blanche.hermine:</div>
+<blockquote>
+<p>Через hosts была задержка 1-2 секунды перед началом видео, не знаю с чем связанная.</p>
+</blockquote>
+</aside>
+<p>Блок через hosts не сбрасывает соединение сразу, а идёт попытка; через NX DOMAIN запись это происходит мгновенно.</p></td><td>2024-08-13T12:32:56.762Z</td></tr><tr><td>ivanixa333(Ivanixa333)</td><td><p>А у вас есть список. Какие надо добавить. Я добавляю . Что это не работает</p></td><td>2024-08-13T13:27:20.767Z</td></tr><tr><td>Xunlei</td><td><p>Список индивидуален для разных провайдеров и городов.</p></td><td>2024-08-13T13:29:15.689Z</td></tr><tr><td>ivanixa333(Ivanixa333)</td><td><p>А сколько их там. Где мне их брат</p></td><td>2024-08-13T13:31:52.976Z</td></tr><tr><td>Xunlei</td><td><p>У меня порядка 300 штук в кэше, брать самостоятельно из консоли разработчика в браузере. Будут домены из вашего города и москвы. Чтобы не сойти с ума написал <a href="https://ntc.party/t/%D0%BF%D0%BB%D0%B0%D0%B3%D0%B8%D0%BD-tdns-%D0%B4%D0%BB%D1%8F-%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D0%B0%D1%86%D0%B8%D0%B8-%D0%BD%D0%B5%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D1%8B%D1%85-ggc/8673">фильтр сетей</a>.</p></td><td>2024-08-13T13:34:10.135Z</td></tr><tr><td>ivanixa333(Ivanixa333)</td><td><p>А почему они не доступны. Они Что так быстро сломались</p></td><td>2024-08-13T13:41:56.369Z</td></tr><tr><td>Xunlei</td><td><aside class="quote quote-modified" data-post="576" data-topic="8074">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/p4h/48/3054_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-youtube-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/8074/576">Обсуждение: Замедление YouTube в России</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Коммерсантъ сообщает, что Роскомнадзор запросил у операторов связи данные о IP и физических адресах расположения серверов Google. 
+Для этого Главный радиочастотный центр (ГРЧЦ, подведомствен Роскомнадзору) направил операторам связи по всей стране соответствующие запросы. Речь идет про адреса узлов связи, на которых осуществлено подключение серверов GGC. В Роскомнадзоре и Google не ответили «Ъ», а в билайне, МегаФоне, МТС, Ростелекоме, ЭР-Телекоме отказались от комментариев. 
+После 1 августа ежед…
+  </blockquote>
+</aside>
+</td><td>2024-08-13T13:43:24.831Z</td></tr><tr><td>celllf(celllf)</td><td><aside class="quote no-group" data-username="blanche.hermine" data-post="70" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar"> blanche.hermine:</div>
+<blockquote>
+<p>Теперь пропускаю весь ютуб трафик через прокси.</p>
+</blockquote>
+</aside>
+<p>То есть? Просто запускаете программу как обычно?<br>
+Попробовал внести в hosts проблемные домены, в целом результата не дало, да. Разве что задержка теперь 3-4 секунды и она всегда(хотя раньше были видео, включающиеся мгновенно), но зато нет загрузки по восемь секунд, что была раньше.<br>
+Почему-то несмотря на блокировку докуменов через hosts ютуб в любом случае выдает ошибку с внесенными в hosts файлами. Это нормально?</p></td><td>2024-08-13T16:31:16.117Z</td></tr><tr><td>ivanixa333(Ivanixa333)</td><td><p>Получается. YouTube. Не поможет. . Программы. Типа. Goodbye… Придётся через VPN сидеть</p></td><td>2024-08-13T16:36:11.453Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Вчера работал ютуб с параметрами gdpi  <code>-9 </code> либо <code>-5 </code><br>
+Сегодня завелся только с такими <code>-f 2 -e 2 --wrong-seq --auto-ttl 2 --frag-by-sni</code><br>
+Без блэклиста.<br>
+upd Хотя вот с таким списком адресов  вроде тоже грузится.</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a><br>
+<a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a><br>
+youtu.be<br>
+<a href="http://googleusercontent.com" rel="noopener nofollow ugc">googleusercontent.com</a><br>
+<a href="http://googleapis.com" rel="noopener nofollow ugc">googleapis.com</a><br>
+<a href="http://redirector.googlevideo.com" rel="noopener nofollow ugc">redirector.googlevideo.com</a><br>
+<a href="http://gvt1.com" rel="noopener nofollow ugc">gvt1.com</a><br>
+<a href="http://video.google.com" rel="noopener nofollow ugc">video.google.com</a><br>
+<a href="http://video.l.google.com" rel="noopener nofollow ugc">video.l.google.com</a><br>
+<a href="http://m.youtube.com" rel="noopener nofollow ugc">m.youtube.com</a><br>
+<a href="http://www.youtube.com" rel="noopener nofollow ugc">www.youtube.com</a><br>
+<a href="http://youtubeeducation.com" rel="noopener nofollow ugc">youtubeeducation.com</a><br>
+<a href="http://youtubeembeddedplayer.googleapis.com" rel="noopener nofollow ugc">youtubeembeddedplayer.googleapis.com</a><br>
+<a href="http://youtube.googleapis.com" rel="noopener nofollow ugc">youtube.googleapis.com</a><br>
+<a href="http://youtubei.googleapis.com" rel="noopener nofollow ugc">youtubei.googleapis.com</a><br>
+<a href="http://youtubekids.com" rel="noopener nofollow ugc">youtubekids.com</a><br>
+<a href="http://youtube-nocookie.com" rel="noopener nofollow ugc">youtube-nocookie.com</a><br>
+<a href="http://youtube-ui.l.google.com" rel="noopener nofollow ugc">youtube-ui.l.google.com</a><br>
+<a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a><br>
+yt.be<br>
+<a href="http://ytimg.com" rel="noopener nofollow ugc">ytimg.com</a><br>
+<a href="http://ytimg.l.google.com" rel="noopener nofollow ugc">ytimg.l.google.com</a><br>
+ytkids.app.goo.gl<br>
+<a href="http://yt-video-upload.l.google.com" rel="noopener nofollow ugc">yt-video-upload.l.google.com</a><br>
+<a href="http://l.google.com" rel="noopener nofollow ugc">l.google.com</a><br>
+<a href="http://i.google.com" rel="noopener nofollow ugc">i.google.com</a><br>
+<a href="http://s.ytimg.com" rel="noopener nofollow ugc">s.ytimg.com</a><br>
+<a href="http://withyoutube.com" rel="noopener nofollow ugc">withyoutube.com</a><br>
+<a href="http://wide-youtube.l.google.com" rel="noopener nofollow ugc">wide-youtube.l.google.com</a><br>
+<a href="http://ggpht.com" rel="noopener nofollow ugc">ggpht.com</a><br>
+<a href="http://youtubefanfest.com" rel="noopener nofollow ugc">youtubefanfest.com</a><br>
+<a href="http://youtubegaming.com" rel="noopener nofollow ugc">youtubegaming.com</a><br>
+<a href="http://youtubego.com" rel="noopener nofollow ugc">youtubego.com</a><br>
+<a href="http://youtubemobilesupport.com" rel="noopener nofollow ugc">youtubemobilesupport.com</a></p>
+</details>
+<p>ps. оператор мегафон, проводной</p></td><td>2024-08-13T16:46:03.273Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>То есть, у моего оператора GoodbyeDPI больше не помогает. Я вместо него VPN использую.</p></td><td>2024-08-13T16:57:49.824Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Мне удалось еще завести zapret и buydpi. Все 3 способа пока что работают. Ключевое “пока что”)</p></td><td>2024-08-13T17:10:47.426Z</td></tr><tr><td>celllf(celllf)</td><td><p>Печально. А какой впн, если не секрет?</p></td><td>2024-08-13T17:13:37.032Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>VLESS+Reality на VPS. Про то какой VPS выбирать можете почитать здесь:</p><aside class="quote" data-post="1" data-topic="8850">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/nalevex/48/6226_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%B2%D1%8B%D0%B1%D0%BE%D1%80-vps-%D1%81%D0%B5%D1%80%D0%B2%D0%B8%D1%81%D0%B0-%D0%B4%D0%BB%D1%8F-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/8850">Выбор VPS сервиса для России</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Хочу настроить свой vps. Какие сейчас можно использовать сервисы, принимающие оплату российскими банками и не требующие персональных данных?
+  </blockquote>
+</aside>
+</td><td>2024-08-13T17:19:41.213Z</td></tr><tr><td>Ori</td><td><p>Меня сия проблема тоже коснулась, опишу тут свой опыт и выводы. Провайдер скайнет, СПб.</p>
+<p>В общем, при просмотре видосов, если смотреть через монитор сети, то видно что почти всё тянется с 2-х видов адресов, скайнетовских <code>---sn-n3toxu-axql</code> и каких-то ещё из СПб <code>---sn-axq7sn7l</code>. Другие адреса проскакивают, но очень редко.</p>
+<p>Если видос популярный, он тянется со скайнетовских GGC <code>---sn-n3toxu-axql</code>, без задержек при перемотке и т.п. В процессе выяснилось, что эти серваки вообще до ТСПУ расположены.<br>
+Однако, если видос непопулярный, то скайнетовские GGC начинают таймаутиться, постоянно валятся NS_BINDING_ABORTED и т.д. Что довольно странно. Именно таймауты в итоге и приводят к жутким паузам при перемотке. А реальный трафик вообще идет с серверов <code>---sn-axq7sn7l</code>, расположенных за ТСПУ.</p>
+<p>Поначалу думал, что может фейки вызывают ошибки, т.к. доходят до сервера. Но на практике даже без gdpi/zapret ситуация не меняется и никакие варианты настроек ничего не дают.</p>
+<p>Наигравшись в браузере, я пошел проверять как дела обстоят в yt-dlp. Если запустить с флагом --get-url, то видно, что yt-dlp обращается к <code>youtube.com</code>, а тот возвращает скайнетовские <code>---sn-n3toxu-axql</code>. При попытке скачать популярное видео проблем нет. При попытке скачать непопулярное видео наблюдается интересная ситуация: пара мегабайт скачивается, потом 5 секунд пауза, пара мегабайт скачивается, снова пауза, и так по кругу. Если прервать закачку на 50%, удалить то, что успелось закачаться и начать снова - то эти 50% закачаются за секунды с максимальной скоростью. Т.е. они закэшировались на сервере и отдаются оттуда без проблем. А начиная с 50% закачка опять начнет ползти как черепаха.</p>
+<p>Исходя из всего этого можно сделать вывод, что проблем на канале между клиентом и GGC скайнета нет - если видео уже лежит там в кэше, то оно отдается мгновенно. Реальная проблема между GGC провайдера и внешней сетью. То ли там искуственно скорость режут, то ли тупо канал не выдерживает нагрузку, т.к. из-за ТСПУ, отрезающего доступ к внешним GGC, все запросы идут на внутрипровайдерные сервера в основном, то ли ещё что. Ну и как следствие, манипуляции с пакетами тут без толку.</p>
+<p>Ещё интересный момент. Недавно, с 30 августа по примерно 3 сентября, на скайнете ютуб вообще почти не работал - ни gdpi, ни zapret практически не помогали. Связано это было как раз с тем, что сервера <code>---sn-axq7sn7l</code> не работали вообще. То есть ситуация: сервера до ТСПУ лагают безбожно, а ближайшие за ТСПУ не пашут. В итоге ютуб тупо встал.</p>
+<hr>
+<p>Какие тут есть решения? Ну, в браузере всё просто: заблочить провайдерские GGC в том же uBlock:</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">www.youtube.com rr1---sn-n3toxu-axql.googlevideo.com * block
+www.youtube.com rr2---sn-n3toxu-axql.googlevideo.com * block
+www.youtube.com rr3---sn-n3toxu-axql.googlevideo.com * block
+www.youtube.com rr4---sn-n3toxu-axql.googlevideo.com * block
+www.youtube.com rr5---sn-n3toxu-axql.googlevideo.com * block
+www.youtube.com rr6---sn-n3toxu-axql.googlevideo.com * block
+www.youtube.com rr7---sn-n3toxu-axql.googlevideo.com * block
+www.youtube.com rr8---sn-n3toxu-axql.googlevideo.com * block
+</code></pre>
+</details>
+<p>В результате задержки полностью пропадают, т.к. видосы тянутся с внешних GGC, которые сейчас работают норм и достать до них можно без проблем через gdpi/zapret. Правда, неизвестно, когда они вновь отключатся - раз уже был прецедент.</p>
+<p>А вот с yt-dlp ситуация сложнее. Если заблочить эти адреса в hosts, то yt-dlp тупо вываливается с ошибкой. Там вроде как есть флаги типа --xff и --geo-verification-proxy, но они не работают (из-за обнов ютуба?), что легко проверить через --get-url. Хоть ты тресни, но присылает ссылку на скайнетовский GGC. Единственный вариант - полностью пустить трафик через прокси флагом --proxy.</p>
+<p>Однако, есть ещё один любопытный момент. При использовании yt-dlp в связке с медиаплеерами, типа mpv или mpc-hc, yt-dlp используется только для получения url-адресов. А сами данные качаются через ffmpeg/lav которые прокси не используют. То есть вы можете пустить yt-dlp через какой-нибудь бесплатный, медленный или даже небезопасный прокси (т.к. вы, фактически, никаких данных кроме url-адреса видоса не отправляете), а сам поток будет тянуться плеером напрямую, через gdpi/zapret, не используя прокси.</p>
+<p>А ещё в качестве прокси можно использовать Тор Браузер (<code>socks5h://127.0.0.1:9150</code>). Сам он довольно медленный, но так как мы через него только url-адрес получаем, то пофиг. + Можно самому нужную страну для GGC настроить, вписав в torrc что-нибудь типа <code>ExitNodes {RU} StrictNodes 1</code>.</p>
+<p>В чем смысл всей этой дичи? Я хз <img src="https://ntc.party/images/emoji/twitter/upside_down_face.png?v=12" title=":upside_down_face:" class="emoji" alt=":upside_down_face:" loading="lazy" width="20" height="20"></p>
+<p>PS: кому интересно, для <code>googlevideo.com</code> на скайнете сейчас работает вариант -e 1 --reverse-frag для gdpi и --dpi-desync=disorder2 для zapret. Даже фейки не нужны. Причем достаёт даже до ростелекомовских GGC. У меня даже появилась теория, что они ослабили блокировки ютуба и гуглвидео, потому что ТСПУ не справляются с фильтрацией фейков.</p></td><td>2024-09-08T08:28:40.071Z</td></tr><tr><td>garklavs</td><td><blockquote>
+<p>Какие тут есть решения? Ну, в браузере всё просто: заблочить провайдерские GGC в том же uBlock:</p>
+</blockquote>
+<p>Я попробовал это, но у меня совсем перестали работать все видео. Обычно, если это не популярное видео, то мне нужно перезагрузить страницу несколько раз, чтобы загрузка началась, и сама загрузка медленная, т.е. когда доходит до конца то будет пауза на некоторое время, но перемотка на незагрженные фрагменты идет с большой задержкой. Я менял DNS на cloudflare, google, opendns, использовал /flushdns и перезапуск браузера естественно, но вся та же фигня.</p></td><td>2024-09-08T11:32:23.197Z</td></tr><tr><td>Ori</td><td><p>Ну, у разных провайдеров ситуация разная и то, что помогло мне - может не помочь вам.</p>
+<p>Короче, я сейчас распишу всю свою последовательность действий, возможно кому пригодится.</p>
+<ol>
+<li>Ставим в браузере режим строгого https, настраиваем doh, отключаем kyber и quic. Делаем ipconfig /flushdns На этом этапе в etc/hosts и в блокировщике рекламы у вас не должны быть заблочены никакие гуглвидео-серваки. Также убедитесь, что выключены всякие браузерные ВПН/ускорители/цензортрекеры.</li>
+<li>Открываем (с gdpi и без) популярное русскоязычное видео, нажимаем F12, раздел сеть/network, смотрим запросы xhr/fetch адресованные к <code>googlevideo.com/videoplayback</code>, выписываем адреса себе в блокнот. Повторяем с несколькими видео.</li>
+<li>Проделываем (с gdpi и без) тоже самое, но с непопулярным англоязычным видео до 5к просмотров.</li>
+<li>Теперь отключаем gdpi, открываем командную строку и проверяем доступность серверов из списка командой наподобие такой:<br>
+<code>curl -sv -o NUL https://rr1---sn-n3toxu-axql.googlevideo.com</code><br>
+Обратите внимание, подключение должно быть по https. Если у вас пишет что-то в духе schannel: disabled, то вам надо обновить curl. Я с такой проблемой столкнулся на ltsc винде с отключенными обновлениями. Ещё есть опасность, что будет редирект, так что смотрите чтобы сертификат был от googlevideo.</li>
+<li>На предыдущем шаге выписываем, какие сервера доступны без обхода (они скорее всего принадлежат вашей сети или типа того) и какие сервера таймаутятся на этапе server hello.</li>
+<li>Запускаем gdpi и проверяем все сервера снова. Важно, чтобы те сервера, что были доступны без обхода не начали возвращать ошибки типа SSL что-то-там. А те, что таймаутились теперь должны отвечать. Настраиваете стратегию gdpi при необходимости, пока не найдем рабочую. На моем провайдере было достаточно <code>goodbyedpi.exe -e 1 --reverse-frag</code></li>
+<li>Теперь проверяем эти сервера на <a href="https://www.nslookup.io/" rel="noopener nofollow ugc">https://www.nslookup.io/</a> С теми серверами, которые не находятся в вашем городе, больше делать ничего не надо.</li>
+<li>Теперь, с включенным gdpi, находим малопопулярное видео и вбиваем его в yt-dlp с флагом --get-url. Вам должно подсунуть ближайшие GGC. Запоминаем какие. Попробуйте несколько видосов.</li>
+<li>Теперь, пробуем скачать видео через yt-dlp. Важно брать новые видео, которое вы не смотрели до этого, т.к. просмотренные могли закэшироваться на провайдерских GGC. Оцениваем скорость. Если видите, что происходит нечто аномальное, типа того, о чем я писал в прошлом посте, то <em>возможно</em> вам мой метод поможет. В противном случае - хз.</li>
+<li>Допустим, после предыдущих тестов, у вас есть 2 группы серверов из вашего города. Одна принадлежит вашему провайдеру, вторая кому-то ещё (соседнему провайдеру, например). Пробуем сначала заблочить свои внутрипровайдерские GGC.</li>
+<li>Определяем диапозон адресов для блокировки командой ping, по аналогии:<br>
+<code>ping rr1---sn-n3toxu-axql.googlevideo.com</code><br>
+<code>ping rr2---sn-n3toxu-axql.googlevideo.com</code><br>
+<code>ping rr3---sn-n3toxu-axql.googlevideo.com</code><br>
+и т.д. пока не начнёт возвращать ошибки.</li>
+<li>Теперь пробуем их заблочить. Я рекомендую через uBlock/uMatrix, т.к. etc/hosts вроде игнорится при включенном doh.</li>
+<li>На примере uBlock. Идем в настройки, раздел “мои фильтры” и блочим вот таким образом:<br>
+<code>||rr1---sn-n3toxu-axql.googlevideo.com</code><br>
+<code>||rr2---sn-n3toxu-axql.googlevideo.com</code><br>
+Нажимаем применить изменения.</li>
+<li>Обновляем ютуб через ctrl+F5 и тестим (с включенным gdpi, естественно).</li>
+<li>Если нет результата или ситуация только ухудшилась - разблокируем заблоченные адреса и возвращаемся к пункту 11. Повторяем шаги для другой группы адресов из вашего города - возможно к проблемам приводит она. Т.е. например, задержки могут вызывать не GGC вашего провайдера, а GGC провайдера <em>по соседству</em>.</li>
+</ol></td><td>2024-09-08T18:11:48.540Z</td></tr><tr><td>Nameless</td><td><p>А куда пропала тема про скайнет? Там нашли способ убрать эти задержки в 3-5 секунд именно на этом провайдере?</p></td><td>2024-09-10T21:33:06.232Z</td></tr><tr><td>garklavs</td><td><p>Я как понимаю был откат сайта по какой-то причине, потому что мой аккаунт тоже удалился, который я создавал за день до него</p></td><td>2024-09-10T21:37:21.059Z</td></tr><tr><td>KDS</td><td><p>Нашли, но не там. И не тот.</p>
+<aside class="quote quote-modified" data-post="144" data-topic="9874">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BF%D0%BE%D0%BC%D0%BE%D0%B3%D0%B8%D1%82%D0%B5-%D1%81-goodbyedpi-%D1%8F-%D1%87%D0%B0%D0%B9%D0%BD%D0%B8%D0%BA/9874/144">Помогите с goodbyedpi (я чайник)</a> <a class="badge-category__wrapper " href="/c/community-software/goodbyedpi/8"><span data-category-id="8" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #BF1E2E;" data-parent-category-id="27" data-drop-close="true" class="badge-category --has-parent" title="GoodbyeDPI Deep Packet Inspection (DPI) circumvention software discussion and official support forum"><span class="badge-category__name">GoodbyeDPI</span></span></a>
+  </div>
+  <blockquote>
+    Короче, я вам предлагаю пока забить на gdpi и попробовать обфусцированный туннель до варпа, пока этот вариант тоже работает на скайнете, как минимум у меня… 
+Тут выкладывали оч удобный скрипт для авто-генерации профиля, не помню кто выкладывал, но вот он: 
+<a href="https://www.mediafire.com/file/b0ysxi1bhowxvxx/wgcf.v6.4.zip/file" rel="noopener nofollow ugc">https://www.mediafire.com/file/b0ysxi1bhowxvxx/wgcf.v6.4.zip/file</a> 
+В gdpi в блэклист добавляете cloudflareclient.com, чтобы соединение прошло, запускаете его. 
+Отключаете файрвол. 
+Дальше запускаете fix_permission.bat и выбираете варианты 1, 1…
+  </blockquote>
+</aside>
+
+<p>Тут посмотрите, выше и ниже.</p></td><td>2024-09-10T22:22:20.546Z</td></tr><tr><td>MrKartoplya(Kartoplya)</td><td><aside class="quote no-group quote-modified" data-username="Xunlei" data-post="9" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<aside class="quote no-group" data-username="blanche.hermine" data-post="8" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar"> blanche.hermine:</div>
+<blockquote>
+<p><code>74.125.X.X</code></p>
+</blockquote>
+</aside>
+<p>Амстердам, работает с byedpi.</p>
+</blockquote>
+</aside>
+<p>74.125.110.218   пинг 13 - отказ<br>
+74.125.110.167   пинг 30 - грузит</p>
+<aside class="quote no-group quote-modified" data-username="Xunlei" data-post="9" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<aside class="quote no-group" data-username="blanche.hermine" data-post="8" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar"> blanche.hermine:</div>
+<blockquote>
+<p><code>173.194.X.X</code></p>
+</blockquote>
+</aside>
+<p>У меня москва AS15169, не работает.</p>
+</blockquote>
+</aside>
+<p>173.194.181.162   пинг 13 - отказ<br>
+173.194.187.200   пинг 54 - грузит</p>
+<p>И точно так-же, для остальных.<br>
+Если пингуется хорошо - встаёт штыком и отказывается работать.</p>
+<hr>
+<p>Через tracert.</p>
+<p>Всё, что пропадает, идёт в<br>
+<code>svo*s*-in-f*.1e100.net</code><br>
+А удачные в<br>
+<code>arn*s*-in-f*.1e100.net</code><br>
+<code>bud*s*-in-f*.1e100.net</code><br>
+<code>fra*s*-in-f*.1e100.net</code></p></td><td>2024-09-13T04:48:45.976Z</td></tr><tr><td>Nixona272(Вадим)</td><td><p>В проге на android данный баг фиксится настройками в самом приложении без всяких блокировок ip ggc.</p>
+<p>Использую ByeDPI. Он создаёт VPN сервер прямо в телефоне и сразу же подключается к нему, видимо, чтобы получить доступ к пакетам, иначе в Android нельзя.</p>
+<p>Была такая же проблема. Некоторые видео начинали воспроизводиться после паузы, а некоторые не воспроизводились совсем, как в приложении youtube, так и на сайте.</p>
+<p>Нашёл статью на Хабре с правильными настройками. Вот её адрес, но нужно заходить через VPN, потому что Хабр выпилил её по требованию РКН <a href="https://habr.com/ru/articles/838324/" rel="noopener nofollow ugc">Хабр (habr.com)</a></p>
+<p>Поменял настройки, Youtube заработал отлично. Проверял в приложении, на сайте через мобилу, раздал на комп через Wi-Fi, проверил у трёх разных провайдеров. Всё работает идеально, никакой задержки, все видео воспроизводятся и на телефоне, и на компе.</p>
+<p>Есть нюанс. Чтобы работал Instagram, нужно возвращать настройки на дефолтные.</p>
+<p>ValdikSS писал, что программа бессильна, потому что РКН банит какие-то ip, а не фильтрует пакеты. Похоже, что это не так. Похоже, что можно как-то подшаманить обход DPI, чтобы Youtube работал нормально.</p></td><td>2024-09-14T13:32:12.271Z</td></tr><tr><td>KDS</td><td><p>Можно подшаманить, например используя DoH, а не DNS провайдера. Power Tunnel Android такую возможность имеет, не знаю имеет ли ByeDPI</p></td><td>2024-09-14T13:36:08.815Z</td></tr><tr><td>Nixona272(Вадим)</td><td><p>Это всё равно разрушает теорию о том, что РКН банит ip ggc</p></td><td>2024-09-14T13:40:56.305Z</td></tr><tr><td>KDS</td><td><p>Я нигде и не сказал, что ТСПУ банят какие-то GGC по IP - потому что этого нет. Я про остальные нельзясайты говорил.</p></td><td>2024-09-14T13:44:32.304Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>У меня при помощи GoodbyeDPI при любых настройках бесконечная загрузка видео. Причем через curl видно, что GoodbyeDPI работает: скорость неограниченная, но на деле видео грузить не хочет.</p>
+<p>Иногда помогает перезагрузить роутер, чтобы IP сменился. Меняется маршрут подключения к <code>googlevideo.com</code> и ютуб использует другие GGC-сервера, которые работают. Через несколько дней провайдер меняет IP, и если снова попадется “плохой”, снова приходится искать “правильный”, перезагружая роутер. Проще через прокси ютуб пропустить, что я и делаю.</p></td><td>2024-09-14T13:58:40.645Z</td></tr><tr><td>Nixona272(Вадим)</td><td><p>На моём провайдере с GoodbyeDPI помогает несколько раз обновить страницу с видео. После 2-7 обновлений видео запускается.</p></td><td>2024-09-14T14:00:05.781Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>У меня это не помогает, если IP плохой.</p></td><td>2024-09-14T14:01:45.043Z</td></tr><tr><td>KDS</td><td><p>[quote=“blanche.hermine, post:96, topic:8395”]Проще через прокси ютуб пропустить, что я и делаю.<br>
+[/quote]</p>
+<p>Ага, а потом ютуб тебе пишет - Зарегистрирован подозрительный трафик, исходящий из вашей сети. Докажи, что ты не бот )</p></td><td>2024-09-14T14:04:12.585Z</td></tr><tr><td>MrKartoplya(Kartoplya)</td><td><p>Увы, но даже так не работает.<br>
+Даже через ByeDPI есть шанс, что отправит на московские AS15169. И опять начинается рулетка, сидишь, перезагружаешь страницу пока не выпадет европа для подключения.<br>
+Вот донести бы до Гугла, чтобы он эти серверы мне никогда не предлагал и жизнь пойдёт.<br>
+Где я только не пытался блокировать сервера, и в хосте, и в хроме, и расширениями.</p></td><td>2024-09-14T14:05:32.779Z</td></tr><tr><td>Nixona272(Вадим)</td><td><p>Сейчас проверил схему. Костыль, конечно, но работает. Если очень хочется посмотреть Youtube, то поможет.</p>
+<p>Ставим на Android ByeDPI, применяем настройки из этой статьи <a href="https://habr.com/ru/articles/838324/" rel="noopener nofollow ugc">Хабр (habr.com)</a>, подключаем мобилу к роутеру по Wi-Fi, раздаём на комп по USB.</p>
+<p>Всё работает.</p></td><td>2024-09-14T14:05:36.178Z</td></tr><tr><td>Nixona272(Вадим)</td><td><p>По всей видимости в ByeDPI есть какой-то то ли баг, то ли особенность. В какой-то момент он начинает работать как бы “на половину” или вообще отваливается, хотя соединение VPN при этом установлено. Нужно зайти в приложение, нажать Disconnect, дождаться, когда отвалится VPN соединение, потом опять нажать Connect.</p>
+<p>Иногда нужно сделать так пару раз или даже перезапустить приложение, а в редких случаях сбросить настройки на дефолтные, потом опять поставить “правильные”.</p>
+<p>Может быть, из-за этого не получилось. Потому что по этой моей схеме у всех моих знакомых в разных регионах всё работает отлично.</p></td><td>2024-09-14T14:18:18.087Z</td></tr><tr><td>Agnostic(Виктор)</td><td><p>Моск область если кто искал, провайдер RNC - (Региональные Сети)<br>
+Заблочить надо эти хосты:<br>
+<a href="https://rr2---sn-4pvgq-n8vs.googlevideo.com" class="onebox" target="_blank" rel="noopener nofollow ugc">https://rr2---sn-4pvgq-n8vs.googlevideo.com</a><br>
+<a href="https://rr5---sn-4pvgq-n8vs.googlevideo.com" class="onebox" target="_blank" rel="noopener nofollow ugc">https://rr5---sn-4pvgq-n8vs.googlevideo.com</a><br>
+<a href="https://rr4---sn-4pvgq-n8v6.googlevideo.com" class="onebox" target="_blank" rel="noopener nofollow ugc">https://rr4---sn-4pvgq-n8v6.googlevideo.com</a><br>
+<a href="https://rr1---sn-4pvgq-n8v6.googlevideo.com" class="onebox" target="_blank" rel="noopener nofollow ugc">https://rr1---sn-4pvgq-n8v6.googlevideo.com</a><br>
+<a href="https://rr9---sn-4pvgq-n8v6.googlevideo.com" class="onebox" target="_blank" rel="noopener nofollow ugc">https://rr9---sn-4pvgq-n8v6.googlevideo.com</a><br>
+<a href="https://rr10---sn-n8v7znze.googlevideo.com" target="_blank" rel="noopener nofollow ugc">https://rr10---sn-n8v7znze.googlevideo.com</a></p>
+<p>Без этого действия задержка 6-10 секунд, сейчас норм, в Network(Хром) оранжевым вылетает rr3, но без задержек запускает. А вот перечисленные красным с задержкой</p></td><td>2024-09-21T12:45:20.743Z</td></tr><tr><td>ivanixa333(Ivanixa333)</td><td><p>А можно ли это Заблокировать на уровне роутера<br>
+<a href="http://rr2---sn-u5uuxaxjvhg0-ocje.googlevideo.com" class="onebox" target="_blank" rel="noopener nofollow ugc">rr2---sn-u5uuxaxjvhg0-ocje.googlevideo.com</a><br>
+<a href="http://rr4---sn-u5uuxaxjvhg0-ocje.googlevideo.com" class="onebox" target="_blank" rel="noopener nofollow ugc">rr4---sn-u5uuxaxjvhg0-ocje.googlevideo.com</a><br>
+<a href="http://rr4---sn-u5uuxaxjvhg0-ocje.googlevideo.com" class="onebox" target="_blank" rel="noopener nofollow ugc">rr4---sn-u5uuxaxjvhg0-ocje.googlevideo.com</a><br>
+<a href="http://rr2---sn-u5uuxaxjvhg0-ocje.googlevideo.com" class="onebox" target="_blank" rel="noopener nofollow ugc">rr2---sn-u5uuxaxjvhg0-ocje.googlevideo.com</a><br>
+<a href="http://rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com" class="onebox" target="_blank" rel="noopener nofollow ugc">rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com</a><br>
+<a href="http://rr3---sn-u5uuxaxjvhg0-ocje.googlevideo.com" target="_blank" rel="noopener nofollow ugc">rr3---sn-u5uuxaxjvhg0-ocje.googlevideo.com</a></p></td><td>2024-09-21T14:03:02.831Z</td></tr><tr><td>Ori</td><td><p>В роутерах, как правило, есть возможность блокировки по айпи. Найдите айпи и заблочьте там.<br>
+Хотя, я бы вам посоветовал блочить через адблок/юблок. В таком случае у вас даже запрос отправляться не будет. А в варианте с роутером придется ждать ответ с ошибкой. Впрочем, это разница в миллисекунду.</p></td><td>2024-09-21T14:08:39.468Z</td></tr><tr><td>Mad1van(Ivan Matveev)</td><td><p>Проверил у себя. Пооткрывал пару роликов. Ошибок как бы и нет, но пинг, как то не алло.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/ddb2bbcc148c04407ebb0ba6edcd196e25b53b87.png" data-download-href="https://ntc.party/uploads/default/ddb2bbcc148c04407ebb0ba6edcd196e25b53b87" title="image"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/ddb2bbcc148c04407ebb0ba6edcd196e25b53b87.png" alt="image" data-base62-sha1="vDesguKhEAGIHOQacrhdIBnKrlB" width="690" height="250" data-dominant-color="2F3237"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">701×254 5.41 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/fb35f6b6284b512fdb5cbd987ab64ae01a836aa6.png" data-download-href="https://ntc.party/uploads/default/fb35f6b6284b512fdb5cbd987ab64ae01a836aa6" title="image"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/fb35f6b6284b512fdb5cbd987ab64ae01a836aa6.png" alt="image" data-base62-sha1="zQjsDd0ylXcgKOWbzqAGnnK2TFI" width="690" height="273" data-dominant-color="313439"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">698×277 7.88 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Ошибок вроде нет</p></td><td>2024-09-25T07:11:06.450Z</td></tr><tr><td>Mad1van(Ivan Matveev)</td><td><aside class="quote no-group" data-username="Ori" data-post="85" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Ну, в браузере всё просто: заблочить провайдерские GGC в том же uBlock:</p>
+</blockquote>
+</aside>
+<p>А где именно это все с * block прописывать в uBlock? Мои правила?</p></td><td>2024-09-25T09:41:46.730Z</td></tr><tr><td>Doqsa</td><td><p>Добрый день! Задержка перед началом воспроизведения видео на YouTube может быть связана с несколькими факторами. Проблемы с маршрутизацией, кэширование и блокировки, DPI и заголовки пакетов.</p>
+<p>Если VPN работает без задержек, это, скорее всего, значит, что он обеспечивает надежное шифрование и обход всех ограничений. В общем, видимо, дело в маршрутизации и обработке пакетов вашим провайдером.</p></td><td>2024-09-25T09:55:30.206Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="Mad1van" data-post="107" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/mad1van/48/9183_2.png" class="avatar"> Mad1van:</div>
+<blockquote>
+<p>А где именно это все с * block прописывать в uBlock? Мои правила?</p>
+</blockquote>
+</aside>
+<p>В “моих фильтрах” можно прописать вот так:</p>
+<pre><code class="lang-auto">! === YouTube ===
+! = Блокируем тормозящие сервера в штучном порядке (адреса тормозящих конкретно у вас серверов ищите сами!) =
+||rr*---blablabla.googlevideo.com^
+! = Превентивно блокируем ошибки 403 =
+||googlevideo.com/videoplayback^$method=get
+</code></pre></td><td>2024-09-25T16:50:28.780Z</td></tr><tr><td>Mad1van(Ivan Matveev)</td><td><aside class="quote no-group" data-username="Ori" data-post="109" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<pre><code class="lang-auto">! === YouTube ===
+! = Блокируем тормозящие сервера в штучном порядке (адреса тормозящих конкретно у вас серверов ищите сами!) =
+||rr*---sn-n3toxu-axql.googlevideo.com^
+! = Превентивно блокируем ошибки 403 =
+||googlevideo.com/videoplayback^$method=get
+</code></pre>
+</blockquote>
+</aside>
+<p>Спасибо большое.</p>
+<p>upd. Вроде сделал, как ты сказал, а на выходе:</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/346b26a10501adb519cc57c0ac6fe00fffb04894.png" data-download-href="https://ntc.party/uploads/default/346b26a10501adb519cc57c0ac6fe00fffb04894" title="image"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/346b26a10501adb519cc57c0ac6fe00fffb04894.png" alt="image" data-base62-sha1="7tIoGFfvLvlA7qCSUNa1UQPmEio" width="690" height="258" data-dominant-color="F5F5F6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">776×291 11.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/8a68397f9c8033b0a665269ab4efff26caf69b8b.png" alt="image" data-base62-sha1="jKpbQBFGoIMSqt5ROw1uF0up2ll" width="669" height="441"><br>
+<img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/6fcc2b7fa079d325922837753dd91090e8af4c96.png" alt="image" data-base62-sha1="fX0qJIr6IKN1DIG2muFf1wfxmU6" width="676" height="142"></p>
+</details></td><td>2024-09-26T04:14:08.451Z</td></tr><tr><td>zzr</td><td><p>я хз ваще в чём смысл блокировать их если ркн делает ето за нас <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20"> надобовлял я целу кучу етих адресов в хостс филе результат такой же прост вместо NS_BINDING_ABORTED буит у вас NS_UNKNOWN_HOST или как то так тока и делов</p></td><td>2024-09-26T05:38:26.775Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>РНК блокирует ggc, не сам хухел. Хухел их видит и пытается подключиться. Для того чтобы он их не видел, их нужно блокировать клиентом. Тогда хухел будет пытаться подключиться к другим сервакам и скорее всего успешно.<br>
+Если NS_UNKNOWN_HOST то надо почистить кеш и куки браузера.</p></td><td>2024-09-26T07:02:53.285Z</td></tr><tr><td>zzr</td><td><p>хм индиресно… ну хз у меня также идёт биндинг абор в том числе и на i.ytimg но превьюшки тем не менее кажут, там ето видно как оно идёт загрузка видева как тока оно попадает на ggc который аборт оно тутже идёт на другой с которова грузит норм т.е. поидее должно стать быстрее кокда их заблокируеш у себя но ето же не мы на клиенте решаем к какому понтключатся а гугол сам понтсовывает их хз по какому алкоритму</p></td><td>2024-09-26T08:56:03.439Z</td></tr><tr><td>KDS</td><td><p>Причем этот “алкоритм” (точно в гугеле набухались и это придумали) работает в разных браузерах по-разному. Например в Хроме (как-бы что ни на есть продукт гугла) GGC почти не хотят с моим браузером общаться по QUIC, Файрфокс это делает с переменным успехом, Эдж почти всегода по QUIC видео забирает. Как это работает и от чего зависит (кроме марки браузера), я так и не понял <img src="https://ntc.party/images/emoji/twitter/roll_eyes.png?v=12" title=":roll_eyes:" class="emoji" alt=":roll_eyes:" loading="lazy" width="20" height="20"></p></td><td>2024-09-26T09:04:09.651Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>Скорее всего это связано с настройками UserAgent. Бровзеры также по разному реагируют на сервер авторизации плау.хухел.ком, хром валит ошибки (но при этом работает), лисе пофиг, эджу тоже. Алсо, у меня эдж ходит по h1 на видево, квик, видимо, в сети порублен.</p></td><td>2024-09-26T10:21:53.727Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="Mad1van" data-post="110" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/mad1van/48/9183_2.png" class="avatar"> Mad1van:</div>
+<blockquote>
+<p>Вроде сделал, как ты сказал, а на выходе:</p>
+</blockquote>
+</aside>
+<p>Бро, у меня буквально чёрным по белому написано: “адреса тормозящих <strong>конкретно у вас</strong> серверов ищите сами”. Так скажи пожалуйста, чего ради ты заблочил сервера <strong>моего</strong> провайдера? Или может у тебя тоже провайдер “скайнет спб”?</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/6773b6a96cdeccf57c3e9ef8ced48a78e8e693fe.png" data-download-href="https://ntc.party/uploads/default/6773b6a96cdeccf57c3e9ef8ced48a78e8e693fe" title="why"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/6773b6a96cdeccf57c3e9ef8ced48a78e8e693fe_2_383x500.png" alt="why" data-base62-sha1="eLb5RopCiKRr4oBLsDbAotdX3n8" width="383" height="500" srcset="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/6773b6a96cdeccf57c3e9ef8ced48a78e8e693fe_2_383x500.png, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/6773b6a96cdeccf57c3e9ef8ced48a78e8e693fe_2_574x750.png 1.5x, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/6773b6a96cdeccf57c3e9ef8ced48a78e8e693fe.png 2x" data-dominant-color="817D80"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">why</span><span class="informations">698×909 312 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2024-09-26T15:29:57.601Z</td></tr><tr><td>Fixator10</td><td><p>В openwrt имеется околонастройка встроенного DNS в разделе “hostnames” (по крайней мере на моей древней версии)<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/5f19a29608f9922e0952dcbbd6c671286d050354.png" data-download-href="https://ntc.party/uploads/default/5f19a29608f9922e0952dcbbd6c671286d050354" title="Network → Hostnames"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/5f19a29608f9922e0952dcbbd6c671286d050354_2_690x370.png" alt="Network → Hostnames" data-base62-sha1="dzihwueEtOHX2wVqVj5kRskA7KQ" width="690" height="370" srcset="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/5f19a29608f9922e0952dcbbd6c671286d050354_2_690x370.png, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/5f19a29608f9922e0952dcbbd6c671286d050354.png 1.5x, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/5f19a29608f9922e0952dcbbd6c671286d050354.png 2x" data-dominant-color="DCDCDD"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Network → Hostnames</span><span class="informations">956×514 28.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/a12ee082f890af2371f389b2dcd676b64542922c.png" data-download-href="https://ntc.party/uploads/default/a12ee082f890af2371f389b2dcd676b64542922c" title="image"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/a12ee082f890af2371f389b2dcd676b64542922c.png" alt="image" data-base62-sha1="mZTiZdxMgsUjLpilbU8s8XE65Ws" width="690" height="48" data-dominant-color="FAF9F9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">960×67 2.27 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-26T17:03:03.777Z</td></tr><tr><td>Fixator10</td><td><p>Ради интереса, а что показывают вот эти две страницы во всех браузерах?</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://quic.nginx.org/quic.html">
+  <header class="source">
+      <img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/3fb03bb8b5d262c78de6e7461d08bedd3667f03d.png" class="site-icon" data-dominant-color="41B16B" width="64" height="64">
+
+      <a href="https://quic.nginx.org/quic.html" target="_blank" rel="noopener nofollow ugc">quic.nginx.org</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://quic.nginx.org/quic.html" target="_blank" rel="noopener nofollow ugc">NGINX QUIC Sandbox</a></h3>
+
+  <p>This is a demo site for NGINX and HTTP/3. It is a way to test if your browser provides QUIC+HTTP/3 end-to-end.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://cloudflare-quic.com">
+  <header class="source">
+      <img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/6306931ef78f06dfd75847eb0b7e513657e7ec29.png" class="site-icon" data-dominant-color="F58827" width="96" height="96">
+
+      <a href="https://cloudflare-quic.com" target="_blank" rel="noopener nofollow ugc">Cloudflare</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/345;"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/b083ebc6bd0b50015499ebf08118ee3f957ea164_2_690x345.png" class="thumbnail" data-dominant-color="FCF0E9" width="690" height="345"></div>
+
+<h3><a href="https://cloudflare-quic.com" target="_blank" rel="noopener nofollow ugc">QUIC | Cloudflare</a></h3>
+
+  <p>Cloudflare Supports QUIC</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-09-26T17:10:22.020Z</td></tr><tr><td>KDS</td><td><p>Мозилла с Хромом отвалились полностью, Эдж - полностью зелененький</p>
+<p>Вторая ссылка - это не тест, там ничего не показывает )</p></td><td>2024-09-26T17:19:29.300Z</td></tr><tr><td>Fixator10</td><td><p>По второй ссылке упрощенный тест в первом абзаце<br>
+<img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/056dcf967fff307bfa77c4ba0c912afd529c7e5c.png" alt="image" data-base62-sha1="M1EG2RRi01Gbavyi9aSJfG89ac" width="376" height="49"></p></td><td>2024-09-26T17:21:00.604Z</td></tr><tr><td>KDS</td><td><p>А, блин ) Во всех 3-х HTTP/3. Но это после перезапуска Лисы и Хрома. Почему в них квик со временем отваливается напрочь - моя не понимать</p></td><td>2024-09-26T17:26:26.404Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>У меня сегодня началась обратная хрень.<br>
+Значица мой местный РКН решил блочить сам сайт вместо хухелвидева. Ситуация обратная, теперь картинки грузятся по несколько минут, зато видосы моментально. <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-09-26T17:53:51.001Z</td></tr><tr><td>KDS</td><td><p>Да я уже начинаю понимать, что если хоть что-то из системы ютуба забанить, то все начинает работать через опу, даже с обходом. Но слава богу, если сильно не присматриваться, это не сильно заметно</p></td><td>2024-09-26T17:58:19.363Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>Странно что картинки не грузятся, они же не на сайте UI висят</p></td><td>2024-09-26T17:59:20.852Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>ytimg начал слишком долго отвечать, хотя стратегия подобрана верно. Без обхода разумеется не работает, так как в бане уже много лет.</p></td><td>2024-09-26T18:04:46.304Z</td></tr><tr><td>uwu(uwu)</td><td><p>у меня такое при ttl=1, видео работает, а картинки и комментарии грузятся медленно<br>
+при ttl =2 и то и другое работает быстро.<br>
+но у тебя возможно другой случай.</p></td><td>2024-09-26T18:08:22.857Z</td></tr><tr><td>KDS</td><td><p>У меня такое было, когда домен был указан с поддоменом, заменил просто на <code>ytimg.com</code> в блэклисте и все залетало. А разве превьюшки были забанены? Это ж аватарки были, а они на <code>ggpht.com</code></p>
+<p>А не, они и там и там (превьюшки)</p></td><td>2024-09-26T18:10:49.522Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>У меня сайт с картинками висит на той же стратегии что и хухелвидево, без ttl, в принципе в моей сети этот параметр бесполезен.<br>
+Скорее всего нужна тонкая настройка, но времени заниматься этим нет. Главное чтобы видосики крутило без проблем, остальное не особо важно.</p></td><td>2024-09-26T18:16:58.750Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>На превью один кликбейт. Так что пусть их не будет <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-09-26T18:20:50.055Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>У меня РКН начал блокировать сам сайт трубы. Без обхода он не открывается. Соответственно, сопутствующие домены тоже.<br>
+Сейчас вот потыкал, ytimg возвращает connection reset. С дурилкой загружает, но очень медленно, и без ошибок.<br>
+ЗЫ. А стримы вообще уехали в бесконечную загрузку без ошибок. Хотя, если запускаются, то сразу отваливаются. При этом никакими другими способами стрим не запустить, внешние плееры просто вываливают ошибки.</p></td><td>2024-09-26T18:24:33.359Z</td></tr><tr><td>KDS</td><td><p>У меня счас тоже отвалились. Пришлось разделить стратегии на гуглвидео и все остальное с ютуба, с разными ттл и с добавлением к сплиту2 фейка гугла</p></td><td>2024-09-26T18:34:57.785Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>Вот-вот.</p></td><td>2024-09-26T18:35:44.362Z</td></tr><tr><td>Fixator10</td><td><p>Попробовал и так и через HOSTS - таймаут</p>
+<p>Пробовал вставлять IPшники казахских кэшей и американских - оба в таймаут уходят</p></td><td>2024-09-27T12:13:56.372Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>Еще инфа по теме на сегодня.<br>
+Задержку перед запуском видео при правильных настройках так же может вызывать quic, а точнее, kyber.<br>
+Статус 204 пытается прогрузиться через h3, он нужен для инициализации соединения по quic, но может отлетать с ошибкой сертификата ssl. Это и вызывает задержку.</p></td><td>2024-09-27T20:52:46.254Z</td></tr><tr><td>KDS</td><td><p>Что за статус такой? Или речь про generate_204? Если да, то у меня его вообще юблок гасит, но все работает и по квику и по HTTP/1.1 без задержек. Кстати, сегодня все улучшилось в этом плане, почти все ролики идут по квику. Кайбер отключен, квик не трогал, -q тоже нет</p>
+<p>Если интересно - могу указать все, что у меня юблок гасит при открытии нового видео</p></td><td>2024-09-27T20:56:13.863Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>Да, именно generate 204. По наблюдениям, именно он, если доступен quic, его активирует. Если через tsl 1.3 204 не проходит, то запускается h1. Это для googlevideo, остальной сайт работает сам по себе в зависимости от доступности h3. По крайней мере, у меня так, ну а раз у меня так, у других тоже так, сайт ведь один и тот же <img src="https://ntc.party/images/emoji/twitter/upside_down_face.png?v=12" title=":upside_down_face:" class="emoji" alt=":upside_down_face:" loading="lazy" width="20" height="20"><br>
+А то, что у тебя юблок сносит, не значит, что респонз не проходит. Юблок закрывает уже после получения запроса, на уровне интерфейса клиента.</p></td><td>2024-09-28T05:28:22.465Z</td></tr><tr><td>KDS</td><td><aside class="quote no-group" data-username="manwithbox" data-post="136" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/manwithbox/48/8274_2.png" class="avatar"> manwithbox:</div>
+<blockquote>
+<p>По наблюдениям, именно он, если доступен quic, его активирует.</p>
+</blockquote>
+</aside>
+<p>Да не похоже, он у меня не проходит, но квик на гуглвидео все равно работает. Другое дело, что у меня квик именно на гуглвидео, видимо забанен, поэтому без запрета только HTTP/1.1 приходится довольствоваться. ютуб.ком и прочие при этом по квику работают исправно.</p></td><td>2024-09-28T05:34:09.506Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>Тогда вообще непонятно как это работает. Вчера тестировал, 204 проходит по квику, и следом по h3 видео. Только видео не загружается, так как 204 возвращает ssl error и уже второй запрос к googlevideo возвращается по h1 и работает. Это и вызывает задержку в 5-10 секунд. Если квик выключить, то и 204 и видос сразу будут по h2 и h1 соответственно.</p></td><td>2024-09-28T07:33:05.049Z</td></tr><tr><td>KDS</td><td><p>Да я сам не понимаю. Квик то работает на одном гуглкэше, то не работает. Если попереключать видео, то на другом видео квик на этом гуглкэше уже работает. Потом на следующем видео опять не работает )</p></td><td>2024-09-28T07:39:47.802Z</td></tr><tr><td>Mad1van(Ivan Matveev)</td><td><p>Почти. СПб, но билайн. Тупанул. Начал добавлять свои:</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/75ac644baf4e5934300e2df66f113a8cf2d3b54a.png" data-download-href="https://ntc.party/uploads/default/75ac644baf4e5934300e2df66f113a8cf2d3b54a" title="image"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/75ac644baf4e5934300e2df66f113a8cf2d3b54a.png" alt="image" data-base62-sha1="gMZd7SAgJ72ohqc8uUQiWyaxZDc" width="690" height="120" data-dominant-color="F2F0EC"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">741×129 5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/3d80bb096cadd994167eb84789eaa9ce4b5fe195.png" alt="image" data-base62-sha1="8M4VE0vxDJZPlfQnTyF1Jgr2h3T" width="678" height="114"><br>
+<img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/7482f1bcdf19d698154d6ea783ae6fb4f0c8d9b5.png" alt="image" data-base62-sha1="gCHVS35SkxSdCOJ9MVpRjxRVsvr" width="470" height="138"><br>
+Но все равно, херня какая-то получается. Вроде начал добавлять свои, а они все равно в итоге проскакивают. Я опять что-то не так делаю? Пробовал и без https* добавлять. Все равно фигня получается.</p>
+</details></td><td>2024-09-29T07:18:49.340Z</td></tr><tr><td>beam(одинокий и солевой)</td><td><p>блок не работает ни через hosts, ни через ublock. Сам ютуб грузит, но видео с бесконечной загрузкой до тех пор, пока не перезагрузишь страницу пару раз. Видео все так же пытается загрузиться с заблокированных серверов, но теперь вместо NS_BINDING_ABORTED выдает либо CORS failed, либо Blocked by uBlock Origin</p></td><td>2024-09-29T08:41:47.911Z</td></tr><tr><td>DimakSerpg(Dimak Serpg)</td><td><p>Сегодня такая же проблема началась. Закинул сервера в хостс и ничего не изменилось. Проблема в том, что мне просто не находит новые серверы.</p>
+<p>Держите список, может кому-то понадобится, если у вас совпадут они.</p>
+<p><a class="attachment" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/pMY2wLVDCr3bWHSza07v8s7Y1cu.txt">gogo.txt</a> (3,9 КБ)</p>
+<p>UPD: Кажется я нашел ещё одно решение.<br>
+Помимо этого списка в хостс, я начал блочить URL прямо в хроме. Я обновлял видео каждые 20 секунд. Блокировал много URL, и через несколько обновлений и заблокированных URL видео начало загружать через 2-3 секунды. Достаточно просто вписать в список “sn-n8v7kn7e” и буду блокироваться все похожие URL. Хотя нет, это всё равно не помогает, ибо гугл продолжает перебирать эти же адреса. Как будто новых ему не предлагает.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/b681d636d10a067e6436b303e5fb3446e9aefc94.png" data-download-href="https://ntc.party/uploads/default/b681d636d10a067e6436b303e5fb3446e9aefc94" title="NVIDIA_Share_EWVfyz85pl"><img src="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/b681d636d10a067e6436b303e5fb3446e9aefc94_2_450x500.png" alt="NVIDIA_Share_EWVfyz85pl" data-base62-sha1="q2x4z1mELakY2DejxEcg6e6trAU" width="450" height="500" srcset="задержка-перед-запуском-видео-youtube-6-10-секунд-8395/b681d636d10a067e6436b303e5fb3446e9aefc94_2_450x500.png, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/b681d636d10a067e6436b303e5fb3446e9aefc94_2_675x750.png 1.5x, задержка-перед-запуском-видео-youtube-6-10-секунд-8395/b681d636d10a067e6436b303e5fb3446e9aefc94.png 2x" data-dominant-color="EAE9EB"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">NVIDIA_Share_EWVfyz85pl</span><span class="informations">875×971 89.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-30T06:33:37.419Z</td></tr><tr><td>abc555</td><td><p>Если вы в файл хост кидаете гугл видео, то вы ничего не меняете, по факту вообще ничего, просто занимаетесь фигнёй, так как ip адреса выдаёт гугл  на один и то же домен, вы не можете управлять этими адресами</p></td><td>2024-09-30T07:02:41.159Z</td></tr><tr><td>abc555</td><td><p>Я как то прикололся, на домен <a href="http://www.youtube.com" rel="noopener nofollow ugc">www.youtube.com</a> поставил ip от <a href="http://www.google.com" rel="noopener nofollow ugc">www.google.com</a> и начал ютуб работать, включил http3 и пофиг работает и шустро, но минут через 20 работать перестало.<br>
+Так что если просто экспериментируете, то играйтесь только с доменом  <a href="http://www.youtube.com" rel="noopener nofollow ugc">www.youtube.com</a></p></td><td>2024-09-30T08:08:13.052Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>проблема с “баном” отдельных ютуб серверов<br>
+что разные видео на разных серверах<br>
+и какие то не особо популярные видео особенно “местные” (которые например смотрят только в РФ)<br>
+могут быть на очень небольшом кол-ве GGC внутри РФ которые как раз и блокируют и сами провайдеры и РКН</p>
+<p>единственный вариант пробовать yt-dlp и аналоги<br>
+они немного отличаются от браузеров в поиске серверов. и могут (а могут и нет.) находить другие рабочие сервера <a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a></p></td><td>2024-09-30T09:08:37.612Z</td></tr><tr><td>zzr</td><td><p>стакими зождержками смотреть шортстсы например ето то ещё извратщение <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-09-30T09:13:17.279Z</td></tr><tr><td>DimakSerpg(Dimak Serpg)</td><td><p>Если кому интересно, починил ютуб по этому методу. <a href="https://ntc.party/t/%D0%BF%D0%BE%D0%B4%D0%B1%D0%BE%D1%80-%D1%80%D0%B0%D0%B1%D0%BE%D1%87%D0%B5%D0%B3%D0%BE-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D0%B0-%D0%B4%D0%BB%D1%8F-ggc-%D1%8E%D1%82%D1%83%D0%B1%D0%B0-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-blockcheck/10060/121" class="inline-onebox">Подбор рабочего конфига для GGC ютуба через blockcheck - #121 by DimakSerpg</a></p>
+<p>Там идёт чек как раз таки этого сервера. Если вы хотите наверняка узнать ваш GGC ютуба, можете запустить эту софтину <a href="https://ntc.party/t/%D0%BF%D0%BE%D0%B4%D0%B1%D0%BE%D1%80-%D1%80%D0%B0%D0%B1%D0%BE%D1%87%D0%B5%D0%B3%D0%BE-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D0%B0-%D0%B4%D0%BB%D1%8F-ggc-%D1%8E%D1%82%D1%83%D0%B1%D0%B0-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-blockcheck/10060/121" class="inline-onebox">Подбор рабочего конфига для GGC ютуба через blockcheck - #121 by DimakSerpg</a></p></td><td>2024-09-30T10:27:39.893Z</td></tr><tr><td>DimakSerpg(Dimak Serpg)</td><td><p>Я имел ввиду эту софтину, если хотите узнать свой GGC <a href="https://ntc.party/t/goodcheck-%D0%B1%D0%BB%D0%BE%D0%BA%D1%87%D0%B5%D0%BA-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82-%D0%B4%D0%BB%D1%8F-goodbyedpi-%D0%BC%D0%BE%D0%B5%D0%B3%D0%BE-%D0%B0%D0%B2%D1%82%D0%BE%D1%80%D1%81%D1%82%D0%B2%D0%B0/10880" class="inline-onebox">GoodCheck - блокчек-скрипт для GoodbyeDPI моего авторства</a></p></td><td>2024-09-30T14:59:19.832Z</td></tr><tr><td>KDS</td><td><p>Чтобы узнать свой GGC (один из GGC) - достаточно открыть консоль браузера (F12 - Сеть) и посмотреть, на какой домен он ломится за видео (запрос с videoplayback). Никаких софтин для этого не нужно.</p></td><td>2024-09-30T15:22:03.494Z</td></tr><tr><td>zzr</td><td><p>наверн он имел ввиду что он с помощью етого починил себе ютуп <img src="https://ntc.party/images/emoji/twitter/wink.png?v=12" title=":wink:" class="emoji" alt=":wink:" loading="lazy" width="20" height="20"></p></td><td>2024-09-30T15:39:15.294Z</td></tr><tr><td>KDS</td><td><p>Теперь даже я запутался <img src="https://ntc.party/images/emoji/twitter/wink.png?v=12" title=":wink:" class="emoji" alt=":wink:" loading="lazy" width="20" height="20"> При чем тут “узнать GGC” и “починился ютуб”? Как у вас в голове это означает одно и то же?</p></td><td>2024-09-30T15:50:49.854Z</td></tr><tr><td>zzr</td><td><p>а ето пердыдущий ответ был <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-10-01T05:36:49.031Z</td></tr><tr><td>MD5(MD5)</td><td><aside class="quote no-group" data-username="blanche.hermine" data-post="8" data-topic="8395" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/blanche.hermine/48/7125_2.png" class="avatar"> blanche.hermine:</div>
+<blockquote>
+<p>После того, как заблокировал таттелькомовские GGC, все видео загружаются через ближайшие ко мне ростелькомовские GGC:</p>
+<pre><code class="lang-auto">213.59.237.148	rr1---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.149	rr2---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.150	rr3---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.151	rr4---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.152	rr5---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.153	rr6---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.154	rr7---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.155	rr8---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.156	rr9---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.157	rr10---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.158	rr11---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.159	rr12---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.160	rr13---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.161	rr14---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.162	rr15---sn-gvnuxaxjvh-bvwz.googlevideo.com
+213.59.237.163	rr16---sn-gvnuxaxjvh-bvwz.googlevideo.com
+
+46.61.170.76	rr1---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.77	rr2---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.78	rr3---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.79	rr4---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.80	rr5---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.81	rr6---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.82	rr7---sn-gvnuxaxjvh-bvw6.googlevideo.com
+46.61.170.83	rr8---sn-gvnuxaxjvh-bvw6.googlevideo.com
+
+</code></pre>
+<p>У меня до них пинг 10-20 мс.<br>
+С ними пока никаких проблем нет.</p>
+<p>Ради интереса заблокировал их тоже. После этого видео начинает грузится с каких-то гугловских серверов с подсети <code>173.194.X.X</code>, <code>74.125.X.X</code>, до которых пинг 20-30.</p>
+</blockquote>
+</aside>
+<p>а как вы отличаете локальные (местные) сервера ростелекомовские или таттелькомовские GCG от забугорных?</p></td><td>2024-10-11T14:34:36.968Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Можно по Ip пробить расположение. ну и по пингу тоже понятно</p></td><td>2024-10-11T14:43:36.714Z</td></tr><tr><td>Udavf</td><td><p>По названию gvnuxa соответствующему стране</p></td><td>2024-10-13T18:46:18.014Z</td></tr><tr><td>anonimnyj113(anonimnyj113)</td><td><p>Для того чтобы избежать задержки в ответ на запросы к замедленным хостам надо вернуть ответ со статусом, который обрабатывает Youtube, например 400. Достичь этого можно если в hosts присвоить замедленным хостам айпишники других кэш серверов гугла которые не замедлены.</p></td><td>2025-01-21T10:41:41.766Z</td></tr><tr><td>ivanixa333(Ivanixa333)</td><td><aside class="quote no-group" data-username="Ori" data-post="109" data-topic="8395">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p><code>||googlevideo.com/videoplayback^$method=get</code></p>
+</blockquote>
+</aside>
+<p>А как можно заблокировать это. файле hosts</p></td><td>2025-03-18T11:57:52.742Z</td></tr><tr><td>Ori</td><td><p>Никак. Смотрите ip серверов, возвращающих код 403 и блокируйте их в роутере или в файрволе, если метод с адблоком вам не подходит.<br>
+От этого в принципе мало толку, так что можете не тратить время даже. Какого-то прироста скорости я у себя от подобных манипуляций не наблюдал.</p></td><td>2025-03-19T02:11:50.265Z</td></tr>
+    </table>
+      </body>
+    </html>

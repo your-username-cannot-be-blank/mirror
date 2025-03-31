@@ -1,0 +1,975 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>ограничение-http3-quic</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>serfreeman1337</td><td><p>Не устанавливается соединение по QUIC для зарубежных сайтов. Не приходит ответ от сервера на Initial пакет.</p>
+<p>Проверял на сайтах google (в том числе youtube), <a href="http://cloudflare-quic.com" rel="noopener nofollow ugc">cloudflare-quic.com</a> и <a href="http://quic.nginx.org" rel="noopener nofollow ugc">quic.nginx.org</a>.<br>
+При этом <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a> продолжает работать по HTTP/3.</p>
+<p>Заметил на операторах Yota, Мегафон и проводном МТС.</p></td><td>2022-03-04T07:41:41.789Z</td></tr><tr><td>Hatomen</td><td><p>Быстрая проверка показывает, что:</p>
+<p>Провайдер RNet (СПб):</p>
+<p><img src="ограничение-http3-quic/bf735738ab7ffd89f00533bc62ca74dfd309ab48.png" alt="image" data-base62-sha1="rjEjpSvvuh9V9ESxylcO3CqRdO0" width="523" height="322"></p>
+<p><img src="ограничение-http3-quic/1db2ca4010d3e3ad3eddf6ccf8d3fe4ab1b37e2d.png" alt="image" data-base62-sha1="4eITXlTkJ9zp3GlUGwqveUtpJuJ" width="438" height="195"></p>
+<p>Мобильный Билайн:</p>
+<p><img src="ограничение-http3-quic/4befe696d1704007fd60cd9fe16311c0f78e356b.png" alt="image" data-base62-sha1="aPLNiVppqtrjkmzMcDlQKoMw47F" width="516" height="318"></p>
+<p><img src="ограничение-http3-quic/20b748711244f1a69be9f3bc4f9eae132c1b5ad1.png" alt="image" data-base62-sha1="4FpXA9uHNY3LB58LVCq5jppbbX3" width="431" height="179"></p>
+<p>При этом аналогичная картинка на обоих провайдерах с включенным впн:</p>
+<p><img src="ограничение-http3-quic/23f236033f846d15b772ef4c1cb1c85d870c3f66.png" alt="image" data-base62-sha1="57ZE3ECUK0C2JKnAODOOKQ2RzP8" width="514" height="309"></p>
+<p><img src="ограничение-http3-quic/a9f6b73e4c45b4fa2cf5f14909b662f3ae990733.png" alt="image" data-base62-sha1="ofzhh9S9bRrola5q4F9WISIK5HB" width="436" height="181"></p></td><td>2022-03-04T08:03:03.667Z</td></tr><tr><td>bolvan</td><td><p>Действительно, ответа на QUIC initial нет. Проверено на <a href="http://cloudflare-quic.com">cloudflare-quic.com</a> и <a href="http://ipv4.google.com">ipv4.google.com</a><br>
+Но на <a href="http://vk.com">vk.com</a> QUIC не заблокирован</p>
+<p>Лечится вот так :</p>
+<pre><code class="lang-auto">iptables -t mangle -I POSTROUTING -p udp --dport 443 -m mark ! --mark 0x40000000/0x40000000 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:3 -j NFQUEUE --queue-num 205 --queue-bypass
+nfqws --qnum=205 ---dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d4
+</code></pre>
+<p>Заодно и проверил работу nfqws на десинхронизацию UDP. Вполне успешно справилось<br>
+Как и ожидалось, фильтр не способен вычленить из QUIC имя хоста, поскольку ему пришлось бы применять сложный алгоритм расшифровки. Потому QUIC банится. Вероятно по white list<br>
+Так же ожидаемо DPI отстает от потока UDP , если 1-й пакет ему не показался похожим на QUIC. Либо ищется только QUIC initial. Не проверял</p>
+<p>UPDATE. Как оказалось, движок QUIC от chromium  ловит не только UDP, но и ICMP ttl expired in transit, связанные со своими UDPшками. Они приходят от фейк-пакетов с низким TTL. Как только броузер славливает такой ICMP, сеанс считает порванным, дальше ничего не проходит.   Mozilla этим НЕ страдает.<br>
+Лечение : либо резать ttl expired in transit (нехорошо, поломаете трейсилки), либо отказаться от ttl fooling и заменить на любой другой, который сработает. Например, badsum.<br>
+А можно вообще убрать fooling. В этом случае фейки будут доходить до сервера, но поскольку там трэш, они будут отбрасываться процессом веб сервера.<br>
+Но если вы вдруг используете badsum и что-то на пути будет дропать пакеты с badsum (роутеры mediatek, заводские прошивки с linux), то обход не сработает<br>
+Проще и надежнее убрать fooling</p></td><td>2022-03-04T13:49:17.067Z</td></tr><tr><td>yuichi001(Никита)</td><td><p>есть аналогичные команды под windows и goodbye dpi?</p></td><td>2022-03-04T14:19:34.318Z</td></tr><tr><td>bolvan</td><td><p>Насколько мне известно, goodbye пока не поддерживает udp</p></td><td>2022-03-04T14:20:55.175Z</td></tr><tr><td>ValdikSS</td><td><p>Подозреваю, что протокол отключили из-за проблем с блокировкой веб-сайтов? Поддерживает ли HTTP/3 подключение только по QUIC, без TCP-соединения вовсе? Насколько понимаю, ему в любом случае нужен TCP, а уведомление о поддержке QUIC передаётся в TLS ALPN или в HTTP Alt-Svc, или я что-то упустил?</p></td><td>2022-03-04T16:59:05.821Z</td></tr><tr><td>bolvan</td><td><p>Технически нет никаких проблем сначала пытаться установить quic handshake, и это сработало бы аналогично ESNI, обойдя все блокировки.<br>
+Другое дело, что броузеры этого не делают. Они действительно сначала лезут по TLS, и только потом в результате процедуры апгрейда лезут по h3.<br>
+Получается, вся защита основывается лишь на “инструментальной беспомощности”. Нет элементарной функции. Но это дело поправимое. Внести небольшую правку в код, добавить переменную в about:config<br>
+Умелец выпустит модифицированный броузер, и дальше результат понятен</p></td><td>2022-03-04T19:14:06.474Z</td></tr><tr><td>serfreeman1337</td><td><aside class="quote no-group" data-username="bolvan" data-post="7" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Другое дело, что броузеры этого не делают. Они действительно сначала лезут по TLS, и только потом в результате процедуры апгрейда лезут по h3.</p>
+</blockquote>
+</aside>
+<p>Обнаружил, что Firefox можно заставить лезть сразу по h3, задав alt-svc для нужных хостов через преф:<br>
+<code>network.http.http3.alt-svc-mapping-for-testing</code></p>
+<p>Установив его в:<br>
+<code>facebook.com;h3=:443,www.facebook.com;h3=:443,static.xx.fbcdn.net;h3=:443</code></p>
+<p>удалось открыть страницу <a href="http://facebook.com" rel="noopener nofollow ugc">facebook.com</a></p>
+<p>При обновлении без кеша (ctrl+f5 или shift+клик по иконке обновления) Firefox снова пытается открыть его через TLS, простое F5 перезагружает его через h3 без проблем.</p></td><td>2022-03-05T06:56:52.856Z</td></tr><tr><td>kelm</td><td><aside class="quote no-group" data-username="serfreeman1337" data-post="8" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/f14d63/48.png" class="avatar"> serfreeman1337:</div>
+<blockquote>
+<p>Обнаружил, что Firefox можно заставить лезть сразу по h3, задав alt-svc для нужных хостов через преф:</p>
+</blockquote>
+</aside>
+<p>Немедленное рукопожатие HTTP/3 (для одного хоста) также возможно в Chrome/Chromium, запустив браузер из командной строки:</p>
+<ol>
+<li>Введите следующую команду:<br>
+Chromium: <code>chromium --enable-quic --origin-to-force-quic-on=www.facebook.com:443</code><br>
+Chrome: <code>chrome --enable-quic --origin-to-force-quic-on=www.facebook.com:443</code></li>
+<li>Введите адрес веб-сайта в адресную строку (используйте точное доменное имя, указанное в команде).</li>
+</ol></td><td>2022-03-06T11:39:59.343Z</td></tr><tr><td>ValdikSS</td><td><p>Фильтр работает только для пакетов с UDP-нагрузкой больше 1001 байтов (включительно).<br>
+Фильтр ищет “00 00 00 01” (hex, QUIC version) в UDP-нагрузке, начиная со второго байта.<br>
+Применяется только к UDP-пакетам на порт назначения 443. Исходящий порт значения не имеет (может быть также 443, фильтр не применится).</p>
+<p>Псевдо-yara-правило фильтра:</p>
+<pre><code class="lang-auto">rule QUIC_block_Russia_TSPU_04_mar_2022
+{
+    condition:
+        filesize &gt; 1000 and dport == 443 and int32be(1) == 0x00000001
+}
+</code></pre>
+<p>Минимальный пакет, на который срабатывает фильтр:<br>
+<a class="attachment" href="ограничение-http3-quic/tUyACxYe8GQEuWlwYwARQ9YLmsi.bin">quic_tspu_filtered.bin</a> (1001 Bytes)</p>
+<pre><code class="lang-auto">nping --udp -p 443 -c 1 --data "$(xxd -ps -c 999999 quic_tspu_filtered.bin)"
+</code></pre></td><td>2022-03-09T00:55:49.310Z</td></tr><tr><td>bolvan</td><td><p>Подтверждаю. Добавлю к этому, что к входящим пакетам фильтрация не применяется и используется stateful фильтр. Если первый пакет между  <code>src_ip:src_port dst_ip:dst_port</code> не распознан как QUIC, остальные не проверяют. Потому и работает <code>desync=fake</code> в nfqws</p>
+<p>desync=ipfrag2 тоже работает , если тестировать с помощью nping со своей VPSкой или девайсом на другом российском провайдере, но на большинстве сайтов не работает, потому что сеть крайне враждебна к ip фрагментам. но все же обмануть ТСПУ этим можно, если речь пойдет о подключении к своему сервису (не обязательно веб, может быть wireguard).  Естественно, ipfrag убивается первым же NAT на пути. Если от провайдера серый ип и ТСПУ находится после NAT или из-за своего роутера - неприменимо</p>
+<p>Проверил еще хождение между 2 российскими провайдерами. Тоже заблокировано<br>
+Значит, гипотеза про white list на ВК подтверждается</p></td><td>2022-03-09T08:00:13.565Z</td></tr><tr><td>serfreeman1337</td><td><p><s>С 12 часов на Yota и Megafon наблюдаю проблемы с доступом на домены google com / google ru. Соединение устанавливается, но после получения некоторого объема данных пакеты перестаю ходить.<br>
+Странно, что такое только с доменами <em>.google.</em>, с ютубом все ок.</s></p>
+<p><s>google_quic_yota.pcapng (79.8 KB)<br>
+IP адрес 142.250.186.196 для google com прописан через /etc/hosts</s></p>
+<p><s>На мобильном билайне с nfqws всё работает без проблем, как и на проводном Net By Net.</s></p>
+<p>UPD:<br>
+<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1759704" rel="noopener nofollow ugc">Проблема с Firefox</a>, с Chromium все загружается.</p>
+<aside class="quote no-group" data-username="ValdikSS" data-post="10" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Фильтр ищет “00 00 00 01” (hex, QUIC version) в UDP-нагрузке, начиная со второго байта.</p>
+</blockquote>
+</aside>
+<p>В firefox можно отключить quic version 1, установив <code>network.http.http3.support_version1</code> в <code>false</code>, тогда  в QUIC Version будет светиться “FF 00 00 1D” (draft-29) и фильтр пропустит его. В alt-svc преф нужно писать <code>h3-29=:443</code> в этом случае.</p></td><td>2022-03-14T15:10:48.566Z</td></tr><tr><td>serfreeman1337</td><td><p>Обход через смену версии на draft-29 больше не работает, по крайней мере с instagram и facebook:<br>
+Следующий пакет не пропускает фильтр:<br>
+<a class="attachment" href="ограничение-http3-quic/ta7LRcmNEMp07Juaie4Ien9qQwD.bin">instagram_quic_initial.bin</a> (1.3 KB)<br>
+Хотя такой же пакет для домена гугла доходит до сервера.</p>
+<p>C nfqws все также работает.</p></td><td>2022-03-19T09:55:03.866Z</td></tr><tr><td>ValdikSS</td><td><p>Ваш пакет доходит до <code>facebook.com (157.240.201.35)</code>, на провайдере с ТСПУ.</p>
+<pre><code class="lang-nohighlight">$ nping --udp -p 443 -c 1 --data "$(xxd -ps -c 999999 instagram_quic_inital.bin)" 157.240.201.35
+
+Starting Nping 0.7.91 ( https://nmap.org/nping ) at 2022-03-20 00:31 MSK
+SENT (0.0022s) UDP packet with 1357 bytes to 157.240.201.35:443
+RCVD (0.0394s) UDP packet with 1232 bytes from 157.240.201.35:443
+ 
+Max rtt: 37.137ms | Min rtt: 37.137ms | Avg rtt: 37.137ms
+UDP packets sent: 1 | Rcvd: 1 | Lost: 0 (0.00%)
+Nping done: 1 IP address pinged in 0.04 seconds
+</code></pre>
+<p>Как минимум у части провайдеров заблокированы часть адресов Instagram. Попробуйте порезолвить домены через разные публичные резолверы и попробовать разные IP-адреса.</p></td><td>2022-03-19T21:32:42.747Z</td></tr><tr><td>serfreeman1337</td><td><p>Я проверял с DigitalOcean AMS. Оператор Yota.</p>
+<p>Тесты с 157.240.201.35:<br>
+Initial с server_name <code>www.google.com</code>:</p>
+<pre><code class="lang-auto">$ nping --udp -p 443 -c 1 --data "$(xxd -ps -c 999999 google_quic_initial.bin)" 157.240.201.35    
+
+Starting Nping 0.7.92 ( https://nmap.org/nping ) at 2022-03-20 11:18 MSK
+SENT (0.0016s) UDP packet with 1357 bytes to 157.240.201.35:443
+RCVD (0.2062s) UDP packet with 1232 bytes from 157.240.201.35:443
+
+Max rtt: 204.642ms | Min rtt: 204.642ms | Avg rtt: 204.642ms
+UDP packets sent: 1 | Rcvd: 1 | Lost: 0 (0.00%)
+Nping done: 1 IP address pinged in 0.21 seconds
+</code></pre>
+<p>Initial с server_name <code>www.instagram.com</code>:</p>
+<pre><code class="lang-auto">$ nping --udp -p 443 -c 1 --data "$(xxd -ps -c 999999 instagram_quic_inital.bin)" 157.240.201.35  
+
+Starting Nping 0.7.92 ( https://nmap.org/nping ) at 2022-03-20 11:18 MSK
+SENT (0.0015s) UDP packet with 1357 bytes to 157.240.201.35:443
+
+Max rtt: N/A | Min rtt: N/A | Avg rtt: N/A
+UDP packets sent: 1 | Rcvd: 0 | Lost: 1 (100.00%)
+Nping done: 1 IP address pinged in 1.00 seconds
+</code></pre>
+<p>Тоже самое происходит и с <code>www.facebook.com</code>. При использовании nfqws оба server_name доходят.</p></td><td>2022-03-20T08:29:32.381Z</td></tr><tr><td>ValdikSS</td><td><p>Через Tele2 instagram отвечает почти всегда, но не каждый раз. На личный сервер этот пакет доходит всегда.</p>
+<p>На Yota, действительно, есть фильтр, и на первый взгляд, он декодирует QUIC-пакет и выявляет имя домена.</p></td><td>2022-03-20T09:33:04.353Z</td></tr><tr><td>bolvan</td><td><p>На моем провайдере с ТСПУ начались непонятные и хаотичные отрубы QUIC сессий, пробитых с помощью nfqws --dpi-desync=fake. Пейлоад пробовал разный. Разницы никакой.</p>
+<p>Тест : с firefox с вычищенным кэшем заходим на <a href="https://ipv4.google.com">https://ipv4.google.com</a><br>
+через раз получается как на картинке<br>
+По паре ip:port перестают ходить пакеты, как если бы DPI занес UDP поток в черный список. Точно так же, как если первым пакетом пошел бы QUIC initial. Но здесь происходит отруб внезапно в середине сеанса. Всовывание фейков перед каждым пакетом не помогает.<br>
+Пробовал завертывать UDP через свой сервер. Тоже самое. Если пропустить через VPN - проблема уходит<br>
+Пробовал взять первые 2 пакета от клиента и от сервера (initial) и долбиться ими nping-ом по одной паре ip:port с сервера и клиента после начального пробития фейком. Не отрубает.<br>
+nping по блокированной паре ip:port с ограниченным TTL показывает, что блок идет на 5-хопе. Там стоит как раз ТСПУ и блокировщик сайтов<br>
+Эвристика - статистика какая-то ?</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="ограничение-http3-quic/89d6f645f6f05975bd7f1cf5c6baa35b73ebec1b.jpeg" data-download-href="https://ntc.party/uploads/default/89d6f645f6f05975bd7f1cf5c6baa35b73ebec1b" title="quic_otrub"><img src="ограничение-http3-quic/89d6f645f6f05975bd7f1cf5c6baa35b73ebec1b_2_690x310.jpeg" alt="quic_otrub" data-base62-sha1="jFnXYM4lHJMo7twlJVZMji6RnLB" width="690" height="310" srcset="ограничение-http3-quic/89d6f645f6f05975bd7f1cf5c6baa35b73ebec1b_2_690x310.jpeg, ограничение-http3-quic/89d6f645f6f05975bd7f1cf5c6baa35b73ebec1b_2_1035x465.jpeg 1.5x, ограничение-http3-quic/89d6f645f6f05975bd7f1cf5c6baa35b73ebec1b_2_1380x620.jpeg 2x" data-dominant-color="8697A1"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">quic_otrub</span><span class="informations">1393×627 227 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2022-03-21T09:19:59.370Z</td></tr><tr><td>Supp</td><td><p>У домру недавно наблюдались блокировки QUIC на youtube, facebook, в отличие от VK. Сейчас проверил, пока QUIC заработал на них. Тестят наверно…</p></td><td>2022-03-23T15:54:44.232Z</td></tr><tr><td>bolvan</td><td><p>Крайний раз, когда тестил домру около месяца назад, у них наблюдался лоад балансинг.<br>
+Часть трафика уходит через ТСПУ, а часть нет. Где нет - там простой пассивный DPI.<br>
+Потому может то работать QUIC, то не работать. По какому критерию балансируется трафик я не изучал, возможно по IP. Учитывая прыгающий характер ip от крупных сервисов, может так и получиться, что когда-то запросы идут через ТСПУ, а когда-то нет</p></td><td>2022-03-23T16:11:39.138Z</td></tr><tr><td>Bronner(Roman)</td><td><p>Почему после включения nfqws может совсем переставать работать http3? Если отключить nfqws, то через curl работает http3, но в хроме только http2. Проверял на <a href="http://quic.nginx.org" rel="noopener nofollow ugc">quic.nginx.org</a> и <a href="http://cloudflare-quic.com" rel="noopener nofollow ugc">cloudflare-quic.com</a>, ютубе и др. Если включить VPN, то в хроме начинает полноценно работать http3. В firefox работает http3 и без vpn, но частично, только  <a href="http://cloudflare-quic.com" rel="noopener nofollow ugc">cloudflare-quic.com</a>, а на <a href="http://quic.nginx.org" rel="noopener nofollow ugc">quic.nginx.org</a> не работает, на других сайтах чаще тоже работает. В Safari совсем ситуация странная, буквально пару дней назад http3 работал везде даже лучше, чем в firefox, а сегодня даже через vpn не работает.</p>
+<p><code>nfqws --dpi-desync-fwmark=0x40000000 --qnum=210 --dpi-desync=fake --debug</code></p>
+<pre><code class="lang-auto">curl -4ILv --max-time 5 --http3 https://vk.com                                                                                                                                                                                                    28 ↵
+*   Trying 87.240.190.72:443...
+* Connect socket 5 over QUIC to 87.240.190.72:443
+* Sent QUIC client Initial, ALPN: h3-29,h3-28,h3-27
+* After 2498ms connect time, move on!
+* connect to 87.240.190.72 port 443 failed: Connection timed out
+*   Trying 87.240.190.67:443...
+* Connect socket 6 over QUIC to 87.240.190.67:443
+* Sent QUIC client Initial, ALPN: h3-29,h3-28,h3-27
+* After 1249ms connect time, move on!
+* connect to 87.240.190.67 port 443 failed: Connection timed out
+*   Trying 87.240.190.78:443...
+* Connect socket 5 over QUIC to 87.240.190.78:443
+* Sent QUIC client Initial, ALPN: h3-29,h3-28,h3-27
+* After 624ms connect time, move on!
+* connect to 87.240.190.78 port 443 failed: Connection timed out
+*   Trying 87.240.137.158:443...
+* Connect socket 6 over QUIC to 87.240.137.158:443
+* Sent QUIC client Initial, ALPN: h3-29,h3-28,h3-27
+* After 313ms connect time, move on!
+* connect to 87.240.137.158 port 443 failed: Connection timed out
+*   Trying 87.240.139.194:443...
+* Connect socket 5 over QUIC to 87.240.139.194:443
+* Sent QUIC client Initial, ALPN: h3-29,h3-28,h3-27
+* After 156ms connect time, move on!
+* connect to 87.240.139.194 port 443 failed: Connection timed out
+*   Trying 93.186.225.208:443...
+* Connect socket 6 over QUIC to 93.186.225.208:443
+* Sent QUIC client Initial, ALPN: h3-29,h3-28,h3-27
+* After 78ms connect time, move on!
+* connect to 93.186.225.208 port 443 failed: Connection timed out
+* Failed to connect to vk.com port 443: Connection timed out
+* Closing connection 0
+curl: (28) Failed to connect to vk.com port 443: Connection timed out
+</code></pre>
+<pre><code class="lang-auto">IP4: 192.168.1.113 =&gt; 87.240.137.158 proto=udp sport=61894 dport=443
+UDP: CF FF 00 00 1D 10 2C 20 B7 21 87 58 81 F7 7C 35 DD 53 A2 C5 3E 53 14 B9 69 39 3D BA 50 CD 16 54 ... : ......, .!.X..|5.S..&gt;S..i9=.P..T ...
+packet contains QUIC initial
+hostname: vk.com
+dpi desync src=192.168.1.113:61894 dst=87.240.137.158:443
+sending fake request : 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ... : ................................ ...
+reinjecting original packet. len=1228 len_payload=1200
+packet: id=30 drop
+packet: id=31 len=1228
+IP4: 192.168.1.113 =&gt; 87.240.139.194 proto=udp sport=61598 dport=443
+UDP: C2 FF 00 00 1D 10 38 DB 6E CE F1 CB 56 79 07 F0 93 1A 44 1A F7 B7 14 D2 BD E2 80 6C A9 B3 09 58 ... : ......8.n...Vy....D........l...X ...
+packet contains QUIC initial
+hostname: vk.com
+dpi desync src=192.168.1.113:61598 dst=87.240.139.194:443
+sending fake request : 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ... : ................................ ...
+reinjecting original packet. len=1228 len_payload=1200
+packet: id=31 drop
+packet: id=32 len=1228
+IP4: 192.168.1.113 =&gt; 93.186.225.208 proto=udp sport=60154 dport=443
+UDP: CF FF 00 00 1D 10 2D F6 2E 56 03 F9 77 77 84 84 EA E7 CE D4 48 AF 14 EF E5 4F 88 92 50 04 C4 1F ... : ......-..V..ww......H....O..P... ...
+packet contains QUIC initial
+hostname: vk.com
+dpi desync src=192.168.1.113:60154 dst=93.186.225.208:443
+sending fake request : 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ... : ................................ ...
+reinjecting original packet. len=1228 len_payload=1200
+packet: id=32 drop
+</code></pre></td><td>2022-03-26T02:47:20.346Z</td></tr><tr><td>bolvan</td><td><p>Единственная проблема с атакой fake против QUIC, которую я нашел , это спорадическое застревание потока на середине, как описано выше. Видимо оно вызванно какими-то статистическими методами анализа на ТСПУ, срабатывающими через раз.</p>
+<p>Но если этого не случается, то поведение броузеров на провайдерах с ТСПУ + nfqws и провайдерах без ТСПУ и без nfqws выглядит идентичным</p>
+<p>Броузеры сейчас слишком умные. Их цель - не подключить вас по самому крутому и модному протоколу, а загрузить страницу как можно быстрее. Исходя из этих соображений они сами вольны выбирать какое подключение использовать и через какую версию ip.</p>
+<p>У меня и на хромиуме, и на мозилле, <a href="http://quic.nginx.org">quic.nginx.org</a> проходит тест на QUIC, а cloudflare не проходит на обоих броузерах. Смотрим F12 и видим, что там первая часть запросов идет по http/2, вторая по http/3. Если убрать nfqws на провайдере с ТСПУ, то все запросы идут http/2</p>
+<p>Мне сообщали, что на некоторых провайдерах (yota), они стали дешифровывать QUIC на DPI. Я не в курсе подробностей, но дело вот в чем. Сейчас у них задача - полностью забанить сам протокол QUIC, кроме white list ip (вконтакт, слишком серьезный клиент).<br>
+Если они научатся анализировать QUIC, они могут перестать банить сам протокол и убрать статистический анализ.</p></td><td>2022-03-26T07:38:58.571Z</td></tr><tr><td>bolvan</td><td><p>Собрал curl с quiche.<br>
+2 теста на провайдере с ТСПУ.<br>
+первый с nfqws, второй без</p>
+<pre><code class="lang-auto">curll -4Iv --http3 https://cloudflare-quic.com
+*   Trying 172.67.9.235:443...
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* Connect socket 5 over QUIC to 172.67.9.235:443
+* Sent QUIC client Initial, ALPN: h3,h3-29,h3-28,h3-27
+*  subjectAltName: host "cloudflare-quic.com" matched cert's "cloudflare-quic.com"
+* Verified certificate just fine
+* Connected to cloudflare-quic.com () port 443 (#0)
+* h2h3 [:method: HEAD]
+* h2h3 [:path: /]
+* h2h3 [:scheme: https]
+* h2h3 [:authority: cloudflare-quic.com]
+* h2h3 [user-agent: curl/7.83.0-DEV]
+* h2h3 [accept: */*]
+* Using HTTP/3 Stream ID: 0 (easy handle 0x7fffd6627210)
+&gt; HEAD / HTTP/3
+&gt; Host: cloudflare-quic.com
+&gt; user-agent: curl/7.83.0-DEV
+&gt; accept: */*
+&gt;
+&lt; HTTP/3 200
+HTTP/3 200
+&lt; date: Sat, 26 Mar 2022 09:32:25 GMT
+date: Sat, 26 Mar 2022 09:32:25 GMT
+&lt; content-type: text/html
+content-type: text/html
+&lt; content-length: 109425
+content-length: 109425
+&lt; expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+&lt; server: cloudflare
+server: cloudflare
+&lt; cf-ray: 6f1ee103ee899150-FRA
+cf-ray: 6f1ee103ee899150-FRA
+&lt; alt-svc: h3=":443"; ma=86400, h3-29=":443"; ma=86400
+alt-svc: h3=":443"; ma=86400, h3-29=":443"; ma=86400
+* Connection #0 to host cloudflare-quic.com left intact
+</code></pre>
+<pre><code class="lang-auto">./curll -4Iv --max-time 5 --http3 https://cloudflare-quic.com
+*   Trying 104.22.9.38:443...
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* Connect socket 5 over QUIC to 104.22.9.38:443
+* Sent QUIC client Initial, ALPN: h3,h3-29,h3-28,h3-27
+* After 2499ms connect time, move on!
+* connect to 104.22.9.38 port 443 failed: No error
+*   Trying 104.22.8.38:443...
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* Connect socket 6 over QUIC to 104.22.8.38:443
+* Sent QUIC client Initial, ALPN: h3,h3-29,h3-28,h3-27
+* After 1249ms connect time, move on!
+* connect to 104.22.8.38 port 443 failed: No error
+*   Trying 172.67.9.235:443...
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* Connect socket 5 over QUIC to 172.67.9.235:443
+* Sent QUIC client Initial, ALPN: h3,h3-29,h3-28,h3-27
+* After 624ms connect time, move on!
+* connect to 172.67.9.235 port 443 failed: No error
+* Failed to connect to cloudflare-quic.com port 443 after 4374 ms: Couldn't connect to server
+* Closing connection 0
+curl: (28) Failed to connect to cloudflare-quic.com port 443 after 4374 ms: Couldn't connect to server
+</code></pre>
+<p>вывод nfqws --debug</p>
+<pre><code class="lang-auto">packet: id=1 len=1228
+IP4: 192.168.4.2 =&gt; 172.67.9.235 proto=udp sport=51710 dport=443
+UDP: C6 00 00 00 01 10 71 F8 72 8E CC 61 C9 FD BB AB FA 94 E7 C1 A6 F1 14 90 55 4D 8B D1 44 3D E1 C9 ... : ......q.r..a............UM..D=.. ...
+packet contains QUIC initial
+hostname: cloudflare-quic.com
+dpi desync src=192.168.4.2:51710 dst=172.67.9.235:443
+sending fake request : 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ... : ................................ ...
+reinjecting original packet. len=1228 len_payload=1200
+packet: id=1 drop
+</code></pre></td><td>2022-03-26T09:35:17.479Z</td></tr><tr><td>zinoid</td><td><aside class="quote no-group" data-username="bolvan" data-post="22" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Собрал curl с quiche</p>
+</blockquote>
+</aside>
+<p>А можно еще собрать curl с <a href="https://github.com/quictls/openssl" rel="noopener nofollow ugc">openssl-quic</a> от мелкомягких + nghttp3 + ngtcp2. Это будет альтернативная реализация, она используется в хромиуме. Только, это непросто <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2022-03-26T10:54:05.576Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="Bronner" data-post="20" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/bronner/48/1130_2.png" class="avatar"> Bronner:</div>
+<blockquote>
+<p>Почему после включения nfqws может совсем переставать работать http3?</p>
+</blockquote>
+</aside>
+<p>Есть еще одна мысль. Недавно такая проблема вскрылась.<br>
+Если в linux настроен сложный policy routing. Несколько аплинков, таблиц маршрутизации, ip rule , основанные на source address, то пакеты, высланные через raw socket-ы могут уходить не с того интерфейса. Что от nfqws, что от nping. При этом обычные пакеты уходят нормально.<br>
+Если это ваш случай, то надо убедиться, что пакеты идут действительно в нужный интерфейс и правильно заменяется source адрес , если используется NAT.<br>
+Пока что самое эффективное лечение этой ситуации - вносить ip rule, базированные на fwmark, который выставляет nfqws</p></td><td>2022-03-26T13:52:30.343Z</td></tr><tr><td>Elevator</td><td><p>Skynet, СПб<br>
+Блочится http3 до инстаграмма и фейсбука, но до гугла пропускает. Похоже стали расшифровывать заголовки.<br>
+Причем по http2 пропускает тоже. К слову у skynet нет dpi, блок идет на транзитном провайдере, скорее всего МТС</p>
+<p>http3 до инсты</p>
+<pre><code class="lang-auto">./curl -4Iv -m 5 --http3 https://instagram.com
+*   Trying 31.13.72.174:443...
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* Connect socket 5 over QUIC to 31.13.72.174:443
+* Sent QUIC client Initial, ALPN: h3,h3-29,h3-28,h3-27
+* After 2493ms connect time, move on!
+* connect to 31.13.72.174 port 443 failed: No error
+* Failed to connect to instagram.com port 443 after 2507 ms: Couldn't connect to server
+* Closing connection 0
+curl: (28) Failed to connect to instagram.com port 443 after 2507 ms: Couldn't connect to server
+</code></pre>
+<p>http3 до инсты через vpn</p>
+<pre><code class="lang-auto">./curl -4Iv -m 5 --http3 https://instagram.com
+*   Trying 31.13.72.174:443...
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* Connect socket 5 over QUIC to 31.13.72.174:443
+* Sent QUIC client Initial, ALPN: h3,h3-29,h3-28,h3-27
+*  subjectAltName: host "instagram.com" matched cert's "instagram.com"
+* Verified certificate just fine
+* Connected to instagram.com () port 443 (#0)
+* h2h3 [:method: HEAD]
+* h2h3 [:path: /]
+* h2h3 [:scheme: https]
+* h2h3 [:authority: instagram.com]
+* h2h3 [user-agent: curl/7.83.0-DEV]
+* h2h3 [accept: */*]
+* Using HTTP/3 Stream ID: 0 (easy handle 0x560fda7c27d0)
+&gt; HEAD / HTTP/3
+&gt; Host: instagram.com
+&gt; user-agent: curl/7.83.0-DEV
+&gt; accept: */*
+&gt;
+&lt; HTTP/3 405
+HTTP/3 405
+</code></pre>
+<p>http2 до инсты</p>
+<pre><code class="lang-auto">./curl -4Iv -m 5 --http2 https://instagram.com
+*   Trying 31.13.72.174:443...
+* Connected to instagram.com (31.13.72.174) port 443 (#0)
+* ALPN: offers http/1.1
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* TLSv1.2 (OUT), TLS handshake, Client hello (1):
+* TLSv1.2 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_128_GCM_SHA256
+* ALPN: server accepted http/1.1
+</code></pre>
+<p>http3 до гугла</p>
+<pre><code class="lang-auto">./curl -4Iv -m 5 --http3 https://google.com
+*   Trying 64.233.162.100:443...
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* Connect socket 5 over QUIC to 64.233.162.100:443
+* Sent QUIC client Initial, ALPN: h3,h3-29,h3-28,h3-27
+*  subjectAltName: host "google.com" matched cert's "google.com"
+* Verified certificate just fine
+* Connected to google.com () port 443 (#0)
+* h2h3 [:method: HEAD]
+* h2h3 [:path: /]
+* h2h3 [:scheme: https]
+* h2h3 [:authority: google.com]
+* h2h3 [user-agent: curl/7.83.0-DEV]
+* h2h3 [accept: */*]
+* Using HTTP/3 Stream ID: 0 (easy handle 0x55ae3ae897d0)
+&gt; HEAD / HTTP/3
+&gt; Host: google.com
+&gt; user-agent: curl/7.83.0-DEV
+&gt; accept: */*
+&gt;
+&lt; HTTP/3 301
+HTTP/3 301
+</code></pre></td><td>2022-04-15T11:29:43.931Z</td></tr><tr><td>bolvan</td><td><p>Они писали на форуме, что на разных тарифах разные фильтры стоят. На lite “более сильный DPI”<br>
+А может быть от адреса подключения зависит<br>
+У меня тариф “Земля”. Все нормально и по v4, и по v6</p></td><td>2022-04-15T12:16:09.227Z</td></tr><tr><td>ValdikSS</td><td><p>Разработчики СКАТ DPI (VAS Experts) выпустили статью о работе с QUIC в своём блоге.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://vasexperts.ru/blog/skat/ot-tcp-k-quic/">
+  <header class="source">
+      <img src="ограничение-http3-quic/c087f2f4870cb73d4d6a8659d0191aeef87acce0.png" class="site-icon" data-dominant-color="0075FF" width="32" height="32">
+
+      <a href="https://vasexperts.ru/blog/skat/ot-tcp-k-quic/" target="_blank" rel="noopener">vasexperts.ru</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:600/372;"><img src="ограничение-http3-quic/26abaafbff9321f10210f21614d0c4b4cb8cdbce_2_690x428.jpeg" class="thumbnail" data-dominant-color="301E19" width="690" height="428"></div>
+
+<h3><a href="https://vasexperts.ru/blog/skat/ot-tcp-k-quic/" target="_blank" rel="noopener">Переход от TCP к QUIC и работа с сигнатурами — блог VAS Experts</a></h3>
+
+  <p>В процессе стандартизации IEFT QUIC разделился на транспортный и HTTP протоколы. С помощью транспортного передаются HTTP данные и другие</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<div class="youtube-onebox lazy-video-container" data-video-id="aVsUsOcUhaA" data-video-title="11 версия СКАТ DPI: обзор и обновленный GUI" data-video-start-time="389s" data-provider-name="youtube">
+  <a href="https://www.youtube.com/watch?v=aVsUsOcUhaA&amp;t=389s" target="_blank" class="video-thumbnail" rel="noopener">
+    <img class="youtube-thumbnail" src="ограничение-http3-quic/ce592639e2864b6f51844dbc278cc4a2c754202d.jpeg" title="11 версия СКАТ DPI: обзор и обновленный GUI" data-dominant-color="232D40" width="690" height="388">
+  </a>
+</div>
+</td><td>2022-04-18T14:09:28.354Z</td></tr><tr><td>0ka(0ka)</td><td><p>На мобильном мегафоне возможно тоже такое есть: пришлось сменить симку в модеме на сим с другим тарифом, и прошлые настройки zapret перестали работать</p></td><td>2022-04-19T09:38:29.882Z</td></tr><tr><td>tango</td><td><p>Kathrin Elmenhorst, an author of <a href="https://ntc.party/t/paper-summary-web-censorship-measurements-of-http-3-over-quic-imc-2021/2353">“Web Censorship Measurements of HTTP/3 over QUIC”</a>, has <a href="https://github.com/kelmenhorst/quic-censorship">a repository</a> with further tests of QUIC blocking, derived from OONI measurements. One thread of investigation is about Russia, and it has some interesting observations.</p>
+<aside class="onebox githubissue" data-onebox-src="https://github.com/kelmenhorst/quic-censorship/issues/4">
+  <header class="source">
+
+      <a href="https://github.com/kelmenhorst/quic-censorship/issues/4" target="_blank" rel="noopener">github.com/kelmenhorst/quic-censorship</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row">
+  <div class="github-icon-container" title="Issue" data-github-private-repo="false">
+	  <svg width="60" height="60" class="github-icon" viewBox="0 0 14 16" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+  </div>
+
+  <div class="github-info-container">
+    <h4>
+      <a href="https://github.com/kelmenhorst/quic-censorship/issues/4" target="_blank" rel="noopener">Broad blocking of HTTP/3 traffic in Russia (AS31213, AS12389)</a>
+    </h4>
+
+    <div class="github-info">
+      <div class="date">
+        opened <span class="discourse-local-date" data-format="ll" data-date="2022-03-29" data-time="12:00:42" data-timezone="UTC">12:00PM - 29 Mar 22 UTC</span>
+      </div>
+
+
+      <div class="user">
+        <a href="https://github.com/kelmenhorst" target="_blank" rel="noopener">
+          <img alt="kelmenhorst" src="ограничение-http3-quic/ef5edff93de274aaf18f58490f72a55f9d884874.png" class="onebox-avatar-inline" width="20" height="20" data-dominant-color="DDE5B6">
+          kelmenhorst
+        </a>
+      </div>
+    </div>
+
+    <div class="labels">
+    </div>
+  </div>
+</div>
+
+  <div class="github-row">
+    <p class="github-body-container">Reports suggest that Russia started to block HTTP/3 traffic nationwide on the 4t<span class="show-more-container"><a href="" rel="noopener" class="show-more">…</a></span><span class="excerpt hidden">h of March 2022. With the increasing restrictions of media since the beginning of the invasion of Ukraine, [internet censorship in Russia is rapidly changing and getting more restrictive](https://ooni.org/post/2022-russia-blocks-amid-ru-ua-conflict/). In this context, people reported that HTTP/3 doesn't work anymore.
+* https://ntc.party/t/http-3-quic/1823/
+* https://github.com/net4people/bbs/issues/108
+
+We were able to run 2 rounds of HTTP/3 measurements in a mobile (PJSC MegaFon Yota, AS31213), and a landline network (PJSC Rostelecom, AS12389) in Russia, on March 27 and 31. The test list contained 11 websites, i.e. 11 HTTPS endpoints and 11 HTTP/3 endpoints were measured.
+
+____
+| abbreviation | failure type |
+|:------|:-------|
+| QUIC-hs-to   | QUIC handshake timeout                |
+| conn-reset   | connection reset: TCP RST terminated connection during TLS handshake |
+_____
+
+
+## Yota, AS31213
+&amp;nbsp; &amp;nbsp; &amp;nbsp;  &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; **HTTPS** &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; **HTTP/3**
+![tcp_quic_AS31213_sankey pdf](https://user-images.githubusercontent.com/45046038/160615226-c2e9968b-f721-4863-877a-dfbbff3c6943.png)
+**Figure 1:** Failure rates of hosts tried over HTTPS vs. HTTP/3. AS31213.
+
+| &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;_experiment&lt;br/&gt; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;destination IP&lt;br/&gt; &amp;nbsp;  &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;SNI&lt;br/&gt; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;QUIC version_ | HTTPS&lt;br/&gt;target&lt;br/&gt;target&lt;br/&gt;- | h3 urlgetter&lt;br/&gt;target&lt;br/&gt;target&lt;br/&gt;1 |  h3 urlgetter&lt;br/&gt;target&lt;br/&gt;`vk.com`&lt;br/&gt;1 | h3 urlgetter&lt;br/&gt;`vk.com`&lt;br/&gt;target&lt;br/&gt;1  | quicping&lt;br/&gt;target IP&lt;br/&gt;-&lt;br/&gt;[0xbabababa](https://www.rfc-editor.org/rfc/rfc9000.html#versions) |
+|:----|:----|:---|:---|:---|:---|
+| quic.nginx.org, 35.214.218.230  |  ✔️| ❌  |   ❌ |  ✔️|  ✔️|
+| cloudflare-quic.com, 172.67.9.235 |  ✔️ | ❌ |   ❌ |  ✔️ |  ✔️|
+| cloudflare-quic.com,  104.22.9.38 | ✔️  |❌ |   ❌ |  ✔️|  ✔️|
+| example.com, 93.184.216.34 _(n = 1)_ | ✔️ |❌ |   ❌ |  ✔️|  ✔️|
+| vk.com, 93.186.225.208 | ✔️ | ✔️| - | - |  ✔️ |
+| vk.com, 87.240.139.194 | ✔️ | ✔️ | - | - |  ✔️ |
+| navalny.com, 188.114.97.7 |❌  |❌ |   ❌  |   ❌ |  ✔️|
+| navalny.com, 188.114.96.7 |❌ | ❌ |   ❌  |   ❌ |  ✔️|
+| ww&lt;span&gt;w.facebook.com&lt;/span&gt;, 157.240.210.35 |❌  |❌ |   ❌  |   ❌ |  ✔️|
+| censor.net, 104.22.72.106|❌| ❌ |   ❌  |   ❌ |  ✔️|
+| censor.net, 172.67.42.195|❌| ❌ |   ❌  |   ❌ |  ✔️|
+| ww&lt;span&gt;w.instagram.com&lt;/span&gt;, 157.240.210.174 |❌ |❌ |    ❌  |   ❌ |  ✔️|
+
+**Table 1** Summary of the results.
+
+### HTTP/3 overblocking
+The second column of Table 1 shows that all tested websites, except for `vk.com` were blocked over HTTP/3. The first column shows that only 4 websites (6 endpoints) were blocked over HTTPS. This observation is consistent with reports saying that [all foreign websites would be blocked over HTTP/3](https://ntc.party/t/http-3-quic/1823/).
+
+### Immediate timeouts
+HTTP/3 blocking appears as timeouts during the QUIC handshake. The timeout always occurs during the very first roundtrip, i.e. the client never receives any response from the server and doesn't read a single byte. 
+
+### quicping works
+[quicping](https://github.com/ooni/spec/blob/master/nettests/ts-031-quicping.md) works in all measured cases which means that the blocking method is more fine grained than just blocking UDP endpoints (see the fifth column). Explanation: **If** the UDP endpoint was blocked, quicping (which only elicits one roundtrip) should also be affected by the blocking because the blocking of HTTP/3 traffic happens during the very first roundtrip.
+
+So why is quicping not impaired? Most likely, quicping packets pass the filter because they do not have the most commonly used QUIC version (`1`). Instead, they carry special version strings which are [reserved for version negotiation](https://www.rfc-editor.org/rfc/rfc9000.html#versions). Supporting this consideration, users in Russia have experienced that HTTP/3 works in some networks when they [disabled QUIC version 1 and used QUIC version draft-29 instead](https://ntc.party/t/http-3-quic/1823/12). 
+
+### SNI blocking (?)
+We measured all failed endpoints again, this time with the SNI set to `vk.com` (see the third column). Blocked endpoints remain blocked when using an allowed SNI.  In contrast, users from other networks in Russia have [reported](https://ntc.party/t/http-3-quic/1823/) that blocked hosts become available when using a fake SNI which shows that HTTP/3 blocking varies between ISPs.
+
+Lastly, we used the domain names of the blocked HTTP/3 hosts as SNI in requests to `vk.com` (see the fourth column). Unexpectedly, `vk.com` was suddenly unavailable when using one of the following blocked domain names as SNI: `navalny.com, www.instagram.com, censor.net, www.facebook.com` - which is precisely the set of hosts that are also blocked over HTTPS. This indicates that certain SNIs trigger blocking and that the censor parses the Initial QUIC packet in order to inspect the SNI. However, since using a fake SNI is not enough to evade blocking in Yota's network, there is probably an additional layer of censorship which drops packets to unwanted destination endpoints regardless of the SNI.
+
+### QUIC version filter as an indication for DPI
+QUIC uses Initial encryption which means that Initial packets in the handshake are already encrypted. While this is better than no encryption, it is only a weak protection because the keys can be derived from the connection IDs and the used QUIC version, so an observer of the connection can decrypt Initial packets. 
+
+It's possible that censors in Russia use a shortcut to decrypt and parse QUIC Initials by assuming that most traffic is using QUIC version 1. When they apply the decryption algorithm to a QUIC packet of version draft-29 rather than version 1, the decryption fails. This would explain the observation that `draft-29` packets do not trigger the filter and that quicping works.
+
+### Blocking scenario
+A possible blocking scenario which would explain the above described observations is the following:
+- The ISP manages a blacklist of SNIs. Given the measurements, we assume that at least `navalny.com, www.instagram.com, censor.net, www.facebook.com` are on the blacklist.
+- All HTTP/3 requests with version 1 are null routed. Either, there is a whitelist to this rule, excluding the IP endpoints of at least `vk.com` from the blocking, or, this null routing is only applied to international network traffic.
+-  There is a second filter inspecting the SNI which seems to be applied to all HTTP/3 traffic (national and international): If the SNI of a given packet is on the blacklist, it cannot pass the filter.
+
+## Rostelecom, AS12389
+&amp;nbsp; &amp;nbsp; &amp;nbsp;  &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; **HTTPS** &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; **HTTP/3**
+![tcp_quic_AS12389_sankey pdf](https://user-images.githubusercontent.com/45046038/160615378-444c7a4d-6a3a-482f-b65a-3defd7220b3e.png)
+**Figure 2:** Failure rates of hosts tried over HTTPS vs. HTTP/3. AS12389.</span></p>
+  </div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>In particular, on Yota (AS 31213), there appears to be a two-layer filter. One layer blocks <em>all</em> QUIC version 1, except to specific servers; and a second layer blocks QUIC version 1 with with specific SNI values, no matter the server. This is interesting because the second layer means they are <a href="https://github.com/kelmenhorst/quic-censorship/blob/4de850f9774d7f6bc6199521e0ee2fdb23cef141/document.md#12-quic-sni-blocking-tls-censorship">decrypting</a> the <a href="https://datatracker.ietf.org/doc/html/rfc9001#section-5.2">initial packet protection</a> on the packet containing the Client Hello.</p>
+<p>The evidence for this comes from observing what happens when accessing different servers using different SNI values.</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>condition</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Access foreign server with correct SNI</td>
+<td>blocked</td>
+</tr>
+<tr>
+<td>Access foreign server with <a href="http://vk.com">vk.com</a> SNI</td>
+<td>blocked</td>
+</tr>
+<tr>
+<td>Access <a href="http://vk.com">vk.com</a> server with <a href="http://vk.com">vk.com</a> SNI</td>
+<td>works</td>
+</tr>
+<tr>
+<td>Access <a href="http://vk.com">vk.com</a> server with <a href="http://www.facebook.com">www.facebook.com</a> SNI</td>
+<td>blocked</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2022-05-02T16:52:04.005Z</td></tr><tr><td>anonymous28(anonymous28)</td><td><aside class="quote no-group" data-username="bolvan" data-post="17" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>На моем провайдере с ТСПУ начались непонятные и хаотичные отрубы QUIC сессий</p>
+</blockquote>
+</aside>
+<p>Всё ещё наблюдается?<br>
+Сколько пакетов пропускает до блокировки (на картинке сквозная нумерация, число неочевидно)? Сохранились дампы?</p></td><td>2022-05-20T08:26:32.210Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="anonymous28" data-post="30" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/e47774/48.png" class="avatar"> anonymous28:</div>
+<blockquote>
+<p>Всё ещё наблюдается?</p>
+</blockquote>
+</aside>
+<p>Наблюдается. Там хаотичное поведение. 1-2 сессии могут пройти, 3 - застрять<br>
+сколько пакетов я не считал<br>
+2 провайдера с ТСПУ дают одинаковое поведение</p></td><td>2022-05-20T09:10:48.990Z</td></tr><tr><td>anonymous28(anonymous28)</td><td><p>Система может расшифровать QUIC_V1 и декодировать SNI.</p>
+<p>Если ограничиться <a href="https://datatracker.ietf.org/doc/html/rfc9001#appendix-A.2" rel="noopener nofollow ugc">тестовым набором</a> или соблюдать тестовые размеры, тогда всё работает: SNI декодируется и принимается решение.</p>
+<p>Система не может или не хочет достать SNI из пакета, который генерирует Firefox. Возможно дело в размерах (например для структур далее по стеку). Недоступный SNI триггерит блокировку.</p></td><td>2022-05-21T07:11:53.451Z</td></tr><tr><td>ValdikSS</td><td><p>Приведите пример пакетов, которые фильтруются и не фильтруются. Выложите pcap’ы или содержимое пакетов.</p></td><td>2022-05-21T09:07:15.428Z</td></tr><tr><td>anonymous28(anonymous28)</td><td><p><a class="attachment" href="ограничение-http3-quic/26gRlDm5wCOG3aLhUlCE9eEcnzx.bin">blocked_firefox.bin</a> (1.3 KB)<br>
+<a class="attachment" href="ограничение-http3-quic/8DX2efzUMt3VPga1ZvWALtYHFrh.bin">works_quictls.bin</a> (1.2 KB)</p></td><td>2022-05-21T09:51:28.815Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="anonymous28" data-post="32" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/e47774/48.png" class="avatar"> anonymous28:</div>
+<blockquote>
+<p>Система может расшифровать QUIC_V1 и декодировать SNI.</p>
+</blockquote>
+</aside>
+<p>Еще раз проверил на своем провайдере с ТСПУ<br>
+Ничего не поменялось. Нет никаких признаков в пользу предположения о декодировании SNI<br>
+Действительно, blocked_firefox.bin не проходит, а works_quictls.bin проходит<br>
+Оба они от <a href="http://example.com">example.com</a>. Подозреваю, там стоит фильтр по некоторым полям или длинам без декодирования, который почему-то не срабатывает в одном случае<br>
+Пробовал curl с quiche на свой vps с разными SNI, в том числе <a href="http://vk.com">vk.com</a>. Ничего не проходит<br>
+На белосписочные IP от vk проходит все</p>
+<pre><code class="lang-auto">./curl -4 --connect-to ::vk.com:443 --http3 https://example.com
+curl: (55) SSL: no alternative certificate subject name matches target host name 'example.com'
+</code></pre>
+<p>При пробивании нулевым фейком или пакетом works_quictls.bin идентичное поведение. Хаотичный вис при загрузке сайтов</p></td><td>2022-05-21T16:22:34.618Z</td></tr><tr><td>anonymous28(anonymous28)</td><td><aside class="quote no-group" data-username="bolvan" data-post="36" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Нет никаких признаков в пользу предположения о декодировании SNI</p>
+</blockquote>
+</aside>
+<p><a class="attachment" href="ограничение-http3-quic/uorsZvOe0fiH3DDwyFocsTGpSro.bin">facebook_quictls.bin</a> (1.2 KB)<br>
+Этот проходит?</p></td><td>2022-05-21T16:46:49.851Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="bolvan" data-post="36" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Подозреваю, там стоит фильтр по некоторым полям или длинам без декодирования, который почему-то не срабатывает в одном случае</p>
+</blockquote>
+</aside>
+<p>Есть, как минимум, проверка целостности: если изменить хоть один байт в works, то пакет не доходит.<br>
+Планирую провести детальные исследования, но если кто-то готов перехватить эстафету, буду только рад.</p></td><td>2022-05-21T17:25:18.326Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="anonymous28" data-post="37" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/e47774/48.png" class="avatar"> anonymous28:</div>
+<blockquote>
+<p><a class="attachment" href="ограничение-http3-quic/uorsZvOe0fiH3DDwyFocsTGpSro.bin">facebook_quictls.bin</a> (1.2 KB)<br>
+Этот проходит?</p>
+</blockquote>
+</aside>
+<p>Нет</p>
+<aside class="quote no-group" data-username="ValdikSS" data-post="38" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Есть, как минимум, проверка целостности: если изменить хоть один байт в works, то пакет не доходит.</p>
+</blockquote>
+</aside>
+<p>Значит, все же расшифровывают. В QUIC initial нет никаких контрольных сумм, там используется GCM для аутентификации. Это AEAD шифр. Authenticated Encryption with Associated Data.<br>
+Шифрование и аутентификация завязаны в том числе и на нешифрованный хедер, чтобы любое изменение порождало неверный atag. И только полная дешифровка с проверкой atag позволяет отсечь коррупцию в любом байте пакета.<br>
+Однако, в остальных предложенных вариантах с этим тоже все в порядке.<br>
+Значит они или ориентируются на расшифрованный блок (почему не секут тогда SNI ?), или расшифровывают исключительно для проверки целки, а блочат по другим признакам типа длины<br>
+Или может быть в некоторых случаях они могут просечь SNI и блочат по нему, а в других случаях не могут (несовершенство парсера дешифрованного блока ?) и блочат, если IP не в white list<br>
+nfqws может распарсить все предложенные бинарики</p></td><td>2022-05-21T18:52:23.280Z</td></tr><tr><td>anonymous28(anonymous28)</td><td><aside class="quote no-group" data-username="bolvan" data-post="36" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Хаотичный вис при загрузке сайтов</p>
+</blockquote>
+</aside>
+<p>Воспроизводится для гугла при запросе из curl+quictls, не воспроизводится для запросов из Firefox. (Внешнее различие в размерах пакетов, у Firefox они больше, а гугл-сервер в выборе размера пакетов ориентируется, в том числе, на размер QUIC initial клиента.)</p>
+<p>До принятия решения о блокировке проходит в среднем 15 входящих пакетов. (Возможно применяется скользящее окно, поэтому не следует ориентироваться на число пакетов с начала сеанса). Выглядит как статистический анализ? Ложно триггерит правило блокировки psiphon или иного протокола (не связанного с QUIC)?</p>
+<p>Не понятно столь широкое применение правила, возможно есть ограничение на адреса/порты/паттерны_inside.</p>
+<aside class="quote no-group" data-username="bolvan" data-post="39" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>блочат по другим признакам</p>
+</blockquote>
+</aside>
+<p>This.</p>
+<p>Возможно SNI успешно извлекается везде, а за блокировку по неизвестным паттернам из расшифрованного QUIC initial отвечает другое правило.</p>
+<p>Можно сравнить пакеты от Firefox, quictls и quiche.<br>
+В коллекцию следует добавить legal_sni_quiche.bin</p></td><td>2022-05-22T05:37:43.566Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="anonymous28" data-post="40" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/e47774/48.png" class="avatar"> anonymous28:</div>
+<blockquote>
+<p>До принятия решения о блокировке проходит в среднем 15 входящих пакетов. (Возможно применяется скользящее окно, поэтому не следует ориентироваться на число пакетов с начала сеанса)</p>
+</blockquote>
+</aside>
+<p>Возможно используется отложенный процессинг. Расшифровка - задача потенциально тяжелая<br>
+Видим initial, временно разрешаем, отдаем в отдельный поток, когда поток возвращает результат - принимаем решение.<br>
+Отдельный поток может ориентироваться на текущую загрузку DPI и отказываться от тяжелых операций при необходимости</p></td><td>2022-05-22T05:53:30.970Z</td></tr><tr><td>anonymous28(anonymous28)</td><td><p>Заполнение нулями (наружное)  QUIC initial триггерит блокировку. В Firefox такое применяется. В quictls внутренний с финальными 1200 байтами. В quiche – у меня нет данных (не собирается ржавчина).</p></td><td>2022-05-22T08:20:30.155Z</td></tr><tr><td>anonymous28(anonymous28)</td><td><p>Хаотичные зависания могут быть вызваны большими (1400+) QUIC пакетами в середине сеанса, которые триггерят блокировку. В моем случае это был механизм pmtud на QUIC клиенте, после отключения зависаний нет. К проблемам с mtu это не имеет отношения, блокировка по тестируемым парам адреса:порты наблюдается на хопе с ТСПУ.</p>
+<p>У Firefox нет механизма pmtud, но он может быть на сервере.</p>
+<p>UPD:<br>
+Большой размер пакета похоже так не важен, дело в другом.</p>
+<p>Есть <a href="https://paste.debian.net/plainh/e04cbb84" rel="noopener nofollow ugc">скрипт</a>, который возможно воспроизводит блокировку.</p>
+<p>Активация блокировки:<br>
+Запрос, ответ, запрос.<br>
+Нет ответа – нет блокировки.<br>
+Размер запросов и ответа учитывается, но точно неизвестно.</p></td><td>2022-05-22T18:07:56.741Z</td></tr><tr><td>anonymous29(anonymous29)</td><td><p>UPD: Код бредовый. Удалил. Вызывает блокировку потому что нарушает RFC.</p></td><td>2022-05-24T08:24:11.746Z</td></tr><tr><td>anonymous30(anonymous30)</td><td><aside class="quote no-group" data-username="anonymous28" data-post="42" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/e47774/48.png" class="avatar"> anonymous28:</div>
+<blockquote>
+<p>Заполнение нулями (наружное) QUIC initial триггерит блокировку.</p>
+</blockquote>
+</aside>
+<p>Если удалить заполняющие нули из пакета от Firefox – блокировки нет, и есть реакция на SNI.<br>
+Это новое поведение или так было?</p></td><td>2022-05-25T18:17:55.235Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote quote-modified" data-post="10" data-topic="1823">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/http-3-quic/1823/10">Ограничение HTTP/3 (QUIC)</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Фильтр работает только для пакетов с UDP-нагрузкой больше 1001 байтов (включительно). 
+Фильтр ищет “00 00 00 01” (hex, QUIC version) в UDP-нагрузке, начиная со второго байта. 
+Применяется только к UDP-пакетам на порт назначения 443. Исходящий порт значения не имеет (может быть также 443, фильтр не применится). 
+Псевдо-yara-правило фильтра: 
+rule QUIC_block_Russia_TSPU_04_mar_2022
+{
+    condition:
+        filesize &gt; 1000 and dport == 443 and int32be(1) == 0x00000001
+}
+
+Минимальный пакет, на котор…
+  </blockquote>
+</aside>
+
+<aside class="quote no-group" data-username="ValdikSS" data-post="10" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Фильтр работает только для пакетов с UDP-нагрузкой больше 1001 байтов (включительно).</p>
+</blockquote>
+</aside></td><td>2022-05-26T06:53:51.772Z</td></tr><tr><td>anonymous30(anonymous30)</td><td><p>Под это правило могли попадать разные сценарии:</p>
+<ol>
+<li>Пробует расшифровать только если размер больше X, неудача=блокировка.</li>
+<li>Пробует расшифровать всегда, неудача=блокировка если размер больше X.</li>
+</ol></td><td>2022-05-26T07:19:45.696Z</td></tr><tr><td>serfreeman1337</td><td><p>Действительно, зависаний сессии больше нет.<br>
+Сессия не зависает, если первым отправлять пакет с длиной 601 байт и “1” во 2-ом бите.</p>
+<p><a class="attachment" href="ограничение-http3-quic/sG1hTyK1gUQnvfe89OzzxYxwSmL">quicfix.bin</a> (601 Bytes)</p></td><td>2022-05-29T19:31:01.346Z</td></tr><tr><td>bolvan</td><td><p>У меня работает такой обход</p>
+<p>первым фейком, состоящим из нулей, пробиваем начальную проверку<br>
+далее при первом встреченном пакете с длиной &gt;=600 и short header шлем произвольный фейк пакет тоже с short header , но другим connection id.  далее можно ничего не слать, сессия похоже окончательно уходит в разрешенные</p>
+<p>для такой хитрости сделал custom скрипт для zapret <strong>custom-nfqws-quic4all-tspu</strong></p>
+<p>Вариант без скриптов :</p>
+<pre><code class="lang-auto">/opt/zapret/nfq/nfqws --qnum 210 --dpi-desync=fake --debug
+/opt/zapret/nfq/nfqws --qnum 211 --dpi-desync=fake --dpi-desync-any-protocol --debug --dpi-desync-fake-unknown-udp=/opt/zapret/files/fake/quic_short_header.bin --dpi-desync-cutoff=d2
+iptables -t mangle -I POSTROUTING -p udp --dport 443 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:1 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 210 --queue-bypass
+iptables -t mangle -I POSTROUTING -p udp --dport 443 -m length --length 600:1500 -m u32 --u32 "0&gt;&gt;22&amp;0x3C@8&gt;&gt;24&amp;0xC0=0x40" -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 211 --queue-bypass
+</code></pre>
+<p>Спасибо <a href="https://ntc.party/u/anonymous32">anonymous32</a> за идею</p></td><td>2022-05-29T20:19:45.239Z</td></tr><tr><td>anonymous32(anonymous32)</td><td><aside class="quote no-group" data-username="bolvan" data-post="52" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>с длиной &gt;=600</p>
+</blockquote>
+</aside>
+<p>На == 600 ТСПУ не переключает фазу проверки и ждет дальше.</p></td><td>2022-05-30T05:50:51.601Z</td></tr><tr><td>bolvan</td><td><p>Сперва у меня не получилось пробить висы лишь первым фейком.<br>
+Но я ошибся, использовал не тот параметр nfqws.<br>
+Все нормально. Достаточно вместо нулей послать первым фейком достаточно длинный пакет с short header. Нет нужды в дополнительных сложностях</p>
+<p>Как-то так</p>
+<pre><code class="lang-auto">nfqws --qnum=210 --user=daemon --dpi-desync-fwmark=0x40000000 --dpi-desync=fake --dpi-desync-fake-quic=/opt/zapret/files/fake/quic_short_header.bin
+iptables -t mangle -I POSTROUTING -p udp --dport 443 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:3 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 210 --queue-bypass
+</code></pre>
+<p>В последней версии nfqws сделал по умолчанию quic fake , состоящий из 620 байт со всеми нулями, кроме первого байта - 0x40. Так что файл с содержимым пакета не нужен</p></td><td>2022-05-30T06:37:28.084Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="anonymous28" data-post="40" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/e47774/48.png" class="avatar"> anonymous28:</div>
+<blockquote>
+<p>Возможно SNI успешно извлекается везде, а за блокировку по неизвестным паттернам из расшифрованного QUIC initial отвечает другое правило.</p>
+</blockquote>
+</aside>
+<p>Kathrin Elmenshort has done some tests and on Yota, at least, there seems to be a 2-layer filter.</p>
+<p><a href="https://github.com/net4people/bbs/issues/108#issuecomment-1115131376">https://github.com/net4people/bbs/issues/108#issuecomment-1115131376</a></p>
+<blockquote>
+<p>One layer blocks <em>all</em> QUIC version 1, except to specific servers; and a second layer blocks QUIC version 1 with with specific SNI values, no matter the server.</p>
+<p>The evidence for this comes from observing what happens when accessing different servers using different SNI values.</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>condition</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Access foreign server with correct SNI</td>
+<td>blocked</td>
+</tr>
+<tr>
+<td>Access foreign server with <a href="http://vk.com">vk.com</a> SNI</td>
+<td>blocked</td>
+</tr>
+<tr>
+<td>Access <a href="http://vk.com">vk.com</a> server with <a href="http://vk.com">vk.com</a> SNI</td>
+<td>works</td>
+</tr>
+<tr>
+<td>Access <a href="http://vk.com">vk.com</a> server with <a href="http://www.facebook.com">www.facebook.com</a> SNI</td>
+<td>blocked</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote></td><td>2022-06-07T19:02:34.267Z</td></tr><tr><td>DarkEmpire</td><td><p>и что как щас жить с этим, есть ли универсальное решение?<br>
+а то в браузерах то я отключил QUIC и стало норм, но не везде выходит его отключить, например в приложении спотифая никак, либо на телефоне в приложениях гугла</p>
+<p>юзаю антизапрет на роутере через openvpn</p></td><td>2022-06-07T23:01:29.741Z</td></tr><tr><td>Supp</td><td><p>как это на nft в openwrt будет выглядеть?</p></td><td>2022-06-08T17:44:57.346Z</td></tr><tr><td>bolvan</td><td><p>см тему whats new в разделе zapret. если руками то есть docs/nftables.txt</p></td><td>2022-06-08T18:17:49.435Z</td></tr><tr><td>bolvan</td><td><p>Сегодня на домру Ростов обнаружилась такая ситуевина.</p>
+<p><a href="http://google.com">google.com</a>, <a href="http://youtube.com">youtube.com</a> - quic нормально работает с curl и PC броузеров firefox, chromium (версия для Linux)<br>
+<a href="http://facebook.com">facebook.com</a> - после пробоя блокировки TLS все то же самое, кроме chromium. С ним первый же quic initial блокируется. При попытке пробоя nfqws через fake ответ от сервера приходит, идет новый пакет от клиента, и дальше вис.</p>
+<p>сам не проверял, но владелец подключения утверждает, что у него проблемы с quic с android/mac с броузера chrome  на <a href="http://google.com">google.com</a>.  И для лечения он использовал nfqws, но неправильно, из-за чего он работал исключительно на блокировку QUIC. Без QUIC броузер довольно быстро выправлялся. А с ним, выходит, что застревал где-то посередине соединения. И на это жалуется не только он.</p>
+<p>ТСПУ там тоже наблюдается. Одна из моих тор нод заблокирована. Но блокировка QUIC отличается от обычной для, скажем, tiera spb или мегафон спб.</p>
+<p>Пробить facebook с PC хрома удалось через --dpi-desync=fake --dpi-desync-repeats=5.<br>
+То ли лимит на количество анализируемых пакетов у DPI, то ли размер буфера ограничен, но если за первые 5 пакетов бросать туда не QUIC, он отстает</p></td><td>2022-06-21T11:11:39.406Z</td></tr><tr><td>ValdikSS</td><td><p>Похоже, блокировка QUIC связана с попыткой блокировки программы Psiphon — она использует QUIC с разными версиями протокола и разными фингерпринтами, как один из методов обхода фильтрации.</p>
+<p>Только вот Psiphon продолжает успешно подключаться через QUIC, хоть и не моментально, а браузеры — нет <img src="https://ntc.party/images/emoji/twitter/smiley.png?v=12" title=":smiley:" class="emoji" alt=":smiley:" loading="lazy" width="20" height="20"></p></td><td>2022-07-14T10:18:39.443Z</td></tr><tr><td>bolvan</td><td><p>На моем провайдере tiera появился дополнительный DPI от gblnet<br>
+Обычный блокировщик и ТСПУ находятся на 5-м хопе.<br>
+gblnet-овский на 11м.</p>
+<pre><code class="lang-auto">- checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=3
+[attempt 1] suspicious redirection 307 to : https://tiera.ru/blocked.php
+[attempt 2] suspicious redirection 307 to : https://tiera.ru/blocked.php
+[attempt 3] suspicious redirection 307 to : https://tiera.ru/blocked.php
+UNAVAILABLE
+- checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=4
+[attempt 1] suspicious redirection 307 to : https://tiera.ru/blocked.php
+[attempt 2] suspicious redirection 307 to : https://tiera.ru/blocked.php
+[attempt 3] suspicious redirection 307 to : https://tiera.ru/blocked.php
+UNAVAILABLE
+- checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=5
+[attempt 1] suspicious redirection 302 to : https://gblnet.net/blocked.php
+[attempt 2] suspicious redirection 302 to : https://gblnet.net/blocked.php
+[attempt 3] suspicious redirection 302 to : https://gblnet.net/blocked.php
+UNAVAILABLE
+- checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=6
+[attempt 1] suspicious redirection 302 to : https://gblnet.net/blocked.php
+[attempt 2] suspicious redirection 302 to : https://gblnet.net/blocked.php
+[attempt 3] suspicious redirection 302 to : https://gblnet.net/blocked.php
+UNAVAILABLE
+..........
+- checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=11
+[attempt 1] AVAILABLE
+[attempt 2] AVAILABLE
+[attempt 3] AVAILABLE
+!!!!! AVAILABLE !!!!!
+</code></pre>
+<p>Что примечательно касаемо QUIC.<br>
+Похоже, что gblnet полностью блокирует QUIC initial пакеты на udp port 443 в stateless режиме вне зависимости от IP назначения.</p>
+<p>Если я отсылаю сначала фейк с short header, потом initial, установив пакету ttl=8, например, то приходит TTL expired in transit. Начиная с 11 хопа не приходит ничего. То есть 5-й хоп пробивается с обычным DPI, но глобал блочит все.</p>
+<p>Проверял на свою VPSку. initial не доходят вообще. если мешать с одним src_port, то short доходят все, initial не доходят</p></td><td>2022-07-26T16:39:50.919Z</td></tr><tr><td>anonymous56(anonymous56)</td><td><aside class="quote no-group" data-username="bolvan" data-post="63" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>gblnet-овский на 11м</p>
+</blockquote>
+</aside>
+<p>Как-то далеко. Есть признаки что это сеть провайдера, а не магистраль?<br>
+Может уровень супербосса блокировок достигли.</p>
+<p>UPD:<br>
+По ссылке на сайте c блокировкой от gblnet картинка и телефон ООО “ЕТЕЛЕКОМ”, который входит вместе с ООО “ГЛОБАЛНЕТ” в холдинг ООО “ЕТ-ГРУПП”. При этом гендир у холдинга и ООО “ТИЕРА ЦЕНТР” один, но тиера не входит в холдинг.<br>
+Спецы вышли из чата, остались 1 гендир и 2 блокировщика.</p></td><td>2022-07-26T17:18:42.767Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="anonymous56" data-post="64" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/f1d935/48.png" class="avatar"> anonymous56:</div>
+<blockquote>
+<p>Как-то далеко. Есть признаки что это сеть провайдера, а не магистраль?</p>
+</blockquote>
+</aside>
+<p>11-й хоп  109.239.134.66</p>
+<p>route:          109.239.134.0/24<br>
+descr:          Butlerova7 P2P Customer Network<br>
+origin:         AS31500<br>
+mnt-by:         MNT-GLOBAL-NET</p>
+<p>и редирект по http идет на сайт магистрала<br>
+получается магистралов подтянули к блокировкам</p></td><td>2022-07-26T17:57:46.062Z</td></tr><tr><td>bolvan</td><td><p>Еще немного подробностей<br>
+Что считается QUIC initial.</p>
+<ol>
+<li>udp_length &gt;=1200</li>
+<li>Старший бит первого байта установлен (long header)</li>
+<li>Байты 1…4  uint32 в network byte order - это версия QUIC. Сечется IETF QUIC и некоторые чуть более старые версии драфта</li>
+</ol>
+<p>Например, такой пакет : 80 00 00 00 01 00 00 … 00 (1200 байт)<br>
+уже не проходит</p>
+<p>У firefox в initial используются лишь несколько сотен байт в начале, остальное - паддинг нолями. Если бы уменьшить размер UDP на передающей стороне , то оно бы прошло<br>
+chromium имеет склонность фрагментировать и раздувать до большого размера нешифрованный блок за счет паддинга и пинга, что приводит к увеличению длины используемого шифрованного блока</p></td><td>2022-07-27T06:57:12.122Z</td></tr><tr><td>anonymous56(anonymous56)</td><td><p>“Классику” тоже дропают?<br>
+<a class="attachment" href="ограничение-http3-quic/3eiSHwWuQueZXP1MmHVh6HcikYu.bin">quic_vk.bin</a> (1.2 KB)</p></td><td>2022-07-27T07:33:14.035Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="anonymous56" data-post="67" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/f1d935/48.png" class="avatar"> anonymous56:</div>
+<blockquote>
+<p>“Классику” тоже дропают?</p>
+</blockquote>
+</aside>
+<p>дропают<br>
+похоже, наши власти обьявили QUIC полную негласную войну<br>
+анализ QUIC сопряжен с алгоритмической и нагрузочной сложностью. проще рубануть.<br>
+любой внутрироссийский сервис будет вынужден отказываться от деплоймента QUIC</p>
+<p>на мегафоне спб смотрел. Опять появились подвисания, непонятно по какому алгоритму. Пробивка short header первым пакетом уже не надежна. Где-то норм, но ютубе скатывается на http2 после небольших тормозов. Полной стателесс блокировки нет</p>
+<p>внедрение блокиратора на магистрале - предполагаю это вынужденная антисанкционная мера в условиях острой нехватки оборудования. не все провайдеры еще с ТСПУ, а где есть, часто бывает лоад балансинг, где не все пути оборудованы этим ДПИ. Пробный шар как прокатит, тестирование на высокой нагрузке, включение щадящих CPU режимов фильтрации (stateless)</p>
+<p>http, кстати, тоже фильтруется stateless. Надо сечь все пакеты внутри keep alive. Обычный режим <a href="http://rdp.ru">rdp.ru</a> предполагает фильтрацию stateful</p></td><td>2022-07-27T07:35:30.193Z</td></tr><tr><td>anonymous57(anonymous57)</td><td><p>Локалхост в надежных руках.</p>
+<p>Меж тем изменения ПО/правил с июня-июля:<br>
+Дефрагментирует фреймы.<br>
+Неудачную расшифровку (в т.ч. проверку размеров) и SNI-less игнорирует.</p></td><td>2022-07-28T19:03:37.277Z</td></tr><tr><td>anonymous109(anonymous109)</td><td><p>По интересному совпадению, rdp научился понимать фрагменты CH сразу после <a href="https://github.com/ntop/nDPI/releases/tag/4.4" rel="noopener nofollow ugc">выпуска nDPI</a> с <a href="https://github.com/ntop/nDPI/issues/1195" rel="noopener nofollow ugc">фиксом</a>.</p>
+<p>У них в планах, нарушить работу всех ваших игрушек, десинхронизирующих nDPI.</p></td><td>2023-03-08T16:54:02.543Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="anonymous109" data-post="70" data-topic="1823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/aca169/48.png" class="avatar"> anonymous109:</div>
+<blockquote>
+<p>У них в планах, нарушить работу всех ваших игрушек, десинхронизирующих nDPI.</p>
+</blockquote>
+</aside>
+<p>Насколько я понял, цель фрагментации CH в chrome - вовсе не обман DPI, а принуждение веб серверов к отказу от предположения, что CH пойдет один блоком. Чтобы они вынуждены были учитывать такой сценарий, а не упрощать себе жизнь, тем самым не полностью поддерживая стандарт.<br>
+Собрать разбросанные фрагменты не настолько алгоритмически сложно и CPU затратно, сколько расшифровать сам пакет. Удивительно, что этого не было сделано сразу.</p></td><td>2023-03-09T19:14:49.609Z</td></tr><tr><td>bolvan</td><td><p>Текущая ситуация  по QUIC примерно такая.<br>
+Опробовано порядка 12 провайдеров в RU из разных городов.<br>
+На большинстве из них QUIC блокируется путем анализа SNI из расшифрованного QUIC initial.<br>
+Если SNI плохой, то блокируется stateful все udp “соединение”.<br>
+Анализируется только udp port 443.</p>
+<p>Поскольку поведение у всех примерно одинаковое, то можно сказать, что блокирует ТСПУ.<br>
+Но тут есть важная оговорка. Модуль парсера кривой.</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/bol-van/bins">
+  <header class="source">
+
+      <a href="https://github.com/bol-van/bins" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="ограничение-http3-quic/6dda3c6dc67e525a5c9c4da4511de54037fb8b19_2_690x344.png" class="thumbnail" data-dominant-color="F6F9F7">
+
+  <h3><a href="https://github.com/bol-van/bins" target="_blank" rel="noopener">GitHub - bol-van/bins: precompiled static binaries for android</a></h3>
+
+    <p><span class="github-repo-description">precompiled static binaries for android</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+тут есть статический curl для x86_64 и arm с поддержкой nghttp3 (curl) и quiche (curlq)<br>
+Если попробовать этими 2 курлами подергать инстаграм, то видно, что curl виснет, а curlq прокатывает.<br>
+Так же firefox после пробивки TCP (чтобы он начал переходить на QUIC) спокойно берет http3, а chrome - только http2.<br>
+Можно проверить, загнав через ncat на свой VPS : блобы из zapret:files/fake. quic_initial_facebook_com.bin не доходит, а quic_initial_facebook_com_quiche.bin доходит.</p>
+<p>То есть вывод, что парсер сечет chrome и nghttp3, но не сечет quiche и firefox.<br>
+Без обхода блокировок по TCP броузеры все равно не пойдут на QUIC, так что разницы практической мало.</p>
+<p>Разблокируется через nfqws --fake.</p>
+<p>Есть и исключение у провайдеров. Tiera, как обычно. Аплинк глобалнет продолжает полностью блокировать QUIC. Больше нет никаких подвисаний сессии. Тупо режут long header в обе стороны.</p></td><td>2023-07-08T10:13:23.505Z</td></tr><tr><td>l8l</td><td><p>Есть ли новости какие? Просто он такой быстрый, вон авито по http3 картинки подгружает, <a href="http://translate.google.ru" rel="noopener nofollow ugc">translate.google.ru</a> тоже отсвечивает соединениями с QUIC…</p></td><td>2024-11-10T13:03:41.759Z</td></tr>
+    </table>
+      </body>
+    </html>

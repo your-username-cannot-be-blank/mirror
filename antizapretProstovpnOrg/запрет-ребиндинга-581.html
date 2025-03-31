@@ -1,0 +1,59 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>запрет-ребиндинга-581</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>vdlftrvuknyrukmztb</td><td><p>dnsmasq, используемый на большинстве роутеров, умеет в защиту от ребиндинга (отбрасывает ответ, если домен резолвится в какой-нибудь адрес из приватных диапазонов)</p>
+<pre><code>  return
+    (((ip_addr &amp; 0xFF000000) == 0x7F000000) &amp;&amp; ban_localhost)  /* 127.0.0.0/8    (loopback) */ ||
+    ((ip_addr &amp; 0xFF000000) == 0x00000000)  /* RFC 5735 section 3. "here" network */ ||
+    ((ip_addr &amp; 0xFF000000) == 0x0A000000)  /* 10.0.0.0/8     (private)  */ ||
+    ((ip_addr &amp; 0xFFF00000) == 0xAC100000)  /* 172.16.0.0/12  (private)  */ ||
+    ((ip_addr &amp; 0xFFFF0000) == 0xC0A80000)  /* 192.168.0.0/16 (private)  */ ||
+    ((ip_addr &amp; 0xFFFF0000) == 0xA9FE0000)  /* 169.254.0.0/16 (zeroconf) */ ||
+    ((ip_addr &amp; 0xFFFFFF00) == 0xC0000200)  /* 192.0.2.0/24   (test-net) */ ||
+    ((ip_addr &amp; 0xFFFFFF00) == 0xC6336400)  /* 198.51.100.0/24(test-net) */ ||
+    ((ip_addr &amp; 0xFFFFFF00) == 0xCB007100)  /* 203.0.113.0/24 (test-net) */ ||
+    ((ip_addr &amp; 0xFFFFFFFF) == 0xFFFFFFFF)  /* 255.255.255.255/32 (broadcast)*/ ;
+}
+</code></pre>
+<p>К сожалению, dnsmasq не позволяет выборочно отключить защиту лишь для 10.0.0.0/8, поэтому приходится эту защиту отключать полностью (либо пересобирать dnsmasq самостоятельно).</p>
+<p>Могли бы вы настроить DNS-сервер на своей стороне таким образом, чтобы защиту от ребиндинга реализовывал он?</p></td><td>2020-07-12T14:04:20.812Z</td></tr><tr><td>ValdikSS</td><td><p>Нет, это нарушит работу множества провайдерских сайтов и просто ресурсов, для которых есть публичный домен, но в качестве IP-адреса указан приватный диапазон.</p>
+<p>dnsmasq же, если не ошибаюсь, позволяет фильтровать отдельные IP-диапазоны, для этого не нужна отдельная опция.</p></td><td>2020-07-12T14:16:33.817Z</td></tr><tr><td>vdlftrvuknyrukmztb</td><td><p>Похоже, возможности блокировать диапазоны нет.</p>
+<p><a href="http://www.thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html" class="onebox" target="_blank" rel="nofollow noopener">http://www.thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html</a></p>
+<p>Но есть возможность через --bogus-nxdomain= указать конкретные адреса (такие ответы будут заменяться на на NXDOMAIN). Так что можно назначить клиентам статические адреса и прикрыть конкретно их. Спасибо за наводку</p></td><td>2020-07-12T15:42:33.665Z</td></tr>
+    </table>
+      </body>
+    </html>

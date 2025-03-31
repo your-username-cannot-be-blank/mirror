@@ -1,0 +1,86 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>tor-exitnodes-with-obfs4-not-working</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>t1m013y</td><td><p>Tor successfully connects with obfs4 bridges but when I add strict ExitNodes to my torrc:</p>
+<pre><code class="lang-auto">ExitNodes {nl},{de},{fi},{se},{no},{pl},{us},{it},{fr},{es}
+StrictNodes 1
+</code></pre>
+<p>Tor cannot connecting and starts echoing <code>[notice] Application request when we haven't used client functionality lately. Optimistically trying known bridges again.</code> in logs.</p>
+<p>I don’t know if this problem is caused by using obfs4 because I cannot connect to tor without bridges (because of censorship).</p></td><td>2024-10-08T13:40:24.766Z</td></tr><tr><td>ValdikSS</td><td><p>Try to remove Tor data directory. Sometimes the DB happens to be in inconsistent state on the older versions. Make sure that you don’t have anything important there (such as keys for hidden services).</p></td><td>2024-10-08T20:35:09.418Z</td></tr><tr><td>t1m013y</td><td><p>I deleted tor’s data directory, but it didn’t help. Still this message. When I remove <code>ExitNodes</code> and <code>StrictNodes</code> lines, tor starts working again.</p></td><td>2024-10-09T19:37:00.462Z</td></tr><tr><td>ValdikSS</td><td><p>Which version do you use?</p></td><td>2024-10-10T01:18:14.462Z</td></tr><tr><td>t1m013y</td><td><p>I use tor expert bundle for Windows.</p>
+<p><code>tor.exe --version</code> output:</p>
+<pre><code class="lang-auto">Tor version 0.4.8.12 (git-2beaa7557c3c93ec).
+This build of Tor is covered by the GNU General Public License (https://www.gnu.org/licenses/gpl-3.0.en.html)
+Tor is running on Windows 8 [or later] with Libevent 2.1.12-stable, OpenSSL 3.0.15, Zlib 1.3.1, Liblzma N/A, Libzstd N/A and Unknown N/A as libc.
+Tor compiled with clang version 16.0.4
+</code></pre></td><td>2024-10-10T13:12:29.146Z</td></tr><tr><td>ValdikSS</td><td><p>Well, do you have ExcludeNodes option? StrictNodes just enables strict handling of ExcludeNodes.</p>
+<pre><code class="lang-auto"> StrictNodes 0|1
+     If StrictNodes is set to 1, Tor will treat solely the ExcludeNodes option as a requirement to follow for all the circuits you generate, even if doing so will break functionality for you
+     (StrictNodes does not apply to ExcludeExitNodes, ExitNodes, MiddleNodes, or MapAddress). If StrictNodes is set to 0, Tor will still try to avoid nodes in the ExcludeNodes list, but it will
+     err on the side of avoiding unexpected errors. Specifically, StrictNodes 0 tells Tor that it is okay to use an excluded node when it is necessary to perform relay reachability self-tests,
+     connect to a hidden service, provide a hidden service to a client, fulfill a .exit request, upload directory information, or download directory information. (Default: 0)
+</code></pre>
+<p>Works for me in Tor 0.4.8.12 @ Fedora with your configuration (with bridges), no issues.</p></td><td>2024-10-12T13:16:02.842Z</td></tr><tr><td>t1m013y</td><td><p>Thanks! I thought that <code>StrictNodes</code> option is applicable to <code>ExitNodes</code>. I removed <code>StrictNodes</code> option and cleared data directory and tor connected successfully. Also I had the problem with no configured geoip files. I solved it by adding <code>GeoIPFile</code> and <code>GeoIPv6File</code> to my torrc-defaults.</p>
+<p>My final configuration (I’m using <a href="https://www.torproject.org/download/tor/" rel="noopener nofollow ugc">tor expert bundle</a> on Windows):</p>
+<p><strong><code>torrc</code>:</strong></p>
+<pre><code class="lang-plaintext">SocksPort 127.0.0.1:9015
+HTTPTunnelPort 127.0.0.1:9018
+
+UseBridges 1
+
+Bridge obfs4 ...
+Bridge obfs4 ...
+
+ExitNodes {nl},{de},{fi},{se},{no},{pl},{us},{it},{fr},{es}
+
+ServerDNSResolvConfFile resolv.conf
+AvoidDiskWrites 1
+
+</code></pre>
+<p>Bridges data is replaces with <code>...</code></p>
+<p><strong><code>torrc-defaults</code>:</strong></p>
+<pre><code class="lang-plaintext">ClientTransportPlugin meek_lite,obfs2,obfs3,obfs4,scramblesuit,webtunnel exec tor\pluggable_transports\lyrebird.exe
+ClientTransportPlugin snowflake exec tor\pluggable_transports\snowflake-client.exe
+ClientTransportPlugin conjure exec tor\pluggable_transports\conjure-client.exe -registerURL https://registration.refraction.network/api
+
+GeoIPFile data\geoip
+GeoIPv6File data\geoip6
+DataDirectory datadir
+
+</code></pre></td><td>2024-10-13T09:06:56.542Z</td></tr>
+    </table>
+      </body>
+    </html>

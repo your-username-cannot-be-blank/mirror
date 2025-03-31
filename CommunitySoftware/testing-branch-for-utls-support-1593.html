@@ -1,0 +1,172 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>testing-branch-for-utls-support-1593</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>I have a branch for adding <a href="https://github.com/refraction-networking/utls">uTLS</a> support to dnstt’s DoH and DoT modes. uTLS (<a href="https://ntc.party/t/utls-fork-of-the-go-standard-tls-library-providing-low-level-access-to-the-clienthello-for-mimicry-purposes/98">NTC thread</a>) is a package that allows changing a network program’s TLS fingerprint so that it resembles other common TLS applications. This intention behind this change is to make dnstt harder to block by the Go crypto/tls fingerprint.</p>
+<p>I invite you to test and comment on the utls branch before I merge it into the mainline. To check out and build the utls branch (currently at <a href="https://repo.or.cz/dnstt.git/shortlog/98bdffa1706dfc041d1e99b86c47f29d72ad3a0c">98bdffa1</a>, <a href="https://repo.or.cz/dnstt.git/commitdiff/d92a791b6864901f9263f7d73d97cfd30ac53b09..98bdffa1706dfc041d1e99b86c47f29d72ad3a0c">cumulative diff</a>):</p>
+<pre><code class="lang-nohighlight">$ git clone -b utls https://www.bamsoftware.com/git/dnstt.git
+$ cd dnstt/dnstt-client
+$ go build
+</code></pre>
+<p>To actually use the DNS tunnel, you will need to <a href="https://www.bamsoftware.com/software/dnstt/#setup">set up a server</a>, but you do not need to set up a server if you only want to look at packet captures of the TLS fingerprints.</p>
+<p>By default, the program chooses a TLS fingerprint randomly from a weighted distribution, which you can see with <code>dnstt-client -help</code>. A log message will show what fingerprint was chosen.</p>
+<pre><code class="lang-nohighlight">$ go run ../dnstt-server/ -gen-key -privkey-file server.key -pubkey-file server.pub
+$ ./dnstt-client -doh https://dns.google/dns-query -pubkey-file server.pub t.example.com 127.0.0.1:7000
+2022/01/03 03:57:20 uTLS fingerprint Firefox 65
+$ ./dnstt-client -dot dns.google:853 -pubkey-file server.pub t.example.com 127.0.0.1:7000
+2022/01/03 04:08:08 uTLS fingerprint iOS 12.1
+</code></pre>
+<p>You can use the <code>-utls</code> to control the weighted distribution of TLS fingerprints. Examples:</p>
+<pre><code class="lang-nohighlight">-utls 5*firefox,2*chrome,1*ios  # 62.5% latest Firefox, 25% latest Chrome, 12.5% latest iOS
+-utls iOS_12_1                  # 100% iOS 12.1
+-utls none                      # disable uTLS and use the Go crypto/tls fingerprint
+</code></pre>
+<p>Not all fingerprints are <a href="https://github.com/refraction-networking/utls#compatibility-risks-of-available-parrots">compatible</a> with all servers. For example,</p>
+<pre><code class="lang-nohighlight">$ ./dnstt-client -utls Chrome_70 -doh https://dns.google/dns-query -pubkey-file server.pub t.example.com 127.0.0.1:7000
+2022/01/03 04:03:39 sendLoop: Post "https://dns.google/dns-query": remote error: tls: unexpected message
+$ ./dnstt-client -utls Chrome_70 -dot dns.google:853 -pubkey-file server.pub t.example.com 127.0.0.1:7000
+2022/01/03 04:07:51 recvLoop: remote error: tls: unexpected message
+</code></pre>
+<p><code>dnstt-client -help</code> shows what fingerprints are available:</p>
+<pre><code class="lang-nohighlight">  none Firefox Firefox_55 Firefox_56 Firefox_63 Firefox_65 Chrome
+  Chrome_58 Chrome_62 Chrome_70 Chrome_72 Chrome_83 iOS iOS_11_1
+  iOS_12_1
+</code></pre>
+<p><code>-utls none</code> will have the best compatibility, but it is the least covert.</p>
+<p>Some feedback I’m looking for is whether any of the TLS fingerprints chosen by default are not compatible with DNS resolvers that people are using.</p></td><td>2022-01-03T04:13:40.155Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="tango" data-post="1" data-topic="1593">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"> tango:</div>
+<blockquote>
+<p>Not all fingerprints are <a href="https://github.com/refraction-networking/utls#compatibility-risks-of-available-parrots">compatible</a> with all servers.</p>
+</blockquote>
+</aside>
+<p>I tried adding a call to <a href="https://pkg.go.dev/github.com/refraction-networking/utls#EnableWeakCiphers"><code>utls.EnableWeakCiphers</code></a> to increase compatibility, but it still fails <a href="https://repo.or.cz/dnstt.git/commit/98bdffa1706dfc041d1e99b86c47f29d72ad3a0c">in the same way as without</a>:</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>fingerprint</th>
+<th><code>-doh dns.google</code></th>
+<th><code>-dot dns.google</code></th>
+<th><code>-doh 1.1.1.1</code></th>
+<th><code>-dot 1.1.1.1</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Firefox_55</code></td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td><code>Firefox_56</code></td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td><code>Firefox_63</code></td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td><code>Firefox_65</code></td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td><code>Chrome_58</code></td>
+<td>ERROR</td>
+<td>ERROR</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td><code>Chrome_62</code></td>
+<td>ERROR</td>
+<td>ERROR</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td><code>Chrome_70</code></td>
+<td>ERROR</td>
+<td>ERROR</td>
+<td>ERROR</td>
+<td>ok</td>
+</tr>
+<tr>
+<td><code>Chrome_72</code></td>
+<td>ok</td>
+<td>ok</td>
+<td>ERROR</td>
+<td>ok</td>
+</tr>
+<tr>
+<td><code>Chrome_83</code></td>
+<td>ok</td>
+<td>ok</td>
+<td>ERROR</td>
+<td>ok</td>
+</tr>
+<tr>
+<td><code>iOS_11_1</code></td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td><code>iOS_12_1</code></td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2022-01-20T01:50:45.244Z</td></tr><tr><td>tango</td><td><p>The utls branch was merged in release <a href="https://ntc.party/t/release-v1-20220208-0-utls-for-tls-camouflage/1687">v1.20220208.0</a>.</p></td><td>2022-02-08T23:10:57.189Z</td></tr>
+    </table>
+      </body>
+    </html>

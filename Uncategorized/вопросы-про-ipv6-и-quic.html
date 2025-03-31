@@ -1,0 +1,129 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>вопросы-про-ipv6-и-quic</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>aggravatingbee</td><td><p>Добрый день!</p>
+<p>Пользуюсь xray без панели + локальным dns-резолвером Unbound; наслаждаюсь скоростью и стабильностью полета. Но есть одно исключение - приложение инстаграма с огромным пингом (и быстрой загрузкой содержимого) - которое пробудило мое любопытство.</p>
+<p>Судя по <a href="https://habr.com/ru/articles/811487/" rel="noopener nofollow ugc">статье на хабре</a> - это может быть связано с ipv6-связностью. Второе мое предположение (взятое с потолка) - подключение по http2 вместо quic (который, как я понимаю, заблокирован в РФ).</p>
+<p>Вопросы:</p>
+<ol>
+<li>
+<p>Есть ли смысл настраивать полную ipv6-связность на клиенте и сервере? Есть ли какие-то риски в плане конфиденциальности (в сравнении с ipv4), если оставлять всё по дефолту, не погружаясь глубоко в специфику протокола?</p>
+</li>
+<li>
+<p>Возможно ли оставить inbound сервера через http2 с tls security, а outbound сервера направить по quic (можно ли в streamsettings в разделе outbound указывать другой alpn)? И главное - есть ли смысл?</p>
+</li>
+</ol>
+<p>UPD: полностью настроил ipv6-связность на клиенте и сервере, задержка не ушла. Видимо проблема все-таки в чем-то другом.</p></td><td>2025-03-12T10:14:18.587Z</td></tr><tr><td>0ka(0ka)</td><td><p>любые подключения к любым сайтам идут через vless, т.е. все протоколы http1,2,3(quic) идут внутри vless (tcp соединения), т.е. все блокировки в рф не имеют значения. непонятно быстро или медленно у вас работает инста и есть ли вообще какие-то проблемы, второй вопрос вообще непонятен.</p></td><td>2025-03-12T10:46:14.167Z</td></tr><tr><td>aggravatingbee</td><td><p>Прошу прощения, не досконально знаю тему, поэтому может быть где-то неправильно формулирую вопросы.</p>
+<p>По поводу второго вопроса (и в контексте вашего ответа на первый) - у меня пару месяцев назад по неким причинам перестал работать mKCP внутри VLESS, который подразумевает использование QUIC и UDP.</p>
+<p>Из этого я и сделал (возможно ложный) вывод, что QUIC и/или UDP-подключения в России блокируются. А раз они блокируются - то получается, что протоколы, завернутые в VLESS все-таки могут быть идентифицированы.</p>
+<p>Исходя из этого задался вопросом можно ли направлять запрос от клиента к серверу по работающим HTTP2 и TCP, а от сервера к месту назначения использовать QUIC с UDP.</p></td><td>2025-03-12T11:12:44.233Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group quote-modified" data-username="aggravatingbee" data-post="3" data-topic="15108">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>можно ли направлять запрос от клиента к серверу по работающим протоколам</p>
+</blockquote>
+</aside>
+<p>это конфиг vless+tls</p>
+<aside class="quote no-group" data-username="aggravatingbee" data-post="3" data-topic="15108">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>а от сервера к месту назначения использовать QUIC с UDP.</p>
+</blockquote>
+</aside>
+<p>xray абсолютно не изменяет ваш трафик, и вы не можете ему указать это делать, по какому протоколу приложение инсты решило работать, по такому и будет. (если решило по quic, то значит будет по quic через vless, и наличия vless по пути даже не заметит)</p></td><td>2025-03-12T12:49:56.018Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="15108">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>приложение инстаграма с огромным пингом</p>
+</blockquote>
+</aside>
+<p>Не понятно, где приложение это запущено, и как настроена проксификация.</p>
+<aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="15108">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>Есть ли смысл настраивать полную ipv6-связность на клиенте и сервере?</p>
+</blockquote>
+</aside>
+<p>Есть.</p>
+<aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="15108">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>Есть ли какие-то риски в плане конфиденциальности</p>
+</blockquote>
+</aside>
+<p>Не больше, чем IPv4.</p></td><td>2025-03-12T12:52:45.710Z</td></tr><tr><td>aggravatingbee</td><td><p>Спасибо!</p>
+<blockquote>
+<p>Не понятно, где приложение это запущено, и как настроена проксификация.</p>
+</blockquote>
+<p>Android 15. Клиенты v2rayng и hiddify, режим VPN. Сервер настроен на xtls-vision с tls security и fallback, а также на SS. Смена протоколов и стран/хостеров не влияет. Предположил бы, что сама установка tls-соединения достаточно долгая, но у других сайтов/приложений такой задержки нет.</p></td><td>2025-03-12T13:12:20.346Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="15108">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>полностью настроил ipv6-связность на клиенте и сервере, задержка не ушла. Видимо проблема все-таки в чем-то другом.</p>
+</blockquote>
+</aside>
+<p>Не пользуюсь ни перечисленным, ни инстаграммом, но попробуйте записать трафик на сервере через tcpdump при использованнии приложения и откройте pcap файл в wireshark — быть может сам инстаграм тротлит сети датацентров и задерживает ответ.</p></td><td>2025-03-12T14:03:52.222Z</td></tr><tr><td>nzkhammatov(Ainur Khammatov)</td><td><aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="15108">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>приложение инстаграма с огромным пингом (и быстрой загрузкой содержимого)</p>
+</blockquote>
+</aside>
+<blockquote>
+<p><a href="https://ntc.party/t/11089/9" class="inline-onebox">Iptables QUIC filter - #9 by ValdikSS</a></p>
+</blockquote>
+<p><strong>Не помогает?</strong></p>
+<details>
+<summary>
+Мой вариант проще, но работает: уже 2 год без проблем</summary>
+<blockquote>
+<p><a href="https://ntc.party/t/129/940" class="inline-onebox">Контейнер VPN АнтиЗапрета для установки на собственный сервер - #940 by nzkhammatov</a></p>
+</blockquote>
+</details></td><td>2025-03-12T14:34:37.989Z</td></tr><tr><td>0ka(0ka)</td><td><p>xtls-vision сам по себе блокирует udp на порт 443, и v2rayNG по дефолту тоже блокирует udp на 443 порт, так что quic уже заблокирован, но скорее всего простым дропом пакетов что не идеально, я бы наоборот разблокировал его для теста</p></td><td>2025-03-12T15:34:04.540Z</td></tr>
+    </table>
+      </body>
+    </html>

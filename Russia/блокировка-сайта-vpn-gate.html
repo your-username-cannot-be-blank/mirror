@@ -1,0 +1,81 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-сайта-vpn-gate</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>anonymous63(anonymous63)</td><td><p>Заблокирован сайт <a href="http://vpngate.net" rel="noopener nofollow ugc">vpngate.net</a> со списком vpn серверов от волонтеров. Блокировка датируется началом августа. Тип блокировки похож на реестровый (без url: адрес с доменом), но в реестре сайт не обнаружен.</p></td><td>2022-08-27T14:22:42.161Z</td></tr><tr><td>ValdikSS</td><td><p>Блокируют на ТСПУ.<br>
+<a href="https://bitbucket.org/anticensority/russian-unlisted-blocks/src/master/readme.txt" class="onebox" target="_blank" rel="noopener">https://bitbucket.org/anticensority/russian-unlisted-blocks/src/master/readme.txt</a></p></td><td>2022-08-27T14:35:46.139Z</td></tr><tr><td>runetchecker</td><td><p>На мобильном операторе Мегафон сайт <a href="http://vpngate.net" rel="noopener nofollow ugc">vpngate.net </a> не открывается даже через GoodbyeDPI.</p></td><td>2022-11-27T19:54:58.987Z</td></tr><tr><td>anonymous74(anonymous74)</td><td><p>Большую часть IP-адресов сайта блокируют через RST/ACK, оставшиеся – прежним способом (похож на реестровую блокировку rutracker и др.)</p></td><td>2022-11-28T20:26:18.109Z</td></tr><tr><td>welazsc</td><td><p>Блокируют сертификаты используемые серверами участников. Пострадал протокол SoftEther на 443 порту без поддержки TLSv1.3.<br>
+Возможно задели другие порты и/или протоколы (OpenVPN при обмене ключами c использованием TLSv1.2)</p></td><td>2023-09-12T17:55:45.497Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="welazsc" data-post="6" data-topic="3146">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/w/c4cdca/48.png" class="avatar"> welazsc:</div>
+<blockquote>
+<p>Пострадал протокол SoftEther на 443 порту</p>
+</blockquote>
+</aside>
+<p>Что насчет SoftEther UDP? Он тоже использует сертификаты? Вроде ему нет нужды маскироваться под TCP. Под QUIC он тоже не косит.</p></td><td>2023-09-12T20:50:22.231Z</td></tr><tr><td>welazsc</td><td><p>Ethernet over UDP это Ethernet over HTTPS over UDP (TCP-over-UDP) c обфускацией. При желании сертификат можно расшифровать из сетевого трафика, но это же не QUIC. За всеми обфускаторами не угонишься. Вероятно для собранных адресов есть дополнительные блокировки. Например блокируют весь UDP, поскольку порты случайные, или что-то еще (есть где зацепиться).</p>
+<p>Есть приложения где проверенные сервера vpngate добавляют бонусом к своим, если родного под Windows не хватило. Приложение == блокировка.</p>
+<hr>
+<p>Похоже бинарник vpngate-client не совпадает с публикуемыми сорцами той же версии.</p>
+<p>В коде:</p>
+<pre><code class="lang-auto">					UINT size_of_padding = 19;
+</code></pre>
+<p>В бинарнике:</p>
+<pre><code class="lang-auto">					UINT size_of_padding = Rand32() % 19;
+</code></pre></td><td>2023-09-13T12:47:07.272Z</td></tr><tr><td>anon94384997</td><td><p>Т.е. udp vpngate в фирменной проге тоже не работает? Хоть она и едкая, но… А вы собираете ее? Я собирал линуксовую 5 версию, работает. Но маршрутами надо самому рулить и нет vpngate.<br>
+Отличается код, ну может бардак (нет даже доков) или специально для запутывания цензора.</p></td><td>2023-09-13T18:55:01.367Z</td></tr><tr><td>welazsc</td><td><p>Пока ничего не понятно, но очень интересно. Сертификаты блочат, но неизвестно почему и что за приложение сливает. Сервера участников с SoftEther на 443 поддерживающие TLSv1.3 есть, примерно каждый третий, если японские сервера исключить. Разрыв невелик, чтобы выделять этот признак для блокировки.</p>
+<p>Код не должен отличаться, это красный флаг. Они и так вырезали секретные части, отвечающие за скачивание более детального списка, без которого Ethernet over UDP неизвестно куда подключать (порты бывают разные для протоколов, “UDP: Supported” это заглушка)</p></td><td>2023-09-13T19:48:04.398Z</td></tr><tr><td>welazsc</td><td><p>Найден заблокированный сервер: <code>public-vpn-97.opengw.net</code>. Вероятно, блокировка напрямую связана с VPN Gate, cледов других сервисов не найдено. Блокируют по IP адресу. Другие public-vpn-xxx были доступны, 96 и 98, например, они ничем кроме адреса не отличаются.</p></td><td>2023-09-25T14:31:51.373Z</td></tr><tr><td>welazsc</td><td><p>del</p></td><td>2023-09-26T11:38:13.836Z</td></tr><tr><td>anonymous138(anonymous138)</td><td><p>Все стоящие VPN сервера участников проекта заблокированы на ТСПУ. Правила блокировки разные, что указывает на разные источники адресов. У одних блокируют весь транспортный протокол, других – паттерны протоколов. Похоже РКН добрался до приложений категории Б, использующих чужие сервера. Как минимум два мобильных VPN приложения предлагали проверенные сервера взятые у vpngate.</p>
+<p>На сайте проекта заявлено 6k серверов онлайн. Блокируют на ТСПУ 3k адресов.</p></td><td>2024-04-25T19:53:38.627Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><blockquote>
+<p>Сертификаты блочат, но неизвестно почему и что за приложение сливает.</p>
+</blockquote>
+<p>Не знаю, как сейчас, но еще буквально год назад SoftEther элементарно детектировался active probing’ом. То есть подключаясь по HTTP к нему и делая запрос на определенный URL, сервер давал очень характерный ответ, позволяющий понять, что там именно SoftEther.</p></td><td>2024-04-28T08:33:06.480Z</td></tr><tr><td>tango</td><td><p>Can you give me a reference for active probing of SoftEther in Russia?</p>
+<p>There was evidence of active probing for SoftEther in 2014 and 2015 in China (<a href="https://ensa.fi/active-probing/#probetype-softether">https://ensa.fi/active-probing/#probetype-softether</a>, <a href="https://censorbib.nymity.ch/#Ensafi2015b">Figure 8</a>). This is the first I have heard active probing could be used in other countries.</p></td><td>2024-05-13T05:18:21.594Z</td></tr><tr><td>ShiroiBara(Shiroi Bara)</td><td><p>Да вы просто гений! Решили проблему VPN over UDP для Linux’овых клиентов. Я тут создал issue на своем кривом английском в официальном репозитории:  <a href="https://github.com/SoftEtherVPN/SoftEtherVPN/issues/2008" class="inline-onebox" rel="noopener nofollow ugc">Can't connect using VPN over UPD with NAT-T under Linux using vpncmd · Issue #2008 · SoftEtherVPN/SoftEtherVPN · GitHub</a> Правда это уже 5 версия (имхо глючная и нестабильная, по крайней мере в OpenWrt, поэтому я юзаю 4ую), но баг гуляет еще со времен 4-ой. И, действительно, замена в коде <a href="https://github.com/SoftEtherVPN/SoftEtherVPN/blob/master/src/Mayaqua/Network.c#L2283" class="inline-onebox" rel="noopener nofollow ugc">SoftEtherVPN/src/Mayaqua/Network.c at master · SoftEtherVPN/SoftEtherVPN · GitHub</a></p>
+<pre><code class="lang-auto">UINT size_of_padding = 19;</code></pre>
+<p>на приведенный вами вариант:</p>
+<pre><code class="lang-auto">UINT size_of_padding = Rand32() % 19;</code></pre>
+<p>решило проблему. Только что пересобрал бинарник vpnclient под Арч, правда 4 версии, и коннект пошел. Для теста использовал SSL-VPN протокол с официального сайта <a href="http://vpngate.net" rel="noopener nofollow ugc">vpngate.net</a> Теперь надо покроскомпилить такой-же под OpenWrt для x86_64 (amd64) архитектуру и потестить на своем роутере. Если все пойдет нормально, то уже отписаться на соответствующих ресурсах - пусть накатывают фикс на разные релизы. Если конечно разрабам это вообще интересно.<br>
+P.S.<br>
+Я вот тут подумал - а может они специально это сделали, чтобы SSL-VPN по UDP фурычил только под Windows? Тогда не понятно, почему этот протокол прекрасно работает по TCP портам в обоих системах.</p></td><td>2024-06-10T21:40:13.030Z</td></tr><tr><td>ShiroiBara(Shiroi Bara)</td><td><blockquote>
+<p>(порты бывают разные для протоколов, “UDP: Supported” это заглушка</p>
+</blockquote>
+<p>Если речь идет о протоколе SSL-VPN Windows (comfortable) тот реальный порт можно подсмотреть, приконнектившись к такому серверу из списка, использую Windows клиент с их фирменным плагином. После установки соединения (обязательно выбирать вторую строчку VPN over UDP в диалоге инициализации соединения!) используем экспорт аккаунта через vpncmd утилиту в текстовый файлик и ищем строчку uint PortUDP. Там и будет нужный порт. Кстати, он всегда 0, если соединение идет через TCP и отличный от нуля если идет завертывание в UDP. В последнем случае порт TCP и строка uint Port игнорируется. Приоретет при чтении конфигурационного файла отдается UDP соединению и соответствующая строка обрабатывается первой. Вот интересно, можно ли как-то средствами Linux’а вытащить данные порты? Хотя, наверное, это закрытые куски кода и запихнуто это все в dll’ку плагина.</p></td><td>2024-06-10T22:29:27.500Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>I don tknow about such cases in Russia, I just mentioned that it’s very easy to do.</p></td><td>2024-06-11T13:56:46.699Z</td></tr><tr><td>anonymous141(anonymous141)</td><td><p>В закрытом коде серверов, публикующих свой адрес на сайте проекта, отдельная проверка на опенсорсный клиент.</p>
+<pre><code class="lang-auto">if (p-&gt;Size == 39 &amp;&amp; ...
+	ok = false;
+</code></pre>
+<p>Кроме паддинга у закрытых клиентов есть еще функционал связанный с UDP, отсутствующий в открытом коде. Неработающий UDP в таком сценарии не похож на ошибку. Даже если удалось подключиться, обойдя эту проверку, отвалится в другом месте, уже неявно.</p>
+<p>На гитхабе, в репе, хостится открытый код, он должен нормально работать через UDP. У SoftEtherVPN и VPNGatePlugin связь не прямая, а обратная, “баги” плагина через гитхаб не исправить.</p></td><td>2024-06-11T21:36:51.707Z</td></tr><tr><td>ShiroiBara(Shiroi Bara)</td><td><p>А можно глупый нубский вопрос - а откуда у вас такая инфа? Вы реверс инжиниринг делаете что-ли под каким-нибудь виндовым отладчиком и дисассемблером?</p></td><td>2024-06-11T21:53:01.005Z</td></tr><tr><td>anonymous141(anonymous141)</td><td><p>Да</p></td><td>2024-06-11T22:17:16.819Z</td></tr><tr><td>ShiroiBara(Shiroi Bara)</td><td><p>Вынужден признать вашу правоту. Добрался до роутера, но дальше получения адреса с сервера процесс не идет. Трафик тупо не туннелируется. Работает только под виндой даже без плагина, если импортировать файл с udp портом. Так что или проверка клиента идет или сервер тупо режет что-то. Кроме того на мой тикет мне ответили, что работа по udp не предусмотрена без закрытого плагина. Так что эту затею придется мне отбросить. И еще момент -  при подключении по udp под виндой внешний ip такого сервера отличается от того, который прописывается для подключения. Походу используется какой-то виртуальный кластер или хаб.</p></td><td>2024-06-13T04:11:41.214Z</td></tr><tr><td>ShiroiBara(Shiroi Bara)</td><td><p>Я осел. Все работает по udp после правки кода. Проблема была в том, что проверял я сервера из списка 219.100.x.x. Но не учел того, что помимо выдачи немного другого IP адреса там так же меняется и default gateway. У меня в статических маршрутах был прописан 10.21*.<em>.</em> для серверов не из универа японского, а для универских он другой - 10.2**.<em>.</em>. Так что если коннектитесь по udp не забывайте проверить таблицу маршрутизации и коректно указывайте шлюз, куда пойдет трафик.</p></td><td>2024-06-15T12:26:23.898Z</td></tr>
+    </table>
+      </body>
+    </html>

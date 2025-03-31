@@ -1,0 +1,55 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>what-are-the-drawbacks-of-using-a-shadowsocks-proxy-instead-of-a-private-tor-bridge</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>danm</td><td><p>Due to the ongoing process of blocking Tor in Russia, I’ve decided to improve my Tor connectivity. Currently, I have a Shadowsocks proxy on the VPS. I’ve configured access ports for unobfuscated and for v2fly-websocket obfuscated connections. I can connect to Tor by configuring proxy access in the Tor Browser or torrc file. I’ve also configured a private Tor bridge, but it seems unnecessary for my use case.</p>
+<p>What are the drawbacks of using Shadowsocks proxy instead of a private Tor bridge? The only issue that I can think of is that a Tor bridge would provide a higher level of obfuscation between my PC and VPS than v2fly-websocket+shadowsocks or plain shadowsocks. Am I missing anything?</p></td><td>2022-02-22T15:03:06.802Z</td></tr><tr><td>tango</td><td><p>A private, obfuscated proxy server and a private, pluggable transport Tor bridge are functionally almost the same. The pluggable transport protocol even uses SOCKS internally to specify the bridge address. There are a few minor differences I can think of:</p>
+<ol>
+<li>With a proxy server, you still have the 3 hops of a normal Tor circuit, so it’s effectively 4 hops in total. With a bridge, it’s the usual 3 hops. (The bridge takes the place of the 1st hop, which otherwise would be your <a href="https://support.torproject.org/about/entry-guards/">entry guard</a>.)</li>
+<li>Tor Metrics won’t count you as a bridge or pluggable transport user. Your traffic will be counted as <a href="https://metrics.torproject.org/userstats-relay-country.html">directly connecting</a>. It will be attributed to the country in which your proxy is located, I believe.</li>
+<li>For the purposes of obfuscation, Shadowsocks AEAD and obfs4 are basically equivalent, and they resemble each other on the wire. obfs4 has some cryptographic advantages, for example obfs4 has forward security and Shadowsocks does not. (If your Shadowsocks password is ever revealed, all your past recorded traffic can be decrypted, which is not the case with obfs4.) There are many implementations of Shadowsocks and they vary in quality; for example I believe they do not all have <a href="https://github.com/net4people/bbs/issues/58">mitigations against active probing</a>.</li>
+</ol></td><td>2022-02-23T00:58:05.710Z</td></tr><tr><td>anonymous23(anonymous23)</td><td><aside class="quote no-group" data-username="danm" data-post="1" data-topic="1715">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8491ac/48.png" class="avatar"> danm:</div>
+<blockquote>
+<p>Am I missing anything?</p>
+</blockquote>
+</aside>
+<p>Методы обнаружения адресов, и причины попадания в блок лист.</p></td><td>2022-02-23T06:57:22.658Z</td></tr>
+    </table>
+      </body>
+    </html>

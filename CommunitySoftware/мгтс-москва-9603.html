@@ -1,0 +1,312 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>мгтс-москва-9603</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>easyone11</td><td><p>не могу подобрать конфиг для рабочего ютуба<br>
+есть у кого получилось настроить трубу?<br>
+MODE=tpws - работает всё кроме ютуба<br>
+—hostspell=HOST --split-http-req=method --split-pos=3 --oob</p>
+<p>нужно что то рабочие найти для nfqws</p></td><td>2024-08-21T17:05:02.078Z</td></tr><tr><td>BBS</td><td><ul>
+<li>SUMMARY<br>
+ipv4 <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> curl_test_http : tpws --split-http-req=method --oob<br>
+ipv4 <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> curl_test_http : nfqws --dpi-desync=split --dpi-desync-fooling=md5sig<br>
+ipv4 <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> curl_test_https_tls12 : tpws not working<br>
+ipv4 <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> curl_test_https_tls12 : nfqws --dpi-desync=fake,split2 --dpi-desync-ttl=3 --dpi-desync-split-pos=1<br>
+МГТС, всё работает, в т.ч. ютуб.</li>
+</ul>
+<p>P.S. Ещё раз выражаю респект создателю за отличную прогу.</p></td><td>2024-08-21T18:42:51.674Z</td></tr><tr><td>easyone11</td><td><p>если не сложно можно полный конфиг?<br>
+у тебя 2 роутера? у меня мгтсовский серком, а за ним уже настроенный опенврт роутер.</p></td><td>2024-08-21T19:16:04.961Z</td></tr><tr><td>BBS</td><td><aside class="quote no-group" data-username="easyone11" data-post="3" data-topic="9603">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/easyone11/48/6759_2.png" class="avatar"> easyone11:</div>
+<blockquote>
+<p>если не сложно можно полный конфиг?</p>
+</blockquote>
+</aside>
+<pre><code class="lang-auto">FWTYPE=iptables
+
+SET_MAXELEM=522288
+IPSET_OPT="hashsize 262144 maxelem $SET_MAXELEM"
+IP2NET_OPT4="--prefix-length=22-30 --v4-threshold=3/4"
+IP2NET_OPT6="--prefix-length=56-64 --v6-threshold=5"
+AUTOHOSTLIST_RETRANS_THRESHOLD=3
+AUTOHOSTLIST_FAIL_THRESHOLD=3
+AUTOHOSTLIST_FAIL_TIME=60
+AUTOHOSTLIST_DEBUGLOG=0
+
+MDIG_THREADS=30
+GZIP_LISTS=1
+MODE=nfqws
+MODE_HTTP=1
+MODE_HTTP_KEEPALIVE=0
+MODE_HTTPS=1
+MODE_QUIC=0
+MODE_FILTER=none
+
+DESYNC_MARK=0x40000000
+DESYNC_MARK_POSTNAT=0x20000000
+NFQWS_OPT_DESYNC="--dpi-desync=fake,split2 --dpi-desync-ttl=3 --dpi-desync-split-pos=1"
+NFQWS_OPT_DESYNC_HTTP="--dpi-desync=split --dpi-desync-fooling=md5sig"
+
+FLOWOFFLOAD=donttouch
+
+IFACE_WAN=br0
+INIT_APPLY_FW=1
+
+DISABLE_IPV6=1
+</code></pre>
+<aside class="quote no-group" data-username="easyone11" data-post="3" data-topic="9603">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/easyone11/48/6759_2.png" class="avatar"> easyone11:</div>
+<blockquote>
+<p>у тебя 2 роутера?</p>
+</blockquote>
+</aside>
+<p>Мы знакомы?<br>
+Да, провайдерский и одноплатник на debian.</p></td><td>2024-08-21T22:42:49.145Z</td></tr><tr><td>easyone11</td><td><aside class="quote no-group" data-username="BBS" data-post="4" data-topic="9603">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/e47774/48.png" class="avatar"> BBS:</div>
+<blockquote>
+<p>Мы знакомы?<br>
+Да, провайдерский и одноплатник на debian.</p>
+</blockquote>
+</aside>
+<p>Спасибо, тоже не работает, по логам вроде всё ок, но толку нет</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>root@OpenWrt:~# /etc/init.d/zapret restart<br>
+Clearing iptables<br>
+Deleting iptables rule for nfqws postrouting (qnum 200) : -p tcp -m multiport --dports 80 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:6 -m mark ! --mark 0x40000000/0x40000000<br>
+Deleting iptables rule for nfqws input+forward (qnum 200) : -p tcp -m multiport --sports 80 -m connbytes --connbytes-dir=reply --connbytes-mode=packets --connbytes 1:1<br>
+Deleting iptables rule for nfqws postrouting (qnum 201) : -p tcp -m multiport --dports 443 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:6 -m mark ! --mark 0x40000000/0x40000000<br>
+Deleting iptables rule for nfqws input+forward (qnum 201) : -p tcp -m multiport --sports 443 -m connbytes --connbytes-dir=reply --connbytes-mode=packets --connbytes 1:1<br>
+Starting daemon 1: /opt/zapret/nfq/nfqws --qnum=200 --user=daemon --dpi-desync-fwmark=0x40000000 --dpi-desync=split --dpi-desync-fooling=md5sig<br>
+Starting daemon 2: /opt/zapret/nfq/nfqws --qnum=201 --user=daemon --dpi-desync-fwmark=0x40000000 --dpi-desync=fake,split2 --dpi-desync-ttl=3 --dpi-desync-split-pos=1<br>
+Applying iptables<br>
+Creating ip list table (firewall type iptables)<br>
+setting high oom kill priority<br>
+reloading ipset backend (no-update)<br>
+Adding iptables rule for nfqws postrouting (qnum 200) : -p tcp -m multiport --dports 80 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:6 -m mark ! --mark 0x40000000/0x40000000<br>
+Adding iptables rule for nfqws input+forward (qnum 200) : -p tcp -m multiport --sports 80 -m connbytes --connbytes-dir=reply --connbytes-mode=packets --connbytes 1:1<br>
+Adding iptables rule for nfqws postrouting (qnum 201) : -p tcp -m multiport --dports 443 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:6 -m mark ! --mark 0x40000000/0x40000000<br>
+Adding iptables rule for nfqws input+forward (qnum 201) : -p tcp -m multiport --sports 443 -m connbytes --connbytes-dir=reply --connbytes-mode=packets --connbytes 1:1</p>
+</details></td><td>2024-08-22T05:12:54.844Z</td></tr><tr><td>dreatrio</td><td><p>тоже не могу настроить нормальную работу на МГТС Москва, твой конфиг у меня тоже работает, причем ютуб он тоже ускоряет если отключить QUIC в браузере. Но мне не подходит, так как я хочу ускорить ютуб на apple tv, а там quic не отключить</p></td><td>2024-08-22T14:47:24.906Z</td></tr><tr><td>easyone11</td><td><aside class="quote no-group" data-username="dreatrio" data-post="6" data-topic="9603">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/9dc877/48.png" class="avatar"> dreatrio:</div>
+<blockquote>
+<p>так как я хочу ускорить ютуб на apple tv</p>
+</blockquote>
+</aside>
+<p>это тебе надо искать конфиг в которому будет MODE_QUIC=1?</p></td><td>2024-08-22T15:07:02.420Z</td></tr><tr><td>dreatrio</td><td><p>я так понял что да</p></td><td>2024-08-22T15:10:39.097Z</td></tr><tr><td>BBS</td><td><aside class="quote no-group" data-username="dreatrio" data-post="6" data-topic="9603">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/9dc877/48.png" class="avatar"> dreatrio:</div>
+<blockquote>
+<p>я хочу ускорить ютуб на apple tv, а там quic не отключить</p>
+</blockquote>
+</aside>
+<p>На роутере запретить подключение исходящих UDP на 443 порт - не вариант?</p></td><td>2024-08-22T17:09:22.236Z</td></tr><tr><td>dreatrio</td><td><p>Пробовал, чет не взлетело. Возможно я не так что-то сделал</p></td><td>2024-08-22T17:23:22.807Z</td></tr><tr><td>easyone11</td><td><p>split-http-req=method --split-pos=3 --oob<br>
+заметил что иногда бывает 1 видео из 100 грузится</p></td><td>2024-08-22T20:10:45.372Z</td></tr><tr><td>easyone11</td><td><p>делал blockcheck.sh рутрекера</p>
+<details>
+<summary>
+редкие видео на ютубе проигрываются, но в основном нет</summary>
+<p>SET_MAXELEM=522288<br>
+IPSET_OPT=“hashsize 262144 maxelem $SET_MAXELEM”<br>
+IP2NET_OPT4=“–prefix-length=22-30 --v4-threshold=3/4”<br>
+IP2NET_OPT6=“–prefix-length=56-64 --v6-threshold=5”<br>
+AUTOHOSTLIST_RETRANS_THRESHOLD=3<br>
+AUTOHOSTLIST_FAIL_THRESHOLD=3<br>
+AUTOHOSTLIST_FAIL_TIME=60<br>
+AUTOHOSTLIST_DEBUGLOG=0<br>
+MDIG_THREADS=30<br>
+GZIP_LISTS=1<br>
+MODE=nfqws<br>
+MODE_HTTP=1<br>
+MODE_HTTP_KEEPALIVE=0<br>
+MODE_HTTPS=1<br>
+MODE_QUIC=0<br>
+MODE_FILTER=none<br>
+DESYNC_MARK=0x40000000<br>
+DESYNC_MARK_POSTNAT=0x20000000<br>
+NFQWS_OPT_DESYNC=“–dpi-desync=syndata --dpi-desync-fake-syndata=/opt/zapret/files/fake/tls_clienthello_iana_org.bin”<br>
+NFQWS_OPT_DESYNC_QUIC=“–dpi-desync=fake --dpi-desync-repeats=6”<br>
+TPWS_OPT=“–hostspell=HOST --split-http-req=method --split-pos=3 --oob”<br>
+FLOWOFFLOAD=donttouch<br>
+INIT_APPLY_FW=1<br>
+DISABLE_IPV6=1<br>
+GETLIST=get_antifilter_ipsmart.sh</p>
+</details>
+<p>PS<br>
+а как это может быть если MODE_FILTER=none<br>
+значит весь трафик коверкается же, у них там на разных серверах разные типы соединений чтоль?<br>
+PSS<br>
+снял данные через системинформер с видео которое играется (где mb накачался)<br>
+chrome.exe, 192.168.3.209, 65168, 74.125.154.9, 443, TCP, 11,27 MB,<br>
+<a href="http://bud02s29-in-f9.1e100.net" rel="noopener nofollow ugc">bud02s29-in-f9.1e100.net</a>, https<br>
+и еще где hostname не определяется удаленный только ip<br>
+chrome.exe, 2088, 192.168.3.209, 65242, 212.188.49.81, 443, TCP, 21,37 MB, , https</p></td><td>2024-08-23T04:49:26.129Z</td></tr><tr><td>easyone11</td><td><details>
+<summary>
+работает всё кроме ютуба nfqws</summary>
+<p>SET_MAXELEM=522288<br>
+IPSET_OPT=“hashsize 262144 maxelem $SET_MAXELEM”<br>
+IP2NET_OPT4=“–prefix-length=22-30 --v4-threshold=3/4”<br>
+IP2NET_OPT6=“–prefix-length=56-64 --v6-threshold=5”<br>
+AUTOHOSTLIST_RETRANS_THRESHOLD=3<br>
+AUTOHOSTLIST_FAIL_THRESHOLD=3<br>
+AUTOHOSTLIST_FAIL_TIME=60<br>
+AUTOHOSTLIST_DEBUGLOG=0<br>
+MDIG_THREADS=30<br>
+GZIP_LISTS=1<br>
+MODE=nfqws<br>
+MODE_HTTP=1<br>
+MODE_HTTP_KEEPALIVE=0<br>
+MODE_HTTPS=1<br>
+MODE_QUIC=0<br>
+MODE_FILTER=none<br>
+DESYNC_MARK=0x40000000<br>
+DESYNC_MARK_POSTNAT=0x20000000<br>
+NFQWS_OPT_DESYNC=“–dpi-desync=disorder2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3”<br>
+NFQWS_OPT_DESYNC_QUIC=“–dpi-desync=fake --dpi-desync-repeats=6”<br>
+TPWS_OPT=“–hostspell=HOST --split-http-req=method --split-pos=3 --oob”<br>
+FLOWOFFLOAD=donttouch<br>
+INIT_APPLY_FW=1<br>
+DISABLE_IPV6=1<br>
+GETLIST=get_antifilter_ipsmart.sh</p>
+</details></td><td>2024-08-23T05:56:42.155Z</td></tr><tr><td>dreatrio</td><td><p>пробовал отключить QUIC в браузере?</p></td><td>2024-08-23T10:26:53.592Z</td></tr><tr><td>easyone11</td><td><p>да, изначально отключено Kyber и QUIC (для GoodbyeDPI требовалось)</p></td><td>2024-08-23T11:25:23.761Z</td></tr><tr><td>halimon</td><td><p>Посоветуйте пожалуйста конфигурацию для МГТС Москва</p></td><td>2024-08-24T13:39:09.792Z</td></tr><tr><td>easyone11</td><td><p>Закончу эпопею свою, никакие конфиги с nfqws нормально не работали тк был включен flow offloading в настройках фаирвола роутера<br>
+выяснили благодаря логам которые изучи разработчик</p>
+<details>
+<summary>
+рабочий конфиг</summary>
+<p>FWTYPE=nftables</p>
+<p>SET_MAXELEM=522288</p>
+<p>IPSET_OPT=“hashsize 262144 maxelem $SET_MAXELEM”</p>
+<p>IP2NET_OPT4=“–prefix-length=22-30 --v4-threshold=3/4”<br>
+IP2NET_OPT6=“–prefix-length=56-64 --v6-threshold=5”</p>
+<p>AUTOHOSTLIST_RETRANS_THRESHOLD=3<br>
+AUTOHOSTLIST_FAIL_THRESHOLD=3<br>
+AUTOHOSTLIST_FAIL_TIME=60<br>
+AUTOHOSTLIST_DEBUGLOG=1</p>
+<p>MDIG_THREADS=30</p>
+<p>GZIP_LISTS=1</p>
+<p>MODE=nfqws<br>
+MODE_HTTP=1<br>
+MODE_HTTP_KEEPALIVE=0<br>
+MODE_HTTPS=1<br>
+MODE_QUIC=1<br>
+MODE_FILTER=none</p>
+<p>DESYNC_MARK=0x40000000<br>
+DESYNC_MARK_POSTNAT=0x20000000<br>
+NFQWS_OPT_DESYNC=“–dpi-desync=fake,split2 --dpi-desync-split-pos=1 --dpi-desync-ttl=3 --dpi-desync-fooling=md5sig”<br>
+NFQWS_OPT_DESYNC_QUIC=“–dpi-desync=fake --dpi-desync-repeats=6”</p>
+<p>TPWS_OPT=“–hostspell=HOST --split-http-req=method --split-pos=3 --oob”</p>
+<p>FLOWOFFLOAD=donttouch</p>
+<p>INIT_APPLY_FW=1</p>
+<p>DISABLE_IPV6=0</p>
+</details></td><td>2024-08-24T20:52:51.252Z</td></tr><tr><td>easyone11</td><td><aside class="quote no-group" data-username="easyone11" data-post="17" data-topic="9603">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/easyone11/48/6759_2.png" class="avatar"> easyone11:</div>
+<blockquote>
+<p>рабочий конфиг</p>
+</blockquote>
+</aside>
+<p>не актуально после 12 09 2024</p>
+<details>
+<summary>
+Можно попробовать без fake</summary>
+<p>DESYNC_MARK=0x40000000<br>
+DESYNC_MARK_POSTNAT=0x20000000<br>
+NFQWS_OPT_DESYNC=“–dpi-desync=split2 --dpi-desync-split-pos=1 --dpi-desync-ttl=3 --dpi-desync-fooling=md5sig”<br>
+#NFQWS_OPT_DESYNC_HTTP=“–dpi-desync=split --dpi-desync-ttl=0 --dpi-desync-fooling=badsum”<br>
+#NFQWS_OPT_DESYNC_HTTPS=“–wssize=1:6 --dpi-desync=split --dpi-desync-ttl=0 --dpi-desync-fooling=badsum”<br>
+#NFQWS_OPT_DESYNC_HTTP6=“–dpi-desync=split --dpi-desync-ttl=5 --dpi-desync-fooling=none”<br>
+#NFQWS_OPT_DESYNC_HTTPS6=“–wssize=1:6 --dpi-desync=split --dpi-desync-ttl=5 --dpi-desync-fooling=none”<br>
+NFQWS_OPT_DESYNC_QUIC=“–dpi-desync=disorder2 --dpi-desync-repeats=6”<br>
+#NFQWS_OPT_DESYNC_QUIC6=“–dpi-desync=hopbyhop”</p>
+</details></td><td>2024-09-12T20:20:49.773Z</td></tr><tr><td>dreatrio</td><td><p>сейчас у тебя работает этот конфиг?</p></td><td>2024-09-28T10:46:05.422Z</td></tr><tr><td>easyone11</td><td><p>–dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig<br>
+сейчас такой</p></td><td>2024-09-28T11:10:54.259Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Disorder2 поменяй на split2</p></td><td>2024-09-28T11:16:56.974Z</td></tr><tr><td>easyone11</td><td><p>сплит2 да, из другого копирнул</p></td><td>2024-09-28T11:25:29.185Z</td></tr><tr><td>MIHAHIM</td><td><p>Привет, я не правильно понимаю речь идет о файле config, который находится по пусти /opt/zapret/?<br>
+Недавно поставил на роутер Openwrt 19.07 поставил запрет, но ни с одним конфигом ничего не работает… И речь даже не о ютубе, ни рутрекер ни любой другой закрытый провайдером сайт…</p>
+<p>При этом на винде тот же запрет работает на ура…</p></td><td>2024-10-12T05:28:21.660Z</td></tr><tr><td>easyone11</td><td><p>ну значит не правильно что то сделал<br>
+да о нём по этому пути</p></td><td>2024-10-12T05:41:04.441Z</td></tr><tr><td>MIHAHIM</td><td><p>У меня вот так в файле config получилось, не знаю как по другому…</p>
+<pre><code class="lang-auto">DESYNC_MARK=0x40000000
+DESYNC_MARK_POSTNAT=0x20000000
+NFQWS_OPT_DESYNC="--wf-tcp=80,443 --wf-udp=443,50000-65535"
+NFQWS_OPT_DESYNC_SUFFIX="--filter-udp=443 --hostlist="%~dp0russia-youtubeQ.txt" --dpi-desync=fake --dpi-desync-repeats=4 --dpi-desync-fake-quic="%~dp0quic_initial_www_google_com.bin" --new"
+NFQWS_OPT_DESYNC_HTTP="--filter-tcp=443 --hostlist="%~dp0russia-youtubeGV.txt" --dpi-desync=split --dpi-desync-split-pos=1 --dpi-desync-fooling=badseq --dpi-desync-repeats=10 --dpi-desync-ttl=4 --new"
+NFQWS_OPT_DESYNC_HTTP_SUFFIX="--filter-tcp=443 --hostlist="%~dp0russia-youtube.txt" --dpi-desync=fake,split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3 --dpi-desync-fake-tls="%~dp0tls_clienthello_www_google_com.bin" --dpi-desync-ttl=3 --new"
+NFQWS_OPT_DESYNC_HTTPS="--filter-tcp=80 --hostlist="%~dp0russia-blacklist.txt" --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --new"
+NFQWS_OPT_DESYNC_HTTPS_SUFFIX="--filter-tcp=443 --hostlist="%~dp0russia-blacklist.txt" --dpi-desync=fake,split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --dpi-desync-fake-tls="%~dp0tls_clienthello_www_google_com.bin" --dpi-desync-ttl=5 --new"
+NFQWS_OPT_DESYNC_HTTP6=""
+NFQWS_OPT_DESYNC_HTTP6_SUFFIX=""
+NFQWS_OPT_DESYNC_HTTPS6=""
+NFQWS_OPT_DESYNC_HTTPS6_SUFFIX=""
+NFQWS_OPT_DESYNC_QUIC="--filter-udp=443 --hostlist="%~dp0russia-discord.txt" --dpi-desync=fake --dpi-desync-udplen-increment=10 --dpi-desync-repeats=7 --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic="%~dp0quic_initial_www_google_com.bin" --new"
+NFQWS_OPT_DESYNC_QUIC_SUFFIX="--filter-udp=50000-65535 --dpi-desync=fake,tamper --dpi-desync-any-protocol --dpi-desync-fake-quic="%~dp0quic_initial_www_google_com.bin" --new"
+NFQWS_OPT_DESYNC_QUIC6=""
+NFQWS_OPT_DESYNC_QUIC6_SUFFIX=""
+</code></pre>
+<p>А вот то что у меня в винде, работает:</p>
+<blockquote>
+<p><span class="mention">@echo</span> off<br>
+start “zapret: http,https,quic,discord” /min “%~dp0winws.exe” ^<br>
+–wf-tcp=80,443 --wf-udp=443,50000-65535 ^<br>
+–filter-udp=443 --hostlist=“%~dp0russia-youtubeQ.txt” --dpi-desync=fake --dpi-desync-repeats=4 --dpi-desync-fake-quic=“%~dp0quic_initial_www_google_com.bin” --new ^<br>
+–filter-tcp=443 --hostlist=“%~dp0russia-youtubeGV.txt” --dpi-desync=split --dpi-desync-split-pos=1 --dpi-desync-fooling=badseq --dpi-desync-repeats=10 --dpi-desync-ttl=4 --new ^<br>
+–filter-tcp=443 --hostlist=“%~dp0russia-youtube.txt” --dpi-desync=fake,split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3 --dpi-desync-fake-tls=“%~dp0tls_clienthello_www_google_com.bin” --dpi-desync-ttl=3 --new ^<br>
+–filter-tcp=80 --hostlist=“%~dp0russia-blacklist.txt” --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --new ^<br>
+–filter-tcp=443 --hostlist=“%~dp0russia-blacklist.txt” --dpi-desync=fake,split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --dpi-desync-fake-tls=“%~dp0tls_clienthello_www_google_com.bin” --dpi-desync-ttl=5 --new ^<br>
+–filter-udp=443 --hostlist=“%~dp0russia-discord.txt” --dpi-desync=fake --dpi-desync-udplen-increment=10 --dpi-desync-repeats=7 --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic=“%~dp0quic_initial_www_google_com.bin” --new ^<br>
+–filter-udp=50000-65535 --dpi-desync=fake,tamper --dpi-desync-any-protocol --dpi-desync-fake-quic=“%~dp0quic_initial_www_google_com.bin” --new ^<br>
+–filter-tcp=443 --hostlist=“%~dp0russia-discord.txt” --dpi-desync=fake,split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --dpi-desync-fake-tls=“%~dp0tls_clienthello_www_google_com.bin” --dpi-desync-ttl=4</p>
+</blockquote></td><td>2024-10-12T07:18:01.087Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><aside class="quote no-group" data-username="MIHAHIM" data-post="25" data-topic="9603">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/b487fb/48.png" class="avatar"> MIHAHIM:</div>
+<blockquote>
+<p><code>%~dp0</code></p>
+</blockquote>
+</aside>
+<p>А разве на линуксе это работает? Мне кажется, вам нужно заменить путь на полный ко всем такого рода файлам. Для фейков /opt/zapret/files/fake/. Для хостилистов тоже (смотря где они лежат)</p></td><td>2024-10-12T08:14:32.116Z</td></tr><tr><td>MIHAHIM</td><td><p>Насчет путей понял, но меня больше смущает другое, мне кажется что весь скрипт (ну почти) нужно вместить  в один или два параметра<br>
+NFQWS_OPT_DESYNC=<br>
+NFQWS_OPT_DESYNC=<br>
+Только как именно сюда всё вместить, я не представляю</p></td><td>2024-10-12T08:20:41.228Z</td></tr>
+    </table>
+      </body>
+    </html>

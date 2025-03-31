@@ -1,0 +1,72 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>настройка-брандмауэра-windows-10-для-goodbyedpi-330</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Hardwarecrypto</td><td><p>Брандмауэр работает для “общего профиля” в режиме “исходящие подключения” - &lt;блокировать&gt;.<br>
+Создано правило для “исходящего подключения” для программы chrome.exe “действие” - &lt;разрешить подключение&gt;, удаленные протоколы и порты TCP 80, 443.<br>
+После запуска GoodbyeDPI в любом режиме подключение chrome.exe блокируется для всех запросов.<br>
+Если создать правило для “исходящего подключения” для “всех пакетов приложений и всех служб” - &lt;разрешить подключение&gt;, удаленные протоколы и порты TCP 80, 443. То подключения с запущенным GoodbyeDPI не блокируется для всех запросов chrome.exe.<br>
+Для каких конкретно служб/программ должны быть настроены дополнительные правила, чтобы не отрывать для всех программ и служб исходящие подключения?</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="настройка-брандмауэра-windows-10-для-goodbyedpi-330/f1e68e9558d7d8cf287653e8e9f5287f2d34d8a9.jpeg" data-download-href="https://ntc.party/uploads/default/f1e68e9558d7d8cf287653e8e9f5287f2d34d8a9" title="01"><img src="настройка-брандмауэра-windows-10-для-goodbyedpi-330/f1e68e9558d7d8cf287653e8e9f5287f2d34d8a9_2_381x500.jpeg" alt="01" data-base62-sha1="yvX2fVfSuUvxPyN8803WOb3yz3z" width="381" height="500" srcset="настройка-брандмауэра-windows-10-для-goodbyedpi-330/f1e68e9558d7d8cf287653e8e9f5287f2d34d8a9_2_381x500.jpeg, настройка-брандмауэра-windows-10-для-goodbyedpi-330/f1e68e9558d7d8cf287653e8e9f5287f2d34d8a9.jpeg 1.5x, настройка-брандмауэра-windows-10-для-goodbyedpi-330/f1e68e9558d7d8cf287653e8e9f5287f2d34d8a9.jpeg 2x" data-dominant-color="E4E3E4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">01</span><span class="informations">539×707 86.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2020-01-25T18:25:43.294Z</td></tr><tr><td>ValdikSS</td><td><blockquote>
+<p>Если дать разрешения для System(ntoskernel.exe) на 80 и 443 порты, то сабж работает.</p>
+</blockquote>
+<p><a href="https://forum.ru-board.com/topic.cgi?forum=5&amp;topic=49599&amp;start=220#18" class="onebox" target="_blank" rel="noopener">https://forum.ru-board.com/topic.cgi?forum=5&amp;topic=49599&amp;start=220#18</a></p></td><td>2020-05-31T18:03:09.864Z</td></tr><tr><td>walala1306</td><td><p>Проблема такая же. Предложенное решение не работает. Уже создал правила на 80 и 443 порты для ntoskrnl.exe, svchost.exe, firefox.exe, goodbyedpi.exe. Куда ещё копать? Да, если создать разрешения на 80 и 443 для всех программ и служб, то работает, но хотелось бы более конкретной точки приложения данного правила.</p></td><td>2021-09-14T14:48:53.272Z</td></tr><tr><td>walala1306</td><td><p>Правило надо создавать для System, а не для ntoskernel.exe. Видимо система их по разному воспринимает. Всё заработало.</p></td><td>2021-09-14T15:45:38.712Z</td></tr><tr><td>GitUser200607(GithubUser)</td><td><p>Тоже нужна помощь.<br>
+Сделал правило для исходящих TCP 80 и 443 для System, но в логах пишется блокировка следующего типа:</p>
+<pre><code class="lang-auto">The Windows Filtering Platform has blocked a connection.
+
+Application Information:
+	Process ID:		4
+	Application Name:	System
+
+Network Information:
+	Direction:		Outbound
+	Source Address:		192.168.1.64
+	Source Port:		57932
+	Destination Address:	77.88.8.8
+	Destination Port:		1253
+	Protocol:		255
+
+Filter Information:
+	Filter Run-Time ID:	94542
+	Layer Name:		Connect
+	Layer Run-Time ID:	48
+</code></pre>
+<p>То есть тут протокол 255, а не TCP, но это резервный протокол, к нему нельзя указывать порты.</p>
+<p>Запускаю так:<br>
+<code>"C:\Program Files\GoodbyeDPI\x86_64\goodbyedpi.exe" -9 --dns-addr 77.88.8.8 --dns-port 1253 --dnsv6-addr 2a02:6b8::feed:0ff --dnsv6-port 1253 --blacklist ..\russia-blacklist.txt --blacklist ..\russia-youtube.txt</code></p></td><td>2024-08-15T10:10:44.777Z</td></tr>
+    </table>
+      </body>
+    </html>

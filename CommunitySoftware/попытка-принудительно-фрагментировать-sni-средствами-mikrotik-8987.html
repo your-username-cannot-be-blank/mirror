@@ -1,0 +1,82 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>попытка-принудительно-фрагментировать-sni-средствами-mikrotik-8987</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Viktor45(Viktor45)</td><td><p>Возникла идея повторить эффект anti-DPI фрагментации пакетов с трафиком средствами самого mikrotik без контейнеров с byeDPI и тд, чтобы операторы связи просто настроили на своем оборудовании и снизили нагрузку на свою тех поддержку, потому что официально ютуб не замедляется или блокируется, а задача оператора - чинить интернет абонентам, чтобы они были довольные в рамках закона.</p>
+<p>Для ros6 было предложено такое начальное решение, возможно число 576 слишком велико, чтобы вызвать эффект аналогичный split<br>
+Идея вкратце взять часть трафика с нужными SNI и пихнуть через интерфейс, где маленькое mtu чтобы пакеты фрагментировались для счастья абонентов</p>
+<pre><code class="lang-auto">
+/ip/vrf/add name=custom-vrf
+
+/interface/vlan/add name=low-mtu-vlan interface=etherX vlan-id=10 mtu=576
+
+/ip/address/add address=192.168.100.1/24 interface=low-mtu-vlan network=192.168.100.0
+/ip/route/vrf/add routing-mark=custom-vrf interfaces=low-mtu-vlan
+
+/ip/firewall/mangle/add chain=prerouting protocol=tcp dst-port=443 tls-host=*.googlevideo.com action=mark-routing new-routing-mark=custom-vrf passthrough=yes
+/ip/firewall/mangle/add chain=prerouting protocol=tcp dst-port=443 tls-host=*.youtube.com action=mark-routing new-routing-mark=custom-vrf passthrough=yes
+...
+
+/ip/route/add dst-address=0.0.0.0/0 gateway=192.168.100.254 routing-mark=custom-vrf
+</code></pre>
+<p>У кого какие мысли, обратимся к коллективному разуму, а также может кто-то и мигрирует инструкции на ros7 чтобы те кто обновился на эту версии тоже могли что-то подобное настроить, либо поправить если что не так.</p></td><td>2024-08-08T17:41:50.210Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Круто, а когда аналогичный вопрос для ovpn подымал, так все мимо прошли. Опробуем</p></td><td>2024-08-08T22:14:54.619Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Думаю <a class="mention" href="/u/nzkhammatov">@nzkhammatov</a> с 7кой поможет</p></td><td>2024-08-08T22:16:28.653Z</td></tr><tr><td>anon60595749</td><td><p><a class="mention" href="/u/bolvan">@bolvan</a> писал, что ТСПУ научился собирать фрагменты. Единственный вариант - резать по границе 1 или 2 байта TLS: <a href="https://ntc.party/t/zapret-whats-new/61/140" class="inline-onebox">Zapret: what's new - #140 by bolvan</a></p></td><td>2024-08-09T06:22:43.262Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://habr.com/ru/articles/838452/">
+  <header class="source">
+      <img src="попытка-принудительно-фрагментировать-sni-средствами-mikrotik-8987/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://habr.com/ru/articles/838452/" target="_blank" rel="noopener nofollow ugc">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="попытка-принудительно-фрагментировать-sni-средствами-mikrotik-8987/80d9388e1c9597cb29e4d525faf4f1daea15c1b2.jpeg" class="thumbnail" data-dominant-color="DBDBE6" width="467" height="260"></div>
+
+<h3><a href="https://habr.com/ru/articles/838452/" target="_blank" rel="noopener nofollow ugc">Решаем проблему блокировок (и YouTube) за 5 минут на роутере Mikrotik через...</a></h3>
+
+  <p>Всем привет! Это моя первая статья на хабре, которая точно кому-то пригодится в данное время. Здесь я расскажу как ускорить ютуб и разблокировать доступ к некоторым заблокированным ресурсам прямо на...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-08-27T15:46:18.756Z</td></tr>
+    </table>
+      </body>
+    </html>

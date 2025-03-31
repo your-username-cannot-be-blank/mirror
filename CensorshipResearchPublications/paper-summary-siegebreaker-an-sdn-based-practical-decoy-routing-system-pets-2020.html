@@ -1,0 +1,50 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-siegebreaker-an-sdn-based-practical-decoy-routing-system-pets-2020</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>SiegeBreaker: An SDN Based Practical Decoy Routing System<br>
+Piyush Kumar Sharma, Devashish Gosain, Himanshu Sagar, Chaitanya Kumar, Aneesh Dogra, Vinayak Naik, H. B. Acharya, Sambuddho Chakravarty<br>
+<a href="https://censorbib.nymity.ch/#Sharma2020a" rel="noopener nofollow ugc">https://censorbib.nymity.ch/#Sharma2020a</a><br>
+<a href="https://www.youtube.com/watch?v=s7mHOKFtcYA&amp;list=PLWSQygNuIsPeBNObt8cV5KOsyomz3-B8_&amp;index=78" rel="noopener nofollow ugc">Presentation video</a><br>
+<a href="https://github.com/Piyush825/SiegeBreaker" rel="noopener nofollow ugc">https://github.com/Piyush825/SiegeBreaker</a></p>
+<p>This paper is about a decoy routing design called SiegeBreaker. What makes it different from other systems is that it is implemented using <a href="https://en.wikipedia.org/wiki/Software-defined_networking" rel="noopener nofollow ugc">software-defined networking</a> (SDN), with a modular design that reduces the traffic inspection load on routers and makes it easy for the proxy server to see only the subset of traffic that is intended for decoy routing. SiegeBreaker is a flow-blocking system: the decoy router is installed as a serial element at an ISP and decides forwarding for each packet, based on whether the packet is part of a covert decoy routing flow. SiegeBreaker therefore questions the design maxim of other systems like <a href="https://censorbib.nymity.ch/#Wustrow2014a" rel="noopener nofollow ugc">TapDance</a> and <a href="https://github.com/net4people/bbs/issues/18" rel="noopener nofollow ugc">Conjure</a>, that decoy routing systems must avoid flow blocking to be realistically deployable. The position of the authors is that software-defined networking is fast, reliable, and cost-effective enough to make a flow-blocking design tenable.</p>
+<p>Software-defined networking divides the task of routing between a <em>controller</em> and <em>switches</em>. The controller, capable of generic though relatively low-speed computation, sets network policy; the switches carry out the policy set by the controller using their high-speed flow tables. The SiegeBreaker protocol begins with the client sending a message to the SDN controller over an unblockable channel (the prototype uses email). The message contains the IP address of the overt destination and the TCP Initial Sequence Number that the client plans to use in its future decoy routing session. On receiving the client’s message, the SDN controller configures its switches to divert TCP connections that have a matching Initial Sequence Number and destination IP address back to the controller itself. The controller inspects all such diverted packets, until it observes a TCP SYN packet with the previously registered Initial Sequence Number and a subsequent TLS handshake. Then the controller updates the switches’ flow rules to forward the remainder of the connection to a secret proxy—the controller does not participate in the protocol after this point. The secret proxy resets the TCP connection with the covert destination (spoofing the client’s source IP address) and sends proof back to the client that the decoy routing session has begun. The client then carries on a proxy session with the secret proxy, tunneled in TLS using a newly negotiated master key.</p>
+<p>An important aspect of the design is that the SDN controller, which is the slower, general-purpose component, is involved only at the beginning of the protocol, and thereafter is disengaged, with the bulk of the session being handled by high-speed switches. This speed, however, comes at a cost: without additional care, the secret proxy will not have the same TCP/IP fingerprint as the overt destination; and because the secret proxy bypasses its local kernel to spoof the destination IP address of the client, it must emulate TCP algorithms such as congestion control in userspace. Another benefit of SiegeBreaker is that the secret proxy, which forwards client traffic to the covert destination, is a separate component from the SDN infrastructure that is responsible for identifying decoy routing flows. This allows for flexible trust relationships; for example, an ISP might trust a third party to operate a secret proxy for decoy routing users, but not trust the third party to inspect every flow on the ISP’s premises. The ISP can run the SDN components, which see everything, and selectively forward only those flows that are confirmed to be decoy routing to the secret proxy. The authors provide suggestions for how existing decoy routing systems could adopt a similar modularization in <a href="https://petsymposium.org/2020/files/papers/issue3/popets-2020-0051.pdf#page=19" rel="noopener nofollow ugc">Appendix A.2</a>.</p>
+<p>The authors give a prototype implementation, using the <a href="https://ryu-sdn.org/" rel="noopener nofollow ugc">Ryu</a> SDN controller and an <a href="https://h20195.www2.hpe.com/v2/GetDocument.aspx?docname=c04123356" rel="noopener nofollow ugc">HP 3500 yl</a> switch, and test it in a lab environment, with induced non-decoy-routing background load of 15 Gbps or 50000 parallel HTTP connections. The performance of transfers under SiegeBreaker is very similar to direct TCP connections, after a few seconds for bootstrapping.</p>
+<p>Thanks to Piyush Kumar Sharma for commenting on a draft of this summary.</p></td><td>2021-02-08T23:04:40.076Z</td></tr>
+    </table>
+      </body>
+    </html>

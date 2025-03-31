@@ -1,0 +1,13 @@
+start "zapret: http,https,quic" /min "%~dp0winws.exe" ^
+--wf-tcp=80,443 --wf-udp=443 ^
+--filter-tcp=80 --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --new ^
+--skip --hostlist-domains=ntc.party --wssize=1:6 --ipset-ip=130.255.77.28,2a02:e00:ffec:4b8::1 --dpi-desync=fake,multidisorder --dpi-desync-split-seqovl=1 --dpi-desync-repeats=2 --dpi-desync-split-pos=1,sld+2,sld+5,sniext+1 --dpi-desync-fooling=md5sig --new ^
+--filter-udp=443 --hostlist-domains=googlevideo.com --dpi-desync=fake --dpi-desync-repeats=2 --dpi-desync-fake-quic="%~dp0quic.bin" --new ^
+--filter-udp=443 --hostlist="%~dp0youtube.txt" --dpi-desync=fake --dpi-desync-repeats=3 --dpi-desync-fake-quic="%~dp0quic.bin" --new ^
+--filter-tcp=443 --hostlist-domains=googlevideo.com --dpi-desync=syndata,multidisorder --wssize=1:6 --ipset-ip=2a02:2168:4::/60,2a02:2168:a800::/38 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=1,host+2,sld+2,sld+5,sniext+1,sniext+2,endhost-2 --dpi-desync-fake-syndata="%~dp0tlsmix1.bin" --dpi-desync-split-seqovl=1 --dpi-desync-split-seqovl-pattern="%~dp0tlsmix1.bin" --new ^
+--filter-tcp=443 --hostlist-domains=googlevideo.com --dpi-desync=syndata,multidisorder --wssize=1:6 --ipset-ip=2a00:1450:4011::/56 --dpi-desync-fake-syndata="%~dp0tlsmix1.bin" --dpi-desync-split-seqovl=1 --dpi-desync-split-seqovl-pattern="%~dp0tlsmix1.bin" --dpi-desync-split-pos=1,host+2,sld+2,sld+5,sniext+1,sniext+2,endhost-2 --new ^
+--filter-tcp=* --hostlist="%~dp0youtube.txt" --dpi-desync=fake,multidisorder --dpi-desync-split-pos=1,host+2,sld+2,sld+5,sniext+1,endhost-2 --dpi-desync-split-seqovl=0 --dpi-desync-fooling=md5sig --dpi-desync-repeats=1 --dpi-desync-ttl=15 --new ^
+--hostlist="%~dp0block1.txt" --dpi-desync=fake,fakedsplit --dpi-desync-repeats=1 --dpi-desync-split-pos=1,midsld,sniext+1,endhost-2 --dpi-desync-fooling=hopbyhop,md5sig --new ^
+--hostlist="%~dp0block2.txt" --dpi-desync=fake,multidisorder --dpi-desync-split-seqovl=1 --dpi-desync-repeats=1 --dpi-desync-split-pos=1,host+2,midsld+1,sniext+1,endhost-2 --dpi-desync-fooling=hopbyhop,md5sig --new ^
+--hostlist-domains=cloudflare-ech.com --dpi-desync=fake,fakedsplit --dpi-desync-fooling=hopbyhop,md5sig --new ^
+--filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=4

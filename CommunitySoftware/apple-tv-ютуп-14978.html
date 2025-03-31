@@ -1,0 +1,57 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>apple-tv-ютуп-14978</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>kpbicka(Sean Williams )</td><td><p>Всем привет<br>
+На RPi поднят zapret и через него работает абсолютно всё на абсолютно любых устройствах и браузерах… за исключением приложения YouTube на  Apple TV 4, но зато на ней с прописанным прокси через  RPi отлично показывают потоки из приложений дождя, голос америки, и т д</p>
+<p>конфигурация запрета простейшая<br>
+NFQWS_OPT=“–dpi-desync=syndata --dpi-desync-fake-quic=/opt/zapret/files/fake/tls_clienthello_iana_org.bin”<br>
+никакие другие ключи ситуацию на улучшают, а иногда даже ломают уже работающий трафик<br>
+да и явного понимания какой конкретно ключ применить нет</p>
+<p>Кто-нибудь победил YT на ATV? Были упоминания что оно работает через QUIC, но deny udp53 не помогает вроде.  Ну или накидайте в каком направлении идти <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2025-01-27T12:58:36.366Z</td></tr><tr><td>Maluha</td><td><p>Любой VPN вместо этих костылей синк шинк крекс фэекс пекс.</p></td><td>2025-01-27T13:09:26.616Z</td></tr><tr><td>kpbicka(Sean Williams )</td><td><p>Да это понятно. Но всё же, железка работает, софт отрабатывает на 99%<br>
+Надо только понять где оставшийся 1%</p></td><td>2025-01-27T13:20:24.299Z</td></tr><tr><td>kotik.neko</td><td><p>Так, на форуме снова можно писать, поэтому отвечу, хоть и с запозданием.</p>
+<p>Приложение Ютуба на Apple TV юзает тот же протокол UDP, что и приложение на обычной iOS. То есть фейкать нужно именно его, там только превьюшки по TCP подгружаются. У меня установлена такая конфигурация, все работает:</p>
+<pre><code class="lang-auto">NFQWS_OPT="
+--filter-tcp=80 --dpi-desync=fake,multisplit --dpi-desync-any-protocol --dpi-desync-split-pos=method+2 --dpi-desync-fooling=md5sig &lt;HOSTLIST&gt; --new
+--filter-tcp=443 --dpi-desync=fake,multisplit --dpi-desync-any-protocol --wssize=1:6 --dpi-desync-split-pos=1,midsld  --dpi-desync-fooling=badseq,md5sig --dpi-desync-repeats=16 &lt;HOSTLIST&gt; --new
+--filter-udp=443 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-fake-quic=opt/zapret/files/fake/quic_initial_www_google_com.bin --dpi-desync-repeats=16  &lt;HOSTLIST_NOAUTO&gt; --new
+--filter-udp=50000-50099 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-repeats=6 --dpi-desync-cutoff=n2
+"
+</code></pre>
+<p>То есть мой Zapret фейкает TCP на портах 80 и 443 (HTTP и HTTPS), протокол UDP на 443 порту (как раз для видеопотока приложений ютуба под iOS и Android) ну и до кучи UDP на портах 50000-50099 для голосовых чатов дискорда. Попробуйте, должно получиться.</p></td><td>2025-03-11T08:49:08.758Z</td></tr>
+    </table>
+      </body>
+    </html>

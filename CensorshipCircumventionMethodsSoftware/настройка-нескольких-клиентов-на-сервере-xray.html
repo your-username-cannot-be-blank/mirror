@@ -1,0 +1,177 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>настройка-нескольких-клиентов-на-сервере-xray</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>vlads</td><td><p>Здравствуйте!<br>
+По статьям на Хабре, удалось настроить xray сервер (обычный ПК x64_86 на linux). Как можно добавить в конфиг сервера ещё одного пользователя (в конфиге настройки для clients, id, privateKey и т.д) и чтоб каждый из них шёл на свой outbounds-protocol?</p></td><td>2024-03-23T20:31:05.699Z</td></tr><tr><td>0ka(0ka)</td><td><p>ничего непонятно, выкладывайте конфиг и пишите подробнее</p></td><td>2024-03-23T21:08:22.695Z</td></tr><tr><td>vlads</td><td><p>Конфиг:</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">{
+  "log": {
+    "loglevel": "info"
+  },
+  "inbounds": [
+    {
+      "listen": "0.0.0.0",
+      "port": 2443,
+      "protocol": "vless",
+      "tag": "reality-in",
+      "settings": {
+        "clients": [
+          {
+            "id": "UUID",
+            "email": "user1",
+            "flow": "xtls-rprx-vision"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "show": false,
+          "dest": "www.microsoft.com:443",
+          "xver": 0,
+          "serverNames": [
+            "www.microsoft.com"
+          ],
+          "privateKey": "privatkey",
+          "minClientVer": "",
+          "maxClientVer": "",
+          "maxTimeDiff": 0,
+          "shortIds": [""]
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "http",
+      "tag": "proxy",
+      "settings":
+      {
+        "servers": [
+          {
+            "address": "127.0.0.1",
+            "port": 3128
+          }
+         ]
+        }
+       },
+       {
+         "protocol": "blackhole",
+         "tag": "block"
+       }
+    ]
+}
+</code></pre>
+</details>
+<p>Здесь, пользователь в конечном итоге подключается к локальному прокси (на той же системе). А другой пользователя (его нужно как-то ещё оформить), должен подключаться к другому прокси, тоже на той же системе.<br>
+Я вообще верно понимаю что для нового пользователя не нужен новый отдельный конфиг и соответственно второй экземпляр xray?</p></td><td>2024-03-24T16:56:09.155Z</td></tr><tr><td>0ka(0ka)</td><td><p>почему не использовать второй inbound с другим портом?</p>
+<p>пробуйте, не проверял</p>
+<pre><code class="lang-auto">"clients": [
+          {
+            "id": "UUID",
+            "email": "user1",
+            "flow": "xtls-rprx-vision"
+          },
+		  {
+            "id": "UUID2",
+            "email": "user2",
+            "flow": "xtls-rprx-vision"
+          },
+        ],
+		
+...
+		
+"routing": {
+        "domainStrategy": "AsIs",
+        "rules": [
+            {
+                "user": ["user1"],
+                "outboundTag": "proxy1",
+                "type": "field"
+            },
+			{
+                "user": ["user2"],
+                "outboundTag": "proxy2",
+                "type": "field"
+            }
+        ]
+    }
+</code></pre></td><td>2024-03-24T18:12:53.972Z</td></tr><tr><td>kstrmv</td><td><p>В серверном конфиге у тебя есть privateKey и shortIds(один или несколько).<br>
+В клиентском конфиге есть publicKey (который “сгененирован в паре” с серверным privateKey) и shortIds(должен быть быть в серверном списке shortIds).<br>
+Так вот серверный конфиг должен содержать один privateKey и количество shortIds, соответствующее количеству юзеров.<br>
+А клиентские конфиги будут содержать один и тот же publicKey, но разные shortIds.</p></td><td>2024-03-24T18:18:05.548Z</td></tr><tr><td>sakontwist</td><td><p>shortid может быть одним для разных пользователей или вообще пустым, если в списке на сервере есть вариант “”. Отличаться должны только UUID. Кроме того, в правилах routing используется именно имя user, а не UUID, поэтому правило может быть универсальным для разных протоколов (например vless и shadowsocks).<br>
+Если UUID сгенерирован по имени юзера, а не рандомно, то в клиенте можно использовать понятное имя:</p>
+<p>xray uuid -i “custom string”</p></td><td>2024-03-24T20:34:45.522Z</td></tr><tr><td>dimzon(Dmitry)</td><td><aside class="quote no-group" data-username="sakontwist" data-post="6" data-topic="7553">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c77e96/48.png" class="avatar"> sakontwist:</div>
+<blockquote>
+<p>Если UUID сгенерирован по имени юзера, а не рандомно, то в клиенте можно использовать понятное имя</p>
+</blockquote>
+</aside>
+<p>не стоит, некоторые клиенты (HiddifyNext) глючат на сочетаниях некоторых символов</p></td><td>2024-03-26T11:12:04.698Z</td></tr><tr><td>sakontwist</td><td><p>ну так-то они глючат и если в ключе shadowsocks залетает “\”. Но v2ray/nekobox переваривают нормально</p></td><td>2024-03-27T10:19:27.016Z</td></tr><tr><td>vlads</td><td><p>По поводу, почему не использовать… я просто не знаю что лучше. Предложенная вами часть конфига работает как нужно. Не подумал бы, что user из email использовался бы в правилах для outbound, для второго пользователя я его решил пропустить. Тут получается что privatekey (и public) одинаковые, я думал что они должны быть разные. И ещё не понятно, какие секции с какими можно (или даже нужно) сочетать.</p></td><td>2024-03-27T19:50:35.815Z</td></tr><tr><td>vlads</td><td><p>Есть небольшая проблема. К прокси, к которому обращается xray, xray формирует запросы типа таких:</p>
+<pre><code class="lang-auto">CONNECT remote_host:port HTTP/1.1
+</code></pre>
+<p>Можно ли их привести к виду:</p>
+<pre><code class="lang-auto">GET http://remote_host:port/ HTTP/1.1
+</code></pre>
+<p>В последнем случае, это когда в браузере непосредственно указан прокси, который в конфиге xray указан в “servers”: [ { “address”: “127.0.0.1”, “port”: 3128        } ], т.е. чтоб запросы через браузер-&gt;xray-&gt;remote_proxy не отличались, как если бы не было xray, т.е. так браузер-&gt;remote_proxy.</p></td><td>2024-04-06T07:00:41.758Z</td></tr><tr><td>soloway(Solo Way)</td><td><p>По стандарту запросы к прокси должны быть:<br>
+Для HTTP:</p>
+<pre><code class="lang-auto">GET http://remote_host:port/ HTTP/1.1
+</code></pre>
+<p>или</p>
+<pre><code class="lang-auto">POST http://remote_host:port/ HTTP/1.1
+</code></pre>
+<p>А в случае создания туннеля для проброса HTTP<strong>S</strong>:</p>
+<pre><code class="lang-auto">CONNECT remote_host:port HTTP/1.1
+</code></pre></td><td>2024-04-06T11:15:15.218Z</td></tr><tr><td>vlads</td><td><p>В данном конкретном случае, я подключаюсь к удалённому серверу по http. Да через туннель. Например stunnel это не смущает.<br>
+Да полноты картины, объясню чего добиваюсь. В моей локальной сети есть nas, на нём есть plex. К нему я подключаюсь с мобильного устройства. На мобильном устройстве установил nekobox, на маршрутизаторе (это другой девайс), который обслуживает локальную сеть установил xray-сервер. Я подключаюсь к plex из браузера, (nekobox при этом работает), набирая обычный локальный адрес nas. Но подключение не происходит, в логе прокси, который работает на маршрутизаторе (в конфиге xray тот что 127.0.0.1:3128) видно, что запрос идёт как connect. Этот прокси фильтрующий. Он не подключает, выдавая ошибку “Error: The TLS/SSL handshake with the client failed: error:0A00009C:SSL routines::http request”. Если запрос идёт через get, то ошибки нет. Аналогичное происходит, если я подключаюсь к сайту, который работает по не защищённому протоколу http, так же не подключается. Чтоб работало, в прокси я должен отключить фильтрацию, но по идее это должно работать только для сайтов https. В общим, в моём кейсе, отключение фильтрации не нужно.</p></td><td>2024-04-06T18:04:19.583Z</td></tr><tr><td>ValdikSS</td><td><p>Не знаю насчёт XRay, но V2Ray/V2Fly не поддерживает не-CONNECT-методы. Полагаю, что то же самое и в XRay.</p></td><td>2024-04-09T10:05:38.728Z</td></tr>
+    </table>
+      </body>
+    </html>

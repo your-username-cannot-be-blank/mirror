@@ -1,0 +1,73 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>tor-obfs4-bridges-ru-blocklist</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>x2922477383(x2922477383)</td><td><p>У меня есть небольшая коллекция obfs4 мостов и меня удивило, что флаг блоклиста бывает только “RU”.<br>
+Выходит отслеживаются блокировки мостов только со стороны РФ? А как же Иран, Китай, Азербайджан, Йемен, Оман, Катар, Саудовская Аравия, ОАЭ, Сомали, Мадагаскар, Мальдивы, Мьянма, Кувейт, Куба, кто там еще? Они не блокирут мосты?<br>
+Выборка статистически значимая: из 1134 в блоке 274 (все в RU).</p></td><td>2023-09-28T17:01:22.107Z</td></tr><tr><td>welazsc</td><td><p>Это были разовые акции после <a href="https://ntc.party/t/ooni-reports-of-tor-blocking-in-certain-isps-since-2021-12-01/1477">cобытия 1 декабря 2021</a>, когда считалось, что большинство мостов было собрано заранее через moat/https. Все существующие мосты пометили в ручном режиме, чтобы не раздавать их на RU адреса, и призвали запускать новые мосты с новыми адресами.</p></td><td>2023-09-28T17:34:17.655Z</td></tr><tr><td>x2922477383(x2922477383)</td><td><p>Спасибо за интересную информацию.<br>
+Но разве статистика доступности не собирается мостами? А как же <a href="https://gitlab.torproject.org/tpo/core/tor/-/blob/main/doc/man/tor.1.txt" rel="noopener nofollow ugc">мануал</a></p>
+<pre><code class="lang-auto">[[BridgeRecordUsageByCountry]] **BridgeRecordUsageByCountry** **0**|**1**::
+    When this option is enabled and BridgeRelay is also enabled, and we have
+    GeoIP data, Tor keeps a per-country count of how many client
+    addresses have contacted it so that it can help the bridge authority guess
+    which countries have blocked access to it. If ExtraInfoStatistics is
+    enabled, it will be published as part of the extra-info document.
+    (Default: 1)
+</code></pre>
+<pre><code class="lang-auto">[[ExtraInfoStatistics]] **ExtraInfoStatistics** **0**|**1**::
+    When this option is enabled, Tor includes previously gathered statistics in
+    its extra-info documents that it uploads to the directory authorities.
+    Disabling this option also removes bandwidth usage statistics, and
+    GeoIPFile and GeoIPv6File hashes from the extra-info file. Bridge
+    ServerTransportPlugin lines are always included in the extra-info file,
+    because they are required by BridgeDB.
+    (Default: 1)
+</code></pre>
+<p>и должно отображаться согласно <a href="https://metrics.torproject.org/onionoo.html#details_bridge_blocklist" rel="noopener nofollow ugc">протоколу</a>.</p>
+<p>Я зря не удаляю из torrc не доступные мосты? Думал от меня уходит статистика по доступности мостов из моей локации.</p></td><td>2023-10-02T21:57:14.769Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="x2922477383" data-post="3" data-topic="5838">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/87869e/48.png" class="avatar"> x2922477383:</div>
+<blockquote>
+<p>Я зря не удаляю из torrc не доступные мосты? Думал от меня уходит статистика по доступности мостов из моей локации.</p>
+</blockquote>
+</aside>
+<p>Клиент добавляет информацию только фактом подключения. Телеметрии у клиента нет, и надеюсь не будет. Если не работает, можете удалять.</p>
+<p>Мосты собирают информацию по количеству клиентов и их стране, которая потом суммируется и отображается в метриках. Отдельно по мостам информация есть, но не публикуется, extra-info невозможно скачать у моста (но можно у релея).</p>
+<p>Факт исчезновения клиентов тоже используется, в метриках показывают вероятную блокировку и разблокировку. Отображается не точное, иногда ошибочное или не связанное с цензурой событие. У проекта есть планы по более прицельному использованию информации от мостов, есть <a href="https://gitlab.torproject.org/tpo/anti-censorship/rdsys/-/issues/112" rel="noopener nofollow ugc">тикет</a>.</p></td><td>2023-10-03T08:17:06.061Z</td></tr><tr><td>x2922477383(x2922477383)</td><td><p>Спасибо, стало яснее.</p></td><td>2023-10-03T21:13:08.188Z</td></tr>
+    </table>
+      </body>
+    </html>

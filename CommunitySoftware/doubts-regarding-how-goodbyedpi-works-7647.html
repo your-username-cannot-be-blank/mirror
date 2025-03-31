@@ -1,0 +1,62 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>doubts-regarding-how-goodbyedpi-works-7647</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>psychobacter</td><td><p>Hey, I had a question about GoodbyeDPI. In a comment on Hacker News, the author mentioned that GoodbyeDPI uses something called “Fragmentation” which actually refers to shrinking the TCP window size to force the operating system to send smaller TCP packets.</p>
+<p>Does this mean GoodbyeDPI is splitting TCP packets into smaller pieces? So, if I run GoodbyeDPI with a modeset of 6 (which sets the HTTP/HTTPS fragmentation value to 2), does that mean all HTTP/HTTPS traffic gets chopped up into twice as many packets? Could that introduce latency or reduce performance for online multiplayer games? Could the extra fragmentation from GoodbyeDPI impact smoothness of gameplay?</p></td><td>2024-04-06T06:34:09.631Z</td></tr><tr><td>ValdikSS</td><td><p>Current GoodbyeDPI version supports both Window Size shrinking and real segmentation by splitting the request into two pieces, optionally sending them in reverse (second piece first, then first piece).</p>
+<aside class="quote no-group" data-username="psychobacter" data-post="1" data-topic="7647">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/p/d9b06d/48.png" class="avatar"> psychobacter:</div>
+<blockquote>
+<p>Could that introduce latency or reduce performance for online multiplayer games?</p>
+</blockquote>
+</aside>
+<p>Window size shrinking applies only to TCP connections, you could see the latency only in the beginning of the connection, as after some time Window Size gets automatically adjusted for optimal network conditions.</p>
+<p>Segmentation also applies only to TCP connections, only to recognized HTTP/HTTPS requests, and if you use blacklist, only to blacklisted domains.<br>
+It may introduce latency only for the first several packages in the connection.</p>
+<aside class="quote no-group" data-username="psychobacter" data-post="1" data-topic="7647">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/p/d9b06d/48.png" class="avatar"> psychobacter:</div>
+<blockquote>
+<p>Could the extra fragmentation from GoodbyeDPI impact smoothness of gameplay?</p>
+</blockquote>
+</aside>
+<p>No.</p></td><td>2024-04-09T11:16:18.701Z</td></tr>
+    </table>
+      </body>
+    </html>

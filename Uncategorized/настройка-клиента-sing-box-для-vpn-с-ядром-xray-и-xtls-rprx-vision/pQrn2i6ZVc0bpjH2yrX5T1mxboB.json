@@ -1,0 +1,239 @@
+{
+  "log": {
+    "level": "warn"
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "dns_proxy",
+        "address": "https://mozilla.cloudflare-dns.com/dns-query",
+        "address_resolver": "dns_resolver",
+        "strategy": "ipv4_only",
+        "detour": "proxy"
+      },
+      {
+        "tag": "dns_direct",
+        "address": "https://common.dot.dns.yandex.net/dns-query",
+        "address_resolver": "dns_resolver",
+        "strategy": "ipv4_only",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns_resolver",
+        "address": "77.88.8.8",
+        "strategy": "ipv4_only",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns_block",
+        "address": "rcode://refused"
+      }
+    ],
+    "rules": [
+      {
+        "domain_keyword": [
+          "aniu.ru",
+          "habr.com",
+          "4pda.to",
+          "4pda.ru"
+        ],
+        "server": "dns_proxy"
+      },
+      {
+        "domain_keyword": [
+          "localhost"
+        ],
+        "domain_regex": [
+          ".*\\.ru$",
+          ".*\\.su$",
+          ".*\\.ru\\.com$",
+          ".*\\.ru\\.net$",
+          ".*\\.moscow$",
+          ".*\\.by$",
+          ".*\\.xn--p1ai$",
+          ".*\\.xn--p1acf$",
+          ".*\\.xn--80aswg$",
+          ".*\\.xn--c1avg$",
+          ".*\\.xn--80asehdb$",
+          ".*\\.xn--d1acj3b$",
+          ".*\\.xn--90ais$"
+        ],
+        "geosite": [
+          "category-ru",
+          "private",
+          "twitch"
+        ],
+        "server": "dns_direct"
+      },
+      {
+        "geosite": [
+          "category-ads-all"
+        ],
+        "server": "dns_block"
+      },
+      {
+        "process_name": [
+          "firefox.exe",
+          "thunderbird.exe",
+          "yarr.exe",
+          "yt-dlp.exe",
+          "mpv.exe",
+          "NVCleanstall.exe"
+        ],
+        "server": "dns_proxy"
+      }
+    ],
+    "final": "dns_direct"
+  },
+  "inbounds": [
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "127.0.0.1",
+      "listen_port": 2080,
+      "sniff": true
+    },
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "interface_name": "tun0",
+      "mtu": 9000,
+      "address": "172.18.0.1/30",
+      "stack": "system",
+      "auto_route": true,
+      "sniff": true
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "vless",
+      "tag": "proxy",
+      "server": "REDACTED",
+      "server_port": 443,
+      "uuid": "REDACTED",
+      "flow": "xtls-rprx-vision",
+      "tls": {
+        "enabled": true,
+        "server_name": "REDACTED",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "REDACTED",
+          "short_id": "REDACTED"
+        }
+      },
+      "packet_encoding": ""
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "block",
+      "tag": "block"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    }
+  ],
+  "route": {
+    "geoip": {
+      "download_detour": "proxy"
+    },
+    "geosite": {
+      "download_detour": "proxy"
+    },
+    "rules": [
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      },
+      {
+        "domain_keyword": [
+          "aniu.ru",
+          "habr.com",
+          "4pda.to",
+          "4pda.ru"
+        ],
+        "outbound": "proxy"
+      },
+      {
+        "domain_keyword": [
+          "localhost"
+        ],
+        "domain_regex": [
+          ".*\\.ru$",
+          ".*\\.su$",
+          ".*\\.ru\\.com$",
+          ".*\\.ru\\.net$",
+          ".*\\.moscow$",
+          ".*\\.by$",
+          ".*\\.xn--p1ai$",
+          ".*\\.xn--p1acf$",
+          ".*\\.xn--80aswg$",
+          ".*\\.xn--c1avg$",
+          ".*\\.xn--80asehdb$",
+          ".*\\.xn--d1acj3b$",
+          ".*\\.xn--90ais$"
+        ],
+        "geosite": [
+          "category-ru",
+          "private",
+          "twitch"
+        ],
+        "geoip": [
+          "private",
+          "ru",
+          "by"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "protocol": [
+          "quic"
+        ],
+        "geosite": [
+          "category-ads-all"
+        ],
+        "source_ip_cidr": [
+          "224.0.0.0/3",
+          "ff00::/8"
+        ],
+        "ip_cidr": [
+          "224.0.0.0/3",
+          "ff00::/8"
+        ],
+        "port": [
+          21,
+          23,
+          135,
+          137,
+          138,
+          139,
+          445,
+          3306,
+          3389,
+          5353
+        ],
+        "outbound": "block"
+      },
+      {
+        "process_name": [
+          "firefox.exe",
+          "thunderbird.exe",
+          "yarr.exe",
+          "yt-dlp.exe",
+          "mpv.exe",
+          "NVCleanstall.exe"
+        ],
+        "outbound": "proxy"
+      }
+    ],
+    "final": "direct",
+    "auto_detect_interface": true
+  }
+}

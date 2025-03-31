@@ -1,0 +1,96 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>domain-existence-check-for-fastly-ips</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>I’ve discovered an interesting feature of censorship of the services which use Fastly. On Turkmentelecom and AGTS, the connection could be established only if the domain exist, i.e. does not return NXDOMAIN.</p>
+<p>I used the following domains during the test:</p>
+<ul>
+<li>
+<code>dev.talent.stackoverflow.com</code>, resolves to <code>198.252.206.27</code>
+</li>
+<li>
+<code>dev-bonfire.stackoverflow.com</code>, does not resolve (NXDOMAIN), but set up with proper SSL certificate on Fastly</li>
+</ul>
+<p>The connection is made to one of <code>stackoverflow.com</code> IP address for both domains.</p>
+<pre data-code-wrap="sh"><code class="lang-plaintext">$ host -t a dev.talent.stackoverflow.com
+dev.talent.stackoverflow.com has address 198.252.206.27
+
+$ host -t a dev-bonfire.stackoverflow.com
+Host dev-bonfire.stackoverflow.com not found: 3(NXDOMAIN)
+
+$ host -t a stackoverflow.com
+stackoverflow.com has address 151.101.193.69
+stackoverflow.com has address 151.101.65.69
+stackoverflow.com has address 151.101.1.69
+stackoverflow.com has address 151.101.129.69
+
+# This is fine, the cert is expired for this domain on Fastly
+$ curl --connect-to ::151.101.1.69:443 https://dev.talent.stackoverflow.com -v
+* Cert verify failed: BADCERT_EXPIRED
+curl: (60) Cert verify failed: BADCERT_EXPIRED
+
+# This domain is NXDOMAIN
+$ curl --connect-to ::151.101.1.69:443 https://dev-bonfire.stackoverflow.com -v
+* ssl_handshake returned - mbedTLS: (-0x0050) NET - Connection was reset by peer
+curl: (35) ssl_handshake returned - mbedTLS: (-0x0050) NET - Connection was reset by peer
+
+# Trying again
+$ curl --connect-to ::151.101.1.69:443 https://dev-bonfire.stackoverflow.com -v
+* ssl_handshake returned - mbedTLS: (-0x0050) NET - Connection was reset by peer
+curl: (35) ssl_handshake returned - mbedTLS: (-0x0050) NET - Connection was reset by peer
+
+# And trying over uncensored connection
+$ curl --connect-to ::151.101.1.69:443 https://dev-bonfire.stackoverflow.com -v
+* Connecting to hostname: 151.101.1.69
+* Connecting to port: 443
+*   Trying 151.101.1.69:443...
+* Connected to (nil) (151.101.1.69) port 443 (#0)
+* ALPN: offers h2
+* ALPN: offers http/1.1
+*  CAfile: /etc/pki/tls/certs/ca-bundle.crt
+*  CApath: none
+* TLSv1.0 (OUT), TLS header, Certificate Status (22):
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.2 (IN), TLS header, Certificate Status (22):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS header, Certificate Status (22):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (IN), TLS header, Certificate Status (22):
+…
+</code></pre></td><td>2023-02-19T09:07:22.151Z</td></tr><tr><td>ValdikSS</td><td><p>The same applies to AGTS.</p></td><td>2023-03-04T10:24:47.236Z</td></tr><tr><td>ValdikSS</td><td><p>A post was merged into an existing topic: <a href="/t/vps/2804/6">VPS в Туркменистане</a></p></td><td>2023-03-07T16:08:27.033Z</td></tr>
+    </table>
+      </body>
+    </html>

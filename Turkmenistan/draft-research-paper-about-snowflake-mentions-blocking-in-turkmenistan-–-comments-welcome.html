@@ -1,0 +1,79 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>draft-research-paper-about-snowflake-mentions-blocking-in-turkmenistan-–-comments-welcome</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>I and my coauthors Cecylia Bocovich, Arlo Breault, Serene, and Xiaokang Wang are writing a paper about Snowflake. One big subsection of the paper is about blocking in Turkmenistan. Turkmenistan remains a challenge, but whatever we have been able to accomplish there has been aided by cooperation with locals, on this forum in particular. We are grateful for that.</p>
+<p>Here is a draft:</p>
+<p><a class="attachment" href="draft-research-paper-about-snowflake-mentions-blocking-in-turkmenistan-–-comments-welcome/yTd6euCmH29j6s0EZvnqRTACyAt.pdf">snowflake.20230925.8d1cc535.pdf</a> (862.6 KB)</p>
+<p>The main request we have is to check if this is a fair way to describe network access and politics in Turkmenistan:</p>
+<p><a href="https://github.com/turfed/snowflake-paper/blob/8d1cc535ec1e1d924afe94def66450baca4ea75b/snowflake.tex#L2862">https://github.com/turfed/snowflake-paper/blob/8d1cc535ec1e1d924afe94def66450baca4ea75b/snowflake.tex#L2862</a></p>
+<blockquote>
+<p>The blocking techniques just described are crude, surely resulting in significant overblocking—but they nevertheless offer greater challenges to circumvention than the more considered blocking of Russia and Iran. We highlight this to make the point that blocking resistance cannot be defined in absolute terms, but only in relation to a particular censor and its predilections. Censors differ not only in resources (time, money, equipment, personnel), but also in their tolerance for the social and economic harms of overblocking. Circumvention can only respond to and act within these constraints. <strong>The government of Turkmenistan has evidently chosen to prioritize political control over a functioning network, to an extreme degree.</strong></p>
+</blockquote>
+<p>Any other comments are welcome. Here’s the rest of the current draft section about Turkmenistan:</p>
+<p><a href="https://github.com/turfed/snowflake-paper/blob/8d1cc535ec1e1d924afe94def66450baca4ea75b/snowflake.tex#L2730">https://github.com/turfed/snowflake-paper/blob/8d1cc535ec1e1d924afe94def66450baca4ea75b/snowflake.tex#L2730</a></p>
+<blockquote>
+<h3>Blocking in Turkmenistan</h3>
+<p>There have never been more than a few tens of Snowflake users in Turkmenistan. Even so, it has happened at least twice that the number of users dropped suddenly to zero, as you can see in Figure 10. We attributed the drops to multiple causes: filtering of the default broker front domain by DNS and TCP RST injection, and blocking of certain UDP port numbers commonly used by STUN.</p>
+<p><img src="draft-research-paper-about-snowflake-mentions-blocking-in-turkmenistan-–-comments-welcome/10f1dfaeefa7d2abc7ca007381965ae42cc8b033.png" alt="Snowflake users in Turkmenistan." data-base62-sha1="2pTQNPTLjGp4fArbpqIjddKqljl" width="686" height="250"><br>
+Figure 10: Snowflake users in Turkmenistan. Though there have never been many Snowflake users in Turkmenistan, blocking events are evident on 2021-10-24 and 2022-08-03.</p>
+<p>Turkmenistan is a particularly challenging environment for circumvention. Though unsophisticated, the censorship there is more severe and indiscriminate than in other places we have seen. The fraction of the population that has access to the Internet is relatively small, which makes it hard to communicate with volunteer testers and lengthens testing cycles. We have been able to mitigate Snowflake blocking in Turkmenistan, but only partly, and after protracted effort.</p>
+<p>The drop on 2021-10-24 was caused by blocking of the default broker front domain. We determined this by taking advantage of a feature of the Turkmenistan firewall, namely its bidirectionality. Nourin et al. [<a href="https://ntc.party/t/measuring-and-evading-turkmenistan%E2%80%99s-internet-censorship-a-case-study-in-large-scale-measurements-of-a-low-penetration-country/4902">Nourin2023a §2</a>] provide more details; we will state just the essential information here. Among the censorship techniques used in Turkmenistan are DNS response injection and TCP RST injection. DNS queries for filtered hostnames receive an injected response containing a false IP address; TLS handshakes with a filtered SNI receive an injected TCP RST packet that tears down the connection. Conveniently for analysis, it works in both directions: packets that <em>enter</em> the country are subject to injection just as those that exit it are. By sending probes into the country from outside, we found that the default broker front domain was blocked at both the DNS and TLS layers. It was some time—not until August 2022—before we got confirmation from testers that an alternative front domain worked to get around the block of the broker.</p>
+<p>The increase in the number users from May to August 2022 visible in Figure 10 was caused by a partial unblocking of the broker front domain on 2023-05-03. We realized this only in retrospect, by looking at logs from Censored Planet [<a href="https://censoredplanet.org/censoredplanet">Raman2020c</a>], a censorship measurement system that had continuous measurements of the domain at that time, in one autonomous system in Turkmenistan. There was a clear shift from RST responses to successful TLS connections on that date. DNS measurements are available only after that date, so they do not show a change, but they also showed no blocking. The unblocking evidently permitted some users to connect as before. But it must not have been nationwide, because as late as 2022-08-18, some users reported that RST injection was still in place for them (though DNS injection had ceased).</p>
+<p>There was yet another layer to the blocking. Even if they could contact the broker (at the default or an alternative front domain), clients could not then establish a connection with a proxy. Further testing revealed blocking of the default STUN port, UDP 3478. A client that cannot communicate with a STUN server cannot find its own ICE candidate addresses (Section 2.2), which makes most WebRTC proxy connections fail. (The exceptions are proxies without NAT and ingress filtering. While there are some such proxies, censorship in Turkmenistan also outright blocks large swaths of the IP address space, including data center address ranges where those proxies tend to run.) As chance would have it, the NAT discovery feature we rely on for testing the NAT type of clients requires STUN servers to open a second, functionally equivalent listener on a different port [<a href="https://www.rfc-editor.org/info/rfc5780">rfc5780 §6</a>] (commonly port 3479). Changing to those alternative STUN port numbers let some users connect to Snowflake again. Specifically, STUN servers on port 3479 worked in AGTS, one of two major affected ISPs. The workaround did not work in Turkmentelecom, the other major ISP, where port 3479 was blocked. Though we do not have continuous measurements to be sure, we suspect that the STUN port blocking began on 2022-08-03 and precipitated the drop seen there in Figure 10.</p>
+<p>The blocking techniques just described are crude, surely resulting in significant overblocking—but they nevertheless offer greater challenges to circumvention than the more considered blocking of Russia and Iran. We highlight this to make the point that blocking resistance cannot be defined in absolute terms, but only in relation to a particular censor and its predilections. Censors differ not only in resources (time, money, equipment, personnel), but also in their tolerance for the social and economic harms of overblocking. Circumvention can only respond to and act within these constraints. The government of Turkmenistan has evidently chosen to prioritize political control over a functioning network, to an extreme degree. To paraphrase one of our collaborators: “What they have in Turkmenistan can hardly be called an Internet.” In a network already heavily damaged by oppressive policy, the marginal harm caused by the clumsy blocking of this or that circumvention system is relatively small. This explains the sense in which a resource-poor censor can “afford” certain blocking actions that a richer, more capable censor cannot.</p>
+</blockquote></td><td>2023-09-25T22:59:56.708Z</td></tr><tr><td>Kokoboom(Aleksey)</td><td><p>If it’s important, I can help with research. I have minimal knowledge, I live in Turkmenistan. Tell me where to write.</p></td><td>2023-09-26T01:39:22.462Z</td></tr><tr><td>tango</td><td><p>Thanks <a class="mention" href="/u/kokoboom">@Kokoboom</a>. What do you think about the statement “The government of Turkmenistan has evidently chosen to prioritize political control over a functioning network, to an extreme degree”? Do you think it is accurate? Would you add anything?</p></td><td>2023-10-08T15:17:11.853Z</td></tr><tr><td>Kokoboom(Aleksey)</td><td><p>This is absolutely accurate. Some foreign sites work without restrictions. Basically, these restrictions help to bypass CDNs from the “white” list. That is, access to the Internet is available only through ws/grpc/meek and only through a CDN.</p></td><td>2023-10-08T15:23:16.337Z</td></tr><tr><td>0ka(0ka)</td><td><p>did you use google translate? i didn’t get it</p></td><td>2023-10-08T15:26:28.060Z</td></tr><tr><td>tango</td><td><p><a class="mention" href="/u/kokoboom">@Kokoboom</a>, have you tried Snowflake, and has it worked for you? The current understanding is that it works on AGTS, as long as a STUN server on port 3479 is reachable; but it doesn’t work on Turkmentelecom. Things might be different since the recent <a href="https://forum.torproject.org/t/problems-with-snowflake-since-2023-09-20-broker-failure-unexpected-error-no-answer/9346/11">front domain changes</a>, I’m not sure.</p></td><td>2023-10-08T15:32:30.398Z</td></tr><tr><td>Kokoboom(Aleksey)</td><td><p>Snowflake has been unavailable for a long time. Only meek is available. And no, I don’t use a translator, I don’t speak English very well. I’m wondering what methods/ways to proxy VPN , besides meek/ws/grpc</p></td><td>2023-10-08T16:19:38.252Z</td></tr><tr><td>Kokoboom(Aleksey)</td><td><p>What exactly didn’t you understand? I am not very good at English and system administration. Please try to ask specific questions</p></td><td>2023-10-08T16:32:17.767Z</td></tr><tr><td>s11</td><td><p><a class="mention" href="/u/kokoboom">@Kokoboom</a> перевод вопроса <a class="mention" href="/u/tango">@tango</a>: что вы думаете по поводу утверждения “Правительство Туркменистана очевидно решило приоритизировать политический контроль над нормальной работой сети/интернета, причем довольно радикальным образом”? Оно точно описывает ситуацию? Есть ли вам что-то добавить?</p>
+<p>Это просто общий вопрос по обстановке в ТМ. По мне так вполне соответствует действительности)</p></td><td>2023-10-10T11:18:30.941Z</td></tr><tr><td>s11</td><td><p><a class="mention" href="/u/tango">@tango</a> if that helps, our description of TM situation is very similar <a href="https://en.greatfire.org/blog/2023/aug/14-million-people-used-freebrowser-circumvent-great-firewall-turkmenistan" rel="noopener nofollow ugc">https://en.greatfire.org/blog/2023/aug/14-million-people-used-freebrowser-circumvent-great-firewall-turkmenistan</a></p></td><td>2023-10-10T11:42:09.214Z</td></tr><tr><td>Kokoboom(Aleksey)</td><td><p>Именно, добавить или убавить нечего. Только от этого не лучше))</p></td><td>2023-10-16T12:04:49.725Z</td></tr><tr><td>tango</td><td><p>This is the finished paper, due to appear in August at the USENIX Security 2024 conference.</p>
+<aside class="quote quote-modified" data-post="1" data-topic="7881">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar">
+    <a href="https://ntc.party/t/snowflake-a-censorship-circumvention-system-using-temporary-webrtc-proxies-usenix-security-2024/7881">Snowflake, a censorship circumvention system using temporary WebRTC proxies (USENIX Security 2024)</a> <a class="badge-category__wrapper " href="/c/censorship-research-publications/22"><span data-category-id="22" style="--category-badge-color: #231F20; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Academic papers, researches, blog posts with useful information"><span class="badge-category__name">Censorship research &amp; publications</span></span></a>
+  </div>
+  <blockquote>
+    Snowflake, a censorship circumvention system using temporary WebRTC proxies 
+Cecylia Bocovich, Arlo Breault, David Fifield, Serene, Xiaokang Wang 
+<a href="https://censorbib.nymity.ch/#Bocovich2024a">https://censorbib.nymity.ch/#Bocovich2024a</a> 
+<a href="https://www.bamsoftware.com/papers/snowflake/">Online HTML</a> 
+<a href="https://www.usenix.org/conference/usenixsecurity24/presentation/bocovich">usenix.org page</a> (will have slides and presentation video eventually) 
+<a href="https://www.bamsoftware.com/papers/snowflake/snowflake.pdf">PDF</a> 
+This paper describes the <a href="https://snowflake.torproject.org/">Snowflake</a> circumvention system: how it works, and a retrospective of operation since 2021, including reactions by censors. The principle behind Snowflake’s blocking resistance is the use of numero…
+  </blockquote>
+</aside>
+</td><td>2024-05-21T06:47:34.965Z</td></tr>
+    </table>
+      </body>
+    </html>

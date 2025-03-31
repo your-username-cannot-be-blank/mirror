@@ -1,0 +1,362 @@
+[
+    {
+        "id": 5313,
+        "name": "",
+        "username": "tango",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/t/e36b37/{size}.png",
+        "created_at": "2022-02-07T16:47:13.671Z",
+        "cooked": "<p>↓ English version is below ↓</p>\n<h1><a name=\"h-2022-1\" class=\"anchor\" href=\"#h-2022-1\"></a>Уроки, вынесенные из отключения интернета в Казахстане в январе 2022 года для обхода цензуры</h1>\n<p>Интернет в Казахстане был недоступен большую часть дня, каждый день с 05.01.2022 по 10.01.2022. Но блокировка не была полной: люди в Казахстане и за его пределами находили способы хоть как-то устанавливать соединения. Хотя успех был лишь частичным, он показал, что отключение Интернета — не обязательно безнадежная ситуация. Существуют инструменты и методы, которые мы можем использовать в будущем.</p>\n<p>Обсуждение случившегося:</p>\n<ul>\n<li><a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601\" class=\"inline-onebox\">Network shutdown, all around Kazakhstan</a></li>\n<li><a href=\"https://github.com/net4people/bbs/issues/99\" class=\"inline-onebox\">Shutdown in Kazakhstan since 2022-01-05, with brief periods of connectivity · Issue #99 · net4people/bbs · GitHub</a></li>\n<li><a href=\"https://www.accessnow.org/kazakhstan-internet-shutdowns-protests-almaty-timeline-whats-happening/\" class=\"inline-onebox\">Kazakhstan internet shutdowns and protests: Timeline</a></li>\n</ul>\n<p>Что удалось:</p>\n<ul>\n<li>Жители Казахстана быстро сообщили о моменте отключения (которое сначала было только в мобильных сетях). Исследователи со стороны (например, <a href=\"https://blog.cloudflare.com/internet-shut-down-in-kazakhstan-amid-unrest/\">Cloudflare Radar</a>, <a href=\"https://ioda.caida.org/ioda/dashboard#lastView=overview&amp;view=inspect&amp;entity=country/KZ&amp;from=1641168000&amp;until=1642032000\">CAIDA IODA</a>, <a href=\"https://labs.ripe.net/author/emileaben/the-kazakhstan-outage-as-seen-from-ripe-atlas/\">Атлас RIPE</a>) смогли собрать данные о сетевой связности и отслеживать её изменения.</li>\n<li>Жители Казахстана могли проводить тесты сети и сообщать о своих результатах в течение коротких периодов восстановления доступа.</li>\n<li>Было обнаружено, что некоторые TCP-порты (включая как минимум порты 3785 и 179) не были заблокированы: исследователи настроили прокси-серверы на этих портах, чтобы предоставлять людям в стране доступ в интернет.</li>\n<li>Было обнаружено, что DNS-трафик на UDP-порту 53 не был заблокирован, и некоторые смогли выйти в сеть с помощью DNS-туннеля.</li>\n</ul>\n<p>Что можно улучшить в работе исследователей:</p>\n<ul>\n<li>Начальная реакция могла бы быть быстрее. Было бы хорошо начать настраивать прокси в первый или второй день, а не на 4 или 5.</li>\n<li>Отсутствуют преднастроенные и публичные туннели DNS. Людям приходилось делать свои собственные туннели, что значительно ограничивало круг лиц, для которых был доступен этот метод обхода.</li>\n</ul>\n<p>Также следует понимать, что сила даже авторитарных государств не безгранична. Казахстан столкнулся с политическими и экономическими проблемами, которые затруднили удержание интернета в отключенном состоянии. Касым-Жомарт Токаев, президент Казахстана, сказал следующее в публичном выступлении 7 января 2022:</p>\n<p><a href=\"https://www.gov.kz/news/details/309489?lang=kk\">https://www.gov.kz/news/details/309489?lang=kk</a> (<a href=\"https://archive.is/WpWRs\">архив</a>)</p>\n<blockquote>\n<p>Осындай «белсенділердің» кесірінен интернет бұғатталады. Нәтижесінде миллиондаған азамат пен отандық бизнес зардап шегеді.</p>\n</blockquote>\n<p><a href=\"https://www.gov.kz/news/details/309489?lang=ru\">https://www.gov.kz/news/details/309489?lang=ru</a> (<a href=\"https://archive.is/SGvGF\">архив</a>)</p>\n<blockquote>\n<p>Из-за этих «активистов» «зауживается» Интернет, в результате чего страдают интересы миллионов граждан и отечественного бизнеса. То есть наносится огромный ущерб внутренней экономической, социальной и политической стабильности.</p>\n</blockquote>\n<p><a href=\"https://www.gov.kz/news/details/309489?lang=en\">https://www.gov.kz/news/details/309489?lang=en</a> (<a href=\"https://archive.is/apKSs\">архив</a>)</p>\n<blockquote>\n<p>Because of these activists, the use of Internet gets limited, as a result of which the interests of millions of citizens and domestic businesses suffer. In other words, internal economic, social and political stability is greatly damaged.</p>\n</blockquote>\n<p>Следует улучшить нашу координацию в ответ на такие внезапные события, как отключение интернет-связности, но при этом стремиться сделать так, чтобы надёжно отключать интернет стало сложнее в общем и целом.</p>\n<h2><a name=\"h-2\" class=\"anchor\" href=\"#h-2\"></a>Открытые порты и их сканирование</h2>\n<p>09 января 2022 г. было сообщено, что в стране работают <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/14\">обычные SOCKS-прокси на порту TCP 3875</a>. На следующей день было получено подтверждение, что <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/24\">OpenVPN на порту UDP 3785</a> также работает. <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/20\">Сканирование портов</a> показало также доступность <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/29\">порта 179</a>.</p>\n<p>Порты 3785 и 179 используются для маршрутизации. 3785 — <a href=\"https://datatracker.ietf.org/doc/html/rfc5881#section-4\">bfd-echo</a> (Bidirectional Forwarding Detection Echo). Порт 179 — <a href=\"https://datatracker.ietf.org/doc/html/rfc4271#section-3\">bgp</a> (Border Gateway Protocol). Доступность этих портов конечным пользователям можно объяснить некорректной настройкой блокировки или техническими ограничениями. Однако, следует помнить об этом в дальнейшем.</p>\n<p>На факт доступности этих портов отреагировал Tor Project, открыв <a href=\"https://forum.torproject.net/t/internet-shutdown-in-kazakhstan-how-to-circumvent-censorship-with-tor/1679\">особую службу поддержки пользователей по почте</a>, предоставляющую мосты Tor на рабочих портах. Lantern <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/28\">перенастроил часть своих серверов</a> на порт 3785 и другие.</p>\n<p>Сканирование портов — удобный метод для нахождения брешей в системе блокировок в целом. В случае отключения интернета он был особенно полезен, т.к. зачастую сканировать порты можно извне с такой же точностью, как и изнутри страны. Так, доступность порта 179 была обнаружена путём сканирования сети Казахстана снаружи: сначала был обнаружен хост, доступный по порту 3785, затем было произведено сканирование всех портов этого хоста. Это выглядит следующим образом в <a href=\"https://nmap.org/\">Nmap</a>:</p>\n<pre><code class=\"lang-plaintext\"># nmap -PS3785 -sn -n gov.kz/24\nNmap scan report for 195.12.114.89\nHost is up (0.21s latency).\nNmap done: 256 IP addresses (1 host up) scanned in 15.57 seconds\n\n# nmap -Pn -n -p- --reason 195.12.114.89\nNmap scan report for 195.12.114.89\nHost is up, received user-set (0.23s latency).\nNot shown: 65529 filtered ports\nReason: 65529 no-responses\nPORT     STATE  SERVICE       REASON\n179/tcp  closed bgp           reset ttl 233\n646/tcp  closed ldp           reset ttl 236\n3784/tcp closed bfd-control   reset ttl 234\n3785/tcp closed bfd-echo      reset ttl 234\n4784/tcp closed bfd-multi-ctl reset ttl 233\n5060/tcp open   sip           syn-ack ttl 50\nNmap done: 1 IP address (1 host up) scanned in 344.21 seconds\n</code></pre>\n<p><code>gov.kz/24</code> означает сканирование IP-адресов gov.kz и всей подсети /24, т.е. 256 соседних адресов. <a href=\"https://nmap.org/book/host-discovery-techniques.html#host-discovery-PS\"><code>-PS3785</code></a> включает функцию обнаружения хостов с помощью отправки TCP SYN на порт 3785. <a href=\"https://nmap.org/book/host-discovery-controls.html#host-discovery-sn\"><code>-sn</code></a> отключает полное сканирование портов и выводит только доступные хосты. <a href=\"https://nmap.org/book/host-discovery-dns.html\"><code>-n</code></a> отключает получение обратной DNS-записи PTR. <a href=\"https://nmap.org/book/host-discovery-controls.html#host-enum-p0\"><code>-Pn</code></a> отключает другие способы обнаружения доступности хостов и выполнит только сканирование одного порта. <a href=\"https://nmap.org/book/port-scanning-options.html#port-scanning-options-ports\"><code>-p-</code></a> задаёт сканирование портов 0–65535. <a href=\"https://nmap.org/book/port-scanning-options.html#port-scanning-options-misc\"><code>--reason</code></a> добавляет колонку <code>REASON</code> в вывод программы.</p>\n<p>В этом случае мы уже знали о доступности порта 3785, поэтому поиск других портов был достаточно простой задачей и мог быть выполнен в пределах маленькой сети. Если о доступности портов изначально неизвестно, следует сканировать больший диапазон портов.</p>\n<h2><a name=\"dns-3\" class=\"anchor\" href=\"#dns-3\"></a>DNS-туннели</h2>\n<p>09 января 2022 г. <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/11\">пользователь сообщил</a> о работоспособности <a href=\"https://www.bamsoftware.com/software/dnstt/\">dnstt</a> — туннеля DNS, в режиме подключения по UDP-порту 53. По-видимому, можно было использовать как провайдерский DNS-резолвер, так и публичный резолвер <a href=\"https://developers.google.com/speed/public-dns/docs/using#addresses\">8.8.8.8 от Google</a> в качестве промежуточного узла для построения туннеля.</p>\n<p>dnstt был создан отчасти как реакция на <a href=\"https://www.article19.org/ttn-iran-november-shutdown/\">отключение работы интернета в Иране в ноябре 2019 г.</a>, когда <a href=\"https://ooni.org/post/2019-iran-internet-blackout/#connecting-to-the-internet-from-iran\">OONI сообщали</a>, что DNS-трафик не был заблокирован. Хоть dnstt в первую очередь предназначен для использования с зашифрованным DNS (DNS через TLS или DNS через HTTPS), он поддерживает режим UDP DNS, несмотря на <a href=\"https://www.bamsoftware.com/software/dnstt/#caveats\">неустойчивость этого режима к блокировке</a>, как раз для подобных экстремальных ситуаций.</p>\n<p>Но полезность туннелей DNS была ограничена, потому что на момент отключения не было уже существующей прокси-инфраструктуры, а для человека, не подкованного с технологиях обхода, не было простого способа запустить туннельный клиент — в частности, не было готовых клиентов для мобильных устройств. Настройка туннеля DNS требует настройки некоторых записей DNS, запуска туннельного сервера на постоянно подключенном к сети компьютере и распространения связки из доменного имени и открытого ключа среди потенциальных пользователей. Выполнение некоторых из этих шагов заранее позволит нам реагировать быстрее.</p>\n<p>DNS-туннели, использующие порт UDP 53, легко обнаружить, т.к. они передают доменное имя туннелирующего сервера в открытом виде. Из-за отсутствия шифрования, человек, просматривающий трафик, может обнаружить имя сервера и заблокировать его. dnstt шифрует содержимое запросов, но он не может предотвратить факт обнаружения использования DNS-туннеля. Было предложено <a href=\"https://ntc.party/t/idea-let-dnstt-server-respond-to-any-dns-zone/1650\">улучшить программу, чтобы она отвечала на любой запрашиваемый домен</a>, что немного повысит устойчивость к блокировке, поскольку к одному и тому же серверу можно обращаться по разным именам, но даже при этом можно обнаружить туннель UDP на порту 53. Лично мне обычно не нравятся методы обхода цензуры, которые зависят от неосведомленности цензора, но я думаю, что такие вещи оправданы, поскольку мы продвигаем границы того, что может быть возможно во время отключения доступа к сети.</p>\n<p>Перевод от <a class=\"mention\" href=\"/u/valdikss\">@ValdikSS</a>.</p>\n<h1><a name=\"lessons-from-the-january-2022-internet-shutdown-in-kazakhstan-for-censorship-circumvention-4\" class=\"anchor\" href=\"#lessons-from-the-january-2022-internet-shutdown-in-kazakhstan-for-censorship-circumvention-4\"></a>Lessons from the January 2022 Internet shutdown in Kazakhstan for censorship circumvention</h1>\n<p>Internet access in Kazakhstan was shut down for most of the day, every day between 2022-01-05 and 2022-01-10. But the blockade was not total: people inside and outside Kazakhstan found ways to maintain a small level of connectivity. Though success was only partial, it showed that an Internet shutdown is not necessarily a hopeless situation. There are tools and techniques that we can be prepared to try in the future.</p>\n<p>Background:</p>\n<ul>\n<li><a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601\" class=\"inline-onebox\">Network shutdown, all around Kazakhstan</a></li>\n<li><a href=\"https://github.com/net4people/bbs/issues/99\" class=\"inline-onebox\">Shutdown in Kazakhstan since 2022-01-05, with brief periods of connectivity · Issue #99 · net4people/bbs · GitHub</a></li>\n<li><a href=\"https://www.accessnow.org/kazakhstan-internet-shutdowns-protests-almaty-timeline-whats-happening/\" class=\"inline-onebox\">Kazakhstan internet shutdowns and protests: Timeline</a></li>\n</ul>\n<p>What worked well:</p>\n<ul>\n<li>People inside Kazakhstan quickly reported the onset of the shutdown (which was only on mobile networks at first). Researchers on the outside (for example <a href=\"https://blog.cloudflare.com/internet-shut-down-in-kazakhstan-amid-unrest/\">Cloudflare Radar</a>, <a href=\"https://ioda.caida.org/ioda/dashboard#lastView=overview&amp;view=inspect&amp;entity=country/KZ&amp;from=1641168000&amp;until=1642032000\">CAIDA IODA</a>, <a href=\"https://labs.ripe.net/author/emileaben/the-kazakhstan-outage-as-seen-from-ripe-atlas/\">RIPE Atlas</a>) were able to collect network evidence and monitor for changes.</li>\n<li>People in Kazakhstan could perform network tests, and report their results during the brief periods of restored access.</li>\n<li>It was discovered that certain TCP ports (including at least ports 3785 and 179) were not blocked, and proxies were set up on those ports to help people in the country.</li>\n<li>It was discovered that DNS traffic on UDP port 53 was not blocked, and some people were able to get access using a DNS tunnel.</li>\n</ul>\n<p>What we can do better:</p>\n<ul>\n<li>The initial response might have been faster. It would have been good to start setting up proxies on day 1 or 2, not day 4 or 5.</li>\n<li>There was no easy-to-use DNS tunnel infrastructure already in place. People had to make their own tunnels, which effectively limited the number of people who could use this form of circumvention.</li>\n</ul>\n<p>It is good to remember that even authoritarians’ power is not unlimited. They face political and economic constraints that increase the cost of sustaining a shutdown. Kassym-Jomart Tokayev, the President of Kazakhstan, acknowledge the cost of the shutdown in his public address of 2022-01-07:</p>\n<p><a href=\"https://www.gov.kz/news/details/309489?lang=kk\">https://www.gov.kz/news/details/309489?lang=kk</a> (<a href=\"https://archive.is/WpWRs\">archive</a>)</p>\n<blockquote>\n<p>Осындай «белсенділердің» кесірінен интернет бұғатталады. Нәтижесінде миллиондаған азамат пен отандық бизнес зардап шегеді.</p>\n</blockquote>\n<p><a href=\"https://www.gov.kz/news/details/309489?lang=ru\">https://www.gov.kz/news/details/309489?lang=ru</a> (<a href=\"https://archive.is/SGvGF\">archive</a>)</p>\n<blockquote>\n<p>Из-за этих «активистов» «зауживается» Интернет, в результате чего страдают интересы миллионов граждан и отечественного бизнеса. То есть наносится огромный ущерб внутренней экономической, социальной и политической стабильности.</p>\n</blockquote>\n<p><a href=\"https://www.gov.kz/news/details/309489?lang=en\">https://www.gov.kz/news/details/309489?lang=en</a> (<a href=\"https://archive.is/apKSs\">archive</a>)</p>\n<blockquote>\n<p>Because of these activists, the use of Internet gets limited, as a result of which the interests of millions of citizens and domestic businesses suffer. In other words, internal economic, social and political stability is greatly damaged.</p>\n</blockquote>\n<p>Let’s improve our ability to respond to acute situations like shutdowns, while keeping in mind a broader goal of establishing conditions in which acts like shutting down the Internet are harder to commit.</p>\n<h2><a name=\"open-ports-and-port-scans-5\" class=\"anchor\" href=\"#open-ports-and-port-scans-5\"></a>Open ports and port scans</h2>\n<p>On 2022-01-09, it was reported that a <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/14\">plain SOCKS proxy on TCP port 3875</a> worked. A day later there was confirmation that <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/24\">OpenVPN on UDP port 3785</a> also worked. <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/20\">Port scans</a> further revealed that <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/29\">port 179 worked as well</a>.</p>\n<p>Ports 3785 and 179 are related to routing. 3785 is <a href=\"https://datatracker.ietf.org/doc/html/rfc5881#section-4\">bfd-echo</a> (Bidirectional Forwarding Detection Echo). Port 179 is <a href=\"https://datatracker.ietf.org/doc/html/rfc4271#section-3\">bgp</a> (Border Gateway Protocol). The fact that these ports were open to ordinary users may have been only an oversight or a technical limitation. Nevertheless, it is a good thing to remember.</p>\n<p>The Tor Project responded to the port-number discovery by setting up a <a href=\"https://forum.torproject.net/t/internet-shutdown-in-kazakhstan-how-to-circumvent-censorship-with-tor/1679\">special email help line</a> for users to get a Tor bridge on a usable port. Lantern <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/28\">made some of their servers</a> listen on port 3785 and others.</p>\n<p>Port scanning can be a useful technique for finding holes in blockades, in general. In a shutdown situation, it can be especially useful, because it likely works equally well from the inside or the outside. In this case, the accessibility of port 179 was discovered by scanning a network in Kazakhstan, from the outside, to find a host that responded on port 3785; then scanning to see what other ports that host responded on. Using <a href=\"https://nmap.org/\">Nmap</a>, it looks like this:</p>\n<pre><code class=\"lang-plaintext\"># nmap -PS3785 -sn -n gov.kz/24\nNmap scan report for 195.12.114.89\nHost is up (0.21s latency).\nNmap done: 256 IP addresses (1 host up) scanned in 15.57 seconds\n\n# nmap -Pn -n -p- --reason 195.12.114.89\nNmap scan report for 195.12.114.89\nHost is up, received user-set (0.23s latency).\nNot shown: 65529 filtered ports\nReason: 65529 no-responses\nPORT     STATE  SERVICE       REASON\n179/tcp  closed bgp           reset ttl 233\n646/tcp  closed ldp           reset ttl 236\n3784/tcp closed bfd-control   reset ttl 234\n3785/tcp closed bfd-echo      reset ttl 234\n4784/tcp closed bfd-multi-ctl reset ttl 233\n5060/tcp open   sip           syn-ack ttl 50\nNmap done: 1 IP address (1 host up) scanned in 344.21 seconds\n</code></pre>\n<p><code>gov.kz/24</code> means to scan the IP address of gov.kz and its /24 network; i.e., it and the 255 addresses around it. <a href=\"https://nmap.org/book/host-discovery-techniques.html#host-discovery-PS\"><code>-PS3785</code></a> means to do host discovery using a TCP SYN probe to port 3785. <a href=\"https://nmap.org/book/host-discovery-controls.html#host-discovery-sn\"><code>-sn</code></a> means to only report the hosts that are up, do not port scan yet. <a href=\"https://nmap.org/book/host-discovery-dns.html\"><code>-n</code></a> means not to do reverse DNS resolution. <a href=\"https://nmap.org/book/host-discovery-controls.html#host-enum-p0\"><code>-Pn</code></a> means to skip host discovery and only do a port scan. <a href=\"https://nmap.org/book/port-scanning-options.html#port-scanning-options-ports\"><code>-p-</code></a> means to scan all 65536 TCP ports. <a href=\"https://nmap.org/book/port-scanning-options.html#port-scanning-options-misc\"><code>--reason</code></a> adds the <code>REASON</code> column to the output.</p>\n<p>In this case, we had the advantage of already knowing that port 3785 was accessible, so it was relatively easy to find other ports, by scanning a small network. If no ports are known in advance, you may have to start with a wider scan over a large range of ports.</p>\n<h2><a name=\"dns-tunnels-6\" class=\"anchor\" href=\"#dns-tunnels-6\"></a>DNS tunnels</h2>\n<p>On 2022-01-09, <a href=\"https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/11\">a user reported</a> having success with <a href=\"https://www.bamsoftware.com/software/dnstt/\">dnstt</a>, a DNS tunnel, in its UDP port 53 mode. Apparently, one could use either an ISP resolver, or <a href=\"https://developers.google.com/speed/public-dns/docs/using#addresses\">Google’s 8.8.8.8</a>, as the recursive resolver in the middle of the tunnel.</p>\n<p>dnstt was created, in part, as a reaction to the <a href=\"https://www.article19.org/ttn-iran-november-shutdown/\">November 2019 shutdown in Iran</a>, when <a href=\"https://ooni.org/post/2019-iran-internet-blackout/#connecting-to-the-internet-from-iran\">OONI reported</a> that DNS traffic was not blocked. Although dnstt is primarily intended to be used with encrypted DNS (DNS over TLS or DNS over HTTPS), it retains a UDP DNS mode, even though that mode is <a href=\"https://www.bamsoftware.com/software/dnstt/#caveats\">not resistant to blocking</a>, precisely because it may be useful in an extreme situation such as a shutdown.</p>\n<p>But the usefulness of DNS tunnels was limited, because there was no alredy existing proxy infrastructure in place at the time of the shutdown, and no easy way for someone without technical ability to run a tunnel client—in particular there was no ready-made mobile app. Setting up a DNS tunnel requires setting some DNS records, running a tunnel server on an always-on network-connected computer, and distributing the server’s domain name and public key to potential users. Doing some of these steps in advance would let us respond more quickly.</p>\n<p>DNS tunnels that use UDP port 53 are detectable because they must include the domain name of the tunnel server. Without some form of encrypted DNS, a middlebox observer can look for DNS queries that are addressed to known tunnel servers, and block them. (dnstt encrypts the <em>contents</em> of the tunnel, but without encrypted DNS it cannot hide the <em>existence</em> of the tunnel.) There is a proposal to <a href=\"https://ntc.party/t/idea-let-dnstt-server-respond-to-any-dns-zone/1650\">let the dnstt tunnel server respond to any domain name</a>, which would enhance blocking resistance a bit, because the same server could be addressed by many names, but even with this a UDP port 53 tunnel is detectable. Personally, I do not normally like circumvention strategies that depend on a censor being ignorant, but I think it is justifiable to try things like this, as we advance the frontiers of what may be possible during a shutdown.</p>",
+        "post_number": 1,
+        "post_type": 1,
+        "posts_count": 2,
+        "updated_at": "2022-02-07T16:47:13.671Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 592,
+        "reads": 80,
+        "readers_count": 79,
+        "score": 2976.0,
+        "yours": false,
+        "topic_id": 1686,
+        "topic_slug": "%D1%83%D1%80%D0%BE%D0%BA%D0%B8-%D0%B2%D1%8B%D0%BD%D0%B5%D1%81%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D0%B8%D0%B7-%D0%BE%D1%82%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82%D0%B0-%D0%B2-%D0%BA%D0%B0%D0%B7%D0%B0%D1%85%D1%81%D1%82%D0%B0%D0%BD%D0%B5-%D0%B2-%D1%8F%D0%BD%D0%B2%D0%B0%D1%80%D0%B5-2022-%D0%B3%D0%BE%D0%B4%D0%B0-%D0%B4%D0%BB%D1%8F-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4%D0%B0-%D1%86%D0%B5%D0%BD%D0%B7%D1%83%D1%80%D1%8B",
+        "display_username": "",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "badges_granted": [],
+        "version": 1,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": false,
+        "can_wiki": false,
+        "link_counts": [
+            {
+                "url": "https://www.bamsoftware.com/software/dnstt/",
+                "internal": false,
+                "reflection": false,
+                "title": "dnstt – DoH- and DoT-capable DNS tunnel",
+                "clicks": 40
+            },
+            {
+                "url": "https://github.com/net4people/bbs/issues/99",
+                "internal": false,
+                "reflection": false,
+                "clicks": 22
+            },
+            {
+                "url": "https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601",
+                "internal": true,
+                "reflection": false,
+                "title": "Network shutdown, all around Kazakhstan",
+                "clicks": 17
+            },
+            {
+                "url": "https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/20",
+                "internal": true,
+                "reflection": false,
+                "title": "Network shutdown, all around Kazakhstan",
+                "clicks": 17
+            },
+            {
+                "url": "https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/28",
+                "internal": true,
+                "reflection": false,
+                "title": "Network shutdown, all around Kazakhstan",
+                "clicks": 16
+            },
+            {
+                "url": "https://ntc.party/t/idea-let-dnstt-server-respond-to-any-dns-zone/1650",
+                "internal": true,
+                "reflection": false,
+                "title": "Idea: let dnstt-server respond to any DNS zone",
+                "clicks": 16
+            },
+            {
+                "url": "https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/24",
+                "internal": true,
+                "reflection": false,
+                "title": "Network shutdown, all around Kazakhstan",
+                "clicks": 15
+            },
+            {
+                "url": "https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/14",
+                "internal": true,
+                "reflection": false,
+                "title": "Network shutdown, all around Kazakhstan",
+                "clicks": 15
+            },
+            {
+                "url": "https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/11",
+                "internal": true,
+                "reflection": false,
+                "title": "Network shutdown, all around Kazakhstan",
+                "clicks": 13
+            },
+            {
+                "url": "https://blog.cloudflare.com/internet-shut-down-in-kazakhstan-amid-unrest/",
+                "internal": false,
+                "reflection": false,
+                "clicks": 11
+            },
+            {
+                "url": "https://nmap.org/",
+                "internal": false,
+                "reflection": false,
+                "title": "Nmap: the Network Mapper - Free Security Scanner",
+                "clicks": 8
+            },
+            {
+                "url": "https://www.gov.kz/news/details/309489?lang=ru",
+                "internal": false,
+                "reflection": false,
+                "clicks": 7
+            },
+            {
+                "url": "https://datatracker.ietf.org/doc/html/rfc5881#section-4",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 5881 - Bidirectional Forwarding Detection (BFD) for IPv4 and IPv6 (Single Hop)",
+                "clicks": 7
+            },
+            {
+                "url": "https://www.accessnow.org/kazakhstan-internet-shutdowns-protests-almaty-timeline-whats-happening/",
+                "internal": false,
+                "reflection": false,
+                "title": "Kazakhstan internet shutdowns and protests: Timeline",
+                "clicks": 6
+            },
+            {
+                "url": "https://www.bamsoftware.com/software/dnstt/#caveats",
+                "internal": false,
+                "reflection": false,
+                "title": "dnstt – DoH- and DoT-capable DNS tunnel",
+                "clicks": 5
+            },
+            {
+                "url": "https://nmap.org/book/host-discovery-techniques.html#host-discovery-PS",
+                "internal": false,
+                "reflection": false,
+                "title": "Host Discovery Techniques | Nmap Network Scanning",
+                "clicks": 5
+            },
+            {
+                "url": "https://labs.ripe.net/author/emileaben/the-kazakhstan-outage-as-seen-from-ripe-atlas/",
+                "internal": false,
+                "reflection": false,
+                "title": "The Kazakhstan Outage - As Seen from RIPE Atlas | RIPE Labs",
+                "clicks": 5
+            },
+            {
+                "url": "https://developers.google.com/speed/public-dns/docs/using#addresses",
+                "internal": false,
+                "reflection": false,
+                "title": "Get Started  |  Public DNS  |  Google Developers",
+                "clicks": 4
+            },
+            {
+                "url": "https://forum.torproject.net/t/internet-shutdown-in-kazakhstan-how-to-circumvent-censorship-with-tor/1679",
+                "internal": false,
+                "reflection": false,
+                "title": "Internet shutdown in Kazakhstan: how to circumvent censorship with Tor - Censorship Circumvention - Tor Project Forum",
+                "clicks": 4
+            },
+            {
+                "url": "https://ioda.caida.org/ioda/dashboard#lastView=overview&view=inspect&entity=country/KZ&from=1641168000&until=1642032000",
+                "internal": false,
+                "reflection": false,
+                "title": "IODA",
+                "clicks": 4
+            },
+            {
+                "url": "https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/29",
+                "internal": true,
+                "reflection": false,
+                "title": "Network shutdown, all around Kazakhstan",
+                "clicks": 4
+            },
+            {
+                "url": "https://www.gov.kz/news/details/309489?lang=kk",
+                "internal": false,
+                "reflection": false,
+                "clicks": 3
+            },
+            {
+                "url": "https://www.article19.org/ttn-iran-november-shutdown/",
+                "internal": false,
+                "reflection": false,
+                "title": "Iran: Tightening the Net 2020 - ARTICLE 19",
+                "clicks": 3
+            },
+            {
+                "url": "https://datatracker.ietf.org/doc/html/rfc4271#section-3",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 4271 - A Border Gateway Protocol 4 (BGP-4)",
+                "clicks": 3
+            },
+            {
+                "url": "https://ooni.org/post/2019-iran-internet-blackout/#connecting-to-the-internet-from-iran",
+                "internal": false,
+                "reflection": false,
+                "title": "Iran’s nation-wide Internet blackout: Measurement data and technical observations | OONI",
+                "clicks": 1
+            },
+            {
+                "url": "https://archive.is/apKSs",
+                "internal": false,
+                "reflection": false,
+                "clicks": 1
+            },
+            {
+                "url": "https://archive.is/SGvGF",
+                "internal": false,
+                "reflection": false,
+                "clicks": 1
+            },
+            {
+                "url": "https://nmap.org/book/port-scanning-options.html#port-scanning-options-misc",
+                "internal": false,
+                "reflection": false,
+                "title": "Command-line Flags | Nmap Network Scanning",
+                "clicks": 1
+            },
+            {
+                "url": "https://nmap.org/book/host-discovery-controls.html#host-discovery-sn",
+                "internal": false,
+                "reflection": false,
+                "title": "Host Discovery Controls | Nmap Network Scanning",
+                "clicks": 0
+            },
+            {
+                "url": "https://archive.is/WpWRs",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://www.gov.kz/news/details/309489?lang=en",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://nmap.org/book/port-scanning-options.html#port-scanning-options-ports",
+                "internal": false,
+                "reflection": false,
+                "title": "Command-line Flags | Nmap Network Scanning",
+                "clicks": 0
+            },
+            {
+                "url": "https://nmap.org/book/host-discovery-controls.html#host-enum-p0",
+                "internal": false,
+                "reflection": false,
+                "title": "Host Discovery Controls | Nmap Network Scanning",
+                "clicks": 0
+            },
+            {
+                "url": "https://nmap.org/book/host-discovery-dns.html",
+                "internal": false,
+                "reflection": false,
+                "title": "DNS Resolution | Nmap Network Scanning",
+                "clicks": 0
+            },
+            {
+                "url": "https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/46",
+                "internal": true,
+                "reflection": true,
+                "title": "Network shutdown, all around Kazakhstan",
+                "clicks": 2
+            },
+            {
+                "url": "https://ntc.party/t/any-reasons-to-pay-for-popular-paid-vpns-vs-configuring-your-own-private-vpn/2262/5",
+                "internal": true,
+                "reflection": true,
+                "title": "Any reasons to pay for popular paid VPNs vs configuring your own private VPN?",
+                "clicks": 2
+            },
+            {
+                "url": "https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/43",
+                "internal": true,
+                "reflection": true,
+                "title": "Network shutdown, all around Kazakhstan",
+                "clicks": 0
+            }
+        ],
+        "read": true,
+        "user_title": "dnstt developer",
+        "title_is_group": false,
+        "bookmarked": false,
+        "actions_summary": [],
+        "moderator": false,
+        "admin": false,
+        "staff": false,
+        "user_id": 26,
+        "hidden": false,
+        "trust_level": 3,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": false,
+        "wiki": false,
+        "post_url": "/t/%D1%83%D1%80%D0%BE%D0%BA%D0%B8-%D0%B2%D1%8B%D0%BD%D0%B5%D1%81%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D0%B8%D0%B7-%D0%BE%D1%82%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82%D0%B0-%D0%B2-%D0%BA%D0%B0%D0%B7%D0%B0%D1%85%D1%81%D1%82%D0%B0%D0%BD%D0%B5-%D0%B2-%D1%8F%D0%BD%D0%B2%D0%B0%D1%80%D0%B5-2022-%D0%B3%D0%BE%D0%B4%D0%B0-%D0%B4%D0%BB%D1%8F-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4%D0%B0-%D1%86%D0%B5%D0%BD%D0%B7%D1%83%D1%80%D1%8B/1686/1",
+        "can_translate": false
+    },
+    {
+        "id": 5315,
+        "name": "",
+        "username": "zinoid",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/z/8e8cbc/{size}.png",
+        "created_at": "2022-02-07T22:45:51.695Z",
+        "cooked": "<p>No one has had any precedent for accessing the Internet via (full-duplex) satellite? I think this is the most acceptable solution. It is possible to mask it under a TV receiver.</p>\n<p>By the way, in Turkmenistan a few years ago many people had satellite TV (because of undeveloped and miserable central TV). Then the government started getting rid of them. It was possible to hide the Internet among them.<br>\n// judging by Varlamov’s photo reports.</p>",
+        "post_number": 2,
+        "post_type": 1,
+        "posts_count": 2,
+        "updated_at": "2022-02-07T22:45:51.695Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 11,
+        "reads": 54,
+        "readers_count": 53,
+        "score": 65.8,
+        "yours": false,
+        "topic_id": 1686,
+        "topic_slug": "%D1%83%D1%80%D0%BE%D0%BA%D0%B8-%D0%B2%D1%8B%D0%BD%D0%B5%D1%81%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D0%B8%D0%B7-%D0%BE%D1%82%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82%D0%B0-%D0%B2-%D0%BA%D0%B0%D0%B7%D0%B0%D1%85%D1%81%D1%82%D0%B0%D0%BD%D0%B5-%D0%B2-%D1%8F%D0%BD%D0%B2%D0%B0%D1%80%D0%B5-2022-%D0%B3%D0%BE%D0%B4%D0%B0-%D0%B4%D0%BB%D1%8F-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4%D0%B0-%D1%86%D0%B5%D0%BD%D0%B7%D1%83%D1%80%D1%8B",
+        "display_username": "",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "badges_granted": [],
+        "version": 1,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": false,
+        "can_wiki": false,
+        "read": true,
+        "user_title": null,
+        "bookmarked": false,
+        "actions_summary": [],
+        "moderator": false,
+        "admin": false,
+        "staff": false,
+        "user_id": 714,
+        "hidden": false,
+        "trust_level": 1,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": false,
+        "wiki": false,
+        "post_url": "/t/%D1%83%D1%80%D0%BE%D0%BA%D0%B8-%D0%B2%D1%8B%D0%BD%D0%B5%D1%81%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D0%B8%D0%B7-%D0%BE%D1%82%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82%D0%B0-%D0%B2-%D0%BA%D0%B0%D0%B7%D0%B0%D1%85%D1%81%D1%82%D0%B0%D0%BD%D0%B5-%D0%B2-%D1%8F%D0%BD%D0%B2%D0%B0%D1%80%D0%B5-2022-%D0%B3%D0%BE%D0%B4%D0%B0-%D0%B4%D0%BB%D1%8F-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4%D0%B0-%D1%86%D0%B5%D0%BD%D0%B7%D1%83%D1%80%D1%8B/1686/2",
+        "can_translate": false
+    }
+]

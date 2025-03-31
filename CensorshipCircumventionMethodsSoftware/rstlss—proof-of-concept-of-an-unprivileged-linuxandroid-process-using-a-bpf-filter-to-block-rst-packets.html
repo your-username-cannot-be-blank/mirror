@@ -1,0 +1,74 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>rstlss—proof-of-concept-of-an-unprivileged-linuxandroid-process-using-a-bpf-filter-to-block-rst-packets</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><aside class="onebox githubrepo" data-onebox-src="https://github.com/darkk/rstlss">
+  <header class="source">
+
+      <a href="https://github.com/darkk/rstlss" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="rstlss—proof-of-concept-of-an-unprivileged-linuxandroid-process-using-a-bpf-filter-to-block-rst-packets/679a37f3bfc11dfb88f45a898d2cafb35069612a_2_690x344.png" class="thumbnail" data-dominant-color="EAEFF0">
+
+  <h3><a href="https://github.com/darkk/rstlss" target="_blank" rel="noopener">GitHub - darkk/rstlss: Proof-of-concept of an unprivileged Linux process...</a></h3>
+
+    <p><span class="github-repo-description">Proof-of-concept of an unprivileged Linux process using a BPF filter to block RST packets</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Small example of using BPF to block TCP RST by <a class="mention" href="/u/darkk">@darkk</a>. Works on Android, does not require root.</p>
+<p><code>rstlss</code> is an example of an unprivileged Linux process using a BPF filter to block certain TCP packets coming to the socket.</p>
+<p>This specific example shows how to circumvent one-sided <a href="https://en.wikipedia.org/wiki/TCP_reset_attack">TCP reset attack</a> by an <em>on-path</em> DPI box <a href="http://isitblockedinrussia.com/?host=https%3A%2F%2Frutracker.org">blocking</a> <code>https://rutracker.org</code> (as <em>Inappropriate TCP Resets Considered Harmful</em> ). <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p>
+<p><em>On-path</em> DPI box is assumed to be <em>passive</em> , being unable to <em>drop</em> packets, just being able to inject some.</p>
+<p><em>One-sided TCP reset attack</em> means that RST packet is injected only towards the “client” endpoints and the “server” does not get another RST. E.g. some networks in <a href="https://ooni.torproject.org/post/uganda-social-media-tax/#vpn-blocking">Uganda block OpenVPN/TCP</a> with two-sided TCP reset attacks. One has to control the server as well to mitigate two-sided attack.</p></td><td>2019-09-23T14:48:14.861Z</td></tr><tr><td>ValdikSS</td><td><p>Note that you can’t use eBPF on Android: bpf() syscall is blocked by seccomp (it’s allowed only for system, but not for user applications). Android seccomp whitelists all syscalls in SYSCALLS.TXT, and then blacklists some, or whitelists missing. Since bpf() is missing from SYSCALLS.TXT and not whitelisted for applications, we can’t use bpf() on stock Android.<br>
+See <a href="https://github.com/aosp-mirror/platform_bionic/tree/master/libc" rel="nofollow noopener">https://github.com/aosp-mirror/platform_bionic/tree/master/libc</a></p>
+<p>You can still use regular BPF (don’t confuse it with bpf() syscall which is used for eBPF).</p></td><td>2019-09-23T15:17:58.161Z</td></tr><tr><td>ValdikSS</td><td><p>cBPF and eBPF support test example for Android, C source code and armv7/arm64 binaries.<br>
+<a class="attachment" href="rstlss—proof-of-concept-of-an-unprivileged-linuxandroid-process-using-a-bpf-filter-to-block-rst-packets/zm7Jid4dowEkTRlHwtsTKDxNTV1.zip">bpftest_android.zip</a> (6.0 KB)</p>
+<p>More information here: <a href="https://www.reddit.com/r/androiddev/comments/93raql/help_me_test_ebpf_support_on_modern_android/">https://www.reddit.com/r/androiddev/comments/93raql/help_me_test_ebpf_support_on_modern_android/</a></p></td><td>2019-10-09T19:00:21.128Z</td></tr>
+    </table>
+      </body>
+    </html>

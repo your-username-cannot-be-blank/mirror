@@ -1,0 +1,154 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>185631441-блокирует-пулы-российских-адресов</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>AmiGO</td><td><p><code>www.linkedin.com</code> резалвится в <code>185.63.144.1</code><br>
+У меня на Селектеле настроен бокс с <code>nfqws</code> в режиме <code>--dpi-desync-fooling=badsum</code>, который в 100% случаев кроме указанного отрабатывает как от него требуется.<br>
+В случае же с <code>185.63.144.1</code> абсолютно неважно что и как делать, на первый SYN сразу приходит RST:</p>
+<details>
+<summary>
+tcpdump -nnn -vvv -i eno1 'host 185.63.144.1' #www.linkedin.com</summary>
+<pre><code>03:00:53.678192 IP (tos 0x0, ttl 64, id 18304, offset 0, flags [DF], proto TCP (6), length 60)
+    31.184.218.179.36138 &gt; 185.63.144.1.443: Flags [S], cksum 0x43db (incorrect -&gt; 0x4214), seq 1884898971, win 64240, options mss 1460,sackOK,TS val 114129575 ecr 0,nop,wscale 7], length 0
+03:00:53.678337 IP (tos 0x0, ttl 63, id 0, offset 0, flags [DF], proto TCP (6), length 40)
+    185.63.144.1.443 &gt; 31.184.218.179.36138: Flags [R.], cksum 0x2b58 (correct), seq 0, ack 1884898972, win 64240, length 0
+</code></pre>
+</details>
+<details>
+<summary>
+tcpdump -nnn -vvv -i eno1 'host 195.82.146.214' #rutracker.org</summary>
+<pre><code>03:03:08.337690 IP (tos 0x0, ttl 64, id 9203, offset 0, flags [DF], proto TCP (6), length 60)
+    31.184.218.179.33836 &gt; 195.82.146.214.443: Flags [S], cksum 0x50c3 (incorrect -&gt; 0xdf9b), seq 3424791788, win 64240, options [mss 1460,sackOK,TS val 19963064 ecr 0,nop,wscale 7], length 0
+03:03:08.366296 IP (tos 0x0, ttl 53, id 0, offset 0, flags [DF], proto TCP (6), length 48)
+    195.82.146.214.443 &gt; 31.184.218.179.33836: Flags [S.], cksum 0x1b75 (correct), seq 2862265699, ack 3424791789, win 14600, options [mss 1460,nop,wscale 8], length 0
+</code></pre>
+<p>[…]</p>
+</details>
+<p>На incorrect checksum не надо обращать внимания, т.к.</p>
+<details>
+<summary>
+ethtool -k eno1</summary>
+<pre><code>Features for eno1:
+rx-checksumming: on
+tx-checksumming: on
+	tx-checksum-ipv4: off [fixed]
+	tx-checksum-ip-generic: on
+	tx-checksum-ipv6: off [fixed]
+	tx-checksum-fcoe-crc: off [fixed]
+	tx-checksum-sctp: off [fixed]
+scatter-gather: on
+	tx-scatter-gather: on
+	tx-scatter-gather-fraglist: off [fixed]
+tcp-segmentation-offload: on
+	tx-tcp-segmentation: on
+	tx-tcp-ecn-segmentation: off [fixed]
+	tx-tcp-mangleid-segmentation: off
+	tx-tcp6-segmentation: on
+udp-fragmentation-offload: off
+generic-segmentation-offload: on
+generic-receive-offload: on
+large-receive-offload: off [fixed]
+rx-vlan-offload: on
+tx-vlan-offload: on
+ntuple-filters: off [fixed]
+receive-hashing: on
+highdma: on [fixed]
+rx-vlan-filter: off [fixed]
+vlan-challenged: off [fixed]
+tx-lockless: off [fixed]
+netns-local: off [fixed]
+tx-gso-robust: off [fixed]
+tx-fcoe-segmentation: off [fixed]
+tx-gre-segmentation: off [fixed]
+tx-gre-csum-segmentation: off [fixed]
+tx-ipxip4-segmentation: off [fixed]
+tx-ipxip6-segmentation: off [fixed]
+tx-udp_tnl-segmentation: off [fixed]
+tx-udp_tnl-csum-segmentation: off [fixed]
+tx-gso-partial: off [fixed]
+tx-sctp-segmentation: off [fixed]
+tx-esp-segmentation: off [fixed]
+tx-udp-segmentation: off [fixed]
+fcoe-mtu: off [fixed]
+tx-nocache-copy: off
+loopback: off [fixed]
+rx-fcs: off
+rx-all: off
+tx-vlan-stag-hw-insert: off [fixed]
+rx-vlan-stag-hw-parse: off [fixed]
+rx-vlan-stag-filter: off [fixed]
+l2-fwd-offload: off [fixed]
+hw-tc-offload: off [fixed]
+esp-hw-offload: off [fixed]
+esp-tx-csum-hw-offload: off [fixed]
+rx-udp_tunnel-port-offload: off [fixed]
+tls-hw-tx-offload: off [fixed]
+tls-hw-rx-offload: off [fixed]
+rx-gro-hw: off [fixed]
+tls-hw-record: off [fixed]
+</code></pre>
+</details>
+<p>Буду признателен, если кто-нибудь со своей стороны проверит доступность <code>185.63.144.1</code>.<br>
+Спасибо.</p></td><td>2019-12-05T00:05:12.719Z</td></tr><tr><td>ValdikSS</td><td><p>Этот IP-адрес заблокирован как IP-адрес. DPI блокирует любые обращения на него.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://reestr.rublacklist.net/ru/record/388515/">
+  <header class="source">
+      <img src="185631441-блокирует-пулы-российских-адресов/339b528678aaa8def08cd93521a3a38711ac4297.png" class="site-icon" data-dominant-color="40446F" width="48" height="48">
+
+      <a href="https://reestr.rublacklist.net/ru/record/388515/" target="_blank" rel="noopener">reestr.rublacklist.net</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="185631441-блокирует-пулы-российских-адресов/d77bb7430fb05dfb485fa7d2ca2a71555c8860b3_2_690x361.png" class="thumbnail" data-dominant-color="F1F2F4" width="690" height="361"></div>
+
+<h3><a href="https://reestr.rublacklist.net/ru/record/388515/" target="_blank" rel="noopener">Реестр запрещенных сайтов</a></h3>
+
+  <p>Реестр запрещенных сайтов. Реестр организаторов распространения информации. Реестр новостных агрегаторов.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>У меня <a href="http://www.linkedin.com">www.linkedin.com</a> резолвится в 185.63.14<strong>5</strong>.1, он не добавлен в реестр по IP-адресу, попробуйте добавить его в hosts.</p></td><td>2019-12-05T00:23:00.733Z</td></tr><tr><td>AmiGO</td><td><p>Спасибо, только теперь понял, что одноуровневой системы для борьбы с блокировками недостаточно, часть трафика всё-равно придётся лить в VPN через сервер, находящийся за границей.</p></td><td>2019-12-05T00:52:04.956Z</td></tr>
+    </table>
+      </body>
+    </html>

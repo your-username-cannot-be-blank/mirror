@@ -1,0 +1,358 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>настройка-mikrotik-под-wireguard-antizapret-11455</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>vitalik6243(vitalik6243)</td><td><p>Для тех кто использует: <a href="https://ntc.party/t/%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82-%D0%B4%D0%BB%D1%8F-%D0%B0%D0%B2%D1%82%D0%BE%D0%BC%D0%B0%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%B3%D0%BE-%D1%80%D0%B0%D0%B7%D0%B2%D0%B5%D1%80%D1%82%D1%8B%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-antizapret-vpn-%D0%BE%D0%B1%D1%8B%D1%87%D0%BD%D1%8B%D0%B9-vpn-%D0%B1%D0%B5%D0%B7-%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%B9%D0%BD%D0%B5%D1%80%D0%B0-openvpn-wireguard-amneziawg-%D0%BF%D0%B0%D1%82%D1%87-%D0%B4%D0%BB%D1%8F-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4%D0%B0-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8-openvpn/9270" class="inline-onebox">Скрипт для автоматического развертывания AntiZapret VPN + обычный VPN (без контейнера) OpenVPN / WireGuard / AmneziaWG + Патч для обхода блокировки OpenVPN</a></p>
+<p>Если в двух словах помучаться придется… все делать нужно руками но вполне возможно. Проверить как работает я не проверял запустил виртуалку с RouterOS трасировка пошла в нужное русло.<br>
+Приступим:</p>
+<ol>
+<li>Создать подключение WG:</li>
+</ol>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="настройка-mikrotik-под-wireguard-antizapret-11455/f9fcce51e4aa9ba3bd7447d6872ea9362f0d72b6.png" data-download-href="https://ntc.party/uploads/default/f9fcce51e4aa9ba3bd7447d6872ea9362f0d72b6" title="image"><img src="настройка-mikrotik-под-wireguard-antizapret-11455/f9fcce51e4aa9ba3bd7447d6872ea9362f0d72b6.png" alt="image" data-base62-sha1="zFuwvEDhdTPeCjhitPFeInnEfSm" width="690" height="446" data-dominant-color="DBDBDC"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">993×643 31.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Дополнение в Allowed Adress нужно добавить ваши DNS с префиксом /32<br>
+К примеру в моем случае днс 192.168.2.1/32<br>
+Действительно не работает без этой настройки.</p>
+</details>
+<ol start="2">
+<li>Создать Adress List:</li>
+</ol>
+<details>
+<summary>
+Спойлер</summary>
+<p><img src="настройка-mikrotik-под-wireguard-antizapret-11455/64dd23a7eeea9c5272f807b7c9b9573945ae9530.png" alt="{A0510D40-6F82-4FF5-882F-89F779F8B1FB}" data-base62-sha1="eohxduWDLPLObFYfAQLn9BBrI3K" width="299" height="245"></p>
+</details>
+<ol start="3">
+<li>Понизить Дистанцию Default Route вашего провайдера до 2ки:</li>
+</ol>
+<details>
+<summary>
+Спойлер</summary>
+<p><img src="настройка-mikrotik-под-wireguard-antizapret-11455/1c675ca8f3b6dbc00ba293ba06ef43f05da13640.png" alt="{400463E3-164B-43CC-8E54-73A446C5355C}" data-base62-sha1="43gOUrATle0CA20hPH87KSPnYaI" width="366" height="320"></p>
+</details>
+<ol start="4">
+<li>Создать список Routes:</li>
+</ol>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="настройка-mikrotik-под-wireguard-antizapret-11455/2d454735e7ecc7f77310ecd65204650dff413e54.png" data-download-href="https://ntc.party/uploads/default/2d454735e7ecc7f77310ecd65204650dff413e54" title="image"><img src="настройка-mikrotik-под-wireguard-antizapret-11455/2d454735e7ecc7f77310ecd65204650dff413e54.png" alt="image" data-base62-sha1="6stUFfwQWUUC1Bhg8rV3NUS7vVy" width="690" height="295" data-dominant-color="DCDCE0"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1114×477 25.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Дополнение:<br>
+Для того чтобы в случае падения сервера WG интернет продолжал работать конфигурацию нужно привести к такому состоянию:<br>
+<img src="настройка-mikrotik-под-wireguard-antizapret-11455/e50215b5443dc12f1a372025d68dd1d9e5da1f89.png" alt="{9EA09490-2236-4AEB-B9F0-9B65048FA1CF}" data-base62-sha1="wFTO3BG3SlIOqAB13wyiZmRapUl" width="407" height="476"><br>
+А именно включить ping, и на место Gateway вбить IP адрес шлюза. Лично у меня работало все хорошо.</p>
+</details>
+<ol start="5">
+<li>Создать маскарад:</li>
+</ol>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="настройка-mikrotik-под-wireguard-antizapret-11455/fd93e0eb3048f4f3b96ea3991c2940c17696e32b.png" data-download-href="https://ntc.party/uploads/default/fd93e0eb3048f4f3b96ea3991c2940c17696e32b" title="{0FADCCB1-9242-4655-86ED-20675FF8F3D2}"><img src="настройка-mikrotik-под-wireguard-antizapret-11455/fd93e0eb3048f4f3b96ea3991c2940c17696e32b.png" alt="{0FADCCB1-9242-4655-86ED-20675FF8F3D2}" data-base62-sha1="AbfCXIxdYRQ5nSuLYnZG1p3KpwD" width="326" height="500" data-dominant-color="E1E1E5"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">{0FADCCB1-9242-4655-86ED-20675FF8F3D2}</span><span class="informations">385×589 10.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="настройка-mikrotik-под-wireguard-antizapret-11455/dedfa6c5db70e9c3b726d9da61712593ceb8a546.png" data-download-href="https://ntc.party/uploads/default/dedfa6c5db70e9c3b726d9da61712593ceb8a546" title="{43931AC8-FEA8-45FE-AE0A-F47DFB5E22BE}"><img src="настройка-mikrotik-под-wireguard-antizapret-11455/dedfa6c5db70e9c3b726d9da61712593ceb8a546.png" alt="{43931AC8-FEA8-45FE-AE0A-F47DFB5E22BE}" data-base62-sha1="vNDavsKk7nKzLt3UKOhWY5EToQC" width="330" height="500" data-dominant-color="E4E5E9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">{43931AC8-FEA8-45FE-AE0A-F47DFB5E22BE}</span><span class="informations">387×585 5.88 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Где 192.168.88.0/24 это ваша локалка</p>
+</details>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="настройка-mikrotik-под-wireguard-antizapret-11455/32bca128eb3a9f45114d4530ab91e859115ec12c.png" data-download-href="https://ntc.party/uploads/default/32bca128eb3a9f45114d4530ab91e859115ec12c" title="{3010D98F-691D-4586-9CF8-A3BBA6EEA997}"><img src="настройка-mikrotik-под-wireguard-antizapret-11455/32bca128eb3a9f45114d4530ab91e859115ec12c.png" alt="{3010D98F-691D-4586-9CF8-A3BBA6EEA997}" data-base62-sha1="7eQ0E5gUL5uFFoMKm8QADjhL38U" width="690" height="286" data-dominant-color="E2E3E9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">{3010D98F-691D-4586-9CF8-A3BBA6EEA997}</span><span class="informations">791×329 9.61 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Лично у меня по трассировкам все заработало как положено.</p>
+<p>Дополнение если в AllowedIPs у вас указаны дополнительные ip/подсети, их все нужно вручную прокидывать в Routes.</p>
+<p>PS добавил проверку ping в Routes, чуть изменил Adress List чтобы работало корректно.<br>
+PS подкорректировал настройку AllowedIPs в конфигурации WireGuard без этой конфигурации действительно не работает.</p></td><td>2024-10-10T09:53:28.007Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Дополнил в тему как сделать Routes с ping кто ранее сделал без него.<br>
+С ping в случае падения сервера интернет продолжит работать через провайдера и не пропадет.</p></td><td>2024-10-10T10:52:19.728Z</td></tr><tr><td>sdbsm</td><td><p>Большое спасибо!</p>
+<p>у меня не заработало…<br>
+может быть дело в пункте с роутом dns провайдера? который я не понял =)<br>
+у меня отклбючен use peer dns и в ip - dns вбиты dns 8.8.8.8 и 1.1.1.1<br>
+я включал юз пир днс, получал днс провайдера и его в роут добавлял. и свои восьмерки прописывал., но заблокированные сайты не открываются</p></td><td>2024-10-10T16:07:23.774Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Открой вкладку dns отправь сюда скрин что у тебя там.<br>
+Отправь еще скрин с Routes возможно у тебя маршруты не поднялись.</p></td><td>2024-10-10T17:24:15.105Z</td></tr><tr><td>sdbsm</td><td><p><img src="настройка-mikrotik-под-wireguard-antizapret-11455/211dc94c6049f5d8b9365f3ecc4f77ad0c3b62f3.png" alt="image" data-base62-sha1="4IXzyf9hC7brQz3ViqGqnRhJV19" width="446" height="478"><br>
+<img src="настройка-mikrotik-под-wireguard-antizapret-11455/95dcf263a359f026f3732d7d1de491e79552da8e.png" alt="image" data-base62-sha1="lnKwcY8AxFAY1RCkp7KB19VO0ou" width="594" height="73"></p></td><td>2024-10-10T17:26:14.788Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Отлично, маршруты поднялись работают, попробуй запустить пинг на 10.29.0.1 из микротика, если пинг не пошел значит WireGuard не соединился с сервером есть ошибки в конфигурации.</p></td><td>2024-10-10T17:27:20.728Z</td></tr><tr><td>sdbsm</td><td><p>я олень. ошибку в конфиге нашел, 10.29.0.1  теперь пингуется<br>
+но в такой конфигурации не работаю вообще dns<br>
+<img src="настройка-mikrotik-под-wireguard-antizapret-11455/c33151900f8f5f51554ef959ea2a80217b3cbf9b.png" alt="image" data-base62-sha1="rQKLP6KrGKwTwHl9JYmWrcfKuCL" width="683" height="444"></p></td><td>2024-10-10T17:35:43.653Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Попробуй в Routes DNS включить проверку по пингу и отправить все на шлюз 10.29.8.1 как я обновил в инструкции.</p></td><td>2024-10-10T17:36:43.693Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Дальше уже в Tools открыть Traceroute и пробовать делать трасировку в начале до закрытых твоему провайдеру ресурсов чтобы увидеть что заработали сайты через впн</p></td><td>2024-10-10T17:38:25.866Z</td></tr><tr><td>sdbsm</td><td><p>так?<br>
+<img src="настройка-mikrotik-под-wireguard-antizapret-11455/eb21f0a51bb77a5ca028e877548aba9c7f7c45c5.png" alt="image" data-base62-sha1="xy4V93GGtpABq2jxE2FqK8yfl5j" width="608" height="70"></p>
+<p>ну и в первых двух роутах включен чек гетвэй пинг<br>
+если да, то ниче не поменялось</p></td><td>2024-10-10T17:47:26.405Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>что скажет tracaroute, маскарад создан?</p></td><td>2024-10-10T17:56:48.013Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Замаж IP своего провайдера и скинь весь список Route что у тебя сидит еще на 1 дистанции?</p></td><td>2024-10-10T17:57:44.306Z</td></tr><tr><td>sdbsm</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="настройка-mikrotik-под-wireguard-antizapret-11455/4596d54cb989278e8f061de3bd575be0489ae9c7.png" data-download-href="https://ntc.party/uploads/default/4596d54cb989278e8f061de3bd575be0489ae9c7" title="image"><img src="настройка-mikrotik-под-wireguard-antizapret-11455/4596d54cb989278e8f061de3bd575be0489ae9c7.png" alt="image" data-base62-sha1="9VC6sbkHcwkg8l9fbubG5LbAeYn" width="690" height="343" data-dominant-color="ECEBF1"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">704×350 9.05 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-10-10T18:36:28.417Z</td></tr><tr><td>sdbsm</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="настройка-mikrotik-под-wireguard-antizapret-11455/057fc9b75400c5c665b95e4271c409082d8efd8f.png" data-download-href="https://ntc.party/uploads/default/057fc9b75400c5c665b95e4271c409082d8efd8f" title="image"><img src="настройка-mikrotik-под-wireguard-antizapret-11455/057fc9b75400c5c665b95e4271c409082d8efd8f_2_689x325.png" alt="image" data-base62-sha1="MEaEk1KfdfjifSYaK8soR962MD" width="689" height="325" srcset="настройка-mikrotik-под-wireguard-antizapret-11455/057fc9b75400c5c665b95e4271c409082d8efd8f_2_689x325.png, настройка-mikrotik-под-wireguard-antizapret-11455/057fc9b75400c5c665b95e4271c409082d8efd8f_2_1033x487.png 1.5x, настройка-mikrotik-под-wireguard-antizapret-11455/057fc9b75400c5c665b95e4271c409082d8efd8f_2_1378x650.png 2x" data-dominant-color="D2D1D2"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">2424×1142 164 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+tracerout не делается на запрещенку… dns не пашет</p>
+<p>upd: ппц. взял и ожил dns<br>
+вот tracerout до ntc.party. я так понимаю это блокировка?</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="настройка-mikrotik-под-wireguard-antizapret-11455/aed7c48e948ab6ed42b8adf386f1485b9129ac5c.png" data-download-href="https://ntc.party/uploads/default/aed7c48e948ab6ed42b8adf386f1485b9129ac5c" title="image"><img src="настройка-mikrotik-под-wireguard-antizapret-11455/aed7c48e948ab6ed42b8adf386f1485b9129ac5c.png" alt="image" data-base62-sha1="oWJmkL1bapBbHVNKZGs4QQZ2tru" width="661" height="500" data-dominant-color="F0F0F2"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1002×757 26.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>upd2:<br>
+я не понимаю че происходит. трассировка по имени работает. а пинг - нет)<br>
+<img src="настройка-mikrotik-под-wireguard-antizapret-11455/fc34e73cd7b12d799dd9f4ca9409cc8b8908f42b.png" alt="image" data-base62-sha1="zZ7Fn47xzy93P1hCocKVn0p6WaT" width="595" height="451"></p></td><td>2024-10-10T18:43:34.952Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>сайт может не отвечать на ping запрос в этом ниче такого нет.<br>
+знаешь че попробуй, попробуй днс 1.1.1.1/32 и 8.8.8.8/32 добавить в AllowedIPS WireGuard сделаем по аналогии с Keenetic. У меня почему-то работает и без этого, в твоем случае похоже что WG не пропускает днсы и трафик не летит.</p></td><td>2024-10-10T23:42:10.018Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Отпишись если заработает добавлю это в инструкцию для всех.</p></td><td>2024-10-10T23:44:35.225Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Где ж вы были 8 часов назад и день… Благодарим</p></td><td>2024-10-11T01:09:39.105Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Получилось сделать по первой инструкции? Или добавляли AllowedIPs?</p></td><td>2024-10-11T07:54:15.730Z</td></tr><tr><td>sdbsm</td><td><p>да, так заработало<br>
+спс</p></td><td>2024-10-11T08:00:28.711Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Дополнил в инструкцию, щас решил потрасерить у себя днсы выставил 8ки и 1ки, и действительно не работало. Ну отлично, потестируйте какую скорость микрот выдает через WG по сравнению с OpenVPN.</p></td><td>2024-10-11T08:03:42.467Z</td></tr><tr><td>sdbsm</td><td><p>у меня hap ac3<br>
+на ovpn было 30-35 мбит<br>
+на wireguard 130</p></td><td>2024-10-11T08:16:57.642Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Ну прирост есть можно и помучаться если нужна такая скорость)</p></td><td>2024-10-11T08:19:12.667Z</td></tr><tr><td>sdbsm</td><td><p>мерил на 2ip.ua<br>
+щас запустил кучу видосов с ютубчика и на интерфейсе в пике в винбоксе было 217 =)</p></td><td>2024-10-11T08:20:53.645Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>лишь бы корректно отрабатывал пинг чек. Т.к. падение впн сервера никто не отменял элементарно может быть на стыке где нибудь проблема)</p></td><td>2024-10-11T08:22:55.095Z</td></tr><tr><td>sdbsm</td><td><p>ну для меня это не так критично. ручками выключу если что</p></td><td>2024-10-11T08:23:55.666Z</td></tr><tr><td>Vazelinchik</td><td><p>Пробую настроить и сразу проблема с 1 пунктом - соединение не проходит дальше 92к (handshake initiation). Пока что смог разобраться с этим только на обычном клиенте wg, вроде бы даже есть <a href="https://gist.github.com/httpsx/76a98ea28e6f3a4ffc947e768c0b6c01?permalink_comment_id=5175608#gistcomment-5175608" rel="noopener nofollow ugc">решение</a>  по добавлению данного метода обхода, но версия ROS 7.17 (т.к. <a href="https://help.mikrotik.com/docs/display/ROS/Device-mode" rel="noopener nofollow ugc">Device-mode</a>) в режиме advanced есть только с этой ветки.</p></td><td>2024-10-12T20:43:51.701Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Там есть нюансы с ключем, в активное подключение нужен приват ключ. В пире приват вообще указывать не нужно, я первоначально тоже мучал микротик в этом направлении т.к. он не конектился к моему серваку. В целом ниче сложного нет можно победить без проблем.</p></td><td>2024-10-13T12:57:53.986Z</td></tr><tr><td>Vazelinchik</td><td><aside class="quote no-group" data-username="vitalik6243" data-post="27" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/vitalik6243/48/6042_2.png" class="avatar"> vitalik6243:</div>
+<blockquote>
+<p>активное подключение</p>
+</blockquote>
+</aside>
+<p>имеется ввиду именно интерфейс wg? убрал инфу о закрытом ключе, но видно что начало и конец совпадают. В peers параметр private key выставлен в ‘none’</p>
+<details>
+<summary>
+Summary</summary>
+<p><img src="настройка-mikrotik-под-wireguard-antizapret-11455/1085741d56c1ad13dbb54ddf9b4cb4a08547cd93.jpeg" alt="Снимок экрана 2024-10-13 164455" data-base62-sha1="2m9yScDoC9vqcdlarxu9yuteGdB" width="600" height="405"></p>
+</details></td><td>2024-10-13T13:51:39.550Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Верно, в сам интерфейс ты указываешь только приват ключ.<br>
+В пир публичный ключ и создаешь адрес. проверить произошел коннект или нет у тебя в пире появился last hanshake значит они подружились.</p></td><td>2024-10-13T13:52:45.951Z</td></tr><tr><td>Vazelinchik</td><td><p>Пробовал и так. По итогу пока не смог добиться подключения (last handshake был, но передает только 92к), вернулся пока на OpenVPN</p></td><td>2024-10-14T06:39:19.391Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Я подозреваю что не правильно сделаны настройки если был Last Hanshake значит все впорядке можно переходить к пункту Adress чтобы появились маршруты на ip адреса WG. Увы но микротик это не кинетик где делается все в 2 клика. Тут нужно мучаться. Я подозреваю что попытались сделать пинг до днса не создав IP для клиента ВГ. В целом я бы оставил OpenVPN если вас он устраивает с ним меньше заморочек. WG это все таки для интузиастов и для кого реально не хватает скорости 15-30 мбит/сек и кому в реальности нужно больше. Как и описано в начале темы тут придется попотеть.</p></td><td>2024-10-14T10:01:04.155Z</td></tr><tr><td>KVinS(KVinS)</td><td><aside class="quote no-group" data-username="vitalik6243" data-post="1" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/vitalik6243/48/6042_2.png" class="avatar"> vitalik6243:</div>
+<blockquote>
+<p>Если в двух словах помучаться придется… все делать нужно руками но вполне возможно</p>
+</blockquote>
+</aside>
+<p>Спасибо за инструкцию, но вы бы ещё написали полные пути пунктов где всё это вбивать &gt;_&lt;<br>
+И много непонятного…</p>
+<blockquote>
+<p>днс 192.168.2.1/32</p>
+</blockquote>
+<p>Это адрес микротика? Это адрес ДНС провайдера?</p>
+<p>Какой IP микротика?</p>
+<blockquote>
+<p>Adress List:</p>
+</blockquote>
+<p>Где?</p>
+<p>Почему в одних местах 10.29.0.0/16 а в других 10.29.0.0/15 ?</p>
+<blockquote>
+<p>вбить IP адрес шлюза</p>
+</blockquote>
+<p>Шлюз это “впн сервер”?</p>
+<blockquote>
+<ol start="5">
+<li>Создать маскарад:</li>
+</ol>
+</blockquote>
+<p>Что там за src adress? Какая-то новая подсеть…</p>
+<p>Я понимаю, что микротики обычно покупают те, кто шарит, но тут моей старушке соседке продали  hap ac2, а она теперь снова хочет на ютубе телек смотреть <img src="https://ntc.party/images/emoji/twitter/smiley.png?v=12" title=":smiley:" class="emoji" alt=":smiley:" loading="lazy" width="20" height="20"></p></td><td>2024-10-15T16:17:59.489Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>всегда используется dns  провайдера либо днс вручную вбитый в поле днс.<br>
+в WG вбивается вся подсеть чтобы не мучаться, в Adress вбивается /24 маска для получения IP т.к. в WG у тебя используется диапазон с маской /24<br>
+Шлюз это адрес DNS сервера. фактически,<br>
+Это твоя локальная подсеть там указано в спойлере.</p></td><td>2024-10-16T11:57:51.887Z</td></tr><tr><td>shum44(Shum44)</td><td><p>Добрый день<br>
+вопросы по мануалу.</p>
+<ol>
+<li>при создании peer wg Allowed Adress мы берем из файла <em>wg</em> из строчки AllowedIPs или Указанные на картинке?</li>
+<li>Adress list мы создаем указанный на картинке 10.29.8.8/24 или все таки можно создать свой?</li>
+<li>В Routes мы создаем для каждого ip указанного в создаваемом Peer?</li>
+</ol>
+<p>PS может лучше дополнить инструкцию уже готовыми скриптами с указанием того что надо поменять или дополнить<br>
+спасибо</p></td><td>2024-10-20T12:43:41.378Z</td></tr><tr><td>idev</td><td><aside class="quote no-group" data-username="KVinS" data-post="32" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a9adbd/48.png" class="avatar"> KVinS:</div>
+<blockquote>
+<p>Я понимаю, что микротики обычно покупают те, кто шарит, но тут моей старушке соседке продали hap ac2, а она теперь снова хочет на ютубе телек смотреть <img src="https://ntc.party/images/emoji/twitter/smiley.png?v=12" title=":smiley:" class="emoji" alt=":smiley:" loading="lazy" width="20" height="20"></p>
+</blockquote>
+</aside>
+<p>Между делом свои 5 копеек вставлю: хап ац 2 – довольно производительный аппарат и по openvpn прекрасно держит около 60-и Мбит/с (aes-128-cbc). А по сему, может, действительно проще остаться на openvpn, коль он работает.</p>
+<p>Ну, это так, в порядке личного мнения <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-10-20T13:07:39.465Z</td></tr><tr><td>KVinS(KVinS)</td><td><aside class="quote no-group" data-username="vitalik6243" data-post="33" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/vitalik6243/48/6042_2.png" class="avatar"> vitalik6243:</div>
+<blockquote>
+<p>в WG вбивается вся подсеть чтобы не мучаться</p>
+</blockquote>
+</aside>
+<p>Что такое “вся подсеть”? &gt;_&lt;</p>
+<aside class="quote no-group" data-username="vitalik6243" data-post="33" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/vitalik6243/48/6042_2.png" class="avatar"> vitalik6243:</div>
+<blockquote>
+<p>Шлюз это адрес DNS сервера. фактически,</p>
+</blockquote>
+</aside>
+<p>Провайдера или ВПН?</p>
+<aside class="quote no-group" data-username="idev" data-post="35" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/idev/48/9118_2.png" class="avatar"> idev:</div>
+<blockquote>
+<p>Между делом свои 5 копеек вставлю: хап ац 2 – довольно производительный аппарат и по openvpn прекрасно держит около 60-и Мбит/с (aes-128-cbc)</p>
+</blockquote>
+</aside>
+<p>Вот только я так и не смог его (опен-впн) настроить. Видимо потому, что по умолчанию там не cbc, а что-то другое, чего в Микротике нет.</p>
+<p>Вся надежда на эту инструкцию &gt;_&lt;<br>
+Но пока смелости пойти попробовать не набрался.</p></td><td>2024-10-20T17:43:13.913Z</td></tr><tr><td>idev</td><td><aside class="quote no-group" data-username="KVinS" data-post="36" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a9adbd/48.png" class="avatar"> KVinS:</div>
+<blockquote>
+<p>Видимо потому, что по умолчанию там не cbc, а что-то другое, чего в Микротике нет.</p>
+</blockquote>
+</aside>
+<p>cbc во всех микротиках есть и во многих (в том числе ac2) шифруестя аппаратно. Это старый протокол. Устаревший.</p></td><td>2024-10-20T17:45:18.158Z</td></tr><tr><td>KVinS(KVinS)</td><td><aside class="quote no-group" data-username="vitalik6243" data-post="20" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/vitalik6243/48/6042_2.png" class="avatar"> vitalik6243:</div>
+<blockquote>
+<p>Дополнил в инструкцию, щас решил потрасерить у себя днсы выставил 8ки и 1ки, и действительно не работало.</p>
+</blockquote>
+</aside>
+<p>При всём уважении, я бы действительно добавил пример ВГ конфига и подсказки что откуда куда вставлять на конкретном примере.</p>
+<aside class="quote no-group" data-username="sdbsm" data-post="21" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/sdbsm/48/1125_2.png" class="avatar"> sdbsm:</div>
+<blockquote>
+<p>на ovpn было 30-35 мбит</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="idev" data-post="37" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/idev/48/9118_2.png" class="avatar"> idev:</div>
+<blockquote>
+<p>cbc во всех микротиках есть и во многих (в том числе ac2) шифруестя аппаратно. Это старый протокол. Устаревший.</p>
+</blockquote>
+</aside>
+<p>А вы для OVPN как-то меняли конфиг сервера? У меня по умолчанию не завелось и я, если честно особо не старался потому, что инструкция с которой я работал озаглавливалась “ПОДУМАЙТЕ НУЖНО ЛИ ОНО ВАМ”.</p></td><td>2024-10-20T23:21:11.797Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><aside class="quote no-group" data-username="shum44" data-post="34" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shum44/48/11522_2.png" class="avatar"> shum44:</div>
+<blockquote>
+<p>при создании peer wg Allowed Adress мы берем из файла <em>wg</em> из строчки AllowedIPs или Указанные на картинке?</p>
+</blockquote>
+</aside>
+<p>Логично что можно указать свои IP адреса и добавить только днсы. В целом можно вообще не париться и указать 0.0.0.0/0 и пробрасывать только route нужные. Вариантов много.</p>
+<aside class="quote no-group" data-username="shum44" data-post="34" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shum44/48/11522_2.png" class="avatar"> shum44:</div>
+<blockquote>
+<p>Adress list мы создаем указанный на картинке 10.29.8.8/24 или все таки можно создать свой?</p>
+</blockquote>
+</aside>
+<p>Указываете тот IP которым у вас в файле .conf только /32 меняете на /24</p>
+<aside class="quote no-group" data-username="shum44" data-post="34" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shum44/48/11522_2.png" class="avatar"> shum44:</div>
+<blockquote>
+<p>В Routes мы создаем для каждого ip указанного в создаваемом Peer?</p>
+</blockquote>
+</aside>
+<p>Routes создаем до тех подсетей которые в AllowedIPs, но обязательно нужно завернуть ваши днс.</p>
+<aside class="quote no-group" data-username="shum44" data-post="34" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shum44/48/11522_2.png" class="avatar"> shum44:</div>
+<blockquote>
+<p>PS может лучше дополнить инструкцию уже готовыми скриптами с указанием того что надо поменять или дополнить<br>
+спасибо</p>
+</blockquote>
+</aside>
+<p>Увы но отредактировать свое сообщение я уже почему то не могу разве что написать новое…</p></td><td>2024-10-21T10:39:44.310Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><aside class="quote no-group" data-username="KVinS" data-post="36" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a9adbd/48.png" class="avatar"> KVinS:</div>
+<blockquote>
+<p>Что такое “вся подсеть”? &gt;_&lt;</p>
+</blockquote>
+</aside>
+<p>Я каждый раз задаюсь вопросом зачем люди покупают микротик если не понимают в сетях, есть же Кинетики которые как раз для базового уровня знаний очень даже подходят.<br>
+Подсети это диапазоны IP адресов.</p>
+<aside class="quote no-group" data-username="KVinS" data-post="36" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a9adbd/48.png" class="avatar"> KVinS:</div>
+<blockquote>
+<p>Провайдера или ВПН?</p>
+</blockquote>
+</aside>
+<p>Шлюз это 1 IP адрес VPN сервера в 90% случаев используется как DNS.</p>
+<aside class="quote no-group" data-username="KVinS" data-post="36" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a9adbd/48.png" class="avatar"> KVinS:</div>
+<blockquote>
+<p>Вот только я так и не смог его (опен-впн) настроить. Видимо потому, что по умолчанию там не cbc, а что-то другое, чего в Микротике нет.</p>
+</blockquote>
+</aside>
+<p>OpenVPN  у меня работает на прошивки 7.13+ без проблем на множестве устройств, как на древних так и на новых используя AES-128-GCM.<br>
+Для настройки можно воспользоваться этой темой: <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8-%D0%BD%D0%B0-mikrotik/666" class="inline-onebox">Обход блокировки на mikrotik</a><br>
+Тут есть косяки но если вы разбираетесь в работе профилей пробелмы можно исправить в основной ветке антизапрета по-моему в контейнере я писал как исправить проблемы связанные с работой OpenVPN. Сообщения можно найти в поиске.</p></td><td>2024-10-21T10:45:33.842Z</td></tr><tr><td>KVinS(KVinS)</td><td><aside class="quote no-group" data-username="vitalik6243" data-post="40" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/vitalik6243/48/6042_2.png" class="avatar"> vitalik6243:</div>
+<blockquote>
+<p>Я каждый раз задаюсь вопросом зачем люди покупают микротик если не понимают в сетях, есть же Кинетики которые как раз для базового уровня знаний очень даже подходят.</p>
+</blockquote>
+</aside>
+<p>Ну все вопросы к людям которые старушке для YouTube на телевизоре установили хап 2 и ещё через пару метров по силовой линии прокинули ретранслятор. (Тоже от микротика разумеется.)</p>
+<p>Лан. Я прикалываюсь - у старушки огромный дом и ретрснслятор там возможно нужен. Но нахрена при этом кинетик я хз.</p>
+<aside class="quote no-group" data-username="vitalik6243" data-post="40" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/vitalik6243/48/6042_2.png" class="avatar"> vitalik6243:</div>
+<blockquote>
+<p>OpenVPN у меня работает на прошивки 7.13+ без проблем на множестве устройств, как на древних так и на новых используя AES-128-GCM.</p>
+</blockquote>
+</aside>
+<p>Я насколько помню стейбл для хапа был только пятой версии, а 7 тестовая.</p></td><td>2024-10-21T14:09:15.758Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><aside class="quote no-group" data-username="KVinS" data-post="41" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a9adbd/48.png" class="avatar"> KVinS:</div>
+<blockquote>
+<p>Лан. Я прикалываюсь - у старушки огромный дом и ретрснслятор там возможно нужен. Но нахрена при этом кинетик я хз.</p>
+</blockquote>
+</aside>
+<p>Ну если у когото в 2020-2024 году хватает мозгов собирать Wi-Fi сети на микротиках это финиш увы. Если большой дом микрот + Ubiquti.</p>
+<aside class="quote no-group" data-username="KVinS" data-post="41" data-topic="11455">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a9adbd/48.png" class="avatar"> KVinS:</div>
+<blockquote>
+<p>Я насколько помню стейбл для хапа был только пятой версии, а 7 тестовая.</p>
+</blockquote>
+</aside>
+<p>Поставь бету потом сразу обнову на stable и полет будет нормальный. На бете есть косяки.</p></td><td>2024-10-21T22:35:42.398Z</td></tr><tr><td>jekh</td><td><p>Вчера весь вечер бился с микротом. Никак не смог забороть.<br>
+Интерфейс поднял, пира добавил. Last handshake проходит, на серваке пира и обмен пакетами вижу. Но спустя буквально секунд 10-15 пакеты полностью перестают приходить с сервака. Соответственно пинги на DNS 10.29.0.1 не идут. Поднял на винде обычный клиент Wireguard, заглянул в логи, там такое:</p>
+<p>2024-10-29 07:43:45.704166: [TUN] [antizapret-client.-wg] Receiving handshake response from peer 1<br>
+2024-10-29 07:43:45.704166: [TUN] [antizapret-client-.-wg] Keypair 1 created for peer 1<br>
+2024-10-29 07:44:02.988602: [TUN] [antizapret-client-.-wg] Retrying handshake with peer 1  because we stopped hearing back after 15 seconds<br>
+2024-10-29 07:44:02.988602: [TUN] [antizapret-client-.-wg] Sending handshake initiation to peer 1<br>
+2024-10-29 07:44:08.062540: [TUN] [antizapret-client-.-wg] Handshake for peer 1 did not complete after 5 seconds, retrying (try 2)<br>
+2024-10-29 07:44:08.062540: [TUN] [antizapret-client-.-wg] Sending handshake initiation to peer 1<br>
+2024-10-29 07:44:13.231071: [TUN] [antizapret-client.-wg] Handshake for peer 1 did not complete after 5 seconds, retrying (try 3)<br>
+2024-10-29 07:44:13.231080: [TUN] [antizapret-client-.-wg] Sending handshake initiation to peer 1<br>
+2024-10-29 07:44:18.118196: [TUN] [antizapret-client-.-wg] Retrying handshake with peer 1  because we stopped hearing back after 15 seconds</p>
+<p>Я так понимаю, провайдер блочит? Потому что сталкивался уже с похожими симптомами, когда Мегафон l2tp/ipsec положил.</p></td><td>2024-10-29T05:10:23.202Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Проверь WG на телефоне через клиент для него же если так же не работает, то твой сервер в черном списке</p></td><td>2024-10-29T06:45:10.169Z</td></tr><tr><td>romex(Roman)</td><td><p>Привет, у меня точно так же, проверил, сервер не в черном списке, что еще может быть?</p></td><td>2024-10-29T14:45:44.482Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Значит есть ошибки при настройке, через встроенный в микротик ping tracerouter пинговать шлюз и проверять поднимается ли связь или нет.</p></td><td>2024-10-29T14:56:37.801Z</td></tr><tr><td>jekh</td><td><p>Встроенный traceroute говорит, что шлюз недоступен. Проверил на другом микротике с другого провайдера из другой части города - такая же точно история. При этом обычный OVPN поднимается без проблем. Но у меня на нём по какой-то причине настолько низкая скорость, что сайты через раз выдают таймаут, а заблокированные сайты не открываются вовсе, из-за чего и ищу альтернативный вариант. Роутеры hap ac3 и rb3011uias. Провайдеры: ростелеком, дом.ру, мегафон. VPS на ВДСине.</p></td><td>2024-10-30T04:45:09.820Z</td></tr><tr><td>vitalik6243(vitalik6243)</td><td><p>Я в об этом писал в Keenetic что если уверены что сделали все правильно и шлюз не пингуется и в добавок через приложение WG не работает данный клиент. Ваш сервер впс попал в блокировку DPI и будет работать только Амнезия. Амнезии на микротике нет остается только опенвпн который пока что еще работает(вопрос на долго ли остается открытым). Проверить связался ваш микротик с сервером можно ввести на сервере команду wg<br>
+если связь видно, тут увы менять сервер если хочет именно WireGuard или остаться на OpenVPN</p></td><td>2024-10-30T11:58:36.638Z</td></tr><tr><td>jekh</td><td><p>Спасибо, что подтвердили догадку. Эх, придется дальше колдовать над ovpn соединением.</p></td><td>2024-10-30T12:05:51.217Z</td></tr><tr><td>Disa</td><td><p>Привет, народ.Не туда написал(</p></td><td>2024-12-21T20:55:41.230Z</td></tr><tr><td>Deposit</td><td><p>11</p></td><td>2025-01-22T16:51:07.079Z</td></tr>
+    </table>
+      </body>
+    </html>

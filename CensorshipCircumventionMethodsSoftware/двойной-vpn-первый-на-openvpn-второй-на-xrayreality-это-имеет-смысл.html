@@ -1,0 +1,94 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>двойной-vpn-первый-на-openvpn-второй-на-xrayreality-это-имеет-смысл</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>congruent.cat</td><td><p>Добрый день!</p>
+<p>Задаю вопрос как неспециалист. Хотел бы сделать двойной ВПН. По определённым причинам до первого VPS могу использовать только OpenVPN. Возможно ли технически использовать протокол XRay для внешнего VPS, причем желательно с фильтрацией трафика на ру и не-ру? Такая постановка задачи вообще имеет смысл?</p>
+<p>Мой немногочисленный опыт: по-отдельности настраивал OpenVPN, XRay с XTLS-Reality по известным мануалам, всё работало. Видел обсуждение похожей схемы двойного ВПН, но с использованием Wireguard вместо OpenVPN.</p>
+<p>Ещё нашёл некий проект <a href="https://github.com/attr0/OpenVPN-xray" class="inline-onebox" rel="noopener nofollow ugc">GitHub - attr0/OpenVPN-xray: Convert OpenVPN to a v2ray node based on docker. Use xray as the v2ray backend.</a> , подскажите, пожалуйста, он как-то отностися к делу?</p>
+<p>Извините, если спрашиваю ерунду.</p></td><td>2024-12-28T23:19:23.613Z</td></tr><tr><td>denium</td><td><p>Двойной VPN это хорошая вещь. Многие коммерческие VPN его используют для разделения входного и выходного IP. Тогда глядишь и ру сайты можно не фильтровать.<br>
+Но я бы использовал наоборот. Xray на стороне провайдера, т.к. протокол более защищён от обнаружения, а OpenVPN на стороне сайтов, на конечной стадии.</p>
+<p>С другой стороны, OpenVPN на стороне провайдеров используют, если хотят стандартный протокол для охвата большого количества девайсов, до ру впски (OpenVPN внутри РФ обычно не блокируют, хотя и бывает), а ру впска ходит до зарубежной. Правда, там наверное нет смысла городить на ней Xray.</p></td><td>2024-12-29T02:21:46.110Z</td></tr><tr><td>congruent.cat</td><td><p>Да, у меня второй вариант, первый сервер в России. Часть клиентов не может поставить ничего, кроме OpenVPN.</p>
+<p>А почему нет смысла в Xray до второго сервера? Избыточно? Я думал, что преимущество ещё 1) в удобной фильтрации, 2) в скорости протокола.</p></td><td>2024-12-29T08:57:39.075Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="congruent.cat" data-post="1" data-topic="14219">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/c/e19b73/48.png" class="avatar"> congruent.cat:</div>
+<blockquote>
+<p>причем желательно с фильтрацией трафика на ру и не-ру?</p>
+</blockquote>
+</aside>
+<p>Можно организовать PBR на dnsmasq.</p>
+<aside class="quote no-group" data-username="congruent.cat" data-post="1" data-topic="14219">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/c/e19b73/48.png" class="avatar"> congruent.cat:</div>
+<blockquote>
+<p>Такая постановка задачи вообще имеет смысл?</p>
+</blockquote>
+</aside>
+<p>Имеет.</p>
+<aside class="quote no-group" data-username="congruent.cat" data-post="1" data-topic="14219">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/c/e19b73/48.png" class="avatar"> congruent.cat:</div>
+<blockquote>
+<p>он как-то отностися к делу?</p>
+</blockquote>
+</aside>
+<p>Вроде бы только для одного пользователя.</p>
+<p>Настройте два работающих тунеля (желательно без congestion control) затем организуйте <a href="https://ntc.party/t/%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-vpn-%D0%B4%D0%BB%D1%8F-%D0%B2%D1%81%D0%B5%D0%B9-%D0%B4%D0%BE%D0%BC%D0%B0%D1%88%D0%BD%D0%B5%D0%B9-%D1%81%D0%B5%D1%82%D0%B8/9125/25">транзит</a> трафика между ними.</p></td><td>2024-12-29T09:25:31.283Z</td></tr><tr><td>congruent.cat</td><td><p>Супер, спасибо! Если получится, попробую отписать сюда.</p></td><td>2024-12-29T10:36:24.141Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Поставьте что-нибудь типа redsocks и заверните трафик OpenVPN на него, а он передаст подключения на локальный Xray.<br>
+А уже на локальном Xray можно будет настроить правила для трафика - например, российские IP и .ru-домены выпускать напрямую, а все остальное перенаправлять через VLESS на второй сервер.</p></td><td>2024-12-29T13:35:07.626Z</td></tr><tr><td>Texsis</td><td><p>Если ставить sing-box то  redsocks лишняя сущность, т.к sing-box  из коробки может поднимать tun интерфейс.</p></td><td>2024-12-29T16:42:59.951Z</td></tr><tr><td>sakontwist</td><td><p>Непонятно, зачем такие сложные конструкции. Еслиу вас сервер1 находится в России, то можно спокойно подключать к нему клиентов по openvpn. На нем трафик от ovpn-клиентов подбирать в xray и далее анализировать ru/not-ru и отправлять в direct либо vless (например).</p></td><td>2024-12-29T17:16:32.219Z</td></tr><tr><td>notcvnt</td><td><aside class="quote no-group" data-username="congruent.cat" data-post="1" data-topic="14219">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/c/e19b73/48.png" class="avatar"> congruent.cat:</div>
+<blockquote>
+<p>причем желательно с фильтрацией трафика на ру и не-ру</p>
+</blockquote>
+</aside>
+<p>у 3x-ui есть такая возможность. Я настроил warp на ру, и direct на всё остальное.</p>
+<p>Единственное о чём хочу предупредить, у 3x-ui кривые geoip и geosite бд, но рф-ные бд вроде бы нормальные</p></td><td>2024-12-29T18:56:48.174Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><aside class="quote no-group" data-username="sakontwist" data-post="8" data-topic="14219">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c77e96/48.png" class="avatar"> sakontwist:</div>
+<blockquote>
+<p>Еслиу вас сервер1 находится в России, то можно спокойно подключать к нему клиентов по openvpn. На нем трафик от ovpn-клиентов подбирать в xray и далее анализировать ru/not-ru и отправлять в direct либо vless (например).</p>
+</blockquote>
+</aside>
+<p>ну так выше как раз именно это обсуждают.</p></td><td>2024-12-30T08:04:05.469Z</td></tr><tr><td>congruent.cat</td><td><p>Спасибо всем написавшим!</p>
+<p>Пока я надеюсь всё сделать с использованием наименьшего количества инструментов, то есть как написал <a href="https://ntc.party/u/sakontwist">sakontwist</a>. Пока курю ман по XRay.</p></td><td>2024-12-30T15:42:02.035Z</td></tr>
+    </table>
+      </body>
+    </html>

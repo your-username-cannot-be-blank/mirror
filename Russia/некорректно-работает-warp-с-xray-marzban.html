@@ -1,0 +1,109 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>некорректно-работает-warp-с-xray-marzban</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Hypick</td><td><p>Я настроил на vps Marzban + WARP, следуя <a href="https://marzban-docs.sm1ky.com/tutorials/cloudflare-warp/" rel="noopener nofollow ugc">этому</a> гайду для конфига WG. В Xray настроил правила маршрутизации и исходящие соединения в конфиге xray, но возникла проблема: WARP не проксирует трафик для заданных сайтов по правилам. Если же поставить WARP первым в списке исходящих, весь трафик начинает проходить через него, игнорируя правила. В чем проблема?</p>
+<p>Конфиг xray:</p>
+<pre><code class="lang-auto">"outbounds": [
+  {
+    "protocol": "freedom",
+    "tag": "DIRECT"
+  },
+  {
+    "protocol": "blackhole",
+    "tag": "BLOCK"
+  },
+  {
+    "protocol": "wireguard",
+    "tag": "WARP",
+    "settings": {
+      "secretKey": "secret",
+      "DNS": "1.1.1.1",
+      "address": [
+        "172.16.0.2/32",
+        "2606:4700:110:8756:9135:af04:3778:40d9/128"
+      ],
+      "peers": [
+        {
+          "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+          "endpoint": "engage.cloudflareclient.com:2408",
+          "keepAlive": 14
+        }
+      ],
+      "kernelMode": false
+    }
+  }
+]
+</code></pre>
+<p>Правила:</p>
+<pre><code class="lang-auto">"rules": [
+  {
+    "ip": [
+      "geoip:private"
+    ],
+    "outboundTag": "BLOCK",
+    "type": "field"
+  },
+  {
+    "protocol": [
+      "bittorrent"
+    ],
+    "outboundTag": "BLOCK",
+    "type": "field"
+  },
+  {
+    "domain": [
+      "geosite:category-gov-ru",
+      "domain:ru"
+    ],
+    "outboundTag": "WARP",
+    "type": "field"
+  },
+  {
+    "ip": [
+      "geoip:ru"
+    ],
+    "outboundTag": "WARP",
+    "type": "field"
+  }
+]
+</code></pre></td><td>2024-10-20T12:39:34.136Z</td></tr><tr><td>gl1tchdev(Pavel Izvekov)</td><td><p>здарова. не знаю справился ты уже или нет. парадокс марцбана - конфиг xray с простым protocol: wireguard на него не встает. я запускал паралельно чистый xray и xray под marzban.<br>
+в связи с чем надо пробовать второй вариант с тунелем - <a href="https://marzban-docs.sm1ky.com/tutorials/cloudflare-warp/" class="inline-onebox" rel="noopener nofollow ugc">Настройка WARP | Marzban</a>.<br>
+но warp.sh может не встать например на ubuntu 24.04, тогда ситуация вообще огонь - <a href="https://gozargah.github.io/marzban/ru/examples/warp" class="inline-onebox" rel="noopener nofollow ugc">فعال سازی CloudFlare Warp | Marzban</a> открываем доку на персидском переводим и копируем команды оттуда<br>
+удачи!</p></td><td>2024-10-28T08:26:28.514Z</td></tr><tr><td>Hypick</td><td><p>через тунель происходит тоже самое - только когда варп стоит первым, то проксируется все</p></td><td>2024-10-31T21:48:05.742Z</td></tr><tr><td>gl1tchdev(Pavel Izvekov)</td><td><p><a href="https://xtls.github.io/ru/config/routing.html#routingobject" class="inline-onebox" rel="noopener nofollow ugc">Маршрутизация | Project X</a> читал?</p></td><td>2024-10-31T22:09:28.645Z</td></tr>
+    </table>
+      </body>
+    </html>

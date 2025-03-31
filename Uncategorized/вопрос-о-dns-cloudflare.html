@@ -1,0 +1,83 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>вопрос-о-dns-cloudflare</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>electrifying</td><td><p>Так как по тестам dns от cloudflare  опережает  практически все остальные хотелось бы задать вопрос, насколько безопасно их использовать если dns leak test постоянно показывает что они обращаются к Московскому сервису,когда любые другие,например, от гугл или opendns делают запросы в зарубежные сервисы. Может ли cloudflare  сохранять какую-то информацию хотя на своем сайте они пишут что ничего не логгируют.Просто это единственный быстрый днс но у него идут обращения к Русским серверам как яндекс днс,например</p></td><td>2024-12-28T14:57:46.218Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="electrifying" data-post="1" data-topic="14212">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/electrifying/48/5915_2.png" class="avatar"> electrifying:</div>
+<blockquote>
+<p>насколько безопасно их использовать</p>
+</blockquote>
+</aside>
+<p>Поясните, какой смысл вы вкладываете в слово безопасность. Если нужна минимальная задержка ответа — используйте резолвер вашего ISP. Защитой от спуфинга занимается расширение DNSSEC, но поскольку администраторы арендуемых доменых имён редко подписывают свои записи добавлением RRSIG, то будут много Insecure записей. Можно настроить рекурсивный резолвер на удалённой машине, который будет ходить только на авторитетные серверы и передавать вам результат через защищённый тунель с аутенфикацией на ассиметричной криптографии, но опять же, такой способ не защитит от MITM трафика DNS запросов удалённой машины.</p></td><td>2024-12-28T15:17:21.226Z</td></tr><tr><td>electrifying</td><td><aside class="quote no-group" data-username="Xunlei" data-post="2" data-topic="14212">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>Поясните, какой смысл вы вкладываете в слово безопасность.</p>
+</blockquote>
+</aside>
+<p>Имел ввиду почему остальные используют зарубежные сервера, а cloudflare обращается именно к Московскому?</p></td><td>2024-12-28T15:18:34.376Z</td></tr><tr><td>Xunlei</td><td><p>Потому, что он в там находится?</p></td><td>2024-12-28T15:19:14.629Z</td></tr><tr><td>electrifying</td><td><p>Ну это понятно из-за этого ответы быстрей, чем у других но вот почему именно cloudflare и яндекс обращаются к Российским серверам, когда все остальные нет. И если с яндексом понятно, то при возникновении каких-либо проблем у ркн к cloudflare они же смогут изъять сервера и если что-то все таки логгируется то посмотреть какие запросы были от всех и куда, а вот с остальными поставщиками они такого сделать не смогут, так как ни один из них не обращается к серверам находящимся в РФ. Поэтому и спрашиваю стоит ли жертвовать временем ответа от более медленных поставщиков днс или можно пользоваться быстрым cloudflare но который обращается на сервер в РФ</p></td><td>2024-12-28T15:25:09.261Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="electrifying" data-post="5" data-topic="14212">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/electrifying/48/5915_2.png" class="avatar"> electrifying:</div>
+<blockquote>
+<p>почему именно cloudflare и яндекс обращаются к Российским серверам, когда все остальные нет</p>
+</blockquote>
+</aside>
+<p>Потому, что ближайшие сервера клаудфлер и яндекс в этой стране, остальные нет (или настроен outbound через зарубеж).</p>
+<aside class="quote no-group" data-username="electrifying" data-post="5" data-topic="14212">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/electrifying/48/5915_2.png" class="avatar"> electrifying:</div>
+<blockquote>
+<p>каких-либо проблем у ркн к cloudflare они же смогут изъять сервера и если что-то все таки логгируется то посмотреть какие запросы были от всех и куда</p>
+</blockquote>
+</aside>
+<p>РКН навряд ли такими делами занимается, МВД или ФСБ скорее. Могут, но в скольких судопроизводствах использовались эти данные?</p>
+<aside class="quote no-group" data-username="electrifying" data-post="5" data-topic="14212">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/electrifying/48/5915_2.png" class="avatar"> electrifying:</div>
+<blockquote>
+<p>Поэтому и спрашиваю стоит ли жертвовать</p>
+</blockquote>
+</aside>
+<p>Зависит от степени вашей паранойи. Можно <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-dns-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80%D0%B5/7656/27">настроить</a> локальный кэширущий резолвер. Можно пользоватся резолвером получаемым от вашего ISP.</p></td><td>2024-12-28T15:32:22.891Z</td></tr><tr><td>0ka(0ka)</td><td><p>я не думаю что службам нужно что-то изьимать чтобы посмотреть запросы, и не важно где находится сервер</p></td><td>2024-12-28T18:30:52.379Z</td></tr>
+    </table>
+      </body>
+    </html>

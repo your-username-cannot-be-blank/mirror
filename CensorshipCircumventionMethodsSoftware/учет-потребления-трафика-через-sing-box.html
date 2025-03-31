@@ -1,0 +1,106 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>учет-потребления-трафика-через-sing-box</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Yojimboz(Yojimboz)</td><td><p>Всем привет!<br>
+После того, как пустил часть клиентов домашней сети через VPN-роутер (raspberry + sing-box), пропала возможность контролировать расход трафика по клиентам.<br>
+Раньше Keenetic все красиво показывал, кто сколько съел трафика за день, то теперь, все это один клиент - сервер sing-box, и какой там телевизор, пылесос или телефон съел весь месячный трафик теперь решительно не понятно.<br>
+Дело происходит на даче, интернет 4G, поэтому хочется какой-то контроль.</p>
+<p>Может, кто сталкивался с подобной задачей?<br>
+Как анализировать потребление трафика по клиентам, которые проходят через sing-box?</p></td><td>2025-01-19T14:12:27.777Z</td></tr><tr><td>MasterYoba</td><td><p>Два способа:</p>
+<ol>
+<li>
+<p>Правильный - вынести синг-бокс в отдельную подсеть/vlan на основном роутере. Сделать шлюзом для клиентских устройств именно роутер, а на роутере сделать маршрут, чтобы трафик с них заворачивался на синг-бокс. Сам я использую именно такой подход, правда на другом роутере.<br>
+Таким образом, весь трафик пойдет сначала через роутер и вы снова сможете увидеть все данные в кинетике. Как именно это сделать я не подскажу, т.к. кинетики сам никогда не настраивал, но гугл говорит что вроде как такой функционал там есть:<br>
+<a href="https://help.keenetic.com/hc/en-us/articles/360005236300-Network-segments" rel="noopener nofollow ugc">https://help.keenetic.com/hc/en-us/articles/360005236300-Network-segments</a><br>
+<a href="https://help.keenetic.com/hc/ru/articles/214471925-%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F-%D0%BD%D0%B5%D1%81%D0%BA%D0%BE%D0%BB%D1%8C%D0%BA%D0%B8%D1%85-%D0%BB%D0%BE%D0%BA%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D1%85-%D1%81%D0%B5%D1%82%D0%B5%D0%B9-%D1%81-%D1%80%D0%B0%D0%B7%D0%BB%D0%B8%D1%87%D0%BD%D1%8B%D0%BC%D0%B8-%D0%BE%D1%81%D0%BD%D0%BE%D0%B2%D0%BD%D1%8B%D0%BC%D0%B8-%D1%88%D0%BB%D1%8E%D0%B7%D0%B0%D0%BC%D0%B8" rel="noopener nofollow ugc">https://help.keenetic.com/hc/ru/articles/214471925-Организация-нескольких-локальных-сетей-с-различными-основными-шлюзами</a></p>
+</li>
+<li>
+<p>Ленивый - добавить в конфиг файл синг-бокса блок:</p>
+</li>
+</ol>
+<pre><code class="lang-auto">{
+....,
+    "experimental": {
+        "clash_api": {
+           "external_controller": "ip_адрес_вашего_синг-бокс:9090",
+           "access_control_allow_private_network": true,
+           "external_ui": "yacd"
+        }
+    }
+}
+</code></pre>
+<p>Далее открываете в браузере http://ip_адрес_вашего_синг-бокс:9090 и изучаете дашборд<br>
+подробнее тут:</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://sing-box.sagernet.org/configuration/experimental/clash-api/">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/1/19db269fb603eecca718a1d5ac9653f35daf0151.svg" class="site-icon" data-dominant-color="" width="463" height="500">
+
+      <a href="https://sing-box.sagernet.org/configuration/experimental/clash-api/" target="_blank" rel="noopener nofollow ugc">sing-box.sagernet.org</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://sing-box.sagernet.org/configuration/experimental/clash-api/" target="_blank" rel="noopener nofollow ugc">Clash API - sing-box</a></h3>
+
+  <p>The universal proxy platform.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Решение так себе, потому что позволяет смотреть данные только “в реальном времени” при открытом дашборде, то есть не хранит исторических данных.</p></td><td>2025-01-20T09:50:28.690Z</td></tr><tr><td>Dr4tez(Dr4tez)</td><td><p>Была подобная проблемка, только роутер у меня Асус. Тоже поднял на домашнем сервачке виртуалку с sing-box, в конфиге dnsmasq роутера указал устройствам айпишник виртуалки шлюзом, и роутер стал считать трафик устройств трафиком той виртуалки. Кто сколько сожрал трафика мне пофиг, мне надо было чтобы QoS на роутере корректно работал. Не стал больше мудрить и поднял sing-box прямо на роутере и больше нет проблем. На кинетиках вроде тоже можно, видел тему про это на их форуме.</p></td><td>2025-01-21T18:05:14.744Z</td></tr><tr><td>Yojimboz(Yojimboz)</td><td><p>Нормально роутер тянет sing-box?<br>
+У меня довольно мощный Keenetic Giga, но что-то мне кажется, что не для того его мама родила, чтобы с нескольких устройств прокачивать youtube в 4k <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"><br>
+Или попробовать…</p></td><td>2025-01-21T18:32:49.117Z</td></tr><tr><td>Dr4tez(Dr4tez)</td><td><aside class="quote no-group" data-username="Yojimboz" data-post="4" data-topic="14729">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/yojimboz/48/5957_2.png" class="avatar"> Yojimboz:</div>
+<blockquote>
+<p>Нормально роутер тянет sing-box?</p>
+</blockquote>
+</aside>
+<p>Ну я не смотрю одновременно на нескольких устройствах ютуб в 4к, увеличения нагрузки на роутер именно из-за sing-box почти не заметил. Но у меня проц в роутере 4 ядерный на 1,8 ГГц и гиг оперативы. Знакомые и на 2 ядерных с 512 МБ пользуют 32 битные версии sing-box, тоже вроде норм. Но это вам лучше узнать именно у пользователей кинетиков, там могут быть свои нюансы.</p></td><td>2025-01-21T18:49:56.841Z</td></tr><tr><td>andmail</td><td><p>На Giga 3 если весь трафик завернуть в Sing-box через socks5, то 100 mb/s превратятся в 50 mb/s при загрузке процессора ±100%.<br>
+Пришлось выборочно заворачивать в тоннель по инструкции из этой темы: <a href="https://forum.keenetic.ru/topic/16441-adguard-home-%D0%B4%D0%BB%D1%8F-%D1%81%D0%B5%D0%BB%D0%B5%D0%BA%D1%82%D0%B8%D0%B2%D0%BD%D0%BE%D0%B9-%D0%BC%D0%B0%D1%80%D1%88%D1%80%D1%83%D1%82%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D0%B8-%D0%B4%D0%BE%D0%BC%D0%B5%D0%BD%D0%BE%D0%B2/#comment-169381" rel="noopener nofollow ugc">AdGuard Home для селективной маршрутизации доменов</a></p></td><td>2025-01-21T19:51:27.290Z</td></tr>
+    </table>
+      </body>
+    </html>

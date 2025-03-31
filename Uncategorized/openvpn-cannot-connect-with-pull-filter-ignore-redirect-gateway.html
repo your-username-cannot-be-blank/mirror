@@ -1,0 +1,261 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>openvpn-cannot-connect-with-pull-filter-ignore-redirect-gateway</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>t1m013y</td><td><p>I am trying to connect to the OpenVPN server. When I run <code>openvpn --config config.ovpn</code>, it connects normally and I have internet access and connections that bind TAP adapter can access internet. When I try <code>openvpn --config config.ovpn --pull-filter ignore redirect-gateway</code>, Windows network connection manager says “No internet connection” on VPN’s TAP adapter. Using <code>--route-nopull</code> and <code>route-noexec</code> give the same result.</p>
+<p>I don’t need to route all traffic through OpenVPN, I just need to bind some connections to VPN’s TAP adapter, so I can’t use it without ignoring redirect-gateway.</p>
+<p>Why does route change ignore breaks connection and how to make OpenVPN connect normally without changing routes?</p>
+<p>Configuration: <a href="https://www.freeopenvpn.org/premium.php?cntid=Germany&amp;lang=en" class="inline-onebox" rel="noopener nofollow ugc">Free OpenVPN - Free VPN server in Germany</a> (tcp version)</p>
+<p>IPv4 routes before connection:</p>
+<pre><code class="lang-auto">IPv4 Route Table
+===========================================================================
+Active Routes:
+Network Destination        Netmask          Gateway       Interface  Metric
+          0.0.0.0          0.0.0.0      192.168.0.1    192.168.0.100      2
+        127.0.0.0        255.0.0.0         On-link         127.0.0.1    331
+        127.0.0.1  255.255.255.255         On-link         127.0.0.1    331
+  127.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+      192.168.0.0    255.255.255.0         On-link     192.168.0.100    257
+    192.168.0.100  255.255.255.255         On-link     192.168.0.100    257
+    192.168.0.255  255.255.255.255         On-link     192.168.0.100    257
+        224.0.0.0        240.0.0.0         On-link         127.0.0.1    331
+        224.0.0.0        240.0.0.0         On-link     192.168.0.100    257
+  255.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+  255.255.255.255  255.255.255.255         On-link     192.168.0.100    257
+===========================================================================
+</code></pre>
+<p>IPv4 routes with connection (<strong>with</strong> <code>--pull-filter ignore redirect-gateway</code>, no internet connection on TAP):</p>
+<pre><code class="lang-auto">IPv4 Route Table
+===========================================================================
+Active Routes:
+Network Destination        Netmask          Gateway       Interface  Metric
+          0.0.0.0          0.0.0.0      192.168.0.1    192.168.0.100      2
+        127.0.0.0        255.0.0.0         On-link         127.0.0.1    331
+        127.0.0.1  255.255.255.255         On-link         127.0.0.1    331
+  127.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+      192.168.0.0    255.255.255.0         On-link     192.168.0.100    257
+    192.168.0.100  255.255.255.255         On-link     192.168.0.100    257
+    192.168.0.255  255.255.255.255         On-link     192.168.0.100    257
+    192.168.244.0    255.255.255.0         On-link   192.168.244.232    281
+  192.168.244.232  255.255.255.255         On-link   192.168.244.232    281
+  192.168.244.255  255.255.255.255         On-link   192.168.244.232    281
+        224.0.0.0        240.0.0.0         On-link         127.0.0.1    331
+        224.0.0.0        240.0.0.0         On-link   192.168.244.232    281
+        224.0.0.0        240.0.0.0         On-link     192.168.0.100    257
+  255.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+  255.255.255.255  255.255.255.255         On-link   192.168.244.232    281
+  255.255.255.255  255.255.255.255         On-link     192.168.0.100    257
+===========================================================================
+</code></pre>
+<p>IPv4 routes with connection (<strong>without</strong> <code>--pull-filter ignore redirect-gateway</code>, normal internet connection on TAP):</p>
+<pre><code class="lang-auto">IPv4 Route Table
+===========================================================================
+Active Routes:
+Network Destination        Netmask          Gateway       Interface  Metric
+          0.0.0.0          0.0.0.0      192.168.0.1    192.168.0.100      2
+          0.0.0.0        128.0.0.0    192.168.244.1  192.168.244.231     25
+     5.154.181.23  255.255.255.255      192.168.0.1    192.168.0.100      1
+        127.0.0.0        255.0.0.0         On-link         127.0.0.1    331
+        127.0.0.1  255.255.255.255         On-link         127.0.0.1    331
+  127.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+        128.0.0.0        128.0.0.0    192.168.244.1  192.168.244.231     25
+      192.168.0.0    255.255.255.0         On-link     192.168.0.100    257
+    192.168.0.100  255.255.255.255         On-link     192.168.0.100    257
+    192.168.0.255  255.255.255.255         On-link     192.168.0.100    257
+    192.168.244.0    255.255.255.0         On-link   192.168.244.231    281
+  192.168.244.231  255.255.255.255         On-link   192.168.244.231    281
+  192.168.244.255  255.255.255.255         On-link   192.168.244.231    281
+        224.0.0.0        240.0.0.0         On-link         127.0.0.1    331
+        224.0.0.0        240.0.0.0         On-link   192.168.244.231    281
+        224.0.0.0        240.0.0.0         On-link     192.168.0.100    257
+  255.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+  255.255.255.255  255.255.255.255         On-link   192.168.244.231    281
+  255.255.255.255  255.255.255.255         On-link     192.168.0.100    257
+===========================================================================
+</code></pre></td><td>2024-12-28T10:53:27.355Z</td></tr><tr><td>Xunlei</td><td><p>You have to change interfaces metric as described in <a href="https://ntc.party/t/openvpn-proxy/6247/2">this</a> post.</p>
+<p>Add to OpenVPN client configuration following options:</p>
+<pre><code class="lang-auto">pull-filter ignore redirect-gateway
+pull-filter ignore "dhcp-option DNS"
+</code></pre>
+<p>Change interfaces metric in PS like:</p>
+<pre><code class="lang-auto">Set-NetIPInterface -InterfaceAlias "Ethernet" -InterfaceMetric "2000" -PolicyStore "PersistentStore"
+Set-NetIPInterface -InterfaceAlias "Ethernet" -InterfaceMetric "2000"
+Set-NetIPInterface -InterfaceAlias "OpenVPN Wintun" -InterfaceMetric "3000" -PolicyStore "PersistentStore"
+Set-NetIPInterface -InterfaceAlias "OpenVPN Wintun" -InterfaceMetric "3000"
+</code></pre>
+<p>Check them:</p>
+<pre><code class="lang-auto">Get-NetIPInterface | Format-Table -AutoSize
+</code></pre></td><td>2024-12-28T11:08:55.054Z</td></tr><tr><td>t1m013y</td><td><p>But for what reason can’t I just use <code>--pull-filter ignore redirect-gateway</code>?</p></td><td>2024-12-28T11:11:09.497Z</td></tr><tr><td>Xunlei</td><td><p>Route to specific address is calculated by combining metric of interface and metric of network route in route table.</p>
+<p>Option <code>--pull-filter ignore redirect-gateway</code> just says client to miss adding following routes:</p>
+<pre><code class="lang-auto">0.0.0.0        128.0.0.0    192.168.244.1  192.168.244.231     25
+128.0.0.0      128.0.0.0    192.168.244.1  192.168.244.231     25
+</code></pre>
+<p>I’ve forgotten necessary OpenVPN client options:</p>
+<pre><code class="lang-auto">route 0.0.0.0 0.0.0.0
+route-ipv6 2000::/3
+</code></pre>
+<p>They must be added too.</p></td><td>2024-12-28T11:21:49.640Z</td></tr><tr><td>t1m013y</td><td><p>Please explain, what do these routes exactly do. I’m not very experienced in networks configuration and routing, and I don’t like doing something I don’t know for what.</p></td><td>2024-12-28T11:23:38.646Z</td></tr><tr><td>Xunlei</td><td><p>These two routes have high priority than <code>0.0.0.0          0.0.0.0      192.168.0.1    192.168.0.100      2</code> rule.<br>
+Option <code>redirect-gateway</code> allow to ignore metric of interface.</p></td><td>2024-12-28T11:31:05.492Z</td></tr><tr><td>t1m013y</td><td><p>Why is netmask set to 128.0.0.1?</p></td><td>2024-12-28T11:38:36.045Z</td></tr><tr><td>Xunlei</td><td><p><code>128.0.0.0</code> you mean or /1. Mostly VPN clients have to split <code>0.0.0.0/0</code> route to two <code>0.0.0.0/1</code> and <code>128.0.0.0/1</code> to gain VPN goal (tunneling whole client traffic) despite of metric settings on client machine. You should shut this behavior off.</p></td><td>2024-12-28T11:42:33.313Z</td></tr><tr><td>t1m013y</td><td><p>I don’t need to route all traffic through OpenVPN, I just need to bind some connections to VPN’s TAP adapter.</p></td><td>2024-12-28T11:44:14.814Z</td></tr><tr><td>Xunlei</td><td><p>If you make all instructions traffic should be routed via default gateway of your main interface.</p>
+<p>It will look like two rules:</p>
+<pre><code class="lang-auto">          0.0.0.0          0.0.0.0      192.168.0.1    192.168.0.100     2002
+          0.0.0.0          0.0.0.0    192.168.244.1  192.168.244.231     3025
+</code></pre>
+<p>Then you can bind outbound connections of specific applications.</p></td><td>2024-12-28T11:46:23.625Z</td></tr><tr><td>t1m013y</td><td><p>Thanks, works for me without metric changing (I still don’t understand why I need to set metric of both interfaces).</p>
+<p>Both connections have internet access, and app that is bound to TAP too.</p>
+<p>Added to config:</p>
+<pre><code class="lang-auto">pull-filter ignore redirect-gateway
+pull-filter ignore "dhcp-option DNS"
+route 0.0.0.0 0.0.0.0
+</code></pre></td><td>2024-12-28T11:57:34.430Z</td></tr><tr><td>Xunlei</td><td><p>Good.</p>
+<aside class="quote no-group" data-username="t1m013y" data-post="11" data-topic="14202">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/t1m013y/48/9761_2.png" class="avatar"> t1m013y:</div>
+<blockquote>
+<p>I still don’t understand why I need to set metric of both interfaces</p>
+</blockquote>
+</aside>
+<p>To avoid unknown metric settings of current configuration of Windows. It just prevents metric value fluctuations.</p></td><td>2024-12-28T11:59:21.984Z</td></tr><tr><td>t1m013y</td><td><p>What does the interface metric affect in this case?</p></td><td>2024-12-28T12:03:32.224Z</td></tr><tr><td>Xunlei</td><td><p>I’ve already written:</p>
+<aside class="quote no-group" data-username="Xunlei" data-post="4" data-topic="14202">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>Route to specific address is calculated by combining metric of interface and metric of network route in route table.</p>
+</blockquote>
+</aside>
+<p>To gain result like</p>
+<aside class="quote no-group" data-username="Xunlei" data-post="10" data-topic="14202">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<pre><code class="lang-auto">          0.0.0.0          0.0.0.0      192.168.0.1    192.168.0.100     2002
+          0.0.0.0          0.0.0.0    192.168.244.1  192.168.244.231     3025
+</code></pre>
+</blockquote>
+</aside>
+<p>The lowest value means highest priority.</p></td><td>2024-12-28T12:04:55.405Z</td></tr><tr><td>t1m013y</td><td><p>Thank you for your answers.</p></td><td>2024-12-28T12:12:40.863Z</td></tr><tr><td>t1m013y</td><td><p><a class="mention" href="/u/xunlei">@Xunlei</a> How can I make it on linux?<br>
+Adding</p>
+<pre><code class="lang-auto">pull-filter ignore redirect-gateway
+pull-filter ignore "dhcp-option DNS"
+route 0.0.0.0 0.0.0.0
+</code></pre>
+<p>to the ovpn file doesn’t work.</p></td><td>2025-01-19T13:42:26.953Z</td></tr><tr><td>Xunlei</td><td><p>What happens? Print here the difference of routing table between original ovpn file and modified.</p></td><td>2025-01-19T14:16:53.285Z</td></tr><tr><td>t1m013y</td><td><p>Without VPN (normal Internet connection):</p>
+<pre><code class="lang-auto">&gt; route -n                     
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         192.168.0.1     0.0.0.0         UG    100    0        0 eth0
+192.168.0.0     0.0.0.0         255.255.255.0   U     100    0        0 eth0
+</code></pre>
+<p>With VPN (no Internet connection):</p>
+<pre><code class="lang-auto">&gt; route -n
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         192.168.230.1   0.0.0.0         UG    0      0        0 tun0
+0.0.0.0         192.168.0.1     0.0.0.0         UG    100    0        0 eth0
+192.168.0.0     0.0.0.0         255.255.255.0   U     100    0        0 eth0
+192.168.230.0   0.0.0.0         255.255.255.0   U     0      0        0 tun0
+</code></pre>
+<p>Also tried <code>route 0.0.0.0 0.0.0.0 vpn_gateway 1000</code> instead of <code>route 0.0.0.0 0.0.0.0</code> (normal connection without VPN, no connection through tun0):</p>
+<pre><code class="lang-auto">&gt; route -n
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         192.168.0.1     0.0.0.0         UG    100    0        0 eth0
+0.0.0.0         192.168.230.1   0.0.0.0         UG    1000   0        0 tun0
+192.168.0.0     0.0.0.0         255.255.255.0   U     100    0        0 eth0
+192.168.230.0   0.0.0.0         255.255.255.0   U     0      0        0 tun0
+</code></pre>
+<p>When using unmodified condig, I can connect to websites through VPN (but all my traffic is routed through it).</p></td><td>2025-01-19T14:22:42.968Z</td></tr><tr><td>Xunlei</td><td><p>Idk. I never did this scheme on linux.</p>
+<p><code>5.154.181.23/32</code> should be routed via <code>192.168.0.1</code> gateway too. Maybe it is necessary to specify another route table.</p></td><td>2025-01-19T14:40:51.171Z</td></tr><tr><td>t1m013y</td><td><p>What is <code>5.154.181.23</code> ip?</p></td><td>2025-01-19T14:41:51.066Z</td></tr><tr><td>Xunlei</td><td><p>Address of ovpn server to avoid recurrent loop packet passing.</p></td><td>2025-01-19T14:43:34.788Z</td></tr><tr><td>t1m013y</td><td><p>Won’t routes <code>0.0.0.0         192.168.0.1     0.0.0.0         UG    100    0        0 eth0</code> and <code>192.168.230.0   0.0.0.0         255.255.255.0   U     0      0        0 tun0</code> do this?</p></td><td>2025-01-19T14:46:04.202Z</td></tr><tr><td>Xunlei</td><td><p>This rules says that routing via virtual gateway is preferred. So all packets for ovpn server are routed via tun. It is necessary to add the exception for ovpn server address.</p>
+<p>I’m too lazy to check the configuration on VM right now. Maybe other members of community will help you.</p></td><td>2025-01-19T14:54:10.287Z</td></tr><tr><td>0ka(0ka)</td><td><p>I dont really get what you want. Do you still want to bind only some apps to the tun? Then why are you setting a gateway at all? Remove route option in the config and it should work “curl -v --interface tun0 <a href="http://ifconfig.me">http://ifconfig.me</a>”</p></td><td>2025-01-19T15:07:50.225Z</td></tr><tr><td>t1m013y</td><td><p>Doesn’t work without route option (neither in Windows nor Linux)</p></td><td>2025-01-19T15:09:01.070Z</td></tr><tr><td>0ka(0ka)</td><td><p>What does curl return</p></td><td>2025-01-19T15:09:23.768Z</td></tr><tr><td>t1m013y</td><td><p>Curl works, but I still can’t bind to interface’s ip.</p></td><td>2025-01-19T15:11:45.167Z</td></tr><tr><td>Xunlei</td><td><p>What kind of application you want to bind?</p></td><td>2025-01-19T15:12:30.289Z</td></tr><tr><td>t1m013y</td><td><p>V2Ray outbound</p></td><td>2025-01-19T15:12:48.625Z</td></tr><tr><td>0ka(0ka)</td><td><p>It works, i did it just like that on my vps: ignored default gateway in ovpn and specified “interface” sockopt in xray freedom out. Whats your result? Do you get an error or xray still binds to default gateway?</p></td><td>2025-01-19T15:13:51.338Z</td></tr><tr><td>t1m013y</td><td><p>Ok, how to specify interface name in windows?</p></td><td>2025-01-19T15:17:28.022Z</td></tr><tr><td>0ka(0ka)</td><td><p>Probably the same way. <a href="https://ntc.party/t/windows-wgawg-app-based-split-tunneling/9739" class="inline-onebox">Windows wg/awg app based split tunneling</a> is a similar topic</p></td><td>2025-01-19T15:19:33.415Z</td></tr><tr><td>t1m013y</td><td><p>Please send your outbound configuration (if it’s not secret).</p></td><td>2025-01-19T15:20:46.585Z</td></tr><tr><td>0ka(0ka)</td><td><p>didn’t test</p>
+<pre><code class="lang-auto">{
+    "inbounds": [
+        {
+            "listen": "127.0.0.1",
+            "port": "1080",
+            "protocol": "socks",
+            "settings": {
+                "ip": "127.0.0.1",
+                "udp": true
+            }
+        }
+    ],
+    "log": {
+        "loglevel": "warning"
+    },
+    "outbounds": [
+        {
+            "protocol": "freedom",
+            "streamSettings": {
+                "sockopt": {
+                    "interface": "tun0"
+                }
+            },
+            "tag": "direct"
+        }
+    ],
+    "routing": {
+        "domainStrategy": "AsIs",
+        "rules": []
+    }
+}
+</code></pre>
+<p>similar sing-box config is in that topic</p></td><td>2025-01-19T15:23:53.282Z</td></tr><tr><td>t1m013y</td><td><p>Thank you very much!</p></td><td>2025-01-19T15:24:45.301Z</td></tr><tr><td>t1m013y</td><td><p>Doesn’t work in v2ray <code>4.34.0</code> (<code>v5.0.6+</code> required)</p></td><td>2025-01-19T15:32:52.934Z</td></tr><tr><td>t1m013y</td><td><p><a class="mention" href="/u/0ka">@0ka</a> It’s preferred to work with <a href="https://github.com/v2fly/gray" rel="noopener nofollow ugc">gray</a>, it doesn’t support features from <code>v5.0.6</code></p></td><td>2025-01-19T15:39:46.435Z</td></tr><tr><td>0ka(0ka)</td><td><p>idk why such an old software, but you can use another routing table (555) with only your tun as a gateway, use clean freedom outbound and run gray as a user, then use “ip rule add uuidrange userid-userid table 555” (or just run the software you need as a user instead of gray)</p></td><td>2025-01-19T15:47:38.174Z</td></tr><tr><td>t1m013y</td><td><p>But how to make it work like on windows, adding <code>route 0.0.0.0 0.0.0.0</code> to ovpn specifies interface gateway and allows to bind to this ip?</p></td><td>2025-01-19T15:50:41.687Z</td></tr><tr><td>0ka(0ka)</td><td><p>wdym? i have no idea how you bound the apps to the tun interface on windows</p></td><td>2025-01-19T15:52:39.214Z</td></tr><tr><td>t1m013y</td><td><p>Like this:</p>
+<pre><code class="lang-auto">{
+        "sendThrough": "192.168.xxx.yyy",
+        "protocol": "freedom",
+        "settings": {
+        },
+        "tag": "TAP_outbound"
+}
+</code></pre>
+<p><code>192.168.xxx.yyy</code> is my ip in VPN network.</p></td><td>2025-01-19T15:54:37.107Z</td></tr><tr><td>0ka(0ka)</td><td><p>yeah, doesn’t work on linux, it tries to use VPN IP (wireguard with 10.0.0.2 ip in my case) at eth0 even though i have a route to the network and even a gateway with a high metric, idk why. just do it with ip rule then, what’s the problem</p></td><td>2025-01-19T16:09:59.455Z</td></tr><tr><td>t1m013y</td><td><p>How to make it ip rule?</p></td><td>2025-01-19T16:11:10.646Z</td></tr><tr><td>0ka(0ka)</td><td><p>i explained it above, ask google and chatgpt for more info</p></td><td>2025-01-19T16:11:30.911Z</td></tr><tr><td>t1m013y</td><td><p>But VPN somehow connects when not using redirect-gateway, it uses only one routing table.</p></td><td>2025-01-19T16:38:34.114Z</td></tr><tr><td>t1m013y</td><td><p>Thank you for advice, two ip tables work! I made rule from all to default table and from vpn ip to vpn table. Now I can bind v2ray to vpn and connect directly from other applications.</p></td><td>2025-01-19T17:45:38.137Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="t1m013y" data-post="46" data-topic="14202">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/t1m013y/48/9761_2.png" class="avatar"> t1m013y:</div>
+<blockquote>
+<p>and from vpn ip to vpn table</p>
+</blockquote>
+</aside>
+<p>didn’t think about that, nice</p></td><td>2025-01-19T18:00:51.052Z</td></tr><tr><td>Xunlei</td><td><p>On linux you should specify metric like</p>
+<pre><code class="lang-auto">pull-filter ignore redirect-gateway
+pull-filter ignore "dhcp-option DNS"
+route 0.0.0.0 0.0.0.0 vpn_gateway 1000
+</code></pre></td><td>2025-03-07T14:32:14.649Z</td></tr>
+    </table>
+      </body>
+    </html>

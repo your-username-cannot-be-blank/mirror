@@ -1,0 +1,47 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-blindtls-circumventing-tls-based-https-censorship-foci-2021</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>BlindTLS: Circumventing TLS-based HTTPS censorship<br>
+Sambhav Satija, Rahul Chatterjee<br>
+<a href="https://dl.acm.org/doi/10.1145/3473604.3474564">https://dl.acm.org/doi/10.1145/3473604.3474564</a></p>
+<p>The paper presents a way to protect TLS connections from certain forms of blocking, making use of <a href="https://datatracker.ietf.org/doc/html/rfc5077">TLS 1.2 session resumption</a>. The most highly distinguishing features of a TLS connection come at the very beginning, during the handshake. This is when the client reveals the destination host in its DNS query and TLS <a href="https://en.wikipedia.org/wiki/Server_Name_Indication">SNI</a>, and the server reveals its identity in the certificate (which is plaintext in TLS 1.2 and earlier). The idea of BlindTLS is to do the TLS handshake—and only the handshake—over an encrypted, unblockable proxy, letting the connection persist just long enough to acquire a <a href="https://datatracker.ietf.org/doc/html/rfc5077#section-3.3">session ticket</a>. Then, disconnect from the proxy, connect directly to the TLS server, and resume the session already started. Session resumption does not involve a new DNS query or the sending of the server certificate, so those features are not available to a censor. Resuming a session does require sending an SNI, so it is necessary to use a false SNI.</p>
+<p>The authors’ experiments find that BlindTLS works with about 50% of TLS 1.2 servers, whether sampled from Alexa top sites or from sites known to be blocked by Jio, an ISP in India. The main causes of failure were that the server did not support session resumption (did not issue the client a session ticket), or that the server enforced an SNI match in the resumed session.</p>
+<p>The benefit of BlindTLS, compared to using the encrypted proxy for the entire connection, is better performance, as the bulk of communication is carried out directly with the destination TLS server, with no intermediary. Compared to domain fronting, BlindTLS has the benefit that the client may authenticate against the destination TLS server’s own certificate (not the certificate of a front domain). Compared to proposed TLS 1.3 protocol extensions like ESNI and <a href="https://datatracker.ietf.org/doc/html/draft-ietf-tls-esni-13">ECH</a>, which would also hide the SNI value but whose deployment is uncertain, session resumption is already widely used and difficult to block.</p>
+<p>Thanks to the authors for reviewing a draft of this summary.</p></td><td>2021-09-23T14:24:20.279Z</td></tr>
+    </table>
+      </body>
+    </html>

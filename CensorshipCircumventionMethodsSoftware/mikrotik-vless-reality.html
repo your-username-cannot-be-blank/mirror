@@ -1,0 +1,909 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>mikrotik-vless-reality</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Strange0ne</td><td><p>Всех приветствую.</p>
+<p>На сколько мне известно, без контейнеров, микротики не умеют в клиента для VLESS+REALITY.<br>
+Собственно вопрос, пытался кто-то поднять рядом виртуальную машину (в локальной сети роутера), на которой бы был развернут этот клиент, который подключался бы к зарубежному VPS в роли сервера?</p>
+<p>То есть флоу бы был примерно таким.</p>
+<p>Запрос из локальной сети на заблокированный ресурс &gt; Микротик &gt; VM &gt; VPS.</p>
+<p>У меня Hap ax2, на котором маленький внутренний накопитель и нет USB, по этому контейнеры крутить не получается.</p>
+<p>Кто может описать примерные шаги, которые необходимы, что бы заставить это работать?</p>
+<p>Заранее благодарен.</p></td><td>2024-08-04T15:38:47.761Z</td></tr><tr><td>akloman</td><td><p>Ну по идее на микротике в mangle маркируешь трафик любым удобным способом, потом через route направляешь его на виртуалку (она будет в качестве шлюза). Но это теория. Как в том анекдоте, рассказать я и сам могу, а ты сделай) Я пробовал сделать маркировку через tls host (то есть sni), mark routing, потом route до вм, где стоит zapret от bol-van’a. Но что-то не срослось. Трафик вроде маркируется, но виртуалка с запретом его жрать не хочет. видимо дополнительная настройка файрвола на самой вм нужна. Хотя по идее zapret в режиме tpws это прозрачный прокси. В общем, сам бы почитал, что в ответ на твой вопрос напишут более опытные админы.</p></td><td>2024-08-04T16:05:46.067Z</td></tr><tr><td>Texsis</td><td><p>У меня похожая проблема, может кто тоже что то подскажет. Ситуация такая, на микротике подняты туннели wg. К своим серверам за рубежом. Пока все работает, но чувствуется новый виток эскалации и не хочется потерять доступ к сети. Для этих целей рядом есть апельсинка, на ней стоит sing-box с vless, там же поднят еще один wg с пересылкой пакетов на sing-box. Все поднялось работает. А теперь затык. С телефона по wg все работает, хожу под vless. А вот с микрота туннель поднимается, но сайты не открываются. Есть подозрение, что проблема в mtu, но пока нет подтверждений. Может кто-то, что-то подскажет.</p></td><td>2024-08-04T18:52:36.429Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Для себя достаточно давно уже сделал такую конструкцию. Наиболее простым и управляемым вариантом оказалось ходить с некротика в xray клиент через wireguard(xray поддерживает входной WG, там только маршруты в самом xray криво работают. Фильтрация по входному тегу не канает, канает только последний маршрут в списке, не подошедший ко всем остальным правилам. Впрочем, на текущий момент могли уже что-то пофиксить).<br>
+Соотв. Заводим белые списки проксируемых адресов, манглом метим им роутинг и всё из этой таблицы заворачиваем в wireguard туннель, который смотрит в xray.<br>
+Если надо заворачивать по sni(как раз для случая с ютьюбом, у которого тысячи адресов локального кеша) - добавляем в mangle правило, которое как раз по sni делает add dst to address list. Можно временно(опять же копить адреса ютьюба толку ноль) Первый запрос при таком подходе улетит вхолостую, зато последующие заработают.<br>
+Ну и да, важно помнить что для работы ipv6 важно добавить правило<br>
+routing rule add action=lookup interface=интерфейс-локального-WG routing-mark=наша_метка table=наша_метка<br>
+Ну и таблицу создать не забыть</p></td><td>2024-08-05T02:38:16.143Z</td></tr><tr><td>Texsis</td><td><p>Отвечу на свой же вопрос. Разобрался все таки с этой вещью, что бы заработала цепочка микрот клиент wg- апельсинка сервер wg и она же клиент vless нужно на микроте через мангл сделать разбиение mtu. И все заработало. Только скорость конечно так себе, но как резерв пойдет.</p></td><td>2024-08-05T21:11:14.242Z</td></tr><tr><td>Texsis</td><td><p>У себя добавил подсетями через адрес лист с маркировкой трафика. Пробовал через raw с доменом, но как то выходит так себе, много айпишников набивает в адрес лист.</p></td><td>2024-08-05T21:13:17.534Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Так таймаут же. ИМХО 48 часов жизни этим адресам с головой. Сначала тоже подсетями хотел, начао сканить вариации найденных адресов, но то ли я немного не уловил логику, то ли какие-то не нашёл, но насканенные списки получились с явными дырками, а лишенего в vpn заворачивать тоже не хотелось</p></td><td>2024-08-05T21:59:26.215Z</td></tr><tr><td>Strange0ne</td><td><p>А что именно под разбиением MTU имеется ввиду?</p></td><td>2024-08-10T13:17:00.021Z</td></tr><tr><td>Dhohbr</td><td><aside class="quote no-group" data-username="Texsis" data-post="5" data-topic="8708">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/ecc23a/48.png" class="avatar"> Texsis:</div>
+<blockquote>
+<p>Только скорость конечно так себе</p>
+</blockquote>
+</aside>
+<p>Если fasttrack отключить в фаерволе микротика, что-то поменяется?</p></td><td>2024-08-10T14:45:11.237Z</td></tr><tr><td>Texsis</td><td><p>Fasttrak у меня отключен, низкая скорость была из за косяка в настройке на стороне апельсинки. Плюс с mtu был косяк</p></td><td>2024-08-10T20:54:23.971Z</td></tr><tr><td>Texsis</td><td><p>Часто встречающаяся проблема микротика. Более подробно по ссылке <a href="https://olegon.ru/showthread.php?t=38451" class="inline-onebox" rel="noopener nofollow ugc">Таймауты при заходе на некоторые сайты через Wireguard : MikroTik</a> там и есть что нужно прописать через консоль.</p></td><td>2024-08-10T21:11:13.943Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Купил таки себе AX3, попробовал припарковать контейнер с xray прямо в роутер. Работает очень даже бодро, лучше чем при завороте чем через малинку, меньше задержки, выше скорость. Схема заворота траффика осталась старой - Для каждого аутбаунда в конфиге xray заводится соответсвующий wireguard-inbound и через маршрутизацию мапятся 1к1, разница только в том что тут WG траффик вообще за пределы роутера не выходит. Ресурсов почти не жрёт, память что-то где-то 50Мб (±), процессор не больше 1.5% (суммарно для WG и container) скорее всего AC3 тоже справится, но не проверял. Сам конфиг можно готовить через 3x-ui, после чего с минимальными правками подкидывать на роутер. Короче если есть подходящее железо - прекрасный вариант.</p></td><td>2024-08-24T17:34:36.213Z</td></tr><tr><td>Strange0ne</td><td><p>А что по скоростям?</p></td><td>2024-08-24T17:44:22.220Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Сложно сказать, у меня что WAN 100мбит, что на VPS-ке тоже 100мбит. Ютуб у меня завёрнут через WARP внутри конфига Xray(потому что вот буквально вчера через нативный некротиковский клиент он подключаться отказался, а в xray работает. Загадочная загадка). В статистике воспроизведения видел цифры в районе 90мбит.<br>
+Трафиик через VLESS через импортный VPS проверить сложнее, но когда-то мерял что при прямом включении выдавало в районе тех же 90, а при завороте через малинку в районе 80Мбит. Сейчас что-то не получается нормально померять, VPS откочевал к другому ISP и я пока не понял куда точно.</p></td><td>2024-08-24T18:10:44.472Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Поправка, через некоторое время проц такие начинает поджирать, но в профайлере это поджирание вылезает в unclassified. Может конечно это и не контейнер, но вроде больше нечему. В любом случае, жрёт оно только одно ядро из четырёх, приемлимо.</p></td><td>2024-08-24T20:52:42.908Z</td></tr><tr><td>busfase(Busfase)</td><td><p>Дядьки, напишите пожалуйста инструкцию как это все реализовать с нуля. Есть VPS сервер с 3x-ui и амнезией и, собственно, ax2. 5й день колупаюсь…</p></td><td>2024-08-27T19:30:00.988Z</td></tr><tr><td>zzr</td><td><p>выкидывайте мемкротики и покупай те роутеры которыйе держут openwrt, routeroсъ пропиертарщина два года ждали пока виригуард туда подвезут с doh’ом, хотя вон <a href="https://habr.com/ru/articles/838452" rel="noopener nofollow ugc">тут</a> чувак через коньтейнеры рилиализовывал, может можн прикрутить коньтэйнер с sign-box, xray or whatever, я самолично заказал себе <a href="https://aliexpress.ru/item/1005004720047158.html?sku_id=12000032518642364" rel="noopener nofollow ugc">такуйю</a> вундервафлю посмотрим щто из етого выйдет</p></td><td>2024-08-29T07:53:32.231Z</td></tr><tr><td>Strange0ne</td><td><p>Пока на OpenWRT, OpenSense\PfSense не появится API, для меня смысла выкидывать нет.<br>
+Просто нужно устройство с USB и нормальным CPU. В итоге можно что угодно засунуть в контейнер.</p></td><td>2024-08-29T08:19:12.122Z</td></tr><tr><td>zzr</td><td><p>ну так то да у меня на ac2 есть юэсби дырка, но чёт на микротеке ето то ещё колдунство мне ближе опенврт, ане вот ето всё</p></td><td>2024-08-29T08:21:31.773Z</td></tr><tr><td>Strange0ne</td><td><p>Я может подумаю о OpenWRT, когда будет стейбл версия под banana pi bpi-r4 с wifi 7 модулем.<br>
+Жду пока приедет rb5009, ax2 теперь будет просто точкой доступа.</p></td><td>2024-08-29T08:42:34.330Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>В связи с тем, что форум воспрял из пепла - восстаналиваю мануал (Копия есть в комментах на хабре <a href="https://habr.com/ru/articles/838452/#comment_27231344" class="inline-onebox" rel="noopener nofollow ugc">Решаем проблему блокировок (и YouTube) за 5 минут на роутере Mikrotik через контейнеры и без VPN / Хабр</a>)</p>
+<p>На микроте ставим пакет с контейнерами, ребутаемся, включаем контейнеры<br>
+<code>/system/device-mode/update container=yes</code><br>
+На железке после этого нужно будет нажать кнопку mode за ограниченное время, удалённо включить контейнеры не выйдет, т.к. потанцевальная дыра в безопасности. Дальше создаём VETH для нашего контейнера, создаём отдельный бридж для контейнеров, навешиваем туда ip адреса(я тут добавляю и ipv6 и ipv4 адрес. На самом деле для схемы с роутингом через WG интерфейс достаточно только v4, но у меня все контейнеры настроены единообразно, так что для общего понимания оставлю)</p>
+<pre><code class="lang-auto">/interface/veth/add address=172.20.0.2/24,fd08:172:20::2/64 gateway=172.20.0.1 gateway6=fd08:172:20::1 name=xray_eth
+/interface/bridge/add name=containers
+/interface/bridge/port/add bridge=containers interface=xray_eth
+/ip/address/add address=172.20.0.1/24 interface=containers interface=xray_eth
+/ip/firewall/nat/add action=masquerade chain=srcnat comment="from containers masq" out-interface-list=WAN src-address=172.20.0.0/24
+/ipv6/address/add address=fd08:172:20::1 interface=containers
+/ipv6/firewall/nat/
+add action=masquerade chain=srcnat comment="from containers masq" out-interface-list=WAN src-address=fd08:172:20::/64
+add action=masquerade chain=srcnat comment="to containers masq" out-interface=containers
+/ipv6/firewall/filter/add action=accept chain=forward comment="Allow Containers" out-interface-list=WAN src-address=fd08:172:20::/64
+</code></pre>
+<p>Последние два правила если что рождены в попытке заставить работать схему с byeDPI, для xray это тоже не нужно(при условии что вы отправляете траффик на ipv4 адрес. Если у вас ipv6-only VPS - то нужно, всё нужно) Дальше втыкаем в микрот флешку, из интерфейса форматируем её в EXT4(Обязательно! Иначе при распаковке контейнера порушатся разрешения фалов и ничего не взлетит) Конфигурим местный докер</p>
+<pre><code class="lang-auto">/container/config/set ram-high=384.0MiB registry-url=https://ghcr.io/ tmpdir=usb1/pull
+</code></pre>
+<p>Аттеншн! Тут ram-high=384.0MiB - это конфиг для AX3 с гигом оперативы. У AС3 её всего 256Мб и с пустым конфигом и установленным пакетом wifi-qcom доступно примерно 145Мб(а с подробным конфигом и под нагрузкой - что-то около 70Мб). У AC2(128Мб) при таких же вводных доступно и того меньше - всего примерно 30Мб. Для AC2 вероятно придётся вообще перейти на легаси Wifi драйвер, иначе с ресурсами ну совсем грустно. Соотв. выставляем параметр с запасом, так чтоб и самому роутеру хватило. При превышении лимита процессы в контейнере начнут нещадно троттлиться, т.е. работать будет, но с дикими тормозами. А вот если память у роутера закончится - скорее всего он тупо крашнется. Не доводим и не включаем старт контейнера при загрузке пока не отладим всё. Скачиваем образ</p>
+<pre><code class="lang-auto">/container/add comment=xray-core remote-image=xtls/xray-core:main interface=veth1 root-dir=usb1/xray/store
+</code></pre>
+<p>После этого можно попробовать его стартануть и убедиться что всё найс и ничего не сыпется. Дальше нужно приготовить конфигу xray (файлик config.json) Либо выдёргиваем его из /usr/local/x-ui/bin/config.json (не с сервера разумеется, а с заранее где-то настроенной клиентской инсталляции x-ui. В самом конфиге придётся поправить ip-шники при этом, очевидно), либо пишем ручками. Должно получиться что-то такое</p>
+<pre><code class="lang-auto">{
+  "log": {
+    "access": "none",
+    "dnsLog": false,
+    "error": "./error.log",
+    "loglevel": "error"
+  },
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": [
+          "api"
+        ],
+        "outboundTag": "api"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "geoip:private",
+          "192.168.88.0/24"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "geoip:ru"
+        ],
+        "outboundTag": "warp"
+      },
+      {
+        "type": "field",
+        "protocol": [
+          "bittorrent"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "inboundTag": [
+          "inbound-172.20.0.2:3125"
+        ],
+        "outboundTag": "warp"
+      },
+      {
+        "type": "field",
+        "inboundTag": [
+          "inbound-172.20.0.2:3126"
+        ],
+        "outboundTag": "VLESS-VPS"
+      }
+    ]
+  },
+  "dns": null,
+  "inbounds": [
+    {
+      "listen": "172.20.0.2",
+      "port": 3126,
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1420,
+        "secretKey": "секрет",
+        "peers": [
+          {
+            "privateKey": "секрет",
+            "publicKey": "секрет",
+            "preSharedKey": "секрет",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "keepAlive": 0
+          }
+        ],
+        "kernelMode": false
+      },
+      "streamSettings": null,
+      "tag": "inbound-172.20.0.2:3126",
+      "sniffing": {
+        "enabled": false,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic",
+          "fakedns"
+        ],
+        "metadataOnly": false,
+        "routeOnly": false
+      }
+    },
+    {
+      "listen": "172.20.0.2",
+      "port": 3125,
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1420,
+        "secretKey": "секрет",
+        "peers": [
+          {
+            "privateKey": "секрет",
+            "publicKey": "секрет",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "keepAlive": 0
+          }
+        ],
+        "kernelMode": false
+      },
+      "streamSettings": null,
+      "tag": "inbound-172.20.0.2:3125",
+      "sniffing": {
+        "enabled": false,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic",
+          "fakedns"
+        ],
+        "metadataOnly": false,
+        "routeOnly": false
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "AsIs"
+      }
+    },
+    {
+      "tag": "blocked",
+      "protocol": "blackhole",
+      "settings": {}
+    },
+    {
+      "tag": "VLESS-VPS",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "секрет",
+            "port": 443,
+            "users": [
+              {
+                "id": "секрет",
+                "flow": "xtls-rprx-vision",
+                "encryption": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "publicKey": "секрет",
+          "fingerprint": "chrome",
+          "serverName": "популярный.хост.близко.к.VPS",
+          "shortId": "секрет",
+          "spiderX": "/"
+        },
+        "tcpSettings": {
+          "header": {
+            "type": "none"
+          }
+        }
+      }
+    },
+    {
+      "tag": "warp",
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1420,
+        "secretKey": "секрет",
+        "address": [
+          "172.16.0.2/32",
+          "секрет"
+        ],
+        "workers": 2,
+        "domainStrategy": "ForceIP",
+        "reserved": [
+          166,
+          231,
+          19
+        ],
+        "peers": [
+          {
+            "publicKey": "секрет",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "endpoint": "список известных хостов и портов есть в сети. Подберите тот, что будет работать для вас",
+            "keepAlive": 0
+          }
+        ],
+        "kernelMode": false
+      }
+    }
+  ],
+  "transport": null,
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserDownlink": true,
+        "statsUserUplink": true
+      }
+    },
+    "system": {
+      "statsInboundDownlink": true,
+      "statsInboundUplink": true,
+      "statsOutboundDownlink": true,
+      "statsOutboundUplink": true
+    }
+  },
+  "api": {
+    "tag": "api",
+    "services": [
+      "HandlerService",
+      "LoggerService",
+      "StatsService"
+    ]
+  },
+  "stats": {},
+  "reverse": null,
+  "fakedns": null,
+  "observatory": null,
+  "burstObservatory": null
+}
+</code></pre>
+<p>Тут у меня конфига на два входа и к ним два выхода - в WARP и в свой VLESS VPN Подкидываем эту конфигу на флешку по пути /usb1/xray/ Добавляем маунт поинт и привязываем его к контейнеру</p>
+<pre><code class="lang-auto">/container/mounts/add dst=/etc/xray/config.json name=xray_config src=/usb1/xray/config.json
+/container/set mounts=xray_config [ /container/find comment=xray-core ]
+</code></pre>
+<p>После чего можно рестартовать контейнер.</p>
+<p>В общем случае вам нужны две ключевые пары из публичного и приватного ключа. Генерятся они любым удобным способом, главное чтоб публичная часть ключа соответствовала приватной. По конфигам раскалдываются каким-то таким образом</p>
+<pre><code class="lang-auto">    {
+      "listen": "172.20.0.2",
+      "port": 3125,
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1420,
+        "secretKey": "PrivkeyB",
+        "peers": [
+          {
+            "privateKey": "PrivkeyA",
+            "publicKey": "PubkeyA",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "keepAlive": 0
+          }
+        ],
+        "kernelMode": false
+      },
+      "streamSettings": null,
+      "tag": "inbound-172.20.0.2:3125",
+      "sniffing": {
+        "enabled": false,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic",
+          "fakedns"
+        ],
+        "metadataOnly": false,
+        "routeOnly": false
+      }
+    }
+</code></pre>
+<pre><code class="lang-auto">/interface/wireguard/print                 
+Flags: X - disabled; R - running 
+
+ 4  R name="WARP-WG" mtu=1420 listen-port=13234 private-key="PrivkeyA" 
+      public-key="PubkeyA" 
+
+/interface wireguard peers
+add allowed-address=0.0.0.0/0,::/0 endpoint-address=172.20.0.2 endpoint-port=3125 interface=WARP-WG name=peer5 public-key=\
+    "PubkeyB"
+</code></pre>
+<p>При этом на самом деле PrivkeyA в конфиге сервера по большому счёту не должен быть нужен, не знаю зачем он его хранит - может это последствия генерации конфига через x-ui.</p>
+<p>Для маршрутизации траффика до контейнера нам вполне достаточно динамических маршрутов, которые автоматически будут созданы в момент создания бриджа.</p>
+<pre><code class="lang-auto">ip/route/print where gateway="containers" 
+Flags: D - DYNAMIC; A - ACTIVE; c - CONNECT
+Columns: DST-ADDRESS, GATEWAY, DISTANCE
+    DST-ADDRESS    GATEWAY     DISTANCE
+DAc 172.20.0.0/24  containers         0
+ipv6/route/print where gateway="containers"
+Flags: D - DYNAMIC; X - DISABLED, I - INACTIVE, A - ACTIVE; c - CONNECT, s - STATIC
+Columns: DST-ADDRESS, GATEWAY, DISTANCE
+#     DST-ADDRESS           GATEWAY     DISTANCE
+  DAc fd08:172:20::/64      containers         0
+  DAc fe80::%containers/64  containers         0
+</code></pre>
+<p>Ну а дальше мы просто создаём WG интерфейсы и пиры для каждого inbound в контейнере</p>
+<pre><code class="lang-auto">/interface wireguard
+add listen-port=13233 mtu=1420 name=VLESS-WG private-key="секрет"
+add listen-port=13234 mtu=1420 name=WARP-WG private-key="секрет"
+/interface wireguard peers
+add allowed-address=0.0.0.0/0,::/0 endpoint-address=172.20.0.2 endpoint-port=3126 interface=VLESS-WG name=peer4 public-key="секрет" 
+add allowed-address=0.0.0.0/0,::/0 endpoint-address=172.20.0.2 endpoint-port=3125 interface=WARP-WG name=peer5 public-key="секрет"
+</code></pre>
+<p>создаём таблицы маршрутизации</p>
+<pre><code class="lang-auto">/routing table 
+add disabled=no fib name=vless
+add disabled=no fib name=warp
+</code></pre>
+<p>Добавляем dummy lookup rule (возможно в актуальных версиях ROS уже не нужно, раньше без этого ipv6 маршрутизация не работала)</p>
+<pre><code class="lang-auto">/routing rule
+add action=lookup disabled=no interface=WARP-WG routing-mark=warp table=warp
+add action=lookup disabled=no interface=VLESS-WG routing-mark=vless table=vless
+</code></pre>
+<p>Добавляем маскарадинг</p>
+<pre><code class="lang-auto">/ip firewall nat
+add action=masquerade chain=srcnat comment="WARP-WG masq" out-interface=WARP-WG
+add action=masquerade chain=srcnat comment="VLESS-WG masq" out-interface=VLESS-WG
+/ipv6 firewall nat
+add action=masquerade chain=srcnat comment="WARP-WG masq" out-interface=WARP-WG
+add action=masquerade chain=srcnat comment="VLESS-WG masq" out-interface=VLESS-WG
+</code></pre>
+<p>Дальше нам нужно повесить на интерфейсы WG какие-нибудь IP адреса, любые, из приватного диапазона(по ним будет идти маршрутизация только до приложения в контейнере). Например так. Опять же, в целом можно без этого, т.к. маршрутизировать мы будет тупо по интерфейсу, но некрасиво.</p>
+<pre><code class="lang-auto">/ip address 
+add address=172.19.0.2 interface=WARP-WG network=172.19.0.2
+add address=172.19.0.3 interface=VLESS-WG network=172.19.0.3
+/ipv6 address
+add address=fd08:172:19::3/128 advertise=no interface=VLESS-WG no-dad=yes
+add address=fd08:172:19::2/128 advertise=no interface=WARP-WG no-dad=yes
+</code></pre>
+<p>Наконец добавляем правила, по которым траффик будет заворачиваться в соотв. таблицу маршрутизации</p>
+<pre><code class="lang-auto">/ip firewall mangle
+add action=mark-routing chain=prerouting comment=VLESS dst-address-list=vless new-routing-mark=vless passthrough=yes routing-mark=!vless
+add action=mark-routing chain=prerouting comment=WARP dst-address-list=warp new-routing-mark=warp passthrough=yes routing-mark=!warp
+/ipv6 firewall mangle
+add action=mark-routing chain=prerouting comment=VLESS dst-address-list=vless new-routing-mark=vless passthrough=yes routing-mark=!vless
+add action=mark-routing chain=prerouting comment=WARP dst-address-list=warp new-routing-mark=warp passthrough=yes routing-mark=!warp
+</code></pre>
+<p>Здесь мы отправляем всё, что будет в соотв. адрес листе в соотв. ему таблицу маршрутизации. Если нужно заворачивать несколько адрес листов в один интерфейс или как-то более гибко рулить всем этим безобразием - можно добавить свои цепочки и делать в них jump. Напр. как-то так:</p>
+<pre><code class="lang-auto">/ipv6 firewall mangle
+add action=mark-connection chain=prerouting_warp comment="WARP_chain" dst-address-list=!vpnexclude new-connection-mark=warp
+add action=mark-routing chain=prerouting_warp comment="WARP_chain" dst-address-list=!vpnexclude new-routing-mark=warp passthrough=yes
+add action=jump chain=prerouting comment=WARP dst-address-list=youtube jump-target=prerouting_warp routing-mark=!warp
+add action=jump chain=prerouting comment=WARP dst-address-list=facebook jump-target=prerouting_warp routing-mark=!warp
+</code></pre>
+<p>В этом примере я создал для ipv6 отдельную цепочку prerouting_warp, в которой заворачиваю траффик в таблицу warp и помечаю соединение(можно собрать любое количество нужных правил). При этом проверяю, что коннект не идёт на адреса из списка, подключение до которых ни в коем случае не должно происходить через VPN - в качестве защиты от своих кривых рук. Ну и дальше двумя правилами закидываю в эту цепочку траффик для адресс листов youtube и facebook. Можно так, можно как в предыдущем примере - в зависимости от подхода и решаемой задачи. Как больше нравится и как удобнее.</p>
+<p>Ну и вишенкой на торте - создаём маршруты в дикий интернет для наших новых таблиц маршрутизации</p>
+<pre><code class="lang-auto">/ip route
+add comment=WARP disabled=no distance=1 dst-address=0.0.0.0/0 gateway=WARP-WG routing-table=warp
+add comment=VLESS disabled=no distance=1 dst-address=0.0.0.0/0 gateway=VLESS-WG routing-table=vless
+/ipv6 route
+add comment=WARP disabled=no distance=1 dst-address=2000::/3 gateway=WARP-WG routing-table=warp
+add comment=VLESS disabled=no distance=1 dst-address=2000::/3 gateway=VLESS-WG routing-table=vless
+</code></pre></td><td>2024-09-08T14:13:54.858Z</td></tr><tr><td>Dhohbr</td><td><p>Настроил тоже пару схем через контейнеры, по инструкции с хабра.<br>
+Первая, byedpi+tun2socks. Столкнулся с проблемой на tun2socks, ютуб не заработал. Хотя в tcpdump пакеты уходили и возвращались обратно. Попробовал эту же связку настроить на железке с линуксом, без докера, тоже самое.<br>
+Скорее всего проблема из-за двух дефолтных маршрутов. Переписал маршрутизацию так:</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>ip route del default # удаляем дефолт<br>
+ip route add default via 198.18.0.1 dev tun0 metric 1 # добавляем дефолт через tun интерфейс<br>
+ip route add 10.0.0.0/24 via 10.0.1.1 dev eth0 # маршрут в локальную сеть<br>
+ip route add 10.0.1.0/24 via 10.0.1.1 dev eth0 # connected маршрут в сеть контейнеров</p>
+</details>
+<p>С такими маршрутами ютуб заработал. Показывает 4k без фризов. На роутере настрен мангл с адресами googlevideo, и со всех устройств в локальной сети трафик прозрачно заворачивается в контейнер, как в инструкции с хабра.<br>
+Единственная странность, через curl ютуб не грузит. Если в curl добавить прокси, и указать адрес контейнера byedpi, то работает, а через tun2socks нет.</p>
+<p>Вторая схема, xray+tun2socks. Официального образа под мою архитектуру нет, взял <a href="https://hub.docker.com/r/teddysun/xray">teddysun/xray</a>, он указан на гитхаб странице <a href="https://github.com/XTLS/Xray-core">Xray-core</a>. Настройка не сложная, в файл /etc/xray/config.json вставляете конфиг клиента и стартуете контейнер. Я конфиг экспортировал из клиента v2rayNG, удалив лишнее.<br>
+На роутере таким же образом мангл с проксируемыми адресами прозрачно для всех устройств заворачиваются через интерфейс tun2socks.<br>
+И вот здесь уже вонзикла проблема, speedtest показывает скорость загрузки до 10 Мбит, что очень мало. С самим xray проблем нет, через v2rayNG загрузка 30-40Мбит (ограничение wifi).</p>
+<p>Пока не могу разобраться в чем проблема. Может из-за медленного tun2socks, но с ютубом проблем нет. Есть еще <a href="https://github.com/heiher/hev-socks5-tunnel">hev-socks5-tunnel</a>, судя по описанию, более производительный, но в докере нет под мою архитектуру, а на линуксе не удалось завести, на этапе настройки ip rule падает сеть на устройстве.<br>
+Wireguard пока не рассматриваю, т.к. хочется иметь однотипные схемы.</p></td><td>2024-09-10T13:24:16.761Z</td></tr><tr><td>Sick</td><td><p>очень сложна, проще перешить в openwrt или выкинуть и купить перешиваемое в openwrt…</p></td><td>2024-09-10T14:49:19.191Z</td></tr><tr><td>TyPuCT</td><td><p>Добрый день. Специально зарегистрировался, чтобы добавить ответ. Прежде всего спасибо Вам за проделанную работу и инструкцию.  Думаю кто в теме по достоинству это оценит. Я к сожалению, не понял как это реализовать на микротике, какие данные и где мне поменять под себя, как отделить трафик на запрещенные ресурсы и разрешенные. Буду Вам признателен за более подробную инструкцию с картинками (или видео). Представьте, что у Вас есть комп с Windows , настроенный в облаке сервер с VLESS и микротик и вам нужно настроить микротик с нуля до запуска. Представьте на месте себя человека который из настройки оборудования знает:  “Вставляем эту команду в это окно…” “В этом окне выставляем эти параметры…” “Данные берём из этого окна…”  “Жмём далее…” .  Понимаю, что до такой степени это тяжело “разжёвывать”, но тогда эта информация станет полезна и востребована широкому кругу обычных пользователей и благодарность за Ваш труд будет несоизмерима выше.</p></td><td>2024-09-11T13:34:31.747Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Добрый день! К сожалению, у меня нет ни сил, ни желания, ни инструментов для создания видеоинструкции. Да и не очень понятно, что именно в ней нужно отражать, т.к. все команды просто прописываются терминале с поправкой на текущий конфиг. На мой личный вкус - всё и так достаточно сильно разжёвано до уровня, которым обладает почти каждый владелец микротиков. Гораздо проще будет, если вы будете просто задавать вопросы по тем пунктам, которые не понятны и тогда возможно я смогу что-то дополнительно пояснить.</p></td><td>2024-09-16T07:19:45.186Z</td></tr><tr><td>a_user(A user)</td><td><p>Привет!</p>
+<p>Подскажите, пожалуйста, какой способ сейчас работает под hap lite ac, архитектура mipsbe?</p>
+<p>Месяц как взял микротик, не думал, что будут проблемы с обходом блокировок в нем</p></td><td>2024-09-16T11:22:49.574Z</td></tr><tr><td>romal2000(romal2000)</td><td><p>Здравствуйте.</p>
+<p>Пытаюсь повторить на RB1100x4 и получаю ошибку “no manifest found for this architecture”. Что делаю не так?</p></td><td>2024-09-16T15:10:34.215Z</td></tr><tr><td>mike7</td><td><p>Архитектура ARM 32bit, попробуйте установить teddysun/xray с докерхаба.<br>
+Но у RB1100x4 вроде нет возможности подцепить внешний диск, 128 МБ не хватит.<br>
+Можно в RAM поставить, но это нужно аккуратно )<br>
+<a href="https://www.youtube.com/watch?v=KO9wbarVPOk" rel="noopener nofollow ugc">https://www.youtube.com/watch?v=KO9wbarVPOk</a></p></td><td>2024-09-16T15:25:03.097Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Поддержка контейнеров ЕМНИП есть только под arm. Но даже если есть под mips - у hap ac lite всего 64мб памяти. Впихнуьь туда что-то кроме самой ROS звучит как нереальная задача, вам проще всего докупить какой-нибудь одноплатник и развернуться на нём</p></td><td>2024-09-16T16:02:38.928Z</td></tr><tr><td>a_user(A user)</td><td><p>Спасибо, была идея поставить на рос. VPS какой-нибудь VPN + обход DPI.<br>
+Но проблема в том, что многие VPN-протоколы, поддерживаемые микротиком, заблокированы. А с какими-то не получилось.</p>
+<p>Я не силен в сетях.</p>
+<p>Сейчас уже думаю поставить OpenWRT</p></td><td>2024-09-16T20:03:29.495Z</td></tr><tr><td>romal2000(romal2000)</td><td><p>Здравствуйте.<br>
+Спасибо за ответ. У RB1100x4 есть слот под microSD, его использую.<br>
+К сожалению, а не понял всю схему, у вас wg используется для подключения к контейнеру. У меня такого в конфиге нет. Не пойму как реализовать. Вот мой конфиг:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="mikrotik-vless-reality/0e7337f1c9fc4c21c2a19d1b7f9f1b20c75d3bec.png" data-download-href="https://ntc.party/uploads/default/0e7337f1c9fc4c21c2a19d1b7f9f1b20c75d3bec" title="image"><img src="mikrotik-vless-reality/0e7337f1c9fc4c21c2a19d1b7f9f1b20c75d3bec_2_306x500.png" alt="image" data-base62-sha1="23PxqvKQwQnemgoi1uNmY1BajnK" width="306" height="500" srcset="mikrotik-vless-reality/0e7337f1c9fc4c21c2a19d1b7f9f1b20c75d3bec_2_306x500.png, mikrotik-vless-reality/0e7337f1c9fc4c21c2a19d1b7f9f1b20c75d3bec_2_459x750.png 1.5x, mikrotik-vless-reality/0e7337f1c9fc4c21c2a19d1b7f9f1b20c75d3bec.png 2x" data-dominant-color="222223"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">537×875 46.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-18T12:29:51.666Z</td></tr><tr><td>mike7</td><td><p>С xray не помогу, я только подсказал по вопросу ошибки с архитектурой проца.</p></td><td>2024-09-18T12:48:28.104Z</td></tr><tr><td>Texsis</td><td><p>Не покупайте микротики. Цена на них необоснованно завышена всегда была. Ну а если взяли или как у меня был в наличии, то берите одноплатник и разворачивайте на нем всю инфраструктуру (sing-box, adguard home что бы использовать нормально doh, потому что в микротике работает doh отвратительно, ну как минимум на версии 7.9) тогда будет работать нормально. Если  выбор стоит перед покупкой то лучше что то, что можно перешить на openwrt.</p></td><td>2024-09-19T17:57:45.168Z</td></tr><tr><td>romal2000(romal2000)</td><td><p>Лично мне микротики нравятся, но не по текущей цене, но они всегда тормозят с новыми технологиями.<br>
+Одноплатник есть, только не пойму как завернуть через него трафик для заблокированных сетей.<br>
+Может у вас есть опыт построения схемы микротик + одноплатник с впн?</p></td><td>2024-09-20T13:08:42.355Z</td></tr><tr><td>Texsis</td><td><p>Опыт есть, потому что я тоже счастливый обладатель микротика). Я вроде писал, но наверное как форум слетел, сообщение не восстановилось.<br>
+У меня схема построена так. На своем vps поднят vless через панель 3x-ui. На Оранж пи установлен WireGuard и sing-box. Sind-box поднимает прокси к серверу и tun0 интерфейс. WireGuard используется для связки микротика с Оранж пи. Весь трафик с WireGuard заворачивается в sing-box. На самом микротике поднят WireGuard на орандж пи и адрес листы для выборочной маршрутизации в vpn. Как то это вот так работает, чукча не писатель)) если есть вопросы пишите в лс</p></td><td>2024-09-20T16:19:33.504Z</td></tr><tr><td>Dhohbr</td><td><p>Не пробовали замерять скорость напрямую через sing-box и через wireguard+sing-box? Интересно, на сколько больше накладных расходов с wireguard.<br>
+Я делал проще, отдельную тачку вынес в отдельную сеть в другой бридж</p></td><td>2024-09-21T07:37:45.642Z</td></tr><tr><td>Texsis</td><td><p>Нет, замерять не пробовал, меня в принципе все устраивает, т.к. видео грузятся без затыков, сайты тоже. Попробую на досуге померить.</p></td><td>2024-09-21T20:06:46.313Z</td></tr><tr><td>Dhohbr</td><td><p>В продолжении моего сообщения <a href="https://ntc.party/t/mkirotik-vless-reality/8708/22">выше</a>.<br>
+Поднял в контейнере микротика <a href="https://github.com/heiher/hev-socks5-tunnel">hev-socks5-tunnel</a><br>
+Скорость через xray(vless+reality) стала 25-30Мбит/с.<br>
+Через <a href="https://github.com/xjasonlyu/tun2socks">tun2socks</a> была в районе 10Мбит/с<br>
+Прогресс есть, но это все-равно мало по сравнению с wg+udp2raw, 85-90Мбит/с<br>
+Еще заметил ютюб стал быстрее воспроизводить видео, почти без задержек в начале, в связке byedpi+hev-socks5-tunnel.</p></td><td>2024-09-22T09:33:13.168Z</td></tr><tr><td>white</td><td><p>Благодарю за инструкцию и интересный подход без использования tun2socks. Если есть возможность, расскажите подробнее про создание ключей WG и какой где добавлять в конфиг.</p>
+<p>Пробую поднять с одним пиром только для vless без warp но никак не могу разобраться какие ключи куда писать в конфиге. по логике из инструкции с одним инбондом должно хватить одной пары ключей, но в примере используется две. вот в этом месте:</p>
+<pre><code class="lang-auto">    {
+      "listen": "172.20.0.2",
+      "port": 3125,
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1420,
+        "secretKey": "PrivkeyB",
+        "peers": [
+          {
+            "privateKey": "PrivkeyA",
+            "publicKey": "PubkeyA",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "keepAlive": 0
+          }
+        ],
+</code></pre>
+<p>Но тогда опять же, по логике для двух инбондов должно быть 4 пары ключей, а не две как в инструкции. Или может я чего то не понимаю.</p>
+<p>хотелось бы более подробные комментарии)</p></td><td>2024-09-24T20:03:19.052Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>У вас две пары ключей(закрытый/открытый). Одна пара для WG интерфейса на роутере, другая - от WG интерфейса в контейнере. Ключевые пары можно генерить самим микротом(или чем угодно что умеет генерить конфигу вайргарда). В данном случае в конфиге микрота будет ключевая пара A в WG интерфейсе, а в пирах - PubkeyB. Но вообще очедно что где какая - неважно, они абсолютно равноценны, главное помнить, что они кладутсч крест-накрест(закрытая часть ключа на “своей” стороне в интерфейса, открытая - на той стороне в пирах и наоборот)</p></td><td>2024-09-27T00:15:39.573Z</td></tr><tr><td>fatmaster(sergey)</td><td><p>Все привет! Арендую vds через marzban за рубежом. Настроен только  vless. На ПК и андроид через соответствующие приложения всё работает четко! Очень хочу реализовать данный впн на микроте. Есть микрот. хап ac2. Планирую поменять на хап AX3. По Вашей инструкции не понял, где взять конфиг config.json. Путь /usr/local/x-ui/bin/config.json это где именно находится? На каком то уже настроенном клиенте? Много туманного в настройке через докер)</p></td><td>2024-09-30T15:45:14.684Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Я просто предложил развернуть где-нибудь инсталляцию 3x-ui, настроить всё там через ГУЙ, стянуть конфигу отуда и чуть-чуть её подправить. Ну типа вместо того чтоб руками всё писать.</p></td><td>2024-09-30T16:06:57.709Z</td></tr><tr><td>white</td><td><p>Благодарю за разъяснения, удалось поднять.</p>
+<p>так же воспользовался 3x-ui для генерации конфига. все прекрасно работает <img src="https://ntc.party/images/emoji/twitter/space_invader.png?v=12" title=":space_invader:" class="emoji" alt=":space_invader:" loading="lazy" width="20" height="20"></p></td><td>2024-10-02T10:00:15.488Z</td></tr><tr><td>timz(Timur)</td><td><p>смогли победить?</p></td><td>2024-10-31T14:17:17.307Z</td></tr><tr><td>the-d-kid(Andrey)</td><td><p>Добавляете вот такой инбаунд:</p>
+<pre data-code-wrap="json"><code class="lang-json">		{
+			"tag": "wireguard",
+			"listen": "0.0.0.0",
+			"port": СЮДА_ПОРТ_СЕРВЕРА,
+			"protocol": "wireguard",
+			"settings": {
+				"secretKey": "СЮДА_ПРИВАТНЫЙ_КЛЮЧ_СЕРВЕРА",
+				"peers": [
+					{
+						"publicKey": "СЮДА_ПУБЛИЧНЫЙ_КЛЮЧ_КЛИЕНТА",
+						"allowedIPs": [
+							"192.168.8.2/32"
+						]
+					}
+				],
+				"kernelMode": false
+			}
+		},
+</code></pre>
+<p>С таким инбаундом XRay становится wireguard сервером, соответственно можно несколько пиров добавить в блок peers по аналогии, первый пир - сам микротик по идее, соответственно микротик настраиваете как клиента WG<br>
+С ключами надеюсь не запутаетесь, если что пишите<br>
+Чуть не забыл, в routing rules добавляете</p>
+<pre data-code-wrap="json"><code class="lang-json">            {
+                "inboundTag": [
+                    "wireguard"
+                ],
+                "network": "udp",
+                "outboundTag": "proxy",
+                "port": "СЮДА_ПОРТ_СЕРВЕРА",
+                "source": [
+                    "192.168.0.0/16",
+                    "10.0.0.0/8",
+                    "172.16.0.0/12"
+                ],
+                "type": "field"
+            },
+</code></pre>
+<p>соответственно эта часть конфига отвечает за то, что всё что пришло в Wireguard inbound уйдёт в “proxy” outbound, слушаем мы WG только из подсетей описанных в source</p>
+<p>UPD2: У вас кстати почему то TAG outbound не проставлен, так что правило роутинга не сработает, по этому допишите в самый конец перед закрывающей скобкой блока с VLESS (между жёлтой и синей скобкой)</p>
+<pre><code class="lang-auto">"tag": "proxy"
+</code></pre></td><td>2024-11-16T12:20:56.920Z</td></tr><tr><td>the-d-kid(Andrey)</td><td><p>нет никакого смысла с поднятым Xray/sing-box грузить бедный микрот задачей набивать адрес листы, тем более что работает реально хреново, гораздо проще в случае с Xray добавить inbound’ы по аналогии с <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8-youtube-%D0%B4%D0%BB%D1%8F-%D0%BB%D1%8E%D0%B1%D1%8B%D1%85-smart-tv-%D1%81-goodbyedpi-v2ray-maradns/9415">этой инструкцией</a> но вместо MaraDNS исользовать самого микрота, добавляя записи заблокированных ресурсов в DNS static на IP с Xray, и всё. Всё что угодно в вебе так можно разбанить на уровне всей сети миротика<br>
+<img src="mikrotik-vless-reality/5803ffd7f6d24d3c0ad3e4f5745bb656b98d43d1.png" alt="image" data-base62-sha1="cyCAkMoG0S2iKgXJ6jLjQqwNuQ9" width="599" height="162"></p></td><td>2024-11-16T12:41:03.125Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Этот подход вырабатывался ещё на тех версиях ROS, когда FWD записи не работали с включённым DOH. Сейчас тоже перешёл на вариант с DNS</p></td><td>2024-11-16T12:57:27.959Z</td></tr><tr><td>centayrus(Artem)</td><td><p>Схема с использованием ВМ с клиентом показалась мне рабочей, с учетем нехватки ресурсов на ac hap2, и реализовал ее - ру сегмент интернета напрямую, зарубежный через VPS. Только пока работает только через браузер, и все летает, указав прокси клиента xray. Но хочется, чтобы все работало через Mikrotik. Для этого нужно завернуть трафик на ВМ, что не получается сделать, т.к. не шарю в микроте. В идеале хотелось бы заворачивать только заблокированные ресурсы, используя antifilter. Может у кого-то уже есть такие настройки или знает как сделать?</p></td><td>2024-11-18T18:46:31.879Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>По текущей теме это xray vless + hev-socks5-tunnel в одном контейнере!<br>
+wiktorbgu/vless-hev-socks5-tunnel-mikrotik<br>
+Если нужна какая-то кастомизация, пишите)</p>
+<p>Полезные контейнеры для Mikrotik<br>
+Решил собрать в одном сообщении<br>
+<a href="https://hub.docker.com/u/wiktorbgu" class="onebox" target="_blank" rel="noopener nofollow ugc">https://hub.docker.com/u/wiktorbgu</a><br>
+—————————————————————————<br>
+AmneziaWG client and server on Mikrotik container<br>
+wiktorbgu/amneziawg-mikrotik<br>
+———————————————————————<br>
+xray vless + hev-socks5-tunnel in one container!<br>
+wiktorbgu/vless-hev-socks5-tunnel-mikrotik<br>
+—————————————————————————<br>
+ByeDPI + hev-socks5-tunnel in one container! &lt; 4Mb<br>
+wiktorbgu/byedpi-hev-socks5-tunnel:mikro<br>
+————————————————————<br>
+Mikro container hev socks tunnel! &lt;3Mb<br>
+wiktorbgu/hev-socks5-tunnel-mikrotik<br>
+————————————————<br>
+Mikro container ByeDPI! &lt;100kb<br>
+wiktorbgu/byedpi-mikrotik</p></td><td>2024-11-18T19:47:32.331Z</td></tr><tr><td>centayrus(Artem)</td><td><p>Микротик hap ac2 со 128Mb памяти потянет контейнер совместно с vless? Здесь писали, что xray-core нужно куда больше оперативы.</p></td><td>2024-11-19T04:34:30.907Z</td></tr><tr><td>centayrus(Artem)</td><td><p>Запустился на микротике, норм. Опять же, используя как прокси из браузера норм работает. Как в него завернуть трафик из роутера?</p></td><td>2024-11-19T18:43:38.525Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>Добавил микро версию на 10Мб меньше, дальше ужиматься некуда</p>
+<p>xray vless + hev-socks5-tunnel in one container! 48Mb<br>
+<code>wiktorbgu/vless-hev-socks5-tunnel-mikrotik:mikro</code></p>
+<p>Заворачивается как обычно через таблицу</p>
+<pre><code class="lang-auto">/routing table 
+add disabled=no fib name=vless
+/ip route
+add comment=VLESS disabled=no distance=1 dst-address=0.0.0.0/0 gateway=VLESS routing-table=vless
+</code></pre>
+<p>По аналогии с инструкцией можете посмотреть как заворачивать нужные ресурсы в таблицу (ссылки тут в описании <a href="https://hub.docker.com/r/wiktorbgu/byedpi-hev-socks5-tunnel" rel="noopener nofollow ugc">https://hub.docker.com/r/wiktorbgu/byedpi-hev-socks5-tunnel</a>)</p></td><td>2024-11-19T21:12:02.294Z</td></tr><tr><td>centayrus(Artem)</td><td><p>Все прекрасно работает, спасибо</p></td><td>2024-11-20T15:33:18.819Z</td></tr><tr><td>s.v.d(00svd00)</td><td><aside class="quote no-group" data-username="wiktorbgu" data-post="52" data-topic="8708">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wiktorbgu/48/7227_2.png" class="avatar"> wiktorbgu:</div>
+<blockquote>
+<p>Добавил микро версию на 10Мб меньше, дальше ужиматься некуда</p>
+</blockquote>
+</aside>
+<p>Можно выкинуть hev-socks5 и подключаться через Wireguard</p></td><td>2024-11-21T08:15:51.362Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>а смысл?</p></td><td>2024-11-21T12:06:57.961Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Удобно, нет проблем с ipv6 маршрутизацией, получаем отдельный интерфейс вместо общего бриджа для всех контейнеров(что позволяет без лишнего головняка например делать марк коннекшн), можно ещё немного порезать образ, нет дополнительного процесса в памяти. Работает очень шустро и стабильно, т.к. wg на некротиках реализован модулем ядра, я этим способом чёрти сколько пользуюсь, с момента когда в xray появилась поддержка wireguard inbound. Ну и вишенкой на торте - можно сделать несколько независимых аутбаунд коннектов, к ним 1к1 сконфигурить wireguard инбаунды и вся эта красота будет реализовываться одним контейнером. В схеме с tun2sock проксёй так не получится.</p></td><td>2024-11-21T12:22:30.367Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>Со всем тем что описано и с ipv6 да, логично оно и нужно для этого. А большинству нужно просто и быстро подключиться к vless серверу поэтому мой контейнер самый простой в настройке. Данные в env вбил, маршрут в контейнер направил и всё работает. Всяко лучше же чем соединяют по 2 контейнера.<br>
+Спрос рождает предложение, поэтому и собрал. Мне до сих пор простого wg хватает, я vless не использую, но потестить и чет собрать полезное интересно)<br>
+Спасибо за описание схемы, подробно и понятно, приятно было читать.</p></td><td>2024-11-21T12:37:58.670Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>В таком ключе да, но я из ваших постов предположил, что стояла задача сэкономить каждый байт, чтобы оно нормально крутилось даже на AC2. Потому и предложил)</p></td><td>2024-11-21T12:56:18.536Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>у меня ax3, а уменьшение образов тупо спортивный интерес))<br>
+а пользую я на все byedpi и на пару тройку сайтов бесплатные wg warp и proton)<br>
+сразу скажу, команды байдпи я не подбираю каждый день как некоторые думают <img src="https://ntc.party/images/emoji/twitter/smiley.png?v=12" title=":smiley:" class="emoji" alt=":smiley:" loading="lazy" width="20" height="20"> , раз поставил и забыл даже инста работает через него</p></td><td>2024-11-21T17:26:29.587Z</td></tr><tr><td>pickier.traces-0o(pickier.traces-0o)</td><td><p>Спасибо! Поставил на ax3, отлично работает.</p></td><td>2024-11-22T11:36:47.777Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Да у меня тоже AX3, но это же не значит что не нужно пытаться оптимизировать) Ваш вариант контейнера bdpi 2в1 работает лучше двух отдельных, проверил. Почему-то при двух отдельных контейнерах была проблема с долгим первым хендшейком, возможно ipv6 маршрутизация чудила. Тут этой проблемы нет<br>
+З.Ы. на всякий случай entrypiont.sh с ipv6</p>
+<pre><code class="lang-auto">#!/bin/sh
+
+TUN="${TUN:-tun0}"
+MTU="${MTU:-9000}"
+IPV4="${IPV4:-198.18.0.1}"
+IPV6="${IPV6:-fd08:198:18::1}"
+
+MARK="${MARK:-438}"
+
+SOCKS5_UDP_MODE="${SOCKS5_UDP_MODE:-udp}"
+OTHER_ROUTE="${OTHER_ROUTE:-}"
+LOG_LEVEL="${LOG_LEVEL:-warn}"
+
+config_file() {
+  cat &gt; /hs5t.yml &lt;&lt; EOF
+misc:
+  log-level: '${LOG_LEVEL}'
+tunnel:
+  name: '${TUN}'
+  mtu: ${MTU}
+  ipv4: '${IPV4}'
+  ipv6: '${IPV6}'
+  post-up-script: '/route.sh'
+socks5:
+  address: '127.0.0.1'
+  port: 1080
+  udp: '${SOCKS5_UDP_MODE}'
+  mark: ${MARK}
+EOF
+}
+
+config_route() {
+  echo "#!/bin/sh" &gt; /route.sh
+  chmod +x /route.sh
+  echo "sysctl -w net.ipv6.conf.all.forwarding=1" &gt;&gt; /route.sh
+  echo "ip rule add from all uidrange 1000-1000 lookup 110 pref 28000" &gt;&gt; /route.sh
+  echo "ip -6 rule add from all uidrange 1000-1000 lookup 110 pref 28000" &gt;&gt; /route.sh
+  echo "ip route flush table 110" &gt;&gt; /route.sh
+  echo "ip -6 route flush table 110" &gt;&gt; /route.sh
+  echo "ip route add default via $(ip route | awk '/default/ &amp;&amp; /eth0/ {print $3}') dev eth0 metric 50 table 110" &gt;&gt; /route.sh
+  echo "ip -6 route add 2000::/3 via $(ip -6 route | awk '/default/ &amp;&amp; /eth0/ {print $3}') dev eth0 metric 50 table 110" &gt;&gt; /route.sh
+  echo "ip route del default" &gt;&gt; /route.sh
+  echo "ip -6 route del default" &gt;&gt; /route.sh
+  echo "ip route add default via ${IPV4} dev ${TUN} metric 1" &gt;&gt; /route.sh
+  echo "ip -6 route add 2000::/3 dev ${TUN} metric 1" &gt;&gt; /route.sh
+  echo "ip route add default via $(ip route | awk '/default/ &amp;&amp; /eth0/ {print $3}') dev eth0 metric 10" &gt;&gt; /route.sh
+  echo "ip -6 route add 2000::/3 via $(ip -6 route | awk '/default/ &amp;&amp; /eth0/ {print $3}') dev eth0 metric 10" &gt;&gt; /route.sh
+  # exclude local network
+  echo "ip route add 10.0.0.0/8 via $(ip route | awk '/default/ &amp;&amp; /eth0/ {print $3}') dev eth0" &gt;&gt; /route.sh
+  echo "ip route add 172.16.0.0/12 via $(ip route | awk '/default/ &amp;&amp; /eth0/ {print $3}') dev eth0" &gt;&gt; /route.sh
+  echo "ip route add 192.168.0.0/16 via $(ip route | awk '/default/ &amp;&amp; /eth0/ {print $3}') dev eth0" &gt;&gt; /route.sh
+  echo "${OTHER_ROUTE}" &gt;&gt; /route.sh
+}
+
+run() {
+  config_file
+  config_route
+  echo "echo 1 &gt; /success" &gt;&gt; /route.sh
+  hev-socks5-tunnel /hs5t.yml &amp;
+  su - ciadpi -c "ciadpi $*"
+
+}
+
+run "$@" || exit 1
+</code></pre>
+<p>Ну и до кучи пусть будет конфига амнезии с ipv6<br>
+Тут соотв 172.21.0.1 и fd08:172:21::1 - адреса бриджа, к которому подключен контейнер</p>
+<pre><code class="lang-auto">[Interface]
+PrivateKey = Секрет
+S1 = 0
+S2 = 0
+Jc = 4
+Jmin = 40
+Jmax = 70
+H1 = 1
+H2 = 2
+H3 = 3
+H4 = 4
+
+# Add IP masquerading
+PostUp = iptables -t nat -A POSTROUTING -o %i -j MASQUERADE
+PostUp = ip6tables-legacy -t nat -A POSTROUTING -o %i -j MASQUERADE
+# Del IP masquerading
+PostDown = iptables -t nat -D POSTROUTING -o %i -j MASQUERADE
+PostDown = ip6tables-legacy -t nat -D POSTROUTING -o %i -j MASQUERADE
+
+# exclude local networks
+PreUp = ip route add 10.0.0.0/8 via 172.21.0.1 dev eth0
+PreUp = ip route add 172.16.0.0/12 via 172.21.0.1 dev eth0
+PreUp = ip route add 192.168.0.0/16 via 172.21.0.1 dev eth0
+
+#IPV6 packet forwarding
+PreUp = sysctl -w net.ipv6.conf.all.forwarding=1
+
+# Here is the IP of the Endpoint
+PreUp = echo '162.159.192.1 engage.cloudflareclient.com' &gt;&gt; /etc/hosts
+PreUp = echo '2606:4700:d0::a29f:c001 engage.cloudflareclient.com' &gt;&gt; /etc/hosts
+PreUp = ip route add 162.159.192.1 via 172.21.0.1 dev eth0
+PreUp = ip -6 route add 2606:4700:d0::a29f:c001 via fd08:172:21::1 dev eth0
+PreDown = ip -6 route del 2606:4700:d0::a29f:c001 via fd08:172:21::1 dev eth0
+
+MTU = 1280
+Address = 172.16.0.2, Секрет(уникальный ipv6 адрес)
+DNS = 1.1.1.1, 2606:4700:4700::1111, 1.0.0.1, 2606:4700:4700::1001
+
+[Peer]
+PublicKey = Секрет
+AllowedIPs = 0.0.0.0/1, 128.0.0.0/1, 2000::/3
+#AllowedIPs = 0.0.0.0/0, ::/0
+#privileged: true 
+PersistentKeepalive = 25
+Endpoint = engage.cloudflareclient.com:2408
+</code></pre></td><td>2024-11-22T12:56:45.272Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>И что-то amnesia-wg на некротике вчера ночью сдохла. Насмерть. Не работает ни через через ipv6, ни через ipv4 эндпоинты. На телефоне при этом подключается. Перебор Jc, Jmin, Jmax тоже особо не спасает. РТК Москва</p></td><td>2024-12-01T12:34:10.876Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Нашёл совершенно прекрасный вариант amnesia-wg</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/artem-russkikh/wireproxy-awg">
+  <header class="source">
+
+      <a href="https://github.com/artem-russkikh/wireproxy-awg" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="mikrotik-vless-reality/55562f5c2955e6b690973ef39912c0029ddde0b5_2_690x344.png" class="thumbnail" data-dominant-color="EAEEEF">
+
+  <h3><a href="https://github.com/artem-russkikh/wireproxy-awg" target="_blank" rel="noopener nofollow ugc">GitHub - artem-russkikh/wireproxy-awg: AmneziaWG compatible wireguard client that exposes...</a></h3>
+
+    <p><span class="github-repo-description">AmneziaWG compatible wireguard client that exposes itself as a socks5 proxy</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Одинокий бинарь, который поднимает socks proxy  и коннектится к подложенному конфигу. Аналогично bdpi вообще ни от чего не зависит, можно собрать в контейнер, содержащий только его<br>
+Сборочный скрипт:</p>
+<pre><code class="lang-auto">#!/bin/bash
+DISTR_WIREPROXY_AWG="https://github.com/artem-russkikh/wireproxy-awg/releases/latest/download/wireproxy_linux_arm64.tar.gz"
+
+rm wireproxy
+echo &gt; awg.conf
+wget $DISTR_WIREPROXY_AWG -O - | tar -xzf -
+chmod +x wireproxy
+if [ -e wireproxy ]; then
+	echo "AWG OK"
+else
+	echo "Unable to prepare AWG. Exiting"
+	exit 0
+fi
+
+echo 'FROM scratch
+COPY wireproxy awg.conf /
+ENTRYPOINT ["/wireproxy -c /awg.conf"]' &gt; Dockerfile
+
+docker build --rm -t wireproxy_awg .
+docker save wireproxy_awg:latest -o wireproxy_awg.tar
+docker image rm wireproxy_awg:latest
+</code></pre>
+<p>В некротике нужно прописать будет руками entrypoint, сам не подхватывает<br>
+(а энтрипоинт соотв /wireproxy -c /awg.conf)<br>
+В конфиге можно прописывать значения через переменные окружения, напр. можно передавать эндпоинт того же WARP-а, а потом перебирать их скриптом, если совсем будет затыкаться.<br>
+Есть ливнес пробы и метрики, есть почти нормальные логи, короче мне нравится</p>
+<p>UPD<br>
+Если вдруг кто-то себе настраивал xray-core как траспорт из wireguard во VLESS и прочие протоколы(когда на входе поднимается wireguard inbound и правилами маршрутизации заворачивается в соответствующий outbound) - не обновляйтесь на последнюю версию.<br>
+Они сломали маршрутизацию по тегам для wireguard инбаундов</p><aside class="onebox githubpullrequest" data-onebox-src="https://github.com/XTLS/Xray-core/pull/4030">
+  <header class="source">
+
+      <a href="https://github.com/XTLS/Xray-core/pull/4030" target="_blank" rel="noopener nofollow ugc">github.com/XTLS/Xray-core</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+
+
+
+    <div class="github-icon-container" title="Pull Request">
+      <svg width="60" height="60" class="github-icon" viewBox="0 0 12 16" aria-hidden="true"><path fill-rule="evenodd" d="M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
+    </div>
+
+  <div class="github-info-container">
+
+
+
+      <h4>
+        <a href="https://github.com/XTLS/Xray-core/pull/4030" target="_blank" rel="noopener nofollow ugc">WireGuard inbound: Fix leaking session information between requests</a>
+      </h4>
+
+    <div class="branches">
+      <code>XTLS:main</code> ← <code>XTLS:wg-fix</code>
+    </div>
+
+      <div class="github-info">
+        <div class="date">
+          opened <span class="discourse-local-date" data-format="ll" data-date="2024-11-19" data-time="12:44:45" data-timezone="UTC">12:44PM - 19 Nov 24 UTC</span>
+        </div>
+
+        <div class="user">
+          <a href="https://github.com/Fangliding" target="_blank" rel="noopener nofollow ugc">
+            <img alt="Fangliding" src="mikrotik-vless-reality/d94746ace5303fc8cf082cd97728cf8be28199e4.jpeg" class="onebox-avatar-inline" width="20" height="20" data-dominant-color="5F565E">
+            Fangliding
+          </a>
+        </div>
+
+        <div class="lines" title="3 commits changed 1 files with 14 additions and 9 deletions">
+          <a href="https://github.com/XTLS/Xray-core/pull/4030/files" target="_blank" rel="noopener nofollow ugc">
+            <span class="added">+14</span>
+            <span class="removed">-9</span>
+          </a>
+        </div>
+      </div>
+  </div>
+</div>
+
+  <div class="github-row">
+    <p class="github-body-container">Fix #3948 #4025 
+
+我本来以为是设计缺陷，结果这竟然是故意的，wg入站在入站级别共享一系列session参数(s.info) 这些参数对于每<span class="show-more-container"><a href="https://github.com/XTLS/Xray-core/pull/4030" target="_blank" rel="noopener nofollow ugc" class="show-more">…</a></span><span class="excerpt hidden">个请求都应该是独立的 多个入站互相操作这些参数导致目标可能被不正确重置 暂时没看懂为什么这么做</span></p>
+  </div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-12-04T23:16:46.153Z</td></tr><tr><td>Diamond(D!amond)</td><td><p>Спасибо за этот интерес!<br>
+ax2 лишили USB <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p></td><td>2024-12-19T14:53:52.219Z</td></tr><tr><td>MellokMell(Mellok Mell)</td><td><p>Добрый день, установил ваш контейнер, добавил конфигурацию, запустил. Контейнер в состоянии running, но в админке x3-ui не видно, что клиент онлайн. И соответственно ничего не работает.</p></td><td>2024-12-23T17:47:41.257Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>Ну что я могу сказать, ищите где ошиблись.</p></td><td>2024-12-23T17:55:11.874Z</td></tr><tr><td>mike_zero</td><td><p>Добрый день! Не подскажите текущие команды для байдипиай? Запустил по вашим мануалам на ax2 контейнер в RAM, все работает кроме инсты и ютюба. Спасибо за труды!</p></td><td>2024-12-23T21:27:09.186Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>Найдите здесь на форуме GoodCheck скрипт и проверьте какая команда вам подойдет<br>
+либо ищите в обсуждениях проекта на гитхабе примеры от других пользователей</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/hufrea/byedpi/">
+  <header class="source">
+
+      <a href="https://github.com/hufrea/byedpi/" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="mikrotik-vless-reality/18bbc50436080f35e899804b2f347e5eaf51de9f_2_690x344.png" class="thumbnail" data-dominant-color="F1F2F4">
+
+  <h3><a href="https://github.com/hufrea/byedpi/" target="_blank" rel="noopener nofollow ugc">GitHub - hufrea/byedpi: Bypass DPI</a></h3>
+
+    <p><span class="github-repo-description">Bypass DPI</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://github.com/dovecoteescapee/ByeDPIAndroid/releases">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/b/bad3e5f9ad67c1ddf145107ce7032ac1d7b22563.svg" class="site-icon" data-dominant-color="" width="32" height="32">
+
+      <a href="https://github.com/dovecoteescapee/ByeDPIAndroid/releases" target="_blank" rel="noopener nofollow ugc">GitHub</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/344;"><img src="mikrotik-vless-reality/1f573a35d66f3981c1f3a233b9f956d1cd1e93ac_2_690x345.png" class="thumbnail" data-dominant-color="EAEAED" width="690" height="345"></div>
+
+<h3><a href="https://github.com/dovecoteescapee/ByeDPIAndroid/releases" target="_blank" rel="noopener nofollow ugc">Releases · dovecoteescapee/ByeDPIAndroid</a></h3>
+
+  <p>App to bypass censorship on Android. Contribute to dovecoteescapee/ByeDPIAndroid development by creating an account on GitHub.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p><a href="https://raw.githubusercontent.com/romanvht/ByeDPIAndroid/refs/heads/master/app/src/main/assets/proxytest_cmds.txt" class="onebox" target="_blank" rel="noopener nofollow ugc">https://raw.githubusercontent.com/romanvht/ByeDPIAndroid/refs/heads/master/app/src/main/assets/proxytest_cmds.txt</a></p></td><td>2024-12-23T22:57:08.036Z</td></tr><tr><td>Focusnik</td><td><p>Может подскажите, как этими регулярными выражениями правильно пользоваться?<br>
+Если я хочу, чтобы все что в зоне .ru или .su резолвилось сервером 77.88.8.8, думаю сработает <code>.*\.(ru|su)$</code><br>
+Как то же самое для .рус и .рф сделать? Я не уверен, что там допустимо кириллицу указывать.</p></td><td>2025-01-01T04:12:02.923Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Для таких случаев придумали punycode - <a href="https://hostingru.net/en/punycode/" class="inline-onebox">Punycode Converter</a></p></td><td>2025-01-01T06:56:49.838Z</td></tr><tr><td>headrobot790(Alexander Rulezzz)</td><td><p>Привет. Подскажи как ты настроил sing-box на orange pi ?<br>
+мой кейс: orange pi5 plus (с 2мя eth портами)<br>
+на нее поставил debian с официального сайта <a href="http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-plus.html" class="inline-onebox" rel="noopener nofollow ugc">Orange Pi - Orangepi</a><br>
+Linux orangepi5plus 6.1.43-rockchip-rk3588 <span class="hashtag-raw">#1</span>.0.8 SMP Sat Feb  3 00:04:38 CST 2024 aarch64 GNU/Linux<br>
+Настроил конфиг, который работает на android версии sing-box. А вот на апельсинке при запуске пишет ошибку</p>
+<pre><code class="lang-auto">orangepi@orangepi5plus:~$ sudo -E /usr/bin/sing-box run -c /etc/sing-box/config.json
+INFO[0000] router: updated default interface enP4p65s0, index 2
+FATAL[0000] start service: initialize inbound/tun[tun-in]: configure tun interface: cleanup rules: operation not supported
+</code></pre>
+<p>в инете нарыл закрытый issue на github проекта, где юзер описал, что это недоработка чего-то в ядре линукса (конкретно для этого дебиана), не заданы какие-то параметры по умолчанию в ядре, и поэтому не может запуститься, но разработчик singbox закрыл issue, написав что не будет фиксить баг.<br>
+Подскажи какая ОС у тебя стоит на апельсинке, какая версия singbox и откуда качал</p></td><td>2025-01-03T10:53:41.856Z</td></tr><tr><td>Texsis</td><td><p>Привет! У меня орандж пи на скрине прикрепил. sing-box ставил с сайта <a href="https://sing-box.sagernet.org/installation/package-manager/#problematic-sources" class="inline-onebox" rel="noopener nofollow ugc">Package Manager - sing-box</a> попробуй поставить отсюда. Он еще очень капризный к конфигу. У меня он запущен в режиме tun.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="mikrotik-vless-reality/fc4501d91619f4cfa0d05ff1a51c2c84d1aa2f68.png" data-download-href="https://ntc.party/uploads/default/fc4501d91619f4cfa0d05ff1a51c2c84d1aa2f68" title="изображение"><img src="mikrotik-vless-reality/fc4501d91619f4cfa0d05ff1a51c2c84d1aa2f68_2_231x500.png" alt="изображение" data-base62-sha1="zZGawR0HoA7QzdYm7DF2gLdGNFm" width="231" height="500" srcset="mikrotik-vless-reality/fc4501d91619f4cfa0d05ff1a51c2c84d1aa2f68_2_231x500.png, mikrotik-vless-reality/fc4501d91619f4cfa0d05ff1a51c2c84d1aa2f68_2_346x750.png 1.5x, mikrotik-vless-reality/fc4501d91619f4cfa0d05ff1a51c2c84d1aa2f68_2_462x1000.png 2x" data-dominant-color="EFEFF0"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">828×1792 157 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2025-01-03T12:21:32.630Z</td></tr><tr><td>headrobot790(Alexander Rulezzz)</td><td><p>А можешь подробнее написать откуда качал дистрибутив и какая у тебя железка?<br>
+Зашел на сайт <a href="https://www.armbian.com/orangepi-5/" rel="noopener nofollow ugc">armbian</a> я вижу, что есть поддержка Orange Pi 5 and 5B. Надеюсь, что мою 5 Plus тоже поддерживает. И не пойму какую ставить операционку: Bookworm или Noble Gnome. Уффф. Можно подробнее плиз<br>
+И по поводу singbox, ты дал ссылку на тэг Problematic Sources, ты прям с исходников ее компилил или через репозиторий\ручную установку ставил?</p></td><td>2025-01-03T13:12:32.170Z</td></tr><tr><td>Texsis</td><td><p>Я скачивал образ для своей по вот этой ссылке, там лежит <a href="https://disk.yandex.ru/d/bNFPEFOGBoxACg?w=1" class="inline-onebox" rel="noopener nofollow ugc">Pi hole on the Orange Pi — Яндекс&nbsp;Диск</a>. Попробуй его накатить на флешку. Если все заведется, то первичная настройка системы, потом вводишь команду bash &lt;(curl -fsSL <a href="https://sing-box.app/deb-install.sh" rel="noopener nofollow ugc">https://sing-box.app/deb-install.sh</a>). Если не покатит, то<br>
+sudo curl -fsSL <a href="https://sing-box.app/gpg.key" rel="noopener nofollow ugc">https://sing-box.app/gpg.key</a> -o /etc/apt/keyrings/sagernet.asc<br>
+sudo chmod a+r /etc/apt/keyrings/sagernet.asc<br>
+echo “deb [arch=<code>dpkg --print-architecture</code> signed-by=/etc/apt/keyrings/sagernet.asc] <a href="https://deb.sagernet.org/" rel="noopener nofollow ugc">https://deb.sagernet.org/</a> * *” | <br>
+sudo tee /etc/apt/sources.list.d/sagernet.list &gt; /dev/null<br>
+sudo apt-get update<br>
+sudo apt-get install sing-box # or sing-box-beta<br>
+Это все с предыдущей ссылки, потому что я уже давненько это делал, на память уже не помню.<a href="https://sing-box.sagernet.org/installation/package-manager/#repository-installation" rel="noopener nofollow ugc">Еще раз ссылка, установка из репозитариев</a></p></td><td>2025-01-03T17:14:44.128Z</td></tr><tr><td>DobryiKot(Александр)</td><td><p>Такая же проблема -контейнер работает, но в x3-ui пользователь оффлайн. Не нашли в чем у вас была ошибка?</p></td><td>2025-01-12T03:02:57.827Z</td></tr><tr><td>Forti04(Forti04)</td><td><p>интересный мануал, но не могу понять где теряю связь с ним ибо в начале создаётся veth c именем xray_eth а по итогу в мануале контейнер поднимается на veth1 которого и нету пока что.</p></td><td>2025-01-15T15:41:06.249Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Очепятался наверное. Сами понимаете, пишется с живого конфига, который на ходу причёсывается.<br>
+Можете ещё тут посмотреть. В некотором смысле - версия дополненная и расширенная</p><aside class="quote quote-modified" data-post="1" data-topic="13694">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/s.v.d/48/6091_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%B9%D0%BD%D0%B5%D1%80-%D1%81-vpn-%D0%B4%D0%BB%D1%8F-mikrotik-%D0%BF%D1%80%D0%B5%D1%82%D0%B5%D0%BD%D0%B4%D1%83%D1%8E%D1%89%D0%B8%D0%B9-%D0%BD%D0%B0-%D1%83%D0%BD%D0%B8%D0%B2%D0%B5%D1%80%D1%81%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D1%81%D1%82%D1%8C/13694">Контейнер с VPN для Mikrotik, претендующий на универсальность</a> <a class="badge-category__wrapper " href="/c/manuals/42"><span data-category-id="42" style="--category-badge-color: #F7941D; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="VPN/Proxy installation and configuration instructions, censorship circumvention software tips and tricks"><span class="badge-category__name">Manuals and How-Tos</span></span></a>
+  </div>
+  <blockquote>
+    Собирал для себя, но выглядит так, что получилось достаточно хорошо для публикации. 
+Основан на <a href="https://github.com/XTLS/Xray-core" rel="noopener nofollow ugc">Xray-core</a>, туда же добавлены бинарники <a href="https://github.com/artem-russkikh/wireproxy-awg" rel="noopener nofollow ugc">wireproxy awg</a> и <a href="https://github.com/hufrea/byedpi" rel="noopener nofollow ugc">byedpi</a>. 
+Также geoip.dat и geosite.dat были заменены на варианты, <a href="https://github.com/runetfreedom" rel="noopener nofollow ugc">адаптированные для РФ</a> 
+Конкретно geosite.dat был взят в варианте geosite:ru-blocked, т.е. заблокированные домены + домены, доступные только из РФ. 
+Есть возможность собрать обрезанный geoip.dat, содержащий только списки для РФ(об этом ниже). Также оставлена возможность прямого подкл…
+  </blockquote>
+</aside>
+</td><td>2025-01-15T16:02:43.780Z</td></tr><tr><td>Forti04(Forti04)</td><td><p>Довольно интересно шайтан машина работает, поднимал соединение до AWG и до панели x-ui и заметил такую вещь что у меня статус канала offline или inactive, но до того момента как микрот что то не кинет в тоннель то сразу поднимает в активный потом опять в статусе падает в inctive со стороны сервака.</p></td><td>2025-01-17T07:25:04.090Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>так и работает vless, но все почему-то удивляются, хотя привыкли что подключаются на какой-то активной системе где сразу идут какие-то запросы на сервер поэтому и сразу видна активность</p></td><td>2025-01-20T20:29:04.329Z</td></tr>
+    </table>
+      </body>
+    </html>

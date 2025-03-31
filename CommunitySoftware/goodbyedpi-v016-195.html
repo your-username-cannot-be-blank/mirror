@@ -1,0 +1,129 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>goodbyedpi-v016-195</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p><span class="bbcode-b">GoodbyeDPI v0.1.6</span><br>
+New feature: Fake Packet Mode, activate with <code>--set-ttl</code> and <code>--wrong-chksum</code> options.<br>
+This feature is surprisingly effective against many DPI systems, where GoodbyeDPI used not to work: Rostelecom-Ural, TTK, cellular Tele2, Turk Telekom.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://github.com/ValdikSS/GoodbyeDPI/releases">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/b/bad3e5f9ad67c1ddf145107ce7032ac1d7b22563.svg" class="site-icon" data-dominant-color="" width="32" height="32">
+
+      <a href="https://github.com/ValdikSS/GoodbyeDPI/releases" target="_blank" rel="noopener">GitHub</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/344;"><img src="goodbyedpi-v016-195/aada5c5a971d1cdb0662aac2f06756af9ed9e1ab_2_690x345.png" class="thumbnail" data-dominant-color="ECEBEC" width="690" height="345"></div>
+
+<h3><a href="https://github.com/ValdikSS/GoodbyeDPI/releases" target="_blank" rel="noopener">Releases · ValdikSS/GoodbyeDPI</a></h3>
+
+  <p>GoodbyeDPI — Deep Packet Inspection circumvention utility (for Windows) - ValdikSS/GoodbyeDPI</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>This mode sends fake HTTP GET request <a href="http://www.w3.org">www.w3.org</a> and TLS ClientHello also to <a href="http://www.w3.org">www.w3.org</a> if real HTTP or HTTPS request is detected. The fake packets are sent with either low TTL value and/or with incorrect TCP checksum, to trigger DPI but to prevent delivering the packet to real destination.<br>
+Incorrect checksum does not work with some routers, which for some reason validate the checksum or recompute it in full upon NAT.<br>
+Both methods won’t work in a virtual machine with userspace NAT networking. Use any kind of proper networking, bridge, macvlan/ipvlan, for example.</p></td><td>2019-10-31T20:11:05.774Z</td></tr><tr><td>zald(alex)</td><td><blockquote>
+<p>Rostelecom-Ural, TTK, cellular Tele2</p>
+</blockquote>
+<p>Теперь указал какими провайдерами пользоваться точно нельзя)</p></td><td>2019-11-01T09:44:52.237Z</td></tr><tr><td>TRI(Дмитрий)</td><td><p>я пробовал через вашу программу в ТТК, не работало даже с ВПН, а потом случайно прочитал, что надо добавить точку в конце и у меня так открывает сайты с ВПН <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2019-11-16T06:12:34.555Z</td></tr><tr><td>ValdikSS</td><td><p>Если у вас не работают сайты при подключенном VPN, то, скорее всего, это проблема с DNS: либо VPN-сервер не выдаёт настройки DNS, либо происходит утечка DNS.<br>
+В любом случае, эта проблема не имеет отношения к GoodbyeDPI.</p></td><td>2019-11-16T07:37:42.366Z</td></tr><tr><td>Vitek9614(Виктор)</td><td><p>Доброго времени суток всем! Давно пользуюсь GoodbyeDPI (в связке с DNSCrypt proxy) для доступа к заблокированным сайтам, установлен в качестве службы Windows. Провайдер Дом.ру. Настроен был на максимальную скорость, низкую совместимость + галочка “Фильтрация дополнительных IP ID” со значением 54321. С недавнего времени работать перестало. На просторах интернета видел что подобная проблема была и у Ростелекома и было предложено решение этой проблемы (установка TTL = 3). Решил попробовать, вроде бы заработало, но почему-то не для всех сайтов, в частности ни одно зеркало nnm-club ( <a href="https://nnm-club.me" rel="noopener nofollow ugc">https://nnm-club.me</a> , <a href="https://nnmclub.to" rel="noopener nofollow ugc">https://nnmclub.to</a> , версия ipv6) не открывается, “ошибка при установлении защищённого соединения”. А другие, например <a href="http://toreents.club/" rel="noopener nofollow ugc">http://toreents.club/</a> , <a href="https://hdreactor.net/" rel="noopener nofollow ugc">https://hdreactor.net/</a> открываются без проблем. Есть ли способ это исправить?</p></td><td>2020-12-12T10:37:37.354Z</td></tr><tr><td>ValdikSS</td><td><p><code>--set-ttl 3</code> может не помочь, нужно определять значение этого параметра эмпирическим путём.<br>
+Лучше его комбинировать с <code>--wrong-chksum</code>, если это возможно — так гораздо безопаснее в плане работоспособности сайтов (не обхода блокировок, а для того, чтобы сайты не ломались просто так).</p>
+<p>Можете <a href="https://github.com/ValdikSS/GoodbyeDPI/wiki/%D0%9A%D0%B0%D0%BA-%D1%81%D0%B4%D0%B5%D0%BB%D0%B0%D1%82%D1%8C-%D0%B4%D0%B0%D0%BC%D0%BF-%D1%82%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0-%D0%B2-Wireshark">записать дамп сайтов</a>, которые не открываются с GoodbyeDPI, и прислать его на почту <a href="mailto:iam@valdikss.org.ru">iam@valdikss.org.ru</a> — посмотрю в свободное время, можно ли улучшить ситуацию.</p>
+<p><small>Пожалуйста, не пишите один и тот же вопрос сразу в несколько мест.</small></p></td><td>2020-12-15T20:34:32.458Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="7" data-topic="195">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Лучше его комбинировать с <code>--wrong-chksum</code></p>
+</blockquote>
+</aside>
+<p>Частенько роутер не пропускает wrong checksum. Его указание приводит к неработоспособности метода. Подтверждено экспериментально</p></td><td>2021-01-03T16:45:08.396Z</td></tr><tr><td>bolvan</td><td><p>Некоторые прошивки роутеров фиксируют TTL на выходе</p>
+<p><a href="https://forum.keenetic.net/topic/3078-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80%D0%B5/page/17/" class="onebox" target="_blank" rel="noopener">https://forum.keenetic.net/topic/3078-обход-блокировок-на-роутере/page/17/</a></p>
+<blockquote>
+<p>Записал трафик по 443 порту для прошивок 2.06 и 2.16 на роутере и wireshark. При сравнении поля TTL 2.16 с 2.06 и с Wireshark подтвердилось предположение о модификации пакета роутером. GoodbyeDPI устанавливает ttl=5. Wireshark показывает TTL=5, прошивка 2.06 TTL=5, а прошивка 2.16 TTL=63.<br>
+В ридми к goodbye автор писал, что TTL не должен быть большим, чтобы пакет не дошел до адресата. Прошивка 2.16 ломает эту схему.</p>
+</blockquote></td><td>2021-01-06T08:37:57.222Z</td></tr><tr><td>DUDE</td><td><p>Приветствую.<br>
+Возникла проблема с GoodbyeDPI, при запущенной проге игра Warzone отказывается соединяться с серверами. Приходится убирать из автозапуска программу, без неё запускать комп и тогда игра находит сервера. Хотелось бы узнать как сделать, чтобы прога не ломала мне Warzone.</p></td><td>2021-05-27T15:18:02.708Z</td></tr><tr><td>ValdikSS</td><td><p>Вероятнее всего, проблема на стороне серверов игры, а не в GoodbyeDPI. Точнее можно будет понять из трафика: <a href="https://github.com/ValdikSS/GoodbyeDPI/wiki/%D0%9A%D0%B0%D0%BA-%D1%81%D0%B4%D0%B5%D0%BB%D0%B0%D1%82%D1%8C-%D0%B4%D0%B0%D0%BC%D0%BF-%D1%82%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0-%D0%B2-Wireshark" class="inline-onebox">Как сделать дамп трафика в Wireshark · ValdikSS/GoodbyeDPI Wiki · GitHub</a></p></td><td>2021-06-02T07:38:51.132Z</td></tr><tr><td>ptastva(Ptastva)</td><td><p>Хотелось бы увидеть в GoodbyeDPI опции обфускации TCP потоков, как рандомная очистка потока данных (Randomized Flushing of Data Streams)<br>
+Это также может помочь с обходом блокировки торрентов в некоторых DPI <img src="https://ntc.party/images/emoji/twitter/+1.png?v=9" title=":+1:" class="emoji" alt=":+1:"></p></td><td>2021-06-08T15:16:04.382Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="ptastva" data-post="12" data-topic="195">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ptastva/48/571_2.png" class="avatar"> ptastva:</div>
+<blockquote>
+<p>обфускации TCP потоков, как рандомная <em>очистка</em> потока данных (Randomized Flushing of Data Streams)</p>
+</blockquote>
+</aside>
+<p>Полагаю, речь о внеочередной отправке данных (flushing), т.е., по сути, фрагментации? Такая опция уже есть для TLS (в начале соединения) и HTTP (в любой момент передачи, опция -k). Для какого случая вам нужна подобная функциональность?</p></td><td>2021-06-14T10:46:23.156Z</td></tr><tr><td>drabad774</td><td><p>Добрый день.<br>
+Я правильно понял что дроп RST пакетов работает только с IPv4?</p></td><td>2021-08-12T13:03:56.109Z</td></tr><tr><td>ValdikSS</td><td><p>Да. На момент добавления этой функции IPv6 не блокировался в России вообще.<br>
+Какой провайдер у вас фильтрует IPv6? Предоставьте .pcap, пожалуйста.</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://github.com/ValdikSS/GoodbyeDPI/wiki/%D0%9A%D0%B0%D0%BA-%D1%81%D0%B4%D0%B5%D0%BB%D0%B0%D1%82%D1%8C-%D0%B4%D0%B0%D0%BC%D0%BF-%D1%82%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0-%D0%B2-Wireshark">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/b/bad3e5f9ad67c1ddf145107ce7032ac1d7b22563.svg" class="site-icon" data-dominant-color="" width="32" height="32">
+
+      <a href="https://github.com/ValdikSS/GoodbyeDPI/wiki/%D0%9A%D0%B0%D0%BA-%D1%81%D0%B4%D0%B5%D0%BB%D0%B0%D1%82%D1%8C-%D0%B4%D0%B0%D0%BC%D0%BF-%D1%82%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0-%D0%B2-Wireshark" target="_blank" rel="noopener">GitHub</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/344;"><img src="goodbyedpi-v016-195/aada5c5a971d1cdb0662aac2f06756af9ed9e1ab_2_690x345.png" class="thumbnail" data-dominant-color="ECEBEC" width="690" height="345"></div>
+
+<h3><a href="https://github.com/ValdikSS/GoodbyeDPI/wiki/%D0%9A%D0%B0%D0%BA-%D1%81%D0%B4%D0%B5%D0%BB%D0%B0%D1%82%D1%8C-%D0%B4%D0%B0%D0%BC%D0%BF-%D1%82%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0-%D0%B2-Wireshark" target="_blank" rel="noopener">Как сделать дамп трафика в Wireshark</a></h3>
+
+  <p>GoodbyeDPI — Deep Packet Inspection circumvention utility (for Windows) - ValdikSS/GoodbyeDPI</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-08-13T11:42:48.320Z</td></tr><tr><td>quyleanh(Quy Le Anh)</td><td><p>Is there any way to by pass the upper level of system proxy?</p>
+<p>For example, I have to use a system proxy (from Squid server) to connect to internet. However, this proxy blocks some site. So can I use this tool to bypass it? Thank you.</p>
+<p><a class="mention" href="/u/valdikss">@ValdikSS</a></p></td><td>2021-08-27T05:04:54.067Z</td></tr><tr><td>ValdikSS</td><td><p>No, GoodbyeDPI is not designed for enterprise access control.</p></td><td>2021-08-27T05:50:13.808Z</td></tr><tr><td>quyleanh(Quy Le Anh)</td><td><p>Ok then. Thank you for your replying.</p></td><td>2021-08-27T06:21:09.725Z</td></tr>
+    </table>
+      </body>
+    </html>

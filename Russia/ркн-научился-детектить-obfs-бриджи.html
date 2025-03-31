@@ -1,0 +1,115 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>ркн-научился-детектить-obfs-бриджи</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Ysengrimus</td><td><p>По криворукости удалил предыдущую тему, прощу прощения <img src="https://ntc.party/images/emoji/twitter/person_facepalming.png?v=12" title=":person_facepalming:" class="emoji" alt=":person_facepalming:" loading="lazy" width="20" height="20"><br>
+Сразу скажу, что у меня довольно поверхностное представление об устройстве интернетов… Столкнулся вчера с таким приколом, при первом подключении Tor к свежему obfs4 бриджу - всё отлично (не всегда, конечно, некоторые сразу зависают). При повторном подключении - зависает на 75%, и всё, насмерть. Ждал по 15 минут - бесполезно. Меняешь бридж - история повторяется… Такое ощущение, что при первом подключении детектируется подключение к Tor, и при попытке повторного - блокируется. Но как я прочитал <a href="https://habr.com/ru/articles/799751/" rel="noopener nofollow ugc">в этой статье</a>, что так как obfs представляет собой рандомный набор байтов, и не имеет каких-либо характерных фингерпринтов, то его заблокируют только при введении белого списка протоколов, чего вроде бы пока не было. Также РКН запрашивает бриджи из открытых источников, прикидываясь обычным пользователем, и блокирует их, но тогда бы они изначально не работали, как я понимаю.<br>
+В общем, перешёл в итоге на webtunnel бриджи, с ними всё отлично. Просто хотелось бы разобраться в ситуации, потому что вроде бы как детектировать obfs невозможно, но всё выглядит так, как будто именно это и происходит… <img src="https://ntc.party/images/emoji/twitter/person_shrugging.png?v=12" title=":person_shrugging:" class="emoji" alt=":person_shrugging:" loading="lazy" width="20" height="20"></p></td><td>2024-12-30T16:35:31.273Z</td></tr><tr><td>rkn-chan</td><td><p>рандомный набор байтов это и есть фингерпринт. сейчас “мусор” блокируют кому не лень. обфускация устарела. сейчас только мимика</p></td><td>2024-12-30T17:49:38.133Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>все guard ноды из<br>
+<code>https://metrics.torproject.org/rs.html#search/flag:guard%20</code><br>
+и выдаваемые obfs4/lyrebird с сайта/gmail/телеграма<br>
+банятся почти у всех провайдеров по IPv4 раз в ХХ часов</p>
+<p>можно проверить взяв древний список (2+ года)</p>
+<pre><code class="lang-auto">https://github.com/scriptzteam/Tor-Bridges-Collector/blob/main/bridges-obfs4-archive
+https://github.com/scriptzteam/Tor-Bridges-Collector/blob/main/bridges-obfs4-guards
+</code></pre>
+<p>часть из них работают до сих пор и не банятся</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>35 из 781 (archive) у меня на РТ пишут работает<br>
+хотя соединится получилось только с 31<br>
+<a href="https://photos.app.goo.gl/TG1QcS5QpHkDUUBt5" rel="noopener nofollow ugc">https://photos.app.goo.gl/TG1QcS5QpHkDUUBt5</a></p>
+<p>7 из 492 =  4 подключились ( obfs4-guard лист )</p>
+</details></td><td>2024-12-30T18:05:50.326Z</td></tr><tr><td>Ysengrimus</td><td><p>Вот у меня как раз древний мост из июня 22-го года спокойно работал больше 2-х лет, а буквально месяц назад внезапно перестал. Вот сейчас попробовал мосты из списка</p>
+<p><code>https://github.com/scriptzteam/Tor-Bridges-Collector/blob/main/bridges-obfs4-archive</code></p>
+<p>к одному удалось подключиться, я даже напишу, к какому именно</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>obfs4 185.144.75.47:1035 D200BD372F929D1AB9E9242B5A17C776C2E0047D cert=3OamEp5Yt7Rvo4YZJB2n1agQtqEsqKk+gwPUyk8tanmJg2KXadP/SJ7VUeNGt/TpiNeLZQ iat-mode=0</p>
+</details>
+<p>Пробую подключится к нему же 2-й раз, и… он виснет на 75%. Я как раз ужин приготовил, сходил поел, минут 15-20 прошло, и ничего не изменилось. Детектирован ТСПУ, получается. Видимо, как товарищ выше и написал, обфускация бесполезна, “мусор” блокируется. Только мимика, только хардкор. Если Tor - то только webtunnel, хотя эти бриджи тоже начинают помаленьку откисать - видимо РКН тоже их потихоньку банит <img src="https://ntc.party/images/emoji/twitter/anger.png?v=12" title=":anger:" class="emoji" alt=":anger:" loading="lazy" width="20" height="20"><br>
+Ну да ладно, у меня Vless с Reality настроен, Tor скорее как запасной вариант.</p></td><td>2024-12-30T19:13:34.004Z</td></tr><tr><td>Ysengrimus</td><td><p>Понятно, большое спасибо за информацию. Webtunnel - это именно мимика, как я понимаю, так что он будет жить, кроме тех мостов, которые РКН побанит вручную. Верно ведь? <img src="https://ntc.party/images/emoji/twitter/roll_eyes.png?v=12" title=":roll_eyes:" class="emoji" alt=":roll_eyes:" loading="lazy" width="20" height="20"></p></td><td>2024-12-30T19:18:17.355Z</td></tr><tr><td>Texsis</td><td><p>Вопрос не совсем в тему. А если поднять свой бридж чисто для себя, насколько быстро его блокнут?</p></td><td>2024-12-30T19:41:58.511Z</td></tr><tr><td>Ysengrimus</td><td><p>Насколько я это понимаю, то obfs-бриджи сейчас в принципе не имеют смысла. Мой провайдер всегда был впереди России всей относительно блокировок, так что если начали банить обфускированный трафик у меня - скоро так будет у всех. Если поднять webtunnel и нигде его не светить - то будет жить и здравствовать, наверное… Но я не очень разбираюсь в подобных вопросах, лучше дождаться ответа от кого-то более осведомлённого.</p></td><td>2024-12-30T19:56:52.911Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Насколько я слышал, WebTunnel имеет банальные детские болячки (например TLS-in-TLS), из-за чего его тоже довольно легко детектить, хоть и труднее.</p>
+<p>Вообще забавно получается, целый консорциум TOR, который поддерживают деньгами в том числе и американские спецслужбы [<a href="https://ru.wikipedia.org/wiki/Tor#%D0%98%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%8F">СУРС</a>], до сих пор не реализовали то, что смогли сделать анонимные китайцы и немногочисленное сообщество вокруг них.</p></td><td>2024-12-30T20:28:15.799Z</td></tr><tr><td>skyrunner(name)</td><td><p>Проверьте 10 разных мостов obfs4, с iat-mode=2.<br>
+Если ни один не сработает - тогда уже надо разбираться</p></td><td>2024-12-30T20:39:23.779Z</td></tr><tr><td>Texsis</td><td><p>Из быстрого поиска еще можно meek через cdn прокинуть, вроде вариант 100% и не палится ip сервака</p></td><td>2024-12-30T20:45:47.193Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Вполне. Только при локдауне к сожалению не будет работать, в таком случае будет нужен безпалевный протокол для локальной связи.</p></td><td>2024-12-30T20:53:20.179Z</td></tr><tr><td>Ysengrimus</td><td><p>В списке <code>https://github.com/scriptzteam/Tor-Bridges-Collector/blob/main/bridges-obfs4-archive</code> всего 3 моста с iat-mode=2, из них удалось подключиться лишь к одному, и на 2-й раз он тоже завис на 75%</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="ркн-научился-детектить-obfs-бриджи/355fb72ff99361afc28307ddac0a2143a470e398.png" data-download-href="https://ntc.party/uploads/default/355fb72ff99361afc28307ddac0a2143a470e398" title="pwsh_(31-12-24)_03-59.877"><img src="ркн-научился-детектить-obfs-бриджи/355fb72ff99361afc28307ddac0a2143a470e398.png" alt="pwsh_(31-12-24)_03-59.877" data-base62-sha1="7CanhQb6dRBRwPB5viKrD6smGyA" width="690" height="345" data-dominant-color="224B57"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">pwsh_(31-12-24)_03-59.877</span><span class="informations">960×480 75.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>Извините, но мне лень ещё искать и проверять, тем более что мосты с iat-mode=2 - это очень редкий зверь. Лично для меня уже и так всё ясно.</p>
+<p>UPD: подключился спустя 7 минут после запуска. То есть, iat-mode=2 всё-таки, хоть со скрипом, но работают. Проверил ещё раз 5 - подключается, причем теперь моментально. Чудеса чудесатые…</p></td><td>2024-12-30T21:03:46.172Z</td></tr><tr><td>Ysengrimus</td><td><p>obfs c iat-mode=2 похоже, работают (по крайней мере, у меня). Случайно наткнулся на <a href="https://computerscot.github.io/tor-obfs4-bridge-iat-mode-2.html" rel="noopener nofollow ugc">статью с настройкой такого моста на сервере и клиенте</a>, возможно, кому-нибудь пригодится.</p></td><td>2024-12-30T21:32:04.006Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>ну многое зависит от провайдеров<br>
+у меня РТ даже vanilla мосты не все банит<br>
+те что не “в консенсусе”<br>
+если бы ТСПУ блочило то почти бы у всего РФ неработал obfs4 а это не так</p>
+<p>p.s. даже IPv6 мосты которые пока что не блочат<br>
+работают не у всех провайдеров РФ (где есть этот IPv6)</p></td><td>2024-12-30T21:56:30.167Z</td></tr><tr><td>MichaelAgarkov(Михаил Агарков)</td><td><p>Не все, obfs4 мост который я использую работает, когда я пробовал другие, то они не работали. Поищите побольше мостов, пока не найдёте рабочий.</p></td><td>2024-12-30T22:14:07.096Z</td></tr><tr><td>Ysengrimus</td><td><p>Я 30-40 штук, наверное, попробовал. Старых, новых - бесполезно, картина одна и та же (которая в первом посте). Из obfs стабильно работает только с iat-mode=2, как вот сейчас выяснилось. Но это настолько редкий зверь, что проще забить и сразу искать webtunnel. Да, безусловно, зависит от провайдера. У меня местный красноярский провайдер, который покупает трафик у МТС. И у меня зачастую блокировки ресурсов и средств обхода происходят намного раньше, чем у других. Когда там у всех wireguard заблокировали, в конце августа? А у меня - весной… OpenVPN уже минимум год как недоступен. Да вот в <a href="https://habr.com/ru/companies/amnezia/articles/861198/" rel="noopener nofollow ugc">этой статье на хабре</a> можно увидеть, что блокировки за Уралом происходят раньше, чем в европейской части РФ. Я ничего не утверждаю со 100% вероятностью, я просто делюсь информацией, которая, возможно, кому-то будет полезна.</p>
+<p>UPD: obfs4 с iat-mode=2 помер спустя пару часов. Ну не работают у меня obfs4-мосты, никакие в принципе <img src="https://ntc.party/images/emoji/twitter/person_shrugging.png?v=12" title=":person_shrugging:" class="emoji" alt=":person_shrugging:" loading="lazy" width="20" height="20"></p></td><td>2024-12-30T23:37:24.933Z</td></tr><tr><td>Ysengrimus</td><td><p>Помер obfs c iat-mode=2 спустя пару часов… webtunnel как работали - так и работают</p></td><td>2024-12-30T23:52:32.076Z</td></tr><tr><td>Ysengrimus</td><td><p>UPD UPD: спустя пару часов уже не работает, в отличие от webtunnel</p></td><td>2024-12-30T23:53:49.135Z</td></tr><tr><td>denium</td><td><p>Детектировать obfs4 по протоколу скорее всего можно и не только мусором. Детектят же shadowsocks по размерам пакетов, которые генерирует openssl внутри. Это приводило и к варнингам в логе тора с obsf4. А в логе failure или eof (end of file)? Если первое, то блок по IP или белый список протоколов, если второе, то по протоколу. Думаю, у вас failure.</p></td><td>2024-12-31T00:51:12.579Z</td></tr><tr><td>Ysengrimus</td><td><pre><code class="lang-auto">Bootstrapped 75% (enough_dirinfo): Loaded enough directory info to build circuits
+</code></pre>
+<p>Последнее, что Тор пишет. Никаких варнингов, ошибок, ни-че-го <img src="https://ntc.party/images/emoji/twitter/person_shrugging.png?v=12" title=":person_shrugging:" class="emoji" alt=":person_shrugging:" loading="lazy" width="20" height="20"><br>
+Сделал вывод в лог-файл - там то же самое.<br>
+Прикрепил лог в подтверждение<br>
+<a class="attachment" href="ркн-научился-детектить-obfs-бриджи/qHXUyqCSkkzlVDo4jI26ZecrIrk.log">tor.log</a> (5,4 КБ)</p></td><td>2024-12-31T01:10:35.442Z</td></tr><tr><td>denium</td><td><p>Хм. Очень странно. Я бы грешил на антивирус или неполадки в системе. По статистике, это самая частая причина.<br>
+Wireshark бы глянуть. Но это может быть сложно.</p></td><td>2024-12-31T02:00:03.591Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>попробуй<br>
+(у меня это в c:\tor\var лежит)</p>
+<pre><code class="lang-auto">net stop tor
+copy /B /V /Y state state.BAK
+grep -Ev "^Guard" state.BAK &gt; state
+net start tor
+</code></pre>
+<p>вместо grep можно findstr встроенный в windows (только <strong>опции запуска поменять</strong>!)<br>
+ну или отредактировать файл вручную == убрать все строки аля</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>Guard in=default rsa_id=3F nickname=S8 sampled_on=2024-09-18T20:33:10 sampled_idx=0 sampled_by=0.4.8.12 listed=1<br>
+Guard in=default rsa_id=06 nickname=Rk sampled_on=2024-09-25T02:17:34 sampled_idx=1 sampled_by=0.4.8.12 listed=1<br>
+etc</p>
+</details></td><td>2024-12-31T02:21:40.175Z</td></tr><tr><td>tehkos(TConst)</td><td><p>Я тор браузер поставил недавно на винду, которой почти не пользуюсь. Он сам нашел 2 моста (через zapret), один из них неделю уже работает. Так что ркн может и следит за мостами, только не всем одинаковые видимо выдают. На одном тг клиенте он предлагает по 4 моста, на другом по 2.</p></td><td>2024-12-31T03:20:08.566Z</td></tr><tr><td>skyrunner(name)</td><td><p>ААоыоОО, просто запрашиваете мост, ставите в torrc (<em>САМИ</em>) IAT=2 и проверяете. Не списки. Для частоты эксперимента я советую вам запросить мосты не только с сайта <a href="https://bridges.torproject.org/" rel="noopener nofollow ugc">https://bridges.torproject.org/</a> , но и с помощью moat (запроса в тор браузере) и так же почты. Везде поменяйте iat на 2 и проверяйте. А после теста скиньте сюда свой torrc проверим. Obfs4 кроме как белыми списками заблокировать анрил</p>
+<p>*поснение, iat - клиентская настройка, не обязательно соответствие с сервером.</p></td><td>2024-12-31T06:23:19.056Z</td></tr><tr><td>rkn-chan</td><td><aside class="quote no-group" data-username="tehkos" data-post="23" data-topic="14247">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/f4b2a3/48.png" class="avatar"> tehkos:</div>
+<blockquote>
+<p>только не всем одинаковые видимо выдают.</p>
+</blockquote>
+</aside>
+<p>в торе была система доверия. для этого собирает метрику подключений. если они видят что юзер “хорошо отличился” то есть гонял хороший трафик и пользовался мостом, то следующие мосты тебе будут выдавать более редкие. если они видят что мост был выдан и ничего кроме рукопожатия в нем не было, то таким юзерам только дохлые мосты дают</p>
+<p>про это сам arma расказывал при саммите тора в начале этого года. где-то было видео этого торкона. поэтому тем кто гоняет тор демона 24/7 есть даже большой плюс. вас помнят, и не в плохом смысле</p>
+<p>хотя может система еще не реализована. не совсем понятно как при реквесте они поймут что это именно ты был. разве что только при moat с реального ип. но оттуда сейчас опасно, а то поймаешь бан на arch linux</p></td><td>2024-12-31T06:33:11.545Z</td></tr>
+    </table>
+      </body>
+    </html>

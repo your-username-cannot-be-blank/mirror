@@ -1,0 +1,150 @@
+[
+    {
+        "id": 21431,
+        "name": "",
+        "username": "tango",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/t/e36b37/{size}.png",
+        "created_at": "2024-01-03T16:50:15.672Z",
+        "cooked": "<p>Chasing Shadows: A security analysis of the ShadowTLS proxy<br>\nGaukas Wang, Anonymous, Jackson Sippe, Hai Chi, Eric Wustrow<br>\n<a href=\"https://censorbib.nymity.ch/#Wang2023a\">https://censorbib.nymity.ch/#Wang2023a</a><br>\n<a href=\"https://www.youtube.com/watch?v=yDjx70RlSNk\">Presentation video</a></p>\n<p><a href=\"https://github.com/ihciah/shadow-tls\">ShadowTLS</a> is a circumvention proxy with a good trick for imitating a TLS connection: it forwards the first part of a connection, the TLS handshake, to an actual TLS server. After the handshake, the ShadowTLS relay starts forwarding traffic to a separate proxy server, for example Shadowsocks. (Similar to the idea of <a href=\"https://github.com/net4people/bbs/issues/18#issuecomment-561336149\">mask sites</a> in Conjure.) This paper discusses flaws in <a href=\"https://github.com/ihciah/shadow-tls/blob/dee3a5a819d6f56cfdd56c44a0d42be186c44238/docs/protocol-en.md#v1\">V1 of the ShadowTLS protocol</a> (<a href=\"https://github.com/ihciah/shadow-tls/blob/dee3a5a819d6f56cfdd56c44a0d42be186c44238/docs/protocol-zh.md#v1\">中文</a>) that made it vulnerable to passive and active distinguishing attacks.</p>\n<p>Two attacks require only passive observation:</p>\n<ul>\n<li>The ShadowTLS client has a <a href=\"https://tlsfingerprint.io/id/ebaa863800590426\">distinctive and uncommon TLS fingerprint</a>. (The server-side fingerprint is, of course, not a problem, because it comes from a genuine TLS server.)</li>\n<li>The traffic after the TLS handshake does not look like TLS—it’s just raw Shadowsocks, or whatever the chosen proxy protocol is. In particular, traffic past the handshake does not have <a href=\"https://datatracker.ietf.org/doc/html/rfc5246#section-10\"><code>application_data</code> record framing</a>. (This property also leads to one of the active attacks.)</li>\n</ul>\n<p>Three other attacks involve seeing how the server responds to bad data at different stages: before the handshake, after the handshake, and inside an <code>application_data</code> record:</p>\n<ul>\n<li>Send a plaintext HTTP request at the beginning of the connection. Most TLS servers will terminate the TCP connection with a RST, or send back an HTTP error response; but the ShadowTLS relay closes the connection with a FIN/ACK.</li>\n<li>Send random data after the TLS handshake. A real TLS server will raise an error or close the connection; but the ShadowTLS relay has already started forwarding traffic to the proxy at this point, so there are no further TLS error checks.</li>\n<li>Send a well-formed <code>application_data</code> record after the handshake, but corrupt the record so that the integrity check fails. TLS <a href=\"https://datatracker.ietf.org/doc/html/rfc5246#section-6.2.3.3\">is specific</a> about what should happen in this situation: the server should send a <code>bad_record_mac</code> alert. The ShadowTLS relay does not, because no TLS server is involved by that point.</li>\n</ul>\n<p>The authors do a ZMap scan and find about 15,000 TLS servers (0.05% of all TLS servers) that respond to the three active probes in the same way a ShadowTLS server would. While other evidence suggests that many of those 15,000 are not actually ShadowTLS relays, the small proportion means a censor could block this subset of TLS servers with little risk.</p>\n<p>The paper then offers solutions against the distinguishers. For TLS handshake fingerprinting, they recommend adopting <a href=\"https://github.com/refraction-networking/utls\">uTLS</a> in the client. For the distinguishers that rely on non-TLS data, they recommend changing the post-handshake traffic to wrap data in <code>application_data</code> records, and then only forwarding records that are encrypted with a special key to the proxy; all other records go to the real TLS server. <a href=\"https://github.com/ihciah/shadow-tls/blob/dee3a5a819d6f56cfdd56c44a0d42be186c44238/docs/protocol-en.md#v2\">V2 of the protocol</a> (<a href=\"https://github.com/ihciah/shadow-tls/blob/dee3a5a819d6f56cfdd56c44a0d42be186c44238/docs/protocol-zh.md#v2\">中文</a>), which began to be implemented in ShadowTLS <a href=\"https://github.com/ihciah/shadow-tls/releases/tag/v0.2.0\">v0.2.0</a>, adopts a slightly different strategy: the client inserts a MAC using a shared secret at the beginning of one of its <code>application_data</code> records, and only after that does the ShadowTLS relay begin forwarding traffic to the proxy server.</p>",
+        "post_number": 1,
+        "post_type": 1,
+        "posts_count": 1,
+        "updated_at": "2024-01-03T16:50:15.672Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 134,
+        "reads": 48,
+        "readers_count": 47,
+        "score": 679.6,
+        "yours": false,
+        "topic_id": 6758,
+        "topic_slug": "chasing-shadows-a-security-analysis-of-the-shadowtls-proxy-foci-2023",
+        "display_username": "",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "badges_granted": [],
+        "version": 1,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": false,
+        "can_wiki": false,
+        "link_counts": [
+            {
+                "url": "https://github.com/ihciah/shadow-tls/blob/dee3a5a819d6f56cfdd56c44a0d42be186c44238/docs/protocol-en.md#v2",
+                "internal": false,
+                "reflection": false,
+                "clicks": 9
+            },
+            {
+                "url": "https://censorbib.nymity.ch/#Wang2023a",
+                "internal": false,
+                "reflection": false,
+                "title": "The Internet censorship bibliography",
+                "clicks": 7
+            },
+            {
+                "url": "https://github.com/ihciah/shadow-tls",
+                "internal": false,
+                "reflection": false,
+                "title": "GitHub - ihciah/shadow-tls: A proxy to expose real tls handshake to the firewall",
+                "clicks": 2
+            },
+            {
+                "url": "https://github.com/net4people/bbs/issues/18#issuecomment-561336149",
+                "internal": false,
+                "reflection": false,
+                "title": "Conjure: Summoning Proxies from Unused Address Space (CCS 19) · Issue #18 · net4people/bbs · GitHub",
+                "clicks": 1
+            },
+            {
+                "url": "https://tlsfingerprint.io/id/ebaa863800590426",
+                "internal": false,
+                "reflection": false,
+                "clicks": 1
+            },
+            {
+                "url": "https://www.youtube.com/watch?v=yDjx70RlSNk",
+                "internal": false,
+                "reflection": false,
+                "clicks": 1
+            },
+            {
+                "url": "https://datatracker.ietf.org/doc/html/rfc5246#section-10",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 5246 - The Transport Layer Security (TLS) Protocol Version 1.2",
+                "clicks": 1
+            },
+            {
+                "url": "https://github.com/ihciah/shadow-tls/blob/dee3a5a819d6f56cfdd56c44a0d42be186c44238/docs/protocol-en.md#v1",
+                "internal": false,
+                "reflection": false,
+                "clicks": 1
+            },
+            {
+                "url": "https://datatracker.ietf.org/doc/html/rfc5246#section-6.2.3.3",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 5246 - The Transport Layer Security (TLS) Protocol Version 1.2",
+                "clicks": 1
+            },
+            {
+                "url": "https://github.com/ihciah/shadow-tls/releases/tag/v0.2.0",
+                "internal": false,
+                "reflection": false,
+                "title": "Release v0.2.0 · ihciah/shadow-tls · GitHub",
+                "clicks": 1
+            },
+            {
+                "url": "https://github.com/ihciah/shadow-tls/blob/dee3a5a819d6f56cfdd56c44a0d42be186c44238/docs/protocol-zh.md#v2",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://github.com/ihciah/shadow-tls/blob/dee3a5a819d6f56cfdd56c44a0d42be186c44238/docs/protocol-zh.md#v1",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://github.com/refraction-networking/utls",
+                "internal": false,
+                "reflection": false,
+                "title": "GitHub - refraction-networking/utls: Fork of the Go standard TLS library, providing low-level access to the ClientHello for mimicry purposes.",
+                "clicks": 0
+            },
+            {
+                "url": "https://ntc.party/t/noisy-shuttle-%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8-%D0%BD%D0%B5%D0%BE%D1%82%D0%BB%D0%B8%D1%87%D0%B8%D0%BC%D1%8B%D0%B9-%D0%BE%D1%82-%D0%BB%D0%B5%D0%B3%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-https-%D1%81%D0%B0%D0%B9%D1%82%D0%B0/7748",
+                "internal": true,
+                "reflection": true,
+                "title": "Noisy-shuttle: прокси, неотличимый от \"легального\" HTTPS-сайта",
+                "clicks": 5
+            }
+        ],
+        "read": true,
+        "user_title": "dnstt developer",
+        "title_is_group": false,
+        "bookmarked": false,
+        "actions_summary": [],
+        "moderator": false,
+        "admin": false,
+        "staff": false,
+        "user_id": 26,
+        "hidden": false,
+        "trust_level": 3,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": false,
+        "wiki": false,
+        "post_url": "/t/chasing-shadows-a-security-analysis-of-the-shadowtls-proxy-foci-2023/6758/1",
+        "can_translate": false
+    }
+]

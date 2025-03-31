@@ -1,0 +1,44 @@
+--- proxy.py	2023-05-23 22:14:44.570896093 +0300
++++ proxy_.py	2023-05-23 22:16:05.128833570 +0300
+@@ -94,16 +94,25 @@
+                                 tcp=True,timeout=self.timeout)
+             reply = DNSRecord.parse(proxy_r)
+ 
+-            if request.q.qtype == QTYPE.AAAA:
+-                print('GOT AAAA')
++            if request.q.qtype == QTYPE.AAAA or request.q.qtype == QTYPE.HTTPS:
++                print('GOT AAAA or HTTPS')
+                 reply = request.reply()
+                 return reply
+-            
++
+             if request.q.qtype == QTYPE.A:
+                 print('GOT A')
++
++                newrr = []
++                for record in reply.rr:
++                    if record.rtype == QTYPE.CNAME:
++                        continue
++                    newrr.append(record)
++                reply.rr = newrr
++
+                 for record in reply.rr:
+                     if record.rtype != QTYPE.A:
+                         continue
++
+                     #print(dir(record))
+                     #print(type(record.rdata))
+ 
+@@ -118,6 +127,7 @@
+                         return reply
+ 
+                     record.rdata = A(fake_addr)
++                    record.rname = request.q.qname
+                     record.ttl = 300
+                     #print(a.rdata)
+                 return reply
+@@ -238,3 +248,4 @@
+ 
+     while udp_server.isAlive():
+         time.sleep(1)
++ 

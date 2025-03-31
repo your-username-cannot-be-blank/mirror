@@ -1,0 +1,69 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-s3amazonawscom</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>zhenyolka</td><td><p><span data-date="2022-07-22" data-time="01:00:00" class="discourse-local-date" data-timezone="Europe/Moscow" data-email-preview="2022-07-21T22:00:00Z UTC">2022-07-21T22:00:00Z</span> мне написал пользователь DPITunnel с сообщением, что у него на операторе Ростелеком и Мегафон не открывается адрес <a href="https://s3.amazonaws.com">https://s3.amazonaws.com</a>. Так же это подтвердили еще несколько других пользователей с Ростелекома и Теле2. У меня это проявляется только на ДомРУ, на Теле2 проблем нет.<br>
+С технической стороны, это выглядит как бесконечная загрузка. При этом в дампе трафика видно, что TCP подключение устанавливается, но ответа на ClientHello не приходит никакого. Соединение закрывается после нескольких неудачных ретрансмиссий. Сайт нормально открывается через VPN, а также используя бессерверные средства обхода блокировок.<br>
+Так же были проведены тесты с помощью curl. Так, команда</p>
+<pre><code class="lang-auto">curl https://s3.amazonaws.com --connect-to ::54.231.193.80
+</code></pre>
+<p>где 54.231.193.80 - IP, отдаваемый DNS на <a href="http://s3.amazonaws.com">s3.amazonaws.com</a>, не выводит результат и зависает, но команда</p>
+<pre><code class="lang-auto">curl https://exmple.com --connect-to ::54.231.193.80
+</code></pre>
+<p>возвращает нормальный ответ:</p>
+<pre><code class="lang-auto">curl: (60) SSL: no alternative certificate subject name matches target host name 'exmple.com'
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+</code></pre>
+<p>При этом подобное происходит и с некоторыми другими IP адресами. Например,</p>
+<pre><code class="lang-auto">curl https://s3.amazonaws.com --connect-to ::1.1.1.1
+</code></pre>
+<p>зависает, но уже</p>
+<pre><code class="lang-auto">curl https://s.amazonaws.com --connect-to ::1.1.1.1
+</code></pre>
+<p>работает нормально. Причем такое наблюдается не со всеми IP.</p>
+<pre><code class="lang-auto">curl https://s3.amazonaws.com --connect-to ::8.8.8.8
+curl https://s3.amazonaws.com --connect-to ::5.255.255.60
+</code></pre>
+<p>отрабатывают корректно.<br>
+Все это говорит, скорее всего, не о проблемах с самим сервисом, а о тесте его блокировки на отдельных провайдерах. Причем, судя по ограниченному набору подверженных проблеме IP, фильтр стоит на каком-то определенном маршруте, а не у самого провайдера, так что есть вероятность работы ТСПУ.</p></td><td>2022-07-22T07:18:36.719Z</td></tr><tr><td>ValdikSS</td><td><p>Действительно, заблокирован.<br>
+Как минимум, Psiphon загружает начальные списки прокси с этого домена.</p></td><td>2022-07-22T07:32:34.712Z</td></tr><tr><td>anon94384997</td><td><p>И зеркало сайта psiphon там есть, 4pda ссылается на этот домен.</p></td><td>2022-07-22T13:09:02.207Z</td></tr><tr><td>ValdikSS</td><td><p>Разблокировали примерно в 15:00 по Москве.</p></td><td>2022-07-22T15:33:44.246Z</td></tr>
+    </table>
+      </body>
+    </html>

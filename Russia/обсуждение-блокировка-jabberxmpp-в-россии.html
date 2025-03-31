@@ -1,0 +1,633 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>обсуждение-блокировка-jabberxmpp-в-россии</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Anyuta1166</td><td><p>Билайн Москва (проводной и мобильный).<br>
+Со вчерашнего вечера опять начались блокировки VPN (OpenVPN, Wireguard).<br>
+А теперь - внимание, новинка!<br>
+Помимо протоколов VPN, заблокировали также протокол… Jabber.<br>
+Да, я им пользуюсь в 2023 году для личной переписки, и у меня есть свой личный сервер. Эдакий семейный мессенджер у меня.<br>
+Методика блокировки очевидно такая же -  через DPI по сигнатурам.<br>
+Если используется STARTTLS, то после отправки клиентом пакета об установке шифрованного соединения, ответный пакет сервера блокируется, а клиенту вместо него прилетает RST пакет.<br>
+Если же STARTTLS отключен и используется нешифрованное соединение, то после отправки клиентом пакета response с данными для аутентификации, блокируется ответный пакет сервера, сообщающий о результате аутентификации, а клиенту так же вместо него прилетает RST пакет.<br>
+Блокировка (VPN и Jabber’а) наблюдается только на Билайне (провод и моб).<br>
+МТС (моб), Мегафон (моб), Йота (моб), Ростелеком (провод) - блокировки нет.<br>
+Интересно, что блокируется доступ к моему личному jabber-серверу, расположенному на VPS в OVH. При этом доступ, например, к <a href="http://jabber.ru" rel="noopener nofollow ugc">jabber.ru</a> (находящемуся в Хетцнере) - работает нормально.</p></td><td>2023-10-14T11:56:03.240Z</td></tr><tr><td>Anyuta1166</td><td><aside class="quote no-group quote-post-not-found" data-username="bolvan" data-post="4" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Можно портами крутить как угодно. jabber поддерживает SRV DNS records</p>
+</blockquote>
+</aside>
+<p>Да, забыла уточнить. Тут точно так же как и с блокировкой VPN. Можно поставить любой порт, но смена порта от блокировки не помогает, блокировка все равно работает, порт не имеет значения.</p></td><td>2023-10-14T13:22:01.475Z</td></tr><tr><td>usnevst</td><td><aside class="quote no-group" data-username="Anyuta1166" data-post="1" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/5fc32e/48.png" class="avatar"> Anyuta1166:</div>
+<blockquote>
+<p>Если используется STARTTLS, то после отправки клиентом пакета об установке шифрованного соединения, ответный пакет сервера блокируется, а клиенту вместо него прилетает RST пакет.</p>
+</blockquote>
+</aside>
+<p>RST прилетает в ответ на <code>STARTTLS</code> или <code>Client Hello</code>?</p></td><td>2023-10-14T19:29:41.197Z</td></tr><tr><td>Anyuta1166</td><td><aside class="quote no-group" data-username="usnevst" data-post="6" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/f4b2a3/48.png" class="avatar"> usnevst:</div>
+<blockquote>
+<p>RST прилетает в ответ на <code>STARTTLS</code> или <code>Client Hello</code>?</p>
+</blockquote>
+</aside>
+<p>RST прилетает в ответ на <code>Client Hello</code>.</p></td><td>2023-10-14T19:39:50.375Z</td></tr><tr><td>usnevst</td><td><p>Значит число исходящих пакетов, с содержимым, после которых прилетает RST, совпадает для обоих сценариев (со STARTTLS и без)?</p></td><td>2023-10-14T20:03:21.679Z</td></tr><tr><td>Anyuta1166</td><td><p>Проверила дампы, получается что именно так. 3 пакета от клиента, 3 пакета от сервера, 4-й пакет от сервера блокируется.</p></td><td>2023-10-14T20:33:49.246Z</td></tr><tr><td>usnevst</td><td><p>Возможно это чужая блокировка которая задела подсеть или хостера целиком. (<a href="https://ntc.party/t/%D1%80%D0%BE%D1%81%D1%82%D0%B5%D0%BB%D0%B5%D0%BA%D0%BE%D0%BC-%D0%BD%D0%B5%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D1%8B-%D0%B2%D1%81%D0%B5-%D0%BF%D0%BE%D1%80%D1%82%D1%8B-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%BE%D0%B2-oracle-cloud-%D1%80%D0%B5%D0%B3%D0%B8%D0%BE%D0%BD%D0%B0-stockholm/3870">Пример</a>). Блокировать могут после определенного числа пакетов, с любым содержимым, но возможно действительно смотрят протокол. Этот вариант легко проверить запуском чего-то другого на проблемном порту.</p>
+<p>OVH на предмет блокировки XMPP можно проверить на чужом сервере, например xmpp.tilde.team (это сервер комьюнити <a href="https://tilde.wiki/wiki/Tilde.team" rel="noopener nofollow ugc">Tilde.team</a>), или найти другой. Для проверки вашей блокировки не нужен рабочий аккаунт.</p></td><td>2023-10-14T21:08:23.701Z</td></tr><tr><td>ValdikSS</td><td><p>Попробуйте CURL’ом. Возможно, заблокировали TLS Fingerprint XMPP-клиента.<br>
+Или напишите IP-адрес, чтобы не гадать.</p></td><td>2023-10-14T21:25:35.702Z</td></tr><tr><td>Anyuta1166</td><td><aside class="quote no-group" data-username="usnevst" data-post="10" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/f4b2a3/48.png" class="avatar"> usnevst:</div>
+<blockquote>
+<p>OVH на предмет блокировки XMPP можно проверить на чужом сервере</p>
+</blockquote>
+</aside>
+<p>Проверила tilde.team - блокируется.</p>
+<p>Проверила также других хостеров.<br>
+Сервер в Scaleway - блокируется<br>
+Сервер в Латвии у ITLDC - блокируется<br>
+Сервер в РФ у российского хостера - не блокируется</p>
+<aside class="quote no-group" data-username="usnevst" data-post="10" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/f4b2a3/48.png" class="avatar"> usnevst:</div>
+<blockquote>
+<p>Этот вариант легко проверить запуском чего-то другого на проблемном порту.</p>
+</blockquote>
+</aside>
+<p>HTTP/HTTPS - работает. XMPP - блокируется. OpenVPN - блокируется.<br>
+Еще, номер порта не имеет значения. Хоть 5222, хоть 443, хоть произвольный нестандартный порт - подключение блокируется на любом порту. То есть все точно так же, как и с блокировками VPN - там тоже смена порта не помогает.</p>
+<aside class="quote no-group quote-modified" data-username="ValdikSS" data-post="159" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"><a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/159">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>Попробуйте CURL’ом. Возможно, заблокировали TLS Fingerprint XMPP-клиента.</p>
+</blockquote>
+</aside>
+<p>Нет, блокировка же наступает даже при незашифрованном соединении.<br>
+А curl не проходит, потому что там STARTTLS. Сервер ожидает начало обмена данными обычным текстом и только потом по специальной команде переход в режим TLS.</p></td><td>2023-10-14T22:03:05.673Z</td></tr><tr><td>ValdikSS</td><td><pre><code class="lang-bash">$ openssl s_client -host tilde.team -port 5222 -servername tilde.team -starttls xmpp &lt; /dev/null &amp;&gt;/dev/null &amp;&amp; echo ok || echo fail
+</code></pre>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>ISP</th>
+<th>AS</th>
+<th>City</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>МТС</td>
+<td>AS28832</td>
+<td>Chelyabinsk</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>МГТС</td>
+<td>AS25513</td>
+<td>Moscow</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Dom.ru</td>
+<td>AS49048</td>
+<td>Tver</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Dom.ru</td>
+<td>AS50544</td>
+<td>Krasnoyarsk</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>tvmapket.ru</td>
+<td>AS42892</td>
+<td>Dolgoprudnyy</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Ростелеком (онлайм)</td>
+<td>AS42610</td>
+<td>Moscow</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Линклайн</td>
+<td>AS44041</td>
+<td>Moscow</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>МГТС</td>
+<td>AS25513</td>
+<td>Moscow</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ENEVA/OBIT</td>
+<td>AS8492</td>
+<td>Saint Petersburg</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Beeline/Corbina</td>
+<td>AS8402</td>
+<td>Tula</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Dom.ru</td>
+<td>AS50543</td>
+<td>Saratov</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Orenburg</td>
+<td>ok</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2023-10-14T22:35:16.600Z</td></tr><tr><td>Anyuta1166</td><td><pre><code class="lang-auto">$ openssl s_client -4 -host tilde.team -port 5222 -servername tilde.team -starttls xmpp &lt; /dev/null &amp;&gt;/dev/null &amp;&amp; echo ok || echo fail
+fail
+</code></pre>
+<p>Beeline/Corbina AS8402 Moscow</p></td><td>2023-10-14T23:06:52.690Z</td></tr><tr><td>usnevst</td><td><p>Если XMPP блокируют как VPN протокол, почему <code>jabber.ru</code> работает. Хетцнер врядли в белом списке.<br>
+Работает ли Direct TLS с <a href="https://xmpp.org/extensions/xep-0368.html" rel="noopener nofollow ugc">ALPN</a>?</p></td><td>2023-10-15T08:30:08.105Z</td></tr><tr><td>Dhohbr</td><td><aside class="quote no-group">
+<blockquote>
+<p><code>$ openssl s_client -4 -host tilde.team -port 5222 -servername tilde.team -starttls xmpp &lt; /dev/null &amp;&gt;/dev/null &amp;&amp; echo ok || echo fail</code></p>
+</blockquote>
+</aside>
+<p>Утром эта команда выдавала ок, сейчас вечером fail.<br>
+Провайдер Подряд. Владивосток.<br>
+При этом телнетом порт открывается. С vps Нидерланды выдает ок.<br>
+<a href="http://jabber.ru" rel="noopener nofollow ugc">jabber.ru</a> доступен с россии и Нидерландов.</p>
+<p>PS. openvpn тоже работает</p></td><td>2023-10-15T09:17:19.382Z</td></tr><tr><td>Anyuta1166</td><td><p>Direct TLS с <a href="https://xmpp.org/extensions/xep-0368.html" rel="noopener nofollow ugc">ALPN</a> - работает.<br>
+Похоже, в ALPN они вообще не смотрят, что подтверждает тест с <code>openssl s_client</code>, который не передает ALPN, а STARTTLS соединение все равно блокируется.</p></td><td>2023-10-15T09:21:53.534Z</td></tr><tr><td>usnevst</td><td><p>Возможно досматривают содержимое STREAM (исходящее и/или входящее), а потом просто считают пакеты и дропают подключение после N. Так блокируют WireGuard и IKE по исходящему от клиента. Скорее всего что-то похожее на <a href="https://github.com/ntop/nDPI/blob/dev/src/lib/protocols/jabber.c" rel="noopener nofollow ugc">это</a>.</p></td><td>2023-10-15T09:33:40.039Z</td></tr><tr><td>ValdikSS</td><td><p>Подключение к <code>tilde.team:5222</code> со STARTTLS из AS8369 (Интерсвязь is74).<br>
+<a class="attachment" href="обсуждение-блокировка-jabberxmpp-в-россии/k9LnxbDGOtqjxH4uuPIsGjLEy0J.pcapng">xmpp_tilde.team_5222_starttls_block_Intersvyaz.pcapng</a> (6.4 KB)</p>
+<p>Подключение к OVH Германия (сервер АнтиЗапрета 51.38.124.100), настроенный на перенаправление трафика к <code>xmpp.jp:5222</code><br>
+<a class="attachment" href="обсуждение-блокировка-jabberxmpp-в-россии/jS87htaZdfjhPJybxz5Pnndk0FB.pcapng">xmpp_ovhde_5222_starttls_block_Intersvyaz.pcapng</a> (2.7 KB)</p>
+<p>Как минимум, регионы GRA и WAW OVH подобной фильтрации не подвергаются.</p>
+<p>Всё, на моих каналах перестали блокировать <span class="discourse-local-date" data-date="2023-10-15" data-email-preview="2023-10-15T15:05:00Z UTC" data-time="18:05:00" data-timezone="Europe/Moscow">2023-10-15T15:05:00Z</span><br>
+Опять началось <span class="discourse-local-date" data-date="2023-10-15" data-email-preview="2023-10-15T15:11:00Z UTC" data-time="18:11:00" data-timezone="Europe/Moscow">2023-10-15T15:11:00Z</span></p></td><td>2023-10-15T14:10:48.426Z</td></tr><tr><td>Anyuta1166</td><td><p>Буквально час назад началась блокировка на Ростелеком (Онлайм) Москва.</p>
+<p>Причем, как и в случае с VPN, фильтрации подвергается только IPv4. На IPv6 блокировок нет.</p></td><td>2023-10-15T16:14:46.173Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="20" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Подключение к <code>tilde.team:5222</code> со STARTTLS из AS8369 (Интерсвязь is74).<br>
+<a class="attachment" href="обсуждение-блокировка-jabberxmpp-в-россии/k9LnxbDGOtqjxH4uuPIsGjLEy0J.pcapng">xmpp_tilde.team_5222_starttls_block_Intersvyaz.pcapng</a> (6.4 KB)</p>
+<p>Подключение к OVH Германия (сервер АнтиЗапрета 51.38.124.100), настроенный на перенаправление трафика к <code>xmpp.jp:5222</code><br>
+<a class="attachment" href="обсуждение-блокировка-jabberxmpp-в-россии/jS87htaZdfjhPJybxz5Pnndk0FB.pcapng">xmpp_ovhde_5222_starttls_block_Intersvyaz.pcapng</a> (2.7 KB)</p>
+</blockquote>
+</aside>
+<p>В этих дампах нет SNI в ClientHello. Может это не нравится ?<br>
+типа <a href="http://jabber.ru">jabber.ru</a> православный, а другие непонятно какие нарушают закон о мессенджерах ?</p>
+<aside class="quote no-group" data-username="ValdikSS" data-post="20" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Всё, на моих каналах перестали блокировать <span class="discourse-local-date" data-date="2023-10-15" data-email-preview="2023-10-15T15:05:00Z UTC" data-time="18:05:00" data-timezone="Europe/Moscow">2023-10-15T15:05:00Z</span><br>
+Опять началось <span class="discourse-local-date" data-date="2023-10-15" data-email-preview="2023-10-15T15:11:00Z UTC" data-time="18:11:00" data-timezone="Europe/Moscow">2023-10-15T15:11:00Z</span></p>
+</blockquote>
+</aside>
+<p>Тестят.<br>
+На 3 spb провайдерах и теле2 блокировки нет.</p>
+<p>Не забываем, что у жаббера есть старый вариант без starttls. На tilde.team  порт 5223 отвечает, можно попробовать через него без starttls</p></td><td>2023-10-15T19:12:17.076Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="bolvan" data-post="22" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>В этих дампах нет SNI в ClientHello. Может это не нравится ?</p>
+</blockquote>
+</aside>
+<p>Нет, дело не в этом.<br>
+<a class="attachment" href="обсуждение-блокировка-jabberxmpp-в-россии/tm6LTnkCChlBQ7iJm9NzJuxrrH.pcap">xmpp_tilde_team_servername_5222_starttls_block_Intersvyaz.pcap</a> (4.1 KB)</p></td><td>2023-10-15T21:14:52.244Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>MTS HOME(MGTS) GPON москва<br>
+openssl s_client -host tilde.team -port 5222 -servername tilde.team -starttls xmpp &lt; /dev/null &amp;&gt;/dev/null &amp;&amp; echo ok || echo fail<br>
+fail</p></td><td>2023-10-17T12:09:47.073Z</td></tr><tr><td>ValdikSS</td><td><p>На текущий момент tilde.team XMPP недоступен c Интерсвязь is74 AS8369 и Dom.ru AS50544.</p></td><td>2023-10-18T12:20:56.488Z</td></tr><tr><td>bolvan</td><td><p>tilde.team:5222  XMPP STARTTLS  блокируется на провайдере <a href="http://sknt.ru">sknt.ru</a>  , только на части подключений (1 из 2 точек работает, другая нет), только по ipv4</p>
+<p>при этом</p>
+<p>подключение со SNI tilde.team к другому серверу - в порядке<br>
+tilde.team:5223 XMPP без STARTTLS в порядке<br>
+другие XMPP STARTTLS в порядке<br>
+еще 2 провайдера в спб - в порядке</p>
+<p>тренируются ?</p></td><td>2023-10-18T15:01:03.556Z</td></tr><tr><td>usnevst</td><td><p>Ждет два входящих <code>stream</code>. Парсит (как минимум, наличие: <code>id</code>, <code>version</code>, <code>xml:lang</code>, <code>xmlns:stream</code>, <code>from</code>). С одним входящим <code>stream:</code> не заблокирует (<code>stream:features</code> должны прилетать отдельным пакетом). Затем ждет 2 любых исходящих и блокирует сессию (заменяет на RST входящие). Счетчики и направление возможно применяют разные. Блокируемые диапазоны неизвестны, рандом для наблюдателя.</p></td><td>2023-10-18T17:33:23.790Z</td></tr><tr><td>usnevst</td><td><p>По другой версии ограничено суммарное число сегментов для XMPP сессии. Или более сложное правило, вырождаемое для отдельных случаев в 2 исходящих. Наблюдалось 3, 1 (все заканчивалось на STARTTLS). Возможно дело просто в latency блокировщика.</p>
+<aside class="quote no-group" data-username="usnevst" data-post="27" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/f4b2a3/48.png" class="avatar"> usnevst:</div>
+<blockquote>
+<p>Ждет два входящих <code>stream</code></p>
+</blockquote>
+</aside>
+<p>Все не так.</p>
+<p>Рабочие сэмплы.<br>
+Client:</p>
+<pre><code class="lang-auto">stream:stream xmlns:stream=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+</code></pre>
+<p>Server:</p>
+<pre><code class="lang-auto">stream:stream id=xxxxxxxxxxxxxxxxxxxxxx version=xxxxx xml:lang=xxxxx xmlns:stream=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx from=xxxxxxxxxx
+</code></pre>
+<p>где <code>x</code> – любой символ, кроме space, например <code>x</code></p>
+<p>Послать Client и принять Client не работает. Послать Server и принять Server не работает. Послать Client и принять Server работает.</p>
+<p>При этом можно bidirectional. Например, только посылать комбинацию, и далее через N-даты будет блок. Но сэмпл нужно передать дважды: Client+Client, Client+Server, Server+Server.</p>
+<hr>
+<p>У Hetzner блокируют XMPP меньше чем у OVH. <code>jabber.ru</code> находится в неблокируемом диапазоне, но вот <code>conversations.im</code> попал.</p>
+<details>
+<summary>
+Неполный список блокируемых</summary>
+<p>135.181.0.0/16<br>
+168.119.0.0/16<br>
+188.34.128.0/17<br>
+65.108.0.0/16<br>
+88.99.0.0/16<br>
+78.46.0.0/15<br>
+94.130.0.0/16<br>
+95.216.0.0/16</p>
+</details></td><td>2023-10-19T09:45:08.508Z</td></tr><tr><td>0human</td><td><p><a href="https://www.opennet.ru/opennews/art.shtml?num=59965" class="onebox" target="_blank" rel="noopener nofollow ugc">https://www.opennet.ru/opennews/art.shtml?num=59965</a></p></td><td>2023-10-20T20:21:58.690Z</td></tr><tr><td>anon94384997</td><td><p>Неужели это всё из-за торговли? Осторожнее надо быть обычным пользователям с непопулярными мессенджерами. Я бы даже тестить боялся теперь этот jabber.<br>
+<a href="https://notes.valdikss.org.ru/jabber.ru-mitm/" class="onebox" target="_blank" rel="noopener nofollow ugc">https://notes.valdikss.org.ru/jabber.ru-mitm/</a></p></td><td>2023-10-21T07:28:14.668Z</td></tr><tr><td>ValdikSS</td><td><p>5 posts were merged into an existing topic: <a href="/t/%D0%B2%D1%8B%D0%B1%D0%BE%D1%80-%D0%BC%D0%B5%D1%81%D1%81%D0%B5%D0%BD%D0%B4%D0%B6%D0%B5%D1%80%D0%B0/6079/2">Выбор мессенджера</a></p></td><td>2023-10-24T14:36:45.955Z</td></tr><tr><td>ff255</td><td><p>Доброго всем, извиняюсь за некропостинг, но по теме.<br>
+Держу семейный мини-jabber/xmpp сервер дома на одноплатнике и белом IP, так вот пару дней назад перестали проходить исходящие к некоторым xmpp-серверам, замечены аномалии с:<br>
+quicksy.im, <a href="http://tigase.org" rel="noopener nofollow ugc">tigase.org</a>, <a href="http://jabb3r.org" rel="noopener nofollow ugc">jabb3r.org</a>, возможно и больше… 5269 startTLS</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>~$ xmpp-dns -46fstv quicksy.im<br>
+xmpp-server xmpp.quicksy.im. 5269<br>
+Priority: 1 Weight: 1<br>
+IP: 157.90.245.42<br>
+Connection: [OK]<br>
+StartTLS: [Not OK]<br>
+read tcp4 192.168.1.103:36748-&gt;157.90.245.42:5269: read: connection reset by peer<br>
+~$ xmpp-dns -46fstv <a href="http://tigase.org" rel="noopener nofollow ugc">tigase.org</a><br>
+xmpp-server xmpp.tigase.tech. 5269<br>
+Priority: 20 Weight: 0<br>
+IP: 54.191.142.250<br>
+Connection: [OK]<br>
+StartTLS: [Not OK]<br>
+read tcp4 192.168.1.103:44508-&gt;54.191.142.250:5269: read: connection reset by peer<br>
+IP: 52.32.179.178<br>
+Connection: [OK]<br>
+StartTLS: [Not OK]<br>
+read tcp4 192.168.1.103:34006-&gt;52.32.179.178:5269: read: connection reset by peer<br>
+IP: 34.208.251.179<br>
+Connection: [OK]<br>
+StartTLS: [Not OK]<br>
+read tcp4 192.168.1.103:32994-&gt;34.208.251.179:5269: read: connection reset by peer<br>
+pisya@COMP3:~$ xmpp-dns -46fstv <a href="http://jabb3r.org" rel="noopener nofollow ugc">jabb3r.org</a><br>
+xmpp-server <a href="http://jabber.hot-chilli.net" rel="noopener nofollow ugc">jabber.hot-chilli.net</a>. 5269<br>
+Priority: 0 Weight: 0<br>
+IP: 2a01:4f8:242:56ca::2<br>
+Connection: [OK]<br>
+StartTLS: [OK]<br>
+Certificate: [OK]<br>
+IP: 49.12.125.53<br>
+Connection: [OK]<br>
+StartTLS: [Not OK]<br>
+read tcp4 192.168.1.103:45244-&gt;49.12.125.53:5269: read: connection reset by peer</p>
+</details>
+<p>Провайдер проводной - <a href="http://Maryno.net" rel="noopener nofollow ugc">Maryno.net</a>. Также пробовал по проводному билайну и мобильному теле2 - xmpp-dns тест работает ОК.<br>
+Послушал wireshark’ом, результаты прикладываю:</p>
+<ol>
+<li>Марьино.нет, соединения нет <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"><br>
+<a class="attachment" href="обсуждение-блокировка-jabberxmpp-в-россии/l8abieLdKLPF4pViuLCJmfGO8gb.pcapng">ws_quicksy_srv_rst.pcapng</a> (11,3 КБ)</li>
+<li>Tele2 мобильный, соединение есть<br>
+<a class="attachment" href="обсуждение-блокировка-jabberxmpp-в-россии/rhUePzy6TyDMUuVY5JYsDoV7wOA.pcapng">ws_quicksy_srv_ok.pcapng</a> (25,6 КБ)</li>
+</ol>
+<p>Подскажите пожалуйста, это вообще что, блокировка? И что дальше делать, пинать/менять провайдера, или кого ещё, или перевозить сервер куда-нибудь на VPS?..</p></td><td>2024-04-09T11:04:19.025Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="ff255" data-post="33" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/848f3c/48.png" class="avatar"> ff255:</div>
+<blockquote>
+<p>это вообще что, блокировка?</p>
+</blockquote>
+</aside>
+<p>Да, похоже на блокировку, вероятно, по какому-то особому признаку. Предполагаю, что по ответу сервера, т.к. изменение домена и параметров в ClientHello не помогает.</p>
+<p><code>openssl s_client -starttls xmpp-server -host xmpp.quicksy.im -port 5269 -xmpphost quicksy.im -servername quicksy.im &lt;/dev/null &amp;&gt;/dev/null &amp;&amp; echo ok || echo fail</code></p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>Node</th>
+<th>ISP</th>
+<th>AS</th>
+<th>City</th>
+<th>test 9 Apr</th>
+<th>test 10 Apr</th>
+<th>test 21 Apr</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RU-001</td>
+<td>ТТК</td>
+<td>AS8427</td>
+<td>Magnitogorsk</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-002</td>
+<td>Интерсвязь is74</td>
+<td>AS8369</td>
+<td>Yemanzhelinsk</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-003</td>
+<td>МТС</td>
+<td>AS28832</td>
+<td>Chelyabinsk</td>
+<td>fail</td>
+<td>fail</td>
+<td>fail</td>
+</tr>
+<tr>
+<td>RU-004</td>
+<td>МГТС</td>
+<td>AS25513</td>
+<td>Moscow</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-005</td>
+<td>Dom.ru</td>
+<td>AS49048</td>
+<td>Tver</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-006</td>
+<td>Dom.ru</td>
+<td>AS50544</td>
+<td>Krasnoyarsk</td>
+<td>fail</td>
+<td>fail</td>
+<td>fail</td>
+</tr>
+<tr>
+<td>RU-009</td>
+<td>Линклайн</td>
+<td>AS44041</td>
+<td>Moscow</td>
+<td>ok</td>
+<td>ok</td>
+<td><strong>fail</strong></td>
+</tr>
+<tr>
+<td>RU-010</td>
+<td>МГТС</td>
+<td>AS25513</td>
+<td>Moscow</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-011</td>
+<td>ENEVA/OBIT</td>
+<td>AS8492</td>
+<td>Saint Petersburg</td>
+<td>fail</td>
+<td><strong>ok</strong></td>
+<td><strong>fail</strong></td>
+</tr>
+<tr>
+<td>RU-012</td>
+<td>Beeline/Corbina</td>
+<td>AS8402</td>
+<td>Tula</td>
+<td>ok</td>
+<td>ok</td>
+<td><strong>fail</strong></td>
+</tr>
+<tr>
+<td>RU-013</td>
+<td>Dom.ru</td>
+<td>AS50543</td>
+<td>Saratov</td>
+<td>fail</td>
+<td>fail</td>
+<td>fail</td>
+</tr>
+<tr>
+<td>RU-014</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Orenburg</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-018</td>
+<td>Evpanet</td>
+<td>AS43936</td>
+<td>Krimea</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-020</td>
+<td>PJSC MegaFon</td>
+<td>AS31205</td>
+<td>Khakasiya</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-021</td>
+<td>ER-Telecom Holding</td>
+<td>AS56981</td>
+<td>Tomsk</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-022</td>
+<td>Sibirskie Seti</td>
+<td>AS40995</td>
+<td>Novokuznetsk</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-023</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Perm region</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-024</td>
+<td>Beeline</td>
+<td>AS34038</td>
+<td>Tyumen</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-025</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Kemerovo</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-026</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Kemerovo</td>
+<td>fail</td>
+<td>fail</td>
+<td>fail</td>
+</tr>
+<tr>
+<td>RU-027</td>
+<td>Sibirskie Seti</td>
+<td>AS47433</td>
+<td>Kemerovo</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-028</td>
+<td>Beeline</td>
+<td>AS3216</td>
+<td>Kemerovo</td>
+<td>ok</td>
+<td>ok</td>
+<td><strong>fail</strong></td>
+</tr>
+<tr>
+<td>RU-029</td>
+<td>Rostelecom Mobile</td>
+<td>AS12389</td>
+<td>Kemerovo (Spb SIM)</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-031</td>
+<td>Beeline</td>
+<td>AS42110</td>
+<td>Sochi</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-032</td>
+<td>Sibirskie Seti Ltd.</td>
+<td>AS34757</td>
+<td>Novosibirsk</td>
+<td>fail</td>
+<td>fail</td>
+<td>fail</td>
+</tr>
+<tr>
+<td>RU-033</td>
+<td>Yota</td>
+<td>AS31213</td>
+<td>Saint Petersburg</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>RU-035</td>
+<td>UBS (ubsnet.ru)</td>
+<td>AS50042</td>
+<td>Sevastopol</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2024-04-09T13:07:01.585Z</td></tr><tr><td>ff255</td><td><p>Спасибо большое за инфу, пойду думать дальше…</p></td><td>2024-04-09T13:21:38.698Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ff255" data-post="33" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/848f3c/48.png" class="avatar"> ff255:</div>
+<blockquote>
+<p>перевозить сервер куда-нибудь на VPS?..</p>
+</blockquote>
+</aside>
+<p>Можно zapret-ом поиграться. nfqws fake,  split и wssize и с ограничителем по IP<br>
+Если, конечно, они не рубят по IP</p></td><td>2024-04-09T14:28:18.819Z</td></tr><tr><td>usnevst</td><td><p>Блокировки вернулись, как уже заметили. Правило и блокируемые диапазоны адресов изменились. Активируют счетчик блокировки по исходящему, содержимое входящих не проверяют. Парсер упростился, тригернуть можно строкой:</p>
+<pre><code class="lang-auto">strea stream stream xmlns
+</code></pre>
+<p>Порядок не важен, проверяют наличие двух <code>stream</code>, одного <code>xmlns</code> и <code>strea</code> (полный <code>stream</code> тоже работает).<br>
+Далее считают исходящие с любым содержимым и по небольшому рандому блокируют подключение, подменив входящие RST’ом.</p>
+<p>Как и прежде, правило действует выборочно.</p></td><td>2024-04-11T12:43:30.696Z</td></tr><tr><td>ff255</td><td><aside class="quote no-group" data-username="ff255" data-post="33" data-topic="5984">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/848f3c/48.png" class="avatar"> ff255:</div>
+<blockquote>
+<p>замечены аномалии с:<br>
+quicksy.im, <a href="http://tigase.org" rel="noopener nofollow ugc">tigase.org</a>, <a href="http://jabb3r.org" rel="noopener nofollow ugc">jabb3r.org</a></p>
+</blockquote>
+</aside>
+<p>На моём ISP (AS39709) на данный момент перестало блокироваться…</p></td><td>2024-04-14T09:27:11.762Z</td></tr><tr><td>ValdikSS</td><td><p>Проблема сохраняется, добавил свежий тест.</p></td><td>2024-04-21T20:39:09.047Z</td></tr><tr><td>usnevst</td><td><p>Правило изменили, добавив проверку на starttls. Подробности бесполезны, детали блокировки меняются быстрей сообщений на форуме.</p></td><td>2024-04-21T21:18:42.034Z</td></tr><tr><td>ValdikSS</td><td><p>Роскомнадзор, оказывается, направлял письмо в <strong>conversations.im</strong> 24 сентября 2024, о том, что по закону о связи мессенджерам нужно идентифицировать пользователей по номеру телефона, а гос. орган не обнаружил договоров с мобильными операторами РФ для осуществления идентификации. Домен блокируется, в выгрузках до сих пор отсутствует.</p>
+<p>Conversations до этого значился в реестре организаторов распространения информации. Роскомнадзор 2 года назад запросил юридическую информацию у сервиса, те её предоставили.</p></td><td>2024-10-22T03:16:28.951Z</td></tr>
+    </table>
+      </body>
+    </html>

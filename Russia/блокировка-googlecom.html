@@ -1,0 +1,109 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-googlecom</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>m0xfff</td><td><p>Наблюдаю блокировку запросов к <a href="http://google.com" rel="noopener nofollow ugc">google.com</a> для некоторых ip адресов сети google:</p>
+<h1><a name="p-70953-nslookup-googlecom-1" class="anchor" href="#p-70953-nslookup-googlecom-1"></a>nslookup <a href="http://google.com" rel="noopener nofollow ugc">google.com</a></h1>
+<p>Server:         8.8.8.8<br>
+Address:        8.8.8.8#53</p>
+<p>Non-authoritative answer:<br>
+Name:   <a href="http://google.com" rel="noopener nofollow ugc">google.com</a><br>
+Address: 172.217.23.206<br>
+Name:   <a href="http://google.com" rel="noopener nofollow ugc">google.com</a><br>
+Address: 2a00:1450:400e:811::200e</p>
+<p>Работает только <a href="http://www.google.com" rel="noopener nofollow ugc">www.google.com</a>, запросы со всем другими SNI блокируются при обращении к этому IP:</p>
+<pre data-code-wrap="bash"><code class="lang-bash">~# curl  -4ko /dev/null https://google.com/ --connect-timeout 5 --connect-to ::172.217.23.206
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0
+curl: (28) SSL connection timeout
+
+~# curl  -4ko /dev/null https://www.google.com/ --connect-timeout 5 --connect-to ::172.217.23.206
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 21484    0 21484    0     0  80887      0 --:--:-- --:--:-- --:--:-- 81071
+
+~# curl  -4ko /dev/null https://vk.com/ --connect-timeout 5 --connect-to ::172.217.23.206
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0
+curl: (28) SSL connection timeout
+
+~# curl  -4ko /dev/null https://www.google.ru/ --connect-timeout 5 --connect-to ::172.217.23.206
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0
+curl: (28) SSL connection timeout
+
+~# curl  -4ko /dev/null https://google.ru/ --connect-timeout 5 --connect-to ::172.217.23.206
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0
+curl: (28) SSL connection timeout
+
+~# curl  -4ko /dev/null https://play.google.com/ --connect-timeout 5 --connect-to ::172.217.23.206
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0
+curl: (28) SSL connection timeout
+</code></pre>
+<p>Соседний IP работает:</p>
+<pre data-code-wrap="bash"><code class="lang-bash">~# curl  -4ko /dev/null https://google.com/ --connect-timeout 5 --connect-to ::172.217.23.196
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   220  100   220    0     0   1052      0 --:--:-- --:--:-- --:--:--  1057
+
+~# curl  -4ko /dev/null https://www.google.com/ --connect-timeout 5 --connect-to ::172.217.23.196
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 21538    0 21538    0     0  81888      0 --:--:-- --:--:-- --:--:-- 81893
+</code></pre>
+<p>Провайдер проводной МТС</p></td><td>2024-12-05T17:15:18.172Z</td></tr><tr><td>denium</td><td><p>У меня на разные IP резолвит. Но эти тоже доступны, кроме <a href="http://play.google.com">play.google.com</a>.<br>
+Йота, Нск.</p></td><td>2024-12-05T17:27:26.434Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Присоединяюсь, так же заметил. Проводной РТ, Западная Сибирь.</p></td><td>2024-12-05T17:31:05.353Z</td></tr><tr><td>Chatlanin</td><td><p><a href="http://play.google.com" rel="noopener nofollow ugc">play.google.com</a> открылся только с обходом, напрямую нет</p></td><td>2024-12-05T18:17:25.790Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="m0xfff" data-post="1" data-topic="13566">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/m0xfff/48/2696_2.png" class="avatar"> m0xfff:</div>
+<blockquote>
+<p><code>curl  -4ko /dev/null https://vk.com/ --connect-timeout 5 --connect-to ::172.217.23.206</code></p>
+</blockquote>
+</aside>
+<p>Работает *.google.com, *.youtube.com<br>
+Эта блокировка не нова. Так они пытались рубить фейки от гудбая и запрета. На диапазоне гуглоадресов разрешены только домены гугла по заданному списку, кроме некоторых поддоменов (<a href="http://play.google.com">play.google.com</a>).<br>
+Потому и пишут такие конструкции</p>
+<p><code>--filter-tcp=443 --hostlist="%~dp0list-youtube.txt" --dpi-desync=fake,multidisorder --dpi-desync-split-pos=1,midsld --dpi-desync-repeats=11 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls="%~dp0tls_clienthello_www_google_com.bin"</code></p></td><td>2024-12-05T18:37:43.300Z</td></tr><tr><td>Chatlanin</td><td><p>Ясно, у меня этот плей гугл блокировщик рекламы сам блокировал почемуто на ютюбе, потому и в список его не добавлял для обхода.</p></td><td>2024-12-05T19:21:52.331Z</td></tr><tr><td>ImMALWARE(MALWARE)</td><td><p>Именно <a href="http://play.google.com" rel="noopener nofollow ugc">play.google.com</a> заблокирован уже очень давно</p></td><td>2024-12-06T09:15:16.900Z</td></tr>
+    </table>
+      </body>
+    </html>

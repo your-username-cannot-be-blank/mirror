@@ -1,0 +1,2616 @@
+* checking system
+CYGWIN detected
+firewall type is windivert
+* checking already running DPI bypass processes
+* checking prerequisites
+* checking DNS
+system DNS is working
+comparing system resolver to public DNS : 8.8.8.8
+pornhub.com : OK
+ntc.party : MISMATCH
+-- system resolver :
+130.255.77.28
+-- 8.8.8.8 :
+188.186.146.207
+-- POSSIBLE DNS HIJACK DETECTED. ZAPRET WILL NOT HELP YOU IN CASE DNS IS SPOOFED !!!
+-- DNS CHANGE OR DNSCRYPT MAY BE REQUIRED
+* searching working DoH server
+https://cloudflare-dns.com/dns-query : OK
+* checking virtualization
+cannot detect
+
+NOTE ! this test should be run with zapret or any other bypass software disabled, without VPN
+
+specify domain(s) to test. multiple domains are space separated.
+domain(s) (default: rutracker.org) : ip protocol version(s) - 4, 6 or 46 for both (default: 4) : 
+check http (default : Y) (Y/N) ? 
+check https tls 1.2 (default : Y) (Y/N) ? 
+TLS 1.3 uses encrypted ServerHello. DPI cannot check domain name in server response.
+This can allow more bypass strategies to work.
+What works for TLS 1.2 will also work for TLS 1.3 but not vice versa.
+Most sites nowadays support TLS 1.3 but not all. If you can't find a strategy for TLS 1.2 use this test.
+TLS 1.3 only strategy is better than nothing.
+check https tls 1.3 (default : N) (Y/N) ? 
+make sure target domain(s) support QUIC or result will be negative in any case
+check http3 QUIC (default : Y) (Y/N) ? 
+on limited systems like openwrt CA certificates might not be installed to preserve space
+in such a case curl cannot verify server certificate and you should either install ca-bundle or disable verification
+however disabling verification will break https check if ISP does MitM attack and substitutes server certificate
+do not verify server certificate (default : N) (Y/N) ? 
+sometimes ISPs use multiple DPIs or load balancing. bypass strategies may work unstable.
+how many times to repeat each test (default: 1) : 
+quick - scan as fast as possible to reveal any working strategy
+standard - do investigation what works on your DPI
+force - scan maximum despite of result
+1 : quick
+2 : standard
+3 : force
+your choice (default : standard) : selected : standard
+
+
+* port block tests ipv4 rutracker.org:80
+nc -z -w 2 172.67.182.196 80
+Connection to 172.67.182.196 80 port [tcp/http] succeeded!
+172.67.182.196 connects
+nc -z -w 2 104.21.32.39 80
+Connection to 104.21.32.39 80 port [tcp/http] succeeded!
+104.21.32.39 connects
+
+* curl_test_http ipv4 rutracker.org
+- checking without DPI bypass
+suspicious redirection 302 to : http://lawfilter.ertelecom.ru
+UNAVAILABLE
+
+- IP block tests (requires manual interpretation)
+> testing iana.org on it's original ip
+!!!!! AVAILABLE !!!!!
+> testing rutracker.org on 192.0.43.8 (iana.org)
+HTTP/1.1 302 Moved Temporarily
+Location: http://lawfilter.ertelecom.ru
+> testing iana.org on 172.67.182.196 (rutracker.org)
+HTTP/1.1 409 Conflict
+> testing iana.org on 104.21.32.39 (rutracker.org)
+HTTP/1.1 409 Conflict
+
+preparing winws redirection
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --hostcase
+curl: (28) Operation timed out after 2009 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --hostspell=hoSt
+curl: (28) Operation timed out after 2008 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --hostnospace
+curl: (28) Operation timed out after 2011 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --domcase
+curl: (28) Operation timed out after 2002 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2
+curl: (28) Operation timed out after 2012 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --hostcase
+curl: (28) Operation timed out after 2011 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-http-req=method
+curl: (28) Operation timed out after 2001 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-http-req=method --hostcase
+curl: (28) Operation timed out after 2013 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-http-req=host
+curl: (28) Operation timed out after 2003 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-http-req=host --hostcase
+curl: (28) Operation timed out after 2012 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=1
+curl: (28) Operation timed out after 2011 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=1 --hostcase
+curl: (28) Operation timed out after 2010 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=3
+curl: (28) Operation timed out after 2012 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=3 --hostcase
+curl: (28) Operation timed out after 2015 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=4
+curl: (28) Operation timed out after 2002 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=4 --hostcase
+curl: (28) Operation timed out after 2009 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=5
+curl: (28) Operation timed out after 2015 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=5 --hostcase
+curl: (28) Operation timed out after 2010 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=10
+curl: (28) Operation timed out after 2006 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=10 --hostcase
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=50
+curl: (28) Operation timed out after 2001 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-pos=50 --hostcase
+curl: (28) Operation timed out after 2006 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder2
+curl: (28) Operation timed out after 2002 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder2 --dpi-desync-split-pos=1
+curl: (28) Operation timed out after 2014 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=1
+curl: (28) Operation timed out after 2012 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-fake-http=0x00000000
+suspicious redirection 302 to : http://lawfilter.ertelecom.ru
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=2
+curl: (28) Operation timed out after 2012 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=2 --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2007 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-fooling=badsum
+suspicious redirection 302 to : http://lawfilter.ertelecom.ru
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-fooling=badsum --dpi-desync-fake-http=0x00000000
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-fooling=badseq
+curl: (28) Operation timed out after 2004 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-fooling=badseq --dpi-desync-fake-http=0x00000000
+suspicious redirection 302 to : http://lawfilter.ertelecom.ru
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-fooling=datanoack
+suspicious redirection 302 to : http://lawfilter.ertelecom.ru
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-fooling=datanoack --dpi-desync-fake-http=0x00000000
+suspicious redirection 302 to : http://lawfilter.ertelecom.ru
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-ttl=1
+curl: (28) Operation timed out after 2004 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-ttl=2
+curl: (28) Operation timed out after 2009 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-fooling=badsum
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-fooling=badseq
+curl: (28) Operation timed out after 2004 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-fooling=datanoack
+curl: (28) Operation timed out after 2011 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=1
+curl: (28) Operation timed out after 2004 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-fake-http=0x00000000
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=2
+curl: (28) Operation timed out after 2002 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2011 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=3
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=3 --dpi-desync-fake-http=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum
+suspicious redirection 302 to : http://lawfilter.ertelecom.ru
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq
+curl: (28) Operation timed out after 2012 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2005 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack
+curl: (28) Operation timed out after 2009 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2012 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1
+curl: (28) Operation timed out after 2009 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2001 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=2
+curl: (28) Operation timed out after 2015 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=2 --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2006 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-fooling=badsum
+curl: (28) Operation timed out after 2005 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-fooling=badsum --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-fooling=badseq
+curl: (28) Operation timed out after 2009 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-fooling=badseq --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2014 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-fooling=datanoack
+curl: (28) Operation timed out after 2010 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2008 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-ttl=1
+curl: (28) Operation timed out after 2004 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-ttl=2
+curl: (28) Operation timed out after 2008 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-fooling=badsum
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-fooling=badseq
+curl: (28) Operation timed out after 2011 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-fooling=datanoack
+curl: (28) Operation timed out after 2004 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1
+curl: (28) Operation timed out after 2011 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2011 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2
+curl: (28) Operation timed out after 2006 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2 --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2011 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum
+curl: (28) Operation timed out after 2011 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq
+curl: (28) Operation timed out after 2009 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2007 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack
+curl: (28) Operation timed out after 2015 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2002 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=1
+curl: (28) Operation timed out after 2007 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2004 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=2
+curl: (28) Operation timed out after 2002 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=2 --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2006 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum
+curl: (56) Recv failure: Connection reset by peer
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq
+curl: (28) Operation timed out after 2002 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2012 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack
+curl: (28) Operation timed out after 2006 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --dpi-desync-fake-http=0x00000000
+curl: (28) Operation timed out after 2004 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-http-req=method
+curl: (28) Operation timed out after 2011 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-http-req=host
+curl: (28) Operation timed out after 2008 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2
+curl: (28) Operation timed out after 2014 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3
+curl: (28) Operation timed out after 2014 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4
+curl: (28) Operation timed out after 2008 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5
+curl: (28) Operation timed out after 2010 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10
+curl: (28) Operation timed out after 2012 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50
+curl: (28) Operation timed out after 2001 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-http-req=method
+curl: (28) Operation timed out after 2009 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-http-req=host
+curl: (28) Operation timed out after 2014 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2
+curl: (28) Operation timed out after 2015 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3
+curl: (28) Operation timed out after 2003 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4
+curl: (28) Operation timed out after 2013 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5
+curl: (28) Operation timed out after 2003 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10
+curl: (28) Operation timed out after 2003 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50
+curl: (28) Operation timed out after 2010 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Operation timed out after 2012 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-http=0x00000000
+curl: (56) Recv failure: Connection reset by peer
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Operation timed out after 2013 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4
+could not read DNS reply blob from stdin
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-http=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=5
+!!!!! AVAILABLE !!!!!
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=1
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=2
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=3
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (56) Recv failure: Software caused connection abort
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=5
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Operation timed out after 2002 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (56) Recv failure: Connection reset by peer
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (56) Recv failure: Connection reset by peer
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-http=0x00000000
+curl: (56) Recv failure: Software caused connection abort
+UNAVAILABLE code=56
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (56) Recv failure: Connection reset by peer
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Operation timed out after 2013 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (56) Recv failure: Connection reset by peer
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Operation timed out after 2003 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-http=0x00000000
+curl: (56) Recv failure: Software caused connection abort
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (56) Recv failure: Connection reset by peer
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Operation timed out after 2009 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-http=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Operation timed out after 2007 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (56) Recv failure: Connection reset by peer
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-http=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (56) Recv failure: Connection reset by peer
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-http=0x00000000
+!!!!! AVAILABLE !!!!!
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (56) Recv failure: Connection reset by peer
+UNAVAILABLE code=56
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Operation timed out after 2002 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Operation timed out after 2013 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (28) Operation timed out after 2016 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-http=0x00000000
+http code 400. likely the server receives fakes.
+UNAVAILABLE
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=syndata
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=syndata --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/http_iana_org.bin
+suspicious redirection 302 to : http://lawfilter.ertelecom.ru
+UNAVAILABLE
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=syndata,split2
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=syndata,split2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/http_iana_org.bin
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=syndata,disorder2
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=syndata,disorder2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/http_iana_org.bin
+!!!!! AVAILABLE !!!!!
+
+!!!!! curl_test_http: working strategy found for ipv4 rutracker.org : winws --dpi-desync=fake --dpi-desync-ttl=3 !!!!!
+
+clearing winws redirection
+
+* port block tests ipv4 rutracker.org:443
+nc -z -w 2 172.67.182.196 443
+Connection to 172.67.182.196 443 port [tcp/https] succeeded!
+172.67.182.196 connects
+nc -z -w 2 104.21.32.39 443
+Connection to 104.21.32.39 443 port [tcp/https] succeeded!
+104.21.32.39 connects
+
+* curl_test_https_tls12 ipv4 rutracker.org
+- checking without DPI bypass
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+
+- IP block tests (requires manual interpretation)
+> testing iana.org on it's original ip
+!!!!! AVAILABLE !!!!!
+> testing rutracker.org on 192.0.43.8 (iana.org)
+curl: (35) Recv failure: Connection reset by peer
+> testing iana.org on 172.67.182.196 (rutracker.org)
+curl: (35) OpenSSL/3.4.0: error:0A000410:SSL routines::ssl/tls alert handshake failure
+> testing iana.org on 104.21.32.39 (rutracker.org)
+curl: (35) OpenSSL/3.4.0: error:0A000410:SSL routines::ssl/tls alert handshake failure
+
+preparing winws redirection
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-tls=sni
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-tls=sniext
+could not read DNS reply blob from stdin
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=3
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=4
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=5
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=10
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=50
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=3
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=3 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=4
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=4 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=5
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=5 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=7
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=7 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=8
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=8 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=9
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=9 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=10
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=10 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=11
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=11 --dpi-desync-fake-tls=0x00000000
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=12
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=12 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badsum
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badseq
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badseq --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=datanoack
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=md5sig
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=3
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=3 --dpi-desync-split-pos=1
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=4
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=5
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=5 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=6
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=7
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=7 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=8
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=8 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=9
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=9 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=10
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=10 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=11
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=11 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=12
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=12 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badsum --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badseq
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badseq --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=md5sig
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badseq
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=3
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=4
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=5
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=5 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=6
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=7
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=7 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=8
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=8 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=9
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=9 --dpi-desync-split-pos=1
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=10
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=10 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=11
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=11 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=12
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=12 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badsum
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badsum --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badseq
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badseq --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=md5sig
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig
+curl: (28) Operation timed out after 2010 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=336 --dpi-desync-split-seqovl-pattern=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2
+curl: (28) Connection timed out after 2000 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5
+!!!!! AVAILABLE !!!!!
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5
+!!!!! AVAILABLE !!!!!
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-split-pos=1
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --wssize 1:6
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --wssize 1:6
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=3 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badsum --wssize 1:6
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badseq --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=datanoack --wssize 1:6
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=md5sig --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --wssize 1:6
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=2 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=3 --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=4 --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=5 --wssize 1:6
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=6 --wssize 1:6
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=6 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=7 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=7 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=8 --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=8 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=9 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=9 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=10 --wssize 1:6
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=10 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=11 --wssize 1:6
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=11 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=12 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=12 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badsum --wssize 1:6
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badseq --wssize 1:6
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=datanoack --wssize 1:6
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=md5sig --wssize 1:6
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --wssize 1:6
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --wssize 1:6
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=3 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --wssize 1:6
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --wssize 1:6
+curl: (28) Operation timed out after 2008 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=3 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badseq --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --wssize 1:6
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=md5sig --wssize 1:6
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badsum --wssize 1:6
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badseq --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=datanoack --wssize 1:6
+!!!!! AVAILABLE !!!!!
+WARNING ! although datanoack fooling worked it may break NAT and may only work with external IP. Additionally it may require nftables to work correctly.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=md5sig --wssize 1:6
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --wssize 1:6
+curl: (28) Operation timed out after 2012 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --wssize 1:6
+curl: (28) Operation timed out after 2004 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+WARNING ! although datanoack fooling worked it may break NAT and may only work with external IP. Additionally it may require nftables to work correctly.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig --wssize 1:6
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --wssize 1:6
+!!!!! AVAILABLE !!!!!
+WARNING ! although datanoack fooling worked it may break NAT and may only work with external IP. Additionally it may require nftables to work correctly.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=md5sig --wssize 1:6
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=336 --dpi-desync-split-seqovl-pattern=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Operation timed out after 2004 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-split-pos=1
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (35) OpenSSL/3.4.0: error:0A0000C6:SSL routines::packet length too long
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --wssize 1:6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --wssize 1:6
+!!!!! AVAILABLE !!!!!
+
+!!!!! curl_test_https_tls12: working strategy found for ipv4 rutracker.org : winws --dpi-desync=fake,split2 --dpi-desync-ttl=3 !!!!!
+
+clearing winws redirection
+
+* curl_test_https_tls13 ipv4 rutracker.org
+- checking without DPI bypass
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+
+- IP block tests (requires manual interpretation)
+> testing iana.org on it's original ip
+!!!!! AVAILABLE !!!!!
+> testing rutracker.org on 192.0.43.8 (iana.org)
+curl: (35) Recv failure: Connection reset by peer
+> testing iana.org on 104.21.32.39 (rutracker.org)
+curl: (35) OpenSSL/3.4.0: error:0A000410:SSL routines::ssl/tls alert handshake failure
+> testing iana.org on 172.67.182.196 (rutracker.org)
+curl: (35) OpenSSL/3.4.0: error:0A000410:SSL routines::ssl/tls alert handshake failure
+
+preparing winws redirection
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-tls=sni
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-tls=sniext
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=3
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=4
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=5
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=10
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=50
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=3
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=3 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=4
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=4 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=5
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=5 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=6
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=7
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=7 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=8
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=8 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=9
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=9 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=10
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=10 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=11
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=11 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=12
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=12 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badsum
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badseq
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badseq --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=datanoack
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=md5sig
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=3
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=4
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=5
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=6
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=7
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=8
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=9
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=10
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=11
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=12
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badseq
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=md5sig
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badseq
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=md5sig
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni
+curl: (28) Operation timed out after 2009 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=336 --dpi-desync-split-seqovl-pattern=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2000 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5
+!!!!! AVAILABLE !!!!!
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-test/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+!!!!! AVAILABLE !!!!!
+
+!!!!! curl_test_https_tls13: working strategy found for ipv4 rutracker.org : winws --dpi-desync=disorder2 !!!!!
+
+clearing winws redirection
+
+* curl_test_http3 ipv4 rutracker.org
+- checking without DPI bypass
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+
+preparing winws redirection
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=fake
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=8
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=16
+could not parse DNS reply blob
+UNAVAILABLE code=6
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=24
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=32
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=40
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=64
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+
+!!!!! curl_test_http3: working strategy found for ipv4 rutracker.org : winws --dpi-desync=fake !!!!!
+
+clearing winws redirection
+
+* SUMMARY
+ipv4 rutracker.org curl_test_http : winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=3
+ipv4 rutracker.org curl_test_https_tls12 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=3
+ipv4 rutracker.org curl_test_https_tls13 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2
+ipv4 rutracker.org curl_test_http3 : winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=fake
+
+Please note this SUMMARY does not guarantee a magic pill for you to copy/paste and be happy.
+Understanding how strategies work is very desirable.
+This knowledge allows to understand better which strategies to prefer and which to avoid if possible, how to combine strategies.
+Blockcheck does it's best to prioritize good strategies but it's not bullet-proof.
+It was designed not as magic pill maker but as a DPI bypass test tool.
+
+press enter to continue

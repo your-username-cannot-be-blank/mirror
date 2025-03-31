@@ -1,0 +1,276 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>goodbyedpi-in-uae-7914</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>toodle(toodle)</td><td><p>GDPI seems to be having issues since yesterday in UAE. Still works but it’s struggling (random SSL errors).</p>
+<p>anyone else facing the same thing or is it just me? Tested on Windows/MacOS/iOS using similar programs and techniques and I see issues everywhere.</p></td><td>2024-05-30T11:33:12.657Z</td></tr><tr><td>ValdikSS</td><td><p><a class="mention" href="/u/toodle">@toodle</a> has provided PCAP dumps, and it looks very similar to <a href="https://ntc.party/t/goodbyedpi-in-saudi-arabia/7884">Saudi Arabia</a> (probably the same DPI manufacturer, <code>ntc.party</code> is blocked as well).</p>
+<p>Workaround as for now:<br>
+<code>goodbyedpi.exe -6 -e 130</code><br>
+It will work only for Firefox though.</p></td><td>2024-05-30T17:55:59.303Z</td></tr><tr><td>toodle(toodle)</td><td><p>and why would it work only on firefox and nowhere else?</p></td><td>2024-05-30T17:58:13.599Z</td></tr><tr><td>ValdikSS</td><td><p>Because Chromium-based browsers <a href="https://chromestatus.com/feature/5124606246518784">randomize TLS extension order</a>, while Firefox does not.</p></td><td>2024-05-30T18:31:18.896Z</td></tr><tr><td>ValdikSS</td><td><p>Try this one</p><aside class="onebox githubactions" data-onebox-src="https://github.com/ValdikSS/GoodbyeDPI/actions/runs/9307982032">
+  <header class="source">
+
+      <a href="https://github.com/ValdikSS/GoodbyeDPI/actions/runs/9307982032" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row">
+  <div class="github-icon-container" title="Commit">
+      <svg width="24" height="24" class="github-icon github-icon-success" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M1 12C1 5.925 5.925 1 12 1s11 4.925 11 11-4.925 11-11 11S1 18.075 1 12zm16.28-2.72a.75.75 0 00-1.06-1.06l-5.97 5.97-2.47-2.47a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l6.5-6.5z"></path></svg>
+
+
+
+  </div>
+
+  <div class="github-info-container">
+    <h4>
+      <a href="https://github.com/ValdikSS/GoodbyeDPI/actions/runs/9307982032" target="_blank" rel="noopener">Fragment packet by the beginning of SNI value. #357
+</a>
+    </h4>
+
+      <div class="github-info">
+        Build GoodbyeDPI <span class="github-run-number">#28</span>
+      </div>
+  </div>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p><code>goodbyedpi.exe -6 --frag-by-sni</code></p>
+<p>You still need to disable Kyber, as there’s no segment reassembly.<br>
+<code>chrome://flags</code> → kyber → disable</p></td><td>2024-05-30T19:20:29.219Z</td></tr><tr><td>toodle(toodle)</td><td><p>thanks. works on chrome now.</p></td><td>2024-05-30T19:43:17.487Z</td></tr><tr><td>Chriscrisis42</td><td><p><code> goodbyedpi.exe -6 -e 130</code> works for some sites, but not others. Specifically <code>https://www.redgifs.com/</code> seems to not be working. And <code>goodbyedpi.exe -6 --frag-by-sni</code> doesn’t seem to be working at all. I get this error:</p>
+<pre><code class="lang-auto">unknown option -- frag-by-sni
+Usage: goodbyedpi.exe [OPTION...]
+ -p          block passive DPI
+ -r          replace Host with hoSt
+ -s          remove space between host header and its value
+ -a          additional space between Method and Request-URI (enables -s, may break sites)
+ -m          mix Host header case (test.com -&gt; tEsT.cOm)
+ -f &lt;value&gt;  set HTTP fragmentation to value
+ -k &lt;value&gt;  enable HTTP persistent (keep-alive) fragmentation and set it to value
+ -n          do not wait for first segment ACK when -k is enabled
+ -e &lt;value&gt;  set HTTPS fragmentation to value
+ -w          try to find and parse HTTP traffic on all processed ports (not only on port 80)
+ --port        &lt;value&gt;    additional TCP port to perform fragmentation on (and HTTP tricks with -w)
+ --ip-id       &lt;value&gt;    handle additional IP ID (decimal, drop redirects and TCP RSTs with this ID).
+ --dns-addr    &lt;value&gt;    redirect UDPv4 DNS requests to the supplied IPv4 address (experimental)
+ --dns-port    &lt;value&gt;    redirect UDPv4 DNS requests to the supplied port (53 by default)
+ --dnsv6-addr  &lt;value&gt;    redirect UDPv6 DNS requests to the supplied IPv6 address (experimental)
+ --dnsv6-port  &lt;value&gt;    redirect UDPv6 DNS requests to the supplied port (53 by default)
+ --dns-verb               print verbose DNS redirection messages
+ --blacklist   &lt;txtfile&gt;  perform circumvention tricks only to host names and subdomains from
+                          supplied text file (HTTP Host/TLS SNI).
+                          This option can be supplied multiple times.
+ --allow-no-sni           perform circumvention if TLS SNI can't be detected with --blacklist enabled.
+ --set-ttl     &lt;value&gt;    activate Fake Request Mode and send it with supplied TTL value.
+                          DANGEROUS! May break websites in unexpected ways. Use with care (or --blacklist).
+ --auto-ttl    [a1-a2-m]  activate Fake Request Mode, automatically detect TTL and decrease
+                          it based on a distance. If the distance is shorter than a2, TTL is decreased
+                          by a2. If it's longer, (a1; a2) scale is used with the distance as a weight.
+                          If the resulting TTL is more than m(ax), set it to m.
+                          Default (if set): --auto-ttl 1-4-10. Also sets --min-ttl 3.
+                          DANGEROUS! May break websites in unexpected ways. Use with care (or --blacklist).
+ --min-ttl     &lt;value&gt;    minimum TTL distance (128/64 - TTL) for which to send Fake Request
+                          in --set-ttl and --auto-ttl modes.
+ --wrong-chksum           activate Fake Request Mode and send it with incorrect TCP checksum.
+                          May not work in a VM or with some routers, but is safer than set-ttl.
+                          Could be combined with --set-ttl
+ --wrong-seq              activate Fake Request Mode and send it with TCP SEQ/ACK in the past.
+ --native-frag            fragment (split) the packets by sending them in smaller packets, without
+                          shrinking the Window Size. Works faster (does not slow down the connection)
+                          and better.
+ --reverse-frag           fragment (split) the packets just as --native-frag, but send them in the
+                          reversed order. Works with the websites which could not handle segmented
+                          HTTPS TLS ClientHello (because they receive the TCP flow "combined").
+ --max-payload [value]    packets with TCP payload data more than [value] won't be processed.
+                          Use this option to reduce CPU usage by skipping huge amount of data
+                          (like file transfers) in already established sessions.
+                          May skip some huge HTTP requests from being processed.
+                          Default (if set): --max-payload 1200.
+
+
+LEGACY modesets:
+ -1          -p -r -s -f 2 -k 2 -n -e 2 (most compatible mode)
+ -2          -p -r -s -f 2 -k 2 -n -e 40 (better speed for HTTPS yet still compatible)
+ -3          -p -r -s -e 40 (better speed for HTTP and HTTPS)
+ -4          -p -r -s (best speed)
+Modern modesets (more stable, more compatible, faster):
+ -5          -f 2 -e 2 --auto-ttl --reverse-frag --max-payload (this is the default)
+ -6          -f 2 -e 2 --wrong-seq --reverse-frag --max-payload
+</code></pre>
+<p>I’m on Firefox 126.0.1 and GoodbyeDPI v0.2.2.</p></td><td>2024-06-03T00:49:05.171Z</td></tr><tr><td>Kinatera(T)</td><td><p>You need to build from source, v0.2.2 (Mar 21 2022) doesn’t have the --frag-by-sni option (~3 days ago)<br>
+If you read path\to\ then you have to replace that part with the actual path to the folder because that wouldn’t work.</p>
+<details>
+<summary>
+Prerequisites</summary>
+<p>Assuming you’re on windows you just need to get <a href="https://github.com/skeeto/w64devkit/releases/tag/v1.23.0" rel="noopener nofollow ugc">w64devkit</a>, <a href="https://github.com/ValdikSS/GoodbyeDPI/archive/refs/heads/master.zip" rel="noopener nofollow ugc">GoodbyeDPI-master</a>, and <a href="https://github.com/basil00/Divert/releases/download/v2.2.2/WinDivert-2.2.2-A.zip" rel="noopener nofollow ugc">WinDivert 2.2.2-A</a><br>
+Extract all of these to their own folders and make note of their names, then add w64devkit/bin to your PATH (refer to the next step/dropdown)</p>
+</details>
+<details>
+<summary>
+Adding to system PATH (Windows 10)</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="goodbyedpi-in-uae-7914/3b953ad1a42eacf519e8ecd16a6fbdd3706d922b.png" data-download-href="https://ntc.party/uploads/default/3b953ad1a42eacf519e8ecd16a6fbdd3706d922b" title="image"><img src="goodbyedpi-in-uae-7914/3b953ad1a42eacf519e8ecd16a6fbdd3706d922b.png" alt="image" data-base62-sha1="8v5TqI7tMcNm5GANkzvwGt6wnTZ" width="665" height="499" data-dominant-color="F1F4F6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">783×588 12.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<img src="goodbyedpi-in-uae-7914/aac892eedc05468b9960a3cfc914d03a699c31ac.png" alt="image" data-base62-sha1="omOTEKvSgX32HNm5H6CPO8S6Wn2" width="407" height="464"><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="goodbyedpi-in-uae-7914/e6f88ca2be18bc3694acb9b4e49675364d7acc8a.png" data-download-href="https://ntc.party/uploads/default/e6f88ca2be18bc3694acb9b4e49675364d7acc8a" title="image"><img src="goodbyedpi-in-uae-7914/e6f88ca2be18bc3694acb9b4e49675364d7acc8a.png" alt="image" data-base62-sha1="wXgkD51yz13yVAtguHLZj5o5dXk" width="527" height="500" data-dominant-color="F2F2F2"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">616×584 10.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="goodbyedpi-in-uae-7914/222a7ee198260739674ab7e35f8532c5630b9503.png" data-download-href="https://ntc.party/uploads/default/222a7ee198260739674ab7e35f8532c5630b9503" title="image"><img src="goodbyedpi-in-uae-7914/222a7ee198260739674ab7e35f8532c5630b9503.png" alt="image" data-base62-sha1="4Sfho5ZLJVIeJUGXXTxdQuWRxbt" width="525" height="500" data-dominant-color="F6F6F6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">527×501 6.51 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>And then just press OK.</p>
+</details>
+<details>
+<summary>
+Building GoodbyeDPI</summary>
+<p>Open up CMD as an administrator and run<br>
+<em>cd  path\to\GoodbyeDPI-master\src</em></p>
+<p>Then run<br>
+<em>make CPREFIX=x86_64-w64-mingw32- BIT64=1 WINDIVERTHEADERS=path\to\windivert\include WINDIVERTLIBS=path\to\windivert\amd64</em></p>
+<p>If there weren’t any issues it should have resulted in a goodbyedpi.exe file being made in GoodbyeDPI-master\src, you want to copy goodbyedpi.exe, WinDivert.dll and WinDivert64.sys over to your existing installation of GoodbyeDPI v0.2.2 and replace all in the x86_64 folder.<br>
+Now you should be able to use --frag-by-sni</p>
+</details>
+<p>Sorry for any bad writing/incorrect information, I’d wrote this based off of what I’d did</p></td><td>2024-06-03T07:43:58.570Z</td></tr><tr><td>TOPER(TOPER)</td><td><p><strong>ValdikSS</strong>, а у этого параметра --frag-by-sni вообще нет значений? Просто использовать как есть?</p></td><td>2024-06-03T09:11:46.443Z</td></tr><tr><td>Kinatera(T)</td><td><p><img src="goodbyedpi-in-uae-7914/92dbfb06a39b1b72c4beb1e232a1ceb2fabc42b9.png" alt="image" data-base62-sha1="kXb12TKL16uzVB6Tu7HMj3BR7PX" width="304" height="22"><br>
+Я думаю, вы можете использовать его как есть, без дополнительных значений (см. скриншот выше). Translated using DeepL</p></td><td>2024-06-04T05:20:18.518Z</td></tr><tr><td>Chriscrisis42</td><td><p>Hi! Sorry about the late reply. I finally got some time to try this out. Everything seemed to work right up until I actually ran the new goodbyedpi.exe file with this command <code>goodbyedpi.exe -6 --frag-by-sni</code>. I get this error:</p>
+<pre><code class="lang-auto">Block passive: 0
+Fragment HTTP: 2
+Fragment persistent HTTP: 2
+Fragment HTTPS: 2
+Fragment by SNI: 1
+Native fragmentation (splitting): 1
+Fragments sending in reverse: 1
+hoSt: 0
+Host no space: 0
+Additional space: 0
+Mix Host: 0
+HTTP AllPorts: 0
+HTTP Persistent Nowait: 1
+DNS redirect: 0
+DNSv6 redirect: 0
+Allow missing SNI: 0
+Fake requests, TTL: fixed (fixed: 0, auto: 0-0-0, min distance: 0)
+Fake requests, wrong checksum: 0
+Fake requests, wrong SEQ/ACK: 1
+Max payload size: 1200
+
+Opening filter
+Error opening filter: The system cannot find the file specified.
+</code></pre>
+<p>I followed all the steps exactly, and didn’t get any errors.</p>
+<p>The only thing I differed on from what you did is that I didn’t have a " <em>\windivert\amd64</em>", I had a “<em>\windivert\x64</em>” folder instead. I assumed it was the same thing with a different name, so I used that. It seemed to have compiled just fine.</p></td><td>2024-06-30T09:32:47.377Z</td></tr><tr><td>Kinatera(T)</td><td><p>Can you send me a picture of your folder structure?<br>
+example,<br>
+<img src="goodbyedpi-in-uae-7914/dc618e3146f61bcb833ae04dd03bdc8fb7021945.png" alt="image" data-base62-sha1="vrA3pFeS8dPXuhYGXNdrCCjdjox" width="617" height="228"></p></td><td>2024-06-30T13:15:37.981Z</td></tr><tr><td>Chriscrisis42</td><td><p>Here you go:</p>
+<p><img src="goodbyedpi-in-uae-7914/a7058ddc4fb4f01003d2de6e28066552cf3f4307.png" alt="image" data-base62-sha1="nPxDvDdNBZtyFF81G53702x4YJ1" width="635" height="343"></p></td><td>2024-06-30T19:42:14.188Z</td></tr><tr><td>Kinatera(T)</td><td><p>Can you go ahead and move “licenses”, “x86”, “BACKUP x86_64” and “Custom_Build” out of the folder, and make sure the contents of “x86_64” are the same as this picture below:<br>
+<img src="goodbyedpi-in-uae-7914/7966b00bc82cfade3fa1ab15f73b0471c7b9ea44.png" alt="image" data-base62-sha1="hjXMraZpDqGkkpP0XXrOhWs3nCc" width="630" height="149"></p>
+<p>The three files in the screenshot above are from the newly compiled version from the github, try again after doing what I’d said above<br>
+Tell me if it had worked, thanks <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-06-30T20:00:30.042Z</td></tr><tr><td>Chriscrisis42</td><td><p>I’m still getting the same error, unfortunately.</p>
+<p>This is what my x86_64 folder looks like:<br>
+<img src="goodbyedpi-in-uae-7914/4f59f024077f225f56ee126ce3e9bcb057001719.png" alt="image" data-base62-sha1="bjYpvZvAaC546KQI5K6FuFf8s8F" width="632" height="322"></p>
+<p>This is what the parent folder looks like:<br>
+<img src="goodbyedpi-in-uae-7914/069baa4fdfc38a85abbfa80e1d15acc2a4a4179d.png" alt="image" data-base62-sha1="WsnjV0ojYOAuUeAp2WpNU4pvAN" width="641" height="474"></p></td><td>2024-06-30T20:25:20.894Z</td></tr><tr><td>Kinatera(T)</td><td><p>I’m sorry it didn’t work, could you send me an image of the .cmd you’re running to get GoodbyeDPI up? Thanks</p></td><td>2024-06-30T20:45:10.823Z</td></tr><tr><td>Chriscrisis42</td><td><p>Here you go:</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="goodbyedpi-in-uae-7914/040a3700e45bfabcb57b6435e8a1bbdf3023f0cd.png" data-download-href="https://ntc.party/uploads/default/040a3700e45bfabcb57b6435e8a1bbdf3023f0cd" title="image"><img src="goodbyedpi-in-uae-7914/040a3700e45bfabcb57b6435e8a1bbdf3023f0cd_2_517x337.png" alt="image" data-base62-sha1="zJNipDhN119AbldcQ5HVBPKfYF" width="517" height="337" srcset="goodbyedpi-in-uae-7914/040a3700e45bfabcb57b6435e8a1bbdf3023f0cd_2_517x337.png, goodbyedpi-in-uae-7914/040a3700e45bfabcb57b6435e8a1bbdf3023f0cd_2_775x505.png 1.5x, goodbyedpi-in-uae-7914/040a3700e45bfabcb57b6435e8a1bbdf3023f0cd_2_1034x674.png 2x" data-dominant-color="131414"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1361×888 45.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>The exact steps are:</p>
+<ol>
+<li>cd to the directory that holds the newly compiled goodbyedpi.exe file, AKA <code>goodbyedpi-0.2.2\x86_64\</code></li>
+<li>Run the command <code>goodbyedpi.exe -6 --frag-by-sni</code></li>
+</ol>
+<p>I also redid all the steps to compile the exe again, just in case. Here’s what I did:</p>
+<ol>
+<li>Extracted <code>w64devkit-1.23.0.zip</code>, <code>GoodbyeDPI-master.zip</code>, and <code>WinDivert-2.2.2-A.zip</code>—gotten from the provided links—into this path <code>C:\Users\ODT\Desktop\goodbyedpi_otherstuff\Custom_Build</code><br>
+<img src="goodbyedpi-in-uae-7914/64ca9a000a52e80af3d2f1adaaf4f5430aba43fc.png" alt="image" data-base62-sha1="enDOLOSMiaGNvDMxiVuhpePgdpa" width="317" height="91"></li>
+<li>Made sure w64devkit/bin has been added to the system PATH.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="goodbyedpi-in-uae-7914/45057e91bdbc4f56a63abb1f0e16638965d0ce8e.png" data-download-href="https://ntc.party/uploads/default/45057e91bdbc4f56a63abb1f0e16638965d0ce8e" title="image"><img src="goodbyedpi-in-uae-7914/45057e91bdbc4f56a63abb1f0e16638965d0ce8e_2_345x206.png" alt="image" data-base62-sha1="9QAIsQMD080i5qOFy9MYPHP4aVE" width="345" height="206" srcset="goodbyedpi-in-uae-7914/45057e91bdbc4f56a63abb1f0e16638965d0ce8e_2_345x206.png, goodbyedpi-in-uae-7914/45057e91bdbc4f56a63abb1f0e16638965d0ce8e_2_517x309.png 1.5x, goodbyedpi-in-uae-7914/45057e91bdbc4f56a63abb1f0e16638965d0ce8e_2_690x412.png 2x" data-dominant-color="EFF2F5"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1384×828 36.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></li>
+<li>Opened up CMD as an administrator and cd’d into <code>C:\Users\ODT\Desktop\goodbyedpi_otherstuff\Custom_Build\GoodbyeDPI-master\src</code><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="goodbyedpi-in-uae-7914/37a6ebe51ceb2eb078305c66593bfdcd3847dd94.png" data-download-href="https://ntc.party/uploads/default/37a6ebe51ceb2eb078305c66593bfdcd3847dd94" title="image"><img src="goodbyedpi-in-uae-7914/37a6ebe51ceb2eb078305c66593bfdcd3847dd94_2_345x196.png" alt="image" data-base62-sha1="7WjT5fJIkl9KCxkBvhtNJnkup48" width="345" height="196" srcset="goodbyedpi-in-uae-7914/37a6ebe51ceb2eb078305c66593bfdcd3847dd94_2_345x196.png, goodbyedpi-in-uae-7914/37a6ebe51ceb2eb078305c66593bfdcd3847dd94_2_517x294.png 1.5x, goodbyedpi-in-uae-7914/37a6ebe51ceb2eb078305c66593bfdcd3847dd94_2_690x392.png 2x" data-dominant-color="101010"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1350×767 18.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></li>
+<li>Ran the <code>make CPREFIX=x86_64-w64-mingw32- BIT64=1 WINDIVERTHEADERS=path\to\windivert\include WINDIVERTLIBS=path\to\windivert\amd64</code> command, making sure to change the path\to\ sections so that they point to the right directories in my drive. Full command: <code>make CPREFIX=x86_64-w64-mingw32- BIT64=1 WINDIVERTHEADERS=C:\Users\ODT\Desktop\goodbyedpi_otherstuff\Custom_Build\WinDivert-2.2.2-A\include WINDIVERTLIBS=C:\Users\ODT\Desktop\goodbyedpi_otherstuff\Custom_Build\WinDivert-2.2.2-A\x64</code></li>
+<li>Got this <a href="https://pastebin.com/wcqDcQ40" rel="noopener nofollow ugc">output from CMD</a> and a “goodbyedpi.exe” file was created in <code>C:\Users\ODT\Desktop\goodbyedpi_otherstuff\Custom_Build\GoodbyeDPI-master\src</code><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="goodbyedpi-in-uae-7914/cc91db1c68741cadf0862f78106e0ef000974cdf.png" data-download-href="https://ntc.party/uploads/default/cc91db1c68741cadf0862f78106e0ef000974cdf" title="image"><img src="goodbyedpi-in-uae-7914/cc91db1c68741cadf0862f78106e0ef000974cdf_2_276x250.png" alt="image" data-base62-sha1="tbHTIZqc6SUuAIJTV22Oi83BDA3" width="276" height="250" srcset="goodbyedpi-in-uae-7914/cc91db1c68741cadf0862f78106e0ef000974cdf_2_276x250.png, goodbyedpi-in-uae-7914/cc91db1c68741cadf0862f78106e0ef000974cdf_2_414x375.png 1.5x, goodbyedpi-in-uae-7914/cc91db1c68741cadf0862f78106e0ef000974cdf_2_552x500.png 2x" data-dominant-color="3D3B40"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">635×575 30 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></li>
+<li>I then moved <code>goodbyedpi.exe</code> from <code>C:\Users\ODT\Desktop\goodbyedpi_otherstuff\Custom_Build\GoodbyeDPI-master\src</code> and <code>WinDivert.dll</code> and <code>WinDivert64.sys</code> from <code>C:\Users\ODT\Desktop\goodbyedpi_otherstuff\Custom_Build\WinDivert-2.2.2-A\x64</code> into <code>C:\Users\ODT\Desktop\goodbyedpi-0.2.2\x86_64</code>, replacing what was already there.<br>
+<img src="goodbyedpi-in-uae-7914/c30b3e0462e122355fd56d683f4ff42b09577c4f.png" alt="image" data-base62-sha1="rPrbYuCJcTHvidXw8J2Wsa9agRV" width="319" height="240"> <img src="goodbyedpi-in-uae-7914/ab03286da4dae231a5aa54f7e9496dfd7b38121d.png" alt="image" data-base62-sha1="ooQpCAMCpnJ5RhnQ3SoMSrYKQbP" width="319" height="236"></li>
+<li>I then cd into <code>C:\Users\ODT\Desktop\goodbyedpi-0.2.2\x86_64</code> using a CMD instance with admin privileges.</li>
+<li>And run this command <code>goodbyedpi.exe -6 --frag-by-sni</code>, to which I get the same error.</li>
+</ol>
+<p>Not sure if any of this helps, but I thought it couldn’t hurt.</p></td><td>2024-07-01T04:31:48.401Z</td></tr><tr><td>0ka(0ka)</td><td><p>old version still works?</p></td><td>2024-07-01T05:43:08.443Z</td></tr><tr><td>Kinatera(T)</td><td><p>Thanks for walking me through what you did so extensively. I redid everything you’d done, and I’m getting GoodbyeDPI working correctly on 3 systems (W10 Pro, W11 Pro, and W10 Enterprise LTSC). Can you make sure your antivirus isn’t messing with anything (<a href="https://github.com/ValdikSS/GoodbyeDPI/issues/327" rel="noopener nofollow ugc">like this</a>)? Maybe reboot and see if that helps.<br>
+Send me a personal message if it keeps erroring out; I don’t want to bloat this thread <img src="https://ntc.party/images/emoji/twitter/face_with_hand_over_mouth.png?v=12" title=":face_with_hand_over_mouth:" class="emoji" alt=":face_with_hand_over_mouth:" loading="lazy" width="20" height="20">.</p></td><td>2024-07-01T23:35:12.464Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Kinatera" data-post="8" data-topic="7914">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/8c91f0/48.png" class="avatar"> Kinatera:</div>
+<blockquote>
+<p>You need to build from source</p>
+</blockquote>
+</aside>
+<p>No, it’s not needed. The binaries are available with the link (at the bottom).</p><aside class="onebox githubactions" data-onebox-src="https://github.com/ValdikSS/GoodbyeDPI/actions/runs/9307982032">
+  <header class="source">
+
+      <a href="https://github.com/ValdikSS/GoodbyeDPI/actions/runs/9307982032" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row">
+  <div class="github-icon-container" title="Commit">
+      <svg width="24" height="24" class="github-icon github-icon-success" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M1 12C1 5.925 5.925 1 12 1s11 4.925 11 11-4.925 11-11 11S1 18.075 1 12zm16.28-2.72a.75.75 0 00-1.06-1.06l-5.97 5.97-2.47-2.47a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l6.5-6.5z"></path></svg>
+
+
+
+  </div>
+
+  <div class="github-info-container">
+    <h4>
+      <a href="https://github.com/ValdikSS/GoodbyeDPI/actions/runs/9307982032" target="_blank" rel="noopener">Fragment packet by the beginning of SNI value. #357
+</a>
+    </h4>
+
+      <div class="github-info">
+        Build GoodbyeDPI <span class="github-run-number">#28</span>
+      </div>
+  </div>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-07-02T17:54:13.533Z</td></tr><tr><td>Kinatera(T)</td><td><p><a class="mention" href="/u/chriscrisis42">@Chriscrisis42</a> Try this, my bad</p></td><td>2024-07-02T18:04:14.070Z</td></tr>
+    </table>
+      </body>
+    </html>

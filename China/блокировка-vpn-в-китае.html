@@ -1,0 +1,120 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-vpn-в-китае</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>gotko1972(GS)</td><td><p>Прошу помощи.<br>
+Используется OpenVPN.<br>
+В Китае он сразу блокируется, даже не подключается.<br>
+Пробовал запускать ExpressVPN, а потом подключать OpenVPN.<br>
+Соединение OpenVPN через ExpressVpn устанавливается, но как только начинает ходить траффик, сразу сбрасывается соединение ExpressVPN.<br>
+Подскажите какие имеются другие сервисы VPN, кроме EpressVPN, которые не блочатся китайским файерволом и позволяют устанавливать через них соединения OpenVpn?</p></td><td>2023-09-27T12:56:26.210Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="gotko1972" data-post="1" data-topic="5812">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/g/2bfe46/48.png" class="avatar"> gotko1972:</div>
+<blockquote>
+<p>В Китае он сразу блокируется, даже не подключается.</p>
+</blockquote>
+</aside>
+<p>А если TCP? Блокируют адрес для последующих попыток? Как это выглядить в Wireshark?</p>
+<aside class="quote no-group" data-username="gotko1972" data-post="1" data-topic="5812">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/g/2bfe46/48.png" class="avatar"> gotko1972:</div>
+<blockquote>
+<p>Соединение OpenVPN через ExpressVpn устанавливается, но как только начинает ходить траффик, сразу сбрасывается соединение ExpressVPN.</p>
+</blockquote>
+</aside>
+<p>Дело в маршрутах? Или у вас они изолированы?</p></td><td>2023-09-27T13:05:15.276Z</td></tr><tr><td>gotko1972(GS)</td><td><p>у меня TCP. Таблицу маршрутов, прилагаю. Я не сильно разбираюсь в протоколах и прочем.<br>
+<a class="attachment" href="блокировка-vpn-в-китае/oy7nKAoVLg8hMmaJTKs4jYyQ9Mo.txt">1.txt</a> (3,8 КБ)</p></td><td>2023-09-27T13:48:12.816Z</td></tr><tr><td>gotko1972(GS)</td><td><aside class="quote no-group" data-username="welazsc" data-post="2" data-topic="5812">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/w/c4cdca/48.png" class="avatar"> welazsc:</div>
+<blockquote>
+<p>А если TCP? Блокируют адрес для последующих попыток?</p>
+</blockquote>
+</aside>
+<p>адрес, куда стучусь по openvpn не блокируют. Отваливается соединение expressvpn</p></td><td>2023-09-27T13:51:15.724Z</td></tr><tr><td>welazsc</td><td><p>Для тестов запустите виртуалку (например virtualbox) в NAT режиме (должно быть по умолчанию). ExpressVPN не трогайте, он будет запускаться как и прежде на хосте. В виртуалке установите любимую операционную систем, OpenVPN клиента и софт который будет работать через него.</p>
+<p>Вам нужна схема при которой сервер ExpressVPN будет ходить через Realtek, сервер OpenVPN через ExpressVPN TUN, а весь трафик по умолчанию через TAP-Windows Adapter. Но это потребует скриптования неопределенной сложности.</p>
+<p>Для начала пробуйте через виртуалку.</p></td><td>2023-09-27T15:23:23.905Z</td></tr><tr><td>Dhohbr</td><td><p>welazsc, правильно ли я понимаю, что описанный вами способ, это VPN внутри VPN? И работать он будет только в случае, когда само соединение VPN установилось, но трафик внутри не ходит?<br>
+Теоретически, можно попробовать поднять два инстанса, один на внешнем IP, второй на tun.</p></td><td>2023-09-27T16:01:42.213Z</td></tr><tr><td>gotko1972(GS)</td><td><aside class="quote no-group" data-username="welazsc" data-post="5" data-topic="5812">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/w/c4cdca/48.png" class="avatar"> welazsc:</div>
+<blockquote>
+<p>Вам нужна схема при которой сервер ExpressVPN будет ходить через Realtek, сервер OpenVPN через ExpressVPN TUN, а весь трафик по умолчанию через TAP-Windows Adapter. Но это потребует скриптования неопределенной сложности.</p>
+</blockquote>
+</aside>
+<p>Ну вроде у меня так и есть, но на хосте, без виртуалки. В Expressvpn стоит настройка, что весь траффик идет через него. Таким образом и OpenVPN тоже идет через expressvpn tun. Получается OpenVPN внутри Expressvpn. Заметил , что и без включения OpenVPN, имея только соединение Expressvpn, при попытке зайти на <a href="http://google.com" rel="noopener nofollow ugc">google.com</a> также рвется соединение ExpressVPN через несколько сек, как начинаю серфить. Т.е. можно предположить, что ExpressVPN в Китае блочится. МОжет у кого есть опыт использования других сервисов, не ExpressVpn? Задача минимум - достучаться до gmail, чтобы почту гонять. Люди посоветовали AstrillVpn, что можете про этот сервис сказать?</p></td><td>2023-09-27T16:33:25.643Z</td></tr><tr><td>bolvan</td><td><p>В китае активно используют статистический анализ.<br>
+детектят TLS inside TLS и другие варианты.<br>
+там надо использовать xray-tls-reality, а через него по желанию пускать openvpn, но в режиме без шифрования</p></td><td>2023-09-27T16:49:37.554Z</td></tr><tr><td>Spilex</td><td><aside class="quote no-group" data-username="gotko1972" data-post="1" data-topic="5812">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/g/2bfe46/48.png" class="avatar"> gotko1972:</div>
+<blockquote>
+<p>Подскажите какие имеются другие сервисы VPN, кроме EpressVPN, которые не блочатся китайским файерволом и позволяют устанавливать через них соединения OpenVpn?</p>
+</blockquote>
+</aside>
+<p>Никакие. На днях человеку из Китая настраивал Shadowsocks-2022 и VLESS-XTLS-Reality. Там не работают: OpenVPN, Wireguard, и даже классический Shadowsocks (не 2022). Рабочих вариантов не так уж и много. Из бесплатного можете попробовать Tor + Snowflake.</p></td><td>2023-09-27T17:35:46.672Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>если tor то или альфу <a href="https://archive.torproject.org/tor-package-archive/torbrowser/13.0a5/" class="inline-onebox" rel="noopener nofollow ugc">Index of /tor-package-archive/torbrowser/13.0a5</a> или АРТИ попробовать собрать<br>
+и пробовать не только snowflake но и webtunnel <a href="https://bridges.torproject.org/bridges/?transport=webtunnel&amp;ipv6=no" rel="noopener nofollow ugc">https://bridges.torproject.org/bridges/?transport=webtunnel&amp;ipv6=no</a></p></td><td>2023-09-27T19:21:50.965Z</td></tr><tr><td>computerscot(computerscot)</td><td><p>OpenVPN was one of the first methods blocked by the Great Fire Wall of China, around 2011. That is what motivated the development of modern circumvention software such as Shadowsocks. There is a short summary of methods here:</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://cscot.pages.dev/2023/06/01/summary-of-methods/">
+  <header class="source">
+      <img src="блокировка-vpn-в-китае/6c30648dbcdae6226eb924ca34139d95bb171ee1.png" class="site-icon" data-dominant-color="494949" width="32" height="32">
+
+      <a href="https://cscot.pages.dev/2023/06/01/summary-of-methods/" target="_blank" rel="noopener nofollow ugc" title="06:00AM - 01 June 2023">cscot – 1 Jun 23</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://cscot.pages.dev/2023/06/01/summary-of-methods/" target="_blank" rel="noopener nofollow ugc">Summary of methods</a></h3>
+
+  <p>These are methods people have used to penetrate the Great Firewall (GFW) of China. Be aware that we don’t live in a static universe. The GFW fights back. It will attempt to block more and more of thes</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Recently working methods include Xray REALITY and Hysteria. You can also combine methods, such as. WireGuard over Hysteria, OpenVPN over Xray, etc. etc. etc.</p></td><td>2023-09-28T10:50:47.358Z</td></tr>
+    </table>
+      </body>
+    </html>

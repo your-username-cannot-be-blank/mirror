@@ -1,0 +1,199 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Saradon(Евгений)</td><td><p>Имеется <a href="https://www.micro-drive.ru/products/tandem-4gx-6-3g/4g-router-lte-cat.6" rel="noopener nofollow ugc">вот этот</a> роутер.<br>
+В нём есть отдельная вкладка под настройку OpenVPN.<br>
+Подскажите пожалуйста, как правильно (и возможно ли) настроить его на Антизапрет.<br>
+Заранее приношу извинения и благодарности.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/f871bb962044cf0345a71389de9e04b33dc30947.jpeg" data-download-href="https://ntc.party/uploads/default/f871bb962044cf0345a71389de9e04b33dc30947" title="VPN"><img src="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/f871bb962044cf0345a71389de9e04b33dc30947_2_690x442.jpeg" alt="VPN" data-base62-sha1="zrQ5cPVgM0KpVx6cGFIDN7H0QN9" width="690" height="442" srcset="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/f871bb962044cf0345a71389de9e04b33dc30947_2_690x442.jpeg, прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/f871bb962044cf0345a71389de9e04b33dc30947.jpeg 1.5x, прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/f871bb962044cf0345a71389de9e04b33dc30947.jpeg 2x" data-dominant-color="F9F8F7"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">VPN</span><span class="informations">875×561 34.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2023-03-17T17:44:38.788Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Попробуйте открыть .ovpn-файл текстовым редактором и перенести в соответствующие поля соответствующие значения. Не забывая и про вкладку “Дополнительные настройки”.</p></td><td>2023-03-18T18:35:43.471Z</td></tr><tr><td>Saradon(Евгений)</td><td><p>Содержимое выглядит так:</p>
+<details>
+<summary>
+antizapret-tcp</summary>
+<pre><code class="lang-auto">##############################################
+# ProstoVPN.AntiZapret                       #
+# http://antizapret.prostovpn.org            #
+##############################################
+
+##### NOTE TO LINUX USERS #####
+# OpenVPN does not handle DNS on Linux.
+# This also applies to ROUTERS.
+#
+# You have two workarounds:
+# 1. Configure OpenVPN connection using NetworkManager.
+#    This is preferrable method.
+# 2. Uncomment the lines below
+#    For Debian, Ubuntu and derivatives:
+#
+# script-security 2
+# up /etc/openvpn/update-resolv-conf
+# down /etc/openvpn/update-resolv-conf
+#
+#    For Fedora:
+#
+# script-security 2
+# up /usr/share/doc/openvpn/contrib/pull-resolv-conf/client.up
+# down /usr/share/doc/openvpn/contrib/pull-resolv-conf/client.down
+#
+#
+# For routers, contact your router manufacturer, or visit
+# https://ntc.party/c/antizapret-prostovpn-org/5
+#
+###############################
+
+nobind
+client
+
+remote vpn.antizapret.prostovpn.org
+
+remote-cert-tls server
+
+dev tun
+proto tcp
+cipher AES-128-CBC
+setenv opt data-ciphers AES-128-GCM:AES-256-GCM:AES-128-CBC
+
+resolv-retry infinite
+persist-key
+persist-tun
+
+setenv FRIENDLY_NAME "AntiZapret VPN TCP"
+
+# Keys
+&lt;ca&gt;
+-----BEGIN CERTIFICATE-----
+MIIDVDCCAjygAwIBAgIURU65u6E+emGuYHg2w1kXS2fUsP0wDQYJKoZIhvcNAQEL
+BQAwGTEXMBUGA1UEAwwOQW50aVphcHJldCBDQTIwHhcNMjMwMzEyMDgyMTExWhcN
+MzMwMzA5MDgyMTExWjAZMRcwFQYDVQQDDA5BbnRpWmFwcmV0IENBMjCCASIwDQYJ
+KoZIhvcNAQEBBQADggEPADCCAQoCggEBAIesu3leAXZve0Cuuww0JT+Q2BUGDYjW
+35yyEJexDmVdaRswZD7U5jYcqz3CyuAQUlSGFf5h/oDZTLnSUfmTuzNehkUlEFPE
+V8JN3A3ZjG6CPXlkYFjjOcMosQxyLm6t7t18OrJfW4tdHCsX7FbvcM3koWPa6I0N
+47nERlYEaaDYvKeP2WyKOh6CvalyL0PJU/a04BbzIR1CznyCwPfstJ2Pwc4r7UGg
+agWY/WxAtJUchhatED7CDPuNzRmJSGH/PLeAZLwmOXVZkUUyrRudUqjYrftPW9ok
+Kz7C2dztWTnAhES3VVHTrvOQFHVdgY5YAZjbF9rxc4wi0JCwWm1csxECAwEAAaOB
+kzCBkDAMBgNVHRMEBTADAQH/MB0GA1UdDgQWBBSIVFSaVM34YEmnIHGpwVtuJXyF
+qDBUBgNVHSMETTBLgBSIVFSaVM34YEmnIHGpwVtuJXyFqKEdpBswGTEXMBUGA1UE
+AwwOQW50aVphcHJldCBDQTKCFEVOubuhPnphrmB4NsNZF0tn1LD9MAsGA1UdDwQE
+AwIBBjANBgkqhkiG9w0BAQsFAAOCAQEAU78Us7Dx0RzkQ5j33VakarFJH4uIeIXS
+h9MBQSaPxuSMKu8ou+TKnnLWogqNtDbbdBd5+C1guB2JWJ5vL6uLwdur1L+K2VJ7
+AQW61qXBzRW0xYqyjGdHAHMZlvBgjWiYWNRHfyOrL/001pbXdlEmCLM/bEcxof5f
+THlDgo5hdeBEu8UCS8ownb+onW0+hvXegw7xOj5vnc2Y5atfwL181lK18AGR0KIy
+7Z08ifUG/1AMHE3z18UdnGdLGFaRc4ZNjz8QRsGu3GIAe9dZLiZBqrb4V3LWw9Yu
+W8Jhygq7qQgntCDOfixM/7KeWNBgwf43jPMDoBbfhLQJWimq6EuAgw==
+-----END CERTIFICATE-----
+&lt;/ca&gt;
+
+&lt;cert&gt;
+-----BEGIN CERTIFICATE-----
+MIIDbTCCAlWgAwIBAgIRAKJHN43vTRTgP+kn8Ky94UQwDQYJKoZIhvcNAQELBQAw
+GTEXMBUGA1UEAwwOQW50aVphcHJldCBDQTIwHhcNMjMwMzEyMDgyMTI3WhcNMzMw
+MzA5MDgyMTI3WjAjMSEwHwYDVQQDDBhhbnRpemFwcmV0LWNsaWVudC1zaGFyZWQw
+ggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCvtMxhTLjfJgdBI2PS5Kj6
+ORHL507jk76TO4HkHogEmWWkw0lQENPAiQxozhhswal61+yj70J9bvU2qMKaxseK
+rGZ8/kYM/ZNMvQcp2L3iPfj1ADR5I197BYQVwhUc65EBmQzRZtdN2vNBJNi9Cag7
+Hp9GZ5waPLiUxna1s8FV3h39wom1qk3S+hWZhFk5bfVpExKLs+7FOz7lhJqPd9eV
+p/bK5hAVbsKe029EMdS1uvDte3bCnlnSjDnP+2ekzrPrPk3t94POeqTvfaEvBBKC
+CxUB4156K2SxvtuQVauetCZY+wSTfaL86EDklo+91b9NHT9wrTiYz99r4GLFSZI3
+AgMBAAGjgaUwgaIwCQYDVR0TBAIwADAdBgNVHQ4EFgQUKkI68+tGkEuE9Ccdoq16
+vnMqD2gwVAYDVR0jBE0wS4AUiFRUmlTN+GBJpyBxqcFbbiV8haihHaQbMBkxFzAV
+BgNVBAMMDkFudGlaYXByZXQgQ0EyghRFTrm7oT56Ya5geDbDWRdLZ9Sw/TATBgNV
+HSUEDDAKBggrBgEFBQcDAjALBgNVHQ8EBAMCB4AwDQYJKoZIhvcNAQELBQADggEB
+AGikbTEkjoLwwhTJOOqMFGS1wPjvygQ3bePMDcZ40HM6AeN/a/I5NTYJ1je7OeSO
++AYGHvz5iTcW+Zx59DJ4esY9/3BbM+u3WVTm+VqbWSGII/EW4q9OMDelZns2ZhQ1
+wdk40n+kE+zo8xKavu7fnYAmHeTn2f3MyNyEi3mPfPhL5F5Im8HgaDMxxKjrNmlr
+lo7Fod1OAENIXl1txK2YvtqvsZIi+bVtpMAvo8EgMdHW76WKbidIpojEUA85LU63
+RBVmY/jVRYeZyajwzb+wq4ozA2ge2+lgUpGqWlZg0LbSVsvCNyzHqBl1NNysN4pK
+ByzVZCS7OXF6uAKg2T2TFIw=
+-----END CERTIFICATE-----
+&lt;/cert&gt;
+
+&lt;key&gt;
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCvtMxhTLjfJgdB
+I2PS5Kj6ORHL507jk76TO4HkHogEmWWkw0lQENPAiQxozhhswal61+yj70J9bvU2
+qMKaxseKrGZ8/kYM/ZNMvQcp2L3iPfj1ADR5I197BYQVwhUc65EBmQzRZtdN2vNB
+JNi9Cag7Hp9GZ5waPLiUxna1s8FV3h39wom1qk3S+hWZhFk5bfVpExKLs+7FOz7l
+hJqPd9eVp/bK5hAVbsKe029EMdS1uvDte3bCnlnSjDnP+2ekzrPrPk3t94POeqTv
+faEvBBKCCxUB4156K2SxvtuQVauetCZY+wSTfaL86EDklo+91b9NHT9wrTiYz99r
+4GLFSZI3AgMBAAECggEADoLTiEuiTwegfMAz+9RXoka5Ugo56TCoAhfdi937pMmY
+a+mW8e5Z1qJa7ILs4HqECTmw+P8HEj3qMYfxfn/hNfI0CqmjVmpQ0nsgDtQwJnGw
+0Gcibki+F3ZmqLddMATCdovR0693I55sDZrB7abRBoTqaZGgAki2g876OdptIq6w
+6T6zvM/gNyhyFsKBJKhE40dxVBVvL/xGopIbcbtjqsLgJQYeM72baKpAxCyYQu98
+scDWrMPsLW2Rb6y+35VfLHMG3krB9R4KqbS3SftiIV+nYrRyZuZ/dadB4Yk5ASQr
+w2qge7ivzH16ZsMCR583b2ZRHJfDJ2ZHd4E60VOcqQKBgQDXVQQ1p2R94ryrbzsE
+dqTCsF5uVmdBJddlKzuB5orTMzUJ8T4mK7NlG7ptHpPv7HSJ250b1+XC5+7Fn3y1
+ZEHiNOp+XpFtv2tUaEwsDuM5KKws2DIBkdxF/QjgK7jh+o5IEgZ6mN53ebzvJILM
+IvQravTJJ0yTpRRL26wOUtqADwKBgQDQ4+50bjYPjXNYp71hkir19w1kEisbhev9
+6vef/KCcs01+S8wJ5KH7nb4Ox2fn+jdzSPII05BposIFhkLWp+6GR85qZgHTkFlG
+dzBGevq+x3eDYK9Ay8sMEDjajewat13BWbC9/X+3RPWYEiq/uGs8Tkr3IWShHQDZ
+vW+CCh8jWQKBgQCDv46dzVdc9nd9ZMb1SiowvHxqgg8W+zI4wiTcq9PQuQoAlUvz
+StWuTTLZRNY6+6+qEWak/ImloQakf5pr2XW+E6ZNv0q3nWDr+gxxAILiHBKMNZMT
+Bs2BPPpLPjUWfpjDW9P++r1S2HdS0kH86H4AeqZe1N6zj1NFvpgdA3CQ3QKBgGix
+M/uqmPGmhR7zwti590obLdzvticvMZ2rO7w1UxH2U2pu9q4mpoCDCJRDoHIFV/Ex
+qAyAbCplZjR6m9kVhVhLeMqeoV+1QuksJ0fLrwwa0G1J8cvZ18QOBVCUPLcPG7Ai
+EZDHElF6AFTdFgvMlAI/gxbk55hP/vMiHFbiV8TRAoGAImVygtTH/b+zH3WHLNy8
+3EbwjLTsoK+rZh1rTa3kuYu3rwuSVUTgZme8eKpGCAAaKjJrI74gdCo5yHapyc4a
+LLyrNlu5yKSq6MG4nAXkIQMzOD8RvRc5dxqN0+4+6uPlvtsjuVJnxwwUVyvCUD54
+619RpjFDQfo9rX0+AMkgR6M=
+-----END PRIVATE KEY-----
+&lt;/key&gt;
+</code></pre>
+</details>
+<p>Вписал всё, что нашёл в основные.<br>
+Осталось непонятно с сжатием (LZ0, LZ4 или отключено) и алгоритм аутентификации.</p>
+<details>
+<summary>
+Основные настройки</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/256deb40d949247ac7e3d78e327eebacf0f701fc.png" data-download-href="https://ntc.party/uploads/default/256deb40d949247ac7e3d78e327eebacf0f701fc" title="Web - OpenVPN - Opera 21.03.2023 20_11_18"><img src="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/256deb40d949247ac7e3d78e327eebacf0f701fc_2_690x367.png" alt="Web - OpenVPN - Opera 21.03.2023 20_11_18" data-base62-sha1="5l7akKyshltX1OUiVDUv9F8hFw0" width="690" height="367" srcset="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/256deb40d949247ac7e3d78e327eebacf0f701fc_2_690x367.png, прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/256deb40d949247ac7e3d78e327eebacf0f701fc_2_1035x550.png 1.5x, прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/256deb40d949247ac7e3d78e327eebacf0f701fc.png 2x" data-dominant-color="F7F6F6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Web - OpenVPN - Opera 21.03.2023 20_11_18</span><span class="informations">1366×728 60.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>В дополнительных настройках особо добавить нечего</p>
+<details>
+<summary>
+Дополнительные настройки</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/22741d5bcf24601e51b6ac6a61af6ce8fef5ce10.png" data-download-href="https://ntc.party/uploads/default/22741d5bcf24601e51b6ac6a61af6ce8fef5ce10" title="Web - OpenVPN - Opera 21.03.2023 20_12_00"><img src="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/22741d5bcf24601e51b6ac6a61af6ce8fef5ce10_2_690x367.png" alt="Web - OpenVPN - Opera 21.03.2023 20_12_00" data-base62-sha1="4UN0wSL8Ij40gWavfxH0z4spS8g" width="690" height="367" srcset="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/22741d5bcf24601e51b6ac6a61af6ce8fef5ce10_2_690x367.png, прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/22741d5bcf24601e51b6ac6a61af6ce8fef5ce10_2_1035x550.png 1.5x, прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/22741d5bcf24601e51b6ac6a61af6ce8fef5ce10.png 2x" data-dominant-color="F8F6F4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Web - OpenVPN - Opera 21.03.2023 20_12_00</span><span class="informations">1366×728 49.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>В настройках аутентификации прописал сертификаты и ключ (кстати, -----BEGIN CERTIFICATE----- и -----END CERTIFICATE----- надо включать?).<br>
+Остались не заполнены Логин и Пароль.<br>
+И не выбрано шифрование.</p>
+<details>
+<summary>
+Аутентификация</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/34d50b1b6adaf2653e8ad0757b4051c8f230d359.png" data-download-href="https://ntc.party/uploads/default/34d50b1b6adaf2653e8ad0757b4051c8f230d359" title="Web - OpenVPN - Opera 21.03.2023 20_14_09"><img src="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/34d50b1b6adaf2653e8ad0757b4051c8f230d359_2_690x367.png" alt="Web - OpenVPN - Opera 21.03.2023 20_14_09" data-base62-sha1="7xngQR9IFq2qWjLkTsfnRHZJgq5" width="690" height="367" srcset="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/34d50b1b6adaf2653e8ad0757b4051c8f230d359_2_690x367.png, прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/34d50b1b6adaf2653e8ad0757b4051c8f230d359_2_1035x550.png 1.5x, прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/34d50b1b6adaf2653e8ad0757b4051c8f230d359.png 2x" data-dominant-color="F2F1EF"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Web - OpenVPN - Opera 21.03.2023 20_14_09</span><span class="informations">1366×728 101 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2023-03-21T17:25:20.441Z</td></tr><tr><td>ValdikSS</td><td><p>Проверяйте журнал (лог) подключения, в нём должны содержаться причины проблемы с подключением.</p></td><td>2023-03-22T10:23:55.120Z</td></tr><tr><td>Saradon(Евгений)</td><td><p>Прошу пардонов, но скину весь лог, ибо неумелым глазом не могу понять в чём проблема.<br>
+<a class="attachment" href="прошу-помощи-с-настройкой-на-роутере-microdrive-tandem-4gx-6-4016/r3Cjld9r1ctpYucZbkHXCwGeKIX.txt">syslog-4gx-19.7.9.txt</a> (71,7 КБ)</p></td><td>2023-03-23T09:02:42.957Z</td></tr><tr><td>ValdikSS</td><td><p>Судя по журналу, соединение устанавливается. Убедитесь, что используется DNS из VPN-туннеля, а не сторонний.</p></td><td>2023-03-23T10:49:48.100Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,277 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>помогите-с-конвертацией-строки-под-zapret-10736</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>om1cr0n</td><td><p>Здравствуйте. Буквально недавно опять перестал работать ютуб через zapret, работает только через GoodbyeDPI с этой командой (goodbyedpi.exe -9 --fake-gen 5 --fake-from-hex 160301FFFF01FFFFFF0303594F5552204144564552544953454D454E542048455245202D202431302F6D6F000000000009000000050003000000). Можно ли как-то эту строку переконвертировать под zapret, дабы на всех устройствах работала?</p></td><td>2024-09-25T06:27:55.485Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p><code>-f 2 -e 2 --wrong-seq --wrong-chksum --reverse-frag --fake-gen 5 --fake-from-hex 160301FFFF01FFFFFF0303594F5552204144564552544953454D454E542048455245202D202431302F6D6F000000000009000000050003000000</code><br>
+Думаю, на запрете будет как-то так:<br>
+<code>--wf-tcp=80,443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq,badsum --dpi-desync-fake-tls="tls_clienthello_www_google_com.bin" --dpi-desync-repeats=5</code><br>
+tls_clienthello_www_google_com.bin должен в той же папке лежать ну или путь к нему указывать</p></td><td>2024-09-25T11:59:36.153Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Почти только disorder2 на split2 поменять</p></td><td>2024-09-26T00:08:21.621Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Если --reverse-frag, то это обратный порядок, то бишь --disorder. Хотя можно оба варианта проверить</p></td><td>2024-09-26T09:48:33.972Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Конечно пусть проверяет оба что то точно работать будет. А вообще лучше пусть через блокчек ищет стратегию.</p></td><td>2024-09-26T12:42:00.300Z</td></tr><tr><td>Mihey(Михаил)</td><td><p>Аналогичная просьба. Есть рабочая строка от Гудбая. На роутере стоит Zapret. К сожалению у меня  Винда 32 разрядная и прогнать Блокчек нет возможности. Неделю промучился с подбором стратегии на Zapret. Видео на Ютубе так и не грузятся. Провайдер у меня похоже самый безжалостный и блочит сервера Ютуба с особой изощрённостью. Однако Гудбай и утилиты на его основе прекрасно работают. Проблема только с Запретом.<br>
+Рабочая строка<br>
+start “” goodbyedpi.exe -5 -e1 -reverse-frag --wrong-chksum --fake-from-hex 1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --fake-gen 5 --set-ttl 3 -q --blacklist …\russia-blacklist.txt --blacklist …\russia-youtube.txt</p>
+<p>Прогнал Гудчек и он нашёл такие стратегии, увы не сто процентные, но всё же<br>
+-e 2 -q --reverse-frag --wrong-chksum --frag-by-sni --fake-from-hex 1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --fake-gen 5 --set-ttl 3<br>
+-e 2 -q --reverse-frag --wrong-chksum --frag-by-sni --fake-from-hex 1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --fake-gen 10 --set-ttl 3<br>
+-e 2 -q --reverse-frag --wrong-chksum --fake-from-hex 1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --fake-gen 15 --set-ttl 3<br>
+-e 2 -q --reverse-frag --wrong-chksum --frag-by-sni --fake-from-hex 1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --fake-gen 15 --set-ttl 3<br>
+-e 2 -q --reverse-frag --fake-from-hex 1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --fake-gen 5 --set-ttl 3<br>
+-e 2 -q --reverse-frag --frag-by-sni --fake-from-hex 1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --fake-gen 5 --set-ttl 3<br>
+-e 2 -q --reverse-frag --fake-from-hex 1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --fake-gen 10 --set-ttl 3<br>
+-e 2 -q --reverse-frag --fake-from-hex 1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --fake-gen 15 --set-ttl 3</p>
+<p>Может кто подскажет что то рабочее по этим данным?</p></td><td>2024-11-16T19:46:46.422Z</td></tr><tr><td>KDS</td><td><p><code>--filter-tcp 443 --hostlist="%~dp0russia-youtube.txt" --dpi-desync=fake,disorder2 --dpi-desync-split-pos=2 --dpi-desync-split-tls=sni --dpi-desync-fooling=md5sig,badseq --dpi-desync-fake-tls=0x1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --dpi-desync-ttl=3</code></p>
+<p>Как-то так.</p></td><td>2024-11-16T20:01:08.340Z</td></tr><tr><td>easyone11</td><td><p>KDS конвертор ))<br>
+написал бы скрипт для перевода значений,)</p></td><td>2024-11-16T20:03:55.604Z</td></tr><tr><td>Mihey(Михаил)</td><td><p>Увы, не работает…</p></td><td>2024-11-16T20:09:30.792Z</td></tr><tr><td>KDS</td><td><p>Добавить <code>--dpi-desync-repeats=2</code> и увеличивать число на 1, перезапуская программу, пока не заработает</p>
+<p>Заработало<br>
+<code>--dpi-desync=fake,disorder2 --dpi-desync-split-pos=2 --dpi-desync-split-tls=sni --dpi-desync-fooling=md5sig,badseq --dpi-desync-fake-tls=0x1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801  --dpi-desync-repeats=7 --dpi-desync-autottl</code></p></td><td>2024-11-16T20:10:34.625Z</td></tr><tr><td>Mihey(Михаил)</td><td><aside class="quote no-group quote-modified" data-username="KDS" data-post="10" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kds/48/12723_2.png" class="avatar"> KDS:</div>
+<blockquote>
+<p>–dpi-desync=fake,disorder2 --dpi-desync-split-pos=2 --dpi-desync-split-tls=sni --dpi-desync-fooling=md5sig,badseq --dpi-desync-fake-tls=0x1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --dpi-desync-repeats=7 --dpi-desync-autottl</p>
+</blockquote>
+</aside>
+<p>Увы. Не рабочий вариант.</p></td><td>2024-11-16T20:30:11.382Z</td></tr><tr><td>easyone11</td><td><p>а не проще подобрать блокчеком чем вот так вот?</p></td><td>2024-11-16T20:46:23.143Z</td></tr><tr><td>uwu(uwu)</td><td><aside class="quote no-group" data-username="Mihey" data-post="11" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/13edae/48.png" class="avatar"> Mihey:</div>
+<blockquote>
+<p>Увы. Не рабочий вариант.</p>
+</blockquote>
+</aside>
+<p>в gdpi квик выключен принудительно, в случае запрета его нужно выключить в браузере</p>
+<aside class="quote no-group" data-username="Mihey" data-post="6" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/13edae/48.png" class="avatar"> Mihey:</div>
+<blockquote>
+<p>start “” goodbyedpi.exe -5 -e1 -reverse-frag --wrong-chksum --fake-from-hex 1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --fake-gen 5 --set-ttl 3 -q --blacklist …</p>
+</blockquote>
+</aside>
+<p><code>--wf-tcp=443 --filter-tcp=443 --dpi-desync=fake,disorder --dpi-desync-split-pos=1 --dpi-desync-fake-tls=0x1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --dpi-desync-fooling=badsum --dpi-desync-autottl</code><br>
+(либо <code>--dpi-desync-ttl=3</code> вместо авто)</p></td><td>2024-11-16T20:46:28.278Z</td></tr><tr><td>KDS</td><td><p>Тогда уж так ))</p>
+<pre><code class="lang-auto">start "zapret: https" /min "%~dp0winws.exe" ^
+--wf-tcp=443 ^
+--filter-tcp 443 --hostlist="%~dp0russia-youtube.txt" --dpi-desync=fake,disorder2 --dpi-desync-split-pos=2 --dpi-desync-split-tls=sni --dpi-desync-fooling=md5sig,badseq --dpi-desync-fake-tls=0x1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --dpi-desync-repeats=7 --dpi-desync-autottl
+</code></pre>
+<p>Чтобы прямо от и до, без квика, правда <img src="https://ntc.party/images/emoji/twitter/upside_down_face.png?v=12" title=":upside_down_face:" class="emoji" alt=":upside_down_face:" loading="lazy" width="20" height="20"></p></td><td>2024-11-16T21:21:27.288Z</td></tr><tr><td>uwu(uwu)</td><td><aside class="quote no-group" data-username="KDS" data-post="14" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kds/48/12723_2.png" class="avatar"> KDS:</div>
+<blockquote>
+<p>Тогда уж так ))</p>
+</blockquote>
+</aside>
+<p>это для роутера?)</p></td><td>2024-11-16T21:25:21.884Z</td></tr><tr><td>KDS</td><td><p>Для репитера вай-фая, байпасснутого через файрволл маршрутизатора Cisco )</p></td><td>2024-11-16T21:29:10.820Z</td></tr><tr><td>uwu(uwu)</td><td><details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="помогите-с-конвертацией-строки-под-zapret-10736/2104866bdb04452d8309db826bcaf8d92dfd3361.jpeg" data-download-href="https://ntc.party/uploads/default/2104866bdb04452d8309db826bcaf8d92dfd3361" title="изображение"><img src="помогите-с-конвертацией-строки-под-zapret-10736/2104866bdb04452d8309db826bcaf8d92dfd3361.jpeg" alt="изображение" data-base62-sha1="4I5rZsazvmBotMz6KT8Ug505wrv" width="500" height="500" data-dominant-color="8C7661"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">601×601 28.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2024-11-16T21:39:24.832Z</td></tr><tr><td>PeFeD(Fedor)</td><td><aside class="quote no-group" data-username="KDS" data-post="16" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kds/48/12723_2.png" class="avatar"> KDS:</div>
+<blockquote>
+<p>байпасснутого <em>через</em> файрволл маршрутизатора Cisco</p>
+</blockquote>
+</aside>
+<p>Хренассе, байпасс… <img src="https://ntc.party/images/emoji/twitter/astonished.png?v=12" title=":astonished:" class="emoji" alt=":astonished:" loading="lazy" width="20" height="20"></p></td><td>2024-11-16T22:34:25.400Z</td></tr><tr><td>Mihey(Михаил)</td><td><p>У меня Win7/32 Блокчек не запускается. Жалуется на вот это:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="помогите-с-конвертацией-строки-под-zapret-10736/9a7439e06eaa987985a686be3c9d688cd1bd2c04.png" data-download-href="https://ntc.party/uploads/default/9a7439e06eaa987985a686be3c9d688cd1bd2c04" title="1"><img src="помогите-с-конвертацией-строки-под-zapret-10736/9a7439e06eaa987985a686be3c9d688cd1bd2c04_2_690x470.png" alt="1" data-base62-sha1="m2mxHTTyXsN9AQETO4oZQjNhnRG" width="690" height="470" srcset="помогите-с-конвертацией-строки-под-zapret-10736/9a7439e06eaa987985a686be3c9d688cd1bd2c04_2_690x470.png, помогите-с-конвертацией-строки-под-zapret-10736/9a7439e06eaa987985a686be3c9d688cd1bd2c04.png 1.5x, помогите-с-конвертацией-строки-под-zapret-10736/9a7439e06eaa987985a686be3c9d688cd1bd2c04.png 2x" data-dominant-color="565758"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">1</span><span class="informations">852×581 43.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-11-17T06:31:46.470Z</td></tr><tr><td>Mihey(Михаил)</td><td><aside class="quote no-group quote-modified" data-username="uwu" data-post="13" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/uwu/48/15300_2.png" class="avatar"> uwu:</div>
+<blockquote>
+<p>–dpi-desync-ttl=3</p>
+</blockquote>
+</aside>
+<p>Попробовал. Не работает.</p></td><td>2024-11-17T06:32:49.090Z</td></tr><tr><td>KDS</td><td><p>Можете просто <a href="https://ntc.party/t/ytdisbystro-%D0%B0%D1%80%D1%85%D0%B8%D0%B2-%D0%B2%D1%81%D0%B5%D1%85-%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D0%B9/12582/31">это</a> попробовать, оно 32 поддерживает. И никакой блокчек обычно не требуется</p></td><td>2024-11-17T08:16:50.838Z</td></tr><tr><td>Mihey(Михаил)</td><td><p>Дык у меня хотелка завести Zapret на роутере. Что бы любое устройство в моей сети работа с Ютуб без дополнительных ухищрений. Так у меня есть работающие решения на каждом из устройств отдельно. А вот на роутере ничего с Ютубом не работает. Вот в чём беда…</p></td><td>2024-11-17T08:26:57.835Z</td></tr><tr><td>KDS</td><td><p>Интересно ) Видимо, конфиг неправильный. В этих линуксах вообще все непонятно</p></td><td>2024-11-17T08:34:33.575Z</td></tr><tr><td>electrifying</td><td><aside class="quote no-group" data-username="Mihey" data-post="22" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/13edae/48.png" class="avatar"> Mihey:</div>
+<blockquote>
+<p>Дык у меня хотелка завести Zapret на роутере</p>
+</blockquote>
+</aside>
+<p>Разверните запрет на роутере  и оттуда запустите блокчек,либо попробовать второй системой поставить 64 битную систему тот же линукс минт и там блокчек крутить</p></td><td>2024-11-17T08:42:04.529Z</td></tr><tr><td>Mihey(Михаил)</td><td><aside class="quote no-group" data-username="electrifying" data-post="24" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/electrifying/48/5915_2.png" class="avatar"> electrifying:</div>
+<blockquote>
+<p>Разверните запрет на роутере</p>
+</blockquote>
+</aside>
+<p>Роутер старик Asus RT-N56UB1 на Padavan. Туда энтузиаст только недавно Zapret прикрутил. Боюсь ждать на нём Блокчека можно до второго пришествия. Придётся искать у знакомых ноут с 64 разрядной Виндой на прокат. Увы…</p></td><td>2024-11-17T10:07:14.388Z</td></tr><tr><td>easyone11</td><td><aside class="quote no-group" data-username="Mihey" data-post="25" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/13edae/48.png" class="avatar"> Mihey:</div>
+<blockquote>
+<p>Asus RT-N56UB1</p>
+</blockquote>
+</aside>
+<p>так он же поддерживает openwrt</p></td><td>2024-11-17T10:11:17.293Z</td></tr><tr><td>Cheeck</td><td><p>Попробуйте скачать последнюю версию Запрета (<a href="https://github.com/bol-van/zapret/releases/download/v68/zapret-v68.zip" rel="noopener nofollow ugc"> zapret-v68.zip </a>) и закинуть файлы из zapret-v68\binaries\win32 в папку Гудчека. Тогда сможете Гудчеком поискать стратегии для Запрета на Win7/32 (по идее, сам не проверял).</p></td><td>2024-11-17T11:42:19.968Z</td></tr><tr><td>Mihey(Михаил)</td><td><p>Спасибо! Этот способ провести Блокчек на Win7x32 вполне рабочий. Только показатели тестов крайне низкие. По tcp к 16 из 30 и по udp к 12 из 30 серверов Ютуб удалось достучаться. В итоге всё как было… ничего не работает. Похоже мой провайдер Запрету не по зубам. Это РТК Москва (Юго-Запад). Что ж, буду использовать программы на движке GDP</p></td><td>2024-11-17T16:08:26.546Z</td></tr><tr><td>Cheeck</td><td><p>Главное − достучаться к своему серверу, к остальным − по возможности. Попробуйте к самой рабочей стратегии добавить --dpi-desync-repeats=5 (или больше) для лучшего достука.</p></td><td>2024-11-17T16:40:16.173Z</td></tr><tr><td>KDS</td><td><p>Это он чеку не по зубам, а запрету по зубам любой провайдер, кроме мелкотни со сквидами</p></td><td>2024-11-17T17:35:56.380Z</td></tr><tr><td>kotik.neko</td><td><p>Перед тем, как пробовать настройки, включите на роутере DoH/DoT, и желательно от Cloudflare (ибо гугловские начинают уже блокировать). Возможно, после этого Zapret заведется на дефолтных настройках.<br>
+Кроме того, в самом запрете нужно включить не только NFQWS_ENABLE=1, но и TPWS_ENABLE=1.<br>
+Для TPWS можно такие настройки использовать, судя по мануалу, они эффективно ломают многие блокировки:</p>
+<pre><code class="lang-auto">TPWS_OPT="
+--filter-tcp=80 --methodeol &lt;HOSTLIST&gt; --new
+--filter-tcp=443 --tlsrec=sni --split-tls=sni --tlsrec-pos=2 --disorder --methodspace --methodeol --unixeol &lt;HOSTLIST&gt;
+"
+</code></pre>
+<p>Для NFQWS можно подбирать по ходу дела, но у меня с такими хорошо работает на роутере:</p>
+<pre><code class="lang-auto">NFQWS_OPT="
+--filter-tcp=80 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig &lt;HOSTLIST&gt; --new
+--filter-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig &lt;HOSTLIST&gt; --dpi-desync-repeats=15 --new
+--filter-udp=443 --dpi-desync=fake,split2 --dpi-desync-fake-quic=opt/zapret/files/fake/quic_initial_www_google_com.bin --dpi-desync-repeats=15 &lt;HOSTLIST_NOAUTO&gt;
+--filter-udp=50000-50099 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d2 --dpi-desync-fake-unknown-udp=0x00 --dpi-desync-repeats=5
+"
+</code></pre>
+<p>На моем провайдере (Дом.Ру) эти настройки <strong>!обязательно!</strong> в сочетании с настроенным DoH ломают вобще все блокировки, включая инсту, ФБ и другие.</p></td><td>2024-11-19T13:51:45.952Z</td></tr><tr><td>Mihey(Михаил)</td><td><aside class="quote no-group" data-username="kotik.neko" data-post="31" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kotik.neko/48/11830_2.png" class="avatar"> kotik.neko:</div>
+<blockquote>
+<p>На моем провайдере (Дом.Ру) эти настройки <strong>!обязательно!</strong> в сочетании с настроенным DoH ломают вобще все блокировки, включая инсту, ФБ и другие</p>
+</blockquote>
+</aside>
+<p>DOH включён и проходит проверку. Увы и с вашими настройками не работает. TPWS в прошивке отсутствует, она урезана.</p></td><td>2024-11-19T14:31:12.101Z</td></tr><tr><td>Mihey(Михаил)</td><td><h1><a name="p-67978-all-arguments-here-httpsgithubcombol-vanzapret-1" class="anchor" href="#p-67978-all-arguments-here-httpsgithubcombol-vanzapret-1"></a>All arguments here: <a href="https://github.com/bol-van/zapret" class="inline-onebox" rel="noopener nofollow ugc">GitHub - bol-van/zapret: DPI bypass multi platform</a></h1>
+<p>–filter-tcp=80<br>
+#–dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig<br>
+#–dpi-desync=fake,multidisorder --dpi-desync-split-pos=1,midsld --dpi-desync-fooling=md5sig<br>
+#–dpi-desync=fake,disorder2 --dpi-desync-ttl=0 --dpi-desync-fooling=md5sig,badsum<br>
+#–dpi-desync=fake,disorder2 --dpi-desync-repeats=6 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig<br>
+#–dpi-desync=fake,multisplit --dpi-desync-split-pos=method+2 --dpi-desync-fooling=md5sig<br>
+–dpi-desync=fake,split2 --dpi-desync-fooling=md5sig<br>
+</p>
+<p>–new<br>
+–filter-tcp=443<br>
+#–dpi-desync=fake,disorder --dpi-desync-ttl=3<br>
+#–dpi-desync=fake,disorder2 --dpi-desync-split-pos=2 --dpi-desync-split-tls=sni --dpi-desync-fooling=md5sig,badseq --dpi-desync-fake-tls=0x1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --dpi-desync-repeats=7 --dpi-desync-ttl=5<br>
+#–dpi-desync=fake,disorder2 --dpi-desync-split-pos=2 --dpi-desync-split-tls=sni --dpi-desync-fooling=md5sig,badseq --dpi-desync-fake-tls=0x1603030135010001310303424143facf5c983ac8ff20b819cfd634cbf5143c0005b2b8b142a6cd335012c220008969b6b387683dedb4114d466ca90be3212b2bde0c4f56261a9801 --dpi-desync-repeats=7 --dpi-desync-autottl<br>
+#–dpi-desync=fake,split2 --dpi-desync-ttl=0 --dpi-desync-ttl6=0 --dpi-desync-repeats=20 --dpi-desync-fake-tls=/usr/share/zapret/fake/tls_clienthello_www_google_com.bin --dpi-desync-fooling=md5sig<br>
+#–dpi-desync=fake,split --dpi-desync-autottl=5 --dpi-desync-repeats=6 --dpi-desync-fooling=badseq --dpi-desync-fake-tls=/usr/share/zapret/fake/tls_clienthello_www_google_com.bin<br>
+#–dpi-desync=fake,split2 --dpi-desync-ttl=4 --dpi-desync-repeats=6 --dpi-desync-split-pos=1 --dpi-desync-fooling=md5sig,badseq<br>
+#–dpi-desync=fake,multidisorder --dpi-desync-split-pos=1,midsld --dpi-desync-fooling=md5sig,badseq --dpi-desync-fake-tls=/usr/share/zapret/fake/tls_clienthello_www_google_com.bin<br>
+#–dpi-desync=fake,split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3 --dpi-desync-fake-tls=/usr/share/zapret/fake/tls_clienthello_www_google_com.bin --dpi-desync-autottl=2<br>
+#–dpi-desync=multidisorder --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=1,midsld<br>
+#–dpi-desync=hopbyhop,ipfrag2 --dpi-desync-fooling=md5sig,hopbyhop --dpi-desync-repeats=2 --dpi-desync-autottl6=1:1-10<br>
+#–dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq<br>
+#–dpi-desync=split2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50<br>
+#–dpi-desync=split --dpi-desync-fooling=badseq --dpi-desync-split-pos=1<br>
+#–dpi-desync=fake,disorder --dpi-desync-ttl=3<br>
+#–dpi-desync=fake,split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --dpi-desync-fake-tls=/usr/share/zapret/fake/tls_clienthello_www_google_com.bin --dpi-desync-ttl=4<br>
+#–dpi-desync=fake,split2 --dpi-desync-split-seqovl=1 --dpi-desync-repeats=11 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=/usr/share/zapret/fake/tls_clienthello_www_google_com.bin<br>
+#–dpi-desync=split --dpi-desync-split-pos=1 --dpi-desync-fooling=badseq --dpi-desync-repeats=10 --dpi-desync-ttl=4<br>
+#–dpi-desync=fake,split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3 --dpi-desync-fake-tls=/usr/share/zapret/fake/tls_clienthello_www_google_com.bin --dpi-desync-ttl=4<br>
+–dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig --dpi-desync-repeats=15<br>
+</p>
+<p>–new<br>
+–filter-udp=443<br>
+#–dpi-desync=fake --dpi-desync-repeats=9 --dpi-desync-fake-quic=/usr/share/zapret/fake/quic_initial_www_google_com.bin<br>
+#–dpi-desync=fake --dpi-desync-udplen-increment=16 --dpi-desync-repeats=7 --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic=/usr/share/zapret/fake/quic_initial_www_google_com.bin<br>
+#–dpi-desync=fake --dpi-desync-repeats=10<br>
+#–dpi-desync=fake --dpi-desync-repeats=16 --dpi-desync-fake-quic=/usr/share/zapret/fake/quic_initial_www_google_com.bin<br>
+#–dpi-desync=fake,disorder2 --dpi-desync-cutoff=d4 --dpi-desync-udplen-increment=10 --dpi-desync-repeats=6 --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic=/usr/share/zapret/fake/quic_initial_www_google_com.bin<br>
+–dpi-desync=fake,split2 --dpi-desync-fake-quic=/usr/share/zapret/fake/quic_initial_www_google_com.bin --dpi-desync-repeats=15<br>
+&lt;HOSTLIST_NOAUTO&gt;</p>
+<p>–new<br>
+–filter-udp=50000-50099<br>
+#–dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-repeats=6 --dpi-desync-cutoff=n2<br>
+#–dpi-desync=fake,tamper --dpi-desync-any-protocol --dpi-desync-fake-quic=/usr/share/zapret/fake/quic_initial_www_google_com.bin<br>
+#–dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d3 --dpi-desync-repeats=6<br>
+–dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d2 --dpi-desync-fake-unknown-udp=0x00 --dpi-desync-repeats=5</p>
+<p>Вот сколько всяких способов я набрал. Неделю мучаюсь с различными сочетаниями и всё бестолку…<br>
+Полное собрание сочинений… Этот грёбаный Ростелеком. Проще поменять провайдера.</p></td><td>2024-11-19T14:41:24.843Z</td></tr><tr><td>KDS</td><td><p>А что линук поддерживает коментирование посередь стратегии? Что-то сомнительно</p></td><td>2024-11-19T15:04:38.904Z</td></tr><tr><td>Mihey(Михаил)</td><td><p>А как это должно быть?</p></td><td>2024-11-19T15:37:48.545Z</td></tr><tr><td>KDS</td><td><pre><code class="lang-auto">--filter-tcp=80 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --new
+# --filter-tcp=80 –dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --new
+# --filter-tcp=80 –dpi-desync=fake,multidisorder --dpi-desync-split-pos=1,midsld --dpi-desync-fooling=md5sig --new
+# --filter-tcp=80 –dpi-desync=fake,disorder2 --dpi-desync-ttl=0 --dpi-desync-fooling=md5sig,badsum --new
+# --filter-tcp=80 –dpi-desync=fake,disorder2 --dpi-desync-repeats=6 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --new
+#--filter-tcp=80 –dpi-desync=fake,multisplit --dpi-desync-split-pos=method+2 --dpi-desync-fooling=md5sig --new
+
+</code></pre>
+<p>Примерно так, да и то я не уверен, что следующие за этим стратегии стработают.</p></td><td>2024-11-19T16:44:43.793Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="kotik.neko" data-post="31" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kotik.neko/48/11830_2.png" class="avatar"> kotik.neko:</div>
+<blockquote>
+<p>Кроме того, в самом запрете нужно включить не только NFQWS_ENABLE=1, но и TPWS_ENABLE=1.<br>
+Для TPWS можно такие настройки использовать, судя по мануалу, они эффективно ломают многие блокировки:</p>
+</blockquote>
+</aside>
+<blockquote>
+<p>Однако, при комбинировании tpws и nfqws с пересечением по L3/L4 протоколам не все так просто , как может показаться на первый взгляд. Первым всегда работает tpws, за ним - nfqws. На nfqws попадает уже “задуренный” трафик от tpws. Получается, что дурилка дурит дурилку, и дурилка не срабатывает, потому что ее задурили. Вот такой веселый момент. nfqws перестает распознавать протоколы и применять методы. Некоторые методы дурения от tpws nfqws в состоянии распознать и отработать корректно, но большинство - нет. Решение - использование --dpi-desync-any-protocol в nfqws и работа как с неизвестным протоколом. Комбинирование tpws и nfqws является продвинутым вариантом, требующим глубокого понимания происходящего. Очень желательно проанализировать действия nfqws по --debug логу. Все ли так, как вы задумали.</p>
+<p>Одновременное использование tpws и nfqws без пересечения по L3/L4 (то есть nfqws - udp, tpws - tcp или nfqws - port 443, tpws - port 80 или nfqws - ipv4, tpws - ipv6) проблем не представляет.</p>
+</blockquote></td><td>2024-11-20T09:26:17.069Z</td></tr><tr><td>zzr</td><td><p>так гукчек можит искать сратегию и для запрета жеш, зачем угадывать? ну если так интеренснее навон попробуй мою куниверсальную срагению засунить who knows может проканает</p>
+<details>
+<summary>
+Summary</summary>
+<blockquote>
+<p><code>--dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --wssize 1:6</code></p>
+</blockquote>
+<p>тока учити что она не работает с хотслистами (буит оборобатываца весь трафек) потому что всссизе етот</p>
+</details>
+<p>ps<br>
+на что тока нига товы люди чтобы не арендовать впску за кардоном <img src="https://ntc.party/images/emoji/twitter/man_shrugging.png?v=12" title=":man_shrugging:" class="emoji" alt=":man_shrugging:" loading="lazy" width="20" height="20"></p></td><td>2024-11-21T07:34:37.530Z</td></tr><tr><td>Mihey(Михаил)</td><td><p>Точно такую же стратегию мне предложил Гудчек <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> Только она не работает.</p>
+<blockquote>
+<p>Strategies with 19 out of 30 successes:<br>
+–wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --wssize 1:6</p>
+</blockquote>
+<p>Увы и ах. Треть серваков гугла так и не пробивает.</p></td><td>2024-11-21T18:43:16.966Z</td></tr><tr><td>KDS</td><td><p>Там нужен не split2 а fakedsplit И не сплит-тлс а сплит-пос midsld-1 И вссайз должен указываться перед дпи-десинк, потому что это 0 фаза (так в хелпе написано)</p></td><td>2024-11-21T20:19:03.083Z</td></tr><tr><td>zzr</td><td><p>всё что назакоментировално надо убирать ио ставлять тока одну сроку конкретно (какую нибудь одну), я хз ета фишка запрета или линукса но чёт оно так не работает и воспринимает ваще всё что там указано в том числе и закоментированые сроки</p>
+<p><a class="mention" href="/u/kds">@KDS</a> хз какая у его там версия на сроутере мож столетняя котора не понтдерживает новые фишки</p>
+<aside class="quote no-group" data-username="Mihey" data-post="39" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/13edae/48.png" class="avatar"> Mihey:</div>
+<blockquote>
+<p>Strategies with 19 out of 30 successes:</p>
+</blockquote>
+</aside>
+<p>ну типа оно и работает какбы не вов сех случаях надо смореть конретно что включет в себя ети 19 из 30 может как раз того чё надо и нет там, адля етого надо <a href="https://ntc.party/t/goodcheck-%D0%B1%D0%BB%D0%BE%D0%BA%D1%87%D0%B5%D0%BA-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82-%D0%B4%D0%BB%D1%8F-goodbyedpi-zapret-byedpi/10880/645">фильтрануть</a> лолг</p></td><td>2024-11-22T05:57:57.981Z</td></tr><tr><td>Mihey(Михаил)</td><td><p>Брр. Напишите пожалуйста как должна выглядеть эта стратегия?</p></td><td>2024-11-22T06:06:22.042Z</td></tr><tr><td>Mihey(Михаил)</td><td><aside class="quote no-group" data-username="zzr" data-post="41" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/zzr/48/14949_2.png" class="avatar"> zzr:</div>
+<blockquote>
+<p>всё что назакоментировално надо убирать ио ставлять тока одну сроку конкретно (какую нибудь одну), я хз ета фишка запрета или линукса но чёт оно так не работает и воспринимает ваще всё что там указано в том числе и закоментированые сроки</p>
+</blockquote>
+</aside>
+<p>Версия запрета в прошивке последняя 69. Попробую вечером оставить только по одной строке на каждый порт в стратегии.</p></td><td>2024-11-22T06:09:42.355Z</td></tr><tr><td>User69</td><td><aside class="quote no-group" data-username="Mihey" data-post="25" data-topic="10736">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/13edae/48.png" class="avatar"> Mihey:</div>
+<blockquote>
+<p>Роутер старик Asus RT-N56UB1 на Padavan. Туда энтузиаст только недавно Zapret прикрутил</p>
+</blockquote>
+</aside>
+<p>А где про это почитать?</p></td><td>2024-11-24T14:51:35.468Z</td></tr><tr><td>Mihey(Михаил)</td><td><p>Читать и скачать новую прошивку можно с 4pda.to</p>
+<p>[<a href="https://4pda.to/forum/index.php?showtopic=428005&amp;st=6380" rel="noopener nofollow ugc">https://4pda.to/forum/index.php?showtopic=428005&amp;st=6380</a>]</p></td><td>2024-11-25T07:25:40.203Z</td></tr><tr><td>kotik.neko</td><td><p>Спасибо, что обратили внимание, сам себя задурил) Хотя в целом все отлично работало…</p></td><td>2024-11-26T15:45:20.364Z</td></tr><tr><td>Mihey(Михаил)</td><td><p>Удалось таки добиться полноценной работы Запрета на роутере. Оказывается причина по которой ничего толком не работало это IPV6! Хотя в конфигурации Запрета я этот протокол отключил, но в самом роутере использование его не было отключено. Мой провайдер этот протокол поддерживает полностью. Я наивно предполагал, что если в конфе Запрета это выключено, то и не влияет. Фигушки. Только когда я отключил в роутере этот протокол полностью, только тогда всё наконец то стало работать. Имейте в виду, что если творятся странные вещи : сайт из блока сейчас не открывается, а через 5 минут открывается, Ютуб не работает, хоть ты тресни, всё нестабильно и зависит от положения звёзд, то это всё проделки IPV6. DoH или DoT само собой должен использоваться, это обязательно, провайдерские DNS под корень и вот тогда всё получится. Надеюсь мои мытарства кому-то пригодятся.</p></td><td>2024-12-04T19:34:35.701Z</td></tr>
+    </table>
+      </body>
+    </html>

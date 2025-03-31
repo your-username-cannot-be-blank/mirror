@@ -1,0 +1,111 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>оптимизация-tcp-для-сетей-с-высокой-задержкой-потерями-jitter</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0ka(0ka)</td><td><p>Между двумя линукс хостами в интернете подключение 100мбит/сек, 100мс задержки, иногда с отклонением в +50мс и потерями в 5%, что можно грубо говоря симулировать в локалке через<br>
+<code>tc qdisc replace dev eth0 root netem delay 150ms 50ms loss random 5%</code> (симуляция только на одном конце для простоты).<br>
+На передающем конце используется ядро 6.1 и TCP CUBIC, и при активной симуляции скорость падает до ~300кбит/сек, в чем и заключается проблема. Можно увеличить скорость до ~10мбит/сек если включить TCP BBR, что уже не так ужасно, но все равно мало. (тестирую скачиванием файла с nginx через curl)</p>
+<p>В инете видел <a href="https://github.com/apernet/hysteria">hysteria2</a>, там используется TCP BRUTAL в котором нужно вручную указывать скорость подключения. Тесты показали, что при ручном указании 90мбит/сек итоговая скорость передачи TCP внутри туннеля hysteria уже ~15мбит/сек, вне туннеля сеть нагружена на ~50мбит/сек. Прога жрет не мало CPU и результат не радует.</p>
+<p>Что еще можно сделать для увеличения скорости? Позже еще протестирую udpspeeder+wg и kcptun. Если у вас есть что добавить то пишите. Спасибо.</p></td><td>2023-12-26T14:45:08.170Z</td></tr><tr><td>0ka(0ka)</td><td><p>вот как выглядит график smokeping хоста, с которым пытаюсь бороться (сеть на нем всегда в простое, он чисто для пингов), здесь всё еще хуже чем в моей симуляции<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="оптимизация-tcp-для-сетей-с-высокой-задержкой-потерями-jitter/7441bd3284103e0eb3c92e248e30db5294e7bc42.png" data-download-href="https://ntc.party/uploads/default/7441bd3284103e0eb3c92e248e30db5294e7bc42" title="image"><img src="оптимизация-tcp-для-сетей-с-высокой-задержкой-потерями-jitter/7441bd3284103e0eb3c92e248e30db5294e7bc42.png" alt="image" data-base62-sha1="gAsenckMuD75OObr84C8bbLP1LA" width="690" height="192" data-dominant-color="F1F1F0"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1397×390 37.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+1 пинг (64байт) каждые 3 секунды</p></td><td>2023-12-26T14:55:50.782Z</td></tr><tr><td>kazancity(kazancity)</td><td><p>Изменение размера socket buffer приемника может влиять. Результат зависит от tcp окна, согласования его размерности. Передающему cubic это помогает слабо, а на bbr есть некоторый эффект. С эмулятора, если код приложения не фиксирует размеры, изменением tcp_rmem приемника до “4K 6MB 6MB” получаю 30Мбит/с, для “4K 16MB 16MB” 40Мбит/с, для “4K 64MB 64MB” 50Мбит/с.</p></td><td>2023-12-26T22:31:38.502Z</td></tr><tr><td>0ka(0ka)</td><td><p>upd: для дальнейших тестов применил <code>net.ipv4.tcp_no_metrics_save=1</code>, результаты тестов немного поменялись…</p>
+<p>спасибо, разница большая выходит, тесты в 1 посте делал с уже мод.размером буфера, но щас откатил, стандартно на обеих концах у меня<br>
+<code>net.ipv4.tcp_rmem="4096 131072 3903584"</code><br>
+<code>net.ipv4.tcp_wmem="4096 65536 16777216"</code><br>
+скорость скачивания с симулятором выходит ~4мбит/сек, меняю на принимающем на<br>
+<code>net.ipv4.tcp_rmem="4096 16000000 16000000"</code><br>
+скорость скачивания очень нестабильная, при скачивании файла 150мб средняя скорость бывает и 5мбит/сек, и 20мбит/сек, и 50мбит/сек</p></td><td>2023-12-27T05:24:07.506Z</td></tr><tr><td>ValdikSS</td><td><aside class="onebox githubrepo" data-onebox-src="https://github.com/xtaci/kcptun">
+  <header class="source">
+
+      <a href="https://github.com/xtaci/kcptun" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="оптимизация-tcp-для-сетей-с-высокой-задержкой-потерями-jitter/fabf327f99c35031ba24edd4a110fb5ed5f05865_2_690x344.png" class="thumbnail" data-dominant-color="E7ECEE">
+
+  <h3><a href="https://github.com/xtaci/kcptun" target="_blank" rel="noopener">GitHub - xtaci/kcptun: A Quantum-Safe Secure Tunnel based on QPP, KCP,...</a></h3>
+
+    <p><span class="github-repo-description">A Quantum-Safe Secure Tunnel based on QPP, KCP, FEC, and N:M multiplexing.</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-01-06T00:58:12.720Z</td></tr><tr><td>haste</td><td><p>Вот такое еще попалось:</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/yeliqseu/pepesc">
+  <header class="source">
+
+      <a href="https://github.com/yeliqseu/pepesc" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="оптимизация-tcp-для-сетей-с-высокой-задержкой-потерями-jitter/5a3176ce50cbd8470a76f10361da42a625f2d972_2_690x344.png" class="thumbnail" data-dominant-color="F1F4F5">
+
+  <h3><a href="https://github.com/yeliqseu/pepesc" target="_blank" rel="noopener nofollow ugc">GitHub - yeliqseu/pepesc: A TCP Performance Enhancing Proxy for...</a></h3>
+
+    <p><span class="github-repo-description">A TCP Performance Enhancing Proxy for Non-Terrestrial (Lossy Long-Distance) Links</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-04-24T09:51:19.668Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><aside class="quote no-group" data-username="0ka" data-post="1" data-topic="6692">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>В инете видел <a href="https://github.com/apernet/hysteria" rel="noopener nofollow ugc">hysteria2 </a>, там используется TCP BRUTAL</p>
+</blockquote>
+</aside>
+<p>Там можно удалить из конфига секцию “bandwidth” и вместо Brutal будет использоваться BBR, пробовали с ним?<br>
+Ну и выше уже посоветовали kcptun. В XRay есть своя реализация KCP - mKCP (похожая, но не совместимая), можно потестировать ее, как с включенным congestion, так и без.</p></td><td>2024-04-28T08:36:44.909Z</td></tr><tr><td>0ka(0ka)</td><td><p>без bandwidth тоже жрёт проц очень сильно, у меня просто не вывозит впс. kcptun и mkcp еще не пробовал, может в другой раз… остановится на варианте c bbr tcp proxy (как тут <a href="https://ntc.party/t/6160/8" class="inline-onebox">Wireguard vs wireguard через tun от sing-box - #8 by 0ka</a>), т.е. прозрачным прокси заворачиваю tcp трафик на xray tproxy для подсети wireguard.</p>
+<p>еще пробовал wireguard over vless, но появляется bufferbloat (до 25000 мс), sqm-scripts решает bufferbloat, но сильно снижается скорость</p></td><td>2024-04-28T08:58:23.117Z</td></tr><tr><td>0ka(0ka)</td><td><p>Попробовал wg over vless еще раз, в этот раз без sqm-scripts выполнил “tc qdisc replace dev wg0 root cake besteffort bandwidth 19mbit rtt <strong>1000ms</strong>”, скорость в однопотоке в итоге почти полная (проверял на <a href="http://speedtest.selectel.ru">speedtest.selectel.ru</a>, там используется cubic) и bufferbloat в разы меньше чем без cake. По дефолту в cake параметр rtt=100ms и с ним скорость сильно снижается, почему так не знаю</p></td><td>2024-05-01T12:31:12.272Z</td></tr>
+    </table>
+      </body>
+    </html>

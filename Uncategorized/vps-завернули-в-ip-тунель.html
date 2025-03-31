@@ -1,0 +1,55 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>vps-завернули-в-ip-тунель</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Xunlei</td><td><p>Возникли проблемы с VPS на промо тарифе аезы в швеции, в результате отладки вяснил, что порезан MTU до 1398, и трафик стал бегать через франкфурт (+22 мс). Пользователи промо аезы, у вас тоже такое происходит?</p></td><td>2024-08-09T13:30:33.439Z</td></tr><tr><td>0ka(0ka)</td><td><p>ага, есть такое, раньше MTU был 1448, и еще с 1 августа они мутят что-то, несколько дней назад были проблемы с MSS, который рандомно фиксировался то в 1200, то в 1300, то вообще не фиксировался, что приводило в зависанию TCP соединения.</p>
+<p>он у меня только для wireguard, поэтому зафиксировал MSS так:<br>
+<code>iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1200</code><br>
+если у вас там прокси (xray/vless/socks/…), то тогда по идее так:<br>
+<code>iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1200</code></p>
+<p>но вот прямо сейчас смотрю: mss всё еще зафиксирован в 1200/1300 (рандом), вроде без промахов, так что можно со своей стороны не фиксировать</p>
+<p>про сниженный MTU это просто подстава и они молчат, я просил поддержку добавить инфу об этом в базу знаний, но они отказались. и хз как щас, но их looking glass были сломаны как минимум пол года, решение поддержки было “купите сервер в нужной локации для теста”</p></td><td>2024-08-09T13:46:41.903Z</td></tr><tr><td>Xunlei</td><td><p>Благодарю, сейчас принудительно снижу, буду тестить. Промо оно такое.</p></td><td>2024-08-09T13:54:51.370Z</td></tr><tr><td>0ka(0ka)</td><td><p>исправил и дополнил пост</p></td><td>2024-08-09T14:08:00.787Z</td></tr><tr><td>podkopaev(Сергей)</td><td><aside class="quote no-group" data-username="Xunlei" data-post="1" data-topic="9033">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>трафик стал бегать через франкфурт (+22 мс)</p>
+</blockquote>
+</aside>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="vps-завернули-в-ip-тунель/166de670fe43da488d69ff34840ad2962aee68ac.jpeg" data-download-href="https://ntc.party/uploads/default/166de670fe43da488d69ff34840ad2962aee68ac" title="Снимок экрана 2024-08-09 172338"><img src="vps-завернули-в-ip-тунель/166de670fe43da488d69ff34840ad2962aee68ac_2_330x500.jpeg" alt="Снимок экрана 2024-08-09 172338" data-base62-sha1="3cpXN03ghhLG5a21fzgUtyqwEa0" width="330" height="500" srcset="vps-завернули-в-ip-тунель/166de670fe43da488d69ff34840ad2962aee68ac_2_330x500.jpeg, vps-завернули-в-ip-тунель/166de670fe43da488d69ff34840ad2962aee68ac_2_495x750.jpeg 1.5x, vps-завернули-в-ip-тунель/166de670fe43da488d69ff34840ad2962aee68ac.jpeg 2x" data-dominant-color="2D3942"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Снимок экрана 2024-08-09 172338</span><span class="informations">566×857 170 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-08-09T14:24:16.777Z</td></tr><tr><td>Xunlei</td><td><p>Понятно, мне на почту пришло только сообщение, о работах 1-ого августа на 1 час.</p></td><td>2024-08-09T14:40:42.625Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>То же самое. MSS = 1200/1300, MTU = 1254/1354. URL Test в Nekoray вырос с 200 мс до 600 мс.</p></td><td>2024-08-10T13:46:47.305Z</td></tr>
+    </table>
+      </body>
+    </html>

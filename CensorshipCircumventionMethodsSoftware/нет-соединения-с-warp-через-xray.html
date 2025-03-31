@@ -1,0 +1,100 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>нет-соединения-с-warp-через-xray</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>AliasNameless</td><td><p>Коллеги, помогите пожалуйста подключаться к WARP.<br>
+Установлены 3Х-UI 2.4.6 и X-RAY 24.11.11.</p>
+<p>Хостинг hshp.host ip адрес немецкий.<br>
+<img src="нет-соединения-с-warp-через-xray/d11579c14f7a512690481b475b36386c70c46cfe.png" alt="изображение" data-base62-sha1="tPDNLbqj3yFGKbe9BBNKKt9lbBk" width="310" height="77"></p>
+<p>Пинг от хостера до <a href="http://engage.cloudflareclient.com" rel="noopener nofollow ugc">engage.cloudflareclient.com</a> есть</p>
+<pre><code class="lang-auto">PING engage.cloudflareclient.com (162.159.192.1) 56(84) bytes of data.
+64 bytes from 162.159.192.1 (162.159.192.1): icmp_seq=1 ttl=58 time=6.91 ms
+64 bytes from 162.159.192.1 (162.159.192.1): icmp_seq=2 ttl=58 time=6.79 ms
+64 bytes from 162.159.192.1 (162.159.192.1): icmp_seq=3 ttl=58 time=6.79 ms
+</code></pre>
+<p>Конфиг аутбонда сгенерирован по умолчанию</p>
+<pre><code class="lang-auto">{
+  "tag": "warp",
+  "protocol": "wireguard",
+  "settings": {
+    "mtu": 1420,
+    "secretKey": "*****************************",
+    "address": [
+      "172.16.0.2/32",
+      "2606:4700:110:876f:9c3d:3388:7aef:dab3/128"
+    ],
+    "workers": 2,
+    "domainStrategy": "ForceIP",
+    "reserved": [
+      232,
+      8,
+      45
+    ],
+    "peers": [
+      {
+        "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+        "allowedIPs": [
+          "0.0.0.0/0",
+          "::/0"
+        ],
+        "endpoint": "engage.cloudflareclient.com:2408",
+        "keepAlive": 0
+      }
+    ],
+    "noKernelTun": false
+  }
+}
+</code></pre>
+<p>Все, что направляю через warp не проходит. Помогите продиагностировать!</p></td><td>2024-11-13T11:28:30.211Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Посмотри пинг 172.16.0.2 и чего mtu так задран уменьши слегка</p></td><td>2024-11-13T17:46:33.005Z</td></tr><tr><td>YamiRami</td><td><p>Присоединюсь к теме, не пингуется на хосте я так понял это локальный ip</p>
+<p>Upd: полез почитал и понял что у меня warp как будто не заведён хотя впринципе такое может быть x-ui не ставит его или я чего то не догоняю</p></td><td>2024-11-13T18:04:19.284Z</td></tr><tr><td>AliasNameless</td><td><p>Пинга нет! Получается, что 3x-ui не ставит его из коробки или по какой то причине он не запускается?</p></td><td>2024-11-14T08:17:01.176Z</td></tr><tr><td>Jabius</td><td><p>В 3x оно из коробки так и не работает, о чем ни в одном обзоре не сказано. Полдня угробил. Да и обгрызен там Warp-вплоть до того, что раздел “DNS” в конфигах игнорит, а из json его выкидывает, если сам создал. Помогло простое-замена в endpoint cloudflare… на “162.159.192.1:порт”.</p></td><td>2024-11-14T08:33:54.490Z</td></tr><tr><td>AliasNameless</td><td><p>Невероятно! Работает! Спасибо!<br>
+Но. Раскатал 3x-ui на другом сервере, той же версии. Залил конфиг. Разница только в версии Debian. И там endpoint по умолчанию <a href="http://engage.cloudflare.com:2048" rel="noopener nofollow ugc">engage.cloudflare.com:2048</a> работает. Как предположение: возможно в старших версиях debian обращение идет по ipv6.  Когда мы указываем прямо ipv4, то работает.</p></td><td>2024-11-14T08:42:46.474Z</td></tr><tr><td>SladerEvil(Slader Evil)</td><td><p>Спасибо большое!</p></td><td>2024-11-14T11:54:50.715Z</td></tr><tr><td>pauk</td><td><p>Сделал так же, к сожалению результата это не дало. И вроде идет пинг по 176.16.0.2, но почему то сайты до сих пор выдают таймаут. Не знаю, что это за трагедия, и как понять что сломалось тоже не могу. Странно все это кароче. …Cказал бы я, но все внезапно завелось. Даже не спрашивайте…</p>
+<p>Забавило одна деталь. Я пробовал пинговать поддомен енгейдж. Шёл он по 162.159.192.1<br>
+<img src="нет-соединения-с-warp-через-xray/e50df43c47bce32101756386a8f6cc0478de5696.png" alt="image" data-base62-sha1="wGjeHy8nleiJkzQtZSF2us6l0N0" width="570" height="101"></p>
+<p>Затем, заменив адрес в эндпоинте на айпишник клаудфлейра вместо адреса, пинг по адресу внезапно почему-то начался именно по IPv6 (и естественно вис потому что не поддерживается)<br>
+<img src="нет-соединения-с-warp-через-xray/6939ce8b259c80265f1968307c48de5ae7ab607c.png" alt="image" data-base62-sha1="f0RZ41vZLaAHVG6A1eWSwsDtpRW" width="586" height="36"></p>
+<p>Не знаю, подтверждение ли это того, что</p>
+<aside class="quote no-group" data-username="AliasNameless" data-post="6" data-topic="13072">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/da6949/48.png" class="avatar"> AliasNameless:</div>
+<blockquote>
+<p>в старших версиях debian обращение идет по ipv6</p>
+</blockquote>
+</aside>
+<p>у самого убунта. Вот такое наблюдение…</p></td><td>2024-11-16T12:31:59.797Z</td></tr><tr><td>gonza159</td><td><p>Такая же проблема на Ubuntu, хотя есть еще два сервера (у которых версия ниже), они работают как надо, трафик перенаправляется. Удалось, что то решить за эти дни ?</p></td><td>2024-11-25T09:07:33.996Z</td></tr>
+    </table>
+      </body>
+    </html>

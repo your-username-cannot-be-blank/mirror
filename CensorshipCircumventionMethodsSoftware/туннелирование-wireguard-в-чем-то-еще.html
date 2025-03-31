@@ -1,0 +1,148 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>туннелирование-wireguard-в-чем-то-еще</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>xpsysdev(xp)</td><td><p>Здравствуйте.<br>
+После недавней <a href="https://ntc.party/t/mullvad-vpn/4285/2">блокировки mullvad vpn</a> задался вопросом восстановления доступа к нему путем поднятия легковесного туннеля до ближайшей страны и работы как прежде через этот туннель, т.к. много всего уже настроено.<br>
+Глубоко тему не копал, но с наскока сделать не получилось. SSH, OpenVPN, IKEv2 - ничего не позволяет запустить wireguard туннель внутри другого туннеля (работаю в macos).<br>
+Понимаю что вопрос можно решить поднятием впн на роутере, но так сильно заморачиваться не хочется, нужно с одного компьютера все сделать.<br>
+Наверняка кто-то уже занимался подобным, подскажите куда копать.</p></td><td>2023-04-18T10:51:28.680Z</td></tr><tr><td>Elevator</td><td><p>А зачем вам mullvad vpn если вы собираетесь поднять туннель до другой страны? У вас и без mullvad все будет работать</p></td><td>2023-04-18T12:02:46.197Z</td></tr><tr><td>xpsysdev(xp)</td><td><p>Нужны адреса mullvad. Там ~400 серверов за 5$/мес, у меня софт настроен их гонять в хвост и в гриву.</p></td><td>2023-04-18T12:27:07.283Z</td></tr><tr><td>soloway(Solo Way)</td><td><p>Nginx умеет форвардить UDP. Попробуйте добавить в nginx.conf что-то вроде этого:</p>
+<pre><code class="lang-auto">stream {
+        server {
+                listen 5151 udp;
+                proxy_pass site.com:5151;
+        }
+}
+</code></pre></td><td>2023-04-18T14:40:24.727Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="xpsysdev" data-post="1" data-topic="4331">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/7ea924/48.png" class="avatar"> xpsysdev:</div>
+<blockquote>
+<p>Понимаю что вопрос можно решить поднятием впн на роутере, но так сильно заморачиваться не хочется, нужно с одного компьютера все сделать.</p>
+</blockquote>
+</aside>
+<p>Как вариант — установить OpenWrt (или любой другой дистрибутив) в виртуальную машину на компьютере, и маршрутизировать трафик через неё (прописать её IP-адрес шлюзом на компьютере, а саму ВМ добавить в физическую сеть мостом).</p></td><td>2023-04-18T17:12:57.128Z</td></tr><tr><td>xpsysdev(xp)</td><td><aside class="quote no-group" data-username="soloway" data-post="4" data-topic="4331">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/e99b99/48.png" class="avatar"> soloway:</div>
+<blockquote>
+<p>Nginx умеет форвардить UDP. Попробуйте добавить в nginx.conf что-то вроде этого:</p>
+</blockquote>
+</aside>
+<p>Думал уже в сторону udptunnel, он делает почти то же самое, но придется править все 400 vpn конфигов, чтобы они ломились на новый сервер, и соответствующую правкам конфигурацию сервера выкатывать.<br>
+Хотя это и оптимальный вариант по быстродействию, я надеялся решить все “на коленке”.</p>
+<aside class="quote no-group" data-username="ValdikSS" data-post="5" data-topic="4331">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Как вариант — установить OpenWrt (или любой другой дистрибутив) в виртуальную машину на компьютере, и маршрутизировать трафик через неё (прописать её IP-адрес шлюзом на компьютере, а саму ВМ добавить в физическую сеть мостом).</p>
+</blockquote>
+</aside>
+<p>Благодарю, вот это уже вариант для таких лентяев как я <img src="https://ntc.party/images/emoji/twitter/melting_face.png?v=12" title=":melting_face:" class="emoji" alt=":melting_face:" loading="lazy" width="20" height="20"></p>
+<p>UPD:<br>
+Как и посоветовали поднял OpenWrt в VirtualBox, спасибо <a class="mention" href="/u/valdikss">@ValdikSS</a>. Пустил туннель на Нидерланды (хостинг vdsina 200р/мес). Заворачиваю wireguard от mullvad в wireguard же от себя. Получил где-то +25мс но в итоге все остальное работает как и было настроено до этого.</p>
+<p>Wireguard на vds поднимается одной строчкой<br>
+<code>wget https://git.io/wireguard -O wireguard-install.sh &amp;&amp; bash wireguard-install.sh</code></p>
+<p>Настроить подключение к wireguard в OpenWrt чуть сложнее, делал по <a href="https://www.ivpn.net/setup/router/openwrt-wireguard/" rel="noopener nofollow ugc">этому гайду</a><br>
+Вдруг кому пригодится.</p></td><td>2023-04-19T06:44:15.878Z</td></tr><tr><td>anon94384997</td><td><p>Знаю, вам врядли это поможет (может, кому другому тогда), потому что вы наверняка используете Windows и Wireguard, но если бы использовали Linux и OpenVPN, можно было было настроить OpenVPN как прокси (для целей VPN через VPN).<br>
+<a href="https://ntc.party/t/convert-tun-tap-to-socks5-http-proxy-openvpn-as-proxy/106">https://ntc.party/t/convert-tun-tap-to-socks5-http-proxy-openvpn-as-proxy/106</a> Convert TUN/TAP to Socks5/HTTP proxy (OpenVPN as proxy)<br>
+<a href="https://rutracker.org/forum/viewtopic.php?t=6292222" rel="noopener nofollow ugc">https://rutracker.org/forum/viewtopic.php?t=6292222</a> OpenVPN как прокси</p>
+<p>Там в темах упоминаются несколько проектов Wireguard как прокси, но у меня ни один не получилось настроить (пробовал аж 4). Кажется, там на серверной стороне еще надо какие-то изменения вносить, что в большинстве случаев невозможно, понятное дело.<br>
+А OpenVPN как прокси проверенное решение (хотя, тоже не обошлось без подводных камней). Придется компилировать и из командной строки конфиги подключать.</p>
+<p>Т.е. в системе поднимается любой обычный VPN, который еще не заблокирован в России. Он предоставит глобально зарубежный IP, чтобы обойти влияние РКН. А потом поднимается openvpn-proxy к серверам Mullvad. И в браузерах уже прописывается локальный прокси. Или можно openvpn-proxy натравить на вышестоящий shadowsocks (чтобы обойти блокировку РКН). Но тут уже надо править ovpn конфиги (прописывать вышестоящий прокси туда). Это сделать в общем не трудно.</p></td><td>2023-04-26T15:41:59.520Z</td></tr><tr><td>anon94384997</td><td><p><a href="https://github.com/zhsj/wghttp" rel="noopener nofollow ugc">wghttp</a> вроде работает, но почему-то не со всеми серверами. С Proton VPN не получилось подружить и в клиенте пришлось отключить распознавание DNS через SOCKS прокси.<br>
+Конфиги пришлось переводить в командную строку.</p>
+<p>Запуск:<br>
+<code>wghttp --listen=127.0.0.1:1080  --client-ip=192.168.6.140 --dns=1.1.1.1 --private-key=KEY --peer-key=KEY  --peer-endpoint=server.com:1024 --exit-mode=remote  --resolve-dns=1.1.1.1</code></p>
+<p>Address --client-ip<br>
+DNS --dns<br>
+PrivateKey --private-key<br>
+PublicKey --peer-key<br>
+Endpoint --peer-endpoint<br>
+PresharedKey --preshared-key<br>
+Local HTTP/SOCKS --listen</p>
+<p>Готовые сборки есть здесь:<br>
+<a href="https://github.com/artenax/wghttp" rel="noopener nofollow ugc">https://github.com/artenax/wghttp</a><br>
+<a href="https://github.com/moremorefun/wghttp" rel="noopener nofollow ugc">https://github.com/moremorefun/wghttp</a></p>
+<p>Но если вам от Mullvad VPN нужен UDP (например, для торрентов), то прокси, конечно, не подойдет.</p></td><td>2023-04-26T19:12:07.472Z</td></tr><tr><td>0ka(0ka)</td><td><p>xray тоже может proxy → wg, настройки сервера не нужно. Почему прокси не подойдёт для udp? socks5 поддерживает udp</p></td><td>2023-04-27T13:12:26.259Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="0ka" data-post="9" data-topic="4331">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>xray тоже может proxy → wg</p>
+</blockquote>
+</aside>
+<p>Легко сказать может, но без реальных примеров командной строки в этом мало смысла.</p></td><td>2023-04-27T18:54:47.235Z</td></tr><tr><td>anon94384997</td><td><p>Ну, вот примерно я представляю как настроить. Бинарники <a href="https://github.com/XTLS/Xray-core/releases" rel="noopener nofollow ugc">тут</a>.<br>
+Запуск:<br>
+<code>xray -c /etc/xray/config.json</code><br>
+Wireguard конфиг надо преобразовать в json<br>
+<a href="https://github.com/XTLS/Xray-core/issues/1981" rel="noopener nofollow ugc">https://github.com/XTLS/Xray-core/issues/1981</a><br>
+<a href="https://github.com/XTLS/Xray-core/issues/1896" rel="noopener nofollow ugc">https://github.com/XTLS/Xray-core/issues/1896</a><br>
+Не работает, конечно, нифига.<br>
+Зато аниме, иероглифы и лапша из json’овских скобок вам обеспечены в процессе экспериментов.</p></td><td>2023-04-27T20:06:17.626Z</td></tr><tr><td>0ka(0ka)</td><td><p>у меня работает<br>
+<a class="attachment" href="туннелирование-wireguard-в-чем-то-еще/df6Ge8y7ZUZuqFFrJF3TEI5QH2b.json">wgcf.json</a> (1 КБ)<br>
+внутри пример конфига cf warp, нужно заменить на свой. Если заменяете на свой cf warp, то имейте ввиду что в россии и на популярных хостингах работать не будет</p></td><td>2023-04-28T14:01:15.698Z</td></tr><tr><td>anon94384997</td><td><p>У меня не работает с варпом (ключи мои):</p>
+<pre><code class="lang-auto">denis@systemp:~$ xray -c /etc/xray/config.json
+Xray 1.7.5 (Xray, Penetrates Everything.) Custom (go1.20 linux/386)
+A unified platform for anti-censorship.
+2023/04/28 23:34:05 [Info] infra/conf/serial: Reading config: /etc/xray/config.json
+2023/04/28 23:34:05 [Warning] core: Xray 1.7.5 started
+2023/04/28 23:34:08 tcp:127.0.0.1:58646 accepted tcp:195.201.201.32:443 [wireguard]
+panic: unaligned 64-bit atomic operation
+
+goroutine 36 [running]:
+runtime/internal/atomic.panicUnaligned()
+	runtime/internal/atomic/unaligned.go:8 +0x2d
+runtime/internal/atomic.Load64(0xa21cc14)
+	runtime/internal/atomic/atomic_386.s:225 +0x10
+go.uber.org/atomic.(*Int64).Load(...)
+	go.uber.org/atomic@v1.10.0/int64.go:45
+github.com/sagernet/wireguard-go/device.(*Device).IsUnderLoad(0xa21cb40)
+	github.com/sagernet/wireguard-go@v0.0.0-20221116151939-c99467f53f2c/device/device.go:224 +0x134
+github.com/sagernet/wireguard-go/device.(*Device).RoutineHandshake(0xa21cb40, 0x1)
+	github.com/sagernet/wireguard-go@v0.0.0-20221116151939-c99467f53f2c/device/receive.go:290 +0x4be
+created by github.com/sagernet/wireguard-go/device.NewDevice
+	github.com/sagernet/wireguard-go@v0.0.0-20221116151939-c99467f53f2c/device/device.go:316 +0x2f4
+denis@systemp:~$
+</code></pre>
+<p>С другим поставщиком таких ошибок нет, но нет коннекта (висяк).<br>
+Но и wghttp не со всеми VPN работает. С Proton, например, не работает. И дело не в РКН.<br>
+Все-таки глючная вещь этот wireguard go, что лежит в основе.<br>
+openvpn гораздо лучше себя ведет.</p>
+<p>Просто, я еще сам выхожу в интернет через wireguard. Это получается wireguard через wireguard.</p></td><td>2023-04-28T16:40:56.322Z</td></tr>
+    </table>
+      </body>
+    </html>

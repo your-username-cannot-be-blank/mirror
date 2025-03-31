@@ -1,0 +1,74 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>настройка-dvtws-на-pfsense-260-3226</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>biveka4392</td><td><p>Всем доброго времени суток!</p>
+<p>Хотел бы попросить помощи по настройке dvtws на pfSense 2.6.0 от знающих людей.</p>
+<p>Проблема заключается в зацикливании пакетов при обработки их dvtws’ом.</p>
+<p>Инструкция по настройке из (<a href="https://github.com/bol-van/zapret/blob/b1b82cb29a84e828bcb86a2db6e970a62ee63619/docs/bsd.eng.md" rel="noopener nofollow ugc">документации</a>) не сработала из-за выпиливания фаерволла ipfw из pfSense в версии 2.6.0. При следовании инструкции ipfw просто игнорируется и не используется вовсе. Включение captive-portal не помогает так, как его <a href="https://github.com/pfsense/pfsense/commit/7c2468c510ea7da6f284a7afad7f62c6c9880717" rel="noopener nofollow ugc">переделали под pf</a>.</p>
+<p>В связи с этим пришлось изобретать способ перенаправления пакетов на divert-сокет.<br>
+Методом научного тыка были выработаны следущие правила для фаерволла pf, позволяющие перенаправлять пакеты на divert-сокет:</p>
+<pre><code class="lang-auto">pass in  quick on igc0 proto tcp from port {80,443} divert-to 989 no state
+pass out quick on igc0 proto tcp to   port {80,443} divert-to 989 no state
+</code></pre>
+<p>При использовании данных правил пакеты успешно перенаправляются на divert-сокет и даже успешно обрабатываются dvtws’ом (заблокированный сайт открывается), но обработанные пакеты продолжают возвращаться на обработку в dvtws.</p>
+<p>Хотел бы попросить помощи в решении данной проблемы.</p>
+<details>
+<summary>
+Версия pfSense</summary>
+<p><img src="настройка-dvtws-на-pfsense-260-3226/e66309bc0849720c750e78047c2f8c607b97c903.png" alt="pfSense-verison" data-base62-sha1="wS60nOe07NaHbRXVJob5zUiELBN" width="411" height="101"></p>
+</details>
+<details>
+<summary>
+Команда запуска dvtws</summary>
+<pre><code class="lang-auto">/opt/zapret/nfq/dvtws --port 989 --dpi-desync=fake,split --dpi-desync-ttl=5 --daemon
+</code></pre>
+<p>(была найдена при помощи <a href="https://github.com/bol-van/zapret/blob/master/blockcheck.sh" rel="noopener nofollow ugc">blockcheck.sh</a>)</p>
+</details>
+<p>Лог работы dvtws:<br>
+<a class="attachment" href="настройка-dvtws-на-pfsense-260-3226/17ec5EkBpmvW6fvfRPRhCn4V1as.log">dvtws.log</a> (60.1 KB)</p></td><td>2022-09-08T15:24:45.591Z</td></tr><tr><td>bolvan</td><td><p>ipfw не выпилен из 2.6.0. Модули ipfw, ipdivert присутствуют, загружаются<br>
+Но ipfw почему-то исключается из обработки.<br>
+Вернуть его помогает disable/enable pf</p>
+<p>pfctl -d ; pfctl -e<br>
+и все начинает опять работать</p></td><td>2022-09-08T18:32:53.600Z</td></tr><tr><td>biveka4392</td><td><p>Действительно помогло.<br>
+Спасибо большое!</p></td><td>2022-09-09T03:23:21.187Z</td></tr><tr><td>Elevator</td><td><blockquote>
+<p>для поиска</p>
+</blockquote>
+<p>Такая же проблема на OPNsense 24.1.10_3<br>
+Способ решения выше</p></td><td>2024-07-23T10:36:18.561Z</td></tr><tr><td>dmshel(Dmshel)</td><td><p>Коллеги, Добрый вечер! А можно пошаговую инструкцию для pfsense. трижды пытался делать по инструкции по ссылке выше, все проделал, финальный выхлоп, как в инструкции, но после этих манипуляций вообще ни один сайт не открывается. делал по доке с момента pfsense.</p></td><td>2024-08-07T13:45:45.104Z</td></tr>
+    </table>
+      </body>
+    </html>

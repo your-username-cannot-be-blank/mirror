@@ -1,0 +1,75 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>idea-let-dnstt-server-respond-to-any-dns-zone-1650</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>dnstt-server requires you to specify a single DNS zone for the tunnel (<a href="https://repo.or.cz/dnstt.git/blob/d92a791b6864901f9263f7d73d97cfd30ac53b09:/README#l130">e.g. t.example.com</a>). Only queries that are under the zone are processed for tunnel data; all others are discarded. Let’s discuss the possibility of letting dnstt-server process queries under <em>any</em> zone. That would make it possible to set up “aliases” for a single dnstt-server instance, under different DNS names. Such aliases could be set up by anyone, not only by the person who runs the dnstt-server.</p>
+<p>I was thinking about this during the <a href="https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601">Kazakhstan shutdown</a>. <a href="https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/33">It was discovered</a> that dnstt in plaintext UDP port 53 mode could get through the shutdown. The problem is that plaintext UDP port 53 mode <a href="https://www.bamsoftware.com/software/dnstt/#caveats">is not covert</a>. A censor can inspect the contents of DNS queries, and block the ones that are for a subdomain of a known dnstt server.</p>
+<p>For example, I could run an instance of dnstt-server and <a href="https://www.bamsoftware.com/software/dnstt/#dns-setup">set up DNS records</a> pointing to it:</p>
+<ul>
+<li><strong>A</strong> tns.tunnel.example points to 203.0.113.2</li>
+<li><strong>NS</strong> t.tunnel.example is managed by tns.tunnel.example</li>
+</ul>
+<p>If I posted publicly, “there is a dnstt-server running at t.tunnel.example,” any censor could read the post and add t.tunnel.example to its blocking rules. But if dnstt-server were modified to respond to queries for any domain, then anyone could set up their own DNS records, under a domain they control, pointing to the same IP addresses:</p>
+<ul>
+<li><strong>A</strong> tns.rhinoceros.example points to 203.0.113.2</li>
+<li><strong>NS</strong> t.rhinoceros.example is managed by tns.rhinoceros.example</li>
+</ul>
+<p>They could then <em>privately</em> use dnstt-client with the DNS zone t.rhinoceros.example, a DNS name that the censor does not know about. If an alias gets discovered and blocked, you can make a new one, without needing to relocate the dnstt-server.</p>
+<p>For this idea to work, you need to be using a recursive resolver located outside the censor’s area of control—otherwise the censor can just block the dnstt-server’s IP address. In the case of the Kazakhstan shutdown, <a href="https://ntc.party/t/network-shutdown-all-around-kazakhstan/1601/24">8.8.8.8</a> would have worked.</p>
+<p>The reason the idea might work at all is that DNS queries do not contain the IP address of the eventual authoritative resolver, only its DNS name. A censor could block this scheme by working through the name abstraction, looking up NS records for DNS queries it observes, then matching them against a database of known DNS tunnel servers. In the example above, having seen a query for xxx.t.rhinoceros.example, a censor could look up the NS for rhinoceros.example, then ask that NS for the NS of t.rhinoceros.example, then resolve tns.rhinoceros.example to find the IP address 203.0.113.2. The censor could then match the IP address against a database of known tunnel proxies. These dynamic lookups are probably awkward to do at line rate for every query, but they could be made more practical by testing domains in batches, or probabilistically.</p>
+<p>A tunnel that uses plaintext DNS, even with a DNS zone that is unknown to the censor, is still probably identifiable anyway, because of the distinctive kinds of DNS messages it uses.</p>
+<p>I normally don’t like this kind of circumvention design, where success depends on the censor’s being ignorant. But in an extreme case like an Internet shutdown, where it’s difficult to get any kind of access, I think it’s justified to try things even if they are theoretically unsound.</p>
+<h3><a name="user-interface-1" class="anchor" href="#user-interface-1"></a>User interface</h3>
+<p>Supposing we do permit dnstt-server to respond to queries for any domain, what should the user interface look like? Currently, the DNS zone is part of the command-line interface:</p>
+<blockquote>
+<p><strong>dnstt-client</strong> <strong>-udp</strong> <em>HOST</em>:<em>PORT</em> <strong>-pubkey-file</strong> <em>FILENAME</em> <em>DOMAIN</em> <em>LOCALADDR</em>:<em>LOCALPORT</em></p>
+</blockquote>
+<p>One way would be to make the <em>DOMAIN</em> argument optional. If dnstt-server gets only 1 non-option argument, it will not restrict the domain of incoming queries:</p>
+<blockquote>
+<p><strong>dnstt-client</strong> <strong>-udp</strong> <em>HOST</em>:<em>PORT</em> <strong>-pubkey-file</strong> <em>FILENAME</em> <em>LOCALADDR</em>:<em>LOCALPORT</em></p>
+</blockquote>
+<p>Another way would be to make the <em>DOMAIN</em> argument a wildcard. You could pass <strong>*</strong> to permit any domain.</p>
+<blockquote>
+<p><strong>dnstt-client</strong> <strong>-udp</strong> <em>HOST</em>:<em>PORT</em> <strong>-pubkey-file</strong> <em>FILENAME</em> <strong>*</strong> <em>LOCALADDR</em>:<em>LOCALPORT</em></p>
+</blockquote>
+<p>Or, we could add a new command line option that means to ignore the <em>DOMAIN</em> argument.</p></td><td>2022-01-20T03:05:15.576Z</td></tr><tr><td>bolvan</td><td><p>Wildcard option looks the best to me. Or move away from positional arguments to named ones.</p>
+<p>From my tests many public DNS already implement rate limiting. Some ISPs also have rate limits in their DNS.<br>
+This can be the most effective measure to stop using bandwidth consuming content although unable to stop low bandwidth usage cases - messengers, email</p>
+<p>Also it is important to not open DNS amplification to net scanners</p>
+<p>Its likely if DNS tunnels become widespread they will block them. The fastest way to achieve this goal is to offer simple solution for everyone</p></td><td>2022-01-20T08:07:45.025Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,192 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>заблокировать-определенные-ipurl-для-клиентов-vpn-сервера</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>kbh38a(wer)</td><td><p>Привет.<br>
+У меня есть vps в европе на debian. Я получаю к нему доступ с помощью wireguard и shadowsocks.<br>
+Я хочу, чтобы клиенты моего vps не могли через него зайти на некоторые адреса. Например, я хочу запретить заходить на <a href="http://sber.ru" rel="noopener nofollow ugc">sber.ru</a>, чтобы люди случайно не зашли туда с иностранного ip и не были заблокированы сбером.</p>
+<p>На первом шаге я хочу блокировать не по URL, а хотя бы по IP.<br>
+Как это сделать? Я правильно понимаю, что надо использовать iptables table=FILTER &amp; chain=FORWARD?<br>
+<code>iptables -A FORWARD -d 5.255.255.242 -j DROP</code><br>
+так не сработало. Клиент может пинговать 5.255.255.242. <strong>Где я ошибся?</strong></p>
+<p>На втором шаге я хочу блокировать по url. Я хочу сделать это так:</p>
+<ol>
+<li>регулярно поддомены домена <a href="http://sber.ru" rel="noopener nofollow ugc">sber.ru</a> (вроде находил такие сервисы), регулярно резолвить ip этих доменов и добавлять в iptables … drop</li>
+<li>найти подсеть, принадлежащую сберу и заблокировать ip диапазон</li>
+</ol>
+<p><strong>Нормальный вариант?</strong>. Я понимаю, что клиент может настроить свой dns и мое решение не сработает на 100%</p></td><td>2024-04-13T21:20:18.048Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="kbh38a" data-post="1" data-topic="7688">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/f14d63/48.png" class="avatar"> kbh38a:</div>
+<blockquote>
+<p>так не сработало. Клиент может пинговать 5.255.255.242. <strong>Где я ошибся?</strong></p>
+</blockquote>
+</aside>
+<p>Вероятно, вы добавили правило в конец таблицы (<code>-A</code>), выше разрешающих правил.</p>
+<aside class="quote no-group" data-username="kbh38a" data-post="1" data-topic="7688">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/f14d63/48.png" class="avatar"> kbh38a:</div>
+<blockquote>
+<p>Нормальный вариант?</p>
+</blockquote>
+</aside>
+<p>Нормальный, только это всё равно блокировка по домену, а не по URL.</p></td><td>2024-04-14T01:25:23.275Z</td></tr><tr><td>Dhohbr</td><td><p>Пару лет назад искал сети Сбера для мобильного приложения. Сейчас может ещё что-то добавилось.<br>
+194.54.12.0/22<br>
+84.252.146.0/24<br>
+185.157.97.0/24<br>
+185.174.128.64/26</p></td><td>2024-04-14T01:43:19.139Z</td></tr><tr><td>bolvan</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://bgp.he.net/AS35237">
+  <header class="source">
+
+      <a href="https://bgp.he.net/AS35237" target="_blank" rel="noopener">bgp.he.net</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://bgp.he.net/AS35237" target="_blank" rel="noopener">AS35237 Sberbank of Russia PJSC - bgp.he.net</a></h3>
+
+  <p>AS35237 Sberbank of Russia PJSC Network Information</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+whois -h <a href="http://whois.radb.net">whois.radb.net</a> – “-i origin AS35237” | sed -nre ‘s/^route: <em>(.</em>)/\1/p’</p>
+<p>непосредственно по домену проще всего сделать через прокси<br>
+теоретически можно по SNI.  поставить ndpi и настроить его на фильтрацию определенных SNI, как это делает РКН</p></td><td>2024-04-14T06:37:09.221Z</td></tr><tr><td>nzkhammatov(Ainur Khammatov)</td><td><p><code>apt install whois curl -y</code></p>
+<pre><code class="lang-auto">iptables -t raw -F
+iptables -t raw -X
+</code></pre>
+<pre><code class="lang-auto">clear
+for prefix in $(whois -h whois.radb.net -- '-i origin AS35237' | grep -oP "\d+\.\d+\.\d+\.\d+\/\d+"); do
+  iptables -A PREROUTING -t raw -s "${prefix}" -j DROP;
+done
+</code></pre>
+<p><code>iptables -S -t raw</code></p>
+<p><strong>test:</strong></p>
+<p><code>curl -s --connect-timeout 10 https://online.sberbank.ru/CSAFront/index.do | grep -q "Сбербанк Онлайн" &amp;&amp; echo "accessible" || echo "blocked"</code></p></td><td>2024-04-14T07:03:50.876Z</td></tr><tr><td>0ka(0ka)</td><td><p>сбер блочит аккаунт? я десятки раз заходил в акк с разных впнов, и в тинькофф тоже.<br>
+Кстати, FORWARD правило сработает только для wireguard, для shadowsocks надо в OUTPUT, или редактировать конфиг на клиенте</p></td><td>2024-04-14T08:44:57.442Z</td></tr><tr><td>kbh38a(wer)</td><td><p>Спасибо. Сделал -I, сработало для WG. И еще сделал<br>
+<code>iptables -A PREROUTING -t raw -s "${prefix}" -j DROP;</code></p>
+<p>Но для Outline / Shadowsocks это не сработало. Я подумал, дело в том, что для outline пакеты не проходят через nat, а как бы рождаются на самом vps. И сделал<br>
+<code>iptables -I OUTPUT -d 5.255.255.242 -j DROP</code><br>
+Но это тоже не сработало. Подскажите пожалуйста, как заблокировать этот адрес для outline через iptables?</p></td><td>2024-04-14T08:52:12.397Z</td></tr><tr><td>kbh38a(wer)</td><td><p>output не сработал у меня для SS.</p>
+<p>Ну я сбер для примера привел. Знаю точно недавно ВТБ блокировал. Помимо банков, я хочу заблокировать еще рабочие подключения, чтобы случайно при включенном vpn не подставиться перед безой.</p></td><td>2024-04-14T08:54:24.900Z</td></tr><tr><td>0ka(0ka)</td><td><p>заблокируйте 1.1.1.2 и проверьте его на клиенте через curl, у меня все сработало. ICMP PING не покажет блокировки т.к. он не поддерживается ss</p></td><td>2024-04-14T08:55:51.437Z</td></tr><tr><td>kbh38a(wer)</td><td><blockquote>
+<p>curl 5.255.255.242<br>
+curl: (52) Empty reply from server</p>
+</blockquote>
+<p>А без включенного vpn - нет ошибки. Значит, заблокировал.</p>
+<p>типа работает?<br>
+А можно еще чуть чуть ключевых слов, чтобы я почитал, почему ping не покажет блокировки?</p></td><td>2024-04-14T08:58:52.101Z</td></tr><tr><td>0ka(0ka)</td><td><p>shadowsocks это прокси, поддерживает только TCP и UDP протоколы, команда ping работает с протоколом ICMP, и некоторые клиенты shadowsocks на запрос ping обычно отсылают фейковый ответ<br>
+<img src="заблокировать-определенные-ipurl-для-клиентов-vpn-сервера/6dd202a63087f97eb8c08350e8f734dcca6b5c2d.png" alt="image" data-base62-sha1="fFvZl9NSsjNQpxicXzK1m9RSJ41" width="499" height="476"><br>
+первый пинг - напрямую, настоящий<br>
+второй пинг - через sing-box tun, фейк</p>
+<p>на outline клиенте я так понял у вас тоже самое</p></td><td>2024-04-14T09:05:25.810Z</td></tr><tr><td>kbh38a(wer)</td><td><p>да, у меня при подключении через SS дико короткий пинг и я не понимал, почему так. Спасибо</p></td><td>2024-04-14T09:15:54.233Z</td></tr><tr><td>kbh38a(wer)</td><td><aside class="quote no-group" data-username="nzkhammatov" data-post="5" data-topic="7688">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/nzkhammatov/48/4650_2.png" class="avatar"> nzkhammatov:</div>
+<blockquote>
+<pre><code class="lang-auto">for prefix in $(whois -h whois.radb.net -- '-i origin AS35237' | grep -oP "\d+\.\d+\.\d+\.\d+\/\d+"); do
+  iptables -A PREROUTING -t raw -s "${prefix}" -j DROP;
+done
+</code></pre>
+</blockquote>
+</aside>
+<p>Спасибо. Написал свой по аналогии.</p></td><td>2024-04-14T15:11:00.373Z</td></tr><tr><td>nzkhammatov(Ainur Khammatov)</td><td><p><strong>Попробуйте</strong></p>
+<pre><code class="lang-auto">clear
+cd /root/
+rm -rf /root/firewall
+mkdir -p /root/firewall
+cd /root/firewall
+touch /root/firewall/run &amp;&amp; chmod 755 /root/firewall/run
+touch /root/firewall/data_raw
+touch /root/firewall/data_clean
+touch /root/firewall/list_as
+clear &amp;&amp; ls -lah
+</code></pre>
+<p><strong>Редактировать список автономных станций, по одному номеру</strong> <code>AS</code> <strong>на каждой строке</strong></p>
+<p><code>nano /root/firewall/list_as</code></p>
+<pre><code class="lang-auto">AS35237
+AS24823
+AS15632
+</code></pre>
+<p><strong>Исполняемый файл</strong></p>
+<p><code>nano /root/firewall/run</code></p>
+<pre><code class="lang-auto">#!/bin/bash
+
+# where's the iptables
+iptables=$(which iptables)
+
+# raw file cleanup
+rm -rf /root/firewall/data_raw
+touch /root/firewall/data_raw
+
+# refreshing data: autonomous systems
+for list_as in $(cat /root/firewall/list_as); do
+ whois -h whois.radb.net -- "-i origin $list_as" | grep -oP "\d+\.\d+\.\d+\.\d+\/\d+" &gt;&gt; /root/firewall/data_raw;
+done
+
+# removing duplicates
+sort -u /root/firewall/data_raw &gt; /root/firewall/data_clean
+
+# raw table cleaning
+"$iptables" -t raw -F
+"$iptables" -t raw -X
+
+# applying new iptables settings
+for prefix in $(cat /root/firewall/data_clean | grep -oP "\d+\.\d+\.\d+\.\d+\/\d+"); do
+  "$iptables" -A PREROUTING -t raw -s "${prefix}" -j DROP;
+done
+</code></pre>
+<p><strong>Пробуем исполнить</strong></p>
+<p><code>/root/firewall/run</code></p>
+<p><strong>Результаты здесь</strong></p>
+<p><code>iptables -S -t raw</code></p></td><td>2024-04-14T17:29:04.783Z</td></tr><tr><td>kbh38a(wer)</td><td><p>Спасибо</p></td><td>2024-04-14T17:43:47.256Z</td></tr><tr><td>0ka(0ka)</td><td><p>оптимизацию списка лучше делать через прогу iprange или aggregate (можно pipe сразу после grep): подсеть ростелекома 2664 линий в whois radb, после прогона iprange становится 756 линий</p></td><td>2024-04-16T17:51:19.000Z</td></tr><tr><td>0ka(0ka)</td><td><p>я добавил 30 тыс DROP правил и пропускная способность VPS снизилась до 1мегабита… Поэтому вместо множества правил<br>
+-A PREROUTING -t raw -s “${prefix}” -j DROP<br>
+лучше использовать ipset create, add и использовать одно правило<br>
+-m set --match-set ipset_name src -j DROP<br>
+с ним снижения производительности не заметил (даже на all листе с 500к строк <a href="https://github.com/borestad/blocklist-abuseipdb">отсюда</a>)</p>
+<p>еще по логике лучше бы использовать DST а не SRC блок, нет?</p></td><td>2024-04-20T10:32:58.876Z</td></tr><tr><td>donetsAN(Andrei Donets)</td><td><p>Всем привет, у меня задача стоит чтобы сделать редирект пользователя на другой сайт с информацией что скоро ключ не будет работать т.е. перенаправлять пользователя если он серфит в интернете кроме инст и ютуба, также использую outline, пока не понимаю как это реализовать</p></td><td>2025-01-17T21:28:44.048Z</td></tr>
+    </table>
+      </body>
+    </html>

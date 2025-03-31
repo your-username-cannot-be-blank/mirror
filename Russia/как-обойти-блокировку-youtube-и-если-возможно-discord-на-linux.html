@@ -1,0 +1,127 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>как-обойти-блокировку-youtube-и-если-возможно-discord-на-linux</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>BacchusVarg(BacchusVarg)</td><td><p>Не знаю в ту ли категорию я это пишу, ибо новенький тут, но я ишу помощи в обходе блокировки ютуба на линуксе. До этого пользовался Spoofdpi, но в один момент он просто перестал у многих работать. Пытался настроить ciadpi, но не разобрался. Расширения юбуст нету, т.к. сижу на Firefox. Провайдер Ростелеком Ульяновск. Может есть ещё какие-нибудь варианты обхода или конфиги для уже существующих? В гугле ничего не нашёл.</p></td><td>2024-10-21T07:28:40.651Z</td></tr><tr><td>Esto</td><td><p>zapret</p></td><td>2024-10-21T08:02:22.965Z</td></tr><tr><td>us3r</td><td><p>Byedpi, zapret отлично работают на linux.<br>
+Рабочие конфиги можно брать из соседних тем.<br>
+Byedpi - прост в использовании, по zapret придется почитать readme.</p></td><td>2024-10-21T08:58:59.826Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="BacchusVarg" data-post="1" data-topic="12116">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/bacchusvarg/48/10764_2.png" class="avatar"> BacchusVarg:</div>
+<blockquote>
+<p>Расширения юбуст нету, т.к. сижу на Firefox</p>
+</blockquote>
+</aside>
+<p>Да, причём в Firefox Nightly его можно временно установить: в about:config включить extensions.backgroundServiceWorker.enabled, затем дополнения - отладка дополнений - загрузить временное дополнение - указать папку с распакованным расширением, например скопированную из профиля хромобраузера, но всё равно не работает.<br>
+backgroundServiceWorker (manifest v3) поддерживается, но фоновый процесс неактивен.</p></td><td>2024-10-21T16:37:08.351Z</td></tr><tr><td>denium</td><td><aside class="quote no-group quote-modified" data-username="us3r" data-post="3" data-topic="12116">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/8edcca/48.png" class="avatar"> us3r:</div>
+<blockquote>
+<p>zapret отлично работает на linux<br>
+по zapret придется почитать readme</p>
+</blockquote>
+</aside>
+<p>Или погрузиться в <a href="https://ntc.party/t/goodbyedpi-4-linux-ubuntu/8394/6">эту</a> инструкцию. Только код для nfqws скорее всего придётся менять.</p></td><td>2024-10-21T16:40:11.452Z</td></tr><tr><td>danaYatsuta</td><td><p>Пробеглась глазами по этой инструкции, мне кажется она слишком комплексная для того чтобы просто обходить блок на линуксе. Режим custom + копирование в custom.d 10-init-nfqws и 50-discord + поподбирать параметры для nfqws в config и все вполне работает.</p></td><td>2024-10-21T21:32:24.612Z</td></tr><tr><td>danaYatsuta</td><td><p>Не знаю насколько я для этого квалифицирована лол, но вот моя мини-инструкция по запрету. Не отменяет прочтения readme.txt (в принципе я тут ничего нового не напишу, только отрывки оттуда) и необходимости по крайней мере примерно знать что происходит, но вдруг кому поможет.</p>
+<ol>
+<li>Временно забейте на войс дискорда, делайте следующие инструкции без его учета</li>
+<li>Следуйте <a href="https://github.com/bol-van/zapret/blob/master/docs/quick_start.txt" class="inline-onebox" rel="noopener nofollow ugc">zapret/docs/quick_start.txt at master · bol-van/zapret · GitHub</a></li>
+<li>Подберите параметры для nfqws/tpws такие чтобы работали все сайты которые надо (опять же, пока забиваем на войс). Можно опираться что выдал блокчек, можно (желательно) прочитать параметры для nfqws/tpws в readme, можно посмотреть параметры которые выкладывают тут на форумах но стоит их анализировать критически, иногда люди постят полную пургу</li>
+<li>Когда все устраивает и есть хотя бы примерное понимание что происходит, в <code>config</code> меняете <code>MODE</code> с <code>nfqws</code> или <code>tpws</code> на <code>custom</code></li>
+<li>Идете в <code>zapret/init.d/sysv</code>, из папки <code>custom.d.examples</code> копируете <code>10-init-[mode]</code> и <code>50-discord</code> в <code>custom.d</code>, где <code>mode</code> - это режим который у Вас стоял (т.е. <code>nfqws</code> или <code>tpws</code>)</li>
+<li>Перезагружаете сервис <code>zapret</code></li>
+</ol>
+<p>Ну и по идее должен быть успех. Если что то после смены <code>MODE</code> на <code>custom</code> естественно все еще можно менять настройки nfqws/tpws, я просто расписала так для пошаговости.</p></td><td>2024-10-21T21:48:30.821Z</td></tr><tr><td>danaYatsuta</td><td><p>А касательно ByeDPI, с ним сложно обойти блокировку войса дискорда поскольку нужен сторонний софт чтобы затолкать UDP пакеты дискорда в прокси.</p></td><td>2024-10-21T21:50:12.436Z</td></tr><tr><td>denium</td><td><p>Что не хватает в линуксе это чтобы разжевали и в рот положили. Причём прозрачно, не боясь запускать sh файлы, которые непонятно что копируют в систему.<br>
+Даже та инструкция не совсем полна. Например, надо бы добавить:</p>
+<ul>
+<li>Чтобы не компилировать, заменить <code>my</code> на <code>x86_64</code> (32 бит для линукса готового нет).</li>
+<li>Команды установки пакетов подходят для Debian и Ubuntu. Для других дистрибутивов надо искать в пакетном менеджере по мотивам, имена могут быть другими. В частности, некоторые дистрибутивы (немногие) используют имена lib64 вместо lib. devel вместо dev.</li>
+</ul>
+<p>Ну, ещё в сторонних дистрибутивах могут быть свои тонкости. sudo может не быть. Установите одноимённый пакет (т.е. так и называется sudo) и nano (консольный текстовый редактор), а потом:</p>
+<pre><code class="lang-auto">su -
+nano /etc/sudoers
+your_username ALL=(ALL:ALL) NOPASSWD: ALL
+Ctrl+X
+Y
+exit
+</code></pre>
+<p>Где your_username ваше имя пользователя линукс. Например, denis.</p>
+<p>/usr/local/bin может не быть в secure_path sudo и поэтому команда sudo nfqws не сработает. Допишите в /etc/sudoers<br>
+<code>Defaults        secure_path="/usr/local/bin:</code><br>
+Каждая новая запись после двоеточия. Ближние пути имеют больший приоритет.<br>
+Важно: если вы по невнимательности испортите синтаксис sudoers файла, sudo перестанет работать (вам придётся исправлять его через <code>su -</code> или загрузившись в Linux Live или в дуалбутный линукс). Поэтому советуют команду:</p>
+<pre><code class="lang-auto">su -
+visudo
+exit
+</code></pre>
+<p>visudo не даст сохранить неправильные значения. Однако, если в системе по умолчанию дефолтный консольный редактор vim вместо nano, то он очень непонятный для многих. Вы даже не сможете выйти из него без гугления как это сделать. Я бы вообще рекомендовал пакет vim удалить из системы. Тогда visudo будет использовать более понятный nano.</p></td><td>2024-10-22T01:25:18.060Z</td></tr><tr><td>danaYatsuta</td><td><p>Ну, мне кажется так можно всю арч вики переписать. Но если кому-то помогут Ваши инструкции, то хорошо.</p></td><td>2024-10-22T10:20:02.766Z</td></tr><tr><td>djvadim100(Вадим)</td><td><p>Arch вики полезная штука, я в плане опыта Arch Linux даже лучше знаю чем debian и ubuntu</p></td><td>2024-10-22T11:46:31.025Z</td></tr><tr><td>us3r</td><td><p>По поводу недостающих пакетов.<br>
+В Manjaro (KDE) zapret выдал такую ошибку:</p>
+<blockquote>
+<p>nslookup or host does not exist. please install</p>
+</blockquote>
+<p>Помогла команда:</p>
+<blockquote>
+<p>sudo pacman -S extra/bind</p>
+</blockquote></td><td>2024-10-22T12:37:12.091Z</td></tr><tr><td>denium</td><td><p>Вики не знаю, а правила PKGBUILD’ов часто выручают при сборках в других дистрибутивах. Но это я больше люблю компилять, чем настраивать систему.<br>
+Сам же AUR довольно избыточен и формален.</p></td><td>2024-10-22T17:18:24.286Z</td></tr><tr><td>djvadim100(Вадим)</td><td><p>Сам собирал через PKGBUILD легче компиляцию не придумать</p></td><td>2024-10-22T17:20:15.930Z</td></tr><tr><td>denium</td><td><p>Ну, да. Для того, чтобы установить пакет, он сначала сжимается zstd с наижутчайшим уровнем сжатия, только для того, чтобы потом распаковаться. И сборку не прервать, потому что исходники удалятся и всё заново.</p></td><td>2024-10-22T17:37:52.725Z</td></tr><tr><td>BacchusVarg(BacchusVarg)</td><td><aside class="onebox githubrepo" data-onebox-src="https://github.com/Flowseal/zapret-discord-youtube/">
+  <header class="source">
+
+      <a href="https://github.com/Flowseal/zapret-discord-youtube/" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="как-обойти-блокировку-youtube-и-если-возможно-discord-на-linux/f247bb3855395bfc5c173f408d686957a7ebf134_2_690x344.png" class="thumbnail" data-dominant-color="ECEDE8">
+
+  <h3><a href="https://github.com/Flowseal/zapret-discord-youtube/" target="_blank" rel="noopener nofollow ugc">GitHub - Flowseal/zapret-discord-youtube</a></h3>
+
+    <p><span class="github-repo-description">Contribute to Flowseal/zapret-discord-youtube development by creating an account on GitHub.</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Вот это похоже на то, что мне и нужно, но у меня так и не получилось настроить zapret, чтобы он работал по такой же схеме. Настроить вручную тоже не вышло, не смог подобрать подходящую стратегию. Может кто с этим помочь?</p></td><td>2024-10-28T19:34:35.331Z</td></tr><tr><td>zverxy(zverxy)</td><td><p>добрый день, вы решили проблему? у меня получилось сделать так чтоб работал zapret. но войс чат не работает. и я не понимаю как его нормально настроить (я понимаю что проблема в udp но не понимаю как фиксить это)</p></td><td>2024-11-29T11:05:58.554Z</td></tr><tr><td>0ka(0ka)</td><td><p>В линуксе легко направить трафик на udp порты 50000-65535 через warp, через вторую routing table и routing rule, пиши в лс если не разберешься как</p></td><td>2024-11-29T14:13:50.622Z</td></tr>
+    </table>
+      </body>
+    </html>

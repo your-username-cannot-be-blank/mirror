@@ -1,0 +1,1094 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>vless-reality-маскировка-под-собственный-сайт</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>lazuli</td><td><p>Добрый день, настраиваю VLESS Reality с маскировкой под свой сайт и столкнулся с проблемой.</p>
+<p>Настроил так, чтобы на порту 443 висел и nginx с сайтом, и xray XTLS-Reality. Если хотят зайти на один из моих сайтов - nginx обрабатывает всё как обычно, если заходят на домен vpn, то запрос перенаправляется в xray.</p>
+<p>Но при url тесте в nekoray и попытках подключения к VPN соединение не удаётся. Логи nginx показывают только это:</p>
+<pre><code class="lang-auto">[25/Dec/2024:18:41:17 +0000] "GET / HTTP/2.0" 200 746 "-" "Chrome"
+[25/Dec/2024:18:41:17 +0000] "GET / HTTP/2.0" 200 746 "-" "Chrome"
+[25/Dec/2024:18:41:17 +0000] "GET / HTTP/2.0" 200 746 "-" "Chrome"
+[25/Dec/2024:18:41:18 +0000] "GET / HTTP/2.0" 200 746 "-" "Chrome"
+</code></pre>
+<p>В логах 3X-UI ничего нет.<br>
+При этом, если использовать маскировку под чужой домен, всё работает нормально.</p>
+<p>Мой nginx.conf:</p>
+<pre><code class="lang-auto">user nginx;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+stream {
+    map $ssl_preread_server_name $name {
+        site.mydomain.com             www;
+        othersite.mydomain.com     www;
+      	vpn.mydomain.com             xray;
+        default                                 xray;
+    }
+
+    upstream xray {
+        server 127.0.0.1:8050;
+    }
+
+    upstream www {
+        server 127.0.0.1:7443;
+    }
+
+    server {
+        listen               443;
+        listen               [::]:443;
+        proxy_pass      $name;
+        ssl_preread     on;
+    }
+
+    server {
+        listen 127.0.0.1:8050;
+        proxy_pass 127.0.0.1:8443;
+    }
+}
+
+http {
+    include /etc/nginx/mime.types;
+    server {
+        listen 80;
+        listen [::]:80;
+        return 301 https://$host$request_uri;
+    }
+
+    server {	
+        listen 127.0.0.1:7443 ssl;
+    	http2 on;
+
+        server_name site.mydomain.com;
+
+        ssl_certificate /etc/letsencrypt/live/site.mydomain.com/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/site.mydomain.com/privkey.pem;
+
+    	ssl_protocols TLSv1.3;
+        ssl_prefer_server_ciphers on;
+        ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
+
+        root /var/www/site.mydomain.com;
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+    }
+}
+</code></pre>
+<p>Конфиг подключения, указан 8443 порт, но подключаюсь по 443:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="vless-reality-маскировка-под-собственный-сайт/1317cafc3e5b6c4a2d192945470970a916bdcb36.png" data-download-href="https://ntc.party/uploads/default/1317cafc3e5b6c4a2d192945470970a916bdcb36" title="vivaldi_ujZBixTt0x"><img src="vless-reality-маскировка-под-собственный-сайт/1317cafc3e5b6c4a2d192945470970a916bdcb36.png" alt="vivaldi_ujZBixTt0x" data-base62-sha1="2IU2YzB8tqRljmobxhjxmDIeI4u" width="368" height="500" data-dominant-color="191C1E"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">vivaldi_ujZBixTt0x</span><span class="informations">503×682 19.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>У меня мало опыта работы с nginx, и VPN я поднимаю впервые, буду рад советам и любой помощи, спасибо!</p></td><td>2024-12-26T14:58:39.150Z</td></tr><tr><td>NowAndThen</td><td><p>Как есть вы должны подключаться к Xray по 8443, он там вас ждет. А на 443 вас встречает Nginx, понятно, что он знать не знает ни про какие VLESS ключи и туннели.</p>
+<pre><code class="lang-auto">    server {
+        listen               443;
+        listen               [::]:443;
+        proxy_pass      $name;
+        ssl_preread     on;
+    }
+</code></pre>
+<p>Если хотите по 443 ходить, то вот этот блок закомментите весь, а в Xray в  Port пропишите 443. Правильная логика: фейс контролем на входе на 443 должен работать Xray, а если вы ключом не подошли, перекидивать вас на сайт на Nginx. Т.е. на 443 порту должен слушать только Xray.</p></td><td>2024-12-26T15:22:24.308Z</td></tr><tr><td>lazuli</td><td><p>Спасибо! Всё оказалось проще, чем я думал)</p></td><td>2024-12-26T15:49:39.160Z</td></tr><tr><td>lazuli</td><td><p>После маскировки под свой сайт пинг увеличился в 2 раза) когда маскировался под <a href="http://www.ign.com" rel="noopener nofollow ugc">www.ign.com</a> пинг был 67-70мс, теперь стал 120-130мс, с чем это может быть связано?<br>
+UPD: отбой, похоже проблема была никак не связана с маскировкой и с моей машиной вообще, просто был сбой на стороне хостера</p></td><td>2024-12-26T19:04:54.055Z</td></tr><tr><td>DeHb86(Danila)</td><td><p>Добрый день!<br>
+Можете подсказать по какому гайду все это делали?<br>
+Вожусь уже второй день, и никак не могу заставить работать такой вариант, чтобы маскироваться своим доменом.</p></td><td>2024-12-26T19:39:09.153Z</td></tr><tr><td>Nocturnal-ru(Roman)</td><td><p>никаких гайдов особо нет, вот код моего nginx.conf</p>
+<pre><code class="lang-auto">user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+error_log /var/log/nginx/error.log;
+include /etc/nginx/modules-enabled/*.conf;
+
+events {
+	worker_connections 768;
+}
+
+http {
+
+	sendfile on;
+	tcp_nopush on;
+	types_hash_max_size 2048;
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+	access_log /var/log/nginx/access.log;
+	gzip on;
+	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*;
+}
+</code></pre>
+<p>вот содержимое nginx/sites-available/default.conf</p>
+<pre><code class="lang-auto">server {
+	listen 80 default_server;
+	listen 1111 ssl default_server;
+	listen 8443 ssl default_server;
+        server_name yourdomain.name;
+	
+	root /var/www/html;
+	# Разрешить доступ к index.html
+    	location = /index.html {
+        index index.html;
+    }
+
+    	# Разрешить доступ к favicon.ico
+    	location = /favicon.ico {
+        # Можно указать root или, если файл находится в том же каталоге:
+        root /var/www/html;
+    }
+
+    	# Разрешить доступ к корню, который отдает index.html
+    	location = / {
+        try_files /index.html =403;
+    }
+
+    	# Все остальные запросы блокируются
+    	location / {
+        return 403;
+    }
+        ssl_certificate /root/cert/yourdomain.name/fullchain.pem;
+        ssl_certificate_key /root/cert/yourdomain.name/privkey.pem;
+	ssl_session_cache shared:le_nginx_SSL:10m;
+	ssl_session_timeout 1440m;
+	ssl_session_tickets off;
+	ssl_protocols TLSv1.2 TLSv1.3;
+	ssl_prefer_server_ciphers off;
+	ssl_ciphers "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384";
+}
+</code></pre>
+<p>содержимое nginx/sites-available/static_site</p>
+<pre><code class="lang-auto">server {
+
+    server_name localhost;
+
+    location / {
+        root /var/www/html;
+        index index.html;
+    }
+}
+
+</code></pre>
+<p>соответственно в панели 3x-ui<br>
+port: 443 (панель его слушает, в случае если нет успешной авторизации - кидает его в nginx на 1111 порт)<br>
+dest: 127.0.0.1:1111<br>
+SNI: yourdomain.name<br>
+yourdomain.name - меняешь на свой домен, пути к SSL сертификату тоже надо поставить актуальные<br>
+ессно по пути /var/www/html/ предполагается наличие некого index.html и favicon.ico<br>
+еще лишние порты закрыть, 1111 оставить только для localhost на всякий</p></td><td>2024-12-26T19:52:01.972Z</td></tr><tr><td>allula</td><td><p>Устанавливаешь <code>nginx</code>. Настраиваешь его слушать <code>ssl</code> соединение на <code>127.0.0.1:</code><mark><code>port</code></mark>, добавляешь пути к сертификатам (выше скинули примерный конфиг). Главное, в качестве порта не указывай 443, потому что на нём будет XRay сидеть. В настройках REALITY в качестве Dest указываешь <code>127.0.0.1</code><mark><code>port</code></mark>, а в SNI запихиваешь свой домен, если покупал.</p></td><td>2024-12-26T19:53:29.644Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Вот как вариант, довольно хороший пример конфигураций nginx / сервера / клиента - <a href="https://github.com/chika0801/Xray-examples/tree/main/VLESS-Vision-REALITY/steal_oneself">тык</a></p></td><td>2024-12-26T19:54:01.323Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><aside class="quote no-group" data-username="allula" data-post="7" data-topic="14160">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>а в SNI запихиваешь свой домен, если покупал.</p>
+</blockquote>
+</aside>
+<p>Хм, интересно… То есть можно без своего домена сделать steal oneself? Если же нет, и домен в любом случае нужен, то подойдёт ли бесплатный домен третьего уровня по типу <a href="http://qwertyuiop.duckdns.org">qwertyuiop.duckdns.org</a>?</p></td><td>2024-12-26T19:56:43.043Z</td></tr><tr><td>Nocturnal-ru(Roman)</td><td><p>без своего домена не получится, но домен 3его уровня теоретически можно, LE <a href="https://community.letsencrypt.org/t/will-you-issue-certificates-for-third-level-domains-too/1962" rel="noopener nofollow ugc">вроде как</a> даст SSL сертификат</p></td><td>2024-12-26T20:05:06.314Z</td></tr><tr><td>DeHb86(Danila)</td><td><aside class="quote no-group" data-username="xX_RUP3R7_P4UL50N_Xx" data-post="9" data-topic="14160">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/xx_rup3r7_p4ul50n_xx/48/13752_2.png" class="avatar"> xX_RUP3R7_P4UL50N_Xx:</div>
+<blockquote>
+<p>н</p>
+</blockquote>
+</aside>
+<p>Вот на него то я и наткнулся ранее (только на сначала на эту ссылку <a href="https://computerscot.github.io/vless-xtls-utls-reality-steal-oneself.html" class="inline-onebox" rel="noopener nofollow ugc">Xray REALITY with 'steal oneself'</a>) и целый день мучался… Даже сайт стал мимикрировать под livelove-anime.jp )) Но вот само подлюкчение к vps через клиента не заработало…<br>
+Возможно я уже на vps-ке накрутил за последние два дня экспериментов.<br>
+В общем сброшу ее и начну по новой.</p></td><td>2024-12-26T20:05:19.269Z</td></tr><tr><td>Nocturnal-ru(Roman)</td><td><p>выше я выложил 100% работоспособный конфиг и настройки со своей vps</p></td><td>2024-12-26T20:06:40.187Z</td></tr><tr><td>NowAndThen</td><td><p>Можете попробовать <a href="https://ntc.party/t/%D0%BA%D0%B0%D0%BA-%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%B2%D0%B8%D1%82%D1%8C-%D0%B2%D0%B5%D0%B1-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80-%D0%B8-vless-%D0%BD%D0%B0-%D0%BE%D0%B4%D0%BD%D0%BE%D0%BC-vps/13773/11">вот как тут</a> описывал. Общо, но зато проще, чем у Чики-китайца настраивается.</p></td><td>2024-12-26T20:20:46.300Z</td></tr><tr><td>allula</td><td><aside class="quote no-group" data-username="xX_RUP3R7_P4UL50N_Xx" data-post="9" data-topic="14160">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/xx_rup3r7_p4ul50n_xx/48/13752_2.png" class="avatar"> xX_RUP3R7_P4UL50N_Xx:</div>
+<blockquote>
+<p>То есть можно без своего домена сделать steal oneself?</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="Nocturnal-ru" data-post="10" data-topic="14160">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/nocturnal-ru/48/1556_2.png" class="avatar"> Nocturnal-ru:</div>
+<blockquote>
+<p>без своего домена не получится</p>
+</blockquote>
+</aside>
+<p>Можно, но будут нужны самозаверенные сертификаты. Про такой вариант я писал <a href="https://ntc.party/t/vless-%D1%82%D1%80%D0%B8-%D0%BF%D0%BE%D0%B4%D1%85%D0%BE%D0%B4%D0%B0-%D0%BA%D0%B0%D0%BA%D0%BE%D0%B9-%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D0%BB%D0%B8-%D0%B2%D1%8B-%D0%B8-%D0%BF%D0%BE%D1%87%D0%B5%D0%BC%D1%83/13835/57">здесь</a>. Если надо, могу подробнее рассказать, как это делается, но у меня сейчас нет уверенности, что такая схема сможет пройти active probing, ради которого REALITY и создавался. Если вас такое не смущает, то в SNI можно указывать что угодно или не указывать вообще ничего (даже неважно, под свой сайт вы маскируетесь или нет), но отчасти теряются преимущества REALITY, как я сказал.</p></td><td>2024-12-26T20:23:48.636Z</td></tr><tr><td>lazuli</td><td><p>К сожалению, никаких гайдов именно по маскировке под собственный домен не находил, приходилось по крупицам искать инфу. Но могу поделиться всеми конфигами.</p>
+<p>Xray в итоге должен работать на 443 порту, в dest нужно указать локалхост - 127.0.0.1 и какой-нибудь другой порт, например 7443. в SNI указываете домен своего сайта, под который маскируетесь.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="vless-reality-маскировка-под-собственный-сайт/83d1cfabfb7822dace56575fd304667cd8fbf211.png" data-download-href="https://ntc.party/uploads/default/83d1cfabfb7822dace56575fd304667cd8fbf211" title="vivaldi_6O7VFCkVOR"><img src="vless-reality-маскировка-под-собственный-сайт/83d1cfabfb7822dace56575fd304667cd8fbf211_2_235x500.png" alt="vivaldi_6O7VFCkVOR" data-base62-sha1="iO849TtzKa6EvuNAVpFeBaewP1D" width="235" height="500" srcset="vless-reality-маскировка-под-собственный-сайт/83d1cfabfb7822dace56575fd304667cd8fbf211_2_235x500.png, vless-reality-маскировка-под-собственный-сайт/83d1cfabfb7822dace56575fd304667cd8fbf211_2_352x750.png 1.5x, vless-reality-маскировка-под-собственный-сайт/83d1cfabfb7822dace56575fd304667cd8fbf211.png 2x" data-dominant-color="1A1C1F"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">vivaldi_6O7VFCkVOR</span><span class="informations">420×890 23.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>И nginx должен слушать этот 127.0.0.1:7443 для вашего маскировочного сайта.<br>
+Мой итоговый nginx.conf:</p>
+<pre><code class="lang-auto">user nginx;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    server {
+        listen 80;
+        listen [::]:80;
+        return 301 https://$host$request_uri;
+    }
+
+    server {	
+        listen 127.0.0.1:7443 ssl;
+	    http2 on;
+
+        server_name site.mydomain.com;
+
+        ssl_certificate /etc/letsencrypt/live/site.mydomain.com/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/site.mydomain.com/privkey.pem;
+
+	    ssl_protocols TLSv1.3;
+        ssl_prefer_server_ciphers on;
+        ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
+
+        root /var/www/site.mydomain.com;
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+    }
+}
+
+</code></pre>
+<p><a href="http://site.mydomain.com" rel="noopener nofollow ugc">site.mydomain.com</a> - ваш домен, под который вы притворяетесь. И домен должен быть привязан именно к этой машине через указание ip адреса машины в A-записи.</p>
+<p>Если nginx у вас работает в докере, как и у меня, то нужно указать network_mode: host для nginx в docker-compose.yml или пробросить необходимые порты</p>
+<p>А так не совсем понятно, с чем у вас возникли проблемы, поэтому полностью всё расписать не могу</p></td><td>2024-12-26T20:26:12.726Z</td></tr><tr><td>throwaway1</td><td><p>Тоже недавно настраивал VLESS-REALITY-Steal-Oneself, на примере вот отсюда:</p>
+<aside class="onebox githubfolder" data-onebox-src="https://github.com/chika0801/Xray-examples/tree/main/VLESS-Vision-REALITY/steal_oneself">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/b/bad3e5f9ad67c1ddf145107ce7032ac1d7b22563.svg" class="site-icon" data-dominant-color="" width="32" height="32">
+
+      <a href="https://github.com/chika0801/Xray-examples/tree/main/VLESS-Vision-REALITY/steal_oneself" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h3><a href="https://github.com/chika0801/Xray-examples/tree/main/VLESS-Vision-REALITY/steal_oneself" target="_blank" rel="noopener nofollow ugc">Xray-examples/VLESS-Vision-REALITY/steal_oneself at main ·...</a></h3>
+
+
+  <p><span class="label1">Xray 配置示例. Contribute to chika0801/Xray-examples development by creating an account on GitHub.</span></p>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>получилось что-то вроде такого:</p>
+<details>
+<summary>
+nginx.conf</summary>
+<pre><code class="lang-auto">user nginx;
+worker_processes auto;
+
+error_log /var/log/nginx/error.log notice;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+    use                epoll;
+    multi_accept       on;
+}
+
+http {
+    log_format main '[$time_local] $proxy_protocol_addr "$http_referer" "$http_user_agent"';
+    access_log /var/log/nginx/access.log main;
+
+    server_tokens   off;
+
+    sendfile        on;
+    tcp_nopush      on;
+    tcp_nodelay     on;
+
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        ""      close;
+    }
+
+    map $proxy_protocol_addr $proxy_forwarded_elem {
+        ~^[0-9.]+$        "for=$proxy_protocol_addr";
+        ~^[0-9A-Fa-f:.]+$ "for=\"[$proxy_protocol_addr]\"";
+        default           "for=unknown";
+    }
+
+    map $http_forwarded $proxy_add_forwarded {
+        "~^(,[ \\t]*)*([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+=([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?(;([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+=([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?)*([ \\t]*,([ \\t]*([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+=([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?(;([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+=([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?)*)?)*$" "$http_forwarded, $proxy_forwarded_elem";
+        default "$proxy_forwarded_elem";
+    }
+
+    server {
+        listen 80;
+        listen [::]:80;
+        return 301 https://$host$request_uri;
+    }
+
+    server {
+        listen                  127.0.0.1:8001 ssl default_server;
+
+        ssl_reject_handshake    on;
+
+        ssl_protocols           TLSv1.3;
+
+        ssl_session_timeout     1h;
+        ssl_session_cache       shared:SSL:10m;
+    }
+
+    server {
+        listen                     127.0.0.1:8001 ssl proxy_protocol;
+        http2                      on; 
+
+        set_real_ip_from           127.0.0.1;
+        real_ip_header             proxy_protocol;
+
+        server_name                subdomain.domain.com; # Твой домен
+
+        ssl_certificate            /root/cert/subdomain.domain.com/fullchain.pem; # Сертификат
+        ssl_certificate_key        /root/cert/subdomain.domain.com/privkey.pem; # Приватный ключ
+
+        ssl_protocols              TLSv1.3;
+        ssl_ciphers                TLS13_AES_128_GCM_SHA256:TLS13_AES_256_GCM_SHA384:TLS13_CHACHA20_POLY1305_SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305;
+        ssl_prefer_server_ciphers  on;
+
+        ssl_stapling               on;
+        ssl_stapling_verify        on;
+        resolver                   1.1.1.1 valid=60s;
+        resolver_timeout           2s;
+
+        location / {
+            sub_filter                            $proxy_host $host;
+            sub_filter_once                       off;
+
+	    #deny                                  all; # Если хочешь иметь 403 Forbidden при заходе на сайт, откоменчиваешь эту строку и закоменчиваешь две снизу
+	    set $website                          www.lovelive-anime.jp; # Сюда можно добавить любую ссылку, контент с этого сайта будет отображаться при заходе на твой сайт
+	    proxy_pass                            https://$website;
+            resolver                              1.1.1.1;
+
+            proxy_set_header Host                 $proxy_host;
+
+            proxy_http_version                    1.1;
+            proxy_cache_bypass                    $http_upgrade;
+
+            proxy_ssl_server_name                 on;
+
+            proxy_set_header Upgrade              $http_upgrade;
+            proxy_set_header Connection           $connection_upgrade;
+            proxy_set_header X-Real-IP            $proxy_protocol_addr;
+            proxy_set_header Forwarded            $proxy_add_forwarded;
+            proxy_set_header X-Forwarded-For      $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto    $scheme;
+            proxy_set_header X-Forwarded-Host     $host;
+            proxy_set_header X-Forwarded-Port     $server_port;
+
+            proxy_connect_timeout                 60s;
+            proxy_send_timeout                    60s;
+            proxy_read_timeout                    60s;
+        }
+    }
+}
+</code></pre>
+</details>
+<details>
+<summary>
+Настройки 3x-ui</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="vless-reality-маскировка-под-собственный-сайт/52e64fdaffc7e1f97cadd617e548cdc821df9c94.png" data-download-href="https://ntc.party/uploads/default/52e64fdaffc7e1f97cadd617e548cdc821df9c94" title="Screenshot_20241226_234047"><img src="vless-reality-маскировка-под-собственный-сайт/52e64fdaffc7e1f97cadd617e548cdc821df9c94_2_381x500.png" alt="Screenshot_20241226_234047" data-base62-sha1="bPmANSUIe4RWdhuLchwfWijAc6w" width="381" height="500" srcset="vless-reality-маскировка-под-собственный-сайт/52e64fdaffc7e1f97cadd617e548cdc821df9c94_2_381x500.png, vless-reality-маскировка-под-собственный-сайт/52e64fdaffc7e1f97cadd617e548cdc821df9c94.png 1.5x, vless-reality-маскировка-под-собственный-сайт/52e64fdaffc7e1f97cadd617e548cdc821df9c94.png 2x" data-dominant-color="F3F4F4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20241226_234047</span><span class="informations">522×685 40.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="vless-reality-маскировка-под-собственный-сайт/aabb4d0ff0410150e5d8d85ba44c22889ad1b5e9.png" data-download-href="https://ntc.party/uploads/default/aabb4d0ff0410150e5d8d85ba44c22889ad1b5e9" title="Screenshot_20241226_234119"><img src="vless-reality-маскировка-под-собственный-сайт/aabb4d0ff0410150e5d8d85ba44c22889ad1b5e9_2_371x500.png" alt="Screenshot_20241226_234119" data-base62-sha1="ommsyqQo7CNkYCxdzZ4SysMt2s1" width="371" height="500" srcset="vless-reality-маскировка-под-собственный-сайт/aabb4d0ff0410150e5d8d85ba44c22889ad1b5e9_2_371x500.png, vless-reality-маскировка-под-собственный-сайт/aabb4d0ff0410150e5d8d85ba44c22889ad1b5e9.png 1.5x, vless-reality-маскировка-под-собственный-сайт/aabb4d0ff0410150e5d8d85ba44c22889ad1b5e9.png 2x" data-dominant-color="D7DAD9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20241226_234119</span><span class="informations">518×698 35.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2024-12-26T21:00:06.963Z</td></tr><tr><td>naykaminka(Sergey)</td><td><p>В чем смысл маскироваться под свой сайт ? Делать вид что там файлопомойка легальная ?</p></td><td>2024-12-26T22:32:49.589Z</td></tr><tr><td>throwaway1</td><td><p>Я далеко не эксперт, но вот мои мысли по поводу этого:</p>
+<ol>
+<li>Потенциально меньше задержек и более стабильное соединение, благодаря тому, что сервер и твой домен для маскировки висят на одном айпи</li>
+<li>Когда маскируешься под чужой домен, ты отправляешь на него довольно много запросов и владелец сайта может заблеклистить айпи твоего сервера, соответственно v+r сразу же отвалится</li>
+<li>Как ты и сказал, на своем домене можно поднять какой-нибудь некстклауд и притвориться файлопомойкой, чтобы у цензора не было вопросов к количеству трафика, который ты гоняешь через свой домен</li>
+<li>При наличии своего домена, можно настроить проксирование через CDN, благодаря новомодному XHTTP или “устаревшему” gRPC, что сделает твой прокси еще более устойчивым к потенциальным нападкам от цензора</li>
+</ol></td><td>2024-12-27T01:36:59.401Z</td></tr><tr><td>NowAndThen</td><td><aside class="quote no-group" data-username="throwaway1" data-post="18" data-topic="14160">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/c67d28/48.png" class="avatar"> throwaway1:</div>
+<blockquote>
+<p>Когда маскируешься под чужой домен, ты отправляешь на него довольно много запросов и владелец сайта может заблеклистить айпи твоего сервера, соответственно v+r сразу же отвалится</p>
+</blockquote>
+</aside>
+<p>А с чего от вас запросы идут на воруемый SNI? Когда вы заходите на Xray вы устанавливаете туннель и работаете через него, на условный <a href="http://yahoo.com:443" rel="noopener nofollow ugc">yahoo.com:443</a> вы вообще не обращаетесь. Туда Xray перекидывает не ваши VLESS, а прочие запросы. Это только одинокий РКН, который когда-то, возможно, придет вас пощупать. И случайные школоботы, которые пришли вас сканировать на предмет дыр. Так они все подряд сканируют. А на yahoo перекинутся только те, которые к вам почему-то по 443 обращаются. А кому еще нужен ваш IP? Там серьезному трафику на воруемый домен неоткуда взяться.</p></td><td>2024-12-27T02:55:26.336Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="NowAndThen" data-post="19" data-topic="14160">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/c0e974/48.png" class="avatar"> NowAndThen:</div>
+<blockquote>
+<p>А с чего от вас запросы идут на воруемый SNI?</p>
+</blockquote>
+</aside>
+<p>Reality на каждый запрос (каждый открытый сайт с клиента это запрос) делает обращение к заданному sni чтобы получить его сертификат и передать клиенту</p></td><td>2024-12-27T04:38:44.533Z</td></tr><tr><td>Nocturnal-ru(Roman)</td><td><aside class="quote no-group" data-username="0ka" data-post="20" data-topic="14160">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>Reality на каждый запрос (каждый открытый сайт с клиента это запрос) делает обращение к заданному sni чтобы получить его сертификат и передать клиенту</p>
+</blockquote>
+</aside>
+<p>помоему всеже только те запросы, которые “не прошли авторизацию”, те условный цензор или некие мимокрокодилы</p></td><td>2024-12-27T22:07:40.129Z</td></tr><tr><td>0ka(0ka)</td><td><p>не предполагайте а протестируйте сами</p></td><td>2024-12-28T01:47:05.472Z</td></tr><tr><td>NowAndThen</td><td><p>А каким инструментарием это можно посмотреть. Wireshark?</p></td><td>2024-12-28T02:07:14.767Z</td></tr><tr><td>0ka(0ka)</td><td><p>возьмите <a href="http://yahoo.com">yahoo.com</a>, в /etc/hosts сервера добавьте только один его айпи адрес, напр.<br>
+<code>98.137.11.163 yahoo.com</code><br>
+поставьте его в реалити конфиг и на сервере запустите <code>tcpdump -n -f "host 98.137.11.163   and outbound and tcp[tcpflags] &amp; (tcp-syn) != 0</code><br>
+затем запустите конфиг на клиенте и начинайте серфить инет, увидите в логе tcpdump что каждый открытый сайт добавляет строчку в лог (запрос на yahoo)</p></td><td>2024-12-28T02:26:56.550Z</td></tr><tr><td>DeHb86(Danila)</td><td><p>Никогда не поздно сказать спасибо, всем кто откликнулся. Не прошло и несколько дней, снова удалось сесть за компьютер. И все удалось!<br>
+Еще раз большое спасибо. Пошел сохранять себе этот мануал <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-12-29T18:01:48.002Z</td></tr><tr><td>wsvall</td><td><p>Настроил маскировку под свой сайт (вернее под заглушку логин\пароль) читая посты тут.<br>
+Знатоки, посмотрите, пожалуйста, конфиги может что-то улучшить можно? С такой настройкой можно спокойно жить?</p>
+<details>
+<summary>
+Nginx</summary>
+<pre><code class="lang-auto">server {
+
+        root /var/www/html;
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name mydomain.com www.mydomain.com;
+
+        location / {
+                auth_basic "Video Area";
+                auth_basic_user_file /etc/htpasswd;
+        }
+
+
+    #listen 443 ssl; # managed by Certbot
+    listen 127.0.0.1:1234 ssl http2;
+    listen [::1]:1234 ssl http2;
+    ssl_certificate /etc/letsencrypt/live/mydomain.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/mydomain.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+server {
+    if ($host = mydomain.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+        server_name mydomain.com;
+    listen 80;
+    return 404; # managed by Certbot
+
+}
+</code></pre>
+</details>
+<details>
+<summary>
+3xui</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="vless-reality-маскировка-под-собственный-сайт/651247205e8d6df41cf406f0bf9fcfb7a92d9b84.png" data-download-href="https://ntc.party/uploads/default/651247205e8d6df41cf406f0bf9fcfb7a92d9b84" title="image"><img src="vless-reality-маскировка-под-собственный-сайт/651247205e8d6df41cf406f0bf9fcfb7a92d9b84_2_186x500.png" alt="image" data-base62-sha1="eq7nQppF3tsHX1FLcVSJMM2QucA" width="186" height="500" srcset="vless-reality-маскировка-под-собственный-сайт/651247205e8d6df41cf406f0bf9fcfb7a92d9b84_2_186x500.png, vless-reality-маскировка-под-собственный-сайт/651247205e8d6df41cf406f0bf9fcfb7a92d9b84_2_279x750.png 1.5x, vless-reality-маскировка-под-собственный-сайт/651247205e8d6df41cf406f0bf9fcfb7a92d9b84_2_372x1000.png 2x" data-dominant-color="1C1E21"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">423×1134 29.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2025-01-06T12:34:33.725Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Вполне, у меня почти так же (разве что REALITY вместо XHTTP и включён sniffing http+tls+quic+fakedns, без двух галочек only).</p>
+<p>Я бы на вашем месте включил Sniffing и настроил роутинг российских айпишников / сайтов в WARP, так - на всякий случай.</p></td><td>2025-01-06T12:58:22.684Z</td></tr><tr><td>wsvall</td><td><aside class="quote no-group" data-username="xX_RUP3R7_P4UL50N_Xx" data-post="27" data-topic="14160" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/xx_rup3r7_p4ul50n_xx/48/13752_2.png" class="avatar"> xX_RUP3R7_P4UL50N_Xx:</div>
+<blockquote>
+<p>Я бы на вашем месте включил Sniffing и настроил роутинг российских айпишников / сайтов в WARP, так - на всякий случай.</p>
+</blockquote>
+</aside>
+<p>А что даст включение Sniffing, я смогу видеть куда ходят клиенты (т.е. я) ?</p>
+<p>И зачем ру сайты в WARP ?  Я на них хожу без проксика (на стороне клиента маршруты заданы)</p></td><td>2025-01-06T13:07:06.522Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="wsvall" data-post="28" data-topic="14160">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wsvall/48/14315_2.png" class="avatar"> wsvall:</div>
+<blockquote>
+<p>включение Sniffing</p>
+</blockquote>
+</aside>
+<p>даёт возможность делать роутинг по доменам</p></td><td>2025-01-06T13:10:13.428Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><aside class="quote no-group" data-username="wsvall" data-post="28" data-topic="14160">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wsvall/48/14315_2.png" class="avatar"> wsvall:</div>
+<blockquote>
+<p>А что даст включение Sniffing, я смогу видеть куда ходят клиенты (т.е. я) ?</p>
+</blockquote>
+</aside>
+<p>Как уже ответили выше - даёт роутить по доменам. Зачем? Для лучшей маскировки от РКН и минимизации риска блокировки по подозрению в использовании сервера как прокси, а не в качестве обычного сайта.</p>
+<aside class="quote no-group" data-username="wsvall" data-post="28" data-topic="14160">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wsvall/48/14315_2.png" class="avatar"> wsvall:</div>
+<blockquote>
+<p>И зачем ру сайты в WARP ? Я на них хожу без проксика (на стороне клиента маршруты заданы)</p>
+</blockquote>
+</aside>
+<p>Даже если настроен роутинг напрямую в клиенте (у меня, кстати, тоже), кмк лишней данная настройка не будет, это своего рода второй слой защиты от утечек RU трафика.</p>
+<p>Да, в России пока не было задокументированно блокировок по этому паттерну, как это уже давно делается в Китае, но нет никаких гарантий что это не будут делать завтра + в данный момент не собираются айпишники в серую базу данных.</p></td><td>2025-01-06T13:18:25.202Z</td></tr><tr><td>wsvall</td><td><p>Спасибо, за ответы. Sniffing включил, а дальше с WARP я кажется завис), не могли бы поподробней рассказать об добавлении WARP в  эту схему, это делается на стороне сервера? какие маршруты указать ? Т.е. с использованием WARP я скрою подключение к VPS?<br>
+На клиенте у меня используются фильтры “все что заблокировано в Россиии пускать в прокси”.</p>
+<details>
+<summary>
+нешел настройку WARP в панели это оно?</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="vless-reality-маскировка-под-собственный-сайт/8ca4bb38524b58b06700d365d0d4294adfcdd2c2.png" data-download-href="https://ntc.party/uploads/default/8ca4bb38524b58b06700d365d0d4294adfcdd2c2" title="image"><img src="vless-reality-маскировка-под-собственный-сайт/8ca4bb38524b58b06700d365d0d4294adfcdd2c2_2_337x500.png" alt="image" data-base62-sha1="k4bMqzmjUxPlmXQFCQD5c5rq5Vw" width="337" height="500" srcset="vless-reality-маскировка-под-собственный-сайт/8ca4bb38524b58b06700d365d0d4294adfcdd2c2_2_337x500.png, vless-reality-маскировка-под-собственный-сайт/8ca4bb38524b58b06700d365d0d4294adfcdd2c2_2_505x750.png 1.5x, vless-reality-маскировка-под-собственный-сайт/8ca4bb38524b58b06700d365d0d4294adfcdd2c2_2_674x1000.png 2x" data-dominant-color="181B1C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">775×1147 52 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>Вы это имелии ввиду:</p>
+<details>
+<summary>
+?</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="vless-reality-маскировка-под-собственный-сайт/e971f00b02c6d1d4fc60325503a4cdf3bfe626ef.png" data-download-href="https://ntc.party/uploads/default/e971f00b02c6d1d4fc60325503a4cdf3bfe626ef" title="image"><img src="vless-reality-маскировка-под-собственный-сайт/e971f00b02c6d1d4fc60325503a4cdf3bfe626ef_2_501x500.png" alt="image" data-base62-sha1="xj9mnsHXDUFnFsCtIz7KBTNYskn" width="501" height="500" srcset="vless-reality-маскировка-под-собственный-сайт/e971f00b02c6d1d4fc60325503a4cdf3bfe626ef_2_501x500.png, vless-reality-маскировка-под-собственный-сайт/e971f00b02c6d1d4fc60325503a4cdf3bfe626ef_2_751x750.png 1.5x, vless-reality-маскировка-под-собственный-сайт/e971f00b02c6d1d4fc60325503a4cdf3bfe626ef.png 2x" data-dominant-color="91969E"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">937×935 72.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2025-01-06T14:09:26.975Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Да, примерно так. Всё просто:</p>
+<ol>
+<li>
+<p>Создаёте outbound WARP (Generate, затем Add)</p>
+</li>
+<li>
+<p>Создаёте правила, в outbound выбираете WARP</p>
+</li>
+<li>
+<p>Сохраняете настройки и перезапускаете Xray</p>
+</li>
+</ol>
+<p>Я у себя так настроил, в принципе этого достаточно (дополнительно прописал deepmind, это нужно для работы AI сервисов от гугла, т.к. с ним могут возникать проблемы если гугл занесёт ваш IP в категорию “из России”, а ntc добавил чисто для большей приватности и в качестве примера):</p>
+<ul>
+<li>
+<p>Сначала правила для доменов <code>geosite:category-ru,domain:livejournal.com,domain:icq.com,domain:by,geosite:google-deepmind,domain:ntc.party</code></p>
+</li>
+<li>
+<p>Потом правила для IP <code>geoip:ru,geoip:by</code></p>
+</li>
+</ul></td><td>2025-01-06T15:05:30.425Z</td></tr><tr><td>wsvall</td><td><p>Как интересно, спасибо!<br>
+Итого, созданный на сервере Outbound в WARP (с маршрутом, например, geoip:ru)</p>
+<ul>
+<li>позволит дать клиенту ответ на его запрос к сайт.ру не с самого VPS, а с IP из сети WARP</li>
+<li>будет работать только, если у клиента отсуствует правило маршрутизации (geoip:ru → direct)</li>
+<li><code>tcpdump -i ens3 -nn -s 0 -v host 162.159.192.1</code> на сервере покажет трафик только, когда на клиенте выключен маршрут geoip:ru → direct</li>
+<li>при посещении сайта <a href="http://ipmy.ru" rel="noopener nofollow ugc">ipmy.ru</a>, который маршрутизируется с клиента в прокси (чисто для эксперимента) будет виден IP из WARP, а не IP VPS или домашний IP</li>
+</ul>
+<p>У меня все 4е пункта с ответом да,  может ли это означать, что добавленый в схему WARP работает как  надо?</p></td><td>2025-01-06T16:16:48.464Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Да, всё правильно</p></td><td>2025-01-06T16:23:36.342Z</td></tr><tr><td>soulvvv</td><td><p>Добрый день, настраиваю nginx для балансировки по SNI на vps несколько сайтов, один заглушка для vless+reality. желаемое поведение что бы при обращении на sni xray выдавало сайт заглушку. ну и остальные сайты работали.<br>
+сейчас остальные сайты работают но xray не работает и заглушка отдаёт  <code>SSL_ERROR_RX_RECORD_TOO_LONG</code><br>
+подскажите пожалуйста куда смотреть, что я делаю не так?<br>
+или не изгаляться с reality и сделать vless+TLS?</p>
+<details>
+<summary>
+текущий конфиг nginx.conf</summary>
+<pre><code class="lang-auto">user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+error_log /var/log/nginx/error.log;
+include /etc/nginx/modules-enabled/*.conf;
+load_module
+events {
+    worker_connections 768;
+    # multi_accept on;
+}
+
+stream {
+    map $ssl_preread_server_name $name {
+        blog.example.com backend_blog;
+        dev.example.com backend_dev;
+        default backend_discard;
+    }
+    #just www
+    upstream backend_blog {
+        server 127.0.0.1:8001;
+    }
+    #xray reality vless
+    upstream backend_dev {
+        server 127.0.0.1:8003;
+    }
+    #reject wrong sni
+    upstream backend_discard {
+        server 127.0.0.1:8011;
+    }
+
+    server {
+        listen 443;
+        proxy_pass $name;
+        ssl_preread on;
+
+        proxy_protocol on;
+    }
+}
+
+
+http {
+    sendfile on;
+    tcp_nopush on;
+    types_hash_max_size 2048;
+
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    log_format main '[$time_local] $proxy_protocol_addr "$http_referer" "$http_user_agent"';
+    access_log /var/log/nginx/access.log main;
+
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        "" close;
+    }
+
+    map $proxy_protocol_addr $proxy_forwarded_elem {
+        ~^[0-9.]+$ "for=$proxy_protocol_addr";
+        ~^[0-9A-Fa-f:.]+$ "for=\"[$proxy_protocol_addr]\"";
+        default "for=unknown";
+    }
+
+    map $http_forwarded $proxy_add_forwarded {
+        "~^(,[ \\t]*)*([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+=([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?(;([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+=([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?)*([ \\t]*,([ \\t]*([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+=([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?(;([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+=([!#$%&amp;'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?)*)?)*$" "$http_forwarded, $proxy_forwarded_elem";
+        default "$proxy_forwarded_elem";
+    }
+    #redirect on ssl
+    server {
+        if ($host = blog.example.com) {
+            return 301 https://$host$request_uri;
+        }
+        if ($host = dev.example.com) {
+            return 301 https://$host$request_uri;
+        }
+
+        listen 80 default_server;
+        return 404;
+    }
+    #reject wrong sni
+    server {
+        listen 127.0.0.1:8011 ssl proxy_protocol;
+
+        ssl_reject_handshake on;
+
+        ssl_protocols TLSv1.2 TLSv1.3;
+    }
+
+
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}
+</code></pre>
+</details>
+<details>
+<summary>
+конфиг dev.example.com</summary>
+<pre><code class="lang-auto">server {
+    listen 127.0.0.1:8004 ssl proxy_protocol;
+
+    ssl_certificate /etc/letsencrypt/live/dev.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/dev.example.com/privkey.pem;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE&gt;
+
+    root /var/www/html/dev.example.com;
+    index index.html;
+
+    client_header_timeout 5m;
+    keepalive_timeout 5m;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+</code></pre>
+</details>
+<details>
+<summary>
+конфиг xray</summary>
+<pre><code class="lang-auto">{
+    "log": {
+        "loglevel": "warning",
+        "access": "/var/log/xray/access.log",
+        "error": "/var/log/xray/error.log"
+    },
+    "dns": {
+        "servers": [
+            "https+local://1.1.1.1/dns-query",
+            "localhost"
+        ]
+    },
+    "routing": {
+        "domainStrategy": "IPIfNonMatch",
+        "rules": [
+            {
+                "type": "field",
+                "ip": [
+                    "geoip:private"
+                ],
+                "outboundTag": "discard"
+            },
+            {
+                "type": "field",
+                "domain": [
+                    "geosite:category-ads-all"
+                ],
+                "outboundTag": "discard"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "listen": "127.0.0.1",
+            "port": 8003,
+            "protocol": "vless",
+            "tag": "in-vless-1",
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls",
+                    "quic"
+                ]
+            },
+            "settings": {
+                "clients": [
+                    {
+                        "id": "1be50faf-751e-4e7e-ba15-5c3afbcaa2de",
+                        "level": 0,
+                        "email": "love@localhost.local"
+                    }
+                ],
+                "decryption": "none"
+            },
+            "streamSettings": {
+                "network": "raw",
+                "security": "reality",
+                "realitySettings": {
+                    "target": "127.0.0.1:8004",
+                    "xver": 1,
+                    "serverNames": [
+                        "dev.example.com"
+                    ],
+                    "privateKey": "тут есть серт",
+                    "shortIds": [
+                        "тут они есть и корректно используются"
+                    ]
+                }
+            },
+            "tcpSettings": {
+                "acceptProxyProtocol": true
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "tag": "russia",
+            "protocol": "freedom"
+        },
+        {
+            "tag": "discard",
+            "protocol": "blackhole"
+        }
+    ]
+}
+</code></pre>
+</details></td><td>2025-01-12T14:28:54.577Z</td></tr><tr><td>sakontwist</td><td><p>Если вы используете свой сертификат, то почему security: reality, а не tls?</p>
+<p>В такой схеме можно использовать обратное решение - повесить на внешний порт 443 docodemo-door (inbound) и включить на нем снифер. В зависимости от domain сделать rules, которые будут раскидывать куда вам нужно - на нормальный xray (127.0.0.1:8003) или nginx (можно тоже на 127.0.0.1).</p></td><td>2025-01-14T09:07:11.922Z</td></tr><tr><td>sakontwist</td><td><p>Вот тут <a href="https://blog.bissquit.com/unix/zametki-peredacha-imeni-iz-sni-na-upstream-v-nginx/" class="inline-onebox" rel="noopener nofollow ugc">Заметки: Передача имени из SNI на upstream в Nginx -</a> рекомендуют использовать в upstream <code>proxy_ssl_server_name on;</code></p></td><td>2025-01-14T09:20:08.385Z</td></tr><tr><td>soulvvv</td><td><p>Да, уже переделал на TLS, хочется всё же решить задачку силами nginx.<br>
+Видимо что-то я недопонимаю в работе revers-proxy и секции stream.<br>
+Спасибо за наводки изучу и потестирую ещё. если добьюсь рабочего конфига постараюсь не забыть и выложить сюда.</p></td><td>2025-01-14T21:04:35.057Z</td></tr><tr><td>xxphantom(Dmitriy)</td><td><p>Если хочется держать на одном VPS и свой сайт(сайты) и XRAY, можно таки сделать, чтобы nginx смотрел первым, и перенаправлял трафик в xray (и он при этом может маскироваться под ваш же сайт, не проблема).</p>
+<p>Рабочий мануал, по нему делал и всё ок: <a href="https://coyotle.ru/posts/xray-and-nginx/" class="inline-onebox" rel="noopener nofollow ugc">Xray с XTLS-Reality и Nginx на одном порту | Мини-блог</a></p>
+<p>Только внимательней, там автор случайно в конфиге вставил после номера порта ссылку на <code>https://github.com/XTLS/Xray-core/releases/</code>, смотрите что копируете)</p>
+<p>Если же хотите, чтобы в инет смотрел XRAY, то можно, как выше писали, для XRay оставить 443 порт, а на NGINX поднять сайт на 127.0.0.1:8443 и под него маскироваться уже в Xray</p></td><td>2025-01-16T11:46:53.017Z</td></tr><tr><td>soulvvv</td><td><p>Как обещал делюсь рабочим конфигом для NGINX(reverse-proxy+web+sub)+XRAY(VLESS-TLS)<br>
+Я точно не эксперт в nginx но конфиг рабочий, своё дело делает. думаю кому-то может пригодится. Буду рад замечаниям и предложениям по улучшению.</p>
+<details>
+<summary>
+nginx.conf</summary>
+<pre><code class="lang-auto">user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+error_log /var/log/nginx/error.log;
+include /etc/nginx/modules-enabled/*.conf;
+load_module
+events {
+    worker_connections 768;
+    # multi_accept on;
+}
+
+stream {
+    map $ssl_preread_server_name $name {
+        blog.example.com backend_blog;
+        dev.example.com backend_dev;
+        default backend_discard;
+    }
+    #just www
+    upstream backend_blog {
+        server 127.0.0.1:8001;
+    }
+    #xray reality vless
+    upstream backend_dev {
+        server 127.0.0.1:8003;
+
+    }
+    }
+    #reject wrong sni
+    upstream backend_discard {
+        server 127.0.0.1:8011;
+    }
+
+    server {
+        listen 443;
+        listen [::]:443;
+        proxy_pass $name;
+        ssl_preread on;
+        proxy_protocol on;
+    }
+}
+
+
+http {
+    sendfile on;
+    tcp_nopush on;
+    types_hash_max_size 2048;
+
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    log_format main '[$time_local] $proxy_protocol_addr "$http_referer" "$http_user_agent"';
+    access_log /var/log/nginx/access.log main;
+
+    #redirect on ssl
+    server {
+        if ($host = blog.example.com) {
+            return 301 https://$host$request_uri;
+        }
+        if ($host = dev.example.com) {
+            return 301 https://$host$request_uri;
+        }
+        if ($host = ipam.example.com) {
+            return 301 https://$host$request_uri;
+        }
+
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        return 404;
+    }
+    #reject wrong sni
+    server {
+        listen 127.0.0.1:8011 ssl proxy_protocol;
+
+        ssl_reject_handshake on;
+
+        ssl_protocols TLSv1.2 TLSv1.3;
+    }
+
+
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}
+</code></pre>
+</details>
+<details>
+<summary>
+dev.conf</summary>
+<pre><code class="lang-auto">server {
+    listen 127.0.0.1:8004 proxy_protocol;
+    listen 127.0.0.1:8005 http2 proxy_protocol;
+    server_name dev.example.com;
+
+    access_log /var/log/nginx/dev.example.com.access.log;
+    error_log /var/log/nginx/dev.example.com.error.log;
+
+    root /var/www/html/dev.example.com;
+    index index.html;
+
+    client_header_timeout 5m;
+    keepalive_timeout 5m;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+    location /random_string/ {
+        try_files $uri /random_string/$uri
+        add_header Cache-Control 'must-revalidate';
+        add_header Content-Type text/plain;
+    }
+}
+</code></pre>
+</details>
+<details>
+<summary>
+xray.json</summary>
+<pre><code class="lang-auto">{
+    "log": {
+        "loglevel": "warning",
+        "access": "/var/log/xray/access.log",
+        "error": "/var/log/xray/error.log"
+    },
+    "dns": {
+        "servers": [
+            "https+local://1.1.1.1/dns-query",
+            "localhost"
+        ]
+    },
+    "inbounds": [
+        {
+            "listen": "127.0.0.1",
+            "port": 8003,
+            "protocol": "vless",
+            "tag": "in-vless-1",
+            "sniffing": {
+                "enabled": true,
+                "routeOnly": true,
+                "destOverride": [
+                    "http",
+                    "tls",
+                    "quic"
+                ]
+            },
+            "settings": {
+                "clients": [
+                    {
+                        "id": "user",
+                        "flow": "xtls-rprx-vision",
+                        "level": 0
+                    }
+                ],
+                "decryption": "none",
+                "fallbacks": [
+                    {
+                        "dest": 8004,
+                        "xver": 1
+                    },
+                    {
+                        "alpn": "h2",
+                        "dest": 8005,
+                        "xver": 1
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "raw",
+                "rawSettings": {
+                    "acceptProxyProtocol": true
+                },
+                "security": "tls",
+                "tlsSettings": {
+                    "serverNames": "dev.example.com",
+                    "rejectUnknownSni": true,
+                    "allowInsecure": false,
+                    "alpn": [
+                        "h2",
+                        "http/1.1"
+                    ],
+                    "minVersion": "1.2",
+                    "maxVersion": "1.3",
+                    "certificates": [
+                        {
+                            "certificateFile": "/etc/letsencrypt/live/dev.example.com/fullchain.pem",
+                            "keyFile": "/etc/letsencrypt/live/dev.example.com/privkey.pem"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "tag": "vless-reality-1",
+            "protocol": "vless",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "dev2.example.com",
+                        "port": 443,
+                        "users": [
+                            {
+                                "id": "dev1",
+                                "flow": "xtls-rprx-vision",
+                                "encryption": "none"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "raw",
+                "rawSettings": {},
+                "security": "reality",
+                "realitySettings": {
+                    "fingerprint": "firefox",
+                    "publicKey": "key",
+                    "serverName": "dev2.example.com",
+                    "shortId": "id"
+                }
+            }
+        },
+        {
+            "tag": "russia",
+            "protocol": "freedom"
+        },
+        {
+            "tag": "discard",
+            "protocol": "blackhole"
+        }
+    ],
+    "routing": {
+        "domainStrategy": "IPIfNonMatch",
+        "rules": [
+            {
+                "ip": [
+                    "geoip:private"
+                ],
+                "outboundTag": "discard"
+            },
+            {
+                "domain": [
+                    "geosite:category-ads-all"
+                ],
+                "outboundTag": "discard"
+            },
+            {
+                "protocol": [
+                    "bittorrent"
+                ],
+                "outboundTag": "discard"
+            },
+            {
+                "ip": [
+                    "geoip:ru"
+                ],
+                "outboundTag": "russia"
+            },
+            {
+                "domain": [
+                    ".ru",
+                    "geosite:apple",
+                    "youtube.com",
+                    "youtu.be",
+                    "yt.be",
+                    "googlevideo.com",
+                    "ytimg.com",
+                    "ggpht.com",
+                    "gvt1.com",
+                    "youtube-nocookie.com",
+                    "youtube-ui.l.google.com",
+                    "youtubeembeddedplayer.googleapis.com",
+                    "youtube.googleapis.com",
+                    "youtubei.googleapis.com",
+                    "yt-video-upload.l.google.com",
+                    "wide-youtube.l.google.com"
+                ],
+                "outboundTag": "russia"
+            }
+
+        ]
+    }
+}
+</code></pre>
+</details></td><td>2025-03-15T13:24:34.118Z</td></tr>
+    </table>
+      </body>
+    </html>

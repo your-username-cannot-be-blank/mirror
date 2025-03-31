@@ -1,0 +1,71 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>ddns-проблема-трафик-идет-через-vpn-при-запросе-на-ddns-адрес-9411</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>BadMandarin(Kirnix)</td><td><p>Не понимаю как мне добавить свой адрес в исключение antizapret docker.<br>
+Сделал эти шаги, но не помогло…</p>
+<ol>
+<li>Добавил адрес в exclude-hosts-custom.txt в формате <a href="http://xxxxxxx.sytes.com" rel="noopener nofollow ugc">xxxxxxx.sytes.com</a></li>
+<li>Сделал это “LANG=C.UTF-8 /root/antizapret/doall.sh” процесс прошел - процессор подолбился в 100% после чего затих.</li>
+<li>Ждал минут 30 после чего результат…ничего не поменялось.</li>
+</ol>
+<p>В чем проблема ?<br>
+Нужно чтоб данный DDNS не ходил через vpn сервер, а подключение шло напрямую на DDNS сервер.</p></td><td>2024-08-16T20:09:31.514Z</td></tr><tr><td>ValdikSS</td><td><p>А по какому правилу он у вас маршрутизируется в VPN? В Реестре такого домена нет.</p></td><td>2024-08-16T20:12:17.377Z</td></tr><tr><td>BadMandarin(Kirnix)</td><td><p>Я не знаю почему он вообще маршрутизируется. Я не очень разбираюсь в этом. Но на всех сайтах которых я проверял этот адрес не заблокирован. Но видел тему, что noip автоматом фильтруется antizapret_ом.<br>
+Что я могу предоставить чтобы можно было лучше понять проблему ?<br>
+DDNS сейчас <a href="http://freedns.afraid.org" rel="noopener nofollow ugc">freedns.afraid.org</a> - <a href="http://mooo.com" rel="noopener nofollow ugc">mooo.com</a><br>
+Адрес ведет на домашний сервер.</p></td><td>2024-08-16T20:15:05.708Z</td></tr><tr><td>ValdikSS</td><td><p>Как вы определили, что трафик маршрутизируется? Каков результат nslookup этого домена? Какие у вас маршруты в ОС?</p></td><td>2024-08-16T20:18:06.313Z</td></tr><tr><td>BadMandarin(Kirnix)</td><td><p>VPN padavan ВКЛЮЧЕН</p>
+<p>Connecting to host <a href="http://xxxxxxxx.mooo.com/" rel="noopener nofollow ugc">XXXXXXXX.mooo.com</a>, port 5201<br>
+[ 5] local 192.168.1.200 port 60838 connected to 10.224.0.35 port 5201<br>
+[ ID] Interval Transfer Bitrate<br>
+[ 5] 0.00-1.01 sec 256 KBytes 2.08 Mbits/sec<br>
+[ 5] 1.01-2.00 sec 256 KBytes 2.11 Mbits/sec<br>
+[ 5] 2.00-3.01 sec 128 KBytes 1.04 Mbits/sec</p>
+<p>VPN padavan ВЫКЛЮЧЕН</p>
+<p>Connecting to host <a href="http://sambee.mooo.com/" rel="noopener nofollow ugc">sambee.mooo.com</a>, port 5201<br>
+[ 5] local 192.168.1.200 port 50159 connected to ВНЕШНИЙ-IP port 5201<br>
+[ ID] Interval Transfer Bitrate<br>
+[ 5] 0.00-1.01 sec 113 MBytes 938 Mbits/sec<br>
+[ 5] 1.01-2.01 sec 112 MBytes 942 Mbits/sec<br>
+[ 5] 2.01-3.01 sec 112 MBytes 936 Mbits/sec</p></td><td>2024-08-16T20:26:23.724Z</td></tr><tr><td>ValdikSS</td><td><p>Вы писали про <code>*.sytes.com</code>, теперь пишете про <code>*.mooo.com</code>.<br>
+Его поддомены в Реестре.</p>
+<p>Либо добавляйте <code>mooo</code> вот в это перечисление<br>
+<a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/6eae76b095ef4d719043a109c05d94900aaa3791/scripts/getzones.awk#lines-20" class="onebox" target="_blank" rel="noopener">https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/6eae76b095ef4d719043a109c05d94900aaa3791/scripts/getzones.awk#lines-20</a></p>
+<p>Либо <code>mooo.com</code> в <code>exclude-hosts-custom.txt</code>.</p></td><td>2024-08-16T20:40:41.507Z</td></tr><tr><td>BadMandarin(Kirnix)</td><td><p>Они у меня просто оба через vpn проходят.</p>
+<p>То есть в exclude-hosts-custom.txt нужно добавлять именно формат <a href="http://mooo.com" rel="noopener nofollow ugc">mooo.com</a>, а не <a href="http://xxxxx.mooo.com" rel="noopener nofollow ugc">xxxxx.mooo.com</a> ?<br>
+Сейчас попробую, благодарю за такую удивительно оперативную поддержку <img src="https://ntc.party/images/emoji/twitter/open_mouth.png?v=12" title=":open_mouth:" class="emoji" alt=":open_mouth:" loading="lazy" width="20" height="20"></p></td><td>2024-08-16T20:43:28.296Z</td></tr><tr><td>BadMandarin(Kirnix)</td><td><p>Все работает! Благодарю <img src="https://ntc.party/images/emoji/twitter/raised_hands.png?v=12" title=":raised_hands:" class="emoji" alt=":raised_hands:" loading="lazy" width="20" height="20"></p></td><td>2024-08-16T20:56:38.315Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,388 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>как-поставить-веб-сервер-и-vless-на-одном-vps</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>aggravatingbee</td><td><h1><a name="p-72335-vless-vps-1" class="anchor" href="#p-72335-vless-vps-1"></a>Как реализовать веб-сервер и VLESS на одном VPS?</h1>
+<p>Добрый день!</p>
+<p>Имеется:</p>
+<ol>
+<li>Один VPS (Debian 12) с xray, настроенный на три протокола.</li>
+<li>Второй VPS (Debian 12) c веб-сервером. Apache2, mariadb-server, phpMyAdmin, composer. Сам сайт - банальная html-ка - заглушка, собранная за пару минут в конструкторе сайтов.</li>
+<li>Желание не платить за два VPS, а поставить все на одном с SNI в лице моего собственного сайта.</li>
+<li>Большая удаленная статья сами-знаете-о-чем, где был краткий раздел про то, что это реально, нужно только заставить веб-сервер слушать localhost на нестандартном порте.</li>
+<li>Полнейший нуб, не имеющий никакого опыта в разработке и сетях. Который умеет только следовать подробным инструкциям. Максимум, что я могу - догадаться, что если какая-то команда не срабатывает - возможно надо сделать apt install с первым словом из команды <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></li>
+</ol>
+<p>Далее постараюсь кратко про весь процесс:</p>
+<ul>
+<li>Поставил веб-сервер, сайт работает, все супер.</li>
+<li>Почитал ту статью, погуглил как заставить Apache слушать только определенные IP и порты, для верности уточнил еще и у ChatGPT.</li>
+<li>Установил xray, конфиг скопировал предыдущий (до переустановки сервера), поменял только SNI, UUID и приватный ключ. Результат - xray при старте выдал ошибку. Собрал конфиг с нуля - то же самое.</li>
+<li>Предположил, что уже в этот момент возник конфликт с веб-сервером. Полез в конфиг ports в Apache и его же конфиг виртуального хоста.</li>
+<li>В первом увидел три строчки - базовая (с 80 портом) и еще две с ним же. Как я понял - одна (mod_gnutls.c) про какие-то Apache’ные штуки, другая для сертификата let’s encrypt (т.к. там было слово SSL). Во втором конфиге - аналогично 80 порт для виртуального хоста. Недолго думая, заменил все 4 строчки на 127.0.0.1:12345, сохранил, systemctl restart apache2 - и вылезла ошибка. Далее откатывал каждую из 4 строчек до дефолтного 80 порта - то же самое. Откатил оба конфига в изначальное состояние - и снова ошибка. Финишом стало то, что после перезагрузки VPS я не смог подключиться к нему по SSH, и его пришлось переустанавливать.<br>
+P.S. Не исключаю, что проблема с Apache возникла не в момент изменения конфигов, а в момент установки и запуска xray.</li>
+</ul>
+<p>Вопросы:<br>
+а) как подружить xray с apache (если это возможно)? Если можно - что конкретно, где и как указать руками, иначе я не разберусь (мне уже попадались упоминания каких-то правок в iptables)<br>
+б) какие порты за что в них отвечают, как правильно их “подружить”? Например, по какому порту в итоге можно будет попасть на мой сайт, а по какому - в админку? И по какому порту обращаться к xray. Учитывая, что они указываются:</p>
+<ul>
+<li>в конфиге xray в разделе inbound (входной порт для xray, как я понимаю);</li>
+<li>в нем же - порт для SNI (моего сайта);</li>
+<li>3 порта в конфиге Apache для вышеуказанных целей;</li>
+<li>порт виртуалки в отдельном конфиге Apache.</li>
+</ul></td><td>2024-12-12T16:49:23.715Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="13773">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>я не смог подключиться к нему по SSH, и его пришлось переустанавливать</p>
+</blockquote>
+</aside>
+<p>Рекомендую учиться на локальной виртуальной машине с самоподписанным сертификатом, механизм снапшотов позволит быстро откатывать изменения. Затем рабочие конфигурации можно применить на VPS.</p></td><td>2024-12-12T17:14:52.504Z</td></tr><tr><td>sakontwist</td><td><p>Есть вариант “веб-сервер” позади vless (через fallback и только для варианта vision, с reality вроде как fallback не используется)<br>
+Есть вариант веб-сервер перед vless с разделением по доменам в sni.</p>
+<p>Но к сожалению примеры конфигурации видел только для caddy и nginx.</p></td><td>2024-12-12T17:29:02.296Z</td></tr><tr><td>aggravatingbee</td><td><p>В правилах инбаунда? Можно пример, если не сложно?</p></td><td>2024-12-12T17:42:03.033Z</td></tr><tr><td>aggravatingbee</td><td><p>Edit: Ответил не туда)</p></td><td>2024-12-12T17:42:41.538Z</td></tr><tr><td>Nocturnal-ru(Roman)</td><td><p>Использую такой кейс, только сервер nginx. Слушает 443, 8443, 80 порты 3xui, в случае если авторизация клиента не прошла (это цензор или кто-то любопытствующий), то перекидывает на nginx (какой-то внутренний порт используем</p></td><td>2024-12-12T18:51:54.362Z</td></tr><tr><td>aggravatingbee</td><td><p>Всем спасибо за ответы! Все получилось.</p>
+<p>Сначала пришлось помучаться с попытками подружить haproxy с apache (до установки xray даже не добрался, т.к. не смог настроить маршрутизацию на сайт).</p>
+<p>В итоге снёс сервер, поставил nginx с переадресацией либо на сайт на нём же или xray. Сайт заработал, xray - не заработал. На стороне сервера xray выдавал ошибку, пока не отключил reality. Клиент “ругался” перестал ругаться на TLS после отключения flow, и начал выдавать ошибку “в доступе отказано”.</p>
+<p>В итоге поставил “шлюзом” все-таки сам xray, с распределением трафика через fallback в зависимости от наличия path.</p></td><td>2024-12-14T09:24:59.553Z</td></tr><tr><td>xofamim548</td><td><aside class="quote no-group" data-username="aggravatingbee" data-post="7" data-topic="13773">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>В итоге поставил “шлюзом” все-таки сам xray, с распределением трафика через fallback в зависимости от наличия path.</p>
+</blockquote>
+</aside>
+<p>Слушайте, я почему fallback? Возможно, я чего-то упускаю, но по идее reality в режиме steal oneself прекрасно работает по такой схеме:</p>
+<pre><code class="lang-auto">"inbounds": [
+    {
+      "port": 443,
+      "protocol": "vless",
+      "tag": "vless_tls",
+      "settings": {
+        "clients": [
+          {
+            "id": "$ID_HERE",
+            "email": "user1@myserver",
+            "flow": "xtls-rprx-vision"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+		"realitySettings": {
+			"show": false,
+			"dest": "127.0.0.1:12345", // СЕРВЕР СЛУШАЕТ ЗДЕСЬ
+			"serverNames": [
+				"$DOMAIN_NAME_HERE"
+			],
+			"privateKey": "$PRIVATE_KEY_HERE",
+			"minClientVer": "",
+			"maxClientVer": "",
+			"maxTimeDiff": 0,
+			"shortIds": [
+				"$SHORT_ID_HERE"
+			]
+		}
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls",
+		  "quic"
+        ]
+      }
+    }
+  ]
+</code></pre>
+<p>В этом случае xray слушает 443 и перенаправляет все прочее на localhost 12345, который в вашем случае слушает nginx. Повторюсь, возможно что-то упускаю, но в целом маскировка под свой сайт сейчас настраивается как-то так.</p></td><td>2024-12-14T09:53:41.901Z</td></tr><tr><td>aggravatingbee</td><td><p>Попробовал запустить ваш конфиг - xray на стороне сервера все так же наотрез отказывается запускаться с включенным reality, как и в сценарии, в котором я пытался поставить nginx “до” xray.</p></td><td>2024-12-14T11:11:30.813Z</td></tr><tr><td>xofamim548</td><td><p>Это странно. А что в <code>journalctl -u xray -e</code> после неудачной попытки запуска xray?</p></td><td>2024-12-14T11:19:25.639Z</td></tr><tr><td>NowAndThen</td><td><ol>
+<li>
+<p>Во-первых, надо где покупали домен настроить DNS запись A-типа, чтобы указывала на IP вашего сервера c Xray. Займет какое-то время. Когда ping по имени сервера начнет выдавать ваш новый IP адрес, движемся дальше.</p>
+</li>
+<li>
+<p>Ставим nginx.</p>
+</li>
+</ol>
+<pre><code class="lang-auto">sudo apt update
+sudo apt install nginx
+</code></pre>
+<p>Конфигурации серверов на nginx живут в папке</p>
+<p><code>etx/nginx/sites-available</code></p>
+<p>Сcылка на текущий рабочий конфиг должна быть в</p>
+<p><code>etx/nginx/sites-enabled</code></p>
+<p>По умолчанию там лежит конфиг default. Если выкинуть из него все каменты, вот минимально рабочий конфиг.</p>
+<pre><code class="lang-auto">server {
+
+	root /var/www/html;
+	index index.html index.htm index.nginx-debian.html;
+
+	server_name mydomain.com www.mydomain.com; # Вписать свой домен
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+}
+</code></pre>
+<ol start="3">
+<li>Дальше нужно установить SSL сертификаты для сайта.</li>
+</ol>
+<p>Устанавливаем скрипт Certbot</p>
+<p><code>sudo apt install python3-certbot-nginx</code></p>
+<p>Генерируем сертификат. Впишите свой домен.</p>
+<p><code>sudo certbot --nginx -d mydomain.com -d www.mydomain.com</code></p>
+<p>Certbot этой командой сам изменит конфиг Nginx, так что он теперь будет выглядеть вот так.</p>
+<pre><code class="lang-auto">server {
+
+	root /var/www/html;
+	index index.html index.htm index.nginx-debian.html;
+
+	server_name mydomain.com www.mydomain.com;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+
+	listen [::]:443 ssl ipv6only=on; # managed by Certbot
+	listen 443 ssl; # managed by Certbot
+	ssl_certificate /etc/letsencrypt/live/mydomain.com/fullchain.pem; # managed by Certbot
+	ssl_certificate_key /etc/letsencrypt/live/mydomain.com/privkey.pem; # managed by Certbot
+	include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+	ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+server {
+    if ($host = mydomain.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+	listen 80 default_server;
+	listen [::]:80 default_server;
+
+	server_name mydomain.com;
+	return 404; # managed by Certbot
+}
+</code></pre>
+<p>Теперь Nginx и Xray конфликтуют, потому что оба слушают 443 порт. Если выключить Xray или перенастроить его на другой порт, это конфиг должен при обращении к сайту выдавать стандартную заглушку Nginx.</p>
+<ol start="4">
+<li>Теперь в конфиге Nginx надо закомментить строчки, слушающие 443.</li>
+</ol>
+<pre><code class="lang-auto">#	listen [::]:443 ssl ipv6only=on; # managed by Certbot
+#	listen 443 ssl; # managed by Certbot
+</code></pre>
+<p>И заставить его вместо этого слушать localhost на порту, который мы потом впишем в Xray</p>
+<p><code>	listen 127.0.0.1:1234 ssl http2;</code></p>
+<p>Второй серверный блок на 80 порту оставляем как есть, чтобы Сертбот мог обновлять сертификат.</p>
+<p>Проверяем синтаксис конфига командой</p>
+<p><code>nginx -t</code></p>
+<p>И перезапускаем сервер</p>
+<p><code>systemctl restart nginx</code></p>
+<ol start="5">
+<li>
+<p>Осталось только настроить Xray. Настраиваете все как обычно, чтобы он слушал 443. Если у вас security = Reality, то в поле dest оно же target, там где вы обычно воруете <a href="http://google.com:443" rel="noopener nofollow ugc">google.com:443</a> прописываете вместо этого 127.0.0.1:1234. Это схема называется “steal oneself”, т.е. мы как бы воруем хендшейк у своего же сервера. Если security = TLS, то нужно прописать fallback, где опять же в поле dest указываем 127.0.0.1:1234, все будет работать так же.</p>
+</li>
+<li>
+<p>Если все настроили правильно, то теперь кидаем свой сайт-заглушку в папку var/www/html и Xray будет слушать 443 порт и принимать VLESS соединение, если вы проходите за своего и перебрасывать на Nginx все прочие запросы.</p>
+</li>
+</ol></td><td>2024-12-14T15:36:47.494Z</td></tr><tr><td>PlavaliZnaem( )</td><td><p>Кому интересно, как сделал я. В качестве прокси выступает сам vless xray, который слушает 443 порт, nginx слушает на 44443 порту. Если пришел легитимный запрос к прокси, работает vless, если любой другой, то отправляется на nginx, который показывает сайт-заглушку, либо, если в запросе указан верный путь, обращается к панеле 3x-ui (работает на порту 18443). В самой панели убираем ссылки на файлы сертификатов, панель слушает только с адреса 127.0.0.1. SNI - ваш сайт, dest: 127.0.0.1:44443</p>
+<pre><code class="lang-auto"># Переадресация с HTTP (80) на HTTPS (443)
+server {
+    listen 80;
+    server_name my.site;
+
+    # Перенаправление на HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 127.0.0.1:44443 ssl;
+    server_name my.site;
+
+    # Укажите путь к SSL-сертификатам
+    ssl_certificate             /root/ssl/certs/fullchain.cer;
+    ssl_certificate_key         /root/ssl/certs_ecc/my.site.key;
+   
+    # Настройки SSL
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # Корневая директория для сайта
+    root /var/www/html;
+    index index.html index.htm;
+
+    # Обработка запросов
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    # Обработка запроса к /panelpath/
+    location /panelpath/ {
+        proxy_pass http://127.0.0.1:18443;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+</code></pre></td><td>2024-12-14T17:42:43.807Z</td></tr><tr><td>aggravatingbee</td><td><p>Судя по всему я как-то неправильно чекал журнал (через journal -xeu). Сейчас уже не хочу снова менять конфиг, чтобы чекнуть ошибки)</p></td><td>2024-12-14T18:50:42.628Z</td></tr><tr><td>aggravatingbee</td><td><p>Инструкция - супер, жаль пришлось самостоятельно разбираться через chatgpt. Есть идеи почему у меня не запускается xray с reality? Даже если брать конфиг от xofamim548. Xray слушает 443, nginx - виртуальный порт. Сертификаты от let’s encrypt есть, сайт есть, всё - как в инструкции.</p></td><td>2024-12-14T18:56:20.449Z</td></tr><tr><td>NowAndThen</td><td><p>Разбирайтесь по-отдельности. Чтобы Xray сам по себе работал и сайт на Nginx сам по себе. А увязать их это всего две строчки, как вы поняли, в тот и в тот конфиги одинаковый внутренний порт прописать.</p></td><td>2024-12-14T19:31:21.815Z</td></tr><tr><td>aggravatingbee</td><td><p>Добрый день! Пока ковырялся со своим сервером - случайно наткнулся на <a href="https://github.com/XTLS/Xray-core/issues/2578" rel="noopener nofollow ugc">старенькую тему.</a>. Как я понимаю - разницы между tls+xtls+fallback и reality особо никакой, но reality мне (субъективно, как человеку, который в этом глубоко не шарит) кажется более более сложной, замороченной (маскировка под собственный сайт, когда у тебя он реально есть и есть сертификаты?) и приоритетной для блокировок (т.к. собственный веб-сервер, домен и сертификаты имеются у меньшинства людей).</p>
+<p>Ну и пока я не плюнул на попытки настроить routing на сервере - структура с fallback мне казалась лаконичнее.</p>
+<p>P.S. Не обратил внимание на localhost в ваших настройках в dest, из-за которого у меня не работал reality. Случайно наткнулся в одной статье, и - да - я просто не заметил)</p></td><td>2024-12-16T14:33:51.018Z</td></tr><tr><td>aggravatingbee</td><td><p>Обратил внимание, что сайт начал выдавать ошибку 400, сам xray работает. Пытался ковыряться в настройках c chatgpt, менял порты, переустанавливал сертификаты - ничего не помогает. То же самое, если меняю tls на reality. Может кто-нибудь, пожалуйста, чекнуть конфиг сайта и инбаунд? Не пойму, что не так.</p>
+<p><strong>Конфиг</strong></p>
+<pre><code class="lang-auto">server {
+    listen 127.0.0.1:44443 ssl http2;
+
+    server_name example.com www.example.com;
+
+    root /var/www/example.com/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem; # managed by Certbot
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384';
+    ssl_prefer_server_ciphers on;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+}
+
+server {
+    if ($host = www.example.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    if ($host = example.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    listen 80;
+    server_name example.com www.example.com;
+    return 301 https://$server_name$request_uri;
+
+}
+
+error_log /var/log/nginx/error.log debug;
+
+
+</code></pre>
+<p><strong>Инбаунд:</strong></p>
+<pre><code class="lang-auto">      {
+      "port": 443,
+      "protocol": "vless",
+      "tag": "vless_tls",
+      "settings": {
+        "clients": [
+          {
+            "id": "your-id",
+            "email": "email",
+            "flow": "xtls-rprx-vision"
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": [
+          {
+            "path": "/your-path",
+            "dest": "@vless-ws"
+          },
+          {
+            "dest": "44443"
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "tls",
+        "tlsSettings": {
+          "alpn": [
+            "http/1.1",
+            "h2"
+          ],
+          "certificates": [
+            {
+              "certificateFile": "/etc/letsencrypt/live/example.com/fullchain.pem",
+              "keyFile": "/etc/letsencrypt/live/example.com/privkey.pem"
+            }
+          ]
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+</code></pre></td><td>2025-01-25T10:24:13.825Z</td></tr><tr><td>sakontwist</td><td><p>у меня работает с раздедением 1.1 и h2 (канонично по мануалам):</p>
+<pre><code class="lang-auto">"fallbacks": [
+        {
+                "dest": "8003"
+        },
+        {
+                "alpn": "h2", "dest": "8004"
+        }
+]
+</code></pre>
+<p>и попробуйте</p>
+<pre><code class="lang-auto">"alpn": ["h2", "http/1.1"],
+</code></pre>
+<p>в tlsSettings (<a href="https://github.com/XTLS/Xray-docs-next/blob/main/docs/ru/config/features/fallback.md" class="inline-onebox">Xray-docs-next/docs/ru/config/features/fallback.md at main · XTLS/Xray-docs-next · GitHub</a>)</p>
+<p>Либо уберите h2 из stream и из nginx<br>
+С reality fallbacks вроде как не поддерживаются, только с tls, но не уверен на 100%</p></td><td>2025-01-25T20:24:33.445Z</td></tr><tr><td>aggravatingbee</td><td><p>Я так понимаю вы про <a href="https://github.com/XTLS/Xray-examples/blob/main/VLESS-TCP-TLS%20(maximal%20by%20rprx)/config_server.jsonc" rel="noopener nofollow ugc">этот мануал?</a>) Прошерстил вчера все, и ничего готового для “совсем маленьких” не нашел.</p>
+<p>Я не понимаю:</p>
+<ol>
+<li>Зачем нужны 2 dest? Предположим 8003 - это nginx на локалхосте, а 8004 для чего? Мне казалось, что достаточно определить признак, по которому ты либо остаешься с xray, либо он шлет тебя куда подальше (в nginx), очищая для nginx запрос от xray-евских параметров, чтобы он не сошел с ума? Или это про отдельные порты для серверов nginx под разные версии http (где-то прочитал про это), и разные версии надо слушать на разных портах?</li>
+<li>Само определение что отправлять в fallback у вас работает по признаку secretpath?</li>
+<li>Я понял, что абсолютно не понимаю как работают эти признаки для fallback. Xray шлёт через fallback на другой порт всё, что не подходит под его строгие критерии в конфиге, в том числе мусор, который nginx не разберет? Или он всегда “упаковывает” запрос в понятный формат, удаляя все то, что nginx/apache и прочее не поймет?</li>
+</ol>
+<p>P.S. Насколько я понимаю - моя проблема, скорее всего, реально в том, что xray форвардит в nginx какой-то мусор, который он не понимает. Может дело реально в версиях протокола. Попробую ваш вариант.</p></td><td>2025-01-26T14:31:36.354Z</td></tr><tr><td>sakontwist</td><td><ol>
+<li>Да, два dest делаются для разных версий alpn. В nginx делаются два разных listener (<a href="https://github.com/XTLS/Xray-examples/blob/main/VLESS-TCP-XTLS-Vision/nginx.conf" class="inline-onebox">Xray-examples/VLESS-TCP-XTLS-Vision/nginx.conf at main · XTLS/Xray-examples · GitHub</a>)</li>
+<li>Я не использую никакие критерии, fallback у меня ведет на nginx, который просто распределяет запросы по вполне обычным сервисам, которые у меня работают “за xray/nginx”</li>
+<li>В fallback отправляется оригинальный запрос но после раскрытия шифрования, если он не прошел проверку на содержание необходимого uuid/shortid. Дальше выполняется проверка условий, определенных в fallback. Если в запросе был мусор, подходящий под условия fallback, то и мусор тоже. Никаких дополнительных действий xray не делает - если это не “его” пакет, то пакет летит в fallback - дальше не его проблема. Единственно что он может сделать - сохранить оригинальный realIP с помощью PROXY protocol</li>
+</ol>
+<p>По ссылке выше в репозитории есть много вариантов - и nginx перед xray и nginx за xray, оба варианта рабочие. Если там нет подходящего, можно посмотреть примеры тут (<a href="https://github.com/chika0801/Xray-examples" class="inline-onebox">GitHub - chika0801/Xray-examples: Xray 配置示例</a>)</p></td><td>2025-01-26T17:12:01.600Z</td></tr><tr><td>armdyn</td><td><p>С Reality и со своим веб сервером настройка куда проще и конфиг Xray короче выходит. Не нужны никакие фоллбэки и дополнительные параметры с путями сертификатов. Всё что нужно сделать, это перенести Nginx или Apache с 443 допустим на 8443 порт (80 оставить как есть), а конфиге Xray просто в dest указать вместо условного <a href="http://yahoo.com:443" rel="noopener nofollow ugc">yahoo.com:443</a>, под который маскировались ранее, свой локалхост 127.0.0.1:8443. И всё. Больше вообще ничего трогать не нужно, всё отлично работает. Единственный момент, если ваши подключения не опознаны, по понятным причинам в логах xray будет писать</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>[Info] transport/internet/tcp: REALITY: processed invalid connection</p>
+</details>
+<p>Но лично меня это не парит.<br>
+Кстати, такая схема очень удобна, когда сервак уже находится в эксплуатации с настоящим коммерческим сайтом, и когда не хочется лишний раз ничего мудрить, чтобы не поломать.</p></td><td>2025-01-26T20:38:44.935Z</td></tr>
+    </table>
+      </body>
+    </html>

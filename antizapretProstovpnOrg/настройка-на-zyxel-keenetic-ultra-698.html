@@ -1,0 +1,518 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>настройка-на-zyxel-keenetic-ultra-698</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>kirill</td><td><p>Настроил OpenVPN на своём стареньком Zyxel Keenetic Ultra.</p>
+<p>Столкнулся с парой нюансов.</p>
+<p>В конфиг при copy-paste дополнительно добавляется параметр<br>
+pull-filter ignore “block-outside-dns”<br>
+иначе не заработает</p>
+<p>Второй нюанс.<br>
+Есть известная проблема: хотя DNS-сервера OpenVPN-подключения и находятся первыми по списку, но резолвинг адресов идёт с DNS-серверов провайдера.<br>
+Их нужно отключить.<br>
+Я делал так:<br>
+отключаем получение адресов DNS-серверов от провайдера (в моём случае - на интерфейсе PPPoE) через CLI<br>
+(config)&gt; interface PPPoE0<br>
+(config-if)&gt; ipcp no name-servers<br>
+Not using remote name servers.<br>
+после делаем<br>
+(config-if)&gt; exit<br>
+и сохраняем конфигурацию<br>
+(config)&gt; copy running-config startup-config<br>
+ну или можно проще, где-то находил, но сам не пробовал:<br>
+(config)&gt; interface ISP no ip dhcp client name-servers<br>
+(config)&gt; system configuration save</p>
+<p>Третий нюанс.<br>
+Если сейчас роутер перезагрузить, то кина не будет: dns отключены, а так как в конфиге параметр прописан как<br>
+remote <a href="http://vpn.antizapret.prostovpn.org" rel="noopener nofollow ugc">vpn.antizapret.prostovpn.org</a><br>
+то пришлось прописать его через ip</p>
+<p>Ну и тогда после перезагрузки всё ОК.</p>
+<p>В связи с этим несколько вопросов:<br>
+• часто ли меняются/блокируются ip-адреса <a href="http://vpn.antizapret.prostovpn.org" rel="noopener nofollow ugc">vpn.antizapret.prostovpn.org</a>, потому что если OpenVPN-соединение упадёт, то интернет будет недоступен при отключенных других dns<br>
+• по опыту знаю, что нередко OpenVPN на роутере отваливается. для этого можно настроить проверку по пингу, но из-за особенностей реализации данного OpenVPN Антизапрета пинговать внешний ресурс (например 1.1.1.1) через них не получится, поэтому принял решение пинговать DNS 192.168.104.1<br>
+В данном случае я получаю адрес из подсети 192.168.104.0/21 (2046 хостов). Это весь диапазон Антизапрета, или в другой раз я получу адрес из другой подсети и DNS уже будет не 192.168.104.1, и по недоступности роутер будет постоянно перезагружать соединение?</p></td><td>2020-09-27T11:28:38.350Z</td></tr><tr><td>ValdikSS</td><td><p>Ответы на все вопросы есть на форуме Keenetic:</p>
+<p><a href="https://forum.keenetic.net/topic/4621-%D0%BA%D0%B0%D0%BA-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C-antizapretprostovpnorg-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80%D0%B5/page/4/?tab=comments#comment-87973" class="onebox" target="_blank" rel="noopener">https://forum.keenetic.net/topic/4621-как-использовать-antizapretprostovpnorg-на-роутере/page/4/?tab=comments#comment-87973</a></p></td><td>2020-09-27T13:11:16.504Z</td></tr><tr><td>kirill</td><td><p>благодарю!</p>
+<p>а по второму вопросу (последний абзац)?<br>
+192.168.104.1 - всегда DNS? 192.168.104.0/21 единственная подсеть, или есть другие?</p></td><td>2020-09-27T15:33:30.077Z</td></tr><tr><td>ValdikSS</td><td><p>На данный момент 192.168.104.0/21 — единственная подсеть, а 192.168.104.1 — единственный DNS-сервер.<br>
+В инструкции по ссылке указано, как сделать правильно, чтобы DNS никогда не ломался, и чтобы не пришлось его прописывать руками — следует добавить маршрут до каких-то рабочих DNS-адресов в интернете через VPN, трафик будет перехватываться и перенаправляться до DNS-сервера АнтиЗапрета. При такой настройке, в случае разрыва соединения трафик пойдет на DNS-серверы в интернете, и интернет останется работоспособным.</p></td><td>2020-09-27T15:55:20.851Z</td></tr><tr><td>kirill</td><td><p>благодарю, я понял принцип работы</p>
+<p>я же немножко про другое.<br>
+если упадёт само OpenVPN-соединение, то чтобы его вручную не перезапускать, можно дать в терминале<br>
+(config)&gt; ping-check profile _WEBADMIN_OpenVPN0 restart-interface<br>
+PingCheck::Profile: Profile “_WEBADMIN_OpenVPN0” enabled restarting interface.<br>
+(config)&gt; system configuration save<br>
+это автоматически перезагрузит OpenVPN0-интерфейс при недоступности по пингу 192.168.104.1, если настроить в той же вебморде</p></td><td>2020-09-27T19:55:16.364Z</td></tr><tr><td>ValdikSS</td><td><p>Соединение OpenVPN переподключается самостоятельно, в OpenVPN есть встроенный keep-alive.</p></td><td>2020-09-27T23:40:10.684Z</td></tr><tr><td>3apa3a(Ярослав)</td><td><p>Здравствуйте. А можно поподробнее о настройке vpn antizapret для KeeneticIII? Чтото  я не догоняю, подключения нет. Или дайте ссылку на гайд. Спасибо</p></td><td>2020-10-21T11:06:04.279Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote" data-post="2" data-topic="698">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/zyxel-keenetic-ultra/698/2">Настройка на Zyxel Keenetic Ultra</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/5"><span data-category-id="5" style="--category-badge-color: #8C6238; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Proxy and VPN service for Russian censorship circumvention, discussion and official support forum. Обсуждение работы сервиса обхода блокировок России АнтиЗапрет. Новости, уведомления о проблемах и помощь в настройке."><span class="badge-category__name">antizapret.prostovpn.org</span></span></a>
+  </div>
+  <blockquote>
+    Ответы на все вопросы есть на форуме Keenetic: 
+<a href="https://forum.keenetic.net/topic/4621-%D0%BA%D0%B0%D0%BA-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C-antizapretprostovpnorg-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80%D0%B5/page/4/?tab=comments#comment-87973" class="onebox" target="_blank" rel="noopener">https://forum.keenetic.net/topic/4621-как-использовать-antizapretprostovpnorg-на-роутере/page/4/?tab=comments#comment-87973</a>
+  </blockquote>
+</aside>
+</td><td>2020-10-21T12:19:00.455Z</td></tr><tr><td>3apa3a(Ярослав)</td><td><p>Спасибо за ссылку, но уже второй день не могу зарегистрироваться на форуме Кинетика - не приходит подтверждающее письмо.</p></td><td>2020-10-23T11:09:42.367Z</td></tr><tr><td>ValdikSS</td><td><p>Итак, корректная настройка VPN АнтиЗапрета на Keenetic.<br>
+Тестировалось на прошивке 3.1.10.</p>
+<p><strong>Шаг 1</strong>: в настройках вашего основного подключения интернета (обычно это проводное подключение), в пункте «Параметры IP и DNS» нажмите на «Показать дополнительные настройки IP».<br>
+В появившихся опциях установить галочку на «Игнорировать DNS».<br>
+В DNS1 и DNS2 ввести либо DNS-серверы вашего провайдера (узнать их можно на главной странице маршрутизатора, нажав кнопку «подробнее о соединении»), либо публичные серверы, например, Google и Yandex: <strong>8.8.8.8</strong> и <strong>77.88.8.8</strong> соответственно.</p>
+<p><strong>Шаг 2</strong>: устанавливаем OpenVPN-клиент. Переходим на страницу Управление → Общие настройки, нажимаем кнопку «Изменить набор компонентов», отмечаем галочкой «Клиент OpenVPN» и устанавливаем его.</p>
+<p><strong>Шаг 3</strong>: настраиваем OpenVPN-клиент. Переходим на страницу Интернет → Другие подключения, нажимаем кнопку «Добавить подключение».</p>
+<ul>
+<li>Использовать для выхода в Интернет: галочка не установлена</li>
+<li>Имя подключения: antizapret</li>
+<li>Тип (протокол): OpenVPN</li>
+<li>Получать маршруты от удаленной стороны: галочка установлена</li>
+<li>Конфигурация OpenVPN:</li>
+</ul>
+<pre><code class="lang-auto">##############################################
+# ProstoVPN.AntiZapret                       #
+# http://antizapret.prostovpn.org            #
+##############################################
+
+nobind
+client
+
+remote vpn.antizapret.prostovpn.org
+
+remote-cert-tls server
+
+dev tun
+proto tcp
+cipher AES-128-CBC
+
+resolv-retry infinite
+persist-key
+persist-tun
+
+pull-filter ignore block-outside-dns
+route 8.8.8.8 255.255.255.255 vpn_gateway
+route 77.88.8.8 255.255.255.255 vpn_gateway
+
+# Keys
+&lt;ca&gt;
+-----BEGIN CERTIFICATE-----
+MIIEKzCCA5SgAwIBAgIJAJuJfmHjR7wuMA0GCSqGSIb3DQEBBQUAMIHAMQswCQYD
+VQQGEwJSVTELMAkGA1UECBMCUlUxETAPBgNVBAcTCEludGVybmV0MRUwEwYDVQQK
+EwxQcm9zdG9WUE4ucnUxEzARBgNVBAsTCkFudGlaYXByZXQxIDAeBgNVBAMTF1By
+b3N0b1ZQTi5BbnRpWmFwcmV0IENBMSAwHgYDVQQpExdQcm9zdG9WUE4uQW50aVph
+cHJldCBDQTEhMB8GCSqGSIb3DQEJARYSYWRtaW5AcHJvc3RvdnBuLnJ1MB4XDTEz
+MDMyMjEzNDYzMFoXDTIzMDMyMDEzNDYzMFowgcAxCzAJBgNVBAYTAlJVMQswCQYD
+VQQIEwJSVTERMA8GA1UEBxMISW50ZXJuZXQxFTATBgNVBAoTDFByb3N0b1ZQTi5y
+dTETMBEGA1UECxMKQW50aVphcHJldDEgMB4GA1UEAxMXUHJvc3RvVlBOLkFudGla
+YXByZXQgQ0ExIDAeBgNVBCkTF1Byb3N0b1ZQTi5BbnRpWmFwcmV0IENBMSEwHwYJ
+KoZIhvcNAQkBFhJhZG1pbkBwcm9zdG92cG4ucnUwgZ8wDQYJKoZIhvcNAQEBBQAD
+gY0AMIGJAoGBALD87/nnrvAvOv3GDSpmYUgdDy34rVjFtlKmigu24qyFKp4dGlfx
+x+JWurQcxzMZSBUajNgIqwb0ltJgK2fYtnIMZwRFX3aOdm7n6U0ec0rEotWx09ZY
+15dGLwy3KYIRlom+CKjc9I8h95peI9CRBeKnIPLk76figBos8qU/jk9bAgMBAAGj
+ggEpMIIBJTAdBgNVHQ4EFgQUa1zT3sc+JvPmjh9Cq3pVA0m++GwwgfUGA1UdIwSB
+7TCB6oAUa1zT3sc+JvPmjh9Cq3pVA0m++GyhgcakgcMwgcAxCzAJBgNVBAYTAlJV
+MQswCQYDVQQIEwJSVTERMA8GA1UEBxMISW50ZXJuZXQxFTATBgNVBAoTDFByb3N0
+b1ZQTi5ydTETMBEGA1UECxMKQW50aVphcHJldDEgMB4GA1UEAxMXUHJvc3RvVlBO
+LkFudGlaYXByZXQgQ0ExIDAeBgNVBCkTF1Byb3N0b1ZQTi5BbnRpWmFwcmV0IENB
+MSEwHwYJKoZIhvcNAQkBFhJhZG1pbkBwcm9zdG92cG4ucnWCCQCbiX5h40e8LjAM
+BgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4GBAKMzBQ9qWk+eAFz4WrcIsVqA
+Mgh9Vu1BTvDLH0vKJkFdL23yH7DHnXPs8UqkLHQtzAswaFAMNrINJAYP10MpQx8K
+M0orrNKF/Jv+jnuu0yq16UoBFxJCKsdmetoCZz1HuK+5Sop140BRBu1bNOdQ9uNK
+Ou4wOSFpotTP2gVFxctw
+-----END CERTIFICATE-----
+&lt;/ca&gt;
+
+&lt;cert&gt;
+-----BEGIN CERTIFICATE-----
+MIIE7DCCBFWgAwIBAgIBBjANBgkqhkiG9w0BAQUFADCBwDELMAkGA1UEBhMCUlUx
+CzAJBgNVBAgTAlJVMREwDwYDVQQHEwhJbnRlcm5ldDEVMBMGA1UEChMMUHJvc3Rv
+VlBOLnJ1MRMwEQYDVQQLEwpBbnRpWmFwcmV0MSAwHgYDVQQDExdQcm9zdG9WUE4u
+QW50aVphcHJldCBDQTEgMB4GA1UEKRMXUHJvc3RvVlBOLkFudGlaYXByZXQgQ0Ex
+ITAfBgkqhkiG9w0BCQEWEmFkbWluQHByb3N0b3Zwbi5ydTAeFw0xNzA2MzAxMTM5
+NDVaFw0yNzA2MjgxMTM5NDVaMIG3MQswCQYDVQQGEwJSVTELMAkGA1UECBMCUlUx
+ETAPBgNVBAcTCEludGVybmV0MRYwFAYDVQQKEw1Qcm9zdG9WUE4ub3JnMRMwEQYD
+VQQLEwpBbnRpWmFwcmV0MR8wHQYDVQQDExZhbnRpemFwcmV0LXVzZXJhY2Nlc3My
+MREwDwYDVQQpEwhjaGFuZ2VtZTEnMCUGCSqGSIb3DQEJARYYYW50aXphcHJldEBw
+cm9zdG92cG4ub3JnMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA9fHj
+vzoLAqXL8N+xWUKcHPdIdi/OOr/lkFXfPG4lkcDiFupFwB81c8aM1H0IQaWD/P50
+wjsDOCAJOgdZFf8rqlxIMMxgL0lwdBJDUAmUWE3fUm3Zk6Ele23w48rZuygWs6LS
+TUueYw+Zk0o202C5z+RLYURFxaS+B7CvYH+Y2nnLVU8TxFiAh86j8GyHiRNrO34H
+6cl1IWWHxnLJXB4zZmPuW9Ff5tPjjLdpcBPSsmC4e/VNjaZe3nqvxkaU6ygIKhTP
+tKjZf3w6wO4kKPnwAhzUC+h3PCRack7YVBBGn5yO/bRX1y/kbgdV+tzhg0HDspq1
+EL6m4By4R3qNog7okwIDAQABo4IBdzCCAXMwCQYDVR0TBAIwADAtBglghkgBhvhC
+AQ0EIBYeRWFzeS1SU0EgR2VuZXJhdGVkIENlcnRpZmljYXRlMB0GA1UdDgQWBBRx
+zBuNpVmdllM2ZhILCIkoZFvcVjCB9QYDVR0jBIHtMIHqgBRrXNPexz4m8+aOH0Kr
+elUDSb74bKGBxqSBwzCBwDELMAkGA1UEBhMCUlUxCzAJBgNVBAgTAlJVMREwDwYD
+VQQHEwhJbnRlcm5ldDEVMBMGA1UEChMMUHJvc3RvVlBOLnJ1MRMwEQYDVQQLEwpB
+bnRpWmFwcmV0MSAwHgYDVQQDExdQcm9zdG9WUE4uQW50aVphcHJldCBDQTEgMB4G
+A1UEKRMXUHJvc3RvVlBOLkFudGlaYXByZXQgQ0ExITAfBgkqhkiG9w0BCQEWEmFk
+bWluQHByb3N0b3Zwbi5ydYIJAJuJfmHjR7wuMBMGA1UdJQQMMAoGCCsGAQUFBwMC
+MAsGA1UdDwQEAwIHgDANBgkqhkiG9w0BAQUFAAOBgQCtvr8gtRUCMruJGTpwazE/
+4fp/kzbavg2UzTxHFyrBA1fRSAPLnNyQELxAdGB9Y0BR4A3soRKBtfPICtdkEgjf
+lGGSnrEH/QRoiDJVSuig5F/C2GP5Yl0Z6CUEm6ZJsu6HTxahBkowJ7YIoXVcf8cs
+LIQi0TktJeL7LvexVYHVYg==
+-----END CERTIFICATE-----
+&lt;/cert&gt;
+
+&lt;key&gt;
+-----BEGIN PRIVATE KEY-----
+MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQD18eO/OgsCpcvw
+37FZQpwc90h2L846v+WQVd88biWRwOIW6kXAHzVzxozUfQhBpYP8/nTCOwM4IAk6
+B1kV/yuqXEgwzGAvSXB0EkNQCZRYTd9SbdmToSV7bfDjytm7KBazotJNS55jD5mT
+SjbTYLnP5EthREXFpL4HsK9gf5jaectVTxPEWICHzqPwbIeJE2s7fgfpyXUhZYfG
+cslcHjNmY+5b0V/m0+OMt2lwE9KyYLh79U2Npl7eeq/GRpTrKAgqFM+0qNl/fDrA
+7iQo+fACHNQL6Hc8JFpyTthUEEafnI79tFfXL+RuB1X63OGDQcOymrUQvqbgHLhH
+eo2iDuiTAgMBAAECggEAdMsjziGwLNezG3X+8FZzcEX2ATn+g2OxjnNZCYd9C9Q/
+CYbDDNNFPO+i3R1rGFGTdkcYB0yi4LpF52qp4YpFoCcmmRXU71++qUAq+w0xhyWj
+0a8czcCO3ih9Zo9kCj6lWTUPDWnFk2FLGuj5VDPwyUquiUg0ogDzxQ8gmYC+g7C4
+jjlrNJhk4/F1EDle89iXEhYcR0FqEnAt031QwvdQRDJ1f1qKZNOP2Ld798yMx69E
+v7lW2mOkN/0MzKLOR6wn+3irykVWazjKyb22LWmmFNXO89GwaE20XWuyKzGPyj0K
+wA8RrEVtgUXBg4aar8YzhCm2bX+xHU/Lt+7lFxD70QKBgQD8WtnKQNjcbWQNJoqF
+Bku087GKpDQjp8xw0Wac4pCebQgs9M7IZGlWMUJhuPaZkdIRFs46DxnDTvXZlnHD
+PmafWjqjzSuXToInedkoEI3JVEyr8CrWTnlLhi8lTWuVIUhIu8NxPeidOJVuZmsJ
+j4vTr7Fc+G1sGCHkUnS/MCM+vwKBgQD5f1YRLxs1pVQ5KpjTCeH1/bmVbXr8MTW4
+nHr4xAtXto9RDrLjDzUhBcip0RH3NF1DZTvyvep5aRxllGbiI4Oz/3DSqgi6TFvD
+d7VJp4jUe94b9C+zXtYbJyag9Hu0cJ5MK8hRQiz9na/e2Z8ujIlo080TZoa1QOPW
+Pv/gIWxfLQKBgEMUr2IZHMxzc64fOaEkzEkcomw1O/riZvDyaPF5NHI4j3zL0o/o
+SSv1Si0J6ttlrM6IHmfGjdWiDq45VKJO2x6u8HmMV3MQFn8B39zLkbUb6Imn/Osc
+zxdpYuzqiJeK0lkrOEfI6iWo3egL55YSB1xNDruk+glK3O+Bj7EmzaenAoGAFQDI
+MQgjJT/2uB1C4jkpwXiLf+3IdaR63kCmBX0Ta13d8LfpDT5Bfbcr7kfAWGwbEcpa
+4pNkQrY7gr2cb5sHwkZVrBZOR8iXzPut0jZ9SU3oI7hJr7LjGUQRd2k9ZLI6UTU6
+VsTYXr1AieUOBnAkPSPfVqvB2U5OH8IL7kVCBz0CgYAOb8+YMdAVTkEOJYa6+3TK
+saoB48cu1wDz+LIh17rknv9jsyFunwt6+AvlHQv9mOcTttd7nuT8HK2QylYdVBZd
+eOemFLtDrquRzUrRYSmFvNA0eSPEQC/3SBiz/55srqtk8qbJEJ4i4aYgAHgmH396
+Zg/tuKUxCrU9CyML3Fmfiw==
+-----END PRIVATE KEY-----
+&lt;/key&gt;
+</code></pre>
+<p>Если вы ввели в шаге 1 DNS-серверы вашего провайдера, замените адреса 77.88.8.8 и 8.8.8.8 в директиве route на адреса вашего провайдера.</p>
+<p>Настройка завершена. Сохраните подключение и попробуйте подключиться к нему. Если всё настроено правильно, заблокированные сайты должны открываться.</p></td><td>2020-10-23T11:17:23.118Z</td></tr><tr><td>Valentin(Валентин)</td><td><p>Добрый день, поставил антизапрет все как здесь, все было хорошо не долго, интернет стал отваливается как только я захожу смотреть фильмы на ТВ боксе, подключен по проводу через кинетик гига 1010. Прошивка 3.5.2<br>
+Роултер откатывал прошивки и на заводские настройки возвращался, не помогло. Все перепробовал, вариантов у меня больше нет. Интернет Билайн.<br>
+Может кто знает в чем проблема?</p></td><td>2020-10-24T15:20:33.678Z</td></tr><tr><td>shambala19691(Roman)</td><td><p>Где-то прочитал что dns должны быть 1.1.1.1 и 8.8.8.8<br>
+setenv FRIENDLY_NAME “AntiZapret VPN TCP”<br>
+route 1.1.1.1 255.255.255.255 vpn_gateway<br>
+route 8.8.8.8 255.255.255.255 vpn_gateway<br>
+pull-filter ignore “block-outside-dns”</p></td><td>2020-11-01T12:17:15.131Z</td></tr><tr><td>wova.kerri(Роман)</td><td><p>Здравствуйте ! Не работает VPN antizapret на keenetik 1210 при этом подключение через опенвпн есть не знаю что уже делать на заблокированых сайтах заглушка провайдера .Настраивал опенвпн антизапрет по мануалу уважаемого ValdikSS. До 22.12.2020 еще работал а последние дни не хочет.Интернет JustLan.Через прокси антиапрет в браузере сайты разблокируються</p></td><td>2020-12-26T15:41:24.286Z</td></tr><tr><td>ValdikSS</td><td><p>Если у вас PPPoE-соединение, полагаю, нужно проделать следующие действия:</p>
+<p><a href="https://forum.keenetic.net/topic/4621-%D0%BA%D0%B0%D0%BA-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C-antizapretprostovpnorg-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80%D0%B5/page/3/?tab=comments#comment-76574" class="onebox" target="_blank" rel="noopener">https://forum.keenetic.net/topic/4621-как-использовать-antizapretprostovpnorg-на-роутере/page/3/?tab=comments#comment-76574</a></p>
+<blockquote>
+<p>Попробуйте эти команды:</p>
+<p>interface PPPoE0<br>
+ipcp no name-servers<br>
+system configuration save</p>
+</blockquote></td><td>2020-12-27T09:43:07.457Z</td></tr><tr><td>wova.kerri(Роман)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="14" data-topic="698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>system configuration save</p>
+</blockquote>
+</aside>
+<p>Не помогло.Да соедение  PPPoE провайдер квант-телеком.Может это провайдер чудит?</p></td><td>2020-12-27T10:48:29.822Z</td></tr><tr><td>ValdikSS</td><td><p>Это особенность настройки на Keenetic — он не умеет правильно работать с DNS внутри VPN, поэтому приходится использовать подобные обходные команды.</p></td><td>2020-12-27T10:55:01.000Z</td></tr><tr><td>wova.kerri(Роман)</td><td><p>И что теперь делать? может есть еще варианты как заставить его (антизапрет) работать?</p></td><td>2020-12-27T11:04:06.572Z</td></tr><tr><td>ValdikSS</td><td><p>Прежде всего убедитесь, что у вас на компьютере используется DNS маршрутизатора, а не прописан DNS провайдера (или какой-либо публичный) непосредственно в настройках компьютера. Также в браузере должен быть отключен DNS over HTTPS.<br>
+Если у вас с компьютера заблокированные сайты резолвятся в их настоящие адреса, а не в адреса из диапазона 10.244.x.x, который используется в VPN АнтиЗапрета, то проблема в настройках DNS на Keenetic. Почитайте <a>сообщения темы</a>, попробуйте решения, которые представлены там для PPPoE.</p>
+<p>Если не поможет — пожалуйста, обратитесь в поддержку Keenetic, они должны подсказать.</p></td><td>2020-12-27T11:14:12.286Z</td></tr><tr><td>wova.kerri(Роман)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="14" data-topic="698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>system configuration save</p>
+</blockquote>
+</aside>
+<p>Вы меня извините за мой тупой вопрос а что писать в поддержку Keenetic ? У меня знаний про эти ВПН только на Ctrl+C Ctrl+V</p></td><td>2020-12-27T12:17:25.566Z</td></tr><tr><td>ValdikSS</td><td><p>Напишите, что не получается настроить VPN таким образом, чтобы использовались DNS-серверы из VPN. Проблема заключается в том, что продолжают использоваться DNS-серверы провайдера, а должны использоваться из VPN. Укажите, что используете PPPoE, я подозреваю, что именно этот тип соединения обрабатывается как-то по-особому, что мешает работе OpenVPN.</p>
+<p>Можете приложить ссылку на тему на форуме Keenetic в сообщении в поддержку, пусть они ответят непосредственно там, метод корректной настройки был доступен публично.</p></td><td>2020-12-27T12:26:31.000Z</td></tr><tr><td>wova.kerri(Роман)</td><td><p>Вообщем что мне ответили в техподдержки<br>
+Добрый день, у Вас в конфиге нет, redirect-gateway def1<br>
+Установите его и проверьте пожалуйста.<br>
+Также в настройках маршрутизации создайте маршрут по умолчанию через OVPN интерфейс<br>
+Спасибо</p>
+<p>С уважением,<br>
+служба поддержки.<br>
+как это все сделать я не знаю.Помогите пожалуйста разобраться что и как надо сделать!</p></td><td>2020-12-29T09:10:28.454Z</td></tr><tr><td>ValdikSS</td><td><p>Маршрут по умолчанию создавать не нужно, также не нужно добавлять параметр redirect-gateway в конфигурационный файл OpenVPN.</p>
+<p>В поддержке вас дезинформировали. Скажите, что у вас проблемы только с DNS: вам необходимо, чтобы использовался только тот, что сообщает VPN-сервер.</p></td><td>2020-12-29T09:21:53.000Z</td></tr><tr><td>wova.kerri(Роман)</td><td><p>что они мне еще ответили<br>
+я уже запутолся<br>
+В конфиг можете поместить redirect-gateway def1 в любое место<br>
+DNS чтобы использовались только VPN провайдера, то нужно установить галочку в настройке PPPoE “игнорировать DNS провайдера”<br>
+​<br>
+Только нужно будет указать в конфиге подключение не к доменному имени а к ip адресу<br>
+Нужно вот это вставить вместо  remote <a href="http://vpn.antizapret.prostovpn.org" rel="noopener nofollow ugc">vpn.antizapret.prostovpn.org</a><br>
+remote 51.75.75.245<br>
+remote 51.75.70.203<br>
+remote-random</p>
+<p>С уважением,<br>
+служба поддержки.</p></td><td>2020-12-29T11:16:27.598Z</td></tr><tr><td>wova.kerri(Роман)</td><td><p>вообщем разобрались на компьютере была запущена служба гудбайдпай ее удалил и все зароботало как надо</p></td><td>2021-01-08T15:26:18.753Z</td></tr><tr><td>ValdikSS</td><td><p>Вероятно, у вас использовалось перенаправление DNS в GoodbyeDPI. С ним работать не будет, конечно же.</p></td><td>2021-01-08T15:54:55.541Z</td></tr><tr><td>wova.kerri(Роман)</td><td><p>я уже понял  спасибо Вам и с праздниками</p></td><td>2021-01-08T16:55:55.277Z</td></tr><tr><td>Govnoed228</td><td><p>все по гайду сделал, ниче не работает, запрет не подключается в опен впн, соединение интернет вообще не работает, не получается получить ip, все днс перепробовал, ниче не работает, все бесит меня</p></td><td>2021-07-11T04:34:35.692Z</td></tr><tr><td>hooddy(Yee Gee)</td><td><p>проделал манипуляции по вашей инструкции. в разделе “другие подключения” добавленный openvpn antizapret пишет, что подключен. но заблоченные сайты не открываются, все так же заглушка от билайна либо ничего, если нет готовой заглушки. что-то изменилось со времени публикации (хотя подозреваю, это у меня руки кривые)?</p></td><td>2022-03-18T18:10:14.025Z</td></tr><tr><td>kirill</td><td><p>ключевое - это отключить DNS’ы провайдера<br>
+у меня на самом первом Ultra настройки такой нет,<br>
+поэтому нужно отключать через telnet/ssh</p>
+<pre><code class="lang-auto">interface PPPoE0
+ipcp no name-servers
+system configuration save
+</code></pre>
+<p>далее прописываете статические DNS’ы: кто-то прописывает “восьмёрки” и “единицы”, но в текущей ситуации я предпочёл прописать 195.208.4.1 и 195.208.5.1 (а что делать…)</p>
+<p>далее в конфиг дописать</p>
+<pre><code class="lang-auto">pull-filter ignore block-outside-dns
+route 195.208.4.1 255.255.255.255 vpn_gateway
+route 195.208.5.1 255.255.255.255 vpn_gateway
+</code></pre>
+<p>ну и собственно всё. можно перезагрузить для надёжности</p>
+<p>у меня так прекрасно работает (и это у меня ещё и резервный LTE-свисток есть, там на его интерфейсе такое же проделать надо)</p>
+<p>p.s.: ну и ipv6 отключил (вообще деинсталлировал пакет)</p></td><td>2022-03-18T19:00:32.307Z</td></tr><tr><td>hooddy(Yee Gee)</td><td><aside class="quote no-group" data-username="kirill" data-post="29" data-topic="698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a9a28c/48.png" class="avatar"> kirill:</div>
+<blockquote>
+<p>ключевое - это отключить DNS’ы провайдера</p>
+</blockquote>
+</aside>
+<p>блин, нифига не понял, как это сделать. у меня lite ii с новой мордой (прошивка ветки 3.х).</p></td><td>2022-03-18T19:27:57.748Z</td></tr><tr><td>IVAN-DODIK(Ivan Palych)</td><td><p><a href="https://djnapalm.ru/it/obhod-blokirovok-na-urovne-routera.html" class="inline-onebox" rel="noopener nofollow ugc">Обход блокировок на уровне роутера - DJ Napalm</a>  ТУТ ПОЧИТАЙ НАГЛЯДНО и С ФОТКЯМЫЫЫ )))</p></td><td>2022-03-18T19:32:21.024Z</td></tr><tr><td>hooddy(Yee Gee)</td><td><p>да, делал все ровно так, как выше написал, на вкладке подключение через openvpn antiзzapret есть, а заболоченные сайты не открываются.<br>
+…<br>
+так, дошло, видимо пробелам в отсутствующем пункте “игнорировать днс…”<br>
+…<br>
+получаю вот такое:</p>
+<p>(config-if)&gt; interface FastEthernet0 ip dhcp client no name-servers<br>
+Dhcp::Client error[9437200]: unsupported interface: FastEthernet0.<br>
+…<br>
+получилось вот так:</p>
+<p>interface FastEthernet0/Vlan2 ip dhcp client no name-servers</p>
+<p>но все равно не открываются блокировки (соединение openvpn antizapet есть). что я делаю не так?<br>
+…<br>
+и вот так не помогло:</p>
+<p>(config)&gt; interface ISP<br>
+Core::Configurator: Done.<br>
+(config-if)&gt; ip dhcp client no name-servers<br>
+Dhcp::Client: ISP DHCP name servers are disabled.</p></td><td>2022-03-18T19:37:54.383Z</td></tr><tr><td>BigBro</td><td><aside class="quote no-group" data-username="kirill" data-post="29" data-topic="698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a9a28c/48.png" class="avatar"> kirill:</div>
+<blockquote>
+<p>я предпочёл прописать 195.208.4.1 и 195.208.5.1</p>
+</blockquote>
+</aside>
+<p>Какой ужас! Резолверы НСДИ! Товарищ майор, вы?..</p>
+<aside class="quote no-group" data-username="hooddy" data-post="30" data-topic="698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/h/ecccb3/48.png" class="avatar"> hooddy:</div>
+<blockquote>
+<p>блин, нифига не понял, как это сделать. у меня lite ii с новой мордой (прошивка ветки 3.х)</p>
+</blockquote>
+</aside>
+<ol>
+<li>Скачайте удобный клиент для подключения через Telnet: <a href="https://putty.org.ru/download.html" rel="noopener nofollow ugc">https://putty.org.ru/download.html</a></li>
+<li>Запустите PuTTY</li>
+<li>Выберите тип соединения Telnet</li>
+<li>Введите адрес в поле «Имя хоста (IP-адрес)»: 192.168.1.1</li>
+<li>В открывшейся командной строке введите стандартные логин и пароль для доступа к интерфейсу.</li>
+<li>Выполните в командной строке команды рекомендованные выше Кириллом: <a href="https://ntc.party/t/zyxel-keenetic-ultra/698/29" class="inline-onebox">Настройка на Zyxel Keenetic Ultra - #29 by kirill</a></li>
+</ol></td><td>2022-03-18T20:30:44.637Z</td></tr><tr><td>hooddy(Yee Gee)</td><td><p>я зашел через телнет виндовый, если я зайду через путти, ничего не изменится, комманды те же самые… я просто что-то упускаю. и у кирилла для другого соединения, я проделал для своего IPoE, все отключил, но не работает.</p></td><td>2022-03-18T20:32:37.711Z</td></tr><tr><td>BigBro</td><td><aside class="quote no-group" data-username="hooddy" data-post="34" data-topic="698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/h/ecccb3/48.png" class="avatar"> hooddy:</div>
+<blockquote>
+<p>я просто что-то упускаю. и у кирилла для другого соединения, я проделал для своего IPoE, все отключил, но не работает.</p>
+</blockquote>
+</aside>
+<p>Надо бы разобраться.</p>
+<ol>
+<li>В настройках OpenVPN галка «Использовать для выхода в интернет» отключена?</li>
+<li>В разделе «Проводные подключения &gt; Параметры IP и DNS» указаны DNS?</li>
+<li>DoT / DoH отключён? Другие фильтры DNS для клиента (AdGuard и т. п.)?</li>
+</ol></td><td>2022-03-18T20:41:06.718Z</td></tr><tr><td>hooddy(Yee Gee)</td><td><aside class="quote no-group" data-username="BigBro" data-post="35" data-topic="698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/90db22/48.png" class="avatar"> BigBro:</div>
+<blockquote>
+<p>В настройках OpenVPN галка «Использовать для выхода в интернет» отключена?</p>
+</blockquote>
+</aside>
+<p>да, так точно.</p>
+<aside class="quote no-group" data-username="BigBro" data-post="35" data-topic="698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/90db22/48.png" class="avatar"> BigBro:</div>
+<blockquote>
+<p>В разделе «Проводные подключения &gt; Параметры IP и DNS» указаны DNS?</p>
+</blockquote>
+</aside>
+<p>да, так точно</p>
+<aside class="quote no-group" data-username="BigBro" data-post="35" data-topic="698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/90db22/48.png" class="avatar"> BigBro:</div>
+<blockquote>
+<p>DoT / DoH отключён? Другие фильтры DNS для клиента (AdGuard и т. п.)?</p>
+</blockquote>
+</aside>
+<p>не уверен. что это, как проверить? никаких других фильтров нет, адгвард года два назад убрал, хотя пользовал.</p>
+<p>у меня Lite II с актуальной прошивкой. соединение до аntizapreta во вкладке  OpenVPN активное и работает. Во вкладке Интренет-фильтр появились DNS (пробовал и провайдера - Билайн, и НСДИ). т.е. они прописаны во вкладке Параметры IP и DNS. вроде все по мануалам, но результат фига.</p></td><td>2022-03-18T20:48:26.909Z</td></tr><tr><td>BigBro</td><td><aside class="quote no-group" data-username="hooddy" data-post="36" data-topic="698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/h/ecccb3/48.png" class="avatar"> hooddy:</div>
+<blockquote>
+<p>не уверен. что это, как проверить? никаких других фильтров нет, адгвард года два назад убрал, хотя пользовал</p>
+</blockquote>
+</aside>
+<p>Там же во вкладке «Интернет-фильтр» могут быть строчки over TLS и over HTTPS. Обычно появляются, если поставить компонент DNS-over-TLS и / или DNS-over-HTTPS из вкладки «Общие настройки &gt; Изменить набор компонентов». Они несовместимы с работой OpenVPN от «Антизапрета».</p>
+<p>Еще можно попробовать очистить кэш DNS командой <code>ipconfig /flushdns</code>.</p></td><td>2022-03-18T20:56:46.361Z</td></tr><tr><td>hooddy(Yee Gee)</td><td><aside class="quote no-group" data-username="BigBro" data-post="37" data-topic="698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/90db22/48.png" class="avatar"> BigBro:</div>
+<blockquote>
+<p>Там же во вкладке «Интернет-фильтр» могут быть строчки over TLS и over HTTPS. Обычно появляются, если поставить компонент DNS-over-TLS и / или DNS-over-HTTPS из вкладки «Общие настройки &gt; Изменить набор компонентов». Они несовместимы с работой OpenVPN от «Антизапрета».</p>
+</blockquote>
+</aside>
+<p>Нет таких, компоненты не установлены такого рода. Как скриншоты показать, что я навертел тут? flushdns тоже не результативен. Я не понимаю <img src="https://ntc.party/images/emoji/twitter/pensive.png?v=12" title=":pensive:" class="emoji" alt=":pensive:" loading="lazy" width="20" height="20"> ipconfig/all показывает  днсы гугла (на компе), а в морде роутера - провайдера.<br>
+…<br>
+блин вот же я ТП… заработало. гугол был прописан в свойствах сетевой сто лет назад, как впрочем и днс на роутере я тогда же отключал. на компе норм, осталось проверить телик и телефон.<br>
+… ура! спасибо, парни, заработало. ждем бана ютуба <img src="https://ntc.party/images/emoji/twitter/cold_sweat.png?v=12" title=":cold_sweat:" class="emoji" alt=":cold_sweat:" loading="lazy" width="20" height="20"></p></td><td>2022-03-19T07:04:10.376Z</td></tr><tr><td>hooddy(Yee Gee)</td><td><p>А можно мануал по прикрутке ProtonVPN с фри планом? Я тоже пытался с год назад, но мозгов не хватило.</p></td><td>2022-03-19T13:18:46.413Z</td></tr><tr><td>neo4511(neo4511)</td><td><p>Добавлю ссылку для тех у кого версия  прошивки ниже 3.1. Где в web интерфейсе нету пункта “Игнорировать DNS” К примеру у меня Keenetic Lite III прошивка 2.15</p>
+<p>По ссылке написано как активировать этот пункт. После выполнения этих действий dns провайдера пропали во вкладке “подробнее о подключении”. А после перезагрузки роутера стали открываться заблокированные сайты.</p>
+<p><a href="https://4pda.to/forum/index.php?showtopic=535079&amp;st=7280#entry107471543" class="onebox" target="_blank" rel="noopener nofollow ugc">https://4pda.to/forum/index.php?showtopic=535079&amp;st=7280#entry107471543</a></p></td><td>2022-03-19T18:40:05.542Z</td></tr><tr><td>Evk(Eugene)</td><td><p>перестал работать после смены DNS<br>
+хотя впн вообще перестал любой работать, пишет, что подключен, а на самом деле нет</p></td><td>2022-04-13T22:34:19.807Z</td></tr><tr><td>sevastianovv(Sevastianovv)</td><td><p>Доброго. Подскажите в чем проблема. Все работало нормально но дней 5 при подключенном обходе частично не работаю сервисы google на смартфоне а именно в google  карты есть “показывать где я” получается что туда данные уходят а от туда нет, то есть при включенном обходе у меня не обновляются данные положения тех кто поделился но если отключить обход или wifi то данные появляются. Также не работает Family link для настройки смартфонов детей приложение пишет что нет интернета. Все одинаково и при подключении к своему серверу и к антизапрету</p></td><td>2022-06-05T07:38:32.880Z</td></tr><tr><td>koctik-2017(Константин)</td><td><p>В общем пытаюсь завести openvpn на keenetic viva kn-1910<br>
+Пробовал удалить dns серверы на рутере а вместо них использовать конфиг openvpn:</p>
+<pre><code class="lang-auto">nobind
+client
+redirect-gateway def1
+remote 51.158.181.228
+remote 51.158.176.255
+remote 51.75.70.203
+remote 141.95.17.71
+remote 51.158.181.161
+remote 51.158.187.25
+remote 51.75.75.245
+remote-random
+
+remote-cert-tls server
+
+dev tun
+proto tcp
+cipher AES-128-CBC
+
+resolv-retry infinite
+persist-key
+persist-tun
+
+pull-filter ignore block-outside-dns
+
+# Keys
+&lt;ca&gt;
+-----BEGIN CERTIFICATE-----
+MIIEKzCCA5SgAwIBAgIJAJuJfmHjR7wuMA0GCSqGSIb3DQEBBQUAMIHAMQswCQYD
+VQQGEwJSVTELMAkGA1UECBMCUlUxETAPBgNVBAcTCEludGVybmV0MRUwEwYDVQQK
+EwxQcm9zdG9WUE4ucnUxEzARBgNVBAsTCkFudGlaYXByZXQxIDAeBgNVBAMTF1By
+b3N0b1ZQTi5BbnRpWmFwcmV0IENBMSAwHgYDVQQpExdQcm9zdG9WUE4uQW50aVph
+cHJldCBDQTEhMB8GCSqGSIb3DQEJARYSYWRtaW5AcHJvc3RvdnBuLnJ1MB4XDTEz
+MDMyMjEzNDYzMFoXDTIzMDMyMDEzNDYzMFowgcAxCzAJBgNVBAYTAlJVMQswCQYD
+VQQIEwJSVTERMA8GA1UEBxMISW50ZXJuZXQxFTATBgNVBAoTDFByb3N0b1ZQTi5y
+dTETMBEGA1UECxMKQW50aVphcHJldDEgMB4GA1UEAxMXUHJvc3RvVlBOLkFudGla
+YXByZXQgQ0ExIDAeBgNVBCkTF1Byb3N0b1ZQTi5BbnRpWmFwcmV0IENBMSEwHwYJ
+KoZIhvcNAQkBFhJhZG1pbkBwcm9zdG92cG4ucnUwgZ8wDQYJKoZIhvcNAQEBBQAD
+gY0AMIGJAoGBALD87/nnrvAvOv3GDSpmYUgdDy34rVjFtlKmigu24qyFKp4dGlfx
+x+JWurQcxzMZSBUajNgIqwb0ltJgK2fYtnIMZwRFX3aOdm7n6U0ec0rEotWx09ZY
+15dGLwy3KYIRlom+CKjc9I8h95peI9CRBeKnIPLk76figBos8qU/jk9bAgMBAAGj
+ggEpMIIBJTAdBgNVHQ4EFgQUa1zT3sc+JvPmjh9Cq3pVA0m++GwwgfUGA1UdIwSB
+7TCB6oAUa1zT3sc+JvPmjh9Cq3pVA0m++GyhgcakgcMwgcAxCzAJBgNVBAYTAlJV
+MQswCQYDVQQIEwJSVTERMA8GA1UEBxMISW50ZXJuZXQxFTATBgNVBAoTDFByb3N0
+b1ZQTi5ydTETMBEGA1UECxMKQW50aVphcHJldDEgMB4GA1UEAxMXUHJvc3RvVlBO
+LkFudGlaYXByZXQgQ0ExIDAeBgNVBCkTF1Byb3N0b1ZQTi5BbnRpWmFwcmV0IENB
+MSEwHwYJKoZIhvcNAQkBFhJhZG1pbkBwcm9zdG92cG4ucnWCCQCbiX5h40e8LjAM
+BgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4GBAKMzBQ9qWk+eAFz4WrcIsVqA
+Mgh9Vu1BTvDLH0vKJkFdL23yH7DHnXPs8UqkLHQtzAswaFAMNrINJAYP10MpQx8K
+M0orrNKF/Jv+jnuu0yq16UoBFxJCKsdmetoCZz1HuK+5Sop140BRBu1bNOdQ9uNK
+Ou4wOSFpotTP2gVFxctw
+-----END CERTIFICATE-----
+&lt;/ca&gt;
+
+&lt;cert&gt;
+-----BEGIN CERTIFICATE-----
+MIIE7DCCBFWgAwIBAgIBBjANBgkqhkiG9w0BAQUFADCBwDELMAkGA1UEBhMCUlUx
+CzAJBgNVBAgTAlJVMREwDwYDVQQHEwhJbnRlcm5ldDEVMBMGA1UEChMMUHJvc3Rv
+VlBOLnJ1MRMwEQYDVQQLEwpBbnRpWmFwcmV0MSAwHgYDVQQDExdQcm9zdG9WUE4u
+QW50aVphcHJldCBDQTEgMB4GA1UEKRMXUHJvc3RvVlBOLkFudGlaYXByZXQgQ0Ex
+ITAfBgkqhkiG9w0BCQEWEmFkbWluQHByb3N0b3Zwbi5ydTAeFw0xNzA2MzAxMTM5
+NDVaFw0yNzA2MjgxMTM5NDVaMIG3MQswCQYDVQQGEwJSVTELMAkGA1UECBMCUlUx
+ETAPBgNVBAcTCEludGVybmV0MRYwFAYDVQQKEw1Qcm9zdG9WUE4ub3JnMRMwEQYD
+VQQLEwpBbnRpWmFwcmV0MR8wHQYDVQQDExZhbnRpemFwcmV0LXVzZXJhY2Nlc3My
+MREwDwYDVQQpEwhjaGFuZ2VtZTEnMCUGCSqGSIb3DQEJARYYYW50aXphcHJldEBw
+cm9zdG92cG4ub3JnMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA9fHj
+vzoLAqXL8N+xWUKcHPdIdi/OOr/lkFXfPG4lkcDiFupFwB81c8aM1H0IQaWD/P50
+wjsDOCAJOgdZFf8rqlxIMMxgL0lwdBJDUAmUWE3fUm3Zk6Ele23w48rZuygWs6LS
+TUueYw+Zk0o202C5z+RLYURFxaS+B7CvYH+Y2nnLVU8TxFiAh86j8GyHiRNrO34H
+6cl1IWWHxnLJXB4zZmPuW9Ff5tPjjLdpcBPSsmC4e/VNjaZe3nqvxkaU6ygIKhTP
+tKjZf3w6wO4kKPnwAhzUC+h3PCRack7YVBBGn5yO/bRX1y/kbgdV+tzhg0HDspq1
+EL6m4By4R3qNog7okwIDAQABo4IBdzCCAXMwCQYDVR0TBAIwADAtBglghkgBhvhC
+AQ0EIBYeRWFzeS1SU0EgR2VuZXJhdGVkIENlcnRpZmljYXRlMB0GA1UdDgQWBBRx
+zBuNpVmdllM2ZhILCIkoZFvcVjCB9QYDVR0jBIHtMIHqgBRrXNPexz4m8+aOH0Kr
+elUDSb74bKGBxqSBwzCBwDELMAkGA1UEBhMCUlUxCzAJBgNVBAgTAlJVMREwDwYD
+VQQHEwhJbnRlcm5ldDEVMBMGA1UEChMMUHJvc3RvVlBOLnJ1MRMwEQYDVQQLEwpB
+bnRpWmFwcmV0MSAwHgYDVQQDExdQcm9zdG9WUE4uQW50aVphcHJldCBDQTEgMB4G
+A1UEKRMXUHJvc3RvVlBOLkFudGlaYXByZXQgQ0ExITAfBgkqhkiG9w0BCQEWEmFk
+bWluQHByb3N0b3Zwbi5ydYIJAJuJfmHjR7wuMBMGA1UdJQQMMAoGCCsGAQUFBwMC
+MAsGA1UdDwQEAwIHgDANBgkqhkiG9w0BAQUFAAOBgQCtvr8gtRUCMruJGTpwazE/
+4fp/kzbavg2UzTxHFyrBA1fRSAPLnNyQELxAdGB9Y0BR4A3soRKBtfPICtdkEgjf
+lGGSnrEH/QRoiDJVSuig5F/C2GP5Yl0Z6CUEm6ZJsu6HTxahBkowJ7YIoXVcf8cs
+LIQi0TktJeL7LvexVYHVYg==
+-----END CERTIFICATE-----
+&lt;/cert&gt;
+
+&lt;key&gt;
+-----BEGIN PRIVATE KEY-----
+MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQD18eO/OgsCpcvw
+37FZQpwc90h2L846v+WQVd88biWRwOIW6kXAHzVzxozUfQhBpYP8/nTCOwM4IAk6
+B1kV/yuqXEgwzGAvSXB0EkNQCZRYTd9SbdmToSV7bfDjytm7KBazotJNS55jD5mT
+SjbTYLnP5EthREXFpL4HsK9gf5jaectVTxPEWICHzqPwbIeJE2s7fgfpyXUhZYfG
+cslcHjNmY+5b0V/m0+OMt2lwE9KyYLh79U2Npl7eeq/GRpTrKAgqFM+0qNl/fDrA
+7iQo+fACHNQL6Hc8JFpyTthUEEafnI79tFfXL+RuB1X63OGDQcOymrUQvqbgHLhH
+eo2iDuiTAgMBAAECggEAdMsjziGwLNezG3X+8FZzcEX2ATn+g2OxjnNZCYd9C9Q/
+CYbDDNNFPO+i3R1rGFGTdkcYB0yi4LpF52qp4YpFoCcmmRXU71++qUAq+w0xhyWj
+0a8czcCO3ih9Zo9kCj6lWTUPDWnFk2FLGuj5VDPwyUquiUg0ogDzxQ8gmYC+g7C4
+jjlrNJhk4/F1EDle89iXEhYcR0FqEnAt031QwvdQRDJ1f1qKZNOP2Ld798yMx69E
+v7lW2mOkN/0MzKLOR6wn+3irykVWazjKyb22LWmmFNXO89GwaE20XWuyKzGPyj0K
+wA8RrEVtgUXBg4aar8YzhCm2bX+xHU/Lt+7lFxD70QKBgQD8WtnKQNjcbWQNJoqF
+Bku087GKpDQjp8xw0Wac4pCebQgs9M7IZGlWMUJhuPaZkdIRFs46DxnDTvXZlnHD
+PmafWjqjzSuXToInedkoEI3JVEyr8CrWTnlLhi8lTWuVIUhIu8NxPeidOJVuZmsJ
+j4vTr7Fc+G1sGCHkUnS/MCM+vwKBgQD5f1YRLxs1pVQ5KpjTCeH1/bmVbXr8MTW4
+nHr4xAtXto9RDrLjDzUhBcip0RH3NF1DZTvyvep5aRxllGbiI4Oz/3DSqgi6TFvD
+d7VJp4jUe94b9C+zXtYbJyag9Hu0cJ5MK8hRQiz9na/e2Z8ujIlo080TZoa1QOPW
+Pv/gIWxfLQKBgEMUr2IZHMxzc64fOaEkzEkcomw1O/riZvDyaPF5NHI4j3zL0o/o
+SSv1Si0J6ttlrM6IHmfGjdWiDq45VKJO2x6u8HmMV3MQFn8B39zLkbUb6Imn/Osc
+zxdpYuzqiJeK0lkrOEfI6iWo3egL55YSB1xNDruk+glK3O+Bj7EmzaenAoGAFQDI
+MQgjJT/2uB1C4jkpwXiLf+3IdaR63kCmBX0Ta13d8LfpDT5Bfbcr7kfAWGwbEcpa
+4pNkQrY7gr2cb5sHwkZVrBZOR8iXzPut0jZ9SU3oI7hJr7LjGUQRd2k9ZLI6UTU6
+VsTYXr1AieUOBnAkPSPfVqvB2U5OH8IL7kVCBz0CgYAOb8+YMdAVTkEOJYa6+3TK
+saoB48cu1wDz+LIh17rknv9jsyFunwt6+AvlHQv9mOcTttd7nuT8HK2QylYdVBZd
+eOemFLtDrquRzUrRYSmFvNA0eSPEQC/3SBiz/55srqtk8qbJEJ4i4aYgAHgmH396
+Zg/tuKUxCrU9CyML3Fmfiw==
+-----END PRIVATE KEY-----
+&lt;/key&gt;
+</code></pre>
+<p>на заблокированных сайтах заглушка провайдера не выскакивает но они не работают, не заблокированные сайты работают.<br>
+при использовании pac скрипта заблокированные сайты работают.<br>
+Может подскажете куда дальше копать?</p></td><td>2022-07-23T19:05:10.312Z</td></tr>
+    </table>
+      </body>
+    </html>

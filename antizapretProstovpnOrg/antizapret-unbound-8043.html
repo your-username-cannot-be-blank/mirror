@@ -1,0 +1,110 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>antizapret-unbound-8043</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ShiGhost(ShiGhost)</td><td><p>Здравствуйте. Имеется свой сервер antizapret. В своей локальной сети поднял unbound и указал в него dns сервер antizapret, почему то не разблокируется сайт <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>, то есть возвращает DNS оригинальный IP адрес, но другие заблокированные домены работают. Если указать напрямую DNS antizapret, без использования unbound, сайт <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a> начинает грузиться. Кэш чистил unbound, системы и самого браузера. (unbound-control flush_zone ., ipconfig /flushdns и запуск браузера в инкогнито). Логи unbound:</p>
+<blockquote>
+<p>[1720699666] unbound[13704:0] info: resolving <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>. A IN<br>
+[1720699666] unbound[13704:0] info: response for <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>. A IN<br>
+[1720699666] unbound[13704:0] info: reply from &lt;.&gt; 8.8.8.8#53<br>
+[1720699666] unbound[13704:0] info: query response was CNAME<br>
+[1720699666] unbound[13704:0] info: resolving <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>. A IN<br>
+[1720699666] unbound[13704:0] info: response for <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>. A IN<br>
+[1720699666] unbound[13704:0] info: reply from &lt;.&gt; 8.8.8.8#53<br>
+[1720699666] unbound[13704:0] info: query response was ANSWER<br>
+[1720699666] unbound[13704:1] info: resolving <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>. AAAA IN<br>
+[1720699666] unbound[13704:1] info: resolving <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>. AAAA IN<br>
+[1720699666] unbound[13704:1] info: response for <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>. AAAA IN<br>
+[1720699666] unbound[13704:1] info: reply from &lt;.&gt; 8.8.8.8#53<br>
+[1720699666] unbound[13704:1] info: query response was nodata ANSWER<br>
+[1720699669] unbound[13704:0] info: resolving <a href="http://photos-ugc.l.googleusercontent.com" rel="noopener nofollow ugc">photos-ugc.l.googleusercontent.com</a>. AAAA IN<br>
+[1720699697] unbound[13704:0] info: resolving <a href="http://photos-ugc.l.googleusercontent.com" rel="noopener nofollow ugc">photos-ugc.l.googleusercontent.com</a>. HTTPS IN<br>
+[1720699697] unbound[13704:0] info: response for <a href="http://photos-ugc.l.googleusercontent.com" rel="noopener nofollow ugc">photos-ugc.l.googleusercontent.com</a>. HTTPS IN<br>
+[1720699697] unbound[13704:0] info: reply from &lt;.&gt; 8.8.8.8#53<br>
+[1720699697] unbound[13704:0] info: query response was nodata ANSWER</p>
+</blockquote>
+<p><a class="attachment" href="antizapret-unbound-8043/RRoFZuPOMGoFlvSfy9PWVT5dnm.conf">unbound.conf</a> (53,7 КБ)</p></td><td>2024-07-11T12:35:16.152Z</td></tr><tr><td>rader</td><td><p>У вас в файле конфигурации настроена пересылка зон на адрес google dns. В логах он и отвечает. В данном случае, какого результаты вы хотите?</p></td><td>2024-07-11T15:09:27.388Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>В конфигурационном файле OpenVPN прописано route 8.8.8.8 255.255.255.255 vpn_gateway, то есть он перехватывает запросы. И как я выше писал, что остальные сайты, которые заблокированы открываются с такими настройками и только с <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a> не работает.</p></td><td>2024-07-11T15:39:27.077Z</td></tr><tr><td>rader</td><td><p>Понятно.<br>
+Попробуйте добавить в конфиг unbound.</p>
+<p>server:<br>
+private-domain: “<a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>”<br>
+domain-insecure: “<a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>”<br>
+forward-zone:<br>
+name: “<a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>”<br>
+forward-addr: 8.8.8.8</p></td><td>2024-07-11T16:11:16.845Z</td></tr><tr><td>Xunlei</td><td><p>Приветствую. Не знаю, как работает антизапрет, но есть пара замечаний:</p>
+<aside class="quote no-group" data-username="ShiGhost" data-post="1" data-topic="8043">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shighost/48/4485_2.png" class="avatar"> ShiGhost:</div>
+<blockquote>
+<p>указал в него dns сервер antizapret</p>
+</blockquote>
+</aside>
+<p>Нет, вы указали google DNS в форфардере.</p>
+<aside class="quote no-group" data-username="ShiGhost" data-post="3" data-topic="8043">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shighost/48/4485_2.png" class="avatar"> ShiGhost:</div>
+<blockquote>
+<p>В конфигурационном файле OpenVPN прописано route 8.8.8.8 255.255.255.255 vpn_gateway, то есть он перехватывает запросы</p>
+</blockquote>
+</aside>
+<p>Эта строка не означает перехват запроса, а лишь указывает машрутизацию через виртуальный интерфейс.</p>
+<p>Как при этом открываются заблокированные сайты, мне не понятно. Заблокированные сайты должны резолвиться на приватную сеть (посредством DNS сервера антизапрета), которые уже машрутизируются через тунель (остальные диапазоны адресов машрутизируются по умолчанию).</p></td><td>2024-07-11T16:25:23.122Z</td></tr><tr><td>rader</td><td><p>Вот я тоже не понимаю зачем так делать? Почему сразу не указать локальный адрес DNS сервера?</p></td><td>2024-07-11T16:32:11.426Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>Не помогло.</p></td><td>2024-07-11T16:46:18.460Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>Указывал 192.168.104.1, ничего не поменялось, а использую 8.8.8.8, вдруг если отвалиться сервер, чтобы DNS запросы дальше работали.</p></td><td>2024-07-11T16:48:40.843Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>Насколько я знаю, внутри контейнера antizapret идёт перехват всех DNS запросов. Настраивал по <a href="https://ntc.party/t/698/10">инструкции на форуме</a>.</p></td><td>2024-07-11T16:50:18.118Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="ShiGhost" data-post="8" data-topic="8043">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shighost/48/4485_2.png" class="avatar"> ShiGhost:</div>
+<blockquote>
+<p>Указывал 192.168.104.1, ничего не поменялось</p>
+</blockquote>
+</aside>
+<p>Может тогда этот домен не в списке заблокированных? Проверить можно <code>nslookup yt3.ggpht.com 192.168.104.1</code></p>
+<aside class="quote no-group" data-username="ShiGhost" data-post="9" data-topic="8043">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shighost/48/4485_2.png" class="avatar"> ShiGhost:</div>
+<blockquote>
+<p>Насколько я знаю, внутри контейнера antizapret идёт перехват всех DNS запросов</p>
+</blockquote>
+</aside>
+<p>Интересно, впервые такое слышу.</p></td><td>2024-07-11T16:57:14.897Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>Я выше уже писал, что если DNS сразу на antizapret, не через unbound, то всё работает (выдаёт ip из подсети 10.224.0.0/24), а если тот же dns адрес указать в самом unbound, и уже запрашивать ip адрес через unbound, то он возвращает оригинальный ip адрес. <a href="https://ntc.party/t/6949/3">На счёт перехватов.</a></p></td><td>2024-07-11T17:03:47.328Z</td></tr><tr><td>Xunlei</td><td><p>Понятно. Я бы сравнил два дампа запросов c unbound и без. Может перехват на какие-то хитрые запросы не срабатывает.</p>
+<p>Что-то вроде:</p>
+<pre><code class="lang-auto">nslookup yt3.ggpht.com 192.168.104.1
+nslookup yt3.ggpht.com 7f.1
+nslookup yt3.ggpht.com 8.8.8.8
+</code></pre></td><td>2024-07-11T17:08:19.605Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>И что это даёт? Я выше писал, что в первом случае вернёт ip из подсети 10.224.0.0/24, а в третьем случаем оригинальный ip адрес, если учитывать что третий вариант через unbound.</p></td><td>2024-07-11T17:25:05.535Z</td></tr><tr><td>Xunlei</td><td><p>Даёт понимание локализации проблемы. Называется отладка. Важны не только результат выполнения, но и сама датаграмма запроса (может там разрешение вообще через TCP идёт, если запрос слишком большой, например, из-за проверки RRSIG).</p></td><td>2024-07-11T17:29:01.769Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>У меня есть предположение, почему это может не работать. При nslookup <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>, возвращается ещё домен (CNAME) <a href="http://photos-ugc.l.googleusercontent.com" rel="noopener nofollow ugc">photos-ugc.l.googleusercontent.com</a>, а другие домены которые я проверял на работоспособность, не имеют CNAME. Я попробовал добавить <a href="http://photos-ugc.l.googleusercontent.com" rel="noopener nofollow ugc">photos-ugc.l.googleusercontent.com</a> в include-hosts-custom.txt, но результата не дало, так же при nslookup <a href="http://photos-ugc.l.googleusercontent.com" rel="noopener nofollow ugc">photos-ugc.l.googleusercontent.com</a>, возвращает оригинальный ip адрес, что через unbound, что напрямую.</p></td><td>2024-07-11T19:10:05.293Z</td></tr><tr><td>nzkhammatov(Ainur Khammatov)</td><td><p><code>https://ntc.party/t/129/436</code></p></td><td>2024-07-11T19:43:00.354Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>Спасибо. Получилось, теперь через unbound грузиться <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>. Конечно это проблемы полностью не решает, ибо сколько доменов заблокировано, которые с CNAME и каждый такой домен вручную добавлять такое себе.</p></td><td>2024-07-12T09:58:17.925Z</td></tr>
+    </table>
+      </body>
+    </html>

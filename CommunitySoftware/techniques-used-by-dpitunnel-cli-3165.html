@@ -1,0 +1,67 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>techniques-used-by-dpitunnel-cli-3165</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>messede(Messede Degod)</td><td><p>Hi, i was hoping someone could provide some insights on the techniques that DPITunnel uses, i have recognized the following methods currently by reading through the code/documentation (if there are other please do mention).</p>
+<ol>
+<li>Split the Client hello at SNI field</li>
+<li>Split and send the client hello in random order</li>
+<li>Use TCP window size  to fragment server hello</li>
+<li>Send Fake client hello with a allowed SNI, but with a TTL not long enough reach the server</li>
+</ol>
+<p>I understand the first method and the 4th one partially, if you could provide some comments as to why these methods exist and how they work i would be grateful.</p>
+<p>My inquiry is out of pure curiosity.</p></td><td>2022-09-01T05:33:31.272Z</td></tr><tr><td>bolvan</td><td><p>DPI’s are designed for maximum bandwidth. Every extra computing is costly, it minimizes bandwidth.<br>
+DPI’s track TCP and UDP channels (src_ip:src_port - dst_ip:dst_port).<br>
+They maintain hashed tables similar to linux conntrack.<br>
+For every packet DPI must decide either to pass or drop it. Table lookup is fast. If it finds corresponding entry marked with “allowed” flag it immediately passes the packet and drops it if entry is marked with “denied” flag. Some DPIs use special network cards with FPGA to offload this task from the main CPU.<br>
+Otherwise it must process and analyze packet, possibly reassembling TCP stream. Its more resource costly.<br>
+To minimize resource usage DPI try to make a verdict as soon as possible and mark conntrack entry either with “allowed” or “denied” flag.<br>
+That’s why fake can work. DPI sees good data and allows TCP connection. Further packets are not analyzed becase connection is already marked.</p>
+<p>Simple splitting works only against DPIs that cannot reassemble TCP streams. Sometimes its possible to mix split parts of real TCP data with fakes and break DPI’s reassembler. Another method is sending split parts in reverse order.</p></td><td>2022-09-01T13:48:38.998Z</td></tr><tr><td>messede(Messede Degod)</td><td><p>thanks for the reply, so out of order delivery is to confuse DPI’s</p>
+<p>im interested in knowing one more thing why are server hellos are being fragment?</p></td><td>2022-09-01T14:02:36.738Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="messede" data-post="3" data-topic="3165">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/messede/48/1783_2.png" class="avatar"> messede:</div>
+<blockquote>
+<p>why are server hellos are being fragment?</p>
+</blockquote>
+</aside>
+<p>Because some DPIs also analyze certificate common name in ServerHello to extract hostname.<br>
+Not much can be done to modify server responses without help from the server. Windows size looks like the only possible method</p></td><td>2022-09-01T14:04:36.708Z</td></tr><tr><td>messede(Messede Degod)</td><td><p>thank you very much, that makes sense now</p></td><td>2022-09-01T14:06:01.826Z</td></tr><tr><td>messede(Messede Degod)</td><td><p>Can TCP MSS be used to induce fragmentation on server side as well ?</p></td><td>2022-09-02T15:29:34.737Z</td></tr><tr><td>bolvan</td><td><p>Technically it should work but according to standard MSS tcp option should be sent only in SYN packet. So its permanent for a TCP connection.  There’s no way to return to normal MSS and restore performance.<br>
+However I haven’t tried myself how different operating systems handle MSS change in subsequent packets.</p></td><td>2022-09-02T15:56:11.290Z</td></tr>
+    </table>
+      </body>
+    </html>

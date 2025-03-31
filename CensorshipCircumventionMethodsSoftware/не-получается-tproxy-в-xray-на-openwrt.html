@@ -1,0 +1,181 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>не-получается-tproxy-в-xray-на-openwrt</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Neutral-Section</td><td><p>Привет! Делаю на OpenWRT 23.05.5 по <a href="https://xtls.github.io/ru/document/level-2/tproxy_ipv4_and_ipv6.html" rel="noopener nofollow ugc">инструкции</a>. Inbound в xray:</p>
+<pre><code class="lang-auto">  {
+    "tag": "dokoproxy",
+    "listen": "127.0.0.1",
+    "port": 10199,
+    "protocol": "dokodemo-door",
+    "settings": {
+      "network": "tcp,udp",
+      "followRedirect": true
+    },
+    "sniffing": {
+      "enabled": true,
+      "destOverride": [
+        "http",
+        "tls",
+        "quic"
+      ]
+    }
+  }
+</code></pre>
+<p>Фаервол в OpenWRT большой и сложный, заменил ручками максимально простым с одним правилом маскарадинга:</p>
+<pre><code class="lang-auto">#!/usr/sbin/nft -f
+
+flush ruleset
+
+table inet fw4 {
+  chain prerouting {
+    type nat hook prerouting priority dstnat; policy accept;
+  }
+  chain postrouting {
+    type nat hook postrouting priority srcnat; policy accept;
+    ip saddr 192.168.69.0/24 oifname "br-wan" counter masquerade
+  }
+ chain mangle_prerouting {
+  type filter hook prerouting priority mangle; policy accept;
+ }
+}
+</code></pre>
+<p>Добавил <code>198 proxy</code> в <code>/etc/iproute2/rt_tables</code>, маршруты:</p>
+<pre><code class="lang-auto">ip rule add fwmark 0x198 table proxy priority 100
+ip route add local 0.0.0.0/0 dev lo table proxy
+ip -6 rule add fwmark 0x198 table proxy priority 100
+ip -6 route add local ::/0 dev lo table proxy
+</code></pre>
+<p>и непосредственно правило <code>nft 'add rule inet fw4 mangle_prerouting iifname "br-lan" meta l4proto { tcp, udp } counter log meta mark set 0x198 tproxy ip to 127.0.0.1:10199 accept'</code></p>
+<p>В логе есть записи <code>Fri Dec 27 11:30:00 2024 IN=br-lan OUT= PHYSIN=lan1 MAC=36:07:b2:f1:59:d4:00:0c:29:3e:13:46:08:00 SRC=192.168.69.229 DST=188.40.167.81 LEN=60 TOS=0x00 PREC=0x00 TTL=64 ID=12060 DF PROTO=TCP SPT=36362 DPT=80 WINDOW=64240 RES=0x00 SYN URGP=0</code>, а в логе <code>xray</code> ничего. При <code>telnet 127.0.0.1 10199</code> это подключение в логе xray видно. Без правила с tproxy интернет через маскарадинг, разумеется, работает</p>
+<p>Та же самая конфигурация на обычном Debian 12 работает с полпинка. В логе xray видно подключение, запрос и detour. Снимите, пожалуйста, с ручника! Что ещё можно подкрутить на OpenWRT? Крутится оно на железке BPI-R3</p></td><td>2024-12-27T12:27:26.023Z</td></tr><tr><td>0ka(0ka)</td><td><p>может здесь найдется подсказка <a href="https://github.com/morytyann/OpenWrt-mihomo/blob/11383113b9340310994a39e6f77f1c9079e0e75e/mihomo/files/nftables/hijack.nft#L125" class="inline-onebox">OpenWrt-mihomo/mihomo/files/nftables/hijack.nft at 11383113b9340310994a39e6f77f1c9079e0e75e · morytyann/OpenWrt-mihomo · GitHub</a></p></td><td>2024-12-27T12:49:20.694Z</td></tr><tr><td>Neutral-Section</td><td><p>Накатал <a href="https://pastebin.com/PWa1Etew" rel="noopener nofollow ugc">небольшой тест</a>, который принимает соединения по образцу исходников xray и выводит на экран. На обычном линуксе соединения в него прилетают и показываются, а на OpenWRT, увы пусто. Попробую сбросить конфигурацию и смотреть что из этого получится</p>
+<p>Ещё интересно, если в правило добавить второй <code>log</code>, то в лог выводит две строчки без метки и с меткой: <code>nft 'add rule inet fw4 mangle_prerouting ip saddr 192.168.69.229/32 meta l4proto { tcp, udp } counter log meta mark set 0x198 tproxy ip to 127.0.0.1:12345 log accept'</code>. В тестовой слушалке всё равно пусто</p>
+<p><code>mihomo</code> нагуглился почти сразу, изучал, но ничего особо не нашёл</p></td><td>2024-12-27T16:26:44.873Z</td></tr><tr><td>nikkymen</td><td><p>Глянь тут настройки nft и маршруты</p>
+<aside class="onebox githubblob" data-onebox-src="https://github.com/itdoginfo/podkop/blob/main/podkop/files/etc/init.d/podkop">
+  <header class="source">
+
+      <a href="https://github.com/itdoginfo/podkop/blob/main/podkop/files/etc/init.d/podkop" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/itdoginfo/podkop/blob/main/podkop/files/etc/init.d/podkop" target="_blank" rel="noopener nofollow ugc">itdoginfo/podkop/blob/main/podkop/files/etc/init.d/podkop</a></h4>
+
+
+      <pre><code class="lang-d/podkop">#!/bin/sh /etc/rc.common
+
+START=99
+USE_PROCD=1
+
+script=$(readlink "$initscript")
+NAME="$(basename ${script:-$initscript})"
+config_load "$NAME"
+
+EXTRA_COMMANDS="list_update add_route_interface check_proxy check_nft check_github check_logs check_all check_three"
+EXTRA_HELP="        list_update     Updating domain and subnet lists
+        add_route_interface  Adding route for interface
+        sing_box_config_vless For test vless string
+        check_proxy          Check if sing-box proxy works correctly
+        check_nft           Show PodkopTable nftables rules
+        check_github        Check GitHub connectivity and lists availability
+        check_logs         Show podkop logs from system journal
+        check_all          Run all checks
+        check_three         Run check_proxy, check_nft and check_github"
+
+</code></pre>
+
+
+
+  This file has been truncated. <a href="https://github.com/itdoginfo/podkop/blob/main/podkop/files/etc/init.d/podkop" target="_blank" rel="noopener nofollow ugc">show original</a>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>У меня все работает</p></td><td>2024-12-27T20:02:28.693Z</td></tr><tr><td>sakontwist</td><td><p>А где вы ставите марку 198 на пакеты, чтобы rule работало?</p>
+<p>UPD: увидел.<br>
+Во-первых, надо исключить из маркировки как минимум 127.0.0.1 (поставить перед правилом  mark)</p>
+<pre><code class="lang-auto">  ip daddr { 127.0.0.0/8, 224.0.0.0/4, 240.0.0.0/4, 255.255.255.255 } counter return
+</code></pre>
+<p>Также желательно исключить dst ip сервера, чтобы otbound не заворачивался обратно в tproxy</p></td><td>2024-12-28T10:20:29.623Z</td></tr><tr><td>sakontwist</td><td><p>Также я не уверен за OpenWrt (нет возможности проверить), но полновесный nftables имеет трассировку пакетов.</p>
+<p>Для этого можно включить метки трейса, например там же в самом начале цепочки mangle_prerouting</p>
+<pre><code class="lang-auto">  &lt;любое условие&gt; meta nftrace set 1
+</code></pre>
+<p>И затем можно получать в реальном времени полный путь пакета через</p>
+<pre><code class="lang-auto">nft -nn monitor trace
+</code></pre></td><td>2024-12-28T10:32:45.797Z</td></tr><tr><td>Neutral-Section</td><td><p>Пока все предложения были мимо, но я, кажись, накопал причину. После удаления пачки зависимостей на легаси iptables заработало:</p>
+<pre data-code-wrap="bash"><code class="lang-bash">[2024-12-28 12:25:32] opkg remove docker
+[2024-12-28 12:25:36] opkg remove docker-compose
+[2024-12-28 12:25:45] opkg remove dockerd
+[2024-12-28 12:26:18] opkg remove kmod-ipt-nat6
+[2024-12-28 12:26:37] opkg remove kmod-ipt-physdev
+[2024-12-28 12:26:44] opkg remove kmod-ipt-nat6
+[2024-12-28 12:26:48] opkg remove kmod-ipt-nat
+[2024-12-28 12:26:54] opkg remove kmod-ipt-extra
+[2024-12-28 12:27:14] opkg remove iptables-mod-extra
+[2024-12-28 12:28:00] opkg remove kmod-ipt-extra
+[2024-12-28 12:30:11] opkg remove kmod-ipt-conntrack
+[2024-12-28 12:31:25] opkg remove ip6tables-zz-legacy
+[2024-12-28 12:31:30] opkg remove kmod-ip6tables
+[2024-12-28 12:33:33] opkg remove kmod-nf-ipvs
+[2024-12-28 12:33:36] opkg remove kmod-ip6tables
+[2024-12-28 12:34:24] opkg remove kmod-ipt-conntrack
+[2024-12-28 12:35:07] opkg remove xtables-legacy
+[2024-12-28 12:35:17] opkg remove iptables-zz-legacy
+[2024-12-28 12:41:17] opkg remove fail2ban
+[2024-12-28 12:41:23] opkg remove iptables-zz-legacy
+[2024-12-28 12:41:37] opkg remove xtables-legacy
+[2024-12-28 12:41:53] opkg remove kmod-ipt-conntrack
+[2024-12-28 12:42:22] opkg remove kmod-br-netfilter
+[2024-12-28 12:42:25] opkg remove kmod-ipt-conntrack
+[2024-12-28 12:42:33] opkg remove kmod-ipt-core
+[2024-12-28 12:44:06] opkg remove jool-tools-netfilter
+[2024-12-28 12:44:11] opkg remove kmod-jool-netfilter
+[2024-12-28 12:45:00] opkg remove kmod-nf-ipt6
+[2024-12-28 12:45:01] opkg remove kmod-nf-ipt
+</code></pre>
+<p>Теперь осталось выяснить, что конкретно мешало. Хотелось бы оставить как минимум <code>fail2ban</code> – там правила для dropbear и luci</p>
+<hr>
+<p><strong>upd</strong><br>
+Нашёл виновного: <code>br_netfilter</code>. Достаточно выключить его и <code>troxy</code> начинает работать. Бридж сетка в докере при этом работать перестаёт. В режиме <code>--network=host</code> работает нормально, так что пережить можно</p></td><td>2024-12-28T13:14:07.776Z</td></tr>
+    </table>
+      </body>
+    </html>

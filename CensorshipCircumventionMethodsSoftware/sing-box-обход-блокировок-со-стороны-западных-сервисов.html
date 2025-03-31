@@ -1,0 +1,257 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>sing-box-обход-блокировок-со-стороны-западных-сервисов</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>prope3ler</td><td><p>Добрый день</p>
+<p>Есть немецкий VPS, на котором запущены X-ray и AmneziaWG (независимые сервисы, конечно).<br>
+На локальном одноплатнике дома настроен sing-box, через который в сторону X-ray выборочно проксируются нужные мне сервисы - по списку из антизапрета плюс сервисы, которые не должны работать в РФ (chatGPT, Claude, Gemini, NotebookLM.Google, Spotify).</p>
+<p>Есть проблема с работой Gemini и NotebbokLM.Google (ChatGPT и Calude рботают нормально) - не получается настроить работу через x-ray, Google определяет что я стучусь из РФ и блокирует мне доступ к сервису.<br>
+При этом, если поднять соединение через AmneziaWG (будет в итоге тот же немецкий IP от VPS) - все работает.</p>
+<p>В sing-box поднимал легирование до debug и смотрел, куда и как он пытается стучаться - все подозрительное вносил в конфиге sing-box в туннель vless-out, в браузере тоже отслеживал через консоль все адреса и вносил в конфиг - все равно не работает.</p>
+<p>Конфиг правил приложил ниже, может кто-то подскажет что я забыл…</p>
+<pre><code class="lang-auto">"route": {
+    "rules": [
+      {
+        "rule_set": "antizapret",
+        "outbound": "vless-out"
+      },
+      {
+        "domain": "claude.ai",
+        "outbound": "vless-out"
+      },
+      {
+        "domain": "anthropic.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain": "chatgpt.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain": "notebooklm.google",
+        "outbound": "vless-out"
+      },
+      {
+        "domain": "notebooklm.google.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".spotify.com",
+        "outbound": "vless-out",
+      },
+      {
+        "domain_suffix": ".youtube.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".googlevideo.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".nhacmp3youtube.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".1e100.net",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".ytimg.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".youtu.be",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".google.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".clients6.google.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".gvt1.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".googleusercontent.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".googleapis.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".gstatic.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".googletagmanager.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".google",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".withgoogle.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".google.de",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".google.ru",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".analytics.google.com",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".claude.ai",
+        "outbound": "vless-out"
+      },
+      {
+        "domain_suffix": ".anthropic.com",
+        "outbound": "vless-out"
+      },
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      }
+    ],
+    "rule_set": [
+      {
+        "type": "remote",
+        "tag": "antizapret",
+        "format": "binary",
+        "url": "https://github.com/savely-krasovsky/antizapret-sing-box/releases/latest/download/antizapret.srs",
+        "download_detour": "vless-out"
+      }
+    ],
+    "auto_detect_interface": true
+
+</code></pre></td><td>2025-01-14T14:12:14.519Z</td></tr><tr><td>0ka(0ka)</td><td><p>кучку правил можно переделать в одно<br>
+<code>"domain": ["chatgpt.com", "qwerty.com"]</code><br>
+домены gemini смотрите через браузер в F12-&gt;network<br>
+ну и сделайте полное проксирование через sing-box и проверьте так, а не только через awg</p></td><td>2025-01-14T15:27:36.784Z</td></tr><tr><td>boltor</td><td><p>Если через Амнезию всё нормально, то возможно К Гуглу сервер подключается по IPv6, который почему-то считается им российским. Попробуйте на сервере пустить гугловский трафик чисто по IPv4 (или наоборот по IPv6, если у вас всё наоборот). У меня в панели x-ui вот так в конфиге сделано:</p>
+<pre><code class="lang-auto">outbounds: [
+  ...
+  ...
+  {
+    "tag": "IPv4",
+    "protocol": "freedom",
+    "settings": {
+      "domainStrategy": "UseIPv4"
+    }
+  },
+  ...
+  ...
+],
+rules: [
+  ...
+  ...
+  {
+    "type": "field",
+    "outboundTag": "IPv4",
+    "domain": [
+      "geosite:google" // правило можете и по доменам собрать, дело ваше. 
+// Может быть у ИИ сервисов Гугла есть свой geosite, 
+    ]
+  },
+  ...
+  ...
+]
+</code></pre>
+<p>P.S. Можете собрать отдельные домены и доменные суффиксы в единые блоки:</p>
+<pre><code class="lang-auto">rules: [
+  {
+    "domain": [
+      "chatgpt.com",
+      "notebooklm.google",
+      ...
+      "notebooklm.google.com"
+    ],
+    "domain_suffix": [
+      ".spotify.com",
+      ".youtube.com",
+      ...
+      ".googlevideo.com"
+    ],
+    "outbound": "vless-out"
+  },
+]
+</code></pre></td><td>2025-01-14T15:34:31.069Z</td></tr><tr><td>prope3ler</td><td><p>у меня v6 адреса вроде нет, провайдер не поддерживает, он даже на роутере отключен<br>
+вообще, похоже Гугл что-то понимает в момент авторизации акаунта, то есть перед тем как перейти на страницу <a href="http://notebooklm.google.com" rel="noopener nofollow ugc">notebooklm.google.com</a> он авторизует меня в акаунте и вот тут все и ломается<br>
+может через куки что-то пролезает?</p></td><td>2025-01-14T19:00:36.021Z</td></tr><tr><td>prope3ler</td><td><p>все что видно в F12 - я внес в правила, даже .ru домен гугла добавил<br>
+если смотреть <code>journal -u sing-box</code> - все соединения к гугловым доменам через vless-out, ничего в директ не идет и это сбивает с толку<br>
+поэкспериментирую еще немного</p></td><td>2025-01-14T19:05:00.024Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="prope3ler" data-post="4" data-topic="14569">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/p/d78d45/48.png" class="avatar"> prope3ler:</div>
+<blockquote>
+<p>у меня v6 адреса вроде нет,</p>
+</blockquote>
+</aside>
+<p>Речь о впс</p>
+<p>Днс сервер еще проверьте, должен быть одинаковый на авг и синге</p></td><td>2025-01-14T19:34:55.569Z</td></tr><tr><td>prope3ler</td><td><p>про v6 все равно не до конца понимаю<br>
+на VPS (в Германии) стоит x-ray, но там правил нет, там все что прилетело - уходит дальше<br>
+все правила в sing-box на одноплатнике в РФ, от которого vless-out в сторону x-ray</p>
+<p>вообще схема выглядит так - в домашней сети ноут, одноплатник, роутер смотрит в интернет<br>
+на ноуте в качестве default gateway указан адрес одноплатника, на одноплатнике sing-box<br>
+клиент amnezia стоит на ноуте</p>
+<p>p.s. я еще немного потыкался, сменил на ноуте браузер на firefox (до этого пробовал через Safari), почистил историю и куки, выключил все расширения - нормально зашел на Gemini…<br>
+ерунда какая-то творится</p></td><td>2025-01-14T19:54:59.922Z</td></tr><tr><td>boltor</td><td><p>Тогда попробуйте на sing-box клиенте поставить в правилах маршрутизации гугловского трафика версию IP:</p>
+<pre><code class="lang-auto">rules: [
+  ...
+  {
+    "geosite": [
+      "google"
+    ],
+    "ip_version": 4,
+    "outbound": "vless-out"
+  }
+  ...
+]
+</code></pre></td><td>2025-01-14T20:33:47.360Z</td></tr><tr><td>Rei(Ayanami Rei)</td><td><p>Используйте geosite, а не domain. <a href="http://chatgpt.com" rel="noopener nofollow ugc">chatgpt.com</a> это далеко не единственный домен openAi. Категории можете посмотреть тут, <a href="https://github.com/v2fly/domain-list-community" class="inline-onebox" rel="noopener nofollow ugc">GitHub - v2fly/domain-list-community: Community managed domain list. Generate geosite.dat for V2Ray.</a></p>
+<p>Из этого репозитория как раз генерируется geosite.dat и geosite.db</p></td><td>2025-01-14T20:36:08.844Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,84 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-web-censorship-measurements-of-http3-over-quic-imc-2021</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Web Censorship Measurements of HTTP/3 over QUIC<br>
+Kathrin Elmenhorst, Bertram Schütz, Nils Aschenbruck, Simone Basso<br>
+<a href="https://censorbib.nymity.ch/#Elmenhorst2021a">https://censorbib.nymity.ch/#Elmenhorst2021a</a></p>
+<p>The paper is about extending <a href="https://github.com/ooni/probe">OONI Probe</a> with support for <a href="https://en.wikipedia.org/wiki/HTTP/3">HTTP/3</a>, and the results of testing HTTP/3 accessibility in four countries between January and March 2021. HTTP/3 is HTTP that runs over <a href="https://dl.acm.org/doi/abs/10.1145/3098822.3098842">QUIC</a> (UDP) rather than TCP+TLS. QUIC is newer than TCP and TLS (and therefore possibly less familiar to censors), and it has some features that make it naturally more resistant to blocking. For example, QUIC’s equivalent to the TCP RST flag, the <a href="https://datatracker.ietf.org/doc/html/rfc9000#section-19.4">RESET_STREAM</a> frame, is authenticated, meaning it is not possible for a middlebox to tear down an established connection by injecting packets, as is often done with TCP. Also, while QUIC uses TLS and therefore includes SNI in its handshake, the SNI is not directly visible on the wire: it and other early handshake fields are <a href="https://datatracker.ietf.org/doc/html/rfc9001#section-5.2">encrypted with a non-secret key</a>. Because the encryption key is not secret, a middlebox can <a href="https://www.ietf.org/archive/id/draft-ietf-quic-manageability-16.html#section-3.4.1">recover the SNI</a> by doing a decryption, but it needs to actually <em>do</em> the decryption.</p>
+<p>The authors extended the <a href="https://github.com/ooni/spec/blob/3e800afafe859befb8a65c3211bc29767bb69819/nettests/ts-027-urlgetter.md">URLGetter</a> test with support for HTTP/3, using the <a href="https://github.com/lucas-clemente/quic-go">quic-go</a> package. They took the <a href="https://github.com/citizenlab/test-lists">Citizen Lab test lists</a> and the top 4000 sites from the <a href="https://tranco-list.eu/">Tranco list</a>, and pre-filtered the URLs to remove the ones without HTTP/3 support, after which about 5% remained. For better safety of OONI Probe users, they removed all URLs in the <a href="https://github.com/citizenlab/test-lists/blob/4cba15c8203210a75804fb712d065d2186accf9c/lists/00-LEGEND-new_category_codes.csv">categories</a> XED, PORN, DATE, REL, and LGBT. They pre-resolved domain names to IP addresses, in order to eliminate any interference from DNS blocking. For each URL, they made two simultaneous requests, one using TCP and one using QUIC. They ran the experiment in 6 ASes in 4 countries. In some cases, they ran OONI Probe in the usual way, on the devices of volunteers, but they also augmented test coverage by running OONI Probe on VPNs and VPSes. After the OONI URLGetter experiments were finished, they did a second scan for HTTP/3 support among the target URLs, in order to remove any that had inconsistent HTTP/3 support.</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>country</th>
+<th>vantages</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>China</td>
+<td>VPS</td>
+<td>QUIC unblocks some URLs, but IP blocking affects TCP and QUIC equally.</td>
+</tr>
+<tr>
+<td>India</td>
+<td>VPS, user devices</td>
+<td>QUIC unblocks some URLs, but IP blocking affects TCP and QUIC equally.</td>
+</tr>
+<tr>
+<td>Iran</td>
+<td>VPS</td>
+<td>QUIC unblocks some URLs, and a small fraction of URLs is blocked <em>only</em> with QUIC.</td>
+</tr>
+<tr>
+<td>Kazakhstan</td>
+<td>VPN</td>
+<td>No evidence of QUIC censorship, though TCP censorship is present.</td>
+</tr>
+</tbody>
+</table>
+</div><p><a href="https://dl.acm.org/doi/pdf/10.1145/3487552.3487836#page=6">Figure 3</a> is a good summary of the results. In general, QUIC connections experienced somewhat less blocking than TCP connections. In China and India, many sites are blocked by IP address; those are inaccessible whether using TCP or QUIC. But some sites are blocked by other means, such as TCP+TLS SNI filtering, and these become accessible when using QUIC. In Iran, a large fraction of sites that are SNI-filtered become available over QUIC (the same sites are reachable over TCP, if you use a fake SNI). But in Iran there also appears to be UDP endpoint blocking; that is, blocking of IP addresses, but only in combination with use of UDP. This causes about 4% of sites to be reachable over TCP but <em>not</em> over QUIC.</p>
+<p>The HTTP/3 test is still considered experimental, and is not run by default. To see the measurements in OONI Explorer, select the “URL Getter” test and uncheck the “Hide failed measurements” box:<br>
+<a href="https://explorer.ooni.org/search?since=2021-01-15&amp;until=2021-03-31&amp;test_name=urlgetter">https://explorer.ooni.org/search?since=2021-01-15&amp;until=2021-03-31&amp;test_name=urlgetter</a><br>
+In <a href="https://explorer.ooni.org/measurement/20210330T235906Z_urlgetter_CN_45090_n1_dclkBSwHg0DqrFtC?input=https%3A%2F%2Fdns.google%2F">this measurement from China</a>, for example, can see that a fetch of <a href="https://dns.google/">https://dns.google/</a> failed because the QUIC handshake timed out.</p>
+<pre><code class="lang-json">"failed_operation": "quic_handshake",
+"failure": "generic_timeout_error",
+</code></pre></td><td>2022-05-02T16:16:27.357Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,72 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>domains-leaked-in-oscp-requests-even-with-doh-and-esniech</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>I don’t think this fact is well known yet, so I will document it here. If you configure DoH and ESNI in Firefox <a href="https://blog.mozilla.org/security/2018/10/18/encrypted-sni-comes-to-firefox-nightly/">according to Mozilla’s instructions</a>, you will still leak some destination domains because of <a href="https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol">OCSP (Online Certificate Status Protocol)</a> requests, which are often plaintext HTTP and contain a certificate serial number, which can be looked up in <a href="https://en.wikipedia.org/wiki/Certificate_Transparency">Certificate Transparency</a> logs.</p>
+<p>There are only a few places online where this is mentioned, so I suspect that many people who try to enable DoH or ESNI according to an online guide will be vulnerable. I don’t know of any workaround, in Firefox, other than setting <code>security.OCSP.enabled=0</code> in about:config.</p>
+<p>2019-01-05: <a href="http://blog.seanmcelroy.com/2019/01/05/ocsp-web-activity-is-not-private/">http://blog.seanmcelroy.com/2019/01/05/ocsp-web-activity-is-not-private/</a></p>
+<blockquote>
+<p>Certificate Transparency (CT) logs increasingly provide virtually every TLS certificate to be identified by serial number.  Since OCSP responses are unencrypted and contain the serial number of the certificate as can be found in CT logs, as well as unsalted hashes of the certificate’s Distinguished Name and public key, these can easily be profiled to compromise the privacy of clients even in the presence of DoH and ESNI privacy protections.</p>
+</blockquote>
+<p>2019-03-13: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1535235">https://bugzilla.mozilla.org/show_bug.cgi?id=1535235</a></p>
+<blockquote>
+<p>I don’t know exactly what <em>should</em> happen, but the OCSP request defeats the purpose of ESNI. Suppose a network intermediary wants to block a site. DNS over HTTPS, ESNI, and TLS 1.3 mean that it cannot match on DNS queries, SNI, or the server certificate; nor even on the IP address without blocking unrelated sites. But it can make a blacklist of certificate serial numbers, then watch for OCSP requests/responses with serial numbers on the blacklist, and then infer (e.g. temporally) which TLS sessions they belong to, or take some other action such as blocking the client’s source IP address.</p>
+<p>Maybe the <code>trr</code> and/or <code>esni</code> prefs should additionally affect OSCP? Or maybe OCSP needs consideration in documentation about activating ESNI in Firefox?</p>
+</blockquote>
+<p>2019-03-29: <a href="https://bugs.torproject.org/28168#comment:7" class="inline-onebox">Use ESNI via Firefox HTTPS helper (#28168) · Issues · Legacy / Trac · GitLab</a></p>
+<blockquote>
+<p>I revised the instructions in comment:5 to add the pref <code>security.OCSP.enabled=0</code>, because ​OCSP can leak the server name even with DoH, ESNI, and TLS 1.3 are used. (This was never a problem with meek because any OCSP leaks would have been of the front domain, not the covert domain.)</p>
+</blockquote>
+<p>2019-08-13: <a href="https://www.usenix.org/system/files/foci19-paper_chai_update.pdf">https://www.usenix.org/system/files/foci19-paper_chai_update.pdf</a> (Section 5.2)</p>
+<blockquote>
+<p><strong>Leakage in OCSP.</strong> For completeness, we note the certificate serial number in unencrypted OCSP (Online Certificate Status Protocol) messages can leak the server name. It can be, consequently, exploited for censorship purposes.</p>
+</blockquote>
+<p>2019-09-25: <a href="https://blog.powerdns.com/2019/09/25/centralised-doh-is-bad-for-privacy-in-2019-and-beyond/" class="inline-onebox">Centralised DoH is bad for privacy, in 2019 and beyond | PowerDNS Blog</a></p>
+<blockquote>
+<p>To achieve the goal of perfect privacy on untrusted networks (without running a VPN) will require us to:<br>
+4. Disable OCSP/make OCSP stapling mandatory, or replacing it by an alternate mechanism.</p>
+</blockquote></td><td>2019-09-26T15:49:13.999Z</td></tr><tr><td>tango</td><td><p>The <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1535235#c10">bugzilla bug has been closed</a>, with Mozilla opting not to do anything about OCSP leaks, other than improve the documentation. These are their recommendations for preventing OCSP leaks with ECH:</p>
+<p>On the server side: implement <a href="https://en.wikipedia.org/wiki/OCSP_stapling">OCSP stapling</a> (as Cloudflare reportedly already does) or use short-lived certificates (I don’t know exactly how short the validity has to be to disable OCSP checks).</p>
+<p>On the client side: disable OSCP checking the preferences.</p>
+<p><a href="https://wiki.mozilla.org/index.php?title=Security/Encrypted_Client_Hello&amp;oldid=1248531#Interaction_with_Revocation_Checking" class="onebox" target="_blank" rel="noopener">https://wiki.mozilla.org/index.php?title=Security/Encrypted_Client_Hello&amp;oldid=1248531#Interaction_with_Revocation_Checking</a></p>
+<blockquote>
+<h2>Interaction with Revocation Checking</h2>
+<p>Firefox supports various methods for checking whether certificates have been revoked including OCSP, OCSP Stapling and (experimentally) CRLite. OCSP requires querying the certificate’s revocation status with the issuing CA and so leaks information about the site a user is visiting. Consequently, sites deploying ECH should also use OCSP Stapling or short lived certificates which don’t involve any network communication and so improves user privacy (Cloudflare deploy OCSP Stapling universally). If sites do not use OCSP Stapling, then ECH still provides a substantial privacy benefit as OCSP responses are cached for multiple days and so the majority of site visits will be protected. In the longer term, CRLite will allow for privacy preserving revocation checking without requiring action by site operators.</p>
+<p>Users who prefer improved privacy over the security of revocation checking can disable revocation via the browser UX in about:preferences (or in about:config by preference).</p>
+</blockquote></td><td>2023-10-07T16:44:08.057Z</td></tr>
+    </table>
+      </body>
+    </html>

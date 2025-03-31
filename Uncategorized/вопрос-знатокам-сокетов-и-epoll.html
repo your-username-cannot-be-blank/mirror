@@ -1,0 +1,76 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>вопрос-знатокам-сокетов-и-epoll</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>bolvan</td><td><p>Может таковые найдутся.</p>
+<p>Вопрос касается реализации логики tcp proxy в tpws.<br>
+tcp proxy означает двустороннюю переброску данных между двумя tcp соединениями (local и remote leg).<br>
+Важно корректно закрывать соединения без потери неотосланных кусков данных, когда какой-то конец инициирует закрытие.<br>
+Но закрытие может быть разным. Это может быть close через FIN, close через RST и half-close - shutdown(SHUT_WR).</p>
+<p>Есть ли способ средствами epoll (да и не только ими) отличить состояние half close от close ?<br>
+Если закрывают с RST, приходит EPOLLERR, тут все ясно. connection reset by peer.<br>
+half close возникает, когда другой конец выполнил shutdown(SHUT_WR). В этом случае от него поступает tcp пакет с FIN, что не означает полное закрытие соединения. Ему еще можно досылать остаток данных.<br>
+В этом случае приходит EPOLLRDHUP.<br>
+Но он же и приходит, когда другой конец закрыл сокет без неотосланных данных, без RST.</p>
+<p>В первом случае еще имеет смысл ожидать от другого конца прокси каких-то данных, во втором надо скорее уже их обоих кидать, как только все неотосланное будет отправлено.<br>
+То, что сделано сейчас, при отсутствии ответа FIN с другой стороны приводит к подвисанию обоих концов - одного в состоянии FIN_WAIT, другого в состоянии CLOSE_WAIT до истечения fin-wait timeout.<br>
+Это не смертельно, но если бы можно было закрывать поскорее, было бы лучше.</p></td><td>2024-08-27T06:35:56.641Z</td></tr><tr><td>serj888</td><td><p>Как вариант настроить параметры conntrack_tcp_timeout уменьшить значения<br>
+conntrack_generic_timeout=60 по умолчанию 600<br>
+conntrack_tcp_timeout_close_wait=30 по умолчанию 60<br>
+conntrack_tcp_timeout_established=180 по умолчанию 7440<br>
+conntrack_tcp_timeout_fin_wait=30 по умолчанию 120<br>
+conntrack_tcp_timeout_syn_recv=30 по умолчанию 60<br>
+conntrack_tcp_timeout_syn_sent=60 по умолчанию 120<br>
+conntrack_tcp_timeout_time_wait=30 по умолчанию 120<br>
+conntrack_udp_timeout_stream=60 по умолчанию 120</p>
+<p>меньше ставить значение я не пробовал, но думаю некоторые можно ещё уменьшить<br>
+это глобальные настройки для всех соединений, настраиваются через nftables или iptables<br>
+Самых 2 жестких параметра conntrack_generic_timeout и conntrack_tcp_timeout_established они жрут ресурсы и удерживают неактивное соединение</p></td><td>2024-08-27T07:53:46.103Z</td></tr><tr><td>bolvan</td><td><p>Вопрос был несколько о другом.</p>
+<p>Эти sysctl относятся к netfilter и conntrack, не к системе<br>
+conntrack есть следилка за соединениями, позволяющая применять stateful действия к проходящему, исходящему и входящему трафику<br>
+Эти значения таймаутов не должны относиться к tcpip реализации системы.<br>
+Система вполне может работать, если выгрузить nf_conntrack, и логика tcp states, прописанная в rfc, от этого никуда не уйдет. Иначе tcpip вообще не будет работать.</p></td><td>2024-08-27T09:50:09.856Z</td></tr><tr><td>amonakov</td><td><p>Я не настоящий знаток сокетов, но в первую очередь проверил бы, не решает ли <a href="https://manpages.debian.org/bookworm/manpages/tcp.7.en.html#TCP_USER_TIMEOUT" rel="noopener nofollow ugc">TCP_USER_TIMEOUT</a> эту задачу.</p></td><td>2024-08-27T09:53:31.604Z</td></tr><tr><td>bolvan</td><td><p>Хотя это и не решает задачу напрямую, но достаточно полезная штука в том числе и для смягчения этой проблемы.<br>
+Жаль, только на linux и macos работает.<br>
+Реализовал.</p></td><td>2024-08-27T15:36:34.025Z</td></tr><tr><td>amonakov</td><td><p>Перечитал начальный пост. На сокете, на который уже сделали shutdown(SHUT_WR), но в котором ещё есть непрочитанные вами данные, epoll должен вернуть EPOLLIN | EPOLLRDHUP, а не голый EPOLLRDHUP. Неужели это не так?</p></td><td>2024-08-28T09:49:08.898Z</td></tr><tr><td>bolvan</td><td><p>Проблема не в этом. На том конце, которому делают SHUT_WR, как раз все как ожидается.<br>
+Проблема на конце, где мне делают SHUT_WR. Я получают оттуда EPOLLRDHUP. Мне тут без разницы есть ли EPOLLIN, так как всегда при этом происходит полная вычитка сокета до  recv&lt;=0.<br>
+Я не могу на этом конце отличить сделали мне SHUT_WR или закрыли сокет через close().<br>
+В первом случае мне еще есть смысл ожидать, когда мне будет что передать этому концу. Во втором случае надо сразу закрывать его сокет и как можно быстрее заканчивать с другим концом, тк ждать смысла нет. Если тот конец висит, то ждать можно до FIN_WAIT timeout.<br>
+И получается у меня пара  FIN_WAIT_1 + CLOSE_WAIT.</p>
+<p>В нормальной ситуации я делаю второму концу SHUT_WR, и если у него ничего нет , - он мне быстренько шлет ACK на мой FIN, на что я получаю EPOLLHUP, и все хорошо.<br>
+Но он может повиснуть.  3-way handshake проходит, дальше мертво. Ситуация cdn, когда backend мертв</p></td><td>2024-08-28T11:19:10.062Z</td></tr>
+    </table>
+      </body>
+    </html>

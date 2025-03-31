@@ -1,0 +1,70 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировказамедление-сервисов-по-диапазонамasn</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>Последний месяц заметил ухудшение работы некоторых сервисов, расположенных у определённых хостеров/в определённых IP-диапазонах.</p>
+<p>Блокируется подключение к OpenVPN-серверам по протоколу TCP на порту 443 у провайдера ITLDC, если сервер расположен в диапазоне <code>195.123.217.0/24</code> (Нидерланды) или <code>195.123.211.0/24</code> (Латвия). При этом у других хостерах (и на других диапазонах адресов) проблем с ровно такой же конфигурацией не наблюдается. OpenVPN-подключение к другим TCP-портам к указанным диапазонам не блокируется.</p>
+<p>SSH-доступ моего сервиса <a href="https://ssh-j.com/">https://ssh-j.com/</a> периодически замедляется у части провайдеров, хотя у него пользователей совсем немного. Он расположен в Scaleway, Нидерланды. Блокировка динамическая: то появляется, то пропадает. Вероятно, соединение помечают подозрительным при длительном подключении к серверу (часы, дни).</p></td><td>2023-02-28T11:35:20.735Z</td></tr><tr><td>anonymous106(anonymous106)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="1" data-topic="3909">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>в диапазоне <code>195.123.217.0/24</code> (Нидерланды) или <code>195.123.211.0/24</code> (Латвия)</p>
+</blockquote>
+</aside>
+<p>В этих диапазонах ничего необычного, но если взять маршруты целиком то там блокируют ~50 адресов по этому шаблону. Cреди них 5 адресов от (предположительно) browsec.</p>
+<hr>
+<p>Что еще там блокируют:<br>
+Kiwi VPN<br>
+Hide My Name VPN<br>
+Неизвестный сервис (tls-auth или tls-crypt), на OPENVPN/TCP/443  и UDP</p></td><td>2023-02-28T13:20:35.778Z</td></tr><tr><td>anonymous107(anonymous107)</td><td><aside class="quote no-group" data-username="anonymous106" data-post="2" data-topic="3909">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/46a35a/48.png" class="avatar"> anonymous106:</div>
+<blockquote>
+<p>Неизвестный сервис (tls-auth или tls-crypt), на OPENVPN/TCP/443 и UDP</p>
+</blockquote>
+</aside>
+<p>Это следы от vpn рыжий кот, бобер или пчела. Что-то из них с вероятностью 99%. Скорее первый, но сейчас его api не работает для подтверждения.</p></td><td>2023-03-03T18:02:16.120Z</td></tr><tr><td>ValdikSS</td><td><p>Это мой сервис и мои серверы.</p></td><td>2023-03-03T18:34:31.000Z</td></tr><tr><td>bolvan</td><td><p>Странности периодически возникают молча и непрозрачно.<br>
+Недавно стали блокировать на globalnet все, кроме tcp, icmp и udp на port 53.<br>
+Включая нестандартные IP протоколы.<br>
+Блокировка длилась минут 20, потом отключили.<br>
+Экспериментят</p>
+<p>globalnet, он же dataix, - первая точка обмена трафиком, где внедрили DPI</p></td><td>2023-03-03T18:54:20.826Z</td></tr><tr><td>anonymous107(anonymous107)</td><td><p><code>195.123.208.161</code> и <code>195.123.214.122</code> не ваши</p>
+<p>ITLDC маршрутизирует <code>/21</code> к себе целиком, и автономный блокировщик это знает. Поэтому когда, например, появляется 100500 правил с одним шаблоном <code>195.123.2xx.x блокировать OpenVPN</code> оно оптимизирует это до <code>195.123.208.0/21 и 195.123.216.0/21 блокировать OpenVPN</code>, если необходимо.</p></td><td>2023-03-03T19:42:27.212Z</td></tr>
+    </table>
+      </body>
+    </html>

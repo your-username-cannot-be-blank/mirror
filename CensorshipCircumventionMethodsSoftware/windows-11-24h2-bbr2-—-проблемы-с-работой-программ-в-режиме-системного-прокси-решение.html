@@ -1,0 +1,76 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>windows-11-24h2-bbr2-—-проблемы-с-работой-программ-в-режиме-системного-прокси-решение</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Rodcrit</td><td><p>После обновления до 24H2 на основной машине и переустановки системы на рабочем ноутбуке обнаружилась неприятная особенность, что программы для обхода замедления общеизвестного списка ресурсов, в которых используется режим системного прокси, отказываются работать. В логах по нулям (буквально). Гуглить проблему сложно, поэтому решил написать дополнительный пост здесь.</p>
+<p>Симптомы:</p>
+<ul>
+<li><strong>NekoRay/NekoBox</strong> — нет подключения, почти сразу появляется всплывающее окно в духе «This action is taking a long time, try reconnecting», соединение не устанавливается</li>
+<li><strong>v2RayN</strong> — подключение якобы устанавливается, соединение не работает. В статус-баре снизу «The delay: -1 ms, none», трафик не гоняется</li>
+<li><strong>Hiddify</strong> — подключение якобы работает (статус «Connected»), фактически соединение не установлено, трафик никуда не идёт.</li>
+</ul>
+<p>TUN во всех случаях продолжает работать, условные WARP или Amnezia WG функционируют. На <a href="https://www.reddit.com/r/Windows11/comments/1h07kj5/windows_11_24h2_and_bbr2/" rel="noopener nofollow ugc">Reddit</a> пишут, что этим, в числе прочего, могут быть обусловлены рандомные ошибки <code>NS_BINDING_ABORTED</code> в Firefox, которым так и не нашли объяснения в соседних темах на форуме.</p>
+<p>В процессе диагностики перепробовал буквально всё — сброс сетевых настроек (тут я был близко), манипуляции с DNS, отключение Zapret, изменение настроек внутри самих программ и много чего ещё. Ничего из вышеперечисленного не дало результата, так как виноватым, внезапно, оказался <strong>алгоритм контроля перегрузки TCP (TCP Congestion Control Provider)</strong>. <a href="https://github.com/2dust/v2rayN/discussions/5795" rel="noopener nofollow ugc">Issue на Гитхабе v2RayN</a>.</p>
+<p>При каждой переустановке системы я всегда менял его на <strong>BBR2</strong>, так как он объективно лучше стандартного CUBIC в условиях высокой нагруженности сети. На 24H2 его сделали стандартным, но при этом как-то умудрились сломать в процессе. На 23H2 использование BBR никаких проблем не вызывало, любые прокси работали идеально.</p>
+<p>Поменять алгоритм можно так:</p>
+<ol>
+<li>Открываем PowerShell от админа.</li>
+<li>Вводим:</li>
+</ol>
+<pre><code class="lang-auto">netsh int tcp set supplemental template=internet congestionprovider=CUBIC
+netsh int tcp set supplemental template=internetcustom congestionprovider=CUBIC
+netsh int tcp set supplemental template=Compat congestionprovider=NewReno
+netsh int tcp set supplemental template=Datacenter congestionprovider=CUBIC
+netsh int tcp set supplemental template=Datacentercustom congestionprovider=CUBIC
+</code></pre>
+<ol start="3">
+<li>Проверяем настройки: <code>Get-NetTCPSetting | Select SettingName, CongestionProvider</code></li>
+</ol>
+<details>
+<summary>
+Было</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="windows-11-24h2-bbr2-—-проблемы-с-работой-программ-в-режиме-системного-прокси-решение/0b180dec6edbe0ece41e4150f45221fa1f821dbe.png" data-download-href="https://ntc.party/uploads/default/0b180dec6edbe0ece41e4150f45221fa1f821dbe" title="BBR2"><img src="windows-11-24h2-bbr2-—-проблемы-с-работой-программ-в-режиме-системного-прокси-решение/0b180dec6edbe0ece41e4150f45221fa1f821dbe.png" alt="BBR2" data-base62-sha1="1A8MSRpNdpqj4msOlDA3eTizHVs" width="690" height="197" data-dominant-color="151515"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">BBR2</span><span class="informations">697×200 3.68 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<details>
+<summary>
+Стало</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="windows-11-24h2-bbr2-—-проблемы-с-работой-программ-в-режиме-системного-прокси-решение/fc13723f491966f12ccbad7381cf563342ef8a2d.png" data-download-href="https://ntc.party/uploads/default/fc13723f491966f12ccbad7381cf563342ef8a2d" title="CUBIC &amp; NewReno"><img src="windows-11-24h2-bbr2-—-проблемы-с-работой-программ-в-режиме-системного-прокси-решение/fc13723f491966f12ccbad7381cf563342ef8a2d.png" alt="CUBIC &amp; NewReno" data-base62-sha1="zXXZ8egbkwjc9MQXKNS5qaWCr6t" width="690" height="197" data-dominant-color="151515"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">CUBIC &amp; NewReno</span><span class="informations">693×198 3.85 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>При желании CUBIC можно заменить на CTCP. Он, <a href="https://www.speedguide.net/articles/tcp-congestion-control-algorithms-comparison-7423" rel="noopener nofollow ugc">насколько известно</a>, чуть лучше показывает себя в процессах, чувствительных к задержкам.</p></td><td>2025-03-21T23:51:47.860Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>FYI, для установки настройки существует командлет <code>Set-NetTCPSetting</code>. Просто получается неаккуратненько: устанавливаете с помощью <code>netsh</code>, а проверяете с помощью пошика.</p></td><td>2025-03-22T06:03:36.677Z</td></tr><tr><td>alk2ntc(Alk2ntc)</td><td><p>Прочел статью и ввел на Win11 24H2 команду для проверки. Получил без каких-либо преобразований результат с четырьмя кубиками и одним NewReno. То есть у меня при переходе на 24H2 ничего не поменялось. Может ли это быть связанным с тем, что алгоритмы Windows меняют что-то в условиях медленной или перегруженной сети? Потому что у меня не медленная и не перегруженная, и всё как работало, так и работает.</p></td><td>2025-03-22T06:27:36.736Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>В свежеустановленной системе по умолчанию тоже CUBIC, поэтому есть мнение, что это автор напутал и BBR у него перенёсся со старой системе.</p>
+<p>То, что BBR сломали, это, конечно, печально, но иллюстрирует то, почему твикать всё, что твикается - чревато и менять дефолты без веской причины не стоит (возможно, на диагностику было затрачено больше ресурсов, чем получено профита от смены алгоритма)</p></td><td>2025-03-22T06:51:30.105Z</td></tr>
+    </table>
+      </body>
+    </html>

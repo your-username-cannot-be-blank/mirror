@@ -1,0 +1,148 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>stunnel-openvpn</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>dark(water)</td><td><p>Всех приветствую друзья!<br>
+Поделителесь пожалуста информацией по следующему вопросу:<br>
+Дано - впс-сервер с настроенным Stunnel и OpenVPNserver и клиент с  настроенным Stunnel и OpenVPNserver. При подключении клиента через Stunnel и OpenVPN, клиент видит только других клиентов в сети, сервер и др ресурсы в сети  OpenVPN, доступа в интернет нет… Пробовал настраивать таким же методом на различных ВПС разных повайдеров (vpsag, <a href="http://cloud.ru" rel="noopener nofollow ugc">cloud.ru</a>), результат один… Работать данная связка перестала где-то 2-3 месяца назад, не могу понять почему. Если кто знает подскажите плиз, почему такое происходит?<br>
+<a class="attachment" href="stunnel-openvpn/2WMlRJghAoi4Xy5Myom1TmXDprg.conf">client_ovpn.conf</a> (305 байтов)<br>
+<a class="attachment" href="stunnel-openvpn/sbOcdQJPUwcFZH1rRtMjURdAuYW.conf">client_stunnel.conf</a> (159 байтов)<br>
+<a class="attachment" href="stunnel-openvpn/4aM0wrOL02FJqdgryG8EXn2zQX7.conf">srv_stunnel.conf</a> (173 байта)<br>
+<a class="attachment" href="stunnel-openvpn/eqm1B72xrJKDbbvxoa8FzUmvgSG.conf">svr_ovpn.conf</a> (342 байта)</p></td><td>2024-05-16T13:37:54.781Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="dark" data-post="1" data-topic="7857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/a88e4f/48.png" class="avatar"> dark:</div>
+<blockquote>
+<p>Пробовал настраивать таким же методом на различных ВПС</p>
+</blockquote>
+</aside>
+<p>Таким — это каким?<br>
+Вероятно, у вас блокируются транзитные пакеты firewall’ом, либо маршрутизация не включена вовсе (<code>net.ipv4.ip_forward</code>).</p></td><td>2024-05-16T16:22:06.417Z</td></tr><tr><td>dark(water)</td><td><p>Я имею ввиду конфиги настроены, таким же образом сейчас, до того, как обрубило все. На сервере <code>net.ipv4.ip_forward</code>=1, на клиенте <code>net.ipv4.ip_forward</code>=0. На клиенете поставил 1, но не завелось. По поводу firewall’а, он не включен:<br>
+на клиенте &gt;&gt;<br>
+cyber@yodo:~$ sudo ufw status<br>
+Status: inactive<br>
+на сервере  &gt;&gt;<br>
+user1@vpn:/etc/openvpn/server$ sudo ufw status<br>
+Status: inactive</p>
+<p>маршруты выглядят так:<br>
+клиент &gt;&gt;<br>
+cyber@yodo:~$ route<br>
+Kernel IP routing table<br>
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface<br>
+0.0.0.0         10.8.0.1        128.0.0.0       UG    0      0        0 tun0<br>
+default         router.lan      0.0.0.0         UG    100    0        0 ens18<br>
+10.8.0.0        0.0.0.0         255.255.255.0   U     0      0        0 tun0<br>
+<a href="http://ns1.onlime.ru" rel="noopener nofollow ugc">ns1.onlime.ru</a>   router.lan      255.255.255.255 UGH   100    0        0 ens18<br>
+<a href="http://ns2.onlime.ru" rel="noopener nofollow ugc">ns2.onlime.ru</a>   router.lan      255.255.255.255 UGH   100    0        0 ens18<br>
+localhost       router.lan      255.255.255.255 UGH   0      0        0 ens18<br>
+128.0.0.0       10.8.0.1        128.0.0.0       UG    0      0        0 tun0<br>
+192.168.88.0    0.0.0.0         255.255.255.0   U     100    0        0 ens18<br>
+router.lan      0.0.0.0         255.255.255.255 UH    100    0        0 ens18</p>
+<p>server &gt;&gt;<br>
+user1@vpn:/etc/openvpn/server$ route<br>
+Kernel IP routing table<br>
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface<br>
+default         _gateway        0.0.0.0         UG    100    0        0 enp3s0<br>
+10.0.0.0        0.0.0.0         255.255.255.0   U     0      0        0 enp3s0<br>
+10.8.0.0        0.0.0.0         255.255.255.0   U     0      0        0 tun0<br>
+169.254.169.254 10.0.0.2        255.255.255.255 UGH   100    0        0 enp3s0</p></td><td>2024-05-16T16:54:43.128Z</td></tr><tr><td>Xunlei</td><td><p>Помимо настройки самого тунеля необходимо настроить машрутизацию между сетями, например, с помощью firewalld добавив policy с настроенными ingress-zone и egress-zone.</p></td><td>2024-05-16T17:06:06.883Z</td></tr><tr><td>dark(water)</td><td><p>это разве обязательно? 2 мес назад работало все с дефолтными правилами.</p></td><td>2024-05-16T17:09:24.447Z</td></tr><tr><td>Xunlei</td><td><p>Не знаю, я не пользуюсь квик инсталлами, компилирую и копирую вручную и всегда прописываю машрутизацию вручную. Мне нравится для этого использовать firewalld — высокоуровневая надстройка над nftables.</p></td><td>2024-05-16T17:12:14.421Z</td></tr><tr><td>ValdikSS</td><td><p>Ну а туннель-то сам стабильно работает? Когда вы пингуете клиентов внутри сети, вы можете делать это продожительное время без проблем?<br>
+Если так, то ищите проблему на стороне сервера: либо в правилах маршрутизации, либо в файрволле.<br>
+Отлаживайте добавлением правил файрволла и просмотром счётчиков на них, а также с помощью tcpdump.<br>
+Также проверьте DNS — убедитесь, что ваш <code>10.9.0.1</code> действительно отвечает на запросы.</p></td><td>2024-05-16T17:19:09.832Z</td></tr><tr><td>dark(water)</td><td><p>внутренняя сеть работает хорошо (сужу по работе 1с), проблем нет. Провайдеры пишут, что у них все ок, они ничего не меняли))<br>
+Знакомый сказал, что РКН блочит, но как? если блочил бы, то вся сеть неверное бы падала.<br>
+Может кто платно помочь разобраться\донастроить?</p></td><td>2024-05-16T17:21:52.977Z</td></tr><tr><td>Xunlei</td><td><p>Бесплатный пример конфига на всякий случай (iptables ufw должны быть удалены чтобы не мешались):</p>
+<pre><code class="lang-auto">Создаём зону внешнего интерфейса с интернетом:
+	sudo firewall-cmd --permanent --new-zone="mine_external"
+Добавляем интерфейс к зоне:
+	sudo firewall-cmd --permanent --zone="mine_external" --add-interface=ens33
+Создаём зону виртуального интерфейса тунеля:
+	sudo firewall-cmd --permanent --new-zone="mine_ikev2"
+Добавляем интерфейс к зоне:
+	sudo firewall-cmd --permanent --zone="mine_ikev2" --add-interface=tun
+Настройка SNAT для внешней зоны
+	sudo firewall-cmd --permanent --zone="mine_external" --add-masquerade
+Настройка транзитного трафика между зонами
+	sudo firewall-cmd --permanent --new-policy="_ikev2_to_exernal"
+	sudo firewall-cmd --permanent --policy="_ikev2_to_exernal" --set-target ACCEPT
+	sudo firewall-cmd --permanent --policy="_ikev2_to_exernal" --add-ingress-zone="mine_ikev2"
+	sudo firewall-cmd --permanent --policy="_ikev2_to_exernal" --add-egress-zone="mine_external"
+</code></pre>
+<p>Ну там ещё можно настроить открытие порта тунеля:</p>
+<pre><code class="lang-auto">	sudo firewall-cmd --permanent --new-service=mine_tunnel
+	sudo firewall-cmd --permanent --service=mine_tunnel --set-description=Mine Tunnel service
+	sudo firewall-cmd --permanent --service=mine_tunnel --add-port=1234/tcp
+	sudo firewall-cmd --permanent --zone="mine_external" --add-service="mine_tunnel"
+</code></pre>
+<p>если по умолчанию стоит отброс пакетов:</p>
+<pre><code class="lang-auto">	sudo firewall-cmd --permanent --zone="mine_external" --set-target=DROP
+</code></pre></td><td>2024-05-16T17:37:43.757Z</td></tr><tr><td>dark(water)</td><td><p>Спасибо, не знаю на сколько он актуален в моем случае)) Но в любом случае пригодится.</p></td><td>2024-05-16T18:36:06.074Z</td></tr><tr><td>dark(water)</td><td><p>Я погуглил сейчас и вижу, что в моем случае для предоставления доступа к интернету компам из сети необходимо, чтобы net.ipv4.ip_forwarding=“1” было, но оно и так было, в остальных случаях, все пакеты, которые залетают на сервер и не подпадают под правила, по умолчанию в такое случае ACCEPT правило применяется. По этому с правилами все ок. (если в чем-то ошибаюсь поправьте плиз).<br>
+По поводу DNS, стоит 10.9.0.1, ранее при таком подходе не работал инет, менял на 8.8.8.8 все заводилось, не знаю почему так…</p></td><td>2024-05-16T20:28:39.824Z</td></tr><tr><td>Dhohbr</td><td><aside class="quote no-group" data-username="dark" data-post="11" data-topic="7857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/a88e4f/48.png" class="avatar"> dark:</div>
+<blockquote>
+<p>По поводу DNS, стоит 10.9.0.1, ранее при таком подходе не работал инет, менял на 8.8.8.8 все заводилось, не знаю почему так…</p>
+</blockquote>
+</aside>
+<p>Наверно потому что надо указывать 10.8.0.1 в качестве днс, у вас же OpenVPN эту сеть выдает. Откуда у вас взялся 10.9.0.1?<br>
+Если пинговать IP, например 8.8.8.8, тоже интернета нет?</p>
+<p>Покажите ещё вывод sysctl -p</p></td><td>2024-05-16T21:08:03.561Z</td></tr><tr><td>dark(water)</td><td><p>не обязательно 10.8.0.1, я настраивал на 10.9.0.1 (не суть в данном случае).<br>
+если 8.8.8.8 указать в конфиге клента (dhcp-option DNS 8.8.8.8) - инета все равно нет…<br>
+на серваке выполня. sysctl -p, в ответ ничего не выдает… Но если:<br>
+user1@vpn:/etc/openvpn/server$ cat /proc/sys/net/ipv4/ip_forward<br>
+1<br>
+З.Ы. Настраиваю на Ubuntu 20.04, где-то читал, что 20 ubuntu не работает должным образом… Завтра попробую в качестве сервака 22 накатить попробовать.</p></td><td>2024-05-16T23:13:43.972Z</td></tr><tr><td>dark(water)</td><td><p>Раскоментировал параметр на сервере<br>
+user1@vpn:/etc/openvpn/server$ sudo nano /etc/sysctl.conf<br>
+user1@vpn:/etc/openvpn/server$ sysctl -p<br>
+sysctl: permission denied on key “net.ipv4.ip_forward”, ignoring<br>
+user1@vpn:/etc/openvpn/server$ sudo sysctl -p<br>
+net.ipv4.ip_forward = 1</p>
+<p>На клиенте рестартанул openvpn-client, поигрался с DNS адресом в конфиге ovpn, интеренета нет)</p></td><td>2024-05-16T23:23:16.173Z</td></tr><tr><td>Dhohbr</td><td><p>Если у вас в /etc/sysctl.conf параметр записан так: net.ipv4.ip_forward=1, то попробуйте прописать так net.ipv4.ip_forward = 1, затем выполнить sudo sysctl -p<br>
+У меня недавно на свежеустановленном дебиане похожая проблема была, мне добавление пробелов помогло, хотя и так и так должно работать, возможно в моем случае был касяк с каким-то скрытым символом, т.к. я копипастил эту строку с какого-то форума.</p></td><td>2024-05-17T02:34:37.863Z</td></tr><tr><td>dark(water)</td><td><p>Да, бывает такое. Но проблема не решилась)</p></td><td>2024-05-17T07:26:57.781Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><aside class="quote no-group" data-username="dark" data-post="8" data-topic="7857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/a88e4f/48.png" class="avatar"> dark:</div>
+<blockquote>
+<p>Знакомый сказал, что РКН блочит, но как? если блочил бы, то вся сеть неверное бы падала.</p>
+</blockquote>
+</aside>
+<p>Дело точно не в блокировке РКН, если была бы блокировка, то у вас бы вообще связности с локалкой (сервером) не было.</p>
+<p>Я кстати что-то упустил, у вас OpenVPN выдает адреса 10.8.x.x, а на сервере или где-то дальше для 10.8.0.0/24 NAT наружу настроен? Иначе как вы клиентов вообще в интернет выпускать собираетесь?</p></td><td>2024-05-18T15:04:30.866Z</td></tr><tr><td>dark(water)</td><td><p>Здравствуйте! NAT не трогал… Все по дефолту… Если подскажите, что сделать, буду признателен, т.к. в этой области пробел, который устранить еще не успел…</p></td><td>2024-05-20T07:33:22.566Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Простого ответа нет, все очень сильно зависит от того, какая у вас сеть, что у вас на сервере, и т.д.</p>
+<p>Если просто VPS на котором крутятся какие-то сервисы, то смотрите обычную инструкцию по настройке MASQUERADE, их обычно упоминают в инструкциях по настройке VPN. С iptables это будет что-то типа <a href="https://arashmilani.com/post?id=53" rel="noopener nofollow ugc">How to configure iptables for openvpn (arashmilani.com)</a></p>
+<p>Возможно вы уже даже это делали когда настраивали, все работало, а потом сервер перезагрузился, и правил снова нет <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-05-20T08:42:16.839Z</td></tr>
+    </table>
+      </body>
+    </html>

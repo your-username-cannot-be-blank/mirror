@@ -1,0 +1,93 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>формат-вывода-ошибок-9390</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Storik4pro(Storik4pro)</td><td><p>Я делаю <a href="https://github.com/Storik4pro/goodbyeDPI-UI" rel="noopener nofollow ugc">UI для goodbyedpi</a>.<br>
+Сейчас программа просто запускает goodbyedpi и не имеет возможности следить за ошибками.<br>
+Сейчас программа может читать вывод <code>goodbyedpi.exe</code> с помощью Pseudo Console (по какой-то причине стандартные способы не работают. Всегда получаю вывод " "), но я не могу понять, что из вывода - ошибка.<br>
+Есть какой-то список всех возможных ошибок, которые печатает goodbyedpi?</p></td><td>2024-08-16T13:53:08.424Z</td></tr><tr><td>ValdikSS</td><td><p>Непосредственно текст ошибки формируется ОС, а не программой.</p><aside class="onebox githubblob" data-onebox-src="https://github.com/ValdikSS/GoodbyeDPI/blob/7b66094f560b1511e2efe00ed4c429c16a3a5f7c/src/goodbyedpi.c#L317">
+  <header class="source">
+
+      <a href="https://github.com/ValdikSS/GoodbyeDPI/blob/7b66094f560b1511e2efe00ed4c429c16a3a5f7c/src/goodbyedpi.c#L317" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/ValdikSS/GoodbyeDPI/blob/7b66094f560b1511e2efe00ed4c429c16a3a5f7c/src/goodbyedpi.c#L317" target="_blank" rel="noopener">ValdikSS/GoodbyeDPI/blob/7b66094f560b1511e2efe00ed4c429c16a3a5f7c/src/goodbyedpi.c#L317</a></h4>
+
+
+
+    <pre class="onebox"><code class="lang-c">
+      <ol class="start lines" start="307" style="counter-reset: li-counter 306 ;">
+          <li>LPTSTR errormessage = NULL;</li>
+          <li>DWORD errorcode = 0;</li>
+          <li>filter = WinDivertOpen(filter, WINDIVERT_LAYER_NETWORK, 0, flags);</li>
+          <li>if (filter != INVALID_HANDLE_VALUE)</li>
+          <li>    return filter;</li>
+          <li>errorcode = GetLastError();</li>
+          <li>FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |</li>
+          <li>              FORMAT_MESSAGE_IGNORE_INSERTS,</li>
+          <li>              NULL, errorcode, MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT),</li>
+          <li>              (LPTSTR)&amp;errormessage, 0, NULL);</li>
+          <li class="selected">printf("Error opening filter: %d %s\n", errorcode, errormessage);</li>
+          <li>LocalFree(errormessage);</li>
+          <li>if (errorcode == 2)</li>
+          <li>    printf("The driver files WinDivert32.sys or WinDivert64.sys were not found.\n");</li>
+          <li>else if (errorcode == 654)</li>
+          <li>    printf("An incompatible version of the WinDivert driver is currently loaded.\n"</li>
+          <li>           "Please unload it with the following commands ran as administrator:\n\n"</li>
+          <li>           "sc stop windivert\n"</li>
+          <li>           "sc delete windivert\n"</li>
+          <li>           "sc stop windivert14"</li>
+          <li>           "sc delete windivert14\n");</li>
+      </ol>
+    </code></pre>
+
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Я попытался сделать их чуточку понятней, но этого еще нет в релизных версиях.</p></td><td>2024-08-16T19:42:47.336Z</td></tr><tr><td>GagaMaga600(GagaMaga600)</td><td><p>воу воу. добавлю в закладки. там надеюсь потом будет оповещение, что UI приобрёл свой “финальный вид” ?</p></td><td>2024-08-16T23:34:44.476Z</td></tr><tr><td>Storik4pro(Storik4pro)</td><td><p>Понял. Спасибо большое!</p></td><td>2024-08-17T05:53:52.333Z</td></tr>
+    </table>
+      </body>
+    </html>

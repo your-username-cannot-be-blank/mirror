@@ -1,0 +1,84 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проблема-с-доступом-к-httpsinventkdeorg</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Ja-Ja-Hey-Ho(Ja-Ja-Hey-Ho)</td><td><p>Сейчас наблюдаются проблемы с доступом к <a href="https://invent.kde.org" rel="noopener nofollow ugc">https://invent.kde.org</a>.<br>
+Интересно, что отвёты с 80 порта проходят без проблем, проверял curl’ом:</p>
+<pre><code class="lang-auto">$ curl -XGET http://invent.kde.org
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;301 Moved Permanently&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;301 Moved Permanently&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>Трассировка до <a href="http://invent.kde.org" rel="noopener nofollow ugc">invent.kde.org</a> идёт без проблем, провайдер Ростелеком.<br>
+Это видимо РКН чудит или что?</p></td><td>2023-07-25T08:08:04.114Z</td></tr><tr><td>ValdikSS</td><td><p>Да, похоже на блокировку порта 443 у IP-адреса 188.40.133.145 на ТСПУ. По IPv6 сайт доступен.</p>
+<pre><code class="lang-plaintext">% sudo ./lft -d 443 188.40.133.145 
+Tracing .....*****
+TTL LFT trace to lerwini.kde.org (188.40.133.145):443/tcp
+ 1  _gateway (192.168.69.1) 0.5ms
+ 2  95-161-156-121.obit.ru (95.161.156.121) 1.1ms
+ 3  vi-xx-1914.4900m.250.112.spb.obit.ru (172.29.192.206) 13.7ms
+ 4  vi-xx-1913.4900m.250.160.spb.obit.ru (172.29.192.121) 5.7ms
+ 5  vi-xx-1920.ohr1.spb.obit.ru (172.29.194.77) 7.0ms
+**  [443/tcp no reply from target]  Try advanced options (use -VV to see packets).
+
+% sudo ./lft -d 80 188.40.133.145  
+Tracing .................T
+TTL LFT trace to lerwini.kde.org (188.40.133.145):80/tcp
+ 1  _gateway (192.168.69.1) 0.4ms
+ 2  95-161-156-121.obit.ru (95.161.156.121) 2.1ms
+ 3  vi-xx-1914.4900m.250.112.spb.obit.ru (172.29.192.206) 2.7ms
+ 4  vi-xx-1913.4900m.250.160.spb.obit.ru (172.29.192.121) 2.8ms
+ 5  vi-xx-1920.ohr1.spb.obit.ru (172.29.194.77) 0.9ms
+ 6  vi-xx-1534.shr3.spb.obit.ru (172.29.194.94) 3.3ms
+ 7  te-1-0-0.hnt3.spb.obit.ru (172.29.255.197) 4.5ms
+ 8  vi-xx-0999.brc1.spb.obit.ru (172.29.194.113) 1.4ms
+ 9  vi-xx-1692.brc1.spb.obit.ru (172.29.194.37) 7.0ms
+10  vi-xx-0150.brc2.obit.ru (85.114.1.13) 2.4ms
+11  109.239.136.184 33.3ms
+12  core0.fra.hetzner.com (213.239.252.17) 37.8ms
+13  core23.fsn1.hetzner.com (213.239.224.65) 43.2ms
+14  ex9k1.dc13.fsn1.hetzner.com (213.239.245.238) 42.8ms
+15  [target open] lerwini.kde.org (188.40.133.145):80 42.4ms
+</code></pre>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="проблема-с-доступом-к-httpsinventkdeorg/ad6f5f3942c058731e46a200c79da54aa78e62de.png" data-download-href="https://ntc.party/uploads/default/ad6f5f3942c058731e46a200c79da54aa78e62de" title="image"><img src="проблема-с-доступом-к-httpsinventkdeorg/ad6f5f3942c058731e46a200c79da54aa78e62de_2_209x500.png" alt="image" data-base62-sha1="oKhdnfUAI6mnOv8UwijdpfWLD54" width="209" height="500" srcset="проблема-с-доступом-к-httpsinventkdeorg/ad6f5f3942c058731e46a200c79da54aa78e62de_2_209x500.png, проблема-с-доступом-к-httpsinventkdeorg/ad6f5f3942c058731e46a200c79da54aa78e62de_2_313x750.png 1.5x, проблема-с-доступом-к-httpsinventkdeorg/ad6f5f3942c058731e46a200c79da54aa78e62de_2_418x1000.png 2x" data-dominant-color="E7E3E6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1126×2685 395 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2023-07-25T08:17:26.290Z</td></tr><tr><td>bam</td><td><p>Можно ли внести данный сайт в список проксируемых?</p></td><td>2023-08-17T14:44:35.847Z</td></tr><tr><td>lordiu(Space Bar)</td><td><p>РКН дал ответ по этому домену<br>
+<a class="attachment" href="проблема-с-доступом-к-httpsinventkdeorg/iKu4EdhSXqyyuwMWIbym3aWf9v5.docx">Ответ заявителю.docx</a> (48,0 КБ)</p></td><td>2023-08-29T08:43:22.781Z</td></tr><tr><td>bam</td><td><p>Но сайт по-прежнему блокирован, видимо в заявлении надо было указывать IP адрес так как блокируется по нему.</p></td><td>2023-08-29T21:23:41.147Z</td></tr><tr><td>welazsc</td><td><p>По данным globalcheck, сейчас местами работает.</p></td><td>2023-08-30T15:04:07.499Z</td></tr><tr><td>bam</td><td><p>У меня недавно заработало, но теперь опять перестало. Может быть снова сменился IP-адрес у сайта?</p></td><td>2023-09-18T11:32:05.700Z</td></tr>
+    </table>
+      </body>
+    </html>

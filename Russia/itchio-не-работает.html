@@ -1,0 +1,86 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>itchio-не-работает</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ivory4313</td><td><p><a href="https://itch.io/t/3791685/itchio-not-available-in-russia-err-connection-refused-and-err-connection-timed-out" class="onebox" target="_blank" rel="noopener nofollow ugc">https://itch.io/t/3791685/itchio-not-available-in-russia-err-connection-refused-and-err-connection-timed-out</a></p></td><td>2024-05-29T16:04:43.173Z</td></tr><tr><td>anon60595749</td><td><p>Не похоже, что блокировка внутри России. По http (порт 80) - все ОК. По https (порт 443) на TCP SYN сразу приходит TCP RST с верным TTL. Так что это не MITM. Подключался к 45.33.107.166.</p></td><td>2024-05-29T16:19:29.508Z</td></tr><tr><td>Xunlei</td><td><p>У меня тоже не работает, пустил через proxifier. А SS, наоборот, сегодня заработал.</p></td><td>2024-05-29T16:20:20.350Z</td></tr><tr><td>ValdikSS</td><td><pre><code class="lang-auto"># lft -d 443 45.33.107.166
+Tracing ....**..*..*.......***.T
+TTL LFT trace to 45-33-107-166.ip.linodeusercontent.com (45.33.107.166):443/tcp
+**  [neglected] no reply packets received from TTL 1
+ 2  89.178.254.204 (89.178.254.204) 1.0ms
+**  [neglected] no reply packets received from TTL 3
+ 4  79.104.58.125 (79.104.58.125) 2.1ms
+**  [neglected] no reply packets received from TTL 5
+ 6  sto-b9-link.ip.twelve99.net (62.115.44.72) 214.4ms
+ 7  sto-bb2-link.ip.twelve99.net (62.115.139.186) 47.0ms
+ 8  kbn-bb6-link.ip.twelve99.net (62.115.139.173) 46.1ms
+ 9  nyk-bb2-link.ip.twelve99.net (80.91.254.91) 114.8ms
+**  [neglected] no reply packets received from TTL 10
+11  akamai-ic-372768.ip.twelve99-cust.net (62.115.50.15) 114.4ms
+12  ae2.r01.ewr01.icn.netarch.akamai.com (23.203.154.36) 115.9ms
+13  ae6.r21.iad04.icn.netarch.akamai.com (23.193.112.222) 122.7ms
+14  ae5.r21.iad02.mag.netarch.akamai.com (23.209.170.80) 123.6ms
+15  ae0.r23.iad02.icn.netarch.akamai.com (23.209.165.135) 121.0ms
+16  ae9.r02.ord01.icn.netarch.akamai.com (23.32.62.123) 132.6ms
+17  ae4.r02.sjc01.icn.netarch.akamai.com (23.32.63.27) 184.9ms
+18  ae2.r11.sjc01.ien.netarch.akamai.com (23.207.232.39) 183.7ms
+19  a23-203-158-51.deploy.static.akamaitechnologies.com (23.203.158.51) 184.4ms
+**  [neglected] no reply packets received from TTLs 20 through 22
+23  [target closed] 45-33-107-166.ip.linodeusercontent.com (45.33.107.166):443 184.8ms
+</code></pre>
+<p>С большей части нод не открывается, с некоторых открывается. Действительно, больше похоже на блокировку со стороны сайта.</p></td><td>2024-05-29T17:04:31.802Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Это блокировка TCP порта для адреса сайта на ТСПУ, где в отличии от DROP-блокировки, RST выполняется как MITM с модификацией ответа. DROP или RST – зависит от настроения the ТСПУ. При RST-блокировке порта под модификацию попадает SYN/ACK. На уровне приложения RST блокировка порта неотличима от закрытого порта.</p></td><td>2024-05-29T17:12:29.136Z</td></tr><tr><td>anon60595749</td><td><p>Хотите сказать, что ТСПУ дожидается SYN ACK от оригинального сервера, блокирует его, вытаскивает оттуда TTL и копирует его в свой поддельный TCP RST? Зачем так заморачиваться? Я не встречал такого поведения цензора. Просто TCP RST с каким-то фиксированным IP TTL - сколько угодно.</p></td><td>2024-05-29T17:15:51.395Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Спросите у разработчиков ТСПУ, зачем им это.<br>
+Не копирует, а модифицирует нагрузку ответа и флаги.</p></td><td>2024-05-29T17:17:36.838Z</td></tr><tr><td>anon60595749</td><td><p>Возможно вы и правы. Если подключаться на 45.33.107.166 и какой-нибудь левый TCP-порт, например 444, то приходит TCP RST с window = 0, как и положено как минимум в случае Linux kernel. Если же на 443, то TCP RST с window = 31856. То же самое значение window в TCP SYN+ACK, если подключаться из места, где этой блокировки нет.</p></td><td>2024-05-29T17:36:29.928Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Отправьте им багрепорт. Возможно.</p></td><td>2024-05-29T17:43:28.977Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Похоже это блокировка VPN сервиса GO2HTTPS<br>
+<code>itch.io</code> хостится по этому адресу только последние пару дней.</p></td><td>2024-05-29T20:13:01.016Z</td></tr><tr><td>anon443-667</td><td><p>Страница на личном субдомене одного из пользователей сайта в списке с 2022:<br>
+<a href="https://reestr.rublacklist.net/en/?q=itch.io" class="onebox" target="_blank" rel="noopener nofollow ugc">https://reestr.rublacklist.net/en/?q=itch.io</a></p></td><td>2024-05-30T07:49:15.739Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Похоже сайт снова переезжает. Проверьте доступность сайта по адресу 173.255.209.84, например через hosts файл.</p></td><td>2024-05-30T23:57:11.751Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="cypherpunks" data-post="12" data-topic="7907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/c/e19adc/48.png" class="avatar"> cypherpunks:</div>
+<blockquote>
+<p>173.255.209.84</p>
+</blockquote>
+</aside>
+<p>Не блокируется.</p></td><td>2024-05-31T04:04:13.362Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>А в Китае этот блокируют и первичный, в отличии от старого 173.255.250.29, но там уже ничего нет.<br>
+Это точно сервер из их инфраструктуры, но не замена или переезд, а вторичный или что там у них.</p></td><td>2024-05-31T17:34:08.855Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><aside class="quote no-group" data-username="cypherpunks" data-post="14" data-topic="7907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/c/e19adc/48.png" class="avatar"> cypherpunks:</div>
+<blockquote>
+<p>вторичный или что там у них</p>
+</blockquote>
+</aside>
+<p>Пришел админ и всех выгнал. Доступ к внутренним системам закрыт, теперь уже с их стороны. Таков <a href="https://ru.wikipedia.org/wiki/%D0%A1%D1%86%D0%B8%D0%BB%D0%BB%D0%B0_%D0%B8_%D0%A5%D0%B0%D1%80%D0%B8%D0%B1%D0%B4%D0%B0" rel="noopener nofollow ugc">путь</a> отцензурованных пользователей. Инфраструктура сайта состоит из первичного кэширующего обратного прокси (45.33.107.166), основного веб сервера (173.255.209.84), и ядра системы на 5 серверах (список адресов не прилагается)</p></td><td>2024-06-02T22:14:18.176Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,137 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>wireguard-over-shadowsocks</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>User2149(User2149)</td><td><p>Привет.<br>
+У меня есть VPS. На нем Wireguard. Поскольку WG начинают блокировать в России, я хочу обернуть его в shadowsocks.</p>
+<p>На VPS WG работает на порту 7788. Я настроил на локали и на VPS shadowsocks. На vps открыл порты для ss. C помощью ss пробросил порт wireguard-а на локаль. Пытаюсь подключиться к wireguard серверу по адресу localhost:7788, но нет соединения.</p>
+<p>Я попробовал так пробросить 22й порт - работает. Я попробовал на VPS и локали поднять udp клиент и сервер (просто sample python udp server) - работает. А WG не работает. Клиент отправляет handshake и все:</p>
+<pre><code class="lang-auto">(base) root@Laptop ~ % ss-tunnel -c ./wg-tun3.json -v
+**2023-08-26 21:46:40 INFO:** initializing ciphers... chacha20-ietf-poly1305
+**2023-08-26 21:46:40 INFO:** listening at 127.0.0.1:7788
+**2023-08-26 21:46:40 INFO:** UDP relay enabled
+**2023-08-26 21:46:40 ERROR:** setting ipv6 dscp failed: 22
+**2023-08-26 21:46:45 INFO:** [udp] server receive a packet
+**2023-08-26 21:46:45 INFO:** [7788] [udp] cache miss: 127.0.0.1:7788 &lt;-&gt; 127.0.0.1:58290
+**2023-08-26 21:46:45 ERROR:** setting ipv6 dscp failed: 22
+**2023-08-26 21:46:50 INFO:** [udp] server receive a packet
+**2023-08-26 21:46:50 INFO:** [7788] [udp] cache hit: xxx.xxx.org:7788 &lt;-&gt; 127.0.0.1:58290
+**2023-08-26 21:46:55 INFO:** [udp] server receive a packet
+**2023-08-26 21:46:55 INFO:** [7788] [udp] cache hit: xxx.xxx.org:7788 &lt;-&gt; 127.0.0.1:58290
+</code></pre>
+<p>SS клиент</p>
+<pre><code class="lang-auto">{
+  "server": "209.x.x.x",
+  "server_port": 14000,
+  "local_address": "127.0.0.1",
+  "local_port": 7788, 
+  "password": "xxx",
+  "timeout": 300,
+  "method": "chacha20-ietf-poly1305",
+  "mode": "tcp_and_udp",
+  "tunnel_address": "127.0.0.1:7788" 
+}
+</code></pre>
+<p>SS сервер</p>
+<pre><code class="lang-auto">{
+    "server": ["::0", "0.0.0.0"],
+    "server_port": 14000,
+    "password": "xxx",
+    "timeout": 300,
+    "method": "chacha20-ietf-poly1305",
+    "mode": "tcp_and_udp",
+    "nameserver":"1.1.1.1"
+}
+</code></pre>
+<p>Что может быть не так? Как это отлаживать?</p></td><td>2023-08-26T19:33:34.970Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="User2149" data-post="1" data-topic="5453">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/57b2e6/48.png" class="avatar"> User2149:</div>
+<blockquote>
+<p>Как это отлаживать?</p>
+</blockquote>
+</aside>
+<p>Посмотреть в tcpdump, что на localhost у VPS происходит</p></td><td>2023-08-27T10:20:45.464Z</td></tr><tr><td>User2149(User2149)</td><td><p>Спасибо<br>
+В процессе отладки изменил локальный порт SS с 7788 на 15000. Таким образом, у меня на VPS SS слушает порт 14000, а на локальном компе SS все транслирует на порт 15000.</p>
+<p>Попытался подключиться к локальному порту SS через telnet. Вижу следы в tcpdump на тачке и в vps.<br>
+Так же с помощью SS попытался прокинуть 22й порт vps-a в локальный порт 15000 и поюключиться к vps через ssh. Успешно. Вижу следы через tcpdump на VPS</p>
+<pre><code class="lang-auto">12:11:29.600217 IP broadband-5-xxx-xxx-xxx.ip.moscow.rt.ru.57909 &gt; vpsname.14000: Flags [.], ack 611, win 2042, options [nop,nop,TS val 2236076564 ecr 1400678557], length 0
+</code></pre>
+<p>А так же на локальном компе</p>
+<pre><code class="lang-auto">15:11:29.573642 IP 127.0.0.1.15000 &gt; 127.0.0.1.57908: Flags [P.], seq 1061:1309, ack 540, win 6304, options [nop,nop,TS val 1348944637 ecr 1579208498], length 248
+</code></pre>
+<p>Но не вижу сообщений в логе ss-tunel</p>
+<p><strong>Однако</strong> когда прошу WG клиент на компе подключиться к локальному порту 15000, вижу сообщение в tcpdump на локали:</p>
+<pre><code class="lang-auto">14:37:44.364939 IP localhost.64183 &gt; localhost.hydap: UDP, length 148
+</code></pre>
+<p>Вижу сообщение в ss-tunel клиенте на локали</p>
+<pre><code class="lang-auto"> 2023-08-27 14:37:44 INFO: [15000] [udp] cache hit: 127.0.0.1:7788 &lt;-&gt; 127.0.0.1:64183
+</code></pre>
+<p><strong>Но не вижу ничего в tcpdump на VPS</strong></p></td><td>2023-08-27T12:18:14.029Z</td></tr><tr><td>welazsc</td><td><p>На 14000 UDP порту внешнего интерфейса VPS есть входящий трафик?</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>tcpdump -i iface -n udp and port 14000</p>
+</details></td><td>2023-08-27T15:20:21.300Z</td></tr><tr><td>User2149(User2149)</td><td><p>Запустил tcpdump -i eth0 -n udp and port 14000<br>
+Когда я включаю локальный клиент WG, который смотрит на сервер localhost:15000 - на сервере трафика нет.<br>
+Когда я просто тестирую возможность отправлять сообщения через udp через python, на сервере и клиенте я вижу сообщения:</p>
+<p>Сервер:</p>
+<pre><code class="lang-auto">root@vps:~ tcpdump -i eth0 -n udp and port 14000
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+15:46:30.441273 IP client_ip.57786 &gt; 209.x.x.x.14000: UDP, length 71
+</code></pre>
+<p>Клиент:</p>
+<pre><code class="lang-auto">(base) root@laptop ~ % ss-tunnel -c ./wg-tun_7788.json -v
+ 2023-08-27 18:46:25 INFO: initializing ciphers... chacha20-ietf-poly1305
+ 2023-08-27 18:46:25 INFO: listening at 127.0.0.1:15000
+ 2023-08-27 18:46:25 INFO: UDP relay enabled
+ 2023-08-27 18:46:25 ERROR: setting ipv6 dscp failed: 22
+ 2023-08-27 18:46:30 INFO: [udp] server receive a packet
+ 2023-08-27 18:46:30 INFO: [17788] [udp] cache miss: server_ip:7788 &lt;-&gt; 127.0.0.1:53167
+</code></pre></td><td>2023-08-27T15:50:19.696Z</td></tr><tr><td>User2149(User2149)</td><td><p>Более того, я попробовал на raspberry поднять клиент SS и WG с теми же конфигами. То же самое.<br>
+Без SS wg работает и на ноуте и на rp.</p>
+<p>Если я выключаю SS и в WG указываю нормальный адрес - тогда на порту WG на сервере трафик есть и WG работает.</p></td><td>2023-08-27T15:53:35.182Z</td></tr><tr><td>User2149(User2149)</td><td><p>Возможно, я идентифицировал проблему.<br>
+Если я в конфиге WG на клиенте ограничиваю адреса, к которым можно подключаться через WG (например <strong>AllowedIPs</strong> = 8.8.8.8/32), все начинает работать.</p>
+<p>Таким образом, я подозреваю, что трафик SS тоже начинает идти через WG.</p>
+<p>update:<br>
+Ну да. С помощью <a href="https://www.procustodibus.com/blog/2021/03/wireguard-allowedips-calculator/" rel="noopener nofollow ugc">какого-то сайта</a> сделал себе allowed ip такой, который исключает только адрес моего vps - и все заработало.</p>
+<p>Буду рад идеям, как это разрулить. Делать через allowed ip - это дикий костыль.<br>
+Через postup в конфиге wireguard, наверное?</p></td><td>2023-08-27T16:15:44.982Z</td></tr><tr><td>welazsc</td><td><p><a href="https://kirill888.github.io/notes/wireguard-via-websocket/" rel="noopener nofollow ugc">Детали</a></p>
+<p>Можно <a href="https://web.archive.org/web/20220522072432/https://www.oilandfish.com/posts/wireguard-shadowsocks.html" rel="noopener nofollow ugc">вручную</a></p></td><td>2023-08-27T16:33:57.165Z</td></tr><tr><td>Xunlei</td><td><p>Да, добавив статический маршрут.</p></td><td>2023-08-27T18:04:15.888Z</td></tr><tr><td>User2149(User2149)</td><td><p>Спасибо. Это решение.</p></td><td>2023-08-27T18:04:24.896Z</td></tr><tr><td>lord(Savely Krasovsky)</td><td><p>В исключении через AllowedIPs нет ничего костыльного.</p></td><td>2023-09-14T11:55:35.034Z</td></tr>
+    </table>
+      </body>
+    </html>

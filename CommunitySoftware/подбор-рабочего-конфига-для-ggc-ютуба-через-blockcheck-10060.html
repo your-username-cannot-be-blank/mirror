@@ -1,0 +1,1899 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>TesterTi(TesterIt)</td><td><p><em><strong>Примечание</strong></em>: На время проверки нужно отключить  фаерволл / брандмауэр / антивирус.<br>
+Если до этого стоял goodbyedpi, то запустить от имени администратора <code>service_remove.cmd</code></p>
+<ol>
+<li>Скачать и распаковать архив с zapret (автор <em><strong>bolvan</strong></em>) <a href="https://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip">https://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip</a></li>
+</ol>
+<details>
+<summary>
+Примечание для системы x32 либо windows 7:</summary>
+<blockquote>
+<p>На x32 zapret не работает, а на windows 7 нужно скопировать файлы WinDivert.dll и WinDivert64.sys из папки x86_64\ с goodbyedpi и заменить в zapret-е в 2 местах: blockcheck\zapret\nfq\ и zapret-winws\</p>
+</blockquote>
+</details>
+<ol start="2">
+<li>Зайти в папку <code>blockcheck</code>. Сохранить туда 2 файла <a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/9YRLCVTya9pE2XBN30eYSrFICjG.bin">quic_initial_google_com.bin</a> и <a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/2CZwyhusyzATpIZvuBJ8OdSBGFv.bin">tls_clienthello_www_google_com.bin</a></li>
+<li>Перезаписать файл <code>blockcheck.cmd</code> таким: <a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/v214pkn5Q1lNCBNv0p8LtMc8q9N.cmd">blockcheck.cmd</a></li>
+<li>Запустить <code>blockcheck.cmd</code>. Он спросит:</li>
+</ol>
+<blockquote>
+<p>specify domain(s) to test. multiple domains are space separated.<br>
+domain(s) (default: <a href="http://rutracker.org">rutracker.org</a>) :</p>
+</blockquote>
+<ol start="5">
+<li>Запустить ролик на ютубе</li>
+</ol>
+<ul>
+<li>открыть лог браузера по F12 или CTRL+SHIFT+J, выбрать вкладку Сеть или Network,</li>
+<li>скопировать адрес GGC вида <code>rr*.....googlevideo.com</code><br>
+<a href="https://iimg.su/i/NeVCn"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/7eab676385d71e474b69d70a81a35e42345b506d.png" data-base62-sha1="i4zokdTLOUbA5zl4EZPtDy33mRD" width="500" height="160"></a></li>
+<li>вставить его в окне blockcheck (можно добавить несколько адресов через пробел),</li>
+<li>нажать Enter</li>
+</ul>
+<ol start="6">
+<li>Когда blockcheck спросит</li>
+</ol>
+<blockquote>
+<p>check https tls <strong>1.3</strong> (default : N) (Y/N) ?</p>
+</blockquote>
+<p>Нажать Y и Enter, на все другие вопросы жать Enter.<br>
+7. Дождаться выполнения скрипта - рядом с blockcheck.cmd появится blockcheck.log - в конце файла в разделе <code>* SUMMARY</code> будут рабочие конфиги для zapret-а вида  <code>winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1</code> (в качестве примера). Можно так же поискать в файле строчку <code>!!!!! AVAILABLE !!!!!</code>. Строка перед ней , начинающаяся с <code>winws</code> - это рабочий конфиг.<br>
+8. Перейти в папку <code>zapret-winws</code> и создать файл <code>test.cmd</code>. Открыть его в текстовом редакторе, прописать в него конфиг из п.7<br>
+(!) Если blockcheck в п.7 не выдал ни одного конфига , нужно запустить <code>_CMD_ADMIN.cmd</code> , вставить в окне <code>winws --wf-tcp=443 --wsize 1500</code>, нажать Enter, и перепроверить, начиная с п.4<br>
+Если при этом конфиг с <code>--wf-tcp=443</code> найдется, то добавить к этому конфигу в <code>test.cmd</code> в самый конец <code>--wsize=1500</code><br>
+9. Запустить <code>test.cmd</code>, проверить, разблокировался ли ютуб?<br>
+Если не работает, в браузере попробовать выставить параметры Kyber и QUIC на стандартные (в firefox в адресной строке перейти сюда <code>about:config</code>, в хромообразных сюда <code>chrome://flags</code> и искать по названию параметра, прим.: в firefox quic обозначается как <code>network.http.http3.enable</code>)<br>
+Если конфигов несколько, можно проверить каждый по очереди.<br>
+Если все ок - можно пользоваться zapret либо переделать конфиг zapret-а под goodbyedpi</p>
+<details>
+<summary>
+приблизительно так</summary>
+<p><code>--dpi-desync=split2</code> - это <code>-e2</code> либо <code>-e2 --native-frag </code><br>
+<code>--dpi-desync=disorder2</code> это <code>-e2 --reverse-frag</code><br>
+<code>--dpi-desync=split</code> или <code>--dpi-desync=fake,split2</code> - это <code>-e2</code> плюс какой-либо фейк <code>(--wrong-seq / --wrong-chksum  /  --fake-from-hex n / --fake-gen n</code>)<br>
+<code>--dpi-desync=disorder</code> или <code>--dpi-desync=fake,disorder2</code> - это <code>-e2 --reverse-frag</code> плюс какой-либо фейк <code>(--wrong-seq / --wrong-chksum  /  --fake-from-hex n / --fake-gen n</code>)<br>
+<code>--dpi-desync-ttl=n</code> это <code>--set-ttl n</code><br>
+<code>--dpi-desync-fooling=badseq</code> это <code>--wrong-seq</code><br>
+<code>--dpi-desync-fooling=badsum</code> это <code>--wrong-chksum</code><br>
+<code>--dpi-desync-fake-tls=n</code> это <code>--fake-from-hex n</code><br>
+<code>--dpi-desync-repeats=n</code> это <code>--fake-resend n</code></p>
+</details></td><td>2024-09-12T20:24:10.389Z</td></tr><tr><td>Hybridd</td><td><p>Добрый день, не вижу в 6ом пункте адрес GGC rr*<a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a> - ни в консоли его нет, ни в Network</p></td><td>2024-09-15T17:36:22.991Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p><a href="http://rr5---sn-jvhnu5g-c35d.googlevideo.com" rel="noopener nofollow ugc">rr5---sn-jvhnu5g-c35d.googlevideo.com</a> забирай</p></td><td>2024-09-15T17:42:39.661Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Какой браузер, хром? Найдите красный запрос <code>videoplayback?expire=</code><br>
+<a href="https://iimg.su/i/0yJAW" rel="noopener nofollow ugc"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/b65ccf2fede60aa0137b771f7fcfbb62cfb21538.png" data-base62-sha1="q1fK2SjFwJqi4xnjx89I1QBEyRa" width="500" height="250"></a><br>
+щелкните по нему и скопируйте адрес <a href="http://xn--rr---googlevideo-xdn0cxb7kqbb5gb2j.com" rel="noopener nofollow ugc">rr--чего-тотамgooglevideo.com</a></p></td><td>2024-09-15T17:56:10.117Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Щедро, но зачем ему ваш сервер? у него своих полно)</p></td><td>2024-09-15T17:56:49.493Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>А что “мой” типо не будет работать? И он не мой а гугловский.</p></td><td>2024-09-15T17:59:02.471Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Если вы с ним в соседних домах живете и с одним провайдером - то может и будет) А так - обычно у каждого провайдера свои кеширующие сервера гугла (GGC)</p></td><td>2024-09-15T18:01:06.669Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Понял. Но уже пробывал так скидывать. Работало у других. Или были случаи когда это не работает?</p></td><td>2024-09-15T18:03:32.047Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Может провайдер один, кто знает. А может, просто у большинства провайдеров ggc пробиваются похожей стратегией. Но бывают и особые случаи. Вы наверно не застали тут описание проблем со скайнетом)</p></td><td>2024-09-15T18:05:27.216Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Да в курсе. Но у меня подгружает GGC европейские поэтому должно работать</p></td><td>2024-09-15T18:10:39.293Z</td></tr><tr><td>Hybridd</td><td><p>Извините за нубство, я просто за это не шарю: не могу найти вкладку “заголовки” и вот эту панельку слева - “Название”</p></td><td>2024-09-15T18:10:39.709Z</td></tr><tr><td>Hybridd</td><td><p>А, хотя нет - увидел где название - просто у меня там нет videoplayback, вот это</p></td><td>2024-09-15T18:14:59.493Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p><a href="https://iimg.su/i/NeVCn" rel="noopener nofollow ugc"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/7eab676385d71e474b69d70a81a35e42345b506d.png" data-base62-sha1="i4zokdTLOUbA5zl4EZPtDy33mRD" width="500" height="160"></a></p></td><td>2024-09-15T18:15:10.285Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>В разных браузерах по-разному просто</p></td><td>2024-09-15T18:15:33.791Z</td></tr><tr><td>Hybridd</td><td><p>А, все, нашел все. Просто ролик должен быть запущен, а не на паузе</p></td><td>2024-09-15T18:16:45.447Z</td></tr><tr><td>Hybridd</td><td><p>Все сделал, как в шапке темы - ничего не получается, все тоже самое(((</p></td><td>2024-09-15T19:03:40.260Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Скинь сюда конфиг который ты запускаешь.</p></td><td>2024-09-15T19:07:47.034Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>–wf-tcp=443 --dpi-desync=split2<br>
+–wf-tcp=443 --dpi-desync=disorder2<br>
+один из них точно должен работать, либо ты делаешь что то не так.</p></td><td>2024-09-15T19:11:20.622Z</td></tr><tr><td>Hybridd</td><td><p>winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2<br>
+–dpi-desync-fake-tls= C:\Users\gewer\OneDrive\Документы\zapret-win-bundle-master\blockcheck\zapret\files\fake\tls_clienthello_www_google_com.bin</p></td><td>2024-09-15T19:11:46.507Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Там кажется пробел у вас лишний, попробуйте</p>
+<pre><code class="lang-auto">winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2 --dpi-desync-fake-tls=C:\Users\gewer\OneDrive\Документы\zapret-win-bundle-master\blockcheck\zapret\files\fake\tls_clienthello_www_google_com.bin
+</code></pre></td><td>2024-09-15T19:13:27.837Z</td></tr><tr><td>bolvan</td><td><p>Кроме пробела после fake-tls=<br>
+еще и с кодировкой вопрос. Русские буквы в пути.<br>
+Если запуск идет через батник, там должна быть кодировка 866.<br>
+Если через ярлык - там пишется как пишется</p></td><td>2024-09-18T05:54:45.640Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p><a class="mention" href="/u/bolvan">@bolvan</a> Скажите, пожалуйста, можно ли вернуть кнопку редактирования своей же темы, хотя б на время? Если нельзя, то у кого есть такие права?<br>
+А то ребята подсказали, что в моем гайде ошибка. Должно быть так:</p>
+<blockquote>
+<p>Скрипт спросит   <code> check https tls 1.3 (default : N) (Y/N) ? Y</code> - нажать Y и enter</p>
+</blockquote>
+<p>Отчего кстати проверка tls 1.3 по умолчанию отключена? Есть ведь причина?<br>
+Еще хотелось бы уточнить, нужно ли в блокчеке для ggc отключать проверку сертификатов  <code>do not verify server certificate (default : N) (Y/N) ?</code><br>
+Заранее спасибо!</p></td><td>2024-09-20T10:29:27.379Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="TesterTi" data-post="22" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>Скажите, пожалуйста, можно ли вернуть кнопку редактирования своей же темы, хотя б на время? Если нельзя, то у кого есть такие права?</p>
+</blockquote>
+</aside>
+<p>К ValdikSS - основателю форума.</p>
+<aside class="quote no-group" data-username="TesterTi" data-post="22" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>Отчего кстати проверка tls 1.3 по умолчанию отключена? Есть ведь причина?</p>
+</blockquote>
+</aside>
+<p>tls 1.2 - более тяжелый случай. Можно сказать гиря 50 кг.<br>
+tls 1.3 - гиря 20 кг<br>
+кто поднимет 50, с 20 точно справится<br>
+tls 1.3 имеет смысл искать только если нет ничего хорошего для tls 1.2<br>
+поднять 50 не осиливаем, так хотя бы 20. лучше, чем ничего</p>
+<aside class="quote no-group" data-username="TesterTi" data-post="22" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>Еще хотелось бы уточнить, нужно ли в блокчеке для ggc отключать проверку сертификатов</p>
+</blockquote>
+</aside>
+<p>а зачем ? если домен введен правильно, там будет норм сертификат. если плохой - это подмена. мегафон так делает.<br>
+если натравлено на <a href="https://googlevideo.com">https://googlevideo.com</a>, то это глупость большая</p></td><td>2024-09-20T12:43:03.730Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Большое спасибо за ответ! В принципе, исходя из него можно и не дергать ValdikSS<br>
+У меня как раз мегафон. На поиск стратегий подмена сертификата не влияет?</p>
+<aside class="quote no-group" data-username="bolvan" data-post="23" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>если натравлено на <a href="https://googlevideo.com" rel="noopener nofollow ugc">https://googlevideo.com</a>, то это глупость большая</p>
+</blockquote>
+</aside>
+<p>Не-не, такого мы не делаем)</p></td><td>2024-09-20T12:48:55.565Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><aside class="quote no-group quote-modified" data-username="bolvan" data-post="23" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<aside class="quote no-group" data-username="TesterTi" data-post="22" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>Скажите, пожалуйста, можно ли вернуть кнопку редактирования своей же темы, хотя б на время? Если нельзя, то у кого есть такие права?</p>
+</blockquote>
+</aside>
+<p>К ValdikSS - основателю форума.</p>
+</blockquote>
+</aside>
+<p><a class="mention" href="/u/valdikss">@ValdikSS</a> Помогите плс с правами на редактирование собственной темы</p></td><td>2024-09-20T22:15:11.836Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Спасибо!</p></td><td>2024-09-22T20:58:11.892Z</td></tr><tr><td>username1(name1)</td><td><p>А это нужно делать для каждого сервера вида <code>rr*.....googlevideo.com</code>? Их там довольно много. У меня пока всё работает, спрашиваю на всякий случай. Я до чтения вашей темы из интереса пробовал просто <a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a>, но блокчек не нашёл ни одной рабочей стратегии обхода.</p></td><td>2024-09-23T11:43:12.976Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Думаю, для парочки неработающих будет достаточно. У меня к примеру иногда не работают ggc провайдера, а иногда зарубежные, они отличаются и по названию и по диапазону ip. А для <a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a> просто нет смысла проверять, это же не конкретный сервер, скорее, что-то вроде балансера, если правильно понимаю.</p></td><td>2024-09-23T11:47:03.659Z</td></tr><tr><td>shiko(shiko)</td><td><p>А как можно эту информацию использовать для настройки goodbyedpi?</p></td><td>2024-09-23T14:55:26.707Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Какую информацию? Блокчек вам выдал какую-то стратегию?</p></td><td>2024-09-23T15:33:28.813Z</td></tr><tr><td>Dimx</td><td><p>Еще бы какую-то карту расшифровки для переконвертирования в GBDPI.<br>
+Ну вот получил я результаты</p>
+<pre><code class="lang-auto">--wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=4
+--wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2
+</code></pre>
+<p>Как это будет выглядеть для goodbyedpi?</p></td><td>2024-09-23T17:17:41.017Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><aside class="quote no-group" data-username="Dimx" data-post="31" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/2acd7d/48.png" class="avatar"> Dimx:</div>
+<blockquote>
+<pre><code class="lang-auto">--wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=4
+--wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2
+</code></pre>
+<p>Как это будет выглядеть для goodbyedpi?</p>
+</blockquote>
+</aside>
+<p><code>--wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=4</code><br>
+Наверно так.<br>
+<code>--wrong-seq --set-ttl 4 --fake-gen 1</code><br>
+И пробовать  --fake-gen увеличивать на единичку, пока не заработает.</p>
+<pre><code class="lang-auto">--wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2
+</code></pre>
+<p>По идее так:<br>
+<code>-e 2 --reverse-frag</code><br>
+А может и <code>-e 1 --reverse-frag</code><br>
+Подробное описание всех параметров запрета тут <a href="https://github.com/bol-van/zapret/blob/master/docs/readme.txt" rel="noopener nofollow ugc">zapret/docs/readme.txt at master · bol-van/zapret · GitHub</a>, а gdpi тут <a href="https://github.com/ValdikSS/GoodbyeDPI" class="inline-onebox" rel="noopener nofollow ugc">GitHub - ValdikSS/GoodbyeDPI: GoodbyeDPI — Deep Packet Inspection circumvention utility (for Windows)</a></p></td><td>2024-09-23T17:22:20.185Z</td></tr><tr><td>Dimx</td><td><p>Спасибо <code>--wrong-seq --set-ttl 4 --fake-gen 1</code> заработал как есть, до этого подобрал рабочую комбинацию <code>--wrong-chksum --fake-gen 13</code>.<br>
+Описание проектов я читал, но это никак не позволяет чайнику сложить 2+2, ибо аргументы проектов не унифицированы между собой. Там оно так, а тут эдак )</p></td><td>2024-09-23T17:47:58.217Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Ну да, это разные проекты)</p></td><td>2024-09-23T17:52:37.742Z</td></tr><tr><td>shiko(shiko)</td><td><p>Выдал, но она не работает даже с запретом <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p></td><td>2024-09-24T09:21:20.378Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А что выдал, для какого сервера и как выглядит ваша командная строка?</p></td><td>2024-09-24T10:38:10.741Z</td></tr><tr><td>Chivapches(Эщкерембус)</td><td><p>Здравствуйте, подобрал рабочие параметры на windows в cmd файле с ними ютуб работает:<br>
+<code>winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin</code>, Но мне нужно поставить их в роутер,</p>
+<pre><code class="lang-auto"># CHOOSE NFQWS DAEMON OPTIONS for DPI desync mode. run "nfq/nfqws --help" for option list
+DESYNC_MARK=0x40000000
+DESYNC_MARK_POSTNAT=0x20000000
+NFQWS_OPT_DESYNC="--dpi-desync=split2 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin"
+#NFQWS_OPT_DESYNC_HTTP=
+#NFQWS_OPT_DESYNC_HTTPS=
+#NFQWS_OPT_DESYNC_HTTP6=
+#NFQWS_OPT_DESYNC_HTTPS6=
+NFQWS_OPT_DESYNC_QUIC="--dpi-desync=split2 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin"
+#NFQWS_OPT_DESYNC_QUIC6=
+</code></pre>
+<p>С этими параметрами не работает, как их адаптировать под роутер? --wf-l3=ipv4 --wf-tcp=443 - нужно ли писать?</p></td><td>2024-09-24T10:38:18.938Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Вот про роутер честно скажу - не знаю, у меня hotspot на windows. Лучше спросить здесь <a href="https://ntc.party/t/zapret-%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5/726/891" class="inline-onebox">Zapret: обсуждение - #891 by anonymous168</a>, там автор запрета и много других знающих людей</p></td><td>2024-09-24T10:44:02.597Z</td></tr><tr><td>shiko(shiko)</td><td><p>Тестил для <code>rr4---sn-gvnuxaxjvh-3ggz.googlevideo.com</code>, нашёл что</p>
+<pre><code class="lang-auto">* SUMMARY
+ipv4 rr4---sn-gvnuxaxjvh-3ggz.googlevideo.com curl_test_http : working without bypass
+ipv4 rr4---sn-gvnuxaxjvh-3ggz.googlevideo.com curl_test_https_tls12 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1
+ipv4 rr4---sn-gvnuxaxjvh-3ggz.googlevideo.com curl_test_https_tls13 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2
+ipv4 rr4---sn-gvnuxaxjvh-3ggz.googlevideo.com curl_test_http3 : winws not working
+</code></pre>
+<p>Пробовал оба предложенных варианта, с выключением/включением кубера, с добавлением (и не добавлением) faketls как в шапке указано.</p>
+<p>До изменений 21-22 чисел норм работал goodbyedpi с параметром “1”<br>
+После - перепробовал многое, включая уникальный хекс и fake-gen от 1 до 30 и все встречные -e -f и пр. комбинации из оригинальной темы.</p></td><td>2024-09-24T11:06:21.588Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Странно конечно. А вот с таким фейком у вас не заработает? (сохраните в ту же папку, откуда запускаете запрет)<br>
+<a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/ssXmsU5Z75P2zZd6ZsKpU7lROiP.bin">tls_clienthello_translate_google_com.bin</a> (320 байтов)</p>
+<pre><code class="lang-auto">winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-fake-tls=tls_clienthello_translate_google_com.bin
+</code></pre>
+<p>По идее, у вас и gdpi с до неприличия простой настройкой должно работать)</p>
+<pre><code class="lang-auto">-e 2 --reverse-frag
+</code></pre>
+<p>Или так:</p>
+<pre><code class="lang-auto">--wrong-seq --set-ttl 1
+</code></pre></td><td>2024-09-24T11:31:13.052Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>Вообще не понимаю как это нечто заставить работать…</p>
+<p>Создал файл .cmd, прописал туда такое:<br>
+winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-tls=sni --dpi-desync-split-pos=3 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --hostlist=“%~dp0russia-blacklist-youtube.txt”<br>
+Почему-то открывает сразу 2 окна (скриншот). Ютуб при этом выдаёт пустую белую страницу вообще без чего-либо.</p>
+<p>Без --hostlist=“%~dp0russia-blacklist-youtube.txt” тоже пробовал, то же самое.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/736e23760cc93bc32fb0b9864b6befe621abcfae.png" data-download-href="https://ntc.party/uploads/default/736e23760cc93bc32fb0b9864b6befe621abcfae" title="screenshot-01"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/736e23760cc93bc32fb0b9864b6befe621abcfae.png" alt="screenshot-01" data-base62-sha1="gt8SxVcuPyjRocIHuVygtpU2goe" width="690" height="443" data-dominant-color="242424"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">screenshot-01</span><span class="informations">974×626 10.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-26T01:23:04.493Z</td></tr><tr><td>Ori</td><td><p>Вместо winws попробуйте прописать <code>start "Zapret" /min "winws.exe"</code> и дальше параметры. По идее первое окно должно просто закрываться после запуска winws.<br>
+Ещё можно попробовать от админа это делать, чтобы привилегий хватало прямо в окне консоли запустить.</p>
+<p>Для ютуба, у большинства, работает стратегия --dpi-desync=split2 --dpi-desync-split-seqovl=1. Остальное можете попробовать из неё выкинуть.</p></td><td>2024-09-26T01:38:01.947Z</td></tr><tr><td>PirateSkull(unknown )</td><td><aside class="quote no-group quote-modified" data-username="RandomNamelessUser" data-post="41" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/randomnamelessuser/48/2954_2.png" class="avatar"> RandomNamelessUser:</div>
+<blockquote>
+<p>–dpi-desync-split-tls=sni --dpi-desync-split-pos=3</p>
+</blockquote>
+</aside>
+<p>Убери это зачем такой огород городить. И вообще что тебе блок чек выдает? По <a href="http://blablabla.googlevideo.com" rel="noopener nofollow ugc">blablabla.googlevideo.com</a>?</p></td><td>2024-09-26T01:45:06.986Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>Так вообще не запускается.<br>
+start “zapret” /min “winws.exe” --dpi-desync=split2 --dpi-desync-split-seqovl=1<br>
+Пытается что-то открыть и мгновенно закрывает окно.</p>
+<p>Блокчек мне, кстати, вот такое выдавал:</p>
+<p>ipv4 <a href="http://rr1---sn-4g5lznes.googlevideo.com" rel="noopener nofollow ugc">rr1---sn-4g5lznes.googlevideo.com</a> curl_test_http : working without bypass<br>
+ipv4 <a href="http://rr1---sn-4g5lznes.googlevideo.com" rel="noopener nofollow ugc">rr1---sn-4g5lznes.googlevideo.com</a> curl_test_https_tls12 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2<br>
+ipv4 <a href="http://rr1---sn-4g5lznes.googlevideo.com" rel="noopener nofollow ugc">rr1---sn-4g5lznes.googlevideo.com</a> curl_test_https_tls13 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-tls=sni<br>
+ipv4 <a href="http://rr1---sn-4g5lznes.googlevideo.com" rel="noopener nofollow ugc">rr1---sn-4g5lznes.googlevideo.com</a> curl_test_http3 : winws not working</p>
+<p>ipv4 <a href="http://rr3---sn-q4fl6nd7.googlevideo.com" rel="noopener nofollow ugc">rr3---sn-q4fl6nd7.googlevideo.com</a> curl_test_http : working without bypass<br>
+ipv4 <a href="http://rr3---sn-q4fl6nd7.googlevideo.com" rel="noopener nofollow ugc">rr3---sn-q4fl6nd7.googlevideo.com</a> curl_test_https_tls12 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2<br>
+ipv4 <a href="http://rr3---sn-q4fl6nd7.googlevideo.com" rel="noopener nofollow ugc">rr3---sn-q4fl6nd7.googlevideo.com</a> curl_test_https_tls13 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=3<br>
+ipv4 <a href="http://rr3---sn-q4fl6nd7.googlevideo.com" rel="noopener nofollow ugc">rr3---sn-q4fl6nd7.googlevideo.com</a> curl_test_http3 : winws not working</p>
+<p>ipv4 <a href="http://rr8---sn-n8v7kn7z.googlevideo.com" rel="noopener nofollow ugc">rr8---sn-n8v7kn7z.googlevideo.com</a> curl_test_http : working without bypass<br>
+ipv4 <a href="http://rr8---sn-n8v7kn7z.googlevideo.com" rel="noopener nofollow ugc">rr8---sn-n8v7kn7z.googlevideo.com</a> curl_test_https_tls12 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2<br>
+ipv4 <a href="http://rr8---sn-n8v7kn7z.googlevideo.com" rel="noopener nofollow ugc">rr8---sn-n8v7kn7z.googlevideo.com</a> curl_test_https_tls13 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2<br>
+ipv4 <a href="http://rr8---sn-n8v7kn7z.googlevideo.com" rel="noopener nofollow ugc">rr8---sn-n8v7kn7z.googlevideo.com</a> curl_test_http3 : winws not working</p></td><td>2024-09-26T01:45:54.389Z</td></tr><tr><td>Ori</td><td><p>Я имел в виду убрать лишние фильтры дурения, а не вообще <em>всё</em>.</p>
+<pre><code class="lang-auto">--wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1
+</code></pre></td><td>2024-09-26T01:47:13.854Z</td></tr><tr><td>PirateSkull(unknown )</td><td><aside class="quote no-group" data-username="RandomNamelessUser" data-post="44" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/randomnamelessuser/48/2954_2.png" class="avatar"> RandomNamelessUser:</div>
+<blockquote>
+<p>winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-tls=sni</p>
+</blockquote>
+</aside>
+<p>Попробуй это</p>
+<blockquote>
+<p>start “zapret: http,https” /min “%~dp0winws.exe” --wf-l3=ipv4 --wf-tcp=80,443 --dpi-desync=split2<br>
+Полная строка</p>
+</blockquote></td><td>2024-09-26T01:49:29.846Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Создай файл my config.cmd и туда эту строку полностью, потом редактируй по желанию.</p>
+<pre><code class="lang-auto">start “zapret: http,https” /min “%~dp0winws.exe” --wf-l3=ipv4 --wf-tcp=80,443 --dpi-desync=split2
+</code></pre></td><td>2024-09-26T02:13:01.172Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>А подряд два отдельных --hostlist в запрете будут работать? Чтобы и другие сайты разблокировать, и при этом отдельно хранить ютубовские домены и всё остальное.<br>
+Вроде такого:<br>
+–hostlist=“%~dp0russia-blacklist.txt” --hostlist=“%~dp0russia-youtube.txt”</p>
+<p>Или тут применится только один из них, и лучше всё в один файл запихать?</p></td><td>2024-09-26T02:25:20.202Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Тут не подскажу тебе в ветку <a href="https://ntc.party/t/zapret-%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5/726/916">zapret обсуждение </a></p></td><td>2024-09-26T02:34:25.563Z</td></tr><tr><td>Ori</td><td><p>Раньше точно работало. Скорее всего, работает и сейчас. Засунь 2 хостлиста и проверь.</p></td><td>2024-09-26T02:36:49.446Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Проверьте плс по очереди все эти 6 стратегий из окна _CMD_ADMIN.cmd (пока без хостлиста, нужно просто найти рабочую, файл tls_clienthello_www_google_com.bin должен лежать в той же папке)</p>
+<pre><code class="lang-auto">start "zapret" /min "winws.exe" --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-fake-tls="tls_clienthello_www_google_com.bin"
+</code></pre>
+<pre><code class="lang-auto">start "zapret" /min "winws.exe" --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls="tls_clienthello_www_google_com.bin"
+</code></pre>
+<pre><code class="lang-auto">start "zapret" /min "winws.exe" --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-tls=sni --dpi-desync-fake-tls="tls_clienthello_www_google_com.bin"
+</code></pre>
+<pre><code class="lang-auto">start "zapret" /min "winws.exe" --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --dpi-desync-split-tls=sni --dpi-desync-fake-tls="tls_clienthello_www_google_com.bin"
+</code></pre>
+<pre><code class="lang-auto">start "zapret" /min "winws.exe" --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=3 --dpi-desync-fake-tls="tls_clienthello_www_google_com.bin"
+</code></pre>
+<pre><code class="lang-auto">start "zapret" /min "winws.exe" --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-split-pos=3 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls="tls_clienthello_www_google_com.bin"
+</code></pre></td><td>2024-09-26T10:24:42.236Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>А есть какое-то отличие в подборе конфига не для ютуба?<br>
+Для <a href="http://twimg.com" rel="noopener nofollow ugc">twimg.com</a>, например, блокчек вообще ничего не находит.</p></td><td>2024-09-26T15:15:55.447Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А он жив вообще? Для него нет никаких ip <a href="https://dnschecker.org/#A/twimg.com" class="inline-onebox">DNS Checker - DNS Check Propagation Tool</a></p></td><td>2024-09-26T15:20:12.977Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>Без него <a href="http://x.com" rel="noopener nofollow ugc">x.com</a> почти не работает, дальше стартовой заглушки с X не уходит, упорно пытаясь подключиться к <a href="http://abs.twimg.com" rel="noopener nofollow ugc">abs.twimg.com</a>.<br>
+С дешёвым 100-рублевым прокси сразу начинает работать.</p></td><td>2024-09-26T15:23:53.280Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Ааа, так и нужно искать конфиг для поддомена <a href="http://abs.twimg.com">abs.twimg.com</a>, не для <a href="http://twimg.com">twimg.com</a>. У последнего даже ip нет)</p></td><td>2024-09-26T15:38:23.421Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="RandomNamelessUser" data-post="54" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/randomnamelessuser/48/2954_2.png" class="avatar"> RandomNamelessUser:</div>
+<blockquote>
+<p>Без него <a href="http://x.com" rel="noopener nofollow ugc">x.com</a> почти не работает, дальше стартовой заглушки с X не уходит, упорно пытаясь подключиться к <a href="http://abs.twimg.com" rel="noopener nofollow ugc">abs.twimg.com</a>.</p>
+</blockquote>
+</aside>
+<p>Добавьте перенаправления в etc/hosts. Сто раз уже об этом говорилось. С кривыми стратегиями, из разряда --fake-gen 29, ломается tls 1.2.<br>
+Ну и, как выше написали, надо тестить не <code>twimg.com</code>, а его поддомены.</p>
+<pre><code class="lang-auto">192.229.233.50 pbs.twimg.com
+152.199.21.141 abs.twimg.com
+192.229.220.133 video.twimg.com
+</code></pre></td><td>2024-09-26T15:44:19.904Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Мне кстати блокчек такое выдал (без доп фейков)</p>
+<blockquote>
+<p>ipv4 <a href="http://abs.twimg.com">abs.twimg.com</a> curl_test_http : winws --wf-l3=ipv4 --wf-tcp=80 --hostcase<br>
+ipv4 <a href="http://abs.twimg.com">abs.twimg.com</a> curl_test_https_tls12 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2<br>
+ipv4 <a href="http://abs.twimg.com">abs.twimg.com</a> curl_test_https_tls13 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2<br>
+ipv4 <a href="http://abs.twimg.com">abs.twimg.com</a> curl_test_http3 : winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=fake</p>
+</blockquote>
+<pre><code class="lang-auto">start "zapret: http,https,quic" /min "%~dp0winws.exe" --wf-l3=ipv4 --wf-tcp=80,443 --wf-udp=443 --filter-udp=443 --dpi-desync=fake --new --filter-tcp=80 --hostcase --new --filter-tcp=443 --dpi-desync=split2
+</code></pre>
+<p>И работает с doh без правки hosts. Но эти адреса не грузятся , им другой конфиг подавай</p>
+<pre><code class="lang-auto">abs-0.twimg.com
+pbs.twimg.com
+video.twimg.com
+</code></pre></td><td>2024-09-26T16:17:19.339Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>Попробовал прописать это в hosts, результата никакого.<br>
+Хром вообще вот такое выдаёт: net::ERR_CERT_COMMON_NAME_INVALID.</p>
+<p>И что блокчек напроверял:<br>
+ipv4 <a href="http://abs.twimg.com" rel="noopener nofollow ugc">abs.twimg.com</a> curl_test_http : winws not working<br>
+ipv4 <a href="http://abs.twimg.com" rel="noopener nofollow ugc">abs.twimg.com</a> curl_test_https_tls12 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=6<br>
+ipv4 <a href="http://abs.twimg.com" rel="noopener nofollow ugc">abs.twimg.com</a> curl_test_https_tls13 : winws not working<br>
+ipv4 <a href="http://abs.twimg.com" rel="noopener nofollow ugc">abs.twimg.com</a> curl_test_http3 : winws not working</p></td><td>2024-09-26T16:25:28.694Z</td></tr><tr><td>rewhat</td><td><p>А так?</p>
+<p>209.237.192.139 <a href="http://twitter.com" rel="noopener nofollow ugc">twitter.com</a><br>
+209.237.192.139 <a href="http://www.twitter.com" rel="noopener nofollow ugc">www.twitter.com</a><br>
+209.237.192.139 <a href="http://x.com" rel="noopener nofollow ugc">x.com</a><br>
+209.237.192.139 <a href="http://www.x.com" rel="noopener nofollow ugc">www.x.com</a><br>
+104.244.42.66 <a href="http://api.x.com" rel="noopener nofollow ugc">api.x.com</a><br>
+152.199.24.185 <a href="http://abs.twimg.com" rel="noopener nofollow ugc">abs.twimg.com</a><br>
+192.229.233.50 <a href="http://pbs.twimg.com" rel="noopener nofollow ugc">pbs.twimg.com</a><br>
+192.229.220.133 <a href="http://video.twimg.com" rel="noopener nofollow ugc">video.twimg.com</a></p></td><td>2024-09-26T16:26:52.633Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>А так работает, спасибо.<br>
+Но куда эти редиректы ведут? Главная страница грузилась в сумме 17+ секунд.</p></td><td>2024-09-26T16:30:39.108Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><aside class="quote no-group" data-username="rewhat" data-post="59" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/rewhat/48/13085_2.png" class="avatar"> rewhat:</div>
+<blockquote>
+<p>209.237.192.139 <a href="http://twitter.com">twitter.com</a><br>
+209.237.192.139 <a href="http://www.twitter.com">www.twitter.com</a><br>
+209.237.192.139 <a href="http://x.com">x.com</a><br>
+209.237.192.139 <a href="http://www.x.com">www.x.com</a><br>
+104.244.42.66 <a href="http://api.x.com">api.x.com</a><br>
+152.199.24.185 <a href="http://abs.twimg.com">abs.twimg.com</a><br>
+192.229.233.50 <a href="http://pbs.twimg.com">pbs.twimg.com</a><br>
+192.229.220.133 <a href="http://video.twimg.com">video.twimg.com</a></p>
+</blockquote>
+</aside>
+<p>Можно красивше причесать)</p>
+<pre><code class="lang-auto">209.237.192.139 twitter.com www.twitter.com x.com www.x.com
+104.244.42.66 api.x.com
+152.199.24.185 abs.twimg.com
+192.229.233.50 pbs.twimg.com
+192.229.220.133 video.twimg.com
+</code></pre></td><td>2024-09-26T16:30:55.861Z</td></tr><tr><td>rewhat</td><td><p>Несколько дней назад очень быстро работало, щас хз что произошло, у меня тоже лаг дикий. Вот инструкцию кто-то публиковал как это всё искать:</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>Например X:</p>
+<ol>
+<li>Заходим на <a href="https://dns.google/" rel="noopener nofollow ugc">https://dns.google/</a></li>
+<li>Нам нужны IP-адреса разных стран. Используем DNS lookup через Google на популярные домены за рубежом: <a href="http://bbc.co.uk" rel="noopener nofollow ugc">bbc.co.uk</a>, <a href="http://quora.com" rel="noopener nofollow ugc">quora.com</a>, <a href="http://naver.com" rel="noopener nofollow ugc">naver.com</a>, <a href="http://foxnews.com" rel="noopener nofollow ugc">foxnews.com</a>, rakuten.co.jp, <a href="http://verizon.com" rel="noopener nofollow ugc">verizon.com</a>, и т.п.</li>
+<li>Выполняем lookup <a href="http://x.com" rel="noopener nofollow ugc">x.com</a>, используя IP-адреса этих сайтов как EDNS Client Subnet, повторяем для каждого домена/адреса</li>
+<li>Полученные IP-адреса, при запущенном GoodbyeDPI, проверяем на работоспособность: curl -v --connect-to ::ip-адрес-x-com-здесь <a href="https://x.com/" rel="noopener nofollow ugc">https://x.com</a><br>
+Если сайт ответил по этому IP-адресу — добавляем его в hosts</li>
+</ol>
+<p>Альтернативный вариант:</p>
+<ol>
+<li>Скачиваем nmap</li>
+<li>Идём на <a href="http://bgp.he.net/" rel="noopener nofollow ugc">bgp.he.net</a> за диапазонами Twitter AS: AS13414 Twitter Inc. - <a href="http://bgp.he.net/" rel="noopener nofollow ugc">bgp.he.net</a></li>
+<li>Запускаем сканирование какого-то смежного диапазона, в надежде, что он тоже настроен на приём входящих подключений: nmap -n -T5 -p443 --open 104.244.41.0/24</li>
+<li>Вручную проверям работоспособность IP-адресов: curl -v --connect-to ::ip-адрес-x-com-здесь <a href="https://x.com/" rel="noopener nofollow ugc">https://x.com</a></li>
+</ol>
+</details></td><td>2024-09-26T16:33:21.397Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А через безопасный dns у вас не открывается? Все ip заблочены что ли?</p></td><td>2024-09-26T16:37:53.736Z</td></tr><tr><td>rewhat</td><td><p>Да я в Твиттере вообще не сижу, другие ip не проверял. А безопасный dns это типа DoH?</p></td><td>2024-09-26T16:40:05.844Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Ну да, он самый.</p></td><td>2024-09-26T16:41:30.692Z</td></tr><tr><td>rewhat</td><td><p>DoH включен, сайт открывается, но дикий лаг до twimg. Может другие айпишники и быстрее будут, не знаю.</p></td><td>2024-09-26T16:42:52.658Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>3-ий пункт не понял</p>
+<blockquote>
+<p>Выполняем lookup <a href="http://x.com" rel="noopener nofollow ugc">x.com</a>, используя IP-адреса этих сайтов как EDNS Client Subnet, повторяем для каждого домена/адреса</p>
+</blockquote>
+<p>Если попроще, это что конкретно сделать нужно?</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/26309ac8e3e6087c2431a4f201d9c9d808b93d00.png" data-download-href="https://ntc.party/uploads/default/26309ac8e3e6087c2431a4f201d9c9d808b93d00" title="screenshot-01"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/26309ac8e3e6087c2431a4f201d9c9d808b93d00_2_690x214.png" alt="screenshot-01" data-base62-sha1="5rQhhKH2UI5dkiwBP4HKMAVUOkg" width="690" height="214" srcset="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/26309ac8e3e6087c2431a4f201d9c9d808b93d00_2_690x214.png, подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/26309ac8e3e6087c2431a4f201d9c9d808b93d00_2_1035x321.png 1.5x, подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/26309ac8e3e6087c2431a4f201d9c9d808b93d00.png 2x" data-dominant-color="F2F3F5"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">screenshot-01</span><span class="informations">1179×366 28.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-26T16:43:24.715Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А вы попробуйте сначала doh включить , любой из этих</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><a href="https://common.dot.dns.yandex.net/dns-query">https://common.dot.dns.yandex.net/dns-query</a><br>
+<a href="https://dns.comss.one/dns-query">https://dns.comss.one/dns-query</a><br>
+<a href="https://dns.adguard-dns.com/dns-query">https://dns.adguard-dns.com/dns-query</a><br>
+<a href="https://dns.cloudflare.com/dns-query">https://dns.cloudflare.com/dns-query</a><br>
+<a href="https://doh.opendns.com/dns-query">https://doh.opendns.com/dns-query</a></p>
+</details>
+<p>Это же проще и быстрее гораздо</p></td><td>2024-09-26T16:48:04.648Z</td></tr><tr><td>rewhat</td><td><p>Например хотим проверить abs.twimg. Идем на <a href="https://dns.google/" rel="noopener nofollow ugc">https://dns.google/</a>, и вводим условный <a href="http://bbc.co.uk" rel="noopener nofollow ugc">bbc.co.uk</a>. Получаем айпишник “151.101.128.81”. Там же вводим этот айпишник в EDNS Client Subnet, а как DNS Name вводим “<a href="http://abs.twimg.com" rel="noopener nofollow ugc">abs.twimg.com</a>”, нажимаем Resolve. Получаем айпишник “199.232.40.159”.</p>
+<p>Потом вводим curl -v --connect-to ::199.232.40.159 <a href="https://abs.twimg.com" rel="noopener nofollow ugc">https://abs.twimg.com</a></p>
+<p>Ну типа того, как я понял.</p>
+<p>Но я пользовался альтернативным варинатом. В <a href="http://bgp.he.net" rel="noopener nofollow ugc">bgp.he.net</a> вбивал этот айпишник от twimg (199.232.40.159), сайт выдавал диапазон типа “199.232.0.0/16”, ну и дальше по той инструкции.</p></td><td>2024-09-26T16:50:01.091Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>А если а меня прямо в настройках роутера прописаны клаудфлэерские 1.1.1.1 и 1.0.0.1, это не то же самое?</p></td><td>2024-09-26T16:51:43.131Z</td></tr><tr><td>rewhat</td><td><p>это то самое, но надо еще doh включить, если он не включен</p></td><td>2024-09-26T16:52:19.120Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>И в огнелисе и в хроме DoH по умолчанию было включено на что-то дефолтное. А раз в роутере прописаны адреса клаудфлэйра, это самое “дефолтное” не эти значения должно использовать?</p></td><td>2024-09-26T16:55:23.941Z</td></tr><tr><td>rewhat</td><td><p>Зайдите на <a href="https://one.one.one.one/help/" class="inline-onebox" rel="noopener nofollow ugc">1.1.1.1 — One of the Internet’s Fastest, Privacy-First DNS Resolver</a></p></td><td>2024-09-26T16:56:00.269Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><blockquote>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>Connected to 1.1.1.1</th>
+<th>Yes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Using DNS over HTTPS (DoH)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Using DNS over TLS (DoT)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Using DNS over WARP</td>
+<td>No</td>
+</tr>
+<tr>
+<td>AS Name</td>
+<td>Cloudflare</td>
+</tr>
+<tr>
+<td>AS Number</td>
+<td>13335</td>
+</tr>
+<tr>
+<td>Cloudflare Data Center</td>
+<td>DME</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote></td><td>2024-09-26T16:56:38.524Z</td></tr><tr><td>rewhat</td><td><p>Ну вот, DoH включен.</p></td><td>2024-09-26T16:56:52.765Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>Doh, как выяснилось, включён, но тогда что должно быть “проще и быстрее”?</p></td><td>2024-09-26T16:58:51.843Z</td></tr><tr><td>uwu(uwu)</td><td><p>в firefox в about:config какое значение стоит в network.trr.mode ?</p></td><td>2024-09-26T16:59:29.120Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><blockquote>
+<p>network.trr.mode	0</p>
+</blockquote></td><td>2024-09-26T17:01:31.224Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Не все doh выдают незабаненные ip. Проще включить в браузере и перебрать разные doh. Ну мне точно проще, а как вам не знаю</p></td><td>2024-09-26T17:02:42.679Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Это настраивается здесь about:preferences#privacy<br>
+Выбрать макс защиту и другой url</p></td><td>2024-09-26T17:04:52.636Z</td></tr><tr><td>uwu(uwu)</td><td><p>ето странно, ну ладно возможно так дефолтная настройка работает, лишь бы в about:networking#dns trr было true</p></td><td>2024-09-26T17:05:30.163Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/32da64feb606f90f7eff9e9f4bc20305fb82aec2.png" data-download-href="https://ntc.party/uploads/default/32da64feb606f90f7eff9e9f4bc20305fb82aec2" title="screenshot-01"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/32da64feb606f90f7eff9e9f4bc20305fb82aec2.png" alt="screenshot-01" data-base62-sha1="7fRMsuucw9z5yd5dHwoH2LHQrtw" width="690" height="304" data-dominant-color="FAFAFA"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">screenshot-01</span><span class="informations">1596×704 17.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-26T17:08:00.987Z</td></tr><tr><td>RandomNamelessUser(Random Nameless User)</td><td><p>А в запрете как-то можно указать редирект на нужного поставщика ДНС, на подобии такого в GDPI?</p>
+<blockquote>
+<p>–dns-addr 77.88.8.8 --dns-port 1253 --dnsv6-addr 2a02:6b8::feed:0ff --dnsv6-port 1253</p>
+</blockquote>
+<p>Чтобы не все запросы через них пускать, если вдруг медленными будут.</p></td><td>2024-09-26T17:14:32.218Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Честно говоря не знаю, надо смотреть в ридми. Если что  у меня твиттер работает со всеми картинками с doh <a href="https://dns.cloudflare.com/dns-query">https://dns.cloudflare.com/dns-query</a> и preset_russia.cmd . Довольно шустро. Причем это же более универсально, чем ip к каждому адресу подбирать. Тут и рутрекер без обхода открывается, и нельзяграмм и многое др</p></td><td>2024-09-26T17:18:23.643Z</td></tr><tr><td>Ori</td><td><p>Альтернативные айпишники от гугл.днс можно еще через командную строку искать. Тут пишем какой-нибудь рандомный айпи:</p>
+<pre><code class="lang-auto">curl "https://dns.google/resolve?name=x.com&amp;type=A&amp;edns_client_subnet=150.150.100.100"
+</code></pre>
+<p>В зависимости от скормленного айпи ответ может быть разным.</p>
+<p>В теории можно написать скрипт. Пингуем гугл другой страны (например, google.nl). Берем айпи. Подставляем его в ссылку выше. Парсим ответ. Возможно, получаем альтернативный айпи для искомого сайта (если он есть).<br>
+Может быть позже напишу.</p></td><td>2024-09-26T17:21:32.806Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="Ori" data-post="85" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Может быть позже напишу.</p>
+</blockquote>
+</aside>
+<p>Написал.</p>
+<p>Скрипт для поиска альтернативных айпи для любого сайта. Использует гугловский днс, отправляя запрос с кастомным сабнетом. Сабнет получается из списка заранее прописанных айпишников, либо пингуя заранее прописанные домены. Список доменов надо подправить, чтобы там были сайты из разных стран.</p>
+<p>Принимает переменные среды: verbose (с любым значением) для наглядного отображения работы; и proxy в стандартном формате (типа <code>proxy=socks5://127.0.0.1:9150</code>).<br>
+Прокси добавил, т.к. боюсь, что сотню днс запросов за 10 секунд днс гугла может понять неправильно.</p>
+<p>Скрипт текстом:</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">::by Ori
+@echo off
+chcp 65001
+title IP finder
+cls
+
+::Setting up proxy or taking it from env if needed
+rem set "proxy=socks5h://127.0.0.1:8086"
+if defined proxy (
+ set "proxy= --proxy %proxy%"
+)
+
+::Enabling verbose mode or taking it from env; any value is accepted
+if not defined verbose (
+ set verbose=
+)
+
+SetLocal EnableDelayedExpansion
+
+::Lists of random domains from all around
+rem set "domainsList=google.us google.nl google.pl"
+rem set "ipList=50.50.50.50 100.100.100.100 150.150.150.150"
+
+::Forming IP list artificially
+for /L %%i in (10,10,250) do (
+ for /L %%j in (10,20,250) do (
+  set "ipList=!ipList!%%i.%%j.128.128 "
+ )
+)
+set "ipList=!ipList:~0,-1!"
+
+::Converting lists into arrays
+set domainsArrayLength=-1
+for %%i in (%domainsList%) do (
+ set /A domainsArrayLength+=1
+ set domainsArray[!domainsArrayLength!]=%%i
+)
+set domainsEndsHere=!domainsArrayLength!
+for %%i in (%ipList%) do (
+ set /A domainsArrayLength+=1
+ set domainsArray[!domainsArrayLength!]=%%i
+)
+
+:INPUTURL
+cls
+
+if defined verbose (echo Using in verbose mode)
+if defined proxy (echo Using with proxy)
+
+echo.
+
+::User input
+set /P site="Input URL to check: "
+if "%site%"=="" (goto INPUTURL)
+echo.
+
+if not defined verbose (
+ echo It may take some time...
+ echo.
+)
+
+::Main routine
+set successes=-1
+for /L %%i in (0,1,%domainsArrayLength%) do (
+ ::Pinging site to find an IP for subnet and parsing result
+ title Progress: %%i out of %domainsArrayLength%
+ set "subnetIP="
+ if %%i LEQ !domainsEndsHere! (
+  for /F "tokens=1,3" %%j in ('ping -n 1 -w 2000 !domainsArray[%%i]!') do (
+   if "%%j"=="Reply" (
+    set "subnetIP=%%k"
+    set subnetIP=!subnetIP:~0,-1!
+   )
+  )
+ ) else (
+  set "subnetIP=!domainsArray[%%i]!"
+ )
+ 
+ if defined subnetIP (
+  ::Resolving DNS of a user-defined site while using custom subnet
+  if defined verbose (echo Resolving DNS with subnet !subnetIP! ^(!domainsArray[%%i]!^))
+  set response=
+  for /F "tokens=4* delims=[]" %%j in ('curl!proxy! -skm 1 "https://dns.google/resolve?name=%site%&amp;type=A&amp;edns_client_subnet=!subnetIP!"') do (set response=%%j)
+  ::Some other DNS resolvers? This one kinda slow, but gives additional results
+  for /F "tokens=4* delims=[]" %%j in ('curl!proxy! -skm 1 "https://doh.li/dns-query?name=%site%&amp;type=A&amp;edns_client_subnet=!subnetIP!"') do (set response=!response!,DOHLI,%%j)
+  if "!successes!"=="-1" (
+   for /F "tokens=4* delims=[]" %%j in ('curl!proxy! -skm 1 -H "accept: application/dns-json" "https://1.1.1.1/dns-query?name=%site%&amp;type=A"') do (set response=!response!,CLOUDFLARE,%%j)
+   for /F "tokens=4* delims=[]" %%j in ('curl!proxy! -skm 1 -H "accept: application/dns-json" "https://dns.nextdns.io/dns-query?name=%site%&amp;type=A"') do (set response=!response!,NEXTDNS,%%j)
+   for /F "tokens=4* delims=[]" %%j in ('curl!proxy! -skm 1 -H "accept: application/dns-json" "https://dns.adguard-dns.com/resolve?name=%site%&amp;type=A"') do (set response=!response!,ADGUARD,%%j)
+  )
+  if defined response (
+   if defined verbose (echo Response from DNS: !response!)
+   set response=!response:{= !
+   set response=!response:}= !
+  ) else (
+   if defined verbose (echo No response from DNS)
+  )
+  ::Parsing response 
+  for %%j in (!response!) do (
+   rem echo %%j
+   for /F "tokens=1,2 delims=:" %%k in ("%%j") do (
+    if %%k=="data" (
+	 ::Checking if valid IP
+	 set "ipCandidate=%%~l"
+	 set "ipCandidate=!ipCandidate:~-1!"
+	 set valid=
+	 for /L %%v in (0,1,9) do (
+	  if "!ipCandidate!"=="%%v" (set valid=1)
+	 )
+	 if defined valid (
+	  ::Checking for duplicates and adding new ones in the list
+	  if defined verbose (echo IP found: %%~l  Checking for duplicates...)
+	  set duplicates=
+	  for /L %%z in (0,1,!successes!) do (
+	   if "%%~l"=="!successesArray[%%z]!" (
+	    if defined verbose (echo Duplicate found^^!)
+		set duplicates=1
+	   )
+	  )
+	  if not defined duplicates (
+	   if defined verbose (echo Adding to list...)
+	   set /A successes+=1
+	   set successesArray[!successes!]=%%~l
+	  )
+	 )
+	)
+   )
+  )
+ ) else (
+  if defined verbose (echo Can't ping !domainsArray[%%i]! for subnet, skipping...)
+ )
+
+ if defined verbose (echo.)
+
+)
+
+title Completed^^!
+
+::Showcasing result
+echo List of IP found:
+for /L %%i in (0,1,%successes%) do (
+ echo !successesArray[%%i]!
+)
+ 
+EndLocal
+
+echo.
+echo That's all. Press any button to exit...
+pause&gt;NUL
+
+title %comspec%
+
+exit /b
+</code></pre>
+</details>
+<p>Файлом:<br>
+<a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/tuU59BevwZwI32u4fIs1ScFZh2g.cmd">IPfinder.cmd</a> (4,3 КБ)</p>
+<p>update: искусственная генерация айпи листа для запросов</p>
+<p>update: прикрутил днс от клаудфлейр в добавку к гугло.днс</p>
+<p>update: добавил ещё несколько днс. Скорость упала, но кол-во результатов выросло. Пытался прикрутить quad9, т.к. тоже есть поддержка edns, но он вообще отказывается работать через курл.</p></td><td>2024-09-27T00:34:32.939Z</td></tr><tr><td>robin_blood</td><td><p>Респект <img src="https://ntc.party/images/emoji/twitter/wink.png?v=12" title=":wink:" class="emoji" alt=":wink:" loading="lazy" width="20" height="20"></p></td><td>2024-09-27T03:51:34.396Z</td></tr><tr><td>robin_blood</td><td><aside class="quote no-group" data-username="Ori" data-post="86" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>update: добавил ещё несколько днс. Скорость упала, но кол-во результатов выросло. Пытался прикрутить quad9, т.к. тоже есть поддержка edns, но он вообще отказывается работать через курл.</p>
+</blockquote>
+</aside>
+<p>Извини, а это нормально out of 324? Что то много и ждать очень долго, у первой версии было 77. Чувствую себя ддосером))</p></td><td>2024-09-27T09:48:55.809Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Круть! А можно утащить идею с doh?) А то у меня совсем простенький батник <a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/qR5GMPnWxmCQU0Wu8fBKs0XEsiw.bat">IPChecker.bat</a> (1,7 КБ) , который ищет системный ip через пинг.  Потом проверяет курлом - заблокирован или нет? Если да - ищет рабочий ip через nslookup. И снова проверяет его курлом. Идея нагло стырена из блокчека bolvan-а)</p></td><td>2024-09-27T12:04:52.234Z</td></tr><tr><td>Ori</td><td><p>Я хз, откровенно говоря <img src="https://ntc.party/images/emoji/twitter/upside_down_face.png?v=12" title=":upside_down_face:" class="emoji" alt=":upside_down_face:" loading="lazy" width="20" height="20"><br>
+Думаешь, стоит уменьшить?</p>
+<p>Новая версия, кста.</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">::by Ori
+@echo off
+chcp 65001
+title IP finder
+cls
+
+::Setting up proxy or taking it from env if needed
+rem set "proxy=socks5h://127.0.0.1:8086"
+if defined proxy (
+ set "proxy= --proxy %proxy%"
+)
+
+::Enabling verbose mode or taking it from env; any value is accepted
+if not defined verbose (
+ set verbose=
+)
+
+SetLocal EnableDelayedExpansion
+
+::Lists of random domains from all around
+rem set "domainsList=google.us google.nl google.pl"
+rem set "ipList=50.50.50.50 100.100.100.100 150.150.150.150"
+
+::Forming IP list artificially
+for /L %%i in (10,10,250) do (
+ for /L %%j in (10,20,250) do (
+  set "ipList=!ipList!%%i.%%j.128.128 "
+ )
+)
+set "ipList=!ipList:~0,-1!"
+
+::Converting lists into arrays
+set domainsArrayLength=-1
+for %%i in (%domainsList%) do (
+ set /A domainsArrayLength+=1
+ set domainsArray[!domainsArrayLength!]=%%i
+)
+set domainsEndsHere=!domainsArrayLength!
+for %%i in (%ipList%) do (
+ set /A domainsArrayLength+=1
+ set domainsArray[!domainsArrayLength!]=%%i
+)
+
+:INPUTURL
+cls
+
+if defined verbose (echo Using in verbose mode)
+if defined proxy (echo Using with proxy)
+
+echo.
+
+::User input
+set /P website="Input URL to check: "
+if "%website%"=="" (goto INPUTURL)
+echo.
+
+::Parsing user input
+set "website=!website:https://=!"
+set "website=!website:http://=!"
+for /F "tokens=1 delims=/" %%i in ("!website!") do (set "website=%%i")
+
+if not defined verbose (
+ echo It may take some time...
+ echo.
+)
+
+::Main routine
+set successes=-1
+for /L %%i in (0,1,%domainsArrayLength%) do (
+ ::Pinging website to find an IP for subnet and parsing result
+ title Progress: %%i out of %domainsArrayLength%
+ set "subnetIP="
+ if %%i LEQ !domainsEndsHere! (
+  for /F "tokens=1,3" %%j in ('ping -n 1 -w 2000 !domainsArray[%%i]!') do (
+   if "%%j"=="Reply" (
+    set "subnetIP=%%k"
+    set subnetIP=!subnetIP:~0,-1!
+   )
+  )
+ ) else (
+  set "subnetIP=!domainsArray[%%i]!"
+ )
+ 
+ if defined subnetIP (
+  ::Resolving DNS of a user-defined website while using custom subnet
+  if defined verbose (echo Resolving DNS with subnet !subnetIP! ^(!domainsArray[%%i]!^))
+  set response=
+  for /F "tokens=4* delims=[]" %%j in ('curl!proxy! -skm 1 "https://dns.google/resolve?name=%website%&amp;type=A&amp;edns_client_subnet=!subnetIP!"') do (set response=%%j)
+  ::Some other DNS resolvers? This one kinda slow, but gives additional results
+  for /F "tokens=4* delims=[]" %%j in ('curl!proxy! -skm 1 "https://doh.li/dns-query?name=%website%&amp;type=A&amp;edns_client_subnet=!subnetIP!"') do (set response=!response!,DOHLI,%%j)
+  if "!successes!"=="-1" (
+   for /F "tokens=4* delims=[]" %%j in ('curl!proxy! -skm 1 -H "accept: application/dns-json" "https://1.1.1.1/dns-query?name=%website%&amp;type=A"') do (set response=!response!,CLOUDFLARE,%%j)
+   for /F "tokens=4* delims=[]" %%j in ('curl!proxy! -skm 1 -H "accept: application/dns-json" "https://dns.nextdns.io/dns-query?name=%website%&amp;type=A"') do (set response=!response!,NEXTDNS,%%j)
+   for /F "tokens=4* delims=[]" %%j in ('curl!proxy! -skm 1 -H "accept: application/dns-json" "https://dns.adguard-dns.com/resolve?name=%website%&amp;type=A"') do (set response=!response!,ADGUARD,%%j)
+  )
+  if defined response (
+   if defined verbose (echo Response from DNS: !response!)
+   set response=!response:{= !
+   set response=!response:}= !
+  ) else (
+   if defined verbose (echo No response from DNS)
+  )
+  ::Parsing response 
+  for %%j in (!response!) do (
+   rem echo %%j
+   for /F "tokens=1,2 delims=:" %%k in ("%%j") do (
+    if %%k=="data" (
+	 ::Checking if valid IP
+	 set "ipCandidate=%%~l"
+	 set "ipCandidate=!ipCandidate:~-1!"
+	 set valid=
+	 for /L %%v in (0,1,9) do (
+	  if "!ipCandidate!"=="%%v" (set valid=1)
+	 )
+	 if defined valid (
+	  ::Checking for duplicates and adding new ones in the list
+	  if defined verbose (echo IP found: %%~l  Checking for duplicates...)
+	  set duplicates=
+	  for /L %%z in (0,1,!successes!) do (
+	   if "%%~l"=="!successesArray[%%z]!" (
+	    if defined verbose (echo Duplicate found^^!)
+		set duplicates=1
+	   )
+	  )
+	  if not defined duplicates (
+	   if defined verbose (echo Adding to list...)
+	   set /A successes+=1
+	   set successesArray[!successes!]=%%~l
+	  )
+	 )
+	)
+   )
+  )
+ ) else (
+  if defined verbose (echo Can't ping !domainsArray[%%i]! for subnet, skipping...)
+ )
+
+ if defined verbose (echo.)
+
+)
+
+title Completed^^!
+
+::Showcasing result
+echo List of IP found:
+for /L %%i in (0,1,%successes%) do (
+ echo !successesArray[%%i]!
+)
+
+echo.
+choice /C 12 /M "That's all. Press 1 to exit or press 2 to save IP list to a file"
+
+if %ERRORLEVEL%==2 (
+ PUSHD "%~dp0"
+ 
+ echo !website!&gt; "!website:.=_!.txt"
+ echo.&gt;&gt; "!website:.=_!.txt"
+ for /L %%i in (0,1,%successes%) do (
+  echo !successesArray[%%i]!&gt;&gt; "!website:.=_!.txt"
+ )
+ echo.
+ echo Saved to "%~dp0!website:.=_!.txt"
+ 
+ POPD
+ 
+ echo.
+ echo Press any button to exit...
+ pause&gt;NUL
+)
+
+echo.
+
+EndLocal
+
+title %comspec%
+
+exit /b
+</code></pre>
+</details>
+<p>Файлом:<br>
+<a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/yYkXp5EGFPODVCWcP5gLJmHFYus.cmd">IPfinder.cmd</a> (4,9 КБ)</p>
+<blockquote>
+<p>А можно утащить идею с doh?)</p>
+</blockquote>
+<p><a class="mention" href="/u/testerti">@TesterTi</a> утаскивай <img src="https://ntc.party/images/emoji/twitter/+1.png?v=12" title=":+1:" class="emoji" alt=":+1:" loading="lazy" width="20" height="20"></p></td><td>2024-09-27T18:37:30.994Z</td></tr><tr><td>Ori</td><td><p>Update: 3 часа ночи, переписал скрипт (снова).</p>
+<ul>
+<li>Теперь запросы идут параллельно, <strike>чтобы было эффективнее ддосить</strike> чтобы было быстрее. Кол-во потоков можно настраивать.</li>
+<li>Добавил вывод листа в файл.</li>
+<li>Добавил несколько “защит от дураков”, чтобы сложнее было сломать скрипт (фильтр протокола, проверка соединения, поддержка кастрированного виндоусовского курла).</li>
+<li>Добавил extra verbose режим для еще лучшего отображения процесса работы.</li>
+<li>И режим emulate, чтобы не ддосить резолверы понапрасну в процессе тестов.</li>
+<li>Выкинул режим с доменами, т.к. не вижу нужды.</li>
+</ul>
+<p>Скрипт текстом:</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">::by Ori
+@echo off
+chcp 65001
+title IP finder
+cls
+
+
+SetLocal EnableDelayedExpansion
+
+
+::===================================================================================
+::Setting up proxy, empty/undefied for no-proxy
+rem set "proxy=socks5h://127.0.0.1:8086"
+
+::Verbose mode; empty/undefied for quiet, 2 for extra verbose, any other value for standart verbose
+set verbose=
+
+::Emulation mode, without making actual requests; empty/undefied to turn off
+set emulate=
+
+::Number of threads, should be &gt;0
+set threads=20
+
+::Curl parameters
+set params=-s -k -m 2 -H "accept: application/dns-json"
+::===================================================================================
+
+
+::===================================================================================
+::Setting up parameter for curl
+if defined verbose (
+ set "params=!params! -S"
+)
+if defined proxy (
+ set "params=!params! --proxy !proxy!"
+)
+if !threads! GTR 1 (
+ set "params=!params! -Z --parallel-immediate --parallel-max !threads!"
+)
+
+::Setting up resolvers
+set "requestGoogleDNS=https://dns.google/resolve?name=website&amp;type=A&amp;edns_client_subnet="
+set "requestDohLi=https://doh.li/dns-query?name=website&amp;type=A&amp;edns_client_subnet="
+set "requestCloudflare=https://1.1.1.1/dns-query?name=website&amp;type=A"
+set "requestNextDNS=https://dns.nextdns.io/dns-query?name=website&amp;type=A"
+set "requestAdguardDNS=https://dns.adguard-dns.com/resolve?name=website&amp;type=A"
+
+::Forming IP array artificially
+set ipArrayLength=0
+for /L %%i in (10,10,250) do (
+ for /L %%j in (10,20,250) do (
+  set /A ipArrayLength+=1
+  set "ipArray[!ipArrayLength!]=%%i.%%j.0.0/16"
+ )
+)
+::===================================================================================
+
+
+::===================================================================================
+::Checking if connected to web, skipping in emulate mode
+if not defined emulate (
+ ping -n 1 -w 2000 "w3.org"&gt;NUL
+ if not "!ERRORLEVEL!"=="0" (
+  echo.
+  echo Can't connect to web, exiting...
+  pause&gt;NUL
+  goto EOF
+ )
+)
+
+:INPUTURL
+cls
+
+::Showcaing some stuff
+if defined verbose (
+ if "!verbose!"=="2" (
+  echo Using in extra verbose mode
+ ) else (
+  echo Using in verbose mode
+ )
+)
+if defined emulate (echo Using in emulation mode)
+if defined proxy (echo Using with proxy)
+if "!verbose!"=="2" (echo Parameters for curl: !params!)
+if "!verbose!"=="2" (echo IP addresses for subnet: !ipArrayLength!)
+
+echo.
+
+::User input
+set /P website="Input URL to check: "
+if "!website!"=="" (goto INPUTURL)
+echo.
+
+::Parsing user input
+set "website=!website:https://=!"
+set "website=!website:http://=!"
+for /F "tokens=1 delims=/" %%i in ("!website!") do (set "website=%%i")
+
+if not defined verbose (
+ echo It may take some time...
+ echo.
+)
+::===================================================================================
+
+
+::===================================================================================
+::Main part
+set successes=-1
+set response=
+
+::One-time request for resolvers without subnet
+if not defined emulate (
+ ::Here additional resolvers can be added
+ for /F "tokens=4* delims=[]" %%j in ('curl !params! "!requestCloudflare:website=%website%!"') do (set response=!response!CLOUDFLARE:%%j)
+ for /F "tokens=4* delims=[]" %%j in ('curl !params! "!requestNextDNS:website=%website%!"') do (set response=!response!NEXTDNS:%%j)
+ for /F "tokens=4* delims=[]" %%j in ('curl !params! "!requestAdguardDNS:website=%website%!"') do (set response=!response!ADGUARD:%%j)
+) else (
+ set response=!response!EMULATED:{"data":"0.0.0.0"}
+)
+
+::Loop for DNS with subnets
+for /L %%i in (1,!threads!,!ipArrayLength!) do (
+ title IP finder - Progress: %%i out of !ipArrayLength!
+ 
+ ::Forming curl input for concurrent requests
+ set requestParallelGoogleDNS=
+ set requestParallelDohLi=
+ set /A "num=%%i+!threads!-1"
+ if "!verbose!"=="2" (
+  echo Processing elements %%i-!num!
+  echo.
+ )
+ for /L %%j in (%%i,1,!num!) do (
+  if %%j LEQ !ipArrayLength! (
+   ::Here additional resolvers can be added
+   set requestParallelGoogleDNS=!requestParallelGoogleDNS! "!requestGoogleDNS:website=%website%!!ipArray[%%j]!"
+   set requestParallelDohLi=!requestParallelDohLi! "!requestDohLi:website=%website%!!ipArray[%%j]!"
+  )
+ )
+ if "!verbose!"=="2" (
+  echo Complete request for GoogleDNS: !params!!requestParallelGoogleDNS!
+  echo.
+  echo Complete request for Doh.Li: !params!!requestParallelDohLi!
+  echo.
+ )
+ 
+ ::Making request
+ if not defined emulate (
+  ::Here additional resolvers can be added
+  for /F "tokens=4* delims=[]" %%j in ('curl !params!!requestParallelGoogleDNS!') do (set response=!response!GOOGLEDNS:%%j)
+  ::This one kinda slow, but gives some more results
+  for /F "tokens=4* delims=[]" %%j in ('curl !params!!requestParallelDohLi!') do (set response=!response!DOH.LI:%%j)
+ )
+ 
+ ::Parsing response 
+ if defined response (
+  if defined verbose (echo Response from DNS: !response!)
+  set response=!response:{= !
+  set response=!response:}= !
+  
+  for %%j in (!response!) do (
+   if "!verbose!"=="2" (echo %%j)
+   for /F "tokens=1,2 delims=:" %%k in ("%%j") do (
+    if %%k=="data" (
+	 ::Checking if valid IP
+	 set "ipCandidate=%%~l"
+     set "ipCandidate=!ipCandidate:~-1!"
+     set valid=
+	 for /L %%v in (0,1,9) do (
+	  if "!ipCandidate!"=="%%v" (set valid=1)
+	 )
+	 if defined valid (
+	  ::Checking for duplicates and adding new ones to the list
+	  if defined verbose (echo IP found: %%~l  Checking for duplicates...)
+	  set duplicates=
+	  for /L %%z in (0,1,!successes!) do (
+	   if "%%~l"=="!successesArray[%%z]!" (
+	    if defined verbose (echo Duplicate found^^!)
+        set duplicates=1
+	   )
+	  )
+	  if not defined duplicates (
+	   if defined verbose (echo Adding to list...)
+	   set /A successes+=1
+	   set successesArray[!successes!]=%%~l
+	  )
+	 )
+	)
+   )
+  )
+  set response=
+  
+ ) else (
+  if defined verbose (echo No response from DNS)
+ )
+ if defined verbose (echo -------------)
+)
+
+title IP finder - Completed^^!
+::===================================================================================
+
+
+::===================================================================================
+::Showcasing result
+echo List of IP found:
+echo.
+for /L %%i in (0,1,!successes!) do (
+ echo !successesArray[%%i]!
+)
+
+echo.
+echo Press 1 to exit
+echo Press 2 to save IP list to a file
+choice /C 12
+echo.
+
+::Saving to file if asked
+if !ERRORLEVEL!==2 (
+ PUSHD "%~dp0"
+ 
+ echo !website!&gt; "!website:.=_!.txt"
+ echo.&gt;&gt; "!website:.=_!.txt"
+ for /L %%i in (0,1,!successes!) do (
+  echo !successesArray[%%i]!&gt;&gt; "!website:.=_!.txt"
+ )
+ echo Saved to "%~dp0!website:.=_!.txt"
+ 
+ POPD
+ 
+ echo.
+ echo Press any button to exit...
+ pause&gt;NUL
+)
+::===================================================================================
+
+
+:EOF
+EndLocal
+
+
+title %comspec%
+exit /b
+</code></pre>
+</details>
+<p>Файлом:<br>
+<a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/zPEXsvNBb0QQ3esN4f4KwvSy1ef.cmd">IPfinder.cmd</a> (6,8 КБ)</p></td><td>2024-09-28T00:21:30.178Z</td></tr><tr><td>robin_blood</td><td><p>Вот это уже быстро и красиво) Спасибо за труды</p></td><td>2024-09-28T00:35:33.127Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>А какова задача, цель данного скрипта? Это некий аналог блокчека?</p></td><td>2024-09-28T00:36:27.360Z</td></tr><tr><td>Ori</td><td><p>Нет. Это скрипт для поиска альтернативных айпишников для любого сайта (если они есть). Использует механизм ecs, позволяющий получить айпишник в конкретной подсети.</p></td><td>2024-09-28T00:37:01.640Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>А то есть потом ip в хост надо добавить, или что потом делать с ip адресами?</p></td><td>2024-09-28T00:39:29.066Z</td></tr><tr><td>Ori</td><td><p>Ну да. В основном польза только в случае айпи-блокировок. Ну или вон как у некоторых сломался tls v1.2, на том же твиттере. Можно попробовать поискать аналоги с tls v1.3 таким образом.</p></td><td>2024-09-28T00:40:58.292Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Все понял. То есть ваш скрипт поможет найти не заблокированный ip шник.</p></td><td>2024-09-28T00:44:32.666Z</td></tr><tr><td>Ori</td><td><p>Типа того. Хм, возможно стоит прикрутить автоматическую проверку найденных айпи на работоспособность <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"><br>
+Должно быть достаточно просто.</p></td><td>2024-09-28T00:45:43.666Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Было бы интересно вашей утилитой проверить ggc которые выдают ns binding aborted. Наверное она поможет в этом деле.</p></td><td>2024-09-28T00:52:41.921Z</td></tr><tr><td>Ori</td><td><p>Не, у ggc вроде всегда только один айпи. Там толку нет альтернативы искать. Это скорее для всяких крупных заблоченных сайтов, типа инстаграмма.</p></td><td>2024-09-28T00:53:38.873Z</td></tr><tr><td>easyone11</td><td><p>глупый вопрос<br>
+Если я использую GoogleDNS, а айпишник например нашёлся на Cloudflare, он для меня будет доступен?<br>
+Если да, есть ли смысл тетсировать ip на доступность, но может еще и отображать задержку чтобы использовать ip которые будут быстрее отдавать?</p></td><td>2024-09-28T04:57:13.701Z</td></tr><tr><td>Ori</td><td><p>Если вы добавляете найденный айпи в etc/hosts, то вам пофиг на днс, т.к. айпи берется из файла.</p>
+<blockquote>
+<p>может еще и отображать задержку</p>
+</blockquote>
+<p>Как по заказу, новая версия! Теперь она тестирует найденные айпи на предмет таймаутов, ошибок, редиректов, версии tls и наличия quic.</p>
+<p>Выкладываю только файлом, потому что кодировки для раскрашивания текста поедут. Да и слишком скрипт распух.</p>
+<p>Для тестирования нужен нормальный курл, а не виндоусовский.</p>
+<p><a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/gHU8q7I0SriOaSj3DUmUsKS3eif.cmd">IPfinder.cmd</a> (11,9 КБ)</p></td><td>2024-09-28T07:26:55.341Z</td></tr><tr><td>easyone11</td><td><aside class="quote no-group" data-username="Ori" data-post="102" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Как по заказу, новая версия!</p>
+</blockquote>
+</aside>
+<p>ну вроде всё красиво</p></td><td>2024-09-28T09:19:21.579Z</td></tr><tr><td>robin_blood</td><td><aside class="quote no-group" data-username="Ori" data-post="102" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Для тестирования нужен нормальный курл, а не виндоусовский</p>
+</blockquote>
+</aside>
+<p>А как организовать процесс? По умолчанию юзается виндовский</p></td><td>2024-09-28T09:41:32.398Z</td></tr><tr><td>easyone11</td><td><p>я скачал последний с сайта и заменил виндовый на новый<br>
+для замены надо дать права себе на виндовый курл c:\Windows\System32\curl.exe</p>
+<p>можно и указать в скрипте путь к скаченому, можно через переменные думаю тоже</p></td><td>2024-09-28T09:44:47.214Z</td></tr><tr><td>easyone11</td><td><aside class="quote no-group" data-username="Ori" data-post="102" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Для тестирования нужен нормальный курл, а не виндоусовский.</p>
+</blockquote>
+</aside>
+<p>можно скрипт еще больше сделать, проверкой какой курл используется и если не тот что надо рекомендации по обновлению ))</p></td><td>2024-09-28T09:47:27.559Z</td></tr><tr><td>Ori</td><td><p>Там и так это уже есть.</p>
+<aside class="quote no-group" data-username="robin_blood" data-post="104" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/robin_blood/48/8798_2.png" class="avatar"> robin_blood:</div>
+<blockquote>
+<p>А как организовать процесс? По умолчанию юзается виндовский</p>
+</blockquote>
+</aside>
+<p>Я через winget качал курл. Он вроде должен быть частью современных виндоусов, но я не уверен. Напиши в командной строке winget -v. Если есть то можно через него.</p></td><td>2024-09-28T09:48:39.744Z</td></tr><tr><td>easyone11</td><td><p>аа отлично) но я еще подумаю что предложить))</p></td><td>2024-09-28T09:49:41.936Z</td></tr><tr><td>robin_blood</td><td><aside class="quote no-group" data-username="easyone11" data-post="105" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/easyone11/48/6759_2.png" class="avatar"> easyone11:</div>
+<blockquote>
+<p>можно и указать в скрипте путь к скаченому, можно через переменные думаю тоже</p>
+</blockquote>
+</aside>
+<p>было бы круто, но как? впринципе думаю если поищу то найду, если знаете можете написать, думаю будет многим полезно</p>
+<aside class="quote no-group" data-username="Ori" data-post="107" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Я через winget качал курл.</p>
+</blockquote>
+</aside>
+<p>winget нету, но curl новый есть, им и пользуюсь обычно</p></td><td>2024-09-28T09:55:20.570Z</td></tr><tr><td>Ori</td><td><p>Можете просто в папку к курлу положить, должно работать. Либо запихнуть курл в системные переменные.</p></td><td>2024-09-28T09:57:01.578Z</td></tr><tr><td>robin_blood</td><td><aside class="quote no-group" data-username="Ori" data-post="110" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Можете просто в папку к курлу положить, должно работать.</p>
+</blockquote>
+</aside>
+<p>опа, так просто, кайф, спасибо</p></td><td>2024-09-28T09:58:21.177Z</td></tr><tr><td>Avanairn(Avanairn)</td><td><p>Никто тут не хочет записать отдельное видео для гайда?</p></td><td>2024-09-28T10:52:50.962Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Какие проблемы? Спрашивай</p></td><td>2024-09-28T10:54:46.921Z</td></tr><tr><td>Avanairn(Avanairn)</td><td><p>Хочется “предостраховки” из за страха того, что куда то неправильно нажму. Да и для чайников новых идеально видео с гайдом подойдет</p></td><td>2024-09-28T15:31:35.108Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Попробуйте сначала просто запустить preset Russia вы ничего не сломаете. В большинстве случаев этого достаточно для работы ютуба и некоторых заблокированных сайтов</p></td><td>2024-09-28T16:24:02.625Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="Ori" data-post="91" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Теперь запросы идут параллельно</p>
+</blockquote>
+</aside>
+<p>Как оказалось, в прошлой версии я сломал парсер, когда переписывал его для параллельных запросов. В итоге учитывались только результаты из 1 потока.</p>
+<p>Исправил. Также немного переделал систему тестирования найденных айпи. Добавил пинг, улучшил проверку редиректа (теперь он реагирует только на смену домена, редиректы из разряда <code>google.com</code> → <code>www.google.com</code> считаются безопасными). В целом сделал отображение покрасивше~</p>
+<p><a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/w0qAOCJ3XjjPZR6fJlNaRVmQZwj.cmd">IPfinder.cmd</a> (15,7 КБ)</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/1037bc5fae2ca8cc9efff1b0a4a103d94df8c77d.png" data-download-href="https://ntc.party/uploads/default/1037bc5fae2ca8cc9efff1b0a4a103d94df8c77d" title="ffffff"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/1037bc5fae2ca8cc9efff1b0a4a103d94df8c77d.png" alt="ffffff" data-base62-sha1="2jt3hK4eVQDzmTCcQnPd6EJhpwh" width="671" height="500" data-dominant-color="151615"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">ffffff</span><span class="informations">979×729 16.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-29T05:18:38.405Z</td></tr><tr><td>easyone11</td><td><p>нет смысла добавить информацию через какой dns какой ip получен?</p></td><td>2024-09-29T05:49:30.665Z</td></tr><tr><td>Ori</td><td><p>Там повторы идут от разных днс. Да и смысла в этом нет, мне кажется.</p></td><td>2024-09-29T06:02:24.483Z</td></tr><tr><td>zirf0(Andrey Y)</td><td><p>Строки с !!! AVAILABLE !!! искать надо обязательно, SUMMARY обычно короткий. Для powershell (-Context 1,0 в Select-String(sls) выдает искомую строку и строку перед ней)</p>
+<p>gc .\blockcheck.log | sls “!!! AV” -Context 1,0</p>
+<p>выдаст (nfqws, а не winws  потому, что лог от линукса, но это не принципиально)</p>
+<pre><code class="lang-auto">  - checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10 --wssize 1:6
+&gt; !!!!! AVAILABLE !!!!!
+  - checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50 --wssize 1:6
+&gt; !!!!! AVAILABLE !!!!!
+  - checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+&gt; !!!!! AVAILABLE !!!!!
+  - checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+&gt; !!!!! AVAILABLE !!!!!
+  - checking nfqws --dpi-desync=syndata,split2 --wssize 1:6
+&gt; !!!!! AVAILABLE !!!!!
+  - checking nfqws --dpi-desync=syndata,disorder2 --wssize 1:6
+&gt; !!!!! AVAILABLE !!!!!
+</code></pre>
+<p>У меня ~46 строк (в SUMMARY 3), нашел рабочую.<br>
+Более красивый вывод дает (корявенько смотрится, конечно)</p>
+<p>gc .\blockcheck.log | sls “!!! AV” -Context 1,0  | ForEach-Object {$_.ToString().Split([Environment]::NewLine)} | sls -Pattern “!!! AV” -NotMatch</p>
+<pre><code class="lang-auto">- checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10 --wssize 1:6
+
+  - checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50 --wssize 1:6
+
+  - checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+
+  - checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+
+  - checking nfqws --dpi-desync=syndata,split2 --wssize 1:6
+
+  - checking nfqws --dpi-desync=syndata,disorder2 --wssize 1:6
+</code></pre></td><td>2024-09-29T07:44:16.246Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Крутой скрипт! Жаль только, на моей 7-ке спецсимволы криво отображаются<br>
+<a href="https://iimg.su/i/NsvsE"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/170a84bb8f1bc94818791caede672714ad1d1834.png" data-base62-sha1="3hPw5ywBJ3jSaDSdwZJ5bCs1BCQ" width="500" height="339"></a></p>
+<blockquote>
+<p>И позвольте тогда уж поделиться и версией 2.0 моего простенького батника:</p>
+</blockquote>
+<p><a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/2j9bMVO4QpVlz53mqzL8AGAmoFP.bat">IPBlockChecker-v2.bat</a> (3,1 КБ)<br>
+Основное назначение - проверка, заблокирован ли сайт по системному ip? Если заблокирован, ищет ip через nslookup (dns провайдеры зарубежные). Если нашелся рабочий ip - предлагает добавить перенаправление на него в hosts. Выводит всего 1 рабочий ip, поскольку главная задача - определить сам факт блокировки. Список всех возможных ip ваш скрипт ищет гораздо лучше. Результат пишется в лог для каждого теста.<br>
+P.S. По ходу тестов выяснилось, что мой провайдер блокирует по ip из всех сайтов только нельзяграмм. Почему именно его - загадка)</p></td><td>2024-09-29T22:42:21.765Z</td></tr><tr><td>DimakSerpg(Dimak Serpg)</td><td><p>Эффекта 0.<br>
+<a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/cY6zAdroU0Bem3kRLDq4Prcyrac.log">blockcheck.log</a> (179,5 КБ)</p>
+<p>UPD: ВСё работает! Я до этого 6 часов с этим ковырялся, наконец-то ютуб грузит. Че я только не пробовал.<br>
+Видимо у меня что-то с командной строкой не так было, ибо только запуск _CMD_ADMIN помог и уже оттуда запуск test.cmd</p>
+<p>Но почему-то не могу заставить это работать с task_create. Только через cmd_admin работает с запуском test.cmd.<br>
+В планировщике задача работает, но эффекта нет. В чем проблема? Уже всё перепробовал. Только через запуск командной строки в папке работает, и уже из этой командной строки, запуск test.cmd.<br>
+Если тоже самое сделать в планировщике, никакого эффекта. Если запускать на ПКМ, так же никакого эффекта. Окно проскавает на милисекунду и всё.<br>
+Если запускать через CMD_ADMIN там прям пишет, виндиверт запустился и т.п.</p>
+<p>Починил. Просто добавил команду прям в cmd_admin и затем добавил в планировщик задач.</p></td><td>2024-09-30T09:00:53.818Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="TesterTi" data-post="120" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p><a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/2j9bMVO4QpVlz53mqzL8AGAmoFP.bat">IPBlockChecker-v2.bat</a> (3,1 КБ)</p>
+</blockquote>
+</aside>
+<p>Красивый у вас скрипт, с отдельными вызываемыми функциями и т.д. А у меня так просто поток сознания, а не скрипт <img src="https://ntc.party/images/emoji/twitter/upside_down_face.png?v=12" title=":upside_down_face:" class="emoji" alt=":upside_down_face:" loading="lazy" width="20" height="20"></p>
+<p>Кстати, я только сейчас, прочитав ваш пост, понял что мне вообще в голову не пришло использовать nslookup или встроенный в курл --doh (или как там правильно параметр выглядит). Вместо этого городил костыли. <img src="https://ntc.party/images/emoji/twitter/face_exhaling.png?v=12" title=":face_exhaling:" class="emoji" alt=":face_exhaling:" loading="lazy" width="20" height="20"></p></td><td>2024-09-30T11:00:14.853Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А мне наоборот ваш подход понравился, буду изучать)) Но для меня он немного сложноват. Я не программист ни разу (думаю, из никнейма понятно), только самые основы понимаю и все. Поэтому и использую простые функции, чтоб не запутаться. А в батнике у меня лютая логическая ошибка, только сейчас дошло, буду переделывать.</p></td><td>2024-09-30T11:04:16.019Z</td></tr><tr><td>uwu(uwu)</td><td><aside class="quote no-group" data-username="Ori" data-post="102" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Как по заказу, новая версия! Теперь она тестирует найденные айпи на предмет таймаутов, ошибок, редиректов, версии tls и наличия quic.</p>
+<p>Выкладываю только файлом, потому что кодировки для раскрашивания текста поедут. Да и слишком скрипт распух.</p>
+<p>Для тестирования нужен нормальный курл, а не виндоусовский.</p>
+</blockquote>
+</aside>
+<p>я правильно понимаю, что в моем случае нет доступных вариантов для <a href="http://x.com" rel="noopener nofollow ugc">x.com</a>?</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/8c572e0175383048486088c8312c0fd32675d4a6.png" data-download-href="https://ntc.party/uploads/default/8c572e0175383048486088c8312c0fd32675d4a6" title="изображение"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/8c572e0175383048486088c8312c0fd32675d4a6.png" alt="изображение" data-base62-sha1="k1vCUdRLJY3YOge2BDRhAK9RQhg" width="690" height="466" data-dominant-color="131010"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1002×678 16.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2024-09-30T16:16:38.792Z</td></tr><tr><td>Ori</td><td><p>Судя по скрину у вас старая версия, потому что последняя версия <a href="https://ntc.party/t/%D0%BF%D0%BE%D0%B4%D0%B1%D0%BE%D1%80-%D1%80%D0%B0%D0%B1%D0%BE%D1%87%D0%B5%D0%B3%D0%BE-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D0%B0-%D0%B4%D0%BB%D1%8F-ggc-%D1%8E%D1%82%D1%83%D0%B1%D0%B0-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-blockcheck/10060/116">выглядит не так</a>. По результату хз. Возможно нет доступных вариантов, возможно скрипт сломан <img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"></p></td><td>2024-09-30T16:27:29.023Z</td></tr><tr><td>uwu(uwu)</td><td><p>теперь вот так:</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/61e6e11222d5ecbe34717f6462e4ab5cbd2678f7.png" data-download-href="https://ntc.party/uploads/default/61e6e11222d5ecbe34717f6462e4ab5cbd2678f7" title="изображение"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/61e6e11222d5ecbe34717f6462e4ab5cbd2678f7.png" alt="изображение" data-base62-sha1="dY4YcwUr9ffEwAS0BQCv3oNGtTN" width="453" height="500" data-dominant-color="11100F"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">904×997 22.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>подскажи пожалуйста для тупого, что дальше сделать -_-</p>
+<p>я пробовал добавить 2 зеленых адреса в hosts вот так:</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/10491000e51811164dac705331fbb36bdcc147a8.png" alt="изображение" data-base62-sha1="2k4aRCMhWYG34msZ5sTkbZNyr8I" width="674" height="244"></p>
+</details>
+<p>но после этого все равно nslookup в cmd выдает адрес из красного.<br>
+и сайт не открывается с запретом (с конфигом, который пробивает ютуб)<br>
+добавил в файрфокс в excluded x,com<br>
+в фф попрежнему блок<br>
+в хроме (где нет дох) пишет теперь DNS_PROBE_FINISHED_NXDOMAIN</p>
+<p>upd. теперь сайт открылся с черной картинкой (я ничего после этого не делал), но ничего не прогружается и в консоли:</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/3bd6db78bf74fb989a3d21b1c080ad956821db09.png" data-download-href="https://ntc.party/uploads/default/3bd6db78bf74fb989a3d21b1c080ad956821db09" title="изображение"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/3bd6db78bf74fb989a3d21b1c080ad956821db09_2_690x142.png" alt="изображение" data-base62-sha1="8xmv1CKO9M7fUHbFxoOUnj81egp" width="690" height="142" srcset="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/3bd6db78bf74fb989a3d21b1c080ad956821db09_2_690x142.png, подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/3bd6db78bf74fb989a3d21b1c080ad956821db09_2_1035x213.png 1.5x, подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/3bd6db78bf74fb989a3d21b1c080ad956821db09_2_1380x284.png 2x" data-dominant-color="F9F8F9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1868×386 25.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2024-09-30T16:40:15.131Z</td></tr><tr><td>Ori</td><td><p>Вот эти попробуй ещё добавить</p>
+<pre><code class="lang-auto">192.229.233.50 pbs.twimg.com
+152.199.21.141 abs.twimg.com
+192.229.220.133 video.twimg.com
+</code></pre>
+<p>А так хз что посоветовать. Скрипт ищет далеко не всё.<br>
+И далеко не всегда работает.</p>
+<p>Я так вообще нашел какой-то айпи, а это оказался не сам сайт, а какой-то FTP-сервер.</p></td><td>2024-09-30T16:44:20.778Z</td></tr><tr><td>uwu(uwu)</td><td><p>я просто пытаюсь для себя понять, как мне самому на будущее такие сайты открывать<br>
+я так понимаю мне нужно также выполнить проверку в ipfinder для тех доменов, которые в консоли с binding aborted</p></td><td>2024-09-30T16:45:30.540Z</td></tr><tr><td>Ori</td><td><p>Вообще <code>twimg.com</code> же тоже заблокирован, проверь что он у тебя в блеклисте есть.</p></td><td>2024-09-30T16:46:32.421Z</td></tr><tr><td>uwu(uwu)</td><td><aside class="quote no-group" data-username="Ori" data-post="127" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Вот эти попробуй ещё добавить</p>
+</blockquote>
+</aside>
+<p>теперь работает (правда только при условии doh), но я так и не понял откуда ты эти домены взял<br>
+ну и + теперь все работает (включая картинки) на х com, а если страница ведет на twitter com , то не открывается)<br>
+попробовал с ним также сделать по аналогии, добавив в hosts зеленые айпи, но не помогло, там совсем глухо<br>
+спасибо, я просто пытался выяснить общую стратегию для себя</p>
+<p>upd. ура, настроил чтобы оба домена работали<br>
+нужно к тем же самым ip от x com дописать через пробел twitter (причем если их добавить отдельной строкой, то не помогает почему-то)<br>
+Причем в случае twitter  ipfinder показывает что 104 подсеть не заблочена, хотя это не так<br>
+curl явно не проходит, в отличие от 162 и 172</p></td><td>2024-09-30T17:19:48.342Z</td></tr><tr><td>easyone11</td><td><aside class="quote no-group" data-username="uwu" data-post="126" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/uwu/48/15300_2.png" class="avatar"> uwu:</div>
+<blockquote>
+<p>но после этого все равно nslookup в cmd выдает адрес из красного.</p>
+</blockquote>
+</aside>
+<p>чтобы сразу работали делали /flushdns для винды и для роутера свою команду? может в этом была проблема</p></td><td>2024-09-30T17:50:54.866Z</td></tr><tr><td>uwu(uwu)</td><td><p>я делал<br>
+короче  нашел сайт (самый первый в гугл  выдаче ага)</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><a href="http://otx.alienvault.com" rel="noopener nofollow ugc">otx.alienvault.com</a></p>
+</details>
+<p>я не знаю насколько корректно его использовать, но я ради интереса покурлил ip адреса для abs.twimg там и нашел несколько альтернативных. теперь у меня работающие картинки вообще на<br>
+<code>93.184.216.139 pbs.twimg.com</code><br>
+думаю с остальными доменами можно аналогично<br>
+но я не уверен насколько это безопасно (я в этом не сильно разбираюсь)</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/e983e300d700783362cb4dbd4ba01f411ad46141.png" data-download-href="https://ntc.party/uploads/default/e983e300d700783362cb4dbd4ba01f411ad46141" title="изображение"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/e983e300d700783362cb4dbd4ba01f411ad46141_2_690x189.png" alt="изображение" data-base62-sha1="xjLOD8HOH9UpJFCjFaTiUXOs7Ch" width="690" height="189" srcset="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/e983e300d700783362cb4dbd4ba01f411ad46141_2_690x189.png, подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/e983e300d700783362cb4dbd4ba01f411ad46141_2_1035x283.png 1.5x, подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/e983e300d700783362cb4dbd4ba01f411ad46141_2_1380x378.png 2x" data-dominant-color="F6F7F9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1855×510 64.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2024-09-30T18:25:57.023Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="RandomNamelessUser" data-post="48" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/randomnamelessuser/48/2954_2.png" class="avatar"> RandomNamelessUser:</div>
+<blockquote>
+<p>А подряд два отдельных --hostlist в запрете будут работать? Чтобы и другие сайты разблокировать, и при этом отдельно хранить ютубовские домены и всё остальное.<br>
+Вроде такого:<br>
+–hostlist=“%~dp0russia-blacklist.txt” --hostlist=“%~dp0russia-youtube.txt”</p>
+</blockquote>
+</aside>
+<p>Сколько угодно можно. У листов есть 2 типа. exclude и include.<br>
+Листы одного типа сливаются в один</p></td><td>2024-10-01T17:21:57.971Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group quote-modified" data-username="RandomNamelessUser" data-post="83" data-topic="10060" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/randomnamelessuser/48/2954_2.png" class="avatar"> RandomNamelessUser:</div>
+<blockquote>
+<p>А в запрете как-то можно указать редирект на нужного поставщика ДНС, на подобии такого в GDPI?</p>
+<blockquote>
+<p>–dns-addr 77.88.8.8 --dns-port 1253 --dnsv6-addr 2a02:6b8::feed:0ff --dnsv6-port 1253</p>
+</blockquote>
+<p>Чтобы не все запросы через них пускать, если вдруг медленными будут.</p>
+</blockquote>
+</aside>
+<p>В *nix это делается средствами ip/nf tables/ipfw/pf или через локальный dns server типа dnsmasq.<br>
+В винде решается простановкой doh вместо plain dns на уровне системы.<br>
+Политика zapret - не делать функций, которые могут быть реализованы иными средствами, чисто ради удобства и простоты.</p></td><td>2024-10-01T17:26:30.806Z</td></tr><tr><td>exvbrn(exvBrn)</td><td><p>Подскажите, пожалуйста, блокчек в качестве рабочей стратегии выкинул --dpi-desync-split-seqovl=1. С ней всё замечательно работает на ПК, и наотрез отказывается работать на смартфоне на андрюше и твбоксе. Есть ли какие-то подводные камни у этой стратегии? Если да, то есть ли варианты обхода?</p></td><td>2024-10-01T17:34:20.960Z</td></tr><tr><td>yatolkosprosit</td><td><p><strong>bolvan</strong><br>
+Я перед началом проверки выполнил в консоли команду<br>
+<code>PKTWS_EXTRA="--dpi-desync-fake-tls=/путь/до/файла/tls_clienthello_www_google_com.bin" </code></p>
+<p>Но в выводе работы блокчека не видно, чтобы он использовал файл<br>
+<code>tls_clienthello_www_google_com.bin</code> для тестирования способов обхода замедления.<br>
+Вижу тоолько <code>tls_clienthello_iana_org.bin</code> и <code>--dpi-desync-fake-tls=0x00000000</code><br>
+Что я сделал не так?</p></td><td>2024-10-01T18:27:23.077Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А вы из той же консоли потом запустили и сам blockcheck.cmd?<br>
+Если нет - то потому он переменную и не подхватил. Причем консоль говорят нужно запускать от админа. Мне кажется, проще сделать так:<br>
+в файл blockcheck.cmd добавить после<br>
+<code>cd /d "%~dp0"</code><br>
+строку<br>
+<code>set "PKTWS_EXTRA=--dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin"</code><br>
+и закинуть файлы tls_clienthello_www_google_com.bin и quic_initial_google_com.bin в ту же папку</p></td><td>2024-10-01T19:00:21.973Z</td></tr><tr><td>yatolkosprosit</td><td><p>Благодарю за ответ, но мне нужна инструкция для Linux.</p></td><td>2024-10-01T20:38:52.713Z</td></tr><tr><td>spv82</td><td><p>Нужно переменную скормить самому blockcheck.sh, а не просто в shell</p><aside class="quote" data-post="153" data-topic="61">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar">
+    <a href="https://ntc.party/t/zapret-whats-new/61/153">Zapret: what's new</a> <a class="badge-category__wrapper " href="/c/community-software/zapret-antidpi/20"><span data-category-id="20" style="--category-badge-color: #9EB83B; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #BF1E2E;" data-parent-category-id="27" data-drop-close="true" class="badge-category --has-parent" title="Zapret Deep Packet Inspection (DPI) circumvention software discussion and official support forum"><span class="badge-category__name">Zapret</span></span></a>
+  </div>
+  <blockquote>
+    В blockcheck внесена поддержка переменных 
+TPWS_EXTRA - для tpws 
+PKTWS_EXTRA - для nfqws/dvtws/winws 
+эти переменные добавляются к параметрам тестовых запусков соотв демонов 
+основное применение - включение разных внешних пейлоадов 
+PKTWS_EXTRA="--dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin" ./blockcheck.sh 
+чтобы не уродовать код скрипта ради сиюминутных частных веяний и хотелок
+  </blockquote>
+</aside>
+</td><td>2024-10-02T06:09:06.106Z</td></tr><tr><td>bolvan</td><td><p>если отдельно, то надо сделать<br>
+export PKTWS_EXTRA=blablabla<br>
+иначе переменная не уйдет в дочерние процессы<br>
+и нельзя пользоваться встроенной элевацией до рута<br>
+нужен предварительный рут шелл</p>
+<p>еще вот это почитайте</p><aside class="quote quote-modified" data-post="154" data-topic="61">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar">
+    <a href="https://ntc.party/t/zapret-whats-new/61/154">Zapret: what's new</a> <a class="badge-category__wrapper " href="/c/community-software/zapret-antidpi/20"><span data-category-id="20" style="--category-badge-color: #9EB83B; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #BF1E2E;" data-parent-category-id="27" data-drop-close="true" class="badge-category --has-parent" title="Zapret Deep Packet Inspection (DPI) circumvention software discussion and official support forum"><span class="badge-category__name">Zapret</span></span></a>
+  </div>
+  <blockquote>
+    Дополнение к *_EXTRA. 
+Похоже, что нельзя адекватно в стандартную шелл переменную засунуть множество аргументов командной строки для вызываемого процесса. 
+Проблема в пробелах. 
+Допустим, у нас PKTWS_EXTRA=“–hostcase --hostnospace” 
+Я передаю эту переменную как есть $PKTWS_EXTRA без кавычек в дочерний процесс. 
+Получается 2 аргумента. Все хорошо. 
+но что делать, если PKTWS_EXTRA=“–hostcase --dpi-desync-fake-tls=”/opt/xxxx xxx xxx/fake.bin"" 
+Нельзя никак сделать, чтобы стало 2 аргумента. И так, …
+  </blockquote>
+</aside>
+</td><td>2024-10-02T08:22:04.408Z</td></tr><tr><td>kvalera(Kvalera)</td><td><p>Вопрос к автору, как добавить --hostlist в службу service_create.cmd?<br>
+Где здесь вставить --hostlist:</p>
+<p>set ARGS=–wf-l3=ipv4,ipv6 --wf-tcp=80,443 --dpi-desync=fake,split --dpi-desync-ttl=7 --dpi-desync-fooling=md5sig<br>
+call :srvinst winws1<br>
+rem set ARGS=–wf-l3=ipv4,ipv6 --wf-udp=443 --dpi-desync=fake<br>
+rem call :srvinst winws2<br>
+goto :eof</p>
+<p>:srvinst<br>
+net stop %1<br>
+sc delete %1<br>
+sc create %1 binPath= “"%~dp0winws.exe" %ARGS%” DisplayName= “zapret DPI bypass : %1” start= auto<br>
+sc description %1 “zapret DPI bypass software”<br>
+sc start %1</p></td><td>2024-10-05T06:48:15.241Z</td></tr><tr><td>newb1e</td><td><p>В строку “set ARGS” в конец, например.</p></td><td>2024-10-05T08:44:05.665Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Да, можно так:</p>
+<pre><code class="lang-auto">set ARGS=--wf-l3=ipv4,ipv6 --wf-tcp=80,443 --dpi-desync=fake,split --dpi-desync-ttl=7 --dpi-desync-fooling=md5sig --hostlist-exclude="blacklist.txt"
+call :srvinst winws1
+goto :eof
+
+:srvinst
+net stop %1
+sc delete %1
+sc create %1 binPath= "\"%~dp0winws.exe\" %ARGS%" DisplayName= "zapret DPI bypass : %1" start= auto
+sc description %1 "zapret DPI bypass software"
+sc start %1 
+</code></pre>
+<p>blacklist.txt должен лежать в одной папке с service_create.cmd</p></td><td>2024-10-05T10:44:12.693Z</td></tr><tr><td>kvalera(Kvalera)</td><td><p>Когда добавлял “blacklist.txt” в конец строки “set ARGS” не работал YouTube,  т.к. нужно было добавить домены ютуба, которые находятся в “list-youtube.txt”. Адреса ютуба нужно добавить в “blacklist.txt” или можно два --hostlist в одну строку прописать? Так работает и ютуб и анти РКН:</p>
+<p>set ARGS=–wf-l3=ipv4,ipv6 --wf-tcp=80,443 --dpi-desync=fake,split --dpi-desync-ttl=7 --dpi-desync-fooling=md5sig --hostlist=“%~dp0list-youtube.txt” --hostlist=“%~dp0blacklist.txt”</p></td><td>2024-10-06T06:46:15.470Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><aside class="quote no-group" data-username="kvalera" data-post="144" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kvalera/48/9506_2.png" class="avatar"> kvalera:</div>
+<blockquote>
+<p>Адреса ютуба нужно добавить в “blacklist.txt” или можно два --hostlist в одну строку прописать?</p>
+</blockquote>
+</aside>
+<p>Можно и так и так на самом деле. Т.к. несколько --hostlist объединяются в один. Как вам удобнее</p></td><td>2024-10-06T13:16:22.556Z</td></tr><tr><td>TheDuck</td><td><p>У меня довольно нестандартная ситуация. Стратегия созданная blockcheck где-то с месяц назад перестала <em>нормально</em> работать. Она позволяет посещать youtube и пользоваться всеми его фишками, естественно кроме просмотра видео. Но есть одна особенность: если открыть видео при winws, закрыть winws и обновить страницу, то видео проигрывается как ни в чём не бывало в любом качестве. Правда работает эта особенность в пределах одного видео (длина видео значения не имеет).</p>
+<p>На всякий случай я всё равно стал подыскивать вариант возвращения ситуации к норме, но пока что безрезультатно. В лучшем случае я получаю возможность просто зайти на страницу самого youtube. И такого же “волшебства” от новых стратегий я не наблюдаю. Прошу о помощи, т.к. уже идей нет что ещё можно сделать. Я полностью прошёлся по гайду из поста, и я уже дополнял старую стратегию вещами из этого же гайда.<br>
+Старая и кое-как рабочая стратегия: --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata<br>
+И я не против повторить уже совершённые операции, т.к. знания по сетевым подключениям у меня почти нулевые.</p></td><td>2024-10-06T15:17:49.176Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><aside class="quote no-group" data-username="TheDuck" data-post="146" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/858c86/48.png" class="avatar"> TheDuck:</div>
+<blockquote>
+<p>Но есть одна особенность: если открыть видео при winws, закрыть winws и обновить страницу, то видео проигрывается как ни в чём не бывало в любом качестве. Правда работает эта особенность в пределах одного видео (длина видео значения не имеет).</p>
+</blockquote>
+</aside>
+<p>Как понять “открыть видео при wins”? Не могли бы пояснить? Т.е. у вас работает после закрытия zapret, так что ли? wins.exe же и есть zapret для windows. Может у вас просто блокировку сняли, нет?)</p>
+<pre><code class="lang-auto">--wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata  --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin
+</code></pre>
+<p>Так не пробовали?</p></td><td>2024-10-06T15:47:35.247Z</td></tr><tr><td>TheDuck</td><td><p>Провайдер точно не  разблокировал youtube. Заход на сам сайт или на конкретное видео без дополнительных инструментов ведёт к бесконечной загрузке. В лучшем случае я получаю пустой экран с какими-то элементами интерфейса youtube. И да, закрытие zapret (winws, для конкретики) начиначет загрузку видео (спустя секунд 20-30). То есть я запускаю winws чтобы открыть сайт и выбрать видео, а потом закрываю winws, чтобы это видео воспроизвести. И как я заметил, это работает только при вот этой конкретной стратегии.</p>
+<p>И я это пробовал. И попробовал только что ещё раз. Эффект такой же, как и от старой стратегии.</p></td><td>2024-10-06T16:20:28.404Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Если есть время, сделайте лог блокчека для rr*…googlevideo.com (которые у вас красные  в логе браузера) и для <a href="http://youtube.com">youtube.com</a> одновременно (просто укажите их в п.5 через пробел)<br>
+Либо этим скриптом прогоните <a href="https://ntc.party/t/goodcheck-%D0%B1%D0%BB%D0%BE%D0%BA%D1%87%D0%B5%D0%BA-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82-%D0%B4%D0%BB%D1%8F-goodbyedpi-zapret-byedpi/">https://ntc.party/t/goodcheck-блокчек-скрипт-для-goodbyedpi-zapret-byedpi/</a> сразу для обоих адресов. Там тоже можно для запрета сделать проверку ( в readme.txt к нему описано как использовать)<br>
+И выложите их сюда</p></td><td>2024-10-06T16:29:52.020Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="TesterTi" data-post="147" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<pre><code class="lang-auto">--wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata  --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin
+</code></pre>
+<p>Так не пробовали?</p>
+</blockquote>
+</aside>
+<p>fake-tls относится только к --dpi-desync=fake<br>
+для syndata фейк задается как --dpi-desync-fake-syndata<br>
+на этапе tcp handshake еще неизвестно какой будет протокол</p></td><td>2024-10-06T16:48:32.252Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Понятно, спасибо, буду знать!<br>
+А не подскажете, отчего у одного человека работало</p>
+<pre><code class="lang-auto">--dpi-desync=split2 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin
+</code></pre>
+<p>и не работало</p>
+<pre><code class="lang-auto">--dpi-desync=split2 
+</code></pre>
+<p>Как такое возможно, ведь split2 не шлет фейки, верно?</p></td><td>2024-10-06T16:55:22.637Z</td></tr><tr><td>bolvan</td><td><p>Может быть процесс с ошибкой завершался из-за отсутствующего файла и тем самым zapret НЕ работал, от того и работало ?</p></td><td>2024-10-06T17:06:00.286Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Да кто его знает) Не могу найти исходное сообщение, но меня оно сильно удивило<br>
+upd нашлось <a href="https://ntc.party/t/zapret-%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5/726/911" class="inline-onebox">Zapret: обсуждение - #911 by Chivapches</a></p></td><td>2024-10-06T17:08:21.788Z</td></tr><tr><td>TheDuck</td><td><p>На всякий сделал ещё один лог с тремя доменами, т.к. до этого на некоторые googlevideo домены результат не выдавался (что и можно увидеть в Log_2domains).</p>
+<p><a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/ob2fz3urSZqkKn5vJ0z4a8jpkmt.log">Log_2domains.log</a> (474.8 KB)<br>
+<a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/zyNRFhzGGyS8MRChflgIY8TZTlo.log">Log_3domains.log</a> (611.8 KB)</p></td><td>2024-10-07T06:59:30.644Z</td></tr><tr><td>TheDuck</td><td><p>Я ещё понаблюдал за работой старой стратегии. Как выяснилось закрывать winws не обязательно, достаточно просто сделать обновление страницы. Это делает ситуацию гораздо лучше. Хотя поведение в целом всё равно странное.</p></td><td>2024-10-07T11:34:44.858Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>У вас в принципе нашлись рабочие стратегии и для ютуба и для ggc</p>
+<pre><code class="lang-auto">winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=11
+winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000
+winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-tls=sni
+winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=fake --dpi-desync-repeats=5
+</code></pre>
+<pre><code class="lang-auto">winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=4
+winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2
+</code></pre>
+<p>Попробуйте такой конфиг</p>
+<pre><code class="lang-auto">start "zapret" /min "winws.exe" --wf-tcp=443 --wf-udp=443 --filter-udp=443 --hostlist="list-youtube.txt"  --dpi-desync=fake --dpi-desync-repeats=5 --new --filter-tcp=443 --hostlist="list-youtube.txt" --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000 --new --filter-tcp=443 --hostlist="list-googlevideo.txt" --dpi-desync=split2 --dpi-desync-split-pos=4
+</code></pre>
+<p>Блэклисты list-youtube.txt и list-googlevideo.txt должны лежать в той же папке, где и wins.exe</p>
+<details>
+<summary>
+list-youtube.txt</summary>
+<pre><code class="lang-auto">youtube.com
+youtu.be
+yt.be
+ytimg.com
+ggpht.com
+gvt1.com
+googleapis.com
+youtube-nocookie.com
+youtube-ui.l.google.com
+yt-video-upload.l.google.com
+wide-youtube.l.google.com
+</code></pre>
+</details>
+<details>
+<summary>
+list-googlevideo.txt</summary>
+<pre><code class="lang-auto">googlevideo.com
+</code></pre>
+</details></td><td>2024-10-07T11:54:56.293Z</td></tr><tr><td>TheDuck</td><td><p>Такая же ситуация. Заходит на youtube и видео запускается только после обновления страницы.</p></td><td>2024-10-07T13:24:19.749Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А wins так же нужно закрывать?</p></td><td>2024-10-07T13:27:47.351Z</td></tr><tr><td>TheDuck</td><td><p>Я дополнительно отписался под ответом с логами, т.к. редактировать старое сообщение не мог:</p>
+<blockquote>
+<p>Я ещё понаблюдал за работой старой стратегии. Как выяснилось закрывать winws не обязательно, достаточно просто сделать обновление страницы. Это делает ситуацию гораздо лучше. Хотя поведение в целом всё равно странное.</p>
+</blockquote>
+<p>И с твоим вариантом аналогичная ситуация. Т.е. я могу зайти на youtube и открыть видео, но чтобы оно запустилось мне нужно обновить страницу.</p></td><td>2024-10-07T13:45:40.620Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Мда, интересно… А попробуй прогнать гудчеком <a href="https://ntc.party/t/goodcheck-%D0%B1%D0%BB%D0%BE%D0%BA%D1%87%D0%B5%D0%BA-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82-%D0%B4%D0%BB%D1%8F-goodbyedpi-zapret-byedpi/">https://ntc.party/t/goodcheck-блокчек-скрипт-для-goodbyedpi-zapret-byedpi/</a> для “default - all.txt”<br>
+Мне кажется, ни одна стратегия для ggc не работает нормально<br>
+Хотя если устраивает обновлять страничку - то и ладно, можно забить)</p></td><td>2024-10-07T13:50:35.925Z</td></tr><tr><td>TheDuck</td><td><p>Таки воспользовался goodcheck. Итоги его работы абсолютно аналогичные.</p>
+<p>Небольшой апдейт относительно рабочих стратегий: после запуска winws youtube работает безукоризненно на короткое время, потом возникает необходимость воспроизводить видео через обновления страницы.</p>
+<p>Ещё я пощёлкал QUIC и Kyber на браузере - без изменений. И посмотрел не устанавливается ли внезапно связь с другими GGC при обновлении страницы - все вызовы к GGC абсолютно одинаковые.</p>
+<p>В целом ситуация терпимая. Хоть выяснилось, что выключать хаотично winws не нужно. Спасибо за помощь.</p></td><td>2024-10-08T06:57:39.078Z</td></tr><tr><td>Dhogzhenya</td><td><p>У меня похожая проблема. Одно из рабочих для меня решений - Invidious . Это прокладка между ютубом и конечным пользователем. Сайты проекта - заблокированны. Но zapret обходит и скорость не тормозит</p></td><td>2024-10-08T20:56:47.266Z</td></tr><tr><td>lylipvtoey</td><td><p><a class="mention" href="/u/ori">@Ori</a><br>
+Потенциальные фичи для IPFinder, если будет свободное время.</p>
+<ol>
+<li>Вроде не очень сложно, попробую сам при случае. На этапе поиска IP ресолвить не только заданный домен, но и вспомогательные. Помогает там, где ряд серверов взаимозаменяемы по сайтам, но на чужие не отдаются - это вроде бы так минимум для Google и CDN а-ля Cloudflare (хотя их адреса все и так знают).</li>
+<li>Если есть локально работающий Tor, ресолвить через него. Добавляется в два движения.</li>
+<li>Явно проблематично. Если есть Tor, обращаться к не поддерживающим ECN серверам через него, принудительно выставляя выходной узел. Использовать DoH либо TCP DNS.</li>
+</ol></td><td>2024-10-12T09:58:34.561Z</td></tr><tr><td>easyone11</td><td><p>месяц не был на даче, тут приехал и увидел такое в блокчеке</p>
+<ul>
+<li>checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10<br>
+suspicious redirection 307 to : <a href="http://forbidden.yota.ru/" rel="noopener nofollow ugc">http://forbidden.yota.ru/</a></li>
+</ul>
+<p>это какая заглушка чтоль работает?</p></td><td>2024-10-12T11:48:12.567Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Это по http что ли соединение?</p></td><td>2024-10-12T11:50:40.334Z</td></tr><tr><td>electrifying</td><td><p>Эта инструкция поможет, если у меня некоторые ggc отлетают а при коннекте на другие работают? То есть, я по консоли вижу что ролики с googlevideo не сразу бывает отдается секунд может через 10 начинает стартовать и некоторые ggc падают</p></td><td>2024-10-12T11:52:25.448Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Если найдется рабочий конфиг то поможет</p></td><td>2024-10-12T11:55:00.893Z</td></tr><tr><td>easyone11</td><td><p>безпонятия<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/26e9720d156f3396f52715fbbb08fba87fa8d81e.png" data-download-href="https://ntc.party/uploads/default/26e9720d156f3396f52715fbbb08fba87fa8d81e" title="image"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/26e9720d156f3396f52715fbbb08fba87fa8d81e.png" alt="image" data-base62-sha1="5yeivK0su4vIrEUDvkZqcke3RoO" width="690" height="119" data-dominant-color="F1F1F1"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1668×289 13.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-10-12T12:09:35.978Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="lylipvtoey" data-post="163" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/l/8e7dd6/48.png" class="avatar"> lylipvtoey:</div>
+<blockquote>
+<p>На этапе поиска IP ресолвить не только заданный домен, но и вспомогательные.</p>
+</blockquote>
+</aside>
+<p>Вряд ли буду делать, мне лень.</p>
+<aside class="quote no-group" data-username="lylipvtoey" data-post="163" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/l/8e7dd6/48.png" class="avatar"> lylipvtoey:</div>
+<blockquote>
+<p>Если есть локально работающий Tor, ресолвить через него</p>
+</blockquote>
+</aside>
+<p>Там уже есть поддержка переменной среды proxy=, либо в самом скрипте в начале идет раздел конфига. Раскомментить, убрав rem, и поставить что нужно.</p>
+<aside class="quote no-group" data-username="lylipvtoey" data-post="163" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/l/8e7dd6/48.png" class="avatar"> lylipvtoey:</div>
+<blockquote>
+<p>принудительно выставляя выходной узел</p>
+</blockquote>
+</aside>
+<p>Это уже в самом торе надо делать, не? Каким образом я это через скрипт реализовать должен?</p></td><td>2024-10-12T15:52:05.176Z</td></tr><tr><td>easyone11</td><td><p>на дачной йоте ничего не находится почему то, лог бы какой нибудь</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/6205d9f5b0274b5d912b440503b5f91a45e0ff82.png" data-download-href="https://ntc.party/uploads/default/6205d9f5b0274b5d912b440503b5f91a45e0ff82" title="image"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/6205d9f5b0274b5d912b440503b5f91a45e0ff82.png" alt="image" data-base62-sha1="dZ9kns3FmGakRVjEdLvvz2hrx3c" width="575" height="500" data-dominant-color="1E1E1E"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">675×586 14.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>переключил ноут на на инет с телефона мегафон и там ipfinder находит ipшники, интересно<br>
+ps<br>
+нашел причину, включённый doh на кинетики… на роутере с опенврт такой проблемы нет с включённым дохом</p></td><td>2024-10-13T09:06:13.883Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Тот конфиг, что выше строчки available, у вас не сработал?</p></td><td>2024-10-13T10:21:49.927Z</td></tr><tr><td>easyone11</td><td><p>работает, просто интересно что за затычка с йотой, которой месяц назад не было</p></td><td>2024-10-13T10:42:37.887Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А вы только гудчеком искали? Или блокчек тоже по нулям?</p></td><td>2024-10-13T10:43:47.719Z</td></tr><tr><td>easyone11</td><td><p>гудчек не юзаю, только блокчек<br>
+находится много рабочих сратегий, повторюсь просто интересно что за затычка с йотой, которой месяц назад не было</p></td><td>2024-10-13T10:45:37.750Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А попробуйте по обновленной инструкции с доп. фейками проверить (<code>PKTWS_EXTRA=--dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin"</code>). Или вы так и проверяли?</p></td><td>2024-10-13T11:18:02.542Z</td></tr><tr><td>easyone11</td><td><p>это надо в блокчек  скрипт куда то прописывать?<br>
+нашёл как, ща проерим<br>
+тоже самое</p></td><td>2024-10-13T11:48:09.498Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Не, ничо не надо, просто переписать cmd готовым из шапки<br>
+Мда, засада. А не хотите проверить гудчеком? Он вам хотя б напишет ваш ggc, можно будет его попинговать</p></td><td>2024-10-13T11:59:27.970Z</td></tr><tr><td>easyone11</td><td><p>не, в целом всё работает да и в город скоро ехать</p></td><td>2024-10-13T12:03:12.914Z</td></tr><tr><td>lylipvtoey</td><td><aside class="quote no-group" data-username="Ori" data-post="169" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Вряд ли буду делать, мне лень.</p>
+</blockquote>
+</aside>
+<p>ОК</p>
+<aside class="quote no-group" data-username="Ori" data-post="169" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Там уже есть поддержка переменной среды proxy=, либо в самом скрипте в начале идет раздел конфига. Раскомментить, убрав rem, и поставить что нужно.</p>
+</blockquote>
+</aside>
+<p>Вот я и говорю - в два движения. Хотя я бы делал иначе.<br>
+127.0.0.1 в список серверов, и <code>DNSPort 53</code> в torrc.</p>
+<aside class="quote no-group" data-username="Ori" data-post="169" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Это уже в самом торе надо делать, не? Каким образом я это через скрипт реализовать должен?</p>
+</blockquote>
+</aside>
+<p>Если вкратце, то Tor предоставляет текстовый протокол управления, позволяющий давать указания вида “Следующий запрос, который поступит, направить по цепочке, оканчивающейся на сервере под названием <code>something</code>”. См. <code>man tor</code>, <code>ControlPort</code>.<br>
+Альтернативный вариант - выставить параметр <code>AllowDotExit 1</code> и тогда запросы к адресам <code>domain.tld.something.exit</code> будут идти таким путём.</p>
+<p>Но да, это сложно и сильно на будущее.</p></td><td>2024-10-14T15:33:15.650Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="lylipvtoey" data-post="179" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/l/8e7dd6/48.png" class="avatar"> lylipvtoey:</div>
+<blockquote>
+<p>Хотя я бы делал иначе.<br>
+127.0.0.1 в список серверов, и <code>DNSPort 53</code> в torrc.</p>
+</blockquote>
+</aside>
+<p>Прикольная идея, не думал даже о таком. Возьму на заметку.</p>
+<blockquote>
+<p>Если вкратце, то Tor предоставляет текстовый протокол управления</p>
+</blockquote>
+<p>Делать это вряд ли буду. Скрипт по-сути делался именно для запросов с кастомным сабнетом, остальные резолверы там так, для галочки.</p>
+<p>Плюс писал для души, за пару дней, не планировал как-то дальше развивать.</p></td><td>2024-10-14T16:24:12.302Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>У меня парсер не работает, требует обновить Курл. Как это сделать на Вин 10? Сейчас у меня версия 8.9.1</p></td><td>2024-10-14T19:44:27.851Z</td></tr><tr><td>Ori</td><td><p>Можете вот эту строчку в скрипте:</p>
+<pre><code class="lang-auto">if !version! LSS 810 (
+</code></pre>
+<p>поменять на:</p>
+<pre><code class="lang-auto">if !version! LSS 809 (
+</code></pre>
+<p>Или просто закомментить/удалить весь кусок кода с проверкой.</p>
+<p>Версии 8.9 должно хватать, наверное. Я просто перестраховывался, т.к. не нашел инфы когда именно в курл добавили поддержку QUIC.</p></td><td>2024-10-14T19:52:47.504Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Заработало, но с ограниченной функциональностью.<br>
+Мелкомягкие в своем репертуаре - даже Курл нельзя без проблем обновить из командной строки. Нужны танцы с бубнами.</p></td><td>2024-10-14T20:16:14.989Z</td></tr><tr><td>Uefi1(Uefi1)</td><td><aside class="quote no-group" data-username="TesterTi" data-post="1" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p><code>--dpi-desync=split2</code> - это <code>-e2</code> либо <code>-e2 --native-frag </code><br>
+<code>--dpi-desync=disorder2</code> это <code>-e2 --reverse-frag</code><br>
+<code>--dpi-desync=split</code> или <code>--dpi-desync=fake,split2</code> - это <code>-e2</code> плюс какой-либо фейк <code>(--wrong-seq / --wrong-chksum  /  --fake-from-hex n / --fake-gen n</code>)<br>
+<code>--dpi-desync=disorder</code> или <code>--dpi-desync=fake,disorder2</code> - это <code>-e2 --reverse-frag</code> плюс какой-либо фейк <code>(--wrong-seq / --wrong-chksum  /  --fake-from-hex n / --fake-gen n</code>)<br>
+<code>--dpi-desync-ttl=n</code> это <code>--set-ttl n</code><br>
+<code>--dpi-desync-fooling=badseq</code> это <code>--wrong-seq</code><br>
+<code>--dpi-desync-fooling=badsum</code> это <code>--wrong-chksum</code><br>
+<code>--dpi-desync-fake-tls=n</code> это <code>--fake-from-hex n</code><br>
+<code>--dpi-desync-repeats=n</code> это <code>--fake-resend n</code></p>
+</blockquote>
+</aside>
+<p>Мдаа конечно скрипты на скриптах тут лучше софт какой то полноценный написать бы может даже с интерфейсом</p></td><td>2024-10-14T20:40:21.016Z</td></tr><tr><td>alk2ntc(Alk2ntc)</td><td><p>С сайта curl.se достаточно скачать последний curl для Windows. Откройте архив и извлеките содержимое папки bin\ в ту же папку, где у вас лежит ipfinder.cmd. Все заработает на новом curl</p></td><td>2024-10-15T06:22:44.260Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>А какой вариант Курла лучше скачать для Вин 10? Там много вариантов всяких на странице загрузки.</p></td><td>2024-10-15T08:10:58.674Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Выдает вот что теперь этот скрипт:</p>
+<pre><code class="lang-auto">curl: option --http3: the installed libcurl version does not support this
+curl: try 'curl --help' for more information
+</code></pre></td><td>2024-10-15T08:16:57.462Z</td></tr><tr><td>alk2ntc(Alk2ntc)</td><td><p>я загрузил последнюю под Windows for 64-bit 8.10.1<br>
+<a href="https://curl.se/windows/" class="onebox" target="_blank" rel="noopener nofollow ugc">https://curl.se/windows/</a><br>
+С ней все работает</p></td><td>2024-10-15T10:04:46.704Z</td></tr><tr><td>Uefi1(Uefi1)</td><td><p>Подскажи как перебираются параметры я наверное свой софт отдельно напишу чем тут скрипты на скриптах в кубе использовать</p></td><td>2024-10-15T10:48:31.630Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Это не мой скрипт, а автора запрета. Моя только пошаговая инструкция для людей, далеких от IT. Я не программист и на bash особо не шарю. Только в виндовых батниках немного. Но думаю, раз ты можешь написать свой софт, то разберешься в скрипте, как он работает. Ну или уточни у его автора - bolvan.</p></td><td>2024-10-15T13:03:06.336Z</td></tr><tr><td>Uefi1(Uefi1)</td><td><p>Я бы написал просто более удобный вариант этого перебора параметров и без сотни скриптов</p></td><td>2024-10-15T13:32:02.533Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Так напишите, Вам тут все спасибо скажут.</p></td><td>2024-10-15T14:01:48.948Z</td></tr><tr><td>Uefi1(Uefi1)</td><td><p>Это понятно я не понимаю как настройки перебираются если узнаю алгоритм напишу конечно</p></td><td>2024-10-15T15:04:55.266Z</td></tr><tr><td>Chupachabra(Chupachabra)</td><td><p>Как выполнить 5 пункт, если ютуб совсем не открывается?</p></td><td>2024-10-18T08:02:40.773Z</td></tr><tr><td>CrazyPencill(Crazy Pencill)</td><td><p>Подскажите, блокчек одной из первых строчек пишет:</p>
+<details>
+<summary>
+Спойлер</summary>
+<ul>
+<li>curl_test_http ipv4 <a href="http://rr1---sn-axq7sn7e.googlevideo.com" rel="noopener nofollow ugc">rr1---sn-axq7sn7e.googlevideo.com</a></li>
+</ul>
+<ul>
+<li>checking without DPI bypass<br>
+!!! AVAILABLE !!!</li>
+</ul>
+</details>
+<p>Но ютуб всё равно не пашет. Больше стратегий не находит (всё делал по инструкции). Это может что-то означать?</p></td><td>2024-10-18T10:29:15.709Z</td></tr><tr><td>easyone11</td><td><aside class="quote no-group" data-username="CrazyPencill" data-post="195" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/crazypencill/48/10639_2.png" class="avatar"> CrazyPencill:</div>
+<blockquote>
+<p>Это может что-то означать?</p>
+</blockquote>
+</aside>
+<p>что блокчек запущен когда работает какое то средство обхода блокировок</p></td><td>2024-10-18T11:05:35.473Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Включить расширение прокси вроде censor tracker или антизапрета (обход блокировок рунета) и добавить в список проксируемых <a href="http://youtube.com">youtube.com</a></p></td><td>2024-10-18T15:40:09.466Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Что по “http” доступен без обхода. У меня тоже так пишет, но это ни на что не влияет. Потому что на самом деле соединение идет по “https”. А вот то что больше ничего не находит… У вас файрволл/брандмауэр/антивирус не блокирует случайно? Если нет - попробуйте еще через гудчек поискать <a href="https://ntc.party/t/goodcheck-%D0%B1%D0%BB%D0%BE%D0%BA%D1%87%D0%B5%D0%BA-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82-%D0%B4%D0%BB%D1%8F-goodbyedpi-zapret-byedpi/10880/875" class="inline-onebox">GoodCheck - блокчек-скрипт для GoodbyeDPI, Zapret, ByeDPI - #875 by zzr</a> Распакуйте его в папку с zapret-winws (так чтоб winws.exe был в одной папке с GoodCheck.cmd)</p></td><td>2024-10-18T15:43:42.284Z</td></tr><tr><td>TikTak(TikTak)</td><td><p>что то у меня :<br>
+‘curl’ is not recognized as an internal or external command, operable program or batch file.<br>
+в смд вместо айпи адресов</p></td><td>2024-10-22T00:36:38.299Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Незнаете почему block check находит стратегии, а они не работают?</p></td><td>2024-10-22T13:45:18.109Z</td></tr><tr><td>ruzmari</td><td><p>Как подобрать стратегию одновременно для discord и для ютуба?</p></td><td>2024-10-22T16:45:47.049Z</td></tr><tr><td>donotmesswithme</td><td><p>Товарищи, у меня что-то очень сложный случай.<br>
+Запрет стоит на Openwrt, подключение по PPPoE.<br>
+Блокчекаю сервера, которые выкидывает в консоли. например, вот эти:</p>
+<pre><code class="lang-auto">rr1---sn-0ahjg0-gv8e.googlevideo.com
+rr2---sn-0ahjg0-gv8e.googlevideo.com
+rr8---sn-ug5onuxaxjvh-n8vs.googlevideo.com
+</code></pre>
+<p>На пару десятков серверов блокчек выдает одинаковые стратегии:</p>
+<pre><code class="lang-auto">- checking nfqws --dpi-desync=syndata,split2 --wssize 1:6 --dpi-desync-split-pos=1 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin 
+- checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin  
+- checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin  
+- checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50 --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin  
+- checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10 --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin  
+- checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4 --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin 
+- checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3 --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin 
+- checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2 --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin         
+- checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin 
+- checking nfqws --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin 
+- checking nfqws --dpi-desync=fake,split --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin 
+- checking nfqws --dpi-desync=fake,split2 --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin  
+- checking nfqws --dpi-desync=syndata,split2 --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin     
+- checking nfqws --dpi-desync=fake,split --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin  
+- checking nfqws --dpi-desync=fake,split2 --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin     
+
+</code></pre>
+<p>Общий паттерн следующий - везде есть --wssize 1:6 (кстати, вопрос - в блокчеке он без “=”, в readme.txt с “=”. Но я пробовал оба варианта, разницы не нашел).<br>
+Если брать следующие стратегии, то соединение бесконечное.</p>
+<pre><code class="lang-auto">--dpi-desync=fake,split2 --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin   
+или
+--dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin 
+или любой с 
+--dpi-desync-autottl=
+</code></pre>
+<p>Если сделать конструкцию с --dpi-desync-ttl=4, либо  --dpi-desync-ttl=4 --dpi-desync-fooling=md5sig(badseq), то в консоли соединение быстро дропается.</p>
+<p>Но объеденяет все стратегии то, что ни одна из них не дается соединиться с кеширующими серверами. Подставлять кастомные tls от гуглдрайва, эппла или еще чего-то результата не дает.<br>
+Помогите.</p></td><td>2024-10-22T18:29:37.823Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>У вас только из summary не работают или вообще все? Из summary могут не работать, потому что там доп. фейки не указаны <code>--dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin</code> Попробуйте их просто добавить в конец стратегии.</p></td><td>2024-10-22T21:27:56.218Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><aside class="quote no-group" data-username="TikTak" data-post="199" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/cc9497/48.png" class="avatar"> TikTak:</div>
+<blockquote>
+<p>‘curl’ is not recognized as an internal or external command, operable program or batch file.</p>
+</blockquote>
+</aside>
+<p>Это в гудчеке? Странно, там curl же в сборку входит. Вы полностью весь архив распаковали в папку с zapret-winws?</p></td><td>2024-10-22T21:31:33.083Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Предлагаю попробовать готовую сборку KDS <a href="https://ntc.party/t/%D1%81%D0%B1%D0%BE%D1%80%D0%BA%D0%B0-ytdisbystro-%D0%BD%D0%B0-%D0%BE%D1%81%D0%BD%D0%BE%D0%B2%D0%B5-zapret-%D1%82%D0%B5%D1%81%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%B8-%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5-%D0%BF%D0%B8%D1%88%D0%B8%D1%82%D0%B5-%D1%81%D1%8E%D0%B4%D0%B0-%D0%BD%D0%B8-%D0%BF%D1%80%D0%BE-%D0%BA%D0%B0%D0%BA%D0%B8%D0%B5-%D0%BE%D1%88%D0%B8%D0%B1%D0%BA%D0%B8-%D0%BD%D0%B5-%D0%BF%D1%80%D0%BE%D1%87%D0%B8%D1%82%D0%B0%D0%B2-1-%D0%B9-%D0%BF%D0%BE%D1%81%D1%82-%D1%82%D0%B5%D0%BC%D1%8B/11624" class="inline-onebox">Сборка YTDisBystro на основе Zapret: Тестирование и обсуждение (Не пишите сюда ни про какие ошибки не прочитав 1-й пост темы)</a> В ней как раз стратегия и для ютуба и для дискорда. Если сработает, то ничего подбирать не нужно.</p></td><td>2024-10-22T21:35:49.924Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А какое у вас конечное устройство, на чем вы смотрите ютуб?</p></td><td>2024-10-22T21:38:37.387Z</td></tr><tr><td>donotmesswithme</td><td><p>amd64, Windows 10, Firefox, Chromium Gost и Yandex браузер.<br>
+Включение и отключение Kyber в Firefox погоды не делает.<br>
+Пару недель назад были стратегии, где все работало на всех устройствах и с любой комбинацией браузеров. Сейчас - нигде кэширующий сервера не работают.</p></td><td>2024-10-23T07:18:02.583Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Странно конечно, что не работает, хотя блокчек выдал столько рабочих стратегий. Даже не знаю, что тут можно сделать… Единственное, что приходит в голову - это какое-нибудь перенаправление попробовать. На одном форуме был такой совет:</p>
+<blockquote>
+<p>За видеороликами ютуба нас всегда направляло на сети 208.65.152.0/22 и 208.117.224.0/19 обе эти сети находятся в US. Направили пакеты к местному GGC.</p>
+</blockquote>
+<pre><code class="lang-auto">iptables -t nat -I PREROUTING -s 10.X.Y.Z/NET -d 208.65.152.0/22 -p tcp --dport http -j DNAT --to-destination 89.218.72.76
+iptables -t nat -I PREROUTING -s 10.X.Y.Z/NET -d 208.117.224.0/19 -p tcp --dport http -j DNAT --to-destination 89.218.72.76
+</code></pre>
+<p>Что если вам наоборот попробовать? С ваших подсетей перенаправить на 208.65.152.0/22 и 208.117.224.0/19. Ну так, в порядке эксперимента…</p></td><td>2024-10-23T11:09:33.663Z</td></tr><tr><td>TikTak(TikTak)</td><td><p>Не не, это было про тот скрипт, который незабаненные айпи в забугорных днсах находит. нашёл посвежее курл для вин7) сейчас работает</p></td><td>2024-10-23T20:46:17.085Z</td></tr><tr><td>easyone11</td><td><p>del</p></td><td>2024-11-02T14:21:06.738Z</td></tr><tr><td>ruzmari</td><td><aside class="quote no-group" data-username="TesterTi" data-post="205" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>Предлагаю попробовать готовую сборку KDS</p>
+</blockquote>
+</aside>
+<p>Вопрос по-прежнему актуален</p></td><td>2024-11-02T18:33:47.116Z</td></tr><tr><td>easyone11</td><td><p>Подскажите, а можно просто через curl проверить доступен какой нибудь <a href="http://rr1---sn-gvnuxaxjvh-aome.googlevideo.com">rr1---sn-gvnuxaxjvh-aome.googlevideo.com</a> или нет?<br>
+чтобы когда zapret не работает, тогда бы и показывал что сервер недоступен.</p></td><td>2024-11-02T18:42:41.930Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>Запрет не расширяет твою видимость. Он лишь снимает ограничение провайдера . Если хост недоступен изначально, то он так и останется недоступен и ты это узнаешь лишь по консоли, курлу и тд.<br>
+В данный момент имеются 3 варианта GGC у любого провайдера и почему-то гугл не подозревает о них:<br>
+1 - Доступные хорошие<br>
+2 - Доступные “обманки”<br>
+3 - Бывшие сервера (которые убрали, но маршрут до них остался)</p>
+<p>Так-же техника запрета запросов к “плохим” серверам помогает улучшить отзывчивость <s>яндекса</s> ютуба (через блокировку рекламу, сам браузер или hosts ). Отображаться запросы будут в консоле, но уже будет что-то типо “block”. А то если их не убирать, “тормозить” <s>яндекса</s> ютуб будет, пока тайм-аут не наступит. Причем тайм-аут может быть выставлен отличный от стандартных 30с…<br>
+Конечно данные хосты можно накидать и в исключение запрета… Но он самый невиновный</p></td><td>2024-11-02T19:24:34.106Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group quote-modified" data-username="easyone11" data-post="212" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/easyone11/48/6759_2.png" class="avatar"> easyone11:</div>
+<blockquote>
+<p>Подскажите, а можно просто через curl проверить доступен какой нибудь <a href="http://rr1---sn-gvnuxaxjvh-aome.googlevideo.com">rr1—sn-gvnuxaxjvh-aome.googlevideo.com</a> или нет?</p>
+</blockquote>
+</aside>
+<p>Простой вариант:</p>
+<pre><code class="lang-auto">curl -m 2 -so NUL -w "code: %{response_code}%{onerror}\nerror: %{errormsg}" https://rr1---sn-gvnuxaxjvh-aome.googlevideo.com
+</code></pre>
+<p>Вариант all-in-one:</p>
+<pre><code class="lang-auto">curl -so NUL -m 2 -w "\nRequested URL: %{url}\nRedirect URL: %{redirect_url}\nIP: %{remote_ip}\nHTTP Ver.: %{scheme}/%{http_version}\nSSL Check (0=ok): %{ssl_verify_result}\n\nTime - DNS: %{time_namelookup} sec\nTime - Connection: %{time_connect} sec\nTime - Handshake: %{time_appconnect} sec\nTime - Receiving Data: %{time_starttransfer} sec\nData sent in request: %{size_request} bytes\nData received in headers: %{size_header} bytes\n\nResponse Code: %{response_code}\nExit Code: %{exitcode}\n%{onerror}Error Message: %{errormsg}" https://rr1---sn-gvnuxaxjvh-aome.googlevideo.com
+</code></pre>
+<p>Фактически, важно наличие респонс кода.</p></td><td>2024-11-02T23:33:50.286Z</td></tr><tr><td>easyone11</td><td><aside class="quote no-group" data-username="Ori" data-post="214" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Простой вариант:</p>
+<pre><code class="lang-auto">curl -m 2 -so NUL -w "code: %{response_code}%{onerror}\nerror: %{errormsg}" https://rr1---sn-gvnuxaxjvh-aome.googlevideo.com
+</code></pre>
+<p>Вариант all-in-one:</p>
+<pre><code class="lang-auto">curl -so NUL -m 2 -w "\nRequested URL: %{url}\nRedirect URL: %{redirect_url}\nIP: %{remote_ip}\nHTTP Ver.: %{scheme}/%{http_version}\nSSL Check (0=ok): %{ssl_verify_result}\n\nTime - DNS: %{time_namelookup} sec\nTime - Connection: %{time_connect} sec\nTime - Handshake: %{time_connect} sec\nTime - Receiving Data: %{time_starttransfer} sec\nData sent in request: %{size_request} bytes\nData received in headers: %{size_header} bytes\n\nResponse Code: %{response_code}\nExit Code: %{exitcode}\n%{onerror}Error Message: %{errormsg}" https://rr1---sn-gvnuxaxjvh-aome.googlevideo.com
+</code></pre>
+<p>Фактически, важно наличие респонс кода.</p>
+</blockquote>
+</aside>
+<p>благодарю</p></td><td>2024-11-03T05:28:18.858Z</td></tr><tr><td>ChikiBrikken</td><td><p>Я из донецкого региона, где гугл ком не работает, есть ли альтернативы файлам типа *google_com.bin?</p></td><td>2024-11-05T20:20:56.795Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>Найди на данном сайте архивы сборок и распакуй их<br>
+Большинство из них можно найти там.</p>
+<p>И да… Называй их пейлоадми</p></td><td>2024-11-05T20:25:42.610Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="ChikiBrikken" data-post="216" data-topic="10060" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/c/e79b87/48.png" class="avatar"> ChikiBrikken:</div>
+<blockquote>
+<p>Я из донецкого региона, где гугл ком не работает, есть ли альтернативы файлам типа *google_com.bin?</p>
+</blockquote>
+</aside>
+<p>Для ютуба - нет. Пэйлоады делают на основе гугла, как раз из-за того, что у большинства он не заблочен и при этом является смежным для ютуба. Как следствие, его не останавливают блокировщики. Если он у вас забанен (и если забанены все поддомены, типа <a href="http://fonts.google.com">fonts.google.com</a> <a href="http://drive.google.com">drive.google.com</a> и др.) - то толку, скорее всего, с кастомных пэйлоадов не будет. Проще сразу искать стратегию без них.</p></td><td>2024-11-05T20:48:14.513Z</td></tr><tr><td>Vartov</td><td><p>Всем привет! Пытался подобрать стратегию для запрета, но скрипт выдал такой результат:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/7ac1a6265a24da7b4117a4ca49f0506c4b3ef1ac.png" data-download-href="https://ntc.party/uploads/default/7ac1a6265a24da7b4117a4ca49f0506c4b3ef1ac" title="image"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/7ac1a6265a24da7b4117a4ca49f0506c4b3ef1ac.png" alt="image" data-base62-sha1="hvX8POIf1jb8wzpNLx8HYpksvuI" width="690" height="98" data-dominant-color="1C1C1C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">767×110 2.38 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Такого результата в теме не встречал. Можете подсказать в чем причина? Или тспу у провайдера мощная? Гудчек тоже выдает не обнадёживающие результаты.  Провайдер ростелеком.<br>
+Еще были ошибки о том, что невозможно записать во временную папку:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/ade81c987e85eb748c31430d5dacce6c3eb9cf42.png" data-download-href="https://ntc.party/uploads/default/ade81c987e85eb748c31430d5dacce6c3eb9cf42" title="image"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/ade81c987e85eb748c31430d5dacce6c3eb9cf42.png" alt="image" data-base62-sha1="oOrTLlSSqru1drvyiGkSwbtwb6O" width="690" height="82" data-dominant-color="1B1B1B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">962×115 5.47 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Ниже txt с тем, что выдало после п.8 пп(!)<br>
+<a class="attachment" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/dO0FDvI13iZ3UuCWdbL7x2DmLHV.log">blockcheck.log</a> (598,6 КБ)</p></td><td>2024-11-10T11:45:41.340Z</td></tr><tr><td>KDS</td><td><p>Домен надо указывать без хттпс://</p></td><td>2024-11-10T14:16:13.507Z</td></tr><tr><td>Vartov</td><td><p>хех, с этим я конечно тупанул.  В общем, нашлась одна стратегия, но с ней только серые ореолы от превьюшек явились взору (до этого бесконечная загрузка). Вкл/ откл quick ничего не дал.<br>
+Поперебирал стратегии из файлика-результат тот же</p></td><td>2024-11-10T20:09:07.461Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>У тебя в блеклист не добавлен какой то домен гугл проверь хостлист</p></td><td>2024-11-10T23:39:39.351Z</td></tr><tr><td>Rocker47(Рокер Хитманович)</td><td><p>Помогите! Какая то ошибка с драйвером windivert<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/b31819cf40120fb2610f5ff7c435246e3bd48735.png" data-download-href="https://ntc.party/uploads/default/b31819cf40120fb2610f5ff7c435246e3bd48735" title="изображение"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/b31819cf40120fb2610f5ff7c435246e3bd48735.png" alt="изображение" data-base62-sha1="pyl6nQ6vqU2dEj4VVhGNWqalARn" width="690" height="360" data-dominant-color="1B1B1B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">979×512 34.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>P.S. разобрался спасибо, наконец-то теперь по правильному теститься</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/c089dddb0ae1fd65c1c38a9f797d17a627be532c.png" data-download-href="https://ntc.party/uploads/default/c089dddb0ae1fd65c1c38a9f797d17a627be532c" title="изображение"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/c089dddb0ae1fd65c1c38a9f797d17a627be532c.png" alt="изображение" data-base62-sha1="rth3eFTYjRWbsrxGuOiwMZ5fBi4" width="690" height="360" data-dominant-color="1B1B1B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">979×512 34.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-11-13T15:09:55.185Z</td></tr><tr><td>Rocker47(Рокер Хитманович)</td><td><p>Что-то не помогло, не нашёл blockcheck рабочих стратегий. Какие ещё есть варианты?<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/5b1c60a642a83fdebdf894035f901c9433f01d5c.png" data-download-href="https://ntc.party/uploads/default/5b1c60a642a83fdebdf894035f901c9433f01d5c" title="изображение"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/5b1c60a642a83fdebdf894035f901c9433f01d5c.png" alt="изображение" data-base62-sha1="d00foRtdXiCntRwrxvopTeLZ27q" width="690" height="373" data-dominant-color="0F0F0F"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1920×1040 25.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-11-13T16:26:03.695Z</td></tr><tr><td>tehkos(TConst)</td><td><p>написано же для тлс1.2 что-то там работает. Для проверок тлс1.3 наверное curl устаревший, нужно другой установить. Хотя то, что работает тлс1.2 работает и для тлс1.3. Не знаю почему на тлс1.2 он нашел, а на тлс 1.3 нет.</p></td><td>2024-11-14T01:05:57.738Z</td></tr><tr><td>KDS</td><td><p>Самое интересное, начерта там в проверке TLS фейк для квика торчит ) Толку от него нет все равно, ибо не работает.</p></td><td>2024-11-14T03:50:25.051Z</td></tr><tr><td>Rocker47(Рокер Хитманович)</td><td><p>Ну по инструкции делал</p></td><td>2024-11-14T09:03:52.179Z</td></tr><tr><td>Rocker47(Рокер Хитманович)</td><td><p>Вроде как нашло рабочие стратегии после двух дней тестов</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/60549d484b7ff723c03a9abcdd29e9fc381fb55d.png" data-download-href="https://ntc.party/uploads/default/60549d484b7ff723c03a9abcdd29e9fc381fb55d" title="изображение"><img src="подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck-10060/60549d484b7ff723c03a9abcdd29e9fc381fb55d.png" alt="изображение" data-base62-sha1="dKb7BrS9gIaQN0Zd8VuUayyOzcp" width="690" height="373" data-dominant-color="F1F1F1"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1920×1040 80.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Только я не понял куда это всё вписывать?</p></td><td>2024-11-14T11:01:19.985Z</td></tr><tr><td>Rocker47(Рокер Хитманович)</td><td><p>А куда вписывать тогда это? Я думал ничего не нашло. Сорри за флуд, не шарю в этом ещё новичок.<br>
+Попробовал вписать:</p>
+<pre><code class="lang-auto">winws --wf-l3=ipv4 --wf-tcp=443 --wssize 1:6 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+</code></pre>
+<p>в test.cmd как в инструкции в шапке, создал его в папке zapret-winws. Ничего не произошло, на пару секунд появилась консоль и закрылась, ютуб на том же месте, видео не прогружаются.</p></td><td>2024-11-14T12:54:29.698Z</td></tr><tr><td>BBS</td><td><p>Прошу помощи профессионалов. Провайдер подмосковский, пытаюсь вылечить ютуб. Большинство блокировок доменов обходится примитивной стратегией, однако ютуб часто отправляет меня на такие домены, которые заблокированы наглухо, и ни goodcheck, ни blockcheck, не могут найти ни одной рабочей стратегии. Я выписал несколько доменов:<br>
+<a href="http://rr1---sn-joug0-n8vl.googlevideo.com" class="onebox" target="_blank" rel="noopener">rr1---sn-joug0-n8vl.googlevideo.com</a><br>
+<a href="http://rr2---sn-joug0-n8vl.googlevideo.com" class="onebox" target="_blank" rel="noopener">rr2---sn-joug0-n8vl.googlevideo.com</a><br>
+– с этими проблем  нет, они находятся в 4 хопах от меня, работает простая стратегия.<br>
+<a href="http://rr14---sn-n8v7kn7d.googlevideo.com" class="onebox" target="_blank" rel="noopener">rr14---sn-n8v7kn7d.googlevideo.com</a><br>
+<a href="http://rr14---sn-n8v7zns6.googlevideo.com" class="onebox" target="_blank" rel="noopener">rr14---sn-n8v7zns6.googlevideo.com</a><br>
+<a href="http://rr8---sn-n8v7snl7.googlevideo.com" class="onebox" target="_blank" rel="noopener">rr8---sn-n8v7snl7.googlevideo.com</a><br>
+<a href="http://rr3---sn-n8v7kn7r.googlevideo.com" target="_blank" rel="noopener">rr3---sn-n8v7kn7r.googlevideo.com</a><br>
+<a href="http://rr4---sn-n8v7znlk.googlevideo.com" target="_blank" rel="noopener">rr4---sn-n8v7znlk.googlevideo.com</a><br>
+<a href="http://rr10---sn-n8v7kn7d.googlevideo.com" target="_blank" rel="noopener">rr10---sn-n8v7kn7d.googlevideo.com</a><br>
+<a href="http://rr7---sn-n8v7zns6.googlevideo.com" target="_blank" rel="noopener">rr7---sn-n8v7zns6.googlevideo.com</a><br>
+– а с этими засада, до них 9 хопов, и ни одна стратегия не помогает. Они пингуются, открываются по http, telnet на 443 порт проходит, но браузер их открывать не хочет.<br>
+Причём если тестировать с другого провайдера, на котором ютуб работает без обходов, он не хочет открывать первые 2 домена.<br>
+Есть ли варианты кроме VPN?<br>
+Заранее спасибо всем кто откликнулся.</p></td><td>2024-12-22T11:51:02.436Z</td></tr><tr><td>0x7f</td><td><p>я бы с такой ситуации попробовал бы выкачивать через тор указав его в настройках приложения для телевизора.<br>
+до недавнего времени у меня прям жёстко блочили, хоть и не бан по айпи но тяжело всё обходилось, приходилось выкачивать себе на комп подписки пока я на работе и потом вечером смотреть что скачал. я это делал таким скриптом <a href="https://gist.github.com/kotsmotritnastul/6bf32effd48aa3623f742055f121ab7c" class="inline-onebox" rel="noopener nofollow ugc">yt-dlp скачать все подписки за последние два дня · GitHub</a></p></td><td>2024-12-22T12:05:47.687Z</td></tr><tr><td>BBS</td><td><p>И ещё одно наблюдение: если открыть видос, которого нет на ближайшем кэширующем сервере и подождать минуты 3, оно там появляется и воспроизводится без проблем. Но всё-таки хочется достучаться до других серверов.</p></td><td>2024-12-22T12:26:23.616Z</td></tr><tr><td>uwu(uwu)</td><td><p><code>--dpi-desync=fake,split --dpi-desync-split-pos=1 --dpi-desync-fake-tls=0x16030102920100028e03035672ea15594162966e8a144297c497ddace5d546af7a4a0414a946fa52023cf720b0220c217abb1db321abbf01985cf3d07c61367c2ba5eff307b0f6f042448077 --dpi-desync-fooling=datanoack</code>  не работает с этим?</p></td><td>2024-12-22T13:03:40.594Z</td></tr><tr><td>BBS</td><td><p>Увы, нет (<br>
+Часть доменов выдают ERR_TIMED_OUT, часть ERR_CONNECTION_RESET. Первые 2 домена работают как и раньше.</p></td><td>2024-12-22T13:11:37.083Z</td></tr><tr><td>uwu(uwu)</td><td><p>а этот открывается?<br>
+<code>rr1---sn-gvnuxaxjvh-aome.googlevideo.com</code></p>
+<p>сборку от kds пробовал?<br>
+<code>https://ntc.party/t/%D1%81%D0%B1%D0%BE%D1%80%D0%BA%D0%B0-ytdisbystro-%D0%BD%D0%B0-%D0%BE%D1%81%D0%BD%D0%BE%D0%B2%D0%B5-zapret-%D0%B4%D0%BB%D1%8F-windows-%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5/13251/410</code></p></td><td>2024-12-22T13:49:23.825Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Я тоже с этим сталкивался можешь попробывать ради интереса поставить bye dpi возможно он поможет</p></td><td>2024-12-22T13:55:45.630Z</td></tr><tr><td>BBS</td><td><aside class="quote no-group" data-username="uwu" data-post="235" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/uwu/48/15300_2.png" class="avatar"> uwu:</div>
+<blockquote>
+<p><a href="http://rr1---sn-gvnuxaxjvh-aome.googlevideo.com">rr1---sn-gvnuxaxjvh-aome.googlevideo.com</a></p>
+</blockquote>
+</aside>
+<p>ERR_TIMED_OUT</p>
+<aside class="quote no-group" data-username="uwu" data-post="235" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/uwu/48/15300_2.png" class="avatar"> uwu:</div>
+<blockquote>
+<p>сборку от kds пробовал?</p>
+</blockquote>
+</aside>
+<p>Да, тоже не помогает.</p></td><td>2024-12-22T17:10:16.853Z</td></tr><tr><td>BBS</td><td><p>Тоже не помог (</p></td><td>2024-12-22T17:24:05.319Z</td></tr><tr><td>bolvan</td><td><p>Когда все not working, первым делом надо смотреть на первые тесты port и ip block, которые требуют ручной интерпретации.<br>
+Если порт не конектит, это сразу приехали.<br>
+Если <a href="http://iana.org">iana.org</a> не проходит на IP гугла (виснет, большинство ошибок SSL вероятно - прошло), значит надо пробовать кастомные пейлоады с гуглом<br>
+UNBLOCKED_DOM=<a href="http://www.google.com">www.google.com</a> blockcheck<br>
+Заменит <a href="http://iana.org">iana.org</a> на <a href="http://www.google.com">www.google.com</a></p></td><td>2024-12-22T17:58:27.644Z</td></tr><tr><td>BBS</td><td><pre><code class="lang-auto">* port block tests ipv4 rr14---sn-n8v7kn7d.googlevideo.com:80
+nc -z -w 2 173.194.176.224 80
+Connection to 173.194.176.224 80 port [tcp/http] succeeded!
+173.194.176.224 connects
+
+* curl_test_http ipv4 rr14---sn-n8v7kn7d.googlevideo.com
+- checking without DPI bypass
+!!!!! AVAILABLE !!!!!
+
+* port block tests ipv4 rr14---sn-n8v7kn7d.googlevideo.com:443
+nc -z -w 2 173.194.176.224 443
+Connection to 173.194.176.224 443 port [tcp/https] succeeded!
+173.194.176.224 connects
+
+* curl_test_https_tls12 ipv4 rr14---sn-n8v7kn7d.googlevideo.com
+- checking without DPI bypass
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+
+- IP block tests (requires manual interpretation)
+&gt; testing iana.org on it's original ip
+!!!!! AVAILABLE !!!!!
+&gt; testing rr14---sn-n8v7kn7d.googlevideo.com on 192.0.43.8 (iana.org)
+curl: (60) SSL: no alternative certificate subject name matches target hostname 'rr14---sn-n8v7kn7d.googlevideo.com'
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the webpage mentioned above.
+&gt; testing iana.org on 173.194.176.224 (rr14---sn-n8v7kn7d.googlevideo.com)
+curl: (28) Connection timed out after 2001 milliseconds
+-------------------------------------
+- IP block tests (requires manual interpretation)
+&gt; testing www.google.com on it's original ip
+!!!!! AVAILABLE !!!!!
+&gt; testing rr14---sn-n8v7kn7d.googlevideo.com on 172.217.20.164 (www.google.com)
+&gt; testing www.google.com on 173.194.176.224 (rr14---sn-n8v7kn7d.googlevideo.com)
+curl: (28) Connection timed out after 2001 milliseconds
+</code></pre>
+<p>Похоже блок по ip (</p></td><td>2024-12-22T18:35:31.079Z</td></tr><tr><td>bolvan</td><td><p>Может быть whitelist по гугловским SNI. Надо пробовать UNBLOCKED_DOM</p></td><td>2024-12-22T19:39:12.772Z</td></tr><tr><td>BBS</td><td><p>Попробовал UNBLOCKED_DOM=<a href="http://www.google.com/">www.google.com</a>, в конце лога.</p></td><td>2024-12-22T20:06:24.057Z</td></tr><tr><td>KDS</td><td><p>Все эти домены - забугорные. Скорее всего к ним по пути несколько коробок и попалась какая-то упорная.<br>
+С Быстро без проблем открываются все из списка. РТК<br>
+Браузер их открывать не хочет по квику или HTTPS? Большая разница.</p>
+<p>Хотя не исключаю возможности, что они тупо забанены по квик/хттпс запросам по подсетям. Возможно пров не хочет платить за зар. трафф, впнщики и так его нагнали достаточно.</p></td><td>2024-12-22T21:06:45.947Z</td></tr><tr><td>BBS</td><td><p>Тестил только https. quic не пашет совсем, ещё не разбирался почему.<br>
+Точно, я чёт сразу не допёр что не работают зарубежные сервера. Интересно, если завернуть трафик к этим серверам через тот же warp, а остальное оставить как есть, ютуб на меня сильно обидится?</p></td><td>2024-12-22T21:41:35.382Z</td></tr><tr><td>Xunlei</td><td><aside class="quote" data-post="117" data-topic="8055">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-youtube-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/8055/117">Замедление/блокировка YouTube в России</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Посидел пару часов со сниффером и интрументом веб разработчика: 
+Если запрос rr*---sn-********.googlevideo.com идёт на IP локального GGC или московского, то кроме первого пакета SYN ACK в ответ ничего не приходит, даже RST, соединение рубится по таймауту. Если через варп туда же запрос идёт, то приходит 1 Кб ответ (что явно не содержит видео) и браузер сразу же запрашивает с американского сервера уже многобегабайтный кусок видео.
+  </blockquote>
+</aside>
+<p>
+Возможно WARP вам ничего и не отдаст, а вообщем конечно так работает <s>без проблем</s> (без проблем, если проксировать *.youtube.com через варп).</p></td><td>2024-12-22T21:46:17.534Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="BBS" data-post="244" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/e47774/48.png" class="avatar"> BBS:</div>
+<blockquote>
+<p>чёт сразу не допёр что не работают зарубежные сервера</p>
+</blockquote>
+</aside>
+<p><code>rr14.sn-n8v7kn7d.googlevideo.com</code> — московский.</p>
+<aside class="quote no-group" data-username="BBS" data-post="230" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/e47774/48.png" class="avatar"> BBS:</div>
+<blockquote>
+<p>Есть ли варианты кроме VPN?</p>
+</blockquote>
+</aside>
+<p>Split tunneling или ZeroOmega в браузере.</p></td><td>2024-12-22T21:56:58.210Z</td></tr><tr><td>KDS</td><td><p>Если эти сервера не работают ни по хттпс ни по квику (а стратегии то разные) - то вывод напрашивается сам собой.<br>
+По впнам - это ни ко мне вопрос, я их на ютубе не использую ни в каком виде, себе дороже</p></td><td>2024-12-22T22:52:24.655Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="BBS" data-post="240" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/e47774/48.png" class="avatar"> BBS:</div>
+<blockquote>
+<pre><code class="lang-auto">&gt; testing www.google.com on 173.194.176.224 (rr14---sn-n8v7kn7d.googlevideo.com)
+curl: (28) Connection timed out after 2001 milliseconds
+</code></pre>
+</blockquote>
+</aside>
+<p>Это можно считать блоком по IP:port:protocol. Любой пейлоад вызывает блокировку.<br>
+Хотя, может существует и такой, который в вайтлисте, но мы не знаем<br>
+Можно для интереса туда всякий левак передавать типа http или вообще мусора и смотреть приходят ли хотя бы ACK или даже ошибки TLS. Если да, то это блок по IP, порту и протоколу. Если нет, то блок по IP:port , но уже после handshake</p></td><td>2024-12-23T08:00:10.013Z</td></tr><tr><td>uwu(uwu)</td><td><p>у меня такое выдает блокчек, если на пути ggc находятся 2 тспу разных провайдеров в основном.<br>
+сервер может пробиваться при этом (а может и нет), но там весьма странное в wireshasrk<br>
+при первом tls соединении оно блочится, при повторном после rst успешно выполняет хэндшейк.</p>
+<p>или к примеру местные сервера этого комрада<code> rr1---sn-joug0-n8vl.googlevideo.com</code> с билайна (вероятно, тоже по пути встречающие второе тспу) тоже выдает ошибку curl: (28) Connection timed out after 2001 milliseconds с <code>www.google.com</code> в блокчеке<br>
+но при этом эти сервера открываются, если убрать все фейки из стратегии, на чистом сплит<br>
+с tls hex от client hello 50/50 при этом</p>
+<p>но вцелом поведение у разных ggc совершенно по разному…</p></td><td>2024-12-23T08:40:45.196Z</td></tr><tr><td>electrifying</td><td><p>А чё там ркн начал местные ggc по айпи блокать?</p></td><td>2024-12-23T08:51:03.673Z</td></tr><tr><td>KDS</td><td><p>Слава богу - пока нет )<br>
+Это у него провайдерская поипень какая-то, причем никто не может понять - какая (</p></td><td>2024-12-23T09:17:40.820Z</td></tr><tr><td>BBS</td><td><p>После ClientHello, сервер присылает ACK и сидит молчит до таймаута.<br>
+Если обращаться не по домену, а по IP адресу, сервер не присылает даже ACK. На retransmission не реагирует.<br>
+Если вместо ClientHello отправить “GET / HTTP 1.1” на 443 порт, сервер присылает ACK и сразу RST,ACK. Повторные соединения заканчиваются так же.</p></td><td>2024-12-23T10:29:49.916Z</td></tr><tr><td>uwu(uwu)</td><td><p>какому провайдеру принадлежит последний хоп на трассировке перед гугловскими?<br>
+по твоему описанию, у меня такое же с частью ростелекомовских ggc  (правда у меня на данный момент ютуб к ним и не отсылает)<br>
+видео работает наоборот только с тех, которые у тебя недоступны</p>
+<p>т.е в основном все ggc с билайна доступны (в том числе других провайдеров), но вот при переходе билайн&gt;ртк в трассировке то часть из них с такими же симптомами</p></td><td>2024-12-23T10:40:34.190Z</td></tr><tr><td>BBS</td><td><pre><code class="lang-auto">tracert rr14---sn-n8v7kn7d.googlevideo.com
+..........
+6     6 ms     3 ms     3 ms  5.143.253.245
+7     3 ms     3 ms     2 ms  192.178.241.249
+8     2 ms     2 ms     2 ms  72.14.233.95
+9     2 ms     2 ms     2 ms  svo07s06-in-f32.1e100.net [173.194.176.224]
+</code></pre>
+<p>6 - РТК, остальные - х.з., по идее google</p></td><td>2024-12-23T10:46:22.062Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="BBS" data-post="252" data-topic="10060">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/e47774/48.png" class="avatar"> BBS:</div>
+<blockquote>
+<p>Если вместо ClientHello отправить “GET / HTTP 1.1” на 443 порт, сервер присылает ACK и сразу RST,ACK. Повторные соединения заканчиваются так же.</p>
+</blockquote>
+</aside>
+<p>Так делает и <a href="http://www.google.com">www.google.com</a><br>
+Значит блок более похож на ip:port:protocol. Возможно, пустой whitelist, то есть блочится любой TLS, кроме “ничего”. Правила для DPI могли написать как угодно</p></td><td>2024-12-23T11:04:45.052Z</td></tr><tr><td>BBS</td><td><p>Всем спасибо за помощь, буду рекомендовать абоненту менять провайдера.</p></td><td>2024-12-23T11:09:23.863Z</td></tr>
+    </table>
+      </body>
+    </html>

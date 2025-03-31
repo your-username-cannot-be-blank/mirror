@@ -1,0 +1,126 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>goodbyedpi-4-linux-ubuntu-8394</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>dreiunbekannt(dreiunbekannt)</td><td><p>Планируется ли портирование на linux?)</p></td><td>2024-08-01T15:06:25.127Z</td></tr><tr><td>djvadim100(Вадим)</td><td><p>Так на Linux есть zapret от bol-van сам пробовал все работает.</p></td><td>2024-08-01T15:19:54.710Z</td></tr><tr><td>ValdikSS</td><td><p>Для Linux есть zapret.</p></td><td>2024-08-01T15:15:40.000Z</td></tr><tr><td>artenox</td><td><p>zapret сложный. Хотелось бы GUI.</p></td><td>2024-08-01T16:13:33.876Z</td></tr><tr><td>frander</td><td><p>Времена нынче смутные. Нужно развиваться, думать, иначе есть вероятность остаться за бортом и утонуть в чебурнэте. Огромная благодарность разработчикам, что пишут такой софт.</p></td><td>2024-08-01T16:35:52.685Z</td></tr><tr><td>artenox</td><td><p>Да, разобрался. По <a href="https://github.com/yt-dlp/yt-dlp/issues/10443#issuecomment-2248940967">этой</a> инструкции.<br>
+Итак, установил zapret (без лишних файлов и конфигов, только бинарники, пути сборки мои, на примере Ubuntu):</p>
+<pre><code class="lang-auto">sudo apt install gcc g++ make git libnetfilter-queue-dev zlib1g-dev iptables
+git clone --depth=1 https://github.com/bol-van/zapret
+cd zapret
+make
+sudo cp /home/denis/zapret/binaries/my/ip2net /usr/local/bin/ip2net
+sudo cp /home/denis/zapret/binaries/my/mdig /usr/local/bin/mdig
+sudo cp /home/denis/zapret/binaries/my/nfqws /usr/local/bin/nfqws
+sudo cp /home/denis/zapret/binaries/my/tpws /usr/local/bin/tpws
+rm -rd /home/denis/zapret
+</code></pre>
+<p>Впрочем, можно не компилировать, а скопировать готовые для своей архитектуры. Но готовые бинарники статические (static), а не shared. Со своим встроенным libnetfilter, видимо. Зависимости можно посмотреть с помощью <code>readelf -d</code></p>
+<p>Создал файл /home/denis/youtube-domain.txt с содержимым:<br>
+<code>googlevideo.com</code></p>
+<p>Дальше, в Терминале 1:<br>
+<code>sudo nfqws --qnum=200 --dpi-desync=disorder2 --dpi-desync-split-pos=1 --hostlist=/home/denis/youtube-domain.txt</code><br>
+(для завершения Ctrl+C)<br>
+Путь к txt файлу, естественно ваш.<br>
+Если терминал случайно закрылся, программа может остаться висеть в памяти. Убить её можно в диспетчере задач. Правда, придётся от root. Можно узнать ID процесса и выполнить <code>sudo kill ID</code> (указав нужный ID) или <code>sudo killall nfqws</code></p>
+<p>В Терминале 2 выполняю две команды (добавление iptables правил, они добавляются до перезагрузки компа, о том, как сохранить на постоянной основе, пока умолчим):</p>
+<p><code>sudo iptables -I OUTPUT -o enp1s0 -p tcp --dport 443 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:6 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 200 --queue-bypass</code></p>
+<p><code>sudo ip6tables -I OUTPUT -o enp1s0 -p tcp --dport 443 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:6 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 200 --queue-bypass</code></p>
+<p>Для ipv4 и ipv6. Сетевой интерфейс у меня enp1s0. У вас может быть другой. Узнать можно командой <code>ip link</code></p>
+<p>Посмотреть список правил:<br>
+<code>sudo iptables -L -n</code></p>
+<p>Проверка скачивания чего-нибудь. Сначала установим yt-dlp из pip (в ~/.local, а потому .local/bin должен быть в PATH):</p>
+<pre><code class="lang-auto">sudo apt install python3-pip ffmpeg curl
+export PATH=$HOME/.local/bin:$PATH
+pip3 install -U yt-dlp
+</code></pre>
+<p>Обновление yt-dlp:<br>
+<code>pip3 install -U yt-dlp</code></p>
+<p>Скачивание:<br>
+<code>yt-dlp 'YOUTUBE ССЫЛКА' -f 137 --no-config --downloader=curl --downloader-args="--http1.1"</code><br>
+curl хорош для тестов, потому что качает весь URL в однопоток (не кусками) и более детально показывает скорость. Но его замедляет уже сам YouTube, правда, не так сильно (2xrealtime bitrate/time). Т.е. должно качаться в два раза быстрее продолжительности видео или аудио. Чем выше качество, тем выше скорость скачивания (для аудио совсем маленькая скорость это норм).<br>
+<code>--http1.1</code> можно заменить на <code>--http3-only</code> но нужен <a href="https://github.com/stunnel/static-curl/releases/latest">curl</a> с поддержкой http3/quic (распакованный бинарник закиньте в /usr/local/bin, т.е. <code>sudo cp /path/to/curl /usr/local/bin/curl</code>, при необходимости сделайте исполняемым sudo <code>chmod +x /usr/local/bin/curl</code></p>
+<p>Или просто:<br>
+<code>yt-dlp 'YOUTUBE ССЫЛКА' -f 137</code><br>
+Можно, например -f 137+251</p>
+<p>Список форматов:<br>
+<code>yt-dlp 'YOUTUBE ССЫЛКА' -F</code></p>
+<p>Для удаления правил надо добавить те же строчки, но заменить -I (значит Insert) на -D (значит Delete). Т.е. будет:</p>
+<p><code>sudo iptables -D OUTPUT -o enp1s0 -p tcp --dport 443 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:6 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 200 --queue-bypass</code></p>
+<p><code>sudo ip6tables -D OUTPUT -o enp1s0 -p tcp --dport 443 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:6 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 200 --queue-bypass</code></p>
+<p>Проверим, что правила удалились:<br>
+<code>sudo iptables -L -n</code></p>
+<p>Удалить yt-dlp из pip (например, чтобы установить из другого источника) можно командой:<br>
+<code>pip3 uninstall yt-dlp</code></p></td><td>2024-08-02T04:31:25.900Z</td></tr><tr><td>TimashiPits(Timashi Pits)</td><td><p>Пишите провайдеров, потому что звездопляски для некоторых провайдеров бесполезны. Win или linux - неважно. Пашет только VPN. (Говоря про ютуб)</p></td><td>2024-08-02T04:58:07.563Z</td></tr><tr><td>artenox</td><td><p>Yota Новосибирск (тариф для модема, 4G модем подключен Ethernet кабелем к компу с Xubuntu 22.04). Работает сейчас. Подрезать скорость начали с 1 августа 2024.</p></td><td>2024-08-02T05:01:43.673Z</td></tr><tr><td>miwneva1994(Miwneva1994)</td><td><p>Ростелеком Новосибирск. Настроил по описанной выше инструкции, показывает 8K.</p></td><td>2024-08-02T23:54:29.557Z</td></tr><tr><td>artenox</td><td><aside class="quote no-group" data-username="frander" data-post="5" data-topic="8394">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/3bc359/48.png" class="avatar"> frander:</div>
+<blockquote>
+<p>Нужно развиваться, думать</p>
+</blockquote>
+</aside>
+<p>Только автор zapret этому никак не способствует своим безразличием к новичкам.</p></td><td>2024-08-07T23:54:47.090Z</td></tr><tr><td>wigeance(Wigeance)</td><td><p>У вас есть целая куча <a href="https://github.com/bol-van/zapret/tree/master/docs" rel="noopener nofollow ugc">readme на github</a> и этот форум. Если их изучить и иметь базовые навыки работы в linux системах, то все довольно просто работает.</p></td><td>2024-08-08T00:31:20.519Z</td></tr><tr><td>rewhat</td><td><p><a href="https://github.com/hufrea/byedpi" rel="noopener nofollow ugc">ByeDPI</a> нормально работает. Пример:</p>
+<pre><code class="lang-auto">./ciadpi --fake 2 --split 3 --ttl 4 -M dcsmix --hosts russia-blacklist.txt --auto=none
+</code></pre>
+<p>(russia-blacklist.txt взять из GoodbyeDPI)</p>
+<p>Потом 0.0.0.0:1080 в прокси прописать, и всё.</p>
+<p>Прокси в Хроме проще всего ставить через <a href="https://chromewebstore.google.com/detail/proxy-switchyomega/padekgcemlokbadohgkifijomclgjgif" rel="noopener nofollow ugc">Proxy SwitchyOmega</a>.</p></td><td>2024-08-08T00:33:25.027Z</td></tr><tr><td>artenox</td><td><p>Если дописать <code>&amp; exit 0</code> то терминал можно не держать открытым.<br>
+iptables правила могут сохранить команды:</p>
+<pre><code class="lang-auto">sudo iptables-save
+sudo ip6tables-save
+</code></pre>
+<p>Для удобства sudo можно сделать без пароля:<br>
+<code>sudo visudo</code><br>
+укажите:<br>
+<code>user ALL=(ALL:ALL) NOPASSWD: ALL</code><br>
+где user ваше имя пользователя<br>
+Ctrl+O (O буква) сохранение<br>
+Ctrl+X выход</p>
+<p>На убунте вместо user используется %sudo (все члены группы sudo, в других дистрах этой группы нет).</p></td><td>2024-08-08T03:41:07.384Z</td></tr><tr><td>artenox</td><td><p>iptables-save оказывается не сохраняет после перезагрузки, а сохраняет в некий файл, который потом надо restore. В общем, сложно. В Debian и Ubuntu есть пакет iptables-persistent. Я не стал с ним связываться. Погуглите сами как сохранить на постоянной основе. Как оказалось, там много подводных камней и дистроспецифично.</p>
+<p>Зато, я наконец-то нашёл способ как обойти блок openvpn протокола на йоте:<br>
+<code>sudo nfqws --qnum=200 --dpi-desync=fake  --dpi-desync-cutoff=d4 --dpi-desync-repeats=6 --dpi-desync-ttl=7 --dpi-desync-any-protocol=1 --hostlist=/home/denis/openvpn.txt &amp; exit 0</code><br>
+Работает с теми же iptables правилами, если openvpn tcp:443. openvpn.txt содержит домен openvpn сервера. Wireshark маркирует такие пакеты как TCP и SSL, а не OpenVPN.<br>
+Посмотреть, запущен ли nfqws можно такой командой:<br>
+<code>ps -e | grep nfqws</code><br>
+Не удаляйте это, пожалуйства. Пусть будет небольшое отступление от темы.</p></td><td>2024-08-15T09:01:14.587Z</td></tr><tr><td>ash</td><td><p>Очень простой не требующий даже прав root способ заключается в использовании бинарника tpws из пакета zapret  в режиме прокси:<br>
+./tpws --debug=1 --bind-addr 127.0.0.1 --port=1080 --socks --hostlist=hosts --split-pos=1 --split-any-protocol --disorder<br>
+Файл hosts со списком доменов лежит рядом с бинарником tpws в данном случае.<br>
+Соответственно, в браузере нужно сконфигурить доступ в сеть через сокс-прокси 127.0.0.1 по 1080 порту.</p>
+<p>Не уверен что параметры обхода DPI самые оптимальные, это у всех по-разному нужно подбирать.<br>
+А вообще я сделал .desktop файл в который прописал простой баш-скрипт, который уже запускает tpws.<br>
+.desktop можно в автозагрузку или просто жамкать когда нада, но сейчас все идет к тому, что нужно systemd-unit просто делать и пусть оно запускается вместе с системой.</p></td><td>2024-08-19T08:50:34.356Z</td></tr>
+    </table>
+      </body>
+    </html>

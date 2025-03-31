@@ -1,0 +1,65 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>wireguard-over-dnstt-3505</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>PartyRock</td><td><p>Hi all,</p>
+<p>Is it possible to make DNSTT support UDP as well?  I am trying to build the following so my mobile phone can bypass firewall restrictions.  However, Wireguard only runs on UDP.</p>
+<p>Wireguard client &lt;—&gt; DNSTT client &lt;—&gt; DNSTT server &lt;—&gt; Wireguard server</p>
+<p>I am very new to this and sorry if I asked a n00b question.</p>
+<p>Thanks.</p></td><td>2022-11-24T18:32:37.770Z</td></tr><tr><td>bolvan</td><td><p>Why do you want wireguard ? Openvpn can operate over TCP.<br>
+Openvpn is available on any platform</p></td><td>2022-11-24T19:55:44.769Z</td></tr><tr><td>PartyRock</td><td><p>I’ll give openvpn a try.  Thanks!</p></td><td>2022-11-24T21:25:13.533Z</td></tr><tr><td>PartyRock</td><td><p>I have not gotten Openvpn to work yet but I do have another question.</p>
+<p>In my region, Internet access might not be the most stable and there could be network disconnection.  Is there a way to make dnstt-client auto reconnect when that happens?  When there is a disconnect, the ncat client can no longer get through to the server side unless I restart the dnstt-client.</p></td><td>2022-11-25T16:20:48.083Z</td></tr><tr><td>tango</td><td><p>dnstt itself is built on the assumption of provide a reliable stream interface to user-space applications.</p>
+<p>You can think of dnstt as a combination of two things: a specific way of encoding chunks of data into DNS <a href="https://www.bamsoftware.com/software/dnstt/protocol.html#query">queries</a> and <a href="https://www.bamsoftware.com/software/dnstt/protocol.html#response">responses</a>, as well as a <a href="https://www.bamsoftware.com/software/dnstt/protocol.html#overview">KCP/smux session and reliability layer</a>. The KCP/smux layer is the “tt” (turbo tunnel) part of the name.</p>
+<p>If you want to use DNS like a VPN (kernel space not user space), you don’t need the session and reliability part. That’s because the kernel already has its own mechanisms for sessions and reliability. You only need a way to encode IP datagrams as DNS queries/responses.</p>
+<p>The software doesn’t support it at this point, but conceptually would be possible to use <a href="https://repo.or.cz/dnstt.git/blob/81b502c735882c74a32ec9acebd3dbe21f30f092:/dnstt-client/dns.go#l99">dnstt’s encodings</a> on raw IP datagrams, and remove the KCP/smux layer to get a VPN-like interface that works with WireGuard and UDP. You would need a virtual network interface with the MTU set small enough (around 120 bytes) to fit into a DNS query. This is how <a href="https://www.bamsoftware.com/software/dnstt/survey.html#TUNS">TUNS</a> works, for example.</p>
+<p>One option for you to try is <a href="https://github.com/xjasonlyu/tun2socks">tun2socks</a>. You can set dnstt up to be a SOCKS proxy; then tun2socks can provide a network interface over the top of it.</p>
+<p>It is likely also possible to implement a DNS encoding specifically for WireGuard. Here are some examples of how obfuscations have been implemented for WireGuard specifically:</p>
+<ul>
+<li><a href="https://github.com/net4people/bbs/issues/117">swgp-go: Userspace WireGuard Proxy with Minimal Overhead</a></li>
+<li><a href="https://lists.zx2c4.com/pipermail/wireguard/2022-September/007822.html">Iptables WireGuard obfuscation extension</a></li>
+</ul></td><td>2022-12-03T21:26:17.286Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="PartyRock" data-post="4" data-topic="3505">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/p/ac91a4/48.png" class="avatar"> PartyRock:</div>
+<blockquote>
+<p>In my region, Internet access might not be the most stable and there could be network disconnection. Is there a way to make dnstt-client auto reconnect when that happens? When there is a disconnect, the ncat client can no longer get through to the server side unless I restart the dnstt-client.</p>
+</blockquote>
+</aside>
+<p>I see what you’re saying. I don’t think there’s an automatic way to do this now. I’m planning a change (after <a href="https://ntc.party/t/do-not-send-data-when-there-are-no-clients/2213">this thread</a>) that might make the situation better. It will have the side effect of starting a new session if all connected clients have disconnected.</p>
+<p>Another possible reference for you is <a href="https://github.com/net4people/bbs/issues/30#issuecomment-1040185547" class="inline-onebox">DNS tunnel that can do DoH and DoT · Issue #30 · net4people/bbs · GitHub</a>.</p></td><td>2022-12-03T21:30:49.400Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,184 @@
+{ 
+    "log": { 
+        "disabled": true 
+    }, 
+    "dns": { 
+        "servers": [ 
+            { 
+                "tag": "google", 
+                "address": "tls://1.1.1.1" 
+            }, 
+            { 
+                "tag": "block", 
+                "address": "rcode://success" 
+            } 
+        ], 
+        "final": "google", 
+        "strategy": "prefer_ipv4", 
+        "disable_cache": false, 
+        "disable_expire": false 
+    }, 
+    "inbounds": [ 
+        { 
+            "type": "tun", 
+            "tag": "tun-in", 
+            "interface_name": "singtun0", 
+            "inet4_address": "172.19.16.1/30", 
+            "stack": "gvisor", 
+            "mtu": 9000, 
+            "auto_route": true, 
+            "strict_route": false, 
+            "endpoint_independent_nat": false, 
+            "sniff": true, 
+            "sniff_override_destination": true 
+        } 
+    ], 
+    "outbounds": [ 
+        { 
+            "type": "selector", 
+            "tag": "Proxy-out", 
+            "outbounds": [ 
+                "URL-Test", 
+                "direct", 
+                "shadowsocks-out", 
+                "vmess-tls-out", 
+                "trojan-WebSocket-out", 
+                "reality-out" 
+            ], 
+            "default": "URL-Test" 
+        }, 
+        { 
+            "type": "urltest", 
+            "tag": "URL-Test", 
+            "outbounds": [ 
+                "shadowsocks-out", 
+                "vmess-tls-out", 
+                "trojan-WebSocket-out", 
+                "reality-out" 
+            ], 
+            "url": "http://www.gstatic.com/generate_204", 
+            "interval": "1m", 
+            "tolerance": 50 
+        }, 
+        {
+            "type": "shadowsocks",
+            "tag": "shadowsocks-out",
+            "server": "IP",
+            "server_port": 15000,
+            "method": "chacha20-ietf-poly1305",
+            "password": "password"
+        },
+        { 
+            "type": "vless", 
+            "tag": "reality-out", 
+            "server": "IP", 
+            "server_port": 8442, 
+            "uuid": "UUID", 
+            "flow": "xtls-rprx-vision", 
+            "network": "tcp", 
+            "tls": { 
+                "enabled": true, 
+                "insecure": false, 
+                "server_name": "SERVERNAME", 
+                "utls": { 
+                    "enabled": true, 
+                    "fingerprint": "chrome" 
+                }, 
+                "reality": { 
+                    "enabled": true, 
+                    "public_key": "AP24JYROAB8odK5glVW_KLnsWl3UZ-voaGq_9ihQgTL" 
+                } 
+            } 
+        }, 
+        { 
+            "type": "trojan", 
+            "tag": "trojan-WebSocket-out", 
+            "server": "IP", 
+            "server_port": 8443, 
+            "password": "PASSWORD", 
+            "transport": { 
+                "type": "ws", 
+                "path": "/", 
+                "early_data_header_name": "Sec-WebSocket-Protocol" 
+            }, 
+            "tls": { 
+                "enabled": true, 
+                "disable_sni": false, 
+                "server_name": "d43f429a97e4ea6d.gstatic.com" 
+            }, 
+            "multiplex": { 
+                "enabled": true, 
+                "max_connections": 4, 
+                "min_streams": 4, 
+                "max_streams": 0 
+            } 
+        }, 
+        { 
+            "type": "vmess", 
+            "tag": "vmess-tls-out", 
+            "server": "IP", 
+            "server_port": 8444, 
+            "uuid": "UUID", 
+            "security": "auto", 
+            "alter_id": 0, 
+            "global_padding": false, 
+            "authenticated_length": true, 
+            "tls": { 
+                "enabled": true,
+                "disable_sni": false, 
+                "server_name": "google.com", 
+                "insecure": false, 
+                "alpn": [ 
+                    "http/1.1" 
+                ] 
+            }, 
+            "multiplex": { 
+                "enabled": true, 
+                "protocol": "smux", 
+                "max_connections": 5, 
+                "min_streams": 4, 
+                "max_streams": 0 
+            }, 
+            "connect_timeout": "5s" 
+        }, 
+        { 
+            "type": "direct", 
+            "tag": "direct" 
+        }, 
+        { 
+            "type": "block", 
+            "tag": "block" 
+        }, 
+        { 
+            "type": "dns", 
+            "tag": "dns-out" 
+        } 
+    ], 
+     "route": { 
+        "geoip": { 
+            "download_url": "https://github.com/L11R/antizapret-sing-geosite/releases/latest/download/geoip.db", 
+            "download_detour": "Proxy-out" 
+        }, 
+        "geosite": { 
+            "download_url": "https://github.com/L11R/antizapret-sing-geosite/releases/latest/download/geosite.db", 
+            "download_detour": "Proxy-out" 
+        }, 
+        "rules": [ 
+            { 
+                "protocol": "dns", 
+                "outbound": "dns-out" 
+            }, 
+            { 
+                "geoip": "antizapret", 
+                "geosite": "antizapret", 
+                "outbound": "Proxy-out" 
+            }, 
+   { 
+                "protocol": "quic", 
+                "outbound": "block" 
+            } 
+        ], 
+        "final": "direct", 
+        "auto_detect_interface": true 
+    } 
+}

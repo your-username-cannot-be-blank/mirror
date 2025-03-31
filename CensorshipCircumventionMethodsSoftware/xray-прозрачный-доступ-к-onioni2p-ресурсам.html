@@ -1,0 +1,482 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>xray-прозрачный-доступ-к-onioni2p-ресурсам</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>dimzon(Dmitry)</td><td><p>Необходимости сохранять анонимность при доступе в даркнет нету. Просто хочется настроить прозрачный доступ чтобы было.</p>
+<p>На сервере крутится <strong>xray</strong> + <strong>tor</strong>, имеется такое правило маршрутизации</p>
+<pre><code class="lang-auto">{
+                "type": "field",
+                "outboundTag": "TOR",
+                "domain": [
+                    "domain:onion"
+                ]
+            },
+</code></pre>
+<p>имеем такой outbound</p>
+<pre><code class="lang-auto">        {
+            "tag": "TOR",
+            "protocol": "socks",
+            "settings": {
+                "servers": [
+                    {
+                        "address": "127.0.0.1",
+                        "port": 9050
+                    }
+                ]
+            }
+        },
+</code></pre>
+<p>В режиме socks5-прокси например с компа сайт <strong><a href="http://flibustaongezhld6dibs2dps6vm4nvqg2kp7vgowbu76tzopgnhazqd.onion/" rel="noopener nofollow ugc">http://flibustaongezhld6dibs2dps6vm4nvqg2kp7vgowbu76tzopgnhazqd.onion/</a></strong> открывается но не с первого раза, при этом в логах на сервере в /var/log/xray/error.log имеем строки вида</p>
+<pre><code class="lang-auto">2023/11/18 06:58:46 [Warning] [2410852795] app/proxyman/outbound: failed to process outbound traffic &gt; proxy/socks: failed to establish connection to server &gt; read tcp 127.0.0.1:12456-&gt;127.0.0.1:9050: i/o timeout
+</code></pre>
+<p>в документации к xray не нашел способа увеличить таймут для этого outbound.</p>
+<p>Ну а на мобильном не всем браузерам подсунешь socks5 прокси. А в режиме tun - это вооще не работает…</p>
+<p>Я так понимаю что должен быть какой-то “локальный” dns-сервер на xray-сервере который будет выдавать уникальные фейковые ip-адреса  (наверное AAAA записи из какого-нибудь волшебного CIDR) для onion, весь dns клиента завернуть на xray чтобы он прозрачно получал ipv6 до onion и потом уже работал с ним…</p>
+<p>Может кто-то уже делал что-то подобное?</p>
+<p>С i2p аналогично, сейчас пока разбираюсь с onion…</p></td><td>2023-11-18T06:22:20.325Z</td></tr><tr><td>0ka(0ka)</td><td><pre><code class="lang-auto">    "policy": {
+        "levels": {
+            "0": {
+                "handshake": 10
+            }
+        }
+    },
+</code></pre>
+<p>не помогает?</p>
+<p>вот еще нашел конфиг для sing-box <a href="https://github.com/XTLS/Xray-core/discussions/2298#discussioncomment-6427330" class="inline-onebox">Regarding nonIPQuery · XTLS/Xray-core · Discussion #2298 · GitHub</a></p></td><td>2023-11-18T12:41:23.509Z</td></tr><tr><td>dimzon(Dmitry)</td><td><aside class="quote no-group" data-username="0ka" data-post="2" data-topic="6278">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p><code>"handshake": 10</code></p>
+</blockquote>
+</aside>
+<p>Помогло!</p>
+<p>Касательно DNS пошел путем linux-way. В torrc добавил строки:</p>
+<pre><code class="lang-auto">DNSPort 127.0.0.2:53
+AutomapHostsOnResolve 1
+AutomapHostsSuffixes .onion
+</code></pre>
+<p>Потом склеил все с помощью dnsmasq добился такого поведения на стороне VDS</p>
+<pre><code class="lang-auto">root@v2136098:/opt/real# nslookup flibustaongezhld6dibs2dps6vm4nvqg2kp7vgowbu76tzopgnhazqd.onion
+Server:         127.0.0.1
+Address:        127.0.0.1#53
+
+Non-authoritative answer:
+Name:   flibustaongezhld6dibs2dps6vm4nvqg2kp7vgowbu76tzopgnhazqd.onion
+Address: 127.230.9.54
+Name:   flibustaongezhld6dibs2dps6vm4nvqg2kp7vgowbu76tzopgnhazqd.onion
+Address: fe80:2f39:b9c6:12ab:10cf:1857:51ca:c510
+
+root@v2136098:/opt/real# nslookup flibusta.lib
+Server:         127.0.0.1
+Address:        127.0.0.1#53
+
+Non-authoritative answer:
+Name:   flibusta.lib
+Address: 179.43.150.83
+</code></pre>
+<p>В server-config.json поставил единственный сервер в dns</p>
+<pre><code class="lang-auto">"dns": {
+        "servers": [
+            "tcp+local:\/\/127.0.0.1"
+        ]
+    }
+</code></pre>
+<p>В режиме socks заработала lib (потому как в настройках dnsmasq указал серверы OpenNIC) но в режиме tun на клиенте не работает: не ресолвится</p>
+<p>Клиент - свежий v2rayNG…</p></td><td>2023-11-18T21:24:15.639Z</td></tr><tr><td>0ka(0ka)</td><td><p>в v2rayng прописан remote dns 127.0.0.1?</p></td><td>2023-11-18T21:53:42.876Z</td></tr><tr><td>dimzon(Dmitry)</td><td><p>пробовал - вообще никакие страницы не  находит, есть мысли но пока воюю на стороне VDS, прикрутил i2pd, все оказалось проще</p>
+<p>В dnsmasq прибил гвоздями 1 адрес и для onion и i2p:</p>
+<pre><code class="lang-auto">address=/i2p/127.254.0.1
+address=/onion/127.254.0.1
+</code></pre>
+<p>повесил на http-порту привокси:</p>
+<pre><code class="lang-auto">listen-address 127.254.0.1:80
+forward-socks5t   .onion     127.0.0.1:9050 .
+forward           .i2p   127.0.0.1:4444
+</code></pre>
+<p>итого wget на vds выдает и onion и i2p</p>
+<p>Теперь вот думаю понравится ли ip адрес 127.254.0.1 клиенту, не попробует ли он сделать bypass lan</p>
+<p>Не в курсе можно ли создать фиктивный адрес типа 195.1.1.1 который будет действовать в рамках VDS на который можно будет повесить привокси?</p></td><td>2023-11-19T02:45:47.582Z</td></tr><tr><td>ValdikSS</td><td><p>Установите какой-то локальный адрес на интерфейс lo, его и пропишите в конфигурационных файлах. При этом слушать (bind’ится) только на этом интерфейсе не нужно.</p></td><td>2023-11-19T03:12:07.548Z</td></tr><tr><td>dimzon(Dmitry)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="6" data-topic="6278">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Установите какой-то локальный адрес на интерфейс lo</p>
+</blockquote>
+</aside>
+<pre><code class="lang-auto">root@v2136098:~# ip address show dev lo
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet 195.195.195.195/32 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+
+root@v2136098:~# nslookup stats.i2p 195.195.195.195
+Server:         195.195.195.195
+Address:        195.195.195.195#53
+
+Name:   stats.i2p
+Address: 195.195.195.195
+
+root@v2136098:~# nslookup ya.ru 195.195.195.195
+Server:         195.195.195.195
+Address:        195.195.195.195#53
+
+Non-authoritative answer:
+Name:   ya.ru
+Address: 5.255.255.242
+Name:   ya.ru
+Address: 77.88.55.242
+Name:   ya.ru
+Address: 2a02:6b8::2:242
+
+root@v2136098:~# nslookup rutor.lib 195.195.195.195
+Server:         195.195.195.195
+Address:        195.195.195.195#53
+
+Non-authoritative answer:
+Name:   rutor.lib
+Address: 193.46.255.25
+</code></pre>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="xray-прозрачный-доступ-к-onioni2p-ресурсам/3694367ad01840484b1950f905edc56928afd7a8.jpeg" data-download-href="https://ntc.party/uploads/default/3694367ad01840484b1950f905edc56928afd7a8" title="image"><img src="xray-прозрачный-доступ-к-onioni2p-ресурсам/3694367ad01840484b1950f905edc56928afd7a8_2_225x500.jpeg" alt="image" data-base62-sha1="7MPkkoYdSWap1ZcZbGfEDBH6oYw" width="225" height="500" srcset="xray-прозрачный-доступ-к-onioni2p-ресурсам/3694367ad01840484b1950f905edc56928afd7a8_2_225x500.jpeg, xray-прозрачный-доступ-к-onioni2p-ресурсам/3694367ad01840484b1950f905edc56928afd7a8_2_337x750.jpeg 1.5x, xray-прозрачный-доступ-к-onioni2p-ресурсам/3694367ad01840484b1950f905edc56928afd7a8_2_450x1000.jpeg 2x" data-dominant-color="0B0B0B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">720×1600 85 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="xray-прозрачный-доступ-к-onioni2p-ресурсам/3f3973d2eaab5dc5f47979e88a8ed8a145a2c8f3.png" data-download-href="https://ntc.party/uploads/default/3f3973d2eaab5dc5f47979e88a8ed8a145a2c8f3" title="image"><img src="xray-прозрачный-доступ-к-onioni2p-ресурсам/3f3973d2eaab5dc5f47979e88a8ed8a145a2c8f3_2_225x500.png" alt="image" data-base62-sha1="91jaEQE5QQzNcb87zjOKeU5FM2L" width="225" height="500" srcset="xray-прозрачный-доступ-к-onioni2p-ресурсам/3f3973d2eaab5dc5f47979e88a8ed8a145a2c8f3_2_225x500.png, xray-прозрачный-доступ-к-onioni2p-ресурсам/3f3973d2eaab5dc5f47979e88a8ed8a145a2c8f3_2_337x750.png 1.5x, xray-прозрачный-доступ-к-onioni2p-ресурсам/3f3973d2eaab5dc5f47979e88a8ed8a145a2c8f3_2_450x1000.png 2x" data-dominant-color="FAFAFA"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">720×1600 72 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<strong><a href="http://ya.ru" rel="noopener nofollow ugc">ya.ru</a></strong> - работает!<br>
+<strong>rutor.lib</strong> - не ресолвит!</p>
+<p>Вот такая фигня. Может scope поменять попробовать у 195.195.195.195 ?</p>
+<p>ЗЫ. Прописал в v2rayng левые dns - при соединении проверка средствами v2rayng говорит что сбой а браузер работает как ни в чем не бывало, ip vps на <a href="http://2ip.ru" rel="noopener nofollow ugc">2ip.ru</a> показывает</p>
+<p>ЗЫ2. Включил галочку fakedns в клиенте, заработало. Но это я так понимаю костыль на стороне клиента,  и мой внутренний перфекционист грызет меня со страшной силой.</p></td><td>2023-11-19T07:07:43.806Z</td></tr><tr><td>dimzon(Dmitry)</td><td><p>Заработало.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="xray-прозрачный-доступ-к-onioni2p-ресурсам/57921d8fb3c438b9cb72b817954bab3c18d6375a.jpeg" data-download-href="https://ntc.party/uploads/default/57921d8fb3c438b9cb72b817954bab3c18d6375a" title="image"><img src="xray-прозрачный-доступ-к-onioni2p-ресурсам/57921d8fb3c438b9cb72b817954bab3c18d6375a_2_225x500.jpeg" alt="image" data-base62-sha1="cuGADndIbXjUCCQfWUKfGJNPVUe" width="225" height="500" srcset="xray-прозрачный-доступ-к-onioni2p-ресурсам/57921d8fb3c438b9cb72b817954bab3c18d6375a_2_225x500.jpeg, xray-прозрачный-доступ-к-onioni2p-ресурсам/57921d8fb3c438b9cb72b817954bab3c18d6375a_2_337x750.jpeg 1.5x, xray-прозрачный-доступ-к-onioni2p-ресурсам/57921d8fb3c438b9cb72b817954bab3c18d6375a_2_450x1000.jpeg 2x" data-dominant-color="0E0D0D"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">720×1600 117 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>При включенной галочке на виртуальном адресе 26.26.26.2:53 поднимается UDP-only  который редиректит dns-запросы на удаленный ресолвер xray</p>
+<p>Смысл опций “удаленная / внутреняя dns” пока не ясен</p></td><td>2023-11-19T10:58:02.590Z</td></tr><tr><td>dimzon(Dmitry)</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a> получилось, вот инструкция может кому пригодится</p>
+<ol>
+<li>
+<p>Обычный DNS рулим на VDS стандартными средствами, ресолвер вешаем на 127.0.0.1:53, помним про /etc/resolve.conf</p>
+</li>
+<li>
+<p>Сломался outbound protocol=“wireguard” , пришлось запускать 2-й экземпляр XRay и лазить в него из основного через socks:</p>
+</li>
+</ol>
+<pre><code class="lang-auto">{
+    "log": {
+        "loglevel": "warning",
+        "access": "\/var\/log\/xray\/wg-access.log",
+        "error": "\/var\/log\/xray\/wg-error.log",
+        "dnsLog": false
+    },
+    "dns": {
+        "servers": [
+            "tcp+local:1.1.1.1",
+            "tcp+local:1.0.0.1"
+        ]
+    },
+    "inbounds": [
+        {
+            "port": "1081",
+            "listen": "127.0.0.1",
+            "tag": "wireproxy",
+            "protocol": "socks",
+            "settings": {
+                "auth": "noauth",
+                "udp": true
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "tag": "WARP",
+            "protocol": "wireguard",
+            "settings": {
+                "secretKey": "...",
+                "address": [
+                    "172.16.0.2\/32",
+                    "2606:4700:110:8de1:4b29:ef08:2482:535d\/128"
+                ],
+                "peers": [
+                    {
+                        "endpoint": "engage.cloudflareclient.com:2408",
+                        "publicKey": "bmXOC+F1FxEMF9dyiK2H5\/1SUtzH0JuVo51h2wPfgyo="
+                    }
+                ],
+                "mtu": 1280
+            }
+        }
+    ],
+    "routing": {
+        "domainStrategy": "IPOnDemand",
+        "rules": []
+    }
+}
+</code></pre>
+<ol start="3">
+<li>Ставим привокси:</li>
+</ol>
+<pre><code class="lang-auto">listen-address 127.0.0.1:8118
+accept-intercepted-requests 1
+
+user-manual /usr/share/doc/privoxy/user-manual
+confdir /etc/privoxy
+logdir /var/log/privoxy
+
+forward-socks5t   .onion     127.0.0.1:9050 .
+forward           .i2p   127.0.0.1:4444
+
+logfile logfile
+toggle  0
+enable-remote-toggle  0
+enable-remote-http-toggle  0
+enable-edit-actions 0
+enforce-blocks 0
+buffer-limit 4096
+enable-proxy-authentication-forwarding 0
+forwarded-connect-retries  0
+allow-cgi-request-crunching 0
+split-large-forms 0
+keep-alive-timeout 5
+tolerate-pipelining 1
+socket-timeout 300
+
+</code></pre>
+<ol start="4">
+<li>xray</li>
+</ol>
+<pre><code class="lang-auto">{
+
+"dns": {
+        "tag": "dns_inbound",
+        "servers": [
+            "localhost"
+        ],
+        "hosts": {
+            "domain:onion": "155.155.155.155",
+            "domain:i2p": "155.155.155.155"
+        }
+    },
+    "inbounds": [
+        {
+            "listen": "127.0.0.4",
+            "port": 53,
+            "protocol": "dokodemo-door",
+            "network": "tcp,udp",
+            "settings": {
+                "address": "127.0.0.1",
+                "port": 53,
+                "network": "tcp,udp"
+            },
+            "tag": "dns-in"
+        },
+.....
+],
+    "outbounds": [
+        {
+            "protocol": "freedom",
+            "domainStrategy": "AsIs",
+            "tag": "freedom",
+            "settings": {}
+        },
+        {
+            "protocol": "freedom",
+            "domainStrategy": "AsIs",
+            "tag": "privoxy",
+            "redirect": "127.0.0.1:8118",
+            "userLevel": 5,
+            "settings": {}
+        },
+        {
+            "protocol": "dns",
+            "address": "9.9.9.9",
+            "port": 53,
+            "settings": {
+                "nonIPQuery": "drop"
+            },
+            "tag": "dns-out"
+        },
+        {
+            "tag": "WARP",
+            "protocol": "socks",
+            "settings": {
+                "servers": [
+                    {
+                        "address": "127.0.0.1",
+                        "port": 1081
+                    }
+                ],
+            }
+        },
+        {
+            "tag": "TOR",
+            "protocol": "socks",
+            "settings": {
+                "servers": [
+                    {
+                        "address": "127.0.0.1",
+                        "port": 9050,
+                        "users": [
+                            {
+                                "user": "tor-user",
+                                "pass": "tor-pass",
+                                "level": 5
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "tag": "i2p",
+            "protocol": "socks",
+            "settings": {
+                "servers": [
+                    {
+                        "address": "127.0.0.1",
+                        "port": 4447,
+                        "users": [
+                            {
+                                "user": "i2p-user",
+                                "pass": "i2p-pass",
+                                "level": 5
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "protocol": "blackhole",
+            "tag": "block"
+        }
+    ],
+    "routing": {
+        "domainStrategy": "IPIfNonMatch",
+        "rules": [
+            {
+                "type": "field",
+                "inboundTag": [
+                    "dns_inbound"
+                ],
+                "outboundTag": "freedom",
+                "network": "tcp,udp"
+            },
+            {
+                "type": "field",
+                "port": "53",
+                "outboundTag": "dns-out",
+                "network": "tcp,udp"
+            },
+            {
+                "type": "field",
+                "outboundTag": "TOR",
+                "domain": [
+                    "domain:onion"
+                ]
+            },
+            {
+                "type": "field",
+                "outboundTag": "i2p",
+                "domain": [
+                    "domain:i2p"
+                ]
+            },
+            {
+                "type": "field",
+                "ip": [
+                    "155.155.155.15"
+                ],
+                "outboundTag": "privoxy",
+                "network": "tcp"
+            },
+            {
+                "type": "field",
+                "ip": [
+                    "geoip:private"
+                ],
+                "outboundTag": "block"
+            },
+            {
+                "type": "field",
+                "port": "25, 587, 465, 2525",
+                "network": "tcp",
+                "outboundTag": "block"
+            },
+            {
+                "type": "field",
+                "outboundTag": "block",
+                "domain": [
+                    "geosite:category-ads-all"
+                ]
+            },
+            {
+                "type": "field",
+                "user": [
+                    "rl_0_Dmitry"
+                ],
+                "outboundTag": "WARP"
+            },
+            {
+                "type": "field",
+                "protocol": [
+                    "bittorrent"
+                ],
+                "outboundTag": "block"
+            }
+        ]
+    },
+    "policy": {
+        "levels": {
+            "0": {
+                "handshake": 5,
+                "connIdle": 120
+            },
+            "5": {
+                "handshake": 120,
+                "connIdle": 300
+            }
+        }
+    }
+}
+</code></pre>
+<ol start="5">
+<li>Настрока v2rayng<br>
+включаем эту галочку<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="xray-прозрачный-доступ-к-onioni2p-ресурсам/0774ac5a97de9003a6f25a817b3a7a9ab4ea14a6.jpeg" data-download-href="https://ntc.party/uploads/default/0774ac5a97de9003a6f25a817b3a7a9ab4ea14a6" title="image"><img src="xray-прозрачный-доступ-к-onioni2p-ресурсам/0774ac5a97de9003a6f25a817b3a7a9ab4ea14a6_2_536x500.jpeg" alt="image" data-base62-sha1="13XjrsgsRALESMzCGfgtEpIqfS6" width="536" height="500" srcset="xray-прозрачный-доступ-к-onioni2p-ресурсам/0774ac5a97de9003a6f25a817b3a7a9ab4ea14a6_2_536x500.jpeg, xray-прозрачный-доступ-к-onioni2p-ресурсам/0774ac5a97de9003a6f25a817b3a7a9ab4ea14a6_2_804x750.jpeg 1.5x, xray-прозрачный-доступ-к-onioni2p-ресурсам/0774ac5a97de9003a6f25a817b3a7a9ab4ea14a6_2_1072x1000.jpeg 2x" data-dominant-color="141212"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1080×1007 102 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></li>
+</ol>
+<p>а тут <strong>забавнее</strong>. Явно тыкаем на удаленная DNS и очищаем значение. При этом в UI все равно будет отображаться 1.1.1.1 Поэтому  тыкаем и убеждаемся что в окошке редактирования поле пустое</p>
+<p>Касательно “Внутренная DNS” наоборот - открывам и явно прописываем 223.5.5.5  (тыкаем и убеждаемся что в окошке редактирования поле  НЕ пустое)<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="xray-прозрачный-доступ-к-onioni2p-ресурсам/19beeb8bdcea80332dab0bbfdb235c54f25d35c7.jpeg" data-download-href="https://ntc.party/uploads/default/19beeb8bdcea80332dab0bbfdb235c54f25d35c7" title="image"><img src="xray-прозрачный-доступ-к-onioni2p-ресурсам/19beeb8bdcea80332dab0bbfdb235c54f25d35c7_2_627x500.jpeg" alt="image" data-base62-sha1="3FKYPIhzt20L0b60048vVJN9rTx" width="627" height="500" srcset="xray-прозрачный-доступ-к-onioni2p-ресурсам/19beeb8bdcea80332dab0bbfdb235c54f25d35c7_2_627x500.jpeg, xray-прозрачный-доступ-к-onioni2p-ресурсам/19beeb8bdcea80332dab0bbfdb235c54f25d35c7_2_940x750.jpeg 1.5x, xray-прозрачный-доступ-к-onioni2p-ресурсам/19beeb8bdcea80332dab0bbfdb235c54f25d35c7.jpeg 2x" data-dominant-color="0B0707"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1080×861 57.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2023-11-21T01:58:20.118Z</td></tr>
+    </table>
+      </body>
+    </html>

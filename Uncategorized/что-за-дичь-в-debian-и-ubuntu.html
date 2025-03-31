@@ -1,0 +1,109 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>что-за-дичь-в-debian-и-ubuntu</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>bolvan</td><td><pre><code class="lang-auto">root@pc:/tmp# ls -ld .
+drwxrwxrwt 19 root root 500 ноя 14 21:40 .
+root@pc:/tmp# sudo -u daemon touch xxx
+root@pc:/tmp# ls -l xxx
+-rw-rw-r-- 1 daemon daemon 0 ноя 14 21:54 xxx
+root@pc:/tmp# echo test &gt;&gt;xxx
+bash: xxx: Permission denied
+root@pc:/tmp# uname -a
+Linux pc 6.5.0-1007-oem #7-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 27 13:57:47 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+root@pc:/tmp# what the $uck ?????
+</code></pre>
+<p>Это происходит на директориях +t<br>
+Такого нет на openwrt и alpine linux. На alpine последнее ядро из 6.x<br>
+cap_dac_override не срабатывает ?  cap set = full.<br>
+Может какой-то странный sysctl или опция компиляции ядра ?</p></td><td>2023-11-14T18:57:33.416Z</td></tr><tr><td>Dhohbr</td><td><aside class="onebox stackexchange" data-onebox-src="https://askubuntu.com/questions/432699/what-is-the-t-letter-in-the-output-of-ls-ld-tmp">
+  <header class="source">
+
+      <a href="https://askubuntu.com/questions/432699/what-is-the-t-letter-in-the-output-of-ls-ld-tmp" target="_blank" rel="noopener nofollow ugc">askubuntu.com</a>
+  </header>
+
+  <article class="onebox-body">
+    
+<h4>
+  <a href="https://askubuntu.com/questions/432699/what-is-the-t-letter-in-the-output-of-ls-ld-tmp" target="_blank" rel="noopener nofollow ugc">What is the "t" letter in the output of "ls -ld /tmp"?</a>
+</h4>
+
+<div class="tags">
+  <strong>permissions, tmp</strong>
+</div>
+
+<div class="date">
+  asked by
+  
+  <a href="" rel="noopener">
+    user255675
+  </a>
+  on <a href="https://askubuntu.com/questions/432699/what-is-the-t-letter-in-the-output-of-ls-ld-tmp" target="_blank" rel="noopener nofollow ugc">12:33PM - 11 Mar 14 UTC</a>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Вроде не что-то новое. На debian 12 и Gentoo у меня тоже самое. Судя по всему этот бит позволяет только владельцу каталога или руту вносить изменения.</p></td><td>2023-11-15T09:59:06.287Z</td></tr><tr><td>usnevst</td><td><h3><a name="protected_regularhttpswwwkernelorgdochtmllatestadmin-guidesysctlfshtmlid12-1" class="anchor" href="#protected_regularhttpswwwkernelorgdochtmllatestadmin-guidesysctlfshtmlid12-1"></a><a href="https://www.kernel.org/doc/html/latest/admin-guide/sysctl/fs.html#id12" rel="noopener nofollow ugc">protected_regular</a></h3>
+<blockquote>
+<p>When set to “0”, writing to regular files is unrestricted.</p>
+</blockquote>
+<blockquote>
+<p>When set to “1” don’t allow <code>O_CREAT</code> open on regular files that we don’t own in world writable sticky directories, unless they are owned by the owner of the directory.</p>
+</blockquote>
+<blockquote>
+<p>When set to “2” it also applies to group writable sticky directories.</p>
+</blockquote></td><td>2023-11-15T10:24:41.811Z</td></tr><tr><td>bolvan</td><td><p>Оно самое. Спс.<br>
+Странная защита от рута, если рут может легко поменять sysctl</p></td><td>2023-11-15T11:47:48.349Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="Dhohbr" data-post="2" data-topic="6256">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> Dhohbr:</div>
+<blockquote>
+<p>Вроде не что-то новое. На debian 12 и Gentoo у меня тоже самое. Судя по всему этот бит позволяет только владельцу каталога или руту вносить изменения.</p>
+</blockquote>
+</aside>
+<p>Ничего подобного нет в изначальном варианте +t.<br>
+Это уже костыли ядра linux</p></td><td>2023-11-15T12:14:52.062Z</td></tr>
+    </table>
+      </body>
+    </html>

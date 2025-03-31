@@ -1,0 +1,83 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>a-new-kind-of-censoship-in-iran</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>gwenoleauvray(auvray gwenole)</td><td><p>Is someone have technical information about iranian new censorship?</p></td><td>2019-11-22T10:58:19.528Z</td></tr><tr><td>ValdikSS</td><td><p>Here’s the message from <span class="hashtag-raw">#openvpn</span> IRC channel:</p>
+<blockquote>
+<p>[08:24]  Hi. I wanted to know how to chain 2 OpenVPN VPN’s. But stuck at routing tables. Can Anyone Help me?<br>
+[08:27]  I’m Currently located in  Iran, as some of you may know is on total Internet Lockdown. I have 2 VPS’es. VPS1 in Iran and VPS2 in europe. Clients can only access VPS1. My scheme is Client &lt;—&gt; VPS1 &lt;—&gt;VPS2 &lt;—&gt; Internet. Client can successfully connect to VPS1 via openvpn, but doesn’t have any access to VPS2. VPS1 can connect to VPS2 via openvpn, but after connection is initiated, no user can connect to VPS1 Anymore.</p>
+</blockquote>
+<p>From this message I assume that the network itself works, but the internet access is limited for residential and mobile connections, but is still available in data centers.</p></td><td>2019-11-22T11:10:56.623Z</td></tr><tr><td>tango</td><td><p>OONI, CAIDA, IODA, and Kandoo have written a report about the Internet blackout in Iran since 2019-11-16.</p>
+<p><a href="https://ooni.org/post/2019-iran-internet-blackout/">Iran’s nation-wide Internet blackout: Measurement data and technical observations</a></p>
+<blockquote>
+<p>This major Internet blackout was rolled out on 16th November 2019, right after <a href="https://www.aljazeera.com/news/2019/11/iran-protests-600-words-191118060831036.html">protests erupted</a> across multiple cities in Iran. The protests (against economic mismanagement and government corruption) were <a href="https://www.nytimes.com/2019/11/15/world/middleeast/iran-gasoline-prices-rations.html">sparked</a> by the government’s abrupt announcement to increase the price of fuel (as much as <a href="https://edition.cnn.com/2019/11/20/middleeast/iran-fuel-protests-intl/index.html">300%</a>) and to impose a strict rationing system. According to Amnesty International, <a href="https://www.amnesty.org/en/latest/news/2019/11/iran-more-than-100-protesters-believed-to-be-killed-as-top-officials-give-green-light-to-crush-protests/">more than 100 protesters are believed to have been killed</a> over the last week, but this figure has been <a href="https://www.aljazeera.com/news/2019/11/iran-blasts-amnesty-protest-toll-calling-disinformation-191120195212119.html">disputed</a> by Iranian authorities. Amid the protests—which began on 15th November 2019 and are ongoing—access to the Internet was <a href="https://www.wired.com/story/iran-internet-shutoff/">reportedly shutdown</a>.</p>
+<p>As of 21st November 2019, Internet access is <a href="https://www.aljazeera.com/news/2019/11/iran-loosens-internet-restrictions-protest-shutdown-191121195539005.html">gradually being restored</a>.</p>
+</blockquote>
+<blockquote>
+<p>Iran’s Internet blackout is also confirmed by several other data sources, such as <a href="https://transparencyreport.google.com/traffic/overview?fraction_traffic=start:1571788800000;end:1574467200000;product:19;region:IR&amp;lu=fraction_traffic">Google traffic data</a>, <a href="https://metrics.torproject.org/userstats-relay-country.html?start=2019-11-10&amp;end=2019-11-21&amp;country=ir&amp;events=off">Tor Metrics</a> (statistics on the use of <a href="https://www.torproject.org/">Tor software</a>, which is used for online privacy, anonymity, and censorship circumvention), and <a href="https://map.internetintel.oracle.com/?root=national&amp;country=IR">Oracle’s Internet Intelligence</a>, as well as by <a href="https://netblocks.org/reports/internet-disrupted-in-iran-amid-fuel-protests-in-multiple-cities-pA25L18b">NetBlocks</a> and <a href="https://twitter.com/jgrahamc/status/1196499414627627010">Cloudflare</a> reports.</p>
+</blockquote>
+<blockquote>
+<p>Not everyone in Iran was disconnected from the Internet during the blackout. We were told that some hosting providers, banks, businesses, and journalists were able to maintain access to the Internet. Meanwhile, most people in Iran were limited to using Iran’s national <em>Intranet</em> during the Internet blackout.</p>
+</blockquote>
+<blockquote>
+<p>To better understand how the Internet blackout was technically implemented in Iran, we ran a series of tests locally.</p>
+<p>By observing the network traffic data from both sides, we can see that a RST packet is injected at both ends of the connection.</p>
+</blockquote>
+<blockquote>
+<p>Through manual testing, we were able to determine that it could theoretically be possible to use <strong>DNS tunneling</strong> to get traffic to leave Iran.</p>
+<p>This means that it’s possible to get the upstream recursive resolvers of the ISP to perform DNS queries on our behalf. This channel could theoretically be used to transfer some data to the Internet at a very low throughput and with high overhead. Tools like <a href="https://code.kryo.se/iodine/">iodine</a> could be used.</p>
+</blockquote>
+<blockquote>
+<p>It is possible for Iranian citizens to acquire <strong>virtual private servers (VPS)</strong> inside the country. Through local testing, we were able to determine that these VPS hosts have connectivity with both users inside the country, but also to the Internet. This makes it possible to use these servers to setup a local proxy inside of the country and to use that proxy to tunnel traffic to another proxy outside Iran. Information about this method has also been circulated in <a href="https://t.me/s/webamoozir/6964">Iranian Telegram forums</a>.</p>
+</blockquote></td><td>2019-11-23T20:38:17.133Z</td></tr><tr><td>xhdix</td><td><p>An easier way to circumvent the Internet blackout in Iran in November was to use <code>nat</code> on <code>iptables</code>.</p>
+<p>To do this, after installing Openconnect on a foreign VPS, just enter these commands on the domestic VPS:</p>
+<pre><code class="lang-bash">echo 1 &gt; /proc/sys/net/ipv4/ip_forward
+iptables -t nat -A PREROUTING -i eth0 -p tcp -m tcp --dport 443 -j DNAT  --to-destination [foreignVPSip]:443
+iptables -t nat -A PREROUTING -i eth0 -p udp -m udp --dport 443 -j DNAT  --to-destination [foreignVPSip]:443
+iptables -t nat -A PREROUTING -i eth0 -p udp -m udp --dport 53 -j DNAT  --to-destination [foreignVPSip]:53
+iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source [domesticVPSip]
+</code></pre>
+<p>And then use Openconnect like this:</p>
+<pre><code class="lang-bash">echo password|openconnect --resolve=domain.com:[domesticVPSip] -vu username --passwd-on-stdin https://domain.com
+</code></pre></td><td>2020-08-10T10:07:39.305Z</td></tr><tr><td>pointer</td><td><p>It is also possible to use Gost on the domestic VPS and V2Ray+WebSocket+TLS on the foreign VPS. This may even look enough like HTTPS to pass a protocol whitelist. <a href="https://www.oilandfish.com/posts/v2ray-server-domestic-relay.html" rel="nofollow noopener">https://www.oilandfish.com/posts/v2ray-server-domestic-relay.html</a></p></td><td>2020-08-27T15:17:11.016Z</td></tr><tr><td>Mohsen</td><td><p>all sockss<br>
+all http proxy<br>
+and all wireguard is be ban<br>
+but in open vpn and chinese protocol<br>
+they are banning late<br>
+since running on your vps</p></td><td>2022-02-23T16:18:28.334Z</td></tr>
+    </table>
+      </body>
+    </html>

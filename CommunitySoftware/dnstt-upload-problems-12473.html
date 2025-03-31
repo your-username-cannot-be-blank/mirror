@@ -1,0 +1,45 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>dnstt-upload-problems-12473</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tarec</td><td><p>When connected through DNSTT and trying to upload a file it always fails, I do not know exactly but it feels like the connection becomes not responding.</p></td><td>2024-10-31T09:00:54.281Z</td></tr><tr><td>tango</td><td><p>Please share some more information. How have you configured the client and server? (What proxy software are they connected to?) How are you uploading the file, with HTTP? Do downloads work while uploads do not work? Do you see any log messages?</p></td><td>2024-11-07T22:29:11.374Z</td></tr><tr><td>tarec</td><td><p>I’m using DNSTT(UDP mode) on Android VPN. I’ve set up the server and client as mentioned in the instructions. The download works fine and well. However, for example, when I want to upload a file on Telegram, it never completes (it gets to upload few KBytes and hangs there whereas downloading works properly). I hope this is clear enough.</p>
+<p>Furthermore, I have another question if you don’t mind.<br>
+My ISP has 8 DNS recursive resolvers and each one of them is usable on DNSTT but the problem is that each one works only for few seconds (5-8s) then stops completely. I’ve edited the source code and managed to add a rotation-like method that uses each DNS resolver every defined interval. It worked, though, switching between DNS resolvers causes overall connection disruptions. So my question is, are there any methods to still use the rotation method and have a stable connection?</p>
+<p>Thanks.</p></td><td>2024-11-08T05:52:38.759Z</td></tr><tr><td>tango</td><td><p>It’s strange that you can download files but not upload them. If there were a problem at the dnstt layer, I would expect it to break the entire connection, not only uploads. It may be a problem with the host that dnstt-server is running on. Maybe Telegram restricts uploads from certain VPS addresses, or something like that? You could try running another kind of proxy (e.g. a plain old SOCKS proxy) on the same server, and check whether uploads also have a problem with that.</p>
+<p>Distributing queries over multiple recursive resolvers should work fine. It is not even necessary to divide it into intervals, you could send each individual query to the next resolver in the list, round-robin. Whether you will get a stable connection depends on the number of resolvers and the specific rate limits they have configured. If you can determine the parameters of the resolvers’ rate limits, you might be able to implement a query rate limiter in dnstt-client that stays under the threshold to a slow, but stable connection.</p></td><td>2024-11-08T18:03:39.385Z</td></tr><tr><td>denium</td><td><p>It’s just that Telegram is a pain in the ass in terms of uploading. I cursed it on 3G internet as well.</p></td><td>2024-11-08T18:41:48.861Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,104 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>asus-rt-n11p-b1-openwrt-zapret-10257</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>yocx_xcoy</td><td><p>Подскажите пожалуйста, есть роутер RT-N11P B1 с OpenWRT - хочется на нём настроить Zapret (или что-то другое) - чтобы не запускать на каждом устройстве VPN/ByeDPI/etc. - а просто иметь доступ к ютубу (и в теории, к другим заблоченным ресурсам) при подключении к нему по проводу и вафле.</p>
+<p>USB у роутера нет. Памяти тоже не много.</p>
+<p>Хочется понять, что на него можно дополнительно поставить для этого и каким образом (любые инструкции).</p>
+<p>Спасибо!<br>
+__<br>
+p.s. статью про кинетик и openwrt (<a href="https://habr.com/ru/articles/833564/" rel="noopener nofollow ugc">link</a>) - изучал, но кажется не мой случай из-за флешки</p></td><td>2024-09-16T16:01:04.435Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>ByeDPI же.<br>
+Даже <a href="https://github.com/spvkgn/ByeDPI-OpenWrt/">готовый пакет</a> есть. Подключаетесь, скажем, по SCP или SFTP и кидаете пакет в /tmp, а дальше стандартно: <code>opkg install /tmp/blablabla.ipk</code></p></td><td>2024-09-17T03:43:54.520Z</td></tr><tr><td>yocx_xcoy</td><td><p>Спасибо за готовые пакеты.<br>
+Доп моменты:</p>
+<ol>
+<li>
+<p>а установить нужно обязательно через консоль (putty как пример) или можно через System → Software → Upload package…?</p>
+</li>
+<li>
+<p>на вкладке Software у меня Free space: 88% (1.83 Mb) - не мало ли? (хотя пакет вижу что совсем небольшой)</p>
+</li>
+<li>
+<p>после установки будет какая-то доп панель (ui) для настройки (как на android) или нужно будет настраивать через консоль? (не увидел никакого гайда на этот счет, потому вопросы примитивные)</p>
+</li>
+</ol>
+<p>Спасибо!</p></td><td>2024-09-17T12:01:47.066Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><ol>
+<li>
+<p>Давно не имел дел с OWrt, в те годы ещё не было никакого “Upload package”. Но, судя по названию, это оно. Впрочем, для правки конфига вам всё равно пригодятся WinSCP и консоль.</p>
+</li>
+<li>
+<p>Из зависимостей у пакета лишь стандартный <code>libc</code>, так что каких-то других пакетов он, видимо, не требует для установки.</p>
+</li>
+<li>
+<p>Все настройки у него в конфиге, распакуйте пакет на ПК, как архив, и увидите: там всего три файла</p>
+</li>
+</ol>
+<ul>
+<li><code>/usr/bin/ciadpi</code> - сам бинарник</li>
+<li><code>/etc/init.d/byedpi</code> - инит-скрипт</li>
+<li><code>/etc/config/byedpi</code> - конфиг</li>
+</ul>
+<p>Соответственно для настройки правите конфиг и затем перезапускаете (<code>service byedpi restart</code> или в веб-интерфейсе в разделе автозагрузки). По итогу получаете SOCKS-прокси.</p>
+<p>Все параметры описаны в документации к <a href="https://github.com/hufrea/byedpi">ByeDPI</a>, обсуждение ведётся на <a href="https://ntc.party/t/byedpi-%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5/9057/84">этом форуме</a>.</p></td><td>2024-09-17T12:39:09.986Z</td></tr><tr><td>gepron1x(Георгий)</td><td><p>Привет, у меня точно такой же роутер, флеш-памяти не хватает чтобы полностью клонировать репозиторий, тем более чтобы устанавливать git. Прогони блокчек на своем компьютере, удали все бинарники других архитектур из репозитория, упакуй и залей на файлообменник, потом на роутере скачаешь и разархивируешь. Потом достаточно запустить install_easy.sh</p></td><td>2024-09-17T12:58:26.432Z</td></tr><tr><td>yocx_xcoy</td><td><p>Спасибо большое.<br>
+Скопировал пакет, заинсталил, появился в плагинах (да, можно было через обзор - видимо добавили такой ui) - далее пошел в system/startup и там нажал Enabled + Start (перезагрузил роутер)</p>
+<p>Но вот пока настройки для конфига не подобрал верные.<br>
+У меня на телефоне, который подключен по wifi есть настройки через ui - и они работают.<br>
+Пытаюсь сделать аналогичные через параметры в конфиге - пока как будто не всё добавил.</p>
+<p>Не нашел возможности в андроид аппке импортнуть настройки текстом - вероятно это бы помогло.</p>
+<p>Может сможете что-то посоветовать в этом направлении - как лучше поступить, если есть по сути рабочий конфиг в телефоне - но в виде UI настроек <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> пока пытаюсь просто догадаться)</p>
+<hr>
+<p>И ещё вопрос - а как понять точно, что установленный пакет-плагин работает сейчас? (ну кроме того что кнопка в ui горит Disabled)</p></td><td>2024-09-17T17:40:24.838Z</td></tr><tr><td>yocx_xcoy</td><td><p>На всякий случай уточню - я же верно понимаю, что установка <a href="https://github.com/spvkgn/ByeDPI-OpenWrt/" rel="noopener nofollow ugc">пакета этого</a> и его активация+настройка конфига на роутере = ByeDPI for Android (1.2.0)<br>
+И на роутер больше ничего не надо ставить? (или я ошибаюсь)</p>
+<hr>
+<p>В логах нашел такое:</p>
+<pre><code class="lang-auto">daemon.err ciadpi[3068]: invalid value: -g 0
+...(6 раз первая строка)...
+daemon.info procd: Instance byedpi::instance1 s in a crash loop 6 crashes, 0 seconds since last crash
+</code></pre></td><td>2024-09-17T18:00:08.256Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="yocx_xcoy" data-post="6" data-topic="10257">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/y/65b543/48.png" class="avatar"> yocx_xcoy:</div>
+<blockquote>
+<ul>
+<li>а как понять точно, что установленный пакет-плагин работает сейчас</li>
+</ul>
+</blockquote>
+</aside>
+<p>Если там есть netstat, то можно в выводе команды <code>netstat -tulpn</code> посмотреть, слушает ли ByeDPI на порту, который указан в конфиге. Хотя, если верить сислогу, он из-за некорректных настроек просто падает.</p>
+<p>В любом случае лучше спрашивать в указанной выше теме, где вам хотя бы могут теоретически ответить пользователи ByeDPI.</p></td><td>2024-09-17T21:43:33.694Z</td></tr><tr><td>yocx_xcoy</td><td><p>Спасибо большое за ответы!</p></td><td>2024-09-19T13:45:22.027Z</td></tr><tr><td>dredj(dredj )</td><td><p>Если нужен просто ютуб есть простое решение <a href="https://github.com/Waujito/youtubeUnblock" class="inline-onebox" rel="noopener nofollow ugc">GitHub - Waujito/youtubeUnblock: Bypasses Deep Packet Inspection (DPI) systems that rely on SNI</a></p></td><td>2024-09-22T17:50:24.707Z</td></tr><tr><td>yocx_xcoy</td><td><p>Спасибо за вариант.<br>
+Подскажите, а как определить по какому пути идти с <strong>iptables</strong> или <strong>nftables</strong>?</p></td><td>2024-09-23T13:55:36.378Z</td></tr><tr><td>dredj(dredj )</td><td><p>Смотря что из них установлен, последний openwrt идёт с nftables, но всё равно проверить надо</p></td><td>2024-09-28T08:05:32.563Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,51 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>помогите-найти-причину-неработоспособности-cloudflare-warp-в-3x-ui</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Sudo</td><td><p>Доброго времени суток. Прошу помочь мне с конфигурацией wireguard warp на сервере с установленным 3x-ui на сервере хостера aeza</p>
+<p>Описание ситуации:<br>
+Имеется два сервера, от двух хостеров, сервера настроены по одному принципу. На сервере aeza создается конфигурация cloudflare warp и создается правило маршрутизации вида <em>geosite:category-gov-ru,regexp:.</em>.ru$,regexp:.<em>.su$</em> после попытки зайти на тестовый сайт <a href="http://2ip.ru" rel="noopener nofollow ugc">2ip.ru</a>, сайт не загружается, а бразуер выдает ошибку по таймауту, при этом, если скопировать этот “не работающий” конфиг на другой сервер от другого хостера, то там все с этой конфигурацией работает. Конфигурация не какая-то кастомная, все по стандарту то что дает warp в начале работы, когда он сам в автоматическом режиме конфигурирует параметры. Подскажите в чем причина такой работы? Неужели из-за сервака у конкретного хостера или в около той теме?</p></td><td>2025-01-19T02:59:31.422Z</td></tr><tr><td>portos</td><td><p>Если ставите варп средствами панели, то почему-то не работает у меня, и не только на аезе.<br>
+Ставьте во так <a href="https://pkg.cloudflareclient.com" rel="noopener nofollow ugc">https://pkg.cloudflareclient.com</a>, потом создайте пркси аутбонд. Должно заработать</p></td><td>2025-01-19T05:04:14.841Z</td></tr><tr><td>0ka(0ka)</td><td><p>не пользуюсь 3x-ui, но если там есть выбор MTU то ставьте 1280, на aeza занижен mtu (1448) поэтому могут быть проблемы на стандартном mtu wireguard (1420)</p></td><td>2025-01-19T05:08:59.568Z</td></tr><tr><td>Sudo</td><td><p>Именно там?</p></td><td>2025-01-19T10:40:17.853Z</td></tr><tr><td>Sudo</td><td><p>Вообще такое ощущение создаётся что реализация данной функции через панель сделана из рук вон плохо, даже на втором хосте манипуляции с конфигурацией которые не меняют ее, вызывают абсолютные и непонятные ее поломки причем абсолютно без вмешательства, вот если взять просто добавить wireguard warp в список исходящих, не открывать его и вообще не трогать раздел с исходящими подключениями то все будет хорошо работать, видимо warp какой-то очень нежный</p></td><td>2025-01-19T10:43:14.210Z</td></tr><tr><td>Sudo</td><td><p>Спасибо за ссылку, обратился в поддержку аезы, посмотрю что скажут там, если ничего то буду пробовать, хотя не знаю чем такой простой способ может помочь исправить проблему, но спасибо</p></td><td>2025-01-19T10:44:56.892Z</td></tr><tr><td>Sudo</td><td><p>И так, пообщавшись с поддержкой aeza, мне помогли починить работу warp и по итогу, что мы имеем</p>
+<p><img src="помогите-найти-причину-неработоспособности-cloudflare-warp-в-3x-ui/0fa989b06d0ca4cbea08f52d5324084e080c4d7f.png" alt="image" data-base62-sha1="2eyovelEmHAyZjMrfK6tIRO9jHh" width="352" height="257"></p>
+<p>Я конечно не супер шарящий чел, скрипты запускать непонятные не очень хорошо, но надеюсь со скриптом все в порядке. Как я понял ничего более после настройки скрипта поддержка не сделала, возможно кроме указания порта и параметра w который устанавливает wireproxy вдогонку. Надеюсь тем кто также столкнулся с такой проблемой это хоть чем-то поможет</p>
+<p>Гитлаб данного скрипта - <a href="https://gitlab.com/fscarmen/warp" rel="noopener nofollow ugc">Тык</a></p>
+<hr>
+<p>В панеле 3x-ui все выглядит примерно так</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="помогите-найти-причину-неработоспособности-cloudflare-warp-в-3x-ui/caec293b9eb91d7efb7bd477ae3ffa924f2909c9.png" data-download-href="https://ntc.party/uploads/default/caec293b9eb91d7efb7bd477ae3ffa924f2909c9" title="image"><img src="помогите-найти-причину-неработоспособности-cloudflare-warp-в-3x-ui/caec293b9eb91d7efb7bd477ae3ffa924f2909c9.png" alt="image" data-base62-sha1="sX8q9ketOoj5UHRZEsYm79itOWt" width="472" height="500" data-dominant-color="182232"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">516×546 13.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="помогите-найти-причину-неработоспособности-cloudflare-warp-в-3x-ui/beb094860ab8e1b06091e73ef0035b25543954c9.png" data-download-href="https://ntc.party/uploads/default/beb094860ab8e1b06091e73ef0035b25543954c9" title="image"><img src="помогите-найти-причину-неработоспособности-cloudflare-warp-в-3x-ui/beb094860ab8e1b06091e73ef0035b25543954c9_2_690x28.png" alt="image" data-base62-sha1="rcV2whkdwvpdXgk7dwt7TJRCsaJ" width="690" height="28" srcset="помогите-найти-причину-неработоспособности-cloudflare-warp-в-3x-ui/beb094860ab8e1b06091e73ef0035b25543954c9_2_690x28.png, помогите-найти-причину-неработоспособности-cloudflare-warp-в-3x-ui/beb094860ab8e1b06091e73ef0035b25543954c9_2_1035x42.png 1.5x, помогите-найти-причину-неработоспособности-cloudflare-warp-в-3x-ui/beb094860ab8e1b06091e73ef0035b25543954c9_2_1380x56.png 2x" data-dominant-color="172133"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1746×71 1.79 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2025-01-19T12:30:02.736Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,72 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проблема-в-моем-конфиге-или-в-чем-то-другом-gbdpi-11273</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>fluffy-femboy</td><td><p>Всем привет, где-то с середины сентября юзаю конфиг " -9 --dns-addr <em>pi-hole</em> -e1 -q --fake-gen 29 --fake-from-hex <em>числа</em> " ютуб работает, но почему-то при просмотре англоязычных каналов (количество просмотров неважно) даже в 720p идут прогрузки каждый 10 секунд, но когда я открываю что-то русскоязычное то оно работает без подгрузок с 1080p и x2 скоростью.<br>
+Как я понял русскоязычное он прогружает из близкого ко мне GGC, а вот с остальным контентом уже проблемы. Есть советы как пофиксить? До середины сентября, когда перешел на fake-gen, все работало идеально</p></td><td>2024-10-08T23:44:51.128Z</td></tr><tr><td>SagePtr(Sage Pointer)</td><td><p>Подобрать при помощи <a href="https://ntc.party/t/goodcheck-%D0%B1%D0%BB%D0%BE%D0%BA%D1%87%D0%B5%D0%BA-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82-%D0%B4%D0%BB%D1%8F-goodbyedpi-zapret-byedpi/10880">этого скрипта</a> стратегию под вашего провайдера, которая как можно больше серверов ютуба обходит. Если в списке нет того сервера, с которого у вас не грузятся видео, докинуть его в список для тестирования.</p></td><td>2024-10-09T00:15:33.543Z</td></tr><tr><td>fluffy-femboy</td><td><p>Большое спасибо за ссылку (и большое спасибо <a class="mention" href="/u/ori">@Ori</a>)<br>
+Запустил проверку дефолтного гугл+ют чеклиста, пока что затестил пару стратегий с 23 и 25 из 31 успешными проходами, но… англоязычные видео все еще работают с подгрузками по 10 секунд <img src="https://ntc.party/images/emoji/twitter/smile.png?v=12" title=":smile:" class="emoji" alt=":smile:" loading="lazy" width="20" height="20"> зато русскоязычные грузит в 4к и х2 скоростью лол<br>
+Каким образом собрать список серверов которые нужны мне? Inspect → network и оттуда брать все домены: <a href="http://xn----7sbbbc1dd.googlevideo.com/videoplayback" rel="noopener nofollow ugc">бла-бла.googlevideo.com/videoplayback</a> до expire ?</p></td><td>2024-10-09T01:44:03.446Z</td></tr><tr><td>SagePtr(Sage Pointer)</td><td><blockquote>
+<p>Inspect → network и оттуда брать все домены</p>
+</blockquote>
+<p>Да, оттуда выковыривать те домены, с которыми имеются проблемы. А ещё также смотреть, если там не таймаут, а ошибка 403 - то это уже другая проблема, не связанная с GoodbyeDPI, их можно отдельно блокнуть через hosts или правило блокировщика рекламы.</p></td><td>2024-10-09T01:47:56.212Z</td></tr><tr><td>fluffy-femboy</td><td><p>Хм забавно, при конфиге с “25 из 31” половина видео вообще перестали открываться, а другие работают на пределе моего тарифа<br>
+<img src="проблема-в-моем-конфиге-или-в-чем-то-другом-gbdpi-11273/c0784428500dfaed5c7322ea6ef9a5e75a290322.png" alt="afsfas" data-base62-sha1="rsFliDksvbmgMgQwkMUYGoZa802" width="431" height="151"></p></td><td>2024-10-09T02:09:31.876Z</td></tr><tr><td>KDS</td><td><p>А exe до последней версии пробовали обновить и юзать фейк-с-сни?</p></td><td>2024-10-09T10:35:54.904Z</td></tr><tr><td>fluffy-femboy</td><td><p>Ехе последней версии.<br>
+<em>фейк-с-сни</em><br>
+Это имеется ввиду только --frag-by-sni?<br>
+Если и sni и fake-hex вместе то у меня это всего лишь “13 из 31”</p></td><td>2024-10-09T14:29:26.047Z</td></tr><tr><td>fluffy-femboy</td><td><p>-9 -e2 -q --frag-by-sni без фейк хекса показывает “25 из 31” но результат такой-же хех</p>
+<p>Верхнее это если загружать что-то из трендов<br>
+Нижнее если включать что-то из моего<br>
+<img src="проблема-в-моем-конфиге-или-в-чем-то-другом-gbdpi-11273/7308bc2389149d006e29583c142ee965b88800fe.png" alt="dgdgd" data-base62-sha1="gpDCF1uZNNEBQXrnlfgJaJ3bToq" width="397" height="61"></p>
+<p>p.s. я понимаю что мне нужно подбирать сервера вручную, последний тест был ради интереса</p></td><td>2024-10-09T14:53:26.248Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="fluffy-femboy" data-post="7" data-topic="11273">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/fluffy-femboy/48/10252_2.png" class="avatar"> fluffy-femboy:</div>
+<blockquote>
+<p><em>фейк-с-сни</em><br>
+Это имеется ввиду только --frag-by-sni?</p>
+</blockquote>
+</aside>
+<p>Нет. Он имел в виду --fake-with-sni, который функционально заменяет --fake-from-hex. Для его функционирования нужен тестовый билд гудбая.</p></td><td>2024-10-09T15:03:38.121Z</td></tr><tr><td>KDS</td><td><p>Из <a href="https://ntc.party/t/%D0%B5%D1%81%D0%BB%D0%B8-%D0%BE%D0%BF%D1%8F%D1%82%D1%8C-%D0%BF%D0%B5%D1%80%D0%B5%D1%81%D1%82%D0%B0%D0%BB-%D0%B3%D1%80%D1%83%D0%B7%D0%B8%D1%82%D1%8C%D1%81%D1%8F-youtube-%D0%B8%D0%BB%D0%B8-%D0%B5%D0%B3%D0%BE-%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/10529">этой темы</a>. Шапку рекомендую изучить обстоятельно и с пристрастием</p></td><td>2024-10-09T15:16:40.969Z</td></tr><tr><td>fluffy-femboy</td><td><p>Не знаю, это сайт умер или я что-то наделал с конфигом, не мог зайти сюда 4 часа лол<br>
+За ссылку спасибо, сделал все по инструкции ииии… по сути вернулся в изначальное состояние <img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"><br>
+Браузер рапортует что все ок, но бесящие подгрузки все равно остались<br>
+<img src="проблема-в-моем-конфиге-или-в-чем-то-другом-gbdpi-11273/22df2138dff07755d6b8653035f72b82b2ad8e50.png" alt="Untitled" data-base62-sha1="4YuhOv8Kmvm298720wo00i4MTwQ" width="469" height="20"></p>
+<p>Взял десяток рандомных серверов googlevideo которые у меня не грузились, прогнал их гудчекером, заюзал десяток из самых успешных стратегий но это просто ломало все сайты (про QUIC не забыл)<br>
+В общем, жесть какая-то у меня с иностранными серверами googlevideo</p>
+<p>Буду дальше перебирать рандомные комбинации <img src="https://ntc.party/images/emoji/twitter/sneezing_face.png?v=12" title=":sneezing_face:" class="emoji" alt=":sneezing_face:" loading="lazy" width="20" height="20"></p>
+<p>upd: вижу что проблемы с сайтом и ютубом сейчас у всех</p></td><td>2024-10-09T19:21:53.464Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Как альтернативный вариант можно попробовать:<br>
+включить расширение Browsec VPN, при включенном впн в умных настройках добавить исключение для <a href="http://googlevideo.com">googlevideo.com</a>, чтобы все домены ютуба, кроме самого видео, шло через впн. Возможно, в таком случае гугл отправит вас на какие-то другие ggc, более быстрые. Если повезет)</p></td><td>2024-10-09T21:49:25.441Z</td></tr>
+    </table>
+      </body>
+    </html>

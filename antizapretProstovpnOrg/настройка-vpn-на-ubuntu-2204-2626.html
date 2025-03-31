@@ -1,0 +1,52 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>настройка-vpn-на-ubuntu-2204-2626</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>danaYatsuta</td><td><p>Я импортировала antizapret-tcp.ovpn в Ubuntu 22.04 с помощью Settings → Network → Add VPN → Import from file…, и поставила галочку Use this connection only for resources on its network во вкладке IPv4. Однако при попытке включить VPN происходит ошибка Activation of network connection failed, лог: <a href="https://pastebin.com/GqNHxdhQ" class="inline-onebox" rel="noopener nofollow ugc">Jun 10 13:38:44 perun-desktop NetworkManager[827]: &lt;info&gt; [1654857524.6550] vpn - Pastebin.com</a></p></td><td>2022-06-10T10:41:49.910Z</td></tr><tr><td>kamlipoltu</td><td><blockquote>
+<p>Cannot load certificate file /home/dana/.cert/nm-openvpn/antizapret-tcp-cert.pem<br>
+ругается на сертификат</p>
+</blockquote></td><td>2022-06-10T17:35:16.169Z</td></tr><tr><td>danaYatsuta</td><td><p>Да, видела, но я не знаю что с этим делать</p></td><td>2022-06-10T22:06:55.242Z</td></tr><tr><td>ValdikSS</td><td><p>Необходимо скачать <a href="https://antizapret.prostovpn.org/antizapret-tcp.zip">zip-архив с сертификатами</a> и указать правильные пути до файлов в настройке подключения.</p></td><td>2022-06-11T13:15:59.408Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Мне не помогает на ubuntu 21.04, 18.04, а вот на Debian bullseye и  на Padavan работает отлично.</p></td><td>2022-06-12T03:56:08.599Z</td></tr><tr><td>kamlipoltu</td><td><p>похожая проблема видимо имеет старые корни и обсуждалась <a href="https://forums.openvpn.net/viewtopic.php?t=23979" rel="noopener nofollow ugc">тут</a>. Найденное решение проблемы:</p>
+<ol>
+<li>Find your Network Manager vpn configuration file (mine is in /etc/NetworkManager/system-connections; if you have a lot of them and filenames do not help much in finding the right one, use grep -i “id=yourmnemonicname” *)</li>
+<li>Under the [vpn] section add the line:<br>
+<code>tls-cipher=DEFAULT:@SECLEVEL=0</code>
+</li>
+<li>Reload the configuration with the command: nmcli connection reload</li>
+</ol>
+<p>Лень пероводить решение на русский, думаю с переводом разберетесь)</p></td><td>2022-06-12T22:17:04.586Z</td></tr><tr><td>filkint(Filkint)</td><td><p>Решилось командой <code>nmcli connection modify antizapret-tcp ipv4.dns-search '~.'</code> , интересно что ранее это у меня не работало, видимо были обновления системы…</p></td><td>2022-06-13T05:51:49.833Z</td></tr>
+    </table>
+      </body>
+    </html>

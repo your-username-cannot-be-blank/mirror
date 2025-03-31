@@ -1,0 +1,1410 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>mrB4el(Oleg L)</td><td><p>Помимо предположений есть что-то? Если это выжимка из комментариев, то такое себе утверждение на данный момент. Отвалы на мобильных операторах, например, так что не полностью “интернет”.</p>
+<p>И, нет, это не охранительство, но лишь попытка не разгонять панику.</p></td><td>2023-08-07T11:26:03.520Z</td></tr><tr><td>lwx</td><td><p>Вот мой конфиг (клиент под iOS), какие опции разнятся с вашим?</p>
+<pre><code class="lang-auto">client
+dev tun
+remote example.com 12345 udp
+
+connect-retry-max 3
+resolv-retry 5
+tls-timeout 10
+hand-window 120
+replay-window 256 60
+
+nobind
+persist-key
+persist-tun
+explicit-exit-notify
+verb 3
+
+cipher AES-256-CBC
+auth SHA512
+
+remote-cert-tls server
+
+&lt;ca&gt;
+-----BEGIN CERTIFICATE-----
+-----END CERTIFICATE-----
+&lt;/ca&gt;
+
+&lt;cert&gt;
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+    Signature Algorithm: sha256WithRSAEncryption
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Subject Key Identifier: 
+            X509v3 Authority Key Identifier: 
+            X509v3 Extended Key Usage: 
+                TLS Web Client Authentication
+            X509v3 Key Usage: 
+                Digital Signature
+    Signature Algorithm: sha256WithRSAEncryption
+-----BEGIN CERTIFICATE-----
+-----END CERTIFICATE-----
+&lt;/cert&gt;
+
+&lt;key&gt;
+-----BEGIN PRIVATE KEY-----
+-----END PRIVATE KEY-----
+&lt;/key&gt;
+
+
+&lt;tls-crypt&gt;
+#
+# 2048 bit OpenVPN static key
+#
+-----BEGIN OpenVPN Static key V1-----
+-----END OpenVPN Static key V1-----
+&lt;/tls-crypt&gt;
+</code></pre></td><td>2023-08-08T07:48:38.133Z</td></tr><tr><td>bolvan</td><td><p>Еще раз проверил.<br>
+все же блокируется после 7 пингов. утром вроде не было, даже iperf делал, но может я ошибся</p>
+<p>лекарство нашел такое : послать 6 или более фейк пакетов (лучше 10 для надежности из-за возможных потерь) с той же связкой ip и портов<br>
+в понятиях nfqws это выглядит так : --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d2 --dpi-desync-repeats=10 --dpi-desync-ttl=3</p>
+<p>то есть DPI смотрит в пределах 6 первых пакетов по “соединению”, потом отпускает и добавляет в allow list</p>
+<p>то же самое можно сделать с помощью nping, если зафиксировать udp source port в клиенте</p></td><td>2023-08-08T08:20:09.231Z</td></tr><tr><td>lwx</td><td><p>Увы, на ios это все проблематично <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p>
+<p>Нашел Packet Generator в AppStore который умеет слать UDP пакеты, отправил несколько - безрезультатно</p></td><td>2023-08-08T09:38:42.522Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="lwx" data-post="4" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/l/ad7895/48.png" class="avatar"> lwx:</div>
+<blockquote>
+<p>Нашел Packet Generator в AppStore который умеет слать UDP пакеты, отправил несколько - безрезультатно</p>
+</blockquote>
+</aside>
+<p>Важно, чтобы source port совпадал у пингера и клиента. Сначала пингер, затем вскоре клиент (таймаут udp не более неск минут)<br>
+Яблочники в их золотой клетке будут страдать первыми.<br>
+Опыт Туркменистана показывает, что на яблоке можно использовать openconnect с отключенным udp.<br>
+Он примечателен тем, что вся его сессия обернута с самого начала в TLS, и распознать можно или актив пробингом, или фингерпринтом TLS сессии (клиенты используют gnutls). Что пока, скорее всего, не сделано</p></td><td>2023-08-08T10:10:50.672Z</td></tr><tr><td>Kebu</td><td><p>Возможна ли настройка контейнера Антазапрет для установки на свои ВПС, которая поможет обходить такую блокировку?<br>
+Учитывая что публичный Антизапрет у многих работает.</p></td><td>2023-08-08T10:13:45.062Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><blockquote>
+<p>Опыт Туркменистана показывает, что на яблоке можно использовать openconnect с отключенным udp.<br>
+Он примечателен тем, что вся его сессия обернута с самого начала в TLS, и распознать можно или актив пробингом</p>
+</blockquote>
+<p>У Openconnect-сервера недавно вышла новая версия 1.2.0 и там теперь есть базовая защита от active probing’а.</p></td><td>2023-08-08T19:51:14.465Z</td></tr><tr><td>Kebu</td><td><p>А для ios есть openconnect клиент разве?</p></td><td>2023-08-08T19:59:13.454Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Для iOS есть оригинальный цисковский AnyConnect-клиент, и он совместим с опенсорсным сервером.</p></td><td>2023-08-09T04:39:36.481Z</td></tr><tr><td>vanyaindigo</td><td><p>Где-то я тут читал, что кто-то из ОПСОСов не тарифицировал трафик, если абонент сообщал, что это VPN. Похоже, что статистику специально собирали.</p></td><td>2023-08-09T06:00:15.224Z</td></tr><tr><td>mrplap</td><td><p>Если не ошибаюсь, такая “услуга” с безлимитным впн была у йоты</p></td><td>2023-08-09T06:24:16.261Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><aside class="quote quote-modified" data-post="1" data-topic="4583">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/vpn-yota-2/4583">Опции «безлимит на VPN» у Yota и Теле2</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Обнаружил наличие опций класса «безлимит на VPN» у Yota и Tele2: 
+<a href="https://www.yota.ru/document/voice-tariffs#optimalSpeed" class="onebox" target="_blank" rel="noopener">https://www.yota.ru/document/voice-tariffs#optimalSpeed</a> 
+Насколько понимаю, опция позволяет использовать протоколы VPN без расходования пакета трафика. Вот ответ Йоты на <a href="https://otvet.mail.ru/question/232273573">ответах mail.ru</a>: 
+
+Привет! Если подключить опцию «VPN» то при при использовании VPN-протоколов: PPTP, L2TP, IKEv1, IKEv2, IKEv1 IPsec nat-t, IKEv2 IPsec nat-t, ExpressVPN(Lightway), OpenVPN, Wireguard трафик расходоваться не будет. Очень важно, что опцией не преду…
+  </blockquote>
+</aside>
+</td><td>2023-08-09T06:35:14.354Z</td></tr><tr><td>ladykolotushkina</td><td><aside class="quote no-group" data-username="Limtech" data-post="31" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/l/9f8e36/48.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/31">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>в обоих случаях 4g билайн</p>
+</blockquote>
+</aside>
+<p>Могли быть разные ТСПУ (даже если сидели с одной соты).</p></td><td>2023-08-09T07:47:57.073Z</td></tr><tr><td>Limtech</td><td><p>За несколько часов проверок с разных мест, разницы не было</p></td><td>2023-08-09T07:56:29.869Z</td></tr><tr><td>Limtech</td><td><p>Еще кстати, на этом же vps/vpn ранее, 5 авг и 26 июл на проводном интернете временно отбрасывались нестандартные порты(кроме 22/80/443), в <a href="https://ntc.party/t/3-tcp-udp/4680/33">соседней ветке</a> отписывался подробнее.</p></td><td>2023-08-09T08:34:29.001Z</td></tr><tr><td>arkadiialifarov(Arkadii Alifarom)</td><td><p>Ну что я вам могу сказать, котики. Три дня игр в кошки мышки привели к следующему сетапу - берём у какого-нить российского провайдера самую мелкую VPS’ку, ставим туда любой понравившийся нам протокол. Дальше берём VPS’ку за пределами РФ.</p>
+<p>А теперь самое главное - настраиваем между серверами какой-нить не попсовый протокол, благо в открытом доступе их сейчас много больше одного. Ну и дальше всё как по нотам - коннектируемся к эндпоинту в РФ, благо внутри VPN пока не лочат, и по туннелю на свободу с чистой совестью. Пусть и не очень быстро, зато без товарища майора.</p></td><td>2023-08-09T13:16:03.751Z</td></tr><tr><td>VasilyGrigoriev378(Василий Григорьев)</td><td><p>Уже несколько дней видно вал жалоб — VPN стали блокировать еще больше и еще лучше, теперь ударили по частным серверам, которые люди поднимают за границей для себя, своих друзей и близких. Блокировка теперь идет «по протоколу» — то есть Роскомнадзор больше не ищет вражеские сервера в интернете, а прямо по характеру подключения понимает, что у вас там внутри нехороший VPN, который надо заблокировать.<br>
+В России стали блокировать VPN по протоколам (через DPI). Этот более эффективно, чем блокировка по IP. И тут к слову миллиардер Алишер Усманов хочет с санкций Запада соскочить — а именно он поставлял властям РФ оборудование для DPI-блокировок.</p></td><td>2023-08-09T18:26:51.561Z</td></tr><tr><td>yatolkosprosit</td><td><aside class="quote no-group" data-username="VasilyGrigoriev378" data-post="18" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/v/ce73a5/48.png" class="avatar"> VasilyGrigoriev378:</div>
+<blockquote>
+<p>VPN стали блокировать еще больше и еще лучше, теперь ударили по частным серверам</p>
+</blockquote>
+</aside>
+<p>Возможно это был по-прежнему удар по публичным VPN, только более радикальный и эффективный. Ведь количестово пользователей публичных сервисов значительно превышает число владельцев собственных серверов. Количество публичных ВПН наверное измеряется тысячами и появляются все новые. Поэтому выявлять и блокировать каждый непросто, вместо этого эффективнее блокировать сразу протоколы.</p></td><td>2023-08-11T01:41:24.951Z</td></tr><tr><td>itsabomberr(itsabomberr)</td><td><aside class="quote no-group" data-username="arkadiialifarov" data-post="17" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b77776/48.png" class="avatar"> arkadiialifarov:</div>
+<blockquote>
+<p>настраиваем между серверами какой-нить не попсовый протокол</p>
+</blockquote>
+</aside>
+<p>Инструкцию - в студию!</p></td><td>2023-08-11T03:49:43.470Z</td></tr><tr><td>ladykolotushkina</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="7" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/7">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p><strong>IPsec</strong> (UDP 500/4500): блокируется прохождение UDP-пакетов после нескольких переданных пакетов во время установления сессии</p>
+</blockquote>
+</aside>
+<p>Проверяли наличие <code>IKE_AUTH Initiator Request</code> (с полным разбором и проверкой размеров), а блокировали уже после N-следующих датаграмм с любым содержимым. При этом проверяли помимо стандартных портов (которые <s>не меняются через конфиги</s> <a href="https://docs.strongswan.org/docs/5.9/support/faq.html#Non-standard-IKE-ports" rel="noopener nofollow ugc">можно поменять</a>) множество других, но не все.</p>
+<p><a href="https://github.com/ntop/nDPI/blob/dev/src/lib/protocols/ipsec.c" rel="noopener nofollow ugc">Похожие проверки</a>, но проверяли еще <code>Message ID</code>. Возможно используют гибрид, разбор после совпадения паттернов.</p></td><td>2023-08-11T08:11:31.961Z</td></tr><tr><td>tlgrmku(tlgrmku)</td><td><p>Tele2 перестал блокировать wireguard</p></td><td>2023-08-11T09:02:51.344Z</td></tr><tr><td>ladykolotushkina</td><td><p>«Применение VPN-протоколов с использованием зарубежной серверной инфраструктуры несёт в себе существенные риски утечки личной, корпоративной и иной информации». Представитель РКН <a href="https://habr.com/en/news/754192/" rel="noopener nofollow ugc">не ответил</a> на повторный вопрос СМИ, связан ли с действиями ведомства сбой на этой неделе в работе в стране VPN-протоколов OpenVPN, IKEv2 и WireGuard.</p></td><td>2023-08-21T10:23:29.830Z</td></tr><tr><td>ladykolotushkina</td><td><aside class="quote no-group" data-username="ladykolotushkina" data-post="21" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ladykolotushkina/48/2954_2.png" class="avatar"> ladykolotushkina:</div>
+<blockquote>
+<p>множество других, но не все.</p>
+</blockquote>
+</aside>
+<p>Теперь проверяют все.</p></td><td>2023-08-21T10:27:38.695Z</td></tr><tr><td>Sofi</td><td><p>Тупой как пробка. Кто в здравом уме позволяет корпоративным сотрудникам использовать зарубежные серверы, лол. <img src="https://ntc.party/images/emoji/twitter/rofl.png?v=12" title=":rofl:" class="emoji" alt=":rofl:" loading="lazy" width="20" height="20"></p></td><td>2023-08-21T11:13:23.862Z</td></tr><tr><td>ValdikSS</td><td><p>A post was merged into an existing topic: <a href="/t/%D0%BF%D0%B5%D1%80%D0%B8%D0%BE%D0%B4%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-openvpn-%D0%BD%D0%B0-%D1%87%D0%B0%D1%81%D1%82%D0%B8-%D0%BE%D0%BF%D0%B5%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%BE%D0%B2-%D1%81-31052023/4576/166">Периодическая блокировка OpenVPN на части операторов (с 31.05.2023)</a></p></td><td>2023-08-24T04:16:04.591Z</td></tr><tr><td>VasilyGrigoriev378(Василий Григорьев)</td><td><p>Представитель РКН ответил в VK на жалобы пользователей которые пишут опять блокировка VPN  началась. Скажите, вы издеваетесь над нами в край или как???<br>
+Ответ представитель РКН дал таков:Применение VPN-протоколов с использованием зарубежной серверной инфраструктуры несёт в себе существенные риски утечки личной, корпоративной и иной информации.<br>
+Рекомендуем российским предприятиям и организациям ускорить перевод информационных систем, протоколов, обеспечивающих работу их внутренних бизнес процессов, на серверную, программную и телекоммуникационную инфраструктуру, находящуюся на территории нашей страны.<br>
+По закону средства обхода блокировок противоправного контента признаются угрозой безопасности граждан. При их использовании сохраняется доступ к запрещённой информации и создаются условия для незаконной деятельности, в том числе связанной с распространением наркотиков, детской порнографии, экстремизма, склонением к суициду.</p>
+<p>Иностранные владельцы VPN-сервисов имеют доступ ко всей информации, которую российские пользователи передают при использовании таких сервисов анонимизации для посещения заблокированных в России ресурсов. Добровольно переданные личные данные, финансовая информация и пароли от учетных записей становятся предметом изучения для последующего использования в мошеннических целях, шантажа и других противоправных действий, направленных против самих пользователей или их окружения.<br>
+Роскомнадзор ведёт постоянный анализ, обновляя перечень VPN, работающих в России, и ограничивает работу сервисов, нарушающих российское законодательство которые отказываются подключаться к ФГИС и отказываются сотрудничать ограничивать блокировать доступ к запрещенным в России сайтам .</p></td><td>2023-08-24T16:50:34.829Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="VasilyGrigoriev378" data-post="28" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/v/ce73a5/48.png" class="avatar"> VasilyGrigoriev378:</div>
+<blockquote>
+<p>Иностранные владельцы VPN-сервисов имеют доступ ко всей информации, которую российские пользователи передают при использовании таких сервисов анонимизации для посещения заблокированных в России ресурсов. Добровольно переданные личные данные, финансовая информация и пароли от учетных записей становятся предметом изучения для последующего использования в мошеннических целях</p>
+</blockquote>
+</aside>
+<p>Интересно, слышал ли он про https.</p></td><td>2023-08-25T02:31:05.894Z</td></tr><tr><td>ladykolotushkina</td><td><p><a href="https://habr.com/en/news/756664/" rel="noopener nofollow ugc">Версия 3</a>. Печальная. Бетатестинг силами интернет ЗК не помогает.</p>
+<blockquote>
+<p>Все настолько грубо и непрофессионально, что работать практически невозможно…</p>
+</blockquote>
+<p>Есть один рабочий способ убрать блокировки – демонтировать <s>ТСПУ</s> систему.</p></td><td>2023-08-25T07:33:44.145Z</td></tr><tr><td>ladykolotushkina</td><td><p>Можно <a href="https://ntc.party/t/wireguard/4968/7">долго пинговать</a>, если выхода нет, блокиратор по таймауту перенесет сессию из <code>watch</code> в <code>pass</code> и отстанет. Это edge case, но могли бы удалять или переносить в <code>block</code>. Впрочем, хорошего выбора в такой архитектуре все равно нет.</p>
+<p>Не самое редкое правило, досматривать входящие. WARP блочат для входящих, но там сигнатур больше одного WG.</p></td><td>2023-08-25T12:36:20.338Z</td></tr><tr><td>ladykolotushkina</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="91" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/91">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>даже сессия блокируется только в одну сторону, трафик от клиента к серверу продолжает доходить, но клиент не получает ответов</p>
+</blockquote>
+</aside>
+<p>Такое наблюдается на госграничных блокировщиках, блокируют исходящие (направление зависит от правила) не трогая входящие. На провайдерском такое поведение странно. Но это может быть просто асимметричный линк, хотя воспроизводится стабильно.</p>
+<hr>
+<p>Что если масштабные (в отдельных местах) блокировки протоколов это баг в дедупликации адресов из правил. Блокировки изначально были расчитаны на приложения со своими адресами, сигнатурами. Сервис может использовать только часть протоколов для части адресов, но после компиляции правила получается единый блок – для всех адресов сервиса блокируют все его сигнатуры. Другое приложение с “чужими” адресами и новой сигнатурой делает ситуацию интересной. Слабые же просто не вывозят и до бага не доходит.</p></td><td>2023-08-25T15:05:10.322Z</td></tr><tr><td>atz</td><td><p>А никто не пробовал “ронять” ТСПУ? Сколько соединений может быть в watch? Если отправить десяток миллионов UDP пакетов на случайные IP/порты (а в watch оно висит до таймаута или N пакетов), там память не кончится?</p></td><td>2023-08-25T23:45:36.993Z</td></tr><tr><td>ladykolotushkina</td><td><p>Его постоянно “роняют”. Когда говорят “бились-бились подключились” это оно. Там есть ограничения, как в любом DPI, на максимальное число сессий.</p></td><td>2023-08-26T06:13:41.117Z</td></tr><tr><td>somebodywashere(Somebodywashere)</td><td><p>А чем 3x-ui + Trojan/(shadowsocks/vmess/vless) не устроило конкретно? Хотелось бы знать т.к. я один из контрибьюторов 3x-ui. Просто зачем делать какие-то танцы с бубном через sshuttle не совсем понимаю.</p></td><td>2023-08-27T10:44:07.732Z</td></tr><tr><td>atomlab(Atomlab)</td><td><p>3x-ui сервер очень прост в установке и настройке. Это удобный web ui для настройки серверной части для разных протоколов. С ним проблем у меня не было.</p>
+<p>Проблемы лично у меня начинаются при выборе и настройке клиентов (в частности под macOS).</p>
+<p>Мне нужен полноценный туннель. Я рассматривал Wireguard внутри Shadowsocks либо Trojan.</p>
+<p>Мне нужно в туннель пустить только этот список публичных ipv4 подсей <code>1.0.0.0/8, 2.0.0.0/8, 3.0.0.0/8, 4.0.0.0/6, 8.0.0.0/7, 11.0.0.0/8, 12.0.0.0/6, 16.0.0.0/4, 32.0.0.0/3, 64.0.0.0/2, 128.0.0.0/3, 160.0.0.0/5, 168.0.0.0/6, 172.0.0.0/12, 172.32.0.0/11, 172.64.0.0/10, 172.128.0.0/9, 173.0.0.0/8, 174.0.0.0/7, 176.0.0.0/4, 192.0.0.0/9, 192.128.0.0/11, 192.160.0.0/13, 192.169.0.0/16, 192.170.0.0/15, 192.172.0.0/14, 192.176.0.0/12, 192.192.0.0/10, 193.0.0.0/8, 194.0.0.0/7, 196.0.0.0/6, 200.0.0.0/5, 208.0.0.0/4</code>.</p>
+<p><strong>Клиенты под macOS:</strong></p>
+<p><strong>V2BOX + Trojan</strong> - умеет делать tun, но я не нашел как заставить его не вмешиваться в мой DNS трафик. Я его сам локально маршрутизирую домены на разные nameservers через локальный <code>dnsmasq</code>. Поэтому у меня в системе прописан DNS 127.0.0.1. А  V2BOX добавляет свой и ломает мне все. Я не смог в macos это победить и в самом клиенте тоже.</p>
+<p><strong>FoXray + Trojan</strong> - такие же проблемы, что и с V2BOX. Просто не нашел как заставить не вмешиваться в DNS.</p>
+<p><strong>Sign-box + Trojan/Shadowsocks</strong> - просто не удалось настроить прокси, чтобы пустить через них Wireguard. Документация скудная, тупо описание директив.  Examples не работают. Отладочной информации все эти клиенты толком никакой не дают даже в verbose режимах.</p>
+<p><strong>ss-server/ss-tunnel</strong> - удалось завести и даже пустить через него WG, но потом перестало работать. Пока разбираюсь.</p>
+<p><strong>Cloak</strong> - для маскировки трафика под HTTP. Пока разбираюсь. Хочу через него Shadowsocks+Wireguard запустить, но тоже пока без результатов.</p>
+<p>UPDATE: короче я верю что все эти прокси протоколы Trojan/(shadowsocks/vmess/vless) классные, но пропихнуть через них обычные нормальные VPN протоколы не очень просто. Вот как раз это и есть настоящие танцы с бубнами.</p></td><td>2023-08-27T16:06:59.542Z</td></tr><tr><td>Snawoot</td><td><aside class="quote no-group" data-username="atomlab" data-post="36" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/atomlab/48/2984_2.png" class="avatar"> atomlab:</div>
+<blockquote>
+<p><strong>ss-server/ss-tunnel</strong> - удалось завести и даже пустить через него WG, но потом перестало работать. Пока разбираюсь.</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="atomlab" data-post="36" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/atomlab/48/2984_2.png" class="avatar"> atomlab:</div>
+<blockquote>
+<p>UPDATE: короче я верю что все эти прокси протоколы Trojan/(shadowsocks/vmess/vless) классные, но пропихнуть через них обычные нормальные VPN протоколы не очень просто. Вот как раз это и есть настоящие танцы с бубнами.</p>
+</blockquote>
+</aside>
+<p>Попробуйте <em>простой советский</em> <a href="https://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security" rel="noopener nofollow ugc">DTLS</a> для туннелирования UDP, может быть вам зайдёт: <a href="https://github.com/Snawoot/dtlspipe" class="inline-onebox" rel="noopener nofollow ugc">GitHub - SenseUnit/dtlspipe: Generic DTLS wrapper for UDP sessions</a></p></td><td>2023-08-28T23:43:34.150Z</td></tr><tr><td>atomlab(Atomlab)</td><td><aside class="quote no-group quote-modified" data-username="Snawoot" data-post="37" data-topic="5239" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/f08c70/48.png" class="avatar"> Snawoot:</div>
+<blockquote>
+<p>Попробуйте <em>простой советский</em> <a href="https://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security" rel="noopener nofollow ugc">DTLS</a> для туннелирования UDP, может быть вам зайдёт: <a href="https://github.com/Snawoot/dtlspipe" class="inline-onebox" rel="noopener nofollow ugc">GitHub - SenseUnit/dtlspipe: Generic DTLS wrapper for UDP sessions</a></p>
+</blockquote>
+</aside>
+<p>Спасибо за <a href="https://github.com/Snawoot/dtlspipe" rel="noopener nofollow ugc">dtlspipe</a>! <img src="https://ntc.party/images/emoji/twitter/fist.png?v=12" title=":fist:" class="emoji" alt=":fist:" loading="lazy" width="20" height="20"> С ним без проблем все завелось. Работает! В итоге я проверил несколько конфигураций и все пока работают.</p>
+<ol>
+<li>dtlspipe + wireguard</li>
+<li>cloak + dtlspipe + wireguard</li>
+<li>cloak + wireguard</li>
+</ol></td><td>2023-08-29T14:52:01.445Z</td></tr><tr><td>PsyHoGK</td><td><p>понимаю что не мне было адресовано, однако вставлю свои 5 копеек:<br>
+Как началась чехарда с протоколами VPN, SS и вариации вцелом функционально решили проблему, однако для моего ОпСоСа(Мотив) каким то особым откровением не стало и ему были побоку любые попытки маскировки, которые предлагали мне протоколы. Чтобы обозначить четче: доступ был, но провайдер четко знал что я использую тот или иной тип контента, и резал скорость. Установка Vless+TLS тоже не решила проблему, однако как только вместо TCP я перешел на http как вид транспортного протокола все ограничения сразу исчезли. В силу того что я знаю все эти штуки скорее по необходимости, чем из интереса каких то конкретных данных предоставить самостоятельно не смогу.</p></td><td>2023-08-31T12:53:18.228Z</td></tr><tr><td>anon94384997</td><td><p>А обычные HTTPS сайты тормозят?</p></td><td>2023-08-31T14:35:24.166Z</td></tr><tr><td>PsyHoGK</td><td><p>Вцелом, любая попытка соединить мобильный интернет и SS и подобные не самая лучшая из затей, и мной откладывалась до последнего, в силу высоких пингов и невозможностью комфортно пользоваться многими функциями(любая онлайн игра к примеру), а http метод его еще усугубил тем, что интернет стал…так скажем “однозадачным”, т.е. обращаясь к адресу А, я не имею связи с адресом Б. Малейшая попытка допустим попробовать открыть страницу другого сайта полностью глушит меня в дискорде, а попытка открыть несколько страниц разом, превращается в долгую историю на пол минуты.</p></td><td>2023-08-31T15:46:55.704Z</td></tr><tr><td>0ka(0ka)</td><td><p>ответь в лс если пришло сообщение</p></td><td>2023-08-31T16:27:57.155Z</td></tr><tr><td>welazsc</td><td><p>Скорость может быть низкой при больших лагах и наличии потерь. Особенно если TCP стек на сервере не учитывает эти условия, или протокол сложнее запрос-ответа.</p></td><td>2023-08-31T17:35:28.407Z</td></tr><tr><td>PsyHoGK</td><td><p>Я тоже думал что проблема где то на серваке, и все ещё так полагаю но слишком уж избирательно у меня лагает и слишком избирательно пропадают пакеты. Я могу смотреть видом на ютубе могу скачать его, но не могу скачать нормально 1фаил с гугл драйва, притом разница в скоростях будет в десятки. Буквально мегабит против 14. Плюсом tcp я тоже пытался не оставлять т.к. тср не даст функционировать дискорду нормально.</p></td><td>2023-08-31T18:06:56.560Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="PsyHoGK" data-post="44" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/p/54ee81/48.png" class="avatar"> PsyHoGK:</div>
+<blockquote>
+<p>разница в скоростях будет в десятки</p>
+</blockquote>
+</aside>
+<p>Через один туннель?<br>
+Протоколы могут быть разные, для видео ютуба и гуглдрайва. UDP туннелируется? Гуглкеш и сервер гуглдрайва могут быть в разных местах, и лаги после сервера добавляться разные.</p>
+<p>Если радиотракт в порядке, можно проверить ютуб vs гуглдрайв в периоды сетевой тишины, исключив влияние нагрузки в сетях оператора (следовательно операторские лаги с потерями). Например в 4 утра местного времени должно быть совсем тихо, если у оператора нет мотивирующих ночных тарифов.</p></td><td>2023-08-31T19:15:05.366Z</td></tr><tr><td>welazsc</td><td><p>31.05 среда<br>
+29.06 четверг<br>
+21.07 пятница<br>
+31.07 понедельник<br>
+05.08 суббота<br>
+16.08 среда<br>
+24.08 четверг<br>
+31.08 четверг</p>
+<p>Похоже на обратный отсчет. Есть ошибки, но сейчас передают 7.</p></td><td>2023-08-31T20:38:26.322Z</td></tr><tr><td>welazsc</td><td><p>Быстро откатили, чтобы передать очередное число. Если в районе 06.09 опять будут блокировки, тогда 21.09 <em>всё</em> закончится. Как минимум интернет.</p></td><td>2023-09-01T09:32:25.070Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Что значит “передать очередное число”?</p></td><td>2023-09-01T10:36:25.137Z</td></tr><tr><td>welazsc</td><td><p>Даты начала блокировок используются неизвестными для передачи информации  широкому кругу лиц</p>
+<p>РКН не взял на себя ответственность за блокировки протоколов, значит это не они. По информации от Эдика известно, что ЦРУ внедрял закладки в ЦПУ, используемые в ТСПУ. В час X связь в РФ превратится в тыкву. Байпасы не спасут.</p>
+<p>Идет обратный отсчет. Наблюдаем.</p></td><td>2023-09-01T10:47:01.126Z</td></tr><tr><td>mrplap</td><td><details>
+<summary>
+Спойлер</summary>
+<p>Товарищ, извините за вопрос, но вам шапочка из фольги не жмёт?</p>
+</details></td><td>2023-09-01T12:58:51.873Z</td></tr><tr><td>welazsc</td><td><p>Шапочка заземлена</p></td><td>2023-09-01T13:11:00.722Z</td></tr><tr><td>CIA_agent</td><td><aside class="quote no-group" data-username="welazsc" data-post="49" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/w/c4cdca/48.png" class="avatar"> welazsc:</div>
+<blockquote>
+<p>РКН не взял на себя ответственность за блокировки протоколов, значит это не они</p>
+</blockquote>
+</aside>
+<p>РКН просто проигнорировали запросы журналистов, по такой логике можно заявить что это точно они, ведь с опровержением РКН не выступили. Вы либо очень хорошего мнения о РКН или очень хотите верить в свою теорию <img src="https://ntc.party/images/emoji/twitter/wink.png?v=12" title=":wink:" class="emoji" alt=":wink:" loading="lazy" width="20" height="20"><br>
+P.S. А если в назначенный срок не наступит конец интернета, то какие будут выводы?</p></td><td>2023-09-01T20:28:01.915Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Для дальнейшего обсуждения шапочек из фольги или другого офтопика создайте новую тему. Ссылку на тему можно сбрость сюда.</p></td><td>2023-09-01T20:41:11.351Z</td></tr><tr><td>computerscot(computerscot)</td><td><blockquote>
+<p>Personally, my problems begin when choosing and configuring clients (in particular, under macOS).</p>
+</blockquote>
+<blockquote>
+<p>I need a full tunnel. I considered Wireguard inside Shadowsocks or Trojan.</p>
+</blockquote>
+<p><strong>OpenVPN</strong></p>
+<p>OpenVPN can easily pass through a Shadowsocks tunnel because OpenVPN has an explicit <code>socks-proxy</code> feature.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://computerscot.github.io/openvpn-over-shadowsocks.html">
+  <header class="source">
+
+      <a href="https://computerscot.github.io/openvpn-over-shadowsocks.html" target="_blank" rel="noopener nofollow ugc">computerscot.github.io</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/345;"><img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/9f6fc3957712e6b0e161760f95c4355b00d90425.png" class="thumbnail" data-dominant-color="BED6ED" width="690" height="345"></div>
+
+<h3><a href="https://computerscot.github.io/openvpn-over-shadowsocks.html" target="_blank" rel="noopener nofollow ugc">OpenVPN over Shadowsocks</a></h3>
+
+  <p>When you want to OpenVPN into a remote server, but your packets to the remote server are detected and blocked</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>The above post includes some suggestions users have made for macOS clients.</p>
+<p>OpenVPN can easily pass through a  V2Ray/Xray tunnel in the same way, using the <code>socks-proxy</code> feature of OpenVPN.</p>
+<p><strong>WireGuard</strong></p>
+<p>With WireGuard, there is no socks-proxy feature, so you have to define the Shadowsocks or WireGuard client as if they were the WireGuard peer, when in fact SS/WG will forward traffic to the real peer.</p>
+<p>WireGuard over V2Ray/Xray is quite straightforward. Tell the WireGuard client that its peer is where the V2Ray/Xray actually is. Forward traffic from there to your server. Also do not route traffic for the server back through the WireGuard client again! It must go direct to the server over your client’s regular default gateway.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://computerscot.github.io/wireguard-over-xray.html">
+  <header class="source">
+
+      <a href="https://computerscot.github.io/wireguard-over-xray.html" target="_blank" rel="noopener nofollow ugc">computerscot.github.io</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/345;"><img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/9f6fc3957712e6b0e161760f95c4355b00d90425.png" class="thumbnail" data-dominant-color="BED6ED" width="690" height="345"></div>
+
+<h3><a href="https://computerscot.github.io/wireguard-over-xray.html" target="_blank" rel="noopener nofollow ugc">WireGuard over Xray</a></h3>
+
+  <p>When you want to WireGuard into a remote server, but your packets to the remote server are detected and blocked</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>There may not be GUI clients for macOS, but as a last resort you can always use the command-line client.</p>
+<p>You <em>may</em> be able to pass WireGuard through Shadowsocks with the <code>ss-tunnel</code> and <code>tunnel_address</code> features of Shadowsocks.</p></td><td>2023-09-01T21:02:54.945Z</td></tr><tr><td>welazsc</td><td><p>Может если он знает тип туннеля и видит содержимое, но такое еще не документировалось. Притом, что FIN сам <a href="https://ntc.party/t/%D0%B2%D0%BA%D0%BB%D1%8E%D1%87%D0%B8%D0%BB%D0%B8-dpi-%D0%B4%D0%BB%D1%8F-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3%D0%BE%D0%B2/3750/2">редкий зверь</a>.</p></td><td>2023-09-01T08:18:19.828Z</td></tr><tr><td>dead(dead)</td><td><p>Интересно только зачем , у них же логика не дать туннелю поднятьсся<br>
+Лезть в содержимое наверное бестолково?</p></td><td>2023-09-01T17:11:21.861Z</td></tr><tr><td>welazsc</td><td><p>На каком основании блокировать если у вас, к примеру, GRE трафик РФ-РФ? Но содержимое видно и значит <em>можно</em> искать крамолу. Если бы у них небыло цели проверять внутренний трафик, ТСПУ ставились бы по периметру зоны, а не прямо под носом пользователя.</p></td><td>2023-09-01T17:27:19.831Z</td></tr><tr><td>dead(dead)</td><td><p>А есть ли какие-то виртуальные образы тспу?<br>
+Какая-либо документация, обкатать дома, изучить поведение.</p></td><td>2023-09-01T17:48:41.269Z</td></tr><tr><td>Sofi</td><td><p>Навряд ли. Клозэдсорсная херабола.</p></td><td>2023-09-01T18:21:46.026Z</td></tr><tr><td>welazsc</td><td><p><a href="https://ntc.party/t/%D1%81%D0%B0%D0%BD%D0%BA%D1%86%D0%B8%D0%B8-%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%B2%D1%89%D0%B8%D0%BA%D0%B0%D0%BC-%D1%82%D1%81%D0%BF%D1%83/1797/2">Общая информация о ТСПУ</a>. По форуму/google еще можно поискать, существовали ли у них образы.</p>
+<p><a href="https://ntc.party/t/ooni-reports-of-tor-blocking-in-certain-isps-since-2021-12-01/1477/81">Сообщение о блокировках внутри туннеля</a>. Без подробностей про RST или FIN.</p></td><td>2023-09-01T18:55:34.430Z</td></tr><tr><td>CIA_agent</td><td><aside class="quote no-group" data-username="welazsc" data-post="57" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/w/c4cdca/48.png" class="avatar"> welazsc:</div>
+<blockquote>
+<p>по периметру зоны, а не прямо под носом пользователя</p>
+</blockquote>
+</aside>
+<p>И каким образом они бы обрабатывали на магистралях такой безумно огромный поток трафика? Блокировка “вредного” трафика тем эффективней чем ближе к источнику этого трафика. Плюс историческая причина в виде попыток РКН переложить работу по фильтрации на самих провайдеров</p></td><td>2023-09-01T20:35:42.919Z</td></tr><tr><td>welazsc</td><td><p>Они досматривают локалки и технологические сети. В чем эффективность?<br>
+На магистралях сейчас тоже ставят, нагрузка хорошо распределяется, а мощности масштабируются.</p></td><td>2023-09-01T20:51:34.439Z</td></tr><tr><td>CIA_agent</td><td><p>Во времена на которые я делал историческую отсылку в сообщении выше на магистралях не ставили. Плюс сейчас ставят DPI “топорного” типа умеющий только в сигнатурный анализ путем поиска нужной последовательности байт по смещению именно из-за проблемы обработки огромного потока. Тезис про локальные и технологические сети уже интересный если это была именно инициатива РКН</p></td><td>2023-09-02T20:50:29.592Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="eblet" data-post="147" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/eblet/48/2887_2.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/147">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>Но корпоративные сети же также используют OVPN и WG протоколы</p>
+</blockquote>
+</aside>
+<p>Если блокировать исходящий, можно подстраховаться белым списком адресов назначения. Они есть и работали. Но если блокировать входящий, нужны белые списки источника. Их не появилось.</p>
+<p>Судя по точечности происходящего, РКН окончательно уверовал в белые списки техпроцессов. ВУЗы, банки, они все там, но это не точно. Для всех остальных есть анонимный дежурный и блокировки.</p></td><td>2023-09-06T22:05:33.611Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Составить белые списки источника не реально. Сейчас подключение к серверу идет с IP1, позже с IP2 и далее с ipN</p></td><td>2023-09-06T22:52:31.436Z</td></tr><tr><td>pikapikapikaaa(Pikapikapikaaa)</td><td><p>Подскажите, есть какой-нибудь способ завернуть antizapret с vps сервера через ShadowSocks (ну или что там сейчас не блокируется))?<br>
+Рабочие схемы по подобной работе в связке с mikrotik мб?</p></td><td>2023-09-07T11:34:18.402Z</td></tr><tr><td>egomozg(Egomozg)</td><td><p>спасибо за инфу</p></td><td>2023-09-07T17:07:39.872Z</td></tr><tr><td>xijewe4896(xijewe4896)</td><td><p>Как обходить такое на Windows?</p></td><td>2023-09-07T17:14:39.641Z</td></tr><tr><td>0x99(Jabas)</td><td><p>Наверное лучше перейти на WG, и обернуть его во что-то, в соседнем топике есть инструкция. Но она для тех, у кого есть свой впн, либо возможность его купить. Ну или использовать другие протоколы, SS (outline), он пока работает</p></td><td>2023-09-07T17:24:13.732Z</td></tr><tr><td>xijewe4896(xijewe4896)</td><td><p>А опенвпн нельзя как-то зашифровать?</p>
+<p>Сейчас решил проверить протон впн (тоже с опенвпн), и он внезапно работает. На бесплатном сервере максимальная скорость (100мбит). ого.</p></td><td>2023-09-07T17:29:06.203Z</td></tr><tr><td>0x99(Jabas)</td><td><p>Не подскажу насчет бесплатных/коммерчиских. Свой можно</p></td><td>2023-09-07T17:31:57.466Z</td></tr><tr><td>anon94384997</td><td><p>stunnel.</p></td><td>2023-09-07T22:23:04.275Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/0a7d66a2fc92d666022c4560d0181bc2b568f9b2.jpeg" data-download-href="https://ntc.party/uploads/default/0a7d66a2fc92d666022c4560d0181bc2b568f9b2" title="S30908-18410663(1)"><img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/0a7d66a2fc92d666022c4560d0181bc2b568f9b2_2_321x499.jpeg" alt="S30908-18410663(1)" data-base62-sha1="1uNrAn6WZXHwCYDIuJ5Tl15kDMC" width="321" height="499" srcset="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/0a7d66a2fc92d666022c4560d0181bc2b568f9b2_2_321x499.jpeg, обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/0a7d66a2fc92d666022c4560d0181bc2b568f9b2_2_481x748.jpeg 1.5x, обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/0a7d66a2fc92d666022c4560d0181bc2b568f9b2_2_642x998.jpeg 2x" data-dominant-color="323435"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">S30908-18410663(1)</span><span class="informations">1080×1681 113 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Сегодня узнал что не могу подключиться к вэб консоли роутера в РФ по HTTPS с IP забугорного. Пару дней назад подключение было…</p>
+<p>upd: прямой доступ к вэб консоли блокируется. Включил в настройках роутера доступ “Через облако”, только так заработало.</p></td><td>2023-09-08T11:07:27.252Z</td></tr><tr><td>anon94384997</td><td><p>Я такое наблюдал давно на ростелекоме, когда пытался сделать из компа socks прокси, чтобы он принимал входящие (от своих, конечно). Это работало, но недолго, а потом рвалось соединение и больше не устанавливалось (можно было только торрентом пробить порт и тогда снова работало). Видимо использование домашнего компа как сервера не любят провайдеры и считают вредоносной активностью. Ведь может быть порядочный сервер, а может из вас сделали ноду для ddos.</p></td><td>2023-09-08T11:42:34.778Z</td></tr><tr><td>llsnk</td><td><p>Никто не рассматривал вариант подать в суд на РКН и/или провайдера? У них нет никакого законного обоснования для блокировки VPN, не используемых для доступа к “информационным ресурсам, информационно-телекоммуникационным сетям, доступ к которым ограничен на территории Российской Федерации”.</p></td><td>2023-09-11T08:16:55.324Z</td></tr><tr><td>KatouMegumi-osu</td><td><p>Желаю удачи человеку, которому захочется это сделать!</p></td><td>2023-09-11T08:46:05.427Z</td></tr><tr><td>anaxios</td><td><p>Мысль здравая. Только с чем в суд идти, с нашими бедами? Они же должны факт блокировок признать официально, иначе как максимум, свалят все на некие технические проблемы.</p></td><td>2023-09-11T08:46:07.035Z</td></tr><tr><td>welazsc</td><td><p>Судилище оставит следы, в этом есть плюс. Тысячелетние рейхи однажды заканчиваются, причем внезапно. Но надо быть готовыми к репрессиям здесь и сейчас. Бороться, пусть и юридически, лучше <a href="https://roskomsvoboda.org/" rel="noopener nofollow ugc">коллективно</a>.</p>
+<p>Бороться лучше, чем не бороться (с) ну почти</p></td><td>2023-09-11T09:07:47.495Z</td></tr><tr><td>anaxios</td><td><p>Какие репрессии, нет их.<br>
+Есть мы, граждане, у нас есть государство и есть действующее в нем законодательство, защищающее наши права.<br>
+Еще есть хомячки, которые решили, что могут втихую творить, что хотят (раз граждане ведь молчат - значит, согласны).</p></td><td>2023-09-11T10:00:37.743Z</td></tr><tr><td>welazsc</td><td><p>Хомячки это вы! РКН стоит на страже несокрушимого союза партии, правительства, народонаселения и лидера от тлетворного влияния вас хомячков, защищая моральные скрепы от впн-протоколов. Если сложить случайные байты из трафика хомячка можно получить свастику, а гитлера они сами собирают. ДОКОЛЕ!?</p></td><td>2023-09-11T10:17:50.149Z</td></tr><tr><td>Hetvel6947</td><td><p>оффтоп: напомню, что в рф тоталитаризм и военная диктатура. Исходя из этого закон, как институт присущий только демократии, в рф отсутствует от слова СОВСЕМ. А все кто подают в суды, собирают бумажки с подписями в генпрокуратуру и т.д., которые только под ножку стола подложить, своими действия легитимизируют режим захвативший власть в стране. Этого всего делать ни в коем случае нельзя.</p></td><td>2023-09-11T10:19:57.438Z</td></tr><tr><td>Hetvel6947</td><td><p>ахах, прикольно. <img src="https://ntc.party/images/emoji/twitter/joy.png?v=12" title=":joy:" class="emoji" alt=":joy:" loading="lazy" width="20" height="20"> как лайк тут поставить?</p></td><td>2023-09-11T10:22:16.204Z</td></tr><tr><td>anonimnyj17(anonimnyj17)</td><td><p>От того что ты не будешь сопротивляться режим только выиграет. Если тебя закроют за лайк или пост, ты не будешь защищаться в суде?<br>
+Бред полный несешь! Сопротивлятся нужно всегда и везде.</p></td><td>2023-09-11T10:36:39.814Z</td></tr><tr><td>Hetvel6947</td><td><p>оффтоп. Какая защита в суде? Нет судов в рф. “судьи” по приказу делают всё что угодно. Не надо заниматься имитацией протеста/сопротивления. Понятно что является РЕАЛЬНЫМ протестом/сопротивлением? Тут наверное бан дадут за разжёвывание данной темы. Если не готов заниматься РЕАЛЬНЫМ протестом/сопротивлением, то советую всем сидеть на ж*пе ровно и не дёргаться.</p></td><td>2023-09-11T10:46:33.096Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Я перенёс обсуждения про суды в топик для обсуждения – пишите туда (сюда).</p></td><td>2023-09-11T10:58:34.843Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="anonimnyj17" data-post="207" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/bb73d2/48.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/207">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>Тащ майор не докладывает нам конфиги black box’ов.</p>
+</blockquote>
+</aside>
+<p>Там нет майоров. У них был цельный генерал и пиджаки в звании лейтенанта.</p></td><td>2023-09-11T11:45:47.196Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="marat" data-post="221" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/91b2a8/48.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/221">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>Черти что творят.</p>
+</blockquote>
+</aside>
+<p>Что хотят то и творят. Что вы им сделаете?</p>
+<p>Сейчас пойдет непрерывная череда сообщений. Финишная. Прямая.</p></td><td>2023-09-12T17:51:52.229Z</td></tr><tr><td>anon94384997</td><td><p>Имеется сильное подозрение, что черти читают рутрекер. Имейте в виду. Похоже выслуживаются.<br>
+Не только читают, но и оффтопят там и не только там.<br>
+Выборы прошли, а впны блочат всё жестче… Говорят, через три дня примут закон о впн и куча сайтов ляжет.</p></td><td>2023-09-12T20:17:41.422Z</td></tr><tr><td>favicon</td><td><p>То был детский утренник, а не выборы. Все ради этого:</p>
+<p>“VIII выборы Президента Российской Федерации, согласно действующему избирательному законодательству России, должны будут пройти 17 марта 2024 года” <a href="https://ru.wikipedia.org/wiki/%D0%9F%D1%80%D0%B5%D0%B7%D0%B8%D0%B4%D0%B5%D0%BD%D1%82%D1%81%D0%BA%D0%B8%D0%B5_%D0%B2%D1%8B%D0%B1%D0%BE%D1%80%D1%8B_%D0%B2_%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B8_(2024)" class="inline-onebox" rel="noopener nofollow ugc">Президентские выборы в России (2024) — Википедия</a></p></td><td>2023-09-12T21:06:06.150Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>A post was merged into an existing topic: <a href="/t/%D1%80%D0%BA%D0%BD-%D0%BC%D0%BE%D0%B6%D0%B5%D1%82-%D0%BD%D0%B0%D1%87%D0%BD%D0%B0%D1%82%D1%8C-%D1%81-1032024-%D0%BE%D0%B3%D1%80%D0%B0%D0%BD%D0%B8%D1%87%D0%B8%D1%82%D1%8C-%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF-%D0%BA-%D0%B8%D0%BD%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%86%D0%B8%D0%B8-%D0%BE%D0%B1-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA/5711">РКН может начнать с 1.03.2024 ограничить доступ к информации об обходе блокировок</a></p></td><td>2023-09-18T21:05:02.116Z</td></tr><tr><td>lowwro(Lowwro)</td><td><p>Всем доброго времени суток!Не уверен,что пишу в нужный топик, если что прошу подсказать куда можно было бы перенести.<br>
+Вопрос в том,что не получается поднять WG+Shadowsock,если кто может окинуть взглядом и понять что не так,прошу подсказать,и так:</p>
+<p>1.WG поднят на сервере:</p>
+<blockquote>
+<p>Слушается 0.0.0.0:53662</p>
+</blockquote>
+<p>2.Поднял сервер SS на сервере:<br>
+config.json:</p>
+<blockquote>
+<p>{<br>
+“server”:[“0.0.0.0”],<br>
+“mode”:“tcp_and_udp”,<br>
+“server_port”:42522,<br>
+“password”:“XXXXX”,<br>
+“timeout”:300,<br>
+“method”:"chacha20-ietf-poly1305<br>
+}</p>
+</blockquote>
+<p>Далее клиент SS на Windows,использую:<br>
+<a href="https://github.com/shadowsocks/shadowsocks-windows/releases" rel="noopener nofollow ugc">SS-Client</a><br>
+IP-адрес: Внешний сервера<br>
+Порт:42522<br>
+Пароль:Тот же<br>
+Таймаут:20 секунд<br>
+Порт прокси:1080</p>
+<p>WG-Client:<br>
+Поменял только сервер на 127.0.0.1:1080</p>
+<p>Проблема:<br>
+1.Не проходит первый handshake  от клиента до сервера<br>
+2.На роутере не вижу в дампе чтобы от компа шли пакеты на 42522(порт SS сервера)<br>
+3.Думаю проблема где-то локальная на компе,но уже не знаю куда копать<br>
+4.В логах SS клиента только такое:<br>
+2023-09-08 12:09:55.8314|DEBUG|Shadowsocks.Controller.UDPRelay+UDPHandler|UDP Relay: 127.0.0.1:61095 =&gt; X.X.X.X:42522 (size=193)<br>
+5. На сервере,tcpdump не видит приходящих пакетов на 42522.</p>
+<p>Заранее спасибо за предоставленную помощь!</p></td><td>2023-09-08T09:10:32.810Z</td></tr><tr><td>User69</td><td><p><a href="https://ntc.party/t/wireguard-over-shadowsocks/">https://ntc.party/t/wireguard-over-shadowsocks/</a></p></td><td>2023-09-08T09:34:32.468Z</td></tr><tr><td>lowwro(Lowwro)</td><td><p>Спасибо!</p></td><td>2023-09-08T09:39:03.185Z</td></tr><tr><td>somebodywashere(Somebodywashere)</td><td><p>Какую цель вы преследуете? Чем просто сс не устраивает?</p></td><td>2023-09-10T20:53:16.344Z</td></tr><tr><td>lowwro(Lowwro)</td><td><p>Хм,когда только начинал настраивать,читал про SS и узнал,что он не шифрует трафик,поэтому идет в связке с Wireguard,он просто нужен для обфускации.Сейчас же почитав еще раз, понял что ошибся,и его можно использовать без связки с Wireguard.<br>
+Цель-не более чем доступ к заблокированным ресурсам.</p></td><td>2023-09-11T06:47:25.483Z</td></tr><tr><td>anon94384997</td><td><p>del</p></td><td>2023-09-28T20:17:17.701Z</td></tr><tr><td>welazsc</td><td><p>У сообщения есть кнопка пожаловаться. Жмите чаще, модераторы и админы что-то могли проглядеть.</p></td><td>2023-09-28T20:25:25.528Z</td></tr><tr><td>Fleymorx</td><td><p>Короче говоря, для моб. устройств самый быстрый и лайтовый способ - поставить Outline на VPS, и подключать сначала его, затем WG, и после уже отключать outline, я так понял?<br>
+Мне вот, разобраться с ручной настройкой SS и кучей плагинов типа v2ray, vless и прочие, оч трудно, особенно, если возникнут трудности подружить это все с WG.</p></td><td>2023-09-27T09:27:07.119Z</td></tr><tr><td>atomlab(Atomlab)</td><td><p>На андроид/ios нельзя одновременно два VPN подключения установить. Типа один через другой. Android просто сначала отключит одно, затем подключит второе. По итогу WG не заработает все равно.</p>
+<p>Для моб устройств самое простое в установке на свою VPS - <a href="https://github.com/MHSanaei/3x-ui" rel="noopener nofollow ugc">https://github.com/MHSanaei/3x-ui</a>. Протокол Trojan например использовать.</p>
+<p>Клиент под Android - <strong>v2rayNG</strong>.</p>
+<p>Для посещения сайтов будет достаточно, если не требуется, что-то отличное от HTTP.</p></td><td>2023-09-27T09:45:32.337Z</td></tr><tr><td>Fleymorx</td><td><p>А под IOS какие варианты? Только shadowsocks?</p></td><td>2023-09-27T14:38:48.642Z</td></tr><tr><td>CRACKen(panic!("this is a terrible mistake!");)</td><td><p>На iOS есть клиенты для использования Shadowsocks, VLESS, VMess, Shadowsocks + Cloak, V2Ray и многого другого.</p></td><td>2023-09-27T14:55:52.136Z</td></tr><tr><td>Fleymorx</td><td><p>Если использовать SS в монорежиме, то по сравнению с WG скорость будет резаться, условно в 50%, а если WG заворачивать в SS, то там до всех 70%? (Видел статью на хабре, что чел завернул)</p></td><td>2023-09-27T15:02:03.726Z</td></tr><tr><td>Spilex</td><td><p>Что значит монорежим? Multiplex? Насколько оно будет резаться - покажет только практика. Если сервер расположен далеко от вас - естественно скорости будут ниже, особенно в однопотоке. А вы уверены, что вам необходимо заворачивать WG в SS? Если задача обойти цензуру - SS без мультиплекса будет достаточно. <a href="https://xyproblem.info/" rel="noopener nofollow ugc">https://xyproblem.info/</a> (?)</p>
+<aside class="quote no-group" data-username="Fleymorx" data-post="100" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/eb9ed0/48.png" class="avatar"> Fleymorx:</div>
+<blockquote>
+<p>А под IOS какие варианты?</p>
+</blockquote>
+</aside>
+<p>Foxray и Shadowrocket - они поддерживают почти всё из серии v2ray.</p>
+<aside class="quote no-group quote-modified" data-username="Fleymorx" data-post="275" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/eb9ed0/48.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/275">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>Outline на VPS</p>
+</blockquote>
+</aside>
+<p>Вам чуть выше <a href="https://habr.com/ru/articles/735536/" rel="noopener nofollow ugc">3X-UI</a> советовали. Там можно и SS-2022 настроить, и VLESS-XTLS-Reality, который пролезет через любой фаервол. Аутлайн-сервер имеет <a href="https://github.com/Jigsaw-Code/outline-ss-server/issues/108" rel="noopener nofollow ugc">не самую приятную особенность</a> - жор батареи с любого клиента, он не даст заснуть вашему смарту.</p></td><td>2023-09-27T18:03:18.860Z</td></tr><tr><td>Fleymorx</td><td><aside class="quote no-group" data-username="Spilex" data-post="103" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/838e76/48.png" class="avatar"> Spilex:</div>
+<blockquote>
+<p>Вам чуть выше <a href="https://habr.com/ru/articles/735536/" rel="noopener nofollow ugc">3X-UI </a> советовали. Там можно и SS-2022 настроить, и VLESS-XTLS-Reality, который пролезет через любой фаервол.</p>
+</blockquote>
+</aside>
+<p>Перед его установкой надо сперва удалить Outline с сервера?</p>
+<p>Под монорежим имел ввиду чисто SS использование. Мне это важно, тк сижу через мобильный интернет постоянно, тк живу в доме, и рано или поздно раздачу начнут блочить, и тут без простого шифрования трафика не обойтись, выручает модуль WG в кинетеке. А SS по умолчанию отсутствует, и требует установки через костыли.</p></td><td>2023-09-28T05:08:03.232Z</td></tr><tr><td>Spilex</td><td><aside class="quote no-group" data-username="Fleymorx" data-post="104" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/eb9ed0/48.png" class="avatar"> Fleymorx:</div>
+<blockquote>
+<p>Перед его установкой надо сперва удалить Outline с сервера?</p>
+</blockquote>
+</aside>
+<p>Скорее да, чем нет. Зачем вам тогда Outline, если будет панелька 3X-UI, где в т.ч. можно настроить Shadowsocks как в аутлайне?</p>
+<aside class="quote no-group" data-username="Fleymorx" data-post="104" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/eb9ed0/48.png" class="avatar"> Fleymorx:</div>
+<blockquote>
+<p>Под монорежим имел ввиду чисто SS использование</p>
+</blockquote>
+</aside>
+<p>Если у VPS местоположение близкое к вам и нет узких мест вроде проца - скорость должна быть нормальная. И в конце концов SS - это прокси, где можно настроить выборочный роутинг, а WG - полноценный VPN.</p>
+<aside class="quote no-group" data-username="Fleymorx" data-post="104" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/eb9ed0/48.png" class="avatar"> Fleymorx:</div>
+<blockquote>
+<p>Мне это важно, тк сижу через мобильный интернет постоянно, тк живу в доме, и рано или поздно раздачу начнут блочить, и тут без простого шифрования трафика не обойтись, выручает модуль WG в кинетеке</p>
+</blockquote>
+</aside>
+<p>Блочить раздачу чего? Не понял.</p>
+<aside class="quote no-group" data-username="Fleymorx" data-post="104" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/eb9ed0/48.png" class="avatar"> Fleymorx:</div>
+<blockquote>
+<p>А SS по умолчанию отсутствует, и требует установки через костыли.</p>
+</blockquote>
+</aside>
+<p>Цензоры делают всё для того, чтобы человек смирился и не смог обойти цензуру. Эпоха удобных и простых VPN в виде WG и OpenVPN, которые поддерживает почти каждый калькулятор, уходит.</p>
+<p>UPD. На кинетики кстати с недавних пор есть вот такое - <a href="https://habr.com/ru/articles/760052/" class="inline-onebox" rel="noopener nofollow ugc">Xray на Keenetic / Xkeen / Хабр</a></p></td><td>2023-09-28T10:17:54.482Z</td></tr><tr><td>Fleymorx</td><td><aside class="quote no-group" data-username="Spilex" data-post="105" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/838e76/48.png" class="avatar"> Spilex:</div>
+<blockquote>
+<p>Скорее да, чем нет. Зачем вам тогда Outline, если будет панелька 3X-UI, где в т.ч. можно настроить Shadowsocks как в аутлайне?</p>
+</blockquote>
+</aside>
+<p>А как его удалить, не подскажите? А то инструкции по установке есть, а по удалению нет) в</p>
+<aside class="quote no-group" data-username="Spilex" data-post="105" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/838e76/48.png" class="avatar"> Spilex:</div>
+<blockquote>
+<p>Блочить раздачу чего? Не понял.</p>
+</blockquote>
+</aside>
+<p>Интернета. У меня не проводной провайдер, а мобильный (МТС), где трафик без офиц. услуги раздачи блочится (при попытке ее скрыть) на основе DPI.</p>
+<p>Пока что сделал так в X3-UI:</p>
+<ol>
+<li>Конфиг для моб. ус-в. VLESS + Reality - тупит открытие сайтов, скорость speedtest не режет.</li>
+<li>Конфиг для моб ус-в ShadowSocks + среднее шифрование - пободрее открывает, скорость не режет</li>
+<li>Конфиг для Keenetic - Socks 5 - и в вебморде роутера просто поставил как proxy сервер.</li>
+</ol></td><td>2023-09-28T13:41:59.256Z</td></tr><tr><td>0x99(Jabas)</td><td><aside class="quote no-group" data-username="Fleymorx" data-post="106" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/eb9ed0/48.png" class="avatar"> Fleymorx:</div>
+<blockquote>
+<p>А как его удалить, не подскажите? А то инструкции по установке есть, а по удалению нет) в</p>
+</blockquote>
+</aside>
+<p>Удалите докер-контейнеры и этого по идее должно хватить</p></td><td>2023-09-28T15:51:52.667Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>Доброго дня.</p>
+<p>А что из VPN/туннелей, поддерживаемых Mikrotik RouterOS 7, сейчас точно (пока) не блокируется? Есть пара мест, где сейчас настроен на микротиках Wireguard. Строго внутри России, пока работает, но новости не радуют и надо подготовиться. Никаких серверов там нет физически, только микротики, а переносить задачу установления VPN-соединения с роутера на конечные устройства тоже не вариант - на условный принтер я ничего поставить не смогу, а удалённый доступ к нему тоже нужен.</p></td><td>2023-10-01T10:37:41.937Z</td></tr><tr><td>Spilex</td><td><p>SSTP и Zerotier вроде пока что живут.</p></td><td>2023-10-01T19:35:15.877Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>По SSTP в соседней теме есть упоминания о блокировках.<br>
+ZeroTier - интересная идея, удобная штука и достаточно экзотическая, чтобы не попасть под раздачу просто по приниципу “руки не дошли”. Гляну, спасибо.</p>
+<p>Ещё интересовали такие штуки как IPSec + IPIP, IPsec + GRE, VPLS. Отчёты о блокировках видел только о IPSec + L2TP и IPSec в туннельном режиме. Понятно, что всё это распознаётся на раз-два, но, опять же, возможно, т.к. для обхода блокировок такие протоколы используются примерно никогда, то их и не замечают…</p></td><td>2023-10-01T19:41:33.217Z</td></tr><tr><td>Spilex</td><td><aside class="quote no-group" data-username="borouhin" data-post="110" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/borouhin/48/3734_2.png" class="avatar"> borouhin:</div>
+<blockquote>
+<p>По SSTP в соседней теме есть упоминания о блокировках</p>
+</blockquote>
+</aside>
+<p>Прошёлся поиском и нашёл только упоминания о том, что SSTP пока ещё держится.</p></td><td>2023-10-01T19:59:33.070Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>И правда, спасибо. В других местах, где читал подобные обсуждения, тоже про SSTP тишина. Только упоминания, что детектируется он совсем до смешного просто, но никаких отчётов о том, что это реально делали. Видимо, невнимательно читал. Буду иметь в виду и его.</p>
+<p>Хотя пока ZeroTier выглядит предпочтительнее для связи между роутерами и серверами, ибо mesh-сеть построить так же просто и удобно, как в WG, да и падение скорости должно быть поменьше. А вот SSTP можно попробовать рассмотреть как простую замену OpenVPN для пользовательских устройств, - ибо научить моих сугубо гуманитарных и при этом удалённых сотрудников устанавливать и настраивать клиенты под Cloack/XRay/SS etc. - та ещё задачка <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2023-10-01T20:11:09.931Z</td></tr><tr><td>Spilex</td><td><p>OpenVPN over Cloak - AmneziaVPN. Для SS/VLESS и прочего есть <a href="https://github.com/InvisibleManVPN/InvisibleMan-XRayClient" class="inline-onebox" rel="noopener nofollow ugc">GitHub - InvisibleManVPN/InvisibleMan-XRayClient: A client for xray core</a> которому можно подсовывать полный конфиг json включая роутинг и DNS. Если только SS - есть Outline.</p></td><td>2023-10-01T20:21:32.855Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>Я знаю про то, что есть, у юзера MiraclePtr на Хабре были монументальные обзоры, читал <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p>
+<p>Но, во-первых, оно всё заточено именно на обход блокировок. А мне в первую очередь нужен доступ к корпоративным ресурсам, с авторизацией в LDAP, 2FA, маршрутизацией своей и пр… Обход блокировок пользователям тоже достаётся в комплекте, но это дополнительный бонус, а не основная цель.</p>
+<p>Во-вторых, у пользователей полный зоопарк (Win, Mac, Android, iOS), и вот найти под какой-то из новомодных протоколов полный набор бесплатных (карточек платить в Play/App Store у них тоже нет) и юзер-френдли программ, - уже задачка посложнее.</p></td><td>2023-10-01T20:26:45.262Z</td></tr><tr><td>Spilex</td><td><p>Тогда - да, вариантов вообще почти нет. Можно поднять сервер Cloak в РФ и пускать туда тот же OpenVPN. То есть на устройствах клиентов будет простой OpenVPN, а сервер Cloak будет выступать в роли прокси.</p></td><td>2023-10-01T20:29:58.800Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>Так сейчас простой OpenVPN до российского сервера и работает, тьфу-тьфу-тьфу, именно так уже давно настроено. Но пытаюсь подготовиться к ситуации, если соединения внутри РФ тоже массово (а не в единичных случаях, как сейчас) будут блокировать и пользователи со своим простым OpenVPN до моего российского же сервера не смогут достучаться. Но это уже другой вопрос, на самом деле… сначала с серверами/роутерами разберусь, чтобы не было сюрпризов, а потом до пользовательского VPN руки дойдут.</p></td><td>2023-10-01T20:38:02.649Z</td></tr><tr><td>welazsc</td><td><p>Главным оружием РКН по прежнему будут сканеры, DPI отсеивает массы обычного трафика и детектируемого, но остаются значимые группы пользователей запрещенных инструкций для ЭВМ. Вот их и будут отсекать, для отчетности или медийных заявлений если потребуется при аппаратном усилении/удержании. При этом в отличии от времен тг есть обширная сеть сенсоров которая посчитает точное число пользователей и объемы трафика на конкретный адрес и выдаст предположительно используемые протоколы. Например, при наличии большого объем TLS трафика, сканер, сверившись с реестром разрешенных технологических процессов, выяснит, а точно ли там есть заявленный сайт, проверит известные SSL-VPN протоколы, выдаст вердикт.</p>
+<p>SSTP можно определить по реализации, статистически, но в общем случае это <a href="https://github.com/reliablehosting/sstp-client/blob/master/support/SSTP-TEST.PCAP" rel="noopener nofollow ugc">TLS трафик</a>.</p></td><td>2023-10-01T20:44:32.950Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>Вообще мне хотелось бы узнать, как РКН (или кто для него формирует ТЗ) в их прекрасном будущем, когда они всё-всё реализуют, просканируют и поймают, - представляет себе судьбу десятков, если не сотен тысяч корпоративных серверов, к которым удалённые (и не только, многие давно отказались от серверов в офисах в пользу аренды VPS/dedicated/colocation) пользователи подключаются через тот или иной VPN для работы. Помнится, в начале всего этого цирка пробегали слухи о регистрации корпоративных VPN для попадания в белый список, но так и сошли на нет…</p></td><td>2023-10-01T20:54:38.403Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>P.S. ZeroTier в Микротиках, увы, для избежания блокировки совершенно бесполезен, т.к. в него не завезли присутствующую в полноценных клиентах ZT опцию указать собственные root-сервера (moon). Т.е. он всегда стучится к root-серверам ZeroTier, Inc., и не работает, если не может до них достучаться. Ну а те блочатся тупо по IP без всякого изучения протокола, что весьма вероятно и произойдёт в ближайшее время, если ещё не.<br>
+Так что попробую SSTP.</p></td><td>2023-10-01T23:42:25.874Z</td></tr><tr><td>anon94384997</td><td><p>SSTP кстати иранцы используют. Что, опять же не показатель в наших реалиях. Скажут - сделают.</p></td><td>2023-10-01T23:52:45.085Z</td></tr><tr><td>Fleymorx</td><td><p>Мне вот интересно, кто эти люди, и как им живется, которые этими блокировками занимаются. Они же сами себя ограничивают в использовании интернета.<br>
+Неужели у нас опередят Китай в блокировке SS?</p></td><td>2023-10-02T08:16:25.362Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="Fleymorx" data-post="121" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/eb9ed0/48.png" class="avatar"> Fleymorx:</div>
+<blockquote>
+<p>опередят Китай в блокировке SS?</p>
+</blockquote>
+</aside>
+<p>Нет, но можно их догнать. Только не факт, что все ТСПУ потянут статистический анализ, практика показывает обратное. С другой стороны блокировка адреса Outline сервера создаст тот же эффект, что и блокировка протокола. Можно блокировать после нескольких tcp сегментов, так уже блокируют некоторые впн сервисы, иногда число пакетов/сегментов рандомное. Можно запутать даже бывалых, если при этом разрешить трафик для службы управления. Вопрос только в вычислении адреса. Применят гибрид?</p>
+<p>На вдсине-рф с ходу нашлось около 200 инсталяций похожих на аутлайн (например: <code>88.218.62.198:11538</code>, <code>195.2.78.70:46030</code>). У РКН совсем не будет проблем, ведь она наблюдает за всем трафиком, могут поднять все обращения к адресу и узнать порты. И тесты для сканера довольно простые, кроме того все сомнения трактуются в пользу блокировок. Допустим есть инсталляции с похожими характеристиками, но не аутлайн, тем хуже для них (см. кейс WebRTC на pion). Сразу возник совет от неофита – ограничить доступ для API порта аутлайна, конфигурировать через ssh туннель. Но надо перепроверять.</p></td><td>2023-10-02T09:11:40.486Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="Fleymorx" data-post="121" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/eb9ed0/48.png" class="avatar"> Fleymorx:</div>
+<blockquote>
+<p>Неужели у нас опередят Китай в блокировке SS?</p>
+</blockquote>
+</aside>
+<p>Где-то тут на форуме писали, что обычный shadowsocks уже не работает в Китае, в отличии от 2022 версии.<br>
+Чтобы заблокировать shadowsocks протокол надо сравнивать количество нулей и единиц нейросетью, а их почти одинаковое количество.<br>
+Может быть под блокировкой ss в РФ действительно имеются в виду какие-то домены Outline проги или по IP.</p></td><td>2023-10-02T15:13:36.407Z</td></tr><tr><td>P4H</td><td><p>С марта 2024 года РКН сможет блокировать (<a href="https://ria.ru/20231003/vpn-1900174800.html" class="inline-onebox" rel="noopener nofollow ugc">РКН сможет блокировать все VPN-сервисы с марта 2024 года, заявили в Совфеде - РИА Новости, 03.10.2023</a>) все VPN-сервисы</p>
+<p>С 1 марта вступит в силу приказ о блокировке Роскомнадзором в магазинах приложений VPN-сервисов, которые дают доступ на запрещенные в России сайты. Об этом сообщил сенатор Артём Шейкин.</p></td><td>2023-10-03T14:26:55.948Z</td></tr><tr><td>tlgrmku(tlgrmku)</td><td><p>Интересно как РКН будет блокировать VPN-приложения в AppStore и Google Play? Сайты сервисов наверно будет блочить.</p></td><td>2023-10-03T16:40:55.117Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Страницы <a href="http://play.google.com" rel="noopener nofollow ugc">play.google.com</a> блокируется как пару лет)</p></td><td>2023-10-03T16:48:17.906Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="yifif" data-post="288" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/y/439d5e/48.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/288">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>Пришло репли от позоровцев</p>
+</blockquote>
+</aside>
+<p>Опубликуйте</p></td><td>2023-10-01T11:31:04.827Z</td></tr><tr><td>yifif(yifif)</td><td><p>Ну чац… Может есчо входящий номер письма опубликовать ))<br>
+Там ничего особенного список на две страницы разных ВПН и та инфа что выше писал. Из неприятного планет ВПН тоже типа прибьют.<br>
+Адгуард заработал после обновления ))</p></td><td>2023-10-01T14:40:59.548Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="yifif" data-post="128" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/y/439d5e/48.png" class="avatar"> yifif:</div>
+<blockquote>
+<p>Может есчо входящий номер письма опубликовать ))</p>
+</blockquote>
+</aside>
+<p>Можете номер не публиковать.</p></td><td>2023-10-01T14:48:12.608Z</td></tr><tr><td>CIA_agent</td><td><aside class="quote no-group" data-username="yifif" data-post="288" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/y/439d5e/48.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/288">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>Пришло репли от позоровцев… с 4 октября v2 ray и им же подобные на всех ТСПУ, ss на трансграничных ТСПУ</p>
+</blockquote>
+</aside>
+<p>В таких письмах обычно список конкретных сервисов(чьи входные ноды можно собрать реверсом приложений было бы желание) или там была речь именно о протоколах?</p></td><td>2023-10-01T15:00:28.267Z</td></tr><tr><td>yifif(yifif)</td><td><p>про ss о протоколах<br>
+про v2 ray было в общем списке<br>
+копипастить не могу, ознакомился под роспись и усё</p></td><td>2023-10-01T21:13:23.128Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="yifif" data-post="288" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/y/439d5e/48.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/288">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>Также был намек на полную блокировку всех средств туннелирования внутри РФ</p>
+</blockquote>
+</aside>
+<p>Один знакомый мент тоже говорит ходят подобные слухи и телегу заодно. Ну, посмотрим.</p></td><td>2023-10-01T23:48:48.777Z</td></tr><tr><td>viva(Viva)</td><td><p>А кто-нибудь пытается судиться? Я не вижу в текущей версии закона, чтобы можно было личный VPN сервер блокировать. Оператор на претензию ответил, что ничего он не блокирует. Поэтому ищу юристов, экспертов, как это доказать то? Может коллективный иск замутим, есть желающие? (просто для истории, понятно, что все тлен)</p></td><td>2023-10-03T06:38:45.681Z</td></tr><tr><td>anaxios</td><td><p>Закона такого конечно, нет. Как и права блокировать трафик по видам протоколов (доказать же невозможно, что в нем присутствует информация с запрещенных ресурсов, или что это не трафик компаний, ушедших из России, вроде <a href="http://ti.com" rel="noopener nofollow ugc">ti.com</a>).<br>
+Как показывает ситуация последних лет, беззаконие и творится именно потому, что народ молчит - всех все как бы устраивает.<br>
+Если судиться - не все судьи подставляться с явно незаконными решениями будут. Именно поэтому усилия - точно не тлен (окажет как минимум, сдерживающий эффект).<br>
+Кроме того, возможны и персональные разрешающие решения, поэтому не с коллективным иском нужно обращаться, а каждому в отдельности со своим кейсом (хорошо если юристы подготовят образец иска).</p></td><td>2023-10-03T08:05:29.033Z</td></tr><tr><td>Hetvel6947</td><td><p>Я для мобильных установил у себя на домашнем компе в вируталке ubuntu. Поставил скриптом 3x-ui и создал через web интерфейс подключение по протоколу vless. Виртуалка с одним сетевым интерфейсом и подключена к роутеру, на который шарится vpn соединение запущенное на хост машине. У хост машины  2 сетевых интерфейса: Ethernet1 и Ethernet2. Ethernet1 от роутера с белым ip. На Ethernet2 шарится vpn подключение (виртуальный сетевой интерфейс). На первом роутере включил переадресацию по рандомному порту на Ethernet1. На хост машине переадресацию на Ethernet2 делаю програмкой 3proxy, потому что она может и tcp и udp перенаправлять. Для каждого порта копирую в отдельную папку, редактирую конфиг, запускаю exe.</p>
+<p>А на хост машине сначала запускаю бесплатный outline, потом wireguard платный, потом отключаю outline.</p>
+<p>Пока не блочат ВЕСЬ vpn трафик, а только момент подключения, то такой вариант буду использовать, чтобы ещё и за зарубежный VPS не платить.</p></td><td>2023-10-03T09:10:58.196Z</td></tr><tr><td>0ka(0ka)</td><td><p>вся эта жесть с виртуалкой для того чтобы на моб устройствах подключать wg? я просто почти ничего не понял…</p></td><td>2023-10-03T09:15:50.798Z</td></tr><tr><td>Hetvel6947</td><td><p>Чтобы на мобильных был инет. На мобильном же сеть падает иногда. Я же не буду каждый раз с мобильным домой бегать, чтобы снова к WG подключиться.</p></td><td>2023-10-03T09:18:19.554Z</td></tr><tr><td>0ka(0ka)</td><td><p>стало еще непонятнее что вы делаете и для чего</p></td><td>2023-10-03T09:19:26.232Z</td></tr><tr><td>Hetvel6947</td><td><p>Блокируется момент подключения OpenVPN или WG. Чтобы на телефоне подключиться по WG я сначала должен предварительно подключиться к Wi-Fi, на котором уже есть доступ к VPN, иначе подключение не установится. Следовательно, когда на телефоне падает МОБИЛЬНАЯ сеть, то я повторно не смогу уже подключиться по WG, т.к. блокируется момент подключения. Верно же?</p>
+<p>Для этого я и сделал виртуалку со всем этим.</p></td><td>2023-10-03T09:31:24.700Z</td></tr><tr><td>Hetvel6947</td><td><p>На телефоне я подключаюсь уже не по WG, а через приложение V2rayNG.</p></td><td>2023-10-03T09:33:38.174Z</td></tr><tr><td>viva(Viva)</td><td><p>Российский “суд” даже действующие законы может трактовать как ему угодно. В стиле, “у зарубежного провайдера нет ТСПУ, значит он раздает интернет без фильтрации, тем самым нарушает закон о суверенном интернете 2019г, значит нужно запретить его целиком”.<br>
+Т.е. добиться отмены блокировки правовым путем не получится (они всегда могут ввести новые поправки, переписать конституцию и т.д.).<br>
+Это скорей для фиксации на бумаге “да, мы уху ели, а вы рабы”.<br>
+Но для начала хотелось бы понять как можно доказать сам факт блокировки.<br>
+А то оператор говорит, что ничего он не блокирует (кстати, иногда действительно пакеты проходят, возможно, после длительного неиспользования, либо какой-то рандомный фактор).<br>
+Вот и как это в суде доказать? Нужна какая-то экспертная организация.</p></td><td>2023-10-03T12:35:22.947Z</td></tr><tr><td>quantalFox</td><td><aside class="quote no-group" data-username="viva" data-post="141" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/viva/48/3703_2.png" class="avatar"> viva:</div>
+<blockquote>
+<p>Вот и как это в суде доказать? Нужна какая-то экспертная организация.</p>
+</blockquote>
+</aside>
+<p><a class="mention" href="/u/vladislav_z">@Vladislav_Z</a> занимался этим еще года 2 назад, но и не помню, чтобы дело у него дошло до суда. Возможно, он вам чем-то поможет</p></td><td>2023-10-03T13:57:53.634Z</td></tr><tr><td>viva(Viva)</td><td><p>Иск состряпать не проблема. Сложность доказательства собрать, нужно какое-то заключение эксперта, а не просто сниффинг трафика. Пока подожду еще позицию РКН, может они признаются, что блочат.</p></td><td>2023-10-03T15:48:38.255Z</td></tr><tr><td>irt</td><td><p>Так оператор, скорее всего, действительно ничего не блокирует, это другие ребята делают и на другом уровне. Физически это вполне может происходить на сетях оператора или на пиринге, но сама компания этого не контролирует же. Оператор в суд принесет какие-нибудь внутренние доки, регламенты, может даже логи с какой-нибудь автоматизрованной системы биллинга и письмо от старшего сисадмина, по заключению которых на самом деле окажется что они не при чем.<br>
+Линия с экспертизой тоже туманна, как мне кажется. У вас в договре с провайдером не определены никакие параметры качества услуг связи (например, количество потерь или время задержки, как это бывает у юрлиц внутри датацентра или на линках между ними), никаких соглашений о том, что провайдер вам гарантирует доступность узла Y да и еще по каким-то конкретным протоколам. Сама суть интернета такова, что каждый провайдер отвечает только за свою Автономную Систему и не может гарантировать что у соседей все ОК.<br>
+Тут как бы часть стратегии всей это инфо-сво в том, что они ломают что-то и говорят - “ээээ… не, это не мы, это они сами, террористы, а мы не знаем почему, сочувствуем вам, держитесь там”… и все в таком духе; они города бомбят с такими же бессовестными рожами, что это не они делают, а вы им про впн какой-то будете доказывать.</p></td><td>2023-10-04T05:26:05.226Z</td></tr><tr><td>kazancity(kazancity)</td><td><p>Наблюдал несколько ТСПУ одного провайдера. На одном VPN трафик для РФ режет, на другом нет. На обоих режет международный. При этом оператор подключает к точке с блокировкой РФ реже, возможно там больше клиентов.</p></td><td>2023-10-04T09:22:16.567Z</td></tr><tr><td>0ka(0ka)</td><td><p>имейте ввиду что на pq.hosting сеть может падать каждые 10 секунд</p></td><td>2023-10-04T17:21:09.135Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://www.rbc.ru/life/news/651d4eeb9a7947857c7df985">
+  <header class="source">
+      <img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/b170864f278b5047c8cc4c490620c95be9964eb8.png" class="site-icon" data-dominant-color="5EA99B" width="32" height="32">
+
+      <a href="https://www.rbc.ru/life/news/651d4eeb9a7947857c7df985" target="_blank" rel="noopener nofollow ugc">РБК Life</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/388;"><img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/03fa72d093e73f39e2aa7ccaeb18d50f11f666f6_2_690x388.jpeg" class="thumbnail" data-dominant-color="A2908D" width="690" height="388"></div>
+
+<h3><a href="https://www.rbc.ru/life/news/651d4eeb9a7947857c7df985" target="_blank" rel="noopener nofollow ugc">Все VPN-сервисы в России могут заблокировать в 2024 году. Что известно</a></h3>
+
+  <p>С 1 марта в России вступит в силу запрет на популяризацию сервисов для обхода блокировок, сообщили ТАСС в Роскомнадзоре. Об этой инициативе стало известно осенью. РБК Life собрал заявления ...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Все VPN-сервисы в России могут заблокировать в 2024 году.</p></td><td>2023-10-05T03:34:22.111Z</td></tr><tr><td>0ka(0ka)</td><td><p>вы уверены что проблема не в хостинге? запустите спидтест, трассировку до 8.8.8.8 и т.д. на своем сервере, на многих мало известных хостингах большие проблемы с сетью (потери пакетов, плохой uptime…)</p></td><td>2023-10-05T08:15:48.083Z</td></tr><tr><td>0ka(0ka)</td><td><p>от публичных впн не ждите ничего, они могут сами по себе не работать</p></td><td>2023-10-05T08:16:58.181Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="zzr" data-post="331" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/zzr/48/14949_2.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx202x/5124/331">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.202x)</a></div>
+<blockquote>
+<p>vless+reality, dumbproxy, psiphon</p>
+</blockquote>
+</aside>
+<p>Они же все разные, а psiphon еще и набор транспортов (SSH, OSSH, HTTPS, QUIC). C dumbproxy, например, будут видны паттерны HTTP или TLS трафика. Могли, конечно, деградировать всё (кроме белого списка протоколов, SNI) по хитрой схеме – дропать пакеты с расчетной вероятностью и схемой. Но для начала исключите сетевые проблемы, и сбои самой vds, как уже советовали (спидтест, трассировку до 8.8.8.8, ping, mtr снаружи и изнутри). В тестах на деградацию используйте что-то одно за раз, работающее через tcp, включайте Wireshark и медитируйте. Можете поделиться дампом.</p></td><td>2023-10-05T09:40:16.128Z</td></tr><tr><td>irt</td><td><aside class="quote no-group" data-username="nordonsimf" data-post="341" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/eada6e/48.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/341">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>А если купить простой VPS в России, что ASN был RU.<br>
+На него поставить wireguard сервер, а далее уже трафик напрямую слать в Нидерланды ?<br>
+Это поможет ?</p>
+</blockquote>
+</aside>
+<p>Мне кажется неважно где ASN зарегена, важно где физически хостинг располагается и какими маршрутами ходит к вашим узлам. Если на пирингах, куда подключен хостинг есть ТСПУ, то теоретически, могут начать блочить в любое время, это лишь вопрос их тактики и наверное времени.</p>
+<p>По сабжу: Можно так сделать так как вы предлагаете (я так делаю), но это скорее для удобства администрирования. Такая схема ни от чего не защищает, а добавляет вам канал возможностей, в случае возникновения проблем с прямым соединением. Можно завернуть все РФ бранчи на этот хост (я бы только не использовал WG для этого) а хост соединить с Голландией. Думаю, со временем с такой схемой будут тоже бороться. Плюс иногда бывает полезно, если реально у кого-то из магистралов что-то ломается и ты можешь использовать другой маршрут. На деле же, что там росменты выкатят завтра мы можем только предполагать (и ошибаться в этих предположениях).</p></td><td>2023-10-06T18:20:04.229Z</td></tr><tr><td>zzr</td><td><p>спасибо за информацию! в следущую волну попробую ети методы</p></td><td>2023-10-11T11:15:06.936Z</td></tr><tr><td>zzr</td><td><p>спасибо! а вообще решил тут ради прикола запустить goodbuyDPI и удивился что с опцией -6 вместо -5 реально работает, я думал ето всё 2017 год уже не канает (хотя в те времена было достаточно одного правила в iptables с опеннета), а оказывается нет всё ещё работает, валдикас i salute u</p></td><td>2023-10-11T11:19:31.132Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>13 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-jabberxmpp-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/5984/6">Обсуждение: Блокировка Jabber/XMPP в России</a></p></td><td>2023-10-15T13:51:46.927Z</td></tr><tr><td>viva(Viva)</td><td><p>ответ <a href="https://docs.google.com/document/d/17cj1pYA37_s1DsZBzlV5L_T0E9Zc7dNZVm76G6o4GQs/edit" class="inline-onebox" rel="noopener nofollow ugc">rkn - Google Docs</a></p></td><td>2023-10-17T13:57:05.878Z</td></tr><tr><td>ValdikSS</td><td><p>2 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-jabberxmpp-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/5984/25">Обсуждение: Блокировка Jabber/XMPP в России</a></p></td><td>2023-10-19T02:18:18.803Z</td></tr><tr><td>Dhohbr</td><td><p>Не работает openvpn udp, нестандартный порт. Подключается, трафик не ходит. Мобильный билайн. Владивосток.<br>
+Работает openvpn tcp, нестандартный порт. Проводной Подряд. Владивосток.<br>
+Так же заметил не открывается сайт <a href="https://play.google.com" rel="noopener nofollow ugc">https://play.google.com</a>, проводной ростелеком, мобильные билайн, мтс, теле2. Через vpn открывается. Но приложение Play Store работает.</p></td><td>2023-10-19T06:54:09.782Z</td></tr><tr><td>Dhohbr</td><td><p>По openvpn ложная тревога. Это мой телефон начал днс трафик через DoT гнать вместо туннельного днс.</p></td><td>2023-10-19T08:50:20.597Z</td></tr><tr><td>bananahero(Artur)</td><td><p>Подскажите пожалуйста, куда копать? Имеется Pritunl клиент с рабочим впном (OpenVPN) где-то с месяц назад перестал подключаться: с верным otp - 60 секунд и <code>Inactivity timeout (--ping-exit), exiting</code>. Если раздавать интернет с телефона (там теле2), то впн подключался и работал. При этом можно было отключить телефон и весь день спокойно сидеть с подключенным впном т.е. затык был ток в логине. Сначала подумал, что дело в оборудовании и начитавшись отзывов об Intel I-225V сменил его на обычный PCI-E адаптер. ВПН заработал но снова, но сейчас всё тоже самое и к моей печали и с телефона теперь редко когда получается подключится. Думал, что настройки впн-сервера некорректны, но я единственный из коллег с этой проблемой. Подскажите, пожалуйста, в какую сторону вообще двигаться? Это провайдер так неумело блокирует или это какая-то моя проблема?</p></td><td>2023-11-04T20:04:49.737Z</td></tr><tr><td>ValdikSS</td><td><p>Чтобы сказать что-то наверняка, нужно записать и проанализировать трафик. Сделать это можно wireshark’ом или tcpdump’ом.</p></td><td>2023-11-08T23:50:00.564Z</td></tr><tr><td>Fleymorx</td><td><p>Сталкивался ли кто с такой проблемой на провайдере Ростелеком (МСК):<br>
+На VPS поднят Wireguard, порт дефолтный (мб имеет значение)</p>
+<p>Клиентом выступает роутер/смартфон/планшет и тд, не особо важно.</p>
+<p>При запуске speedtest в утреннее и позднее вечернее-ночное время, скорость загрузки/выгрузки одинаковая.<br>
+А днем и вечером скорость загрузки нормальная, а выгрузки очень сильно проседает.<br>
+Пробовал играться с MTU - разницы нет никакой.</p></td><td>2023-11-14T23:41:22.049Z</td></tr><tr><td>mike_smith</td><td><p>Здравствуйте, подскажите, на локальной машине стоит fedora с установленным  прокси клиентом nekoray и настроеном 3x-ui на vps по протоколу vless xtls, в виртуалбоксе установлен whonix-gw и ws, так вот суть вопроса в том, что gw не пускает трафик через запущенный на машине прокси, а пытается соединится на прямую, что без мостов не получается тк тор заблочен, кто нибудь знает как пустить трафик через прокси на локале, возможно ли это и если да, то как? Заранее спасибо.</p></td><td>2023-11-15T05:35:53.528Z</td></tr><tr><td>0ka(0ka)</td><td><p>iperf3 тестите а не спидтестом, vps от кого? выгрузка = скачивание?</p></td><td>2023-11-15T08:45:27.545Z</td></tr><tr><td>anonymous47(anonymous47)</td><td><aside class="quote no-group" data-username="welazsc" data-post="122" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/w/c4cdca/48.png" class="avatar"> welazsc:</div>
+<blockquote>
+<p>На вдсине-рф с ходу нашлось около 200 инсталяций похожих на аутлайн (например: <code>88.218.62.198:11538</code>, <code>195.2.78.70:46030</code>). У РКН совсем не будет проблем, ведь она наблюдает за всем трафиком, могут поднять все обращения к адресу и узнать порты. И тесты для сканера довольно простые, кроме того все сомнения трактуются в пользу блокировок.</p>
+</blockquote>
+</aside>
+<p><a href="https://paste.debian.net/plainh/8ed593d9" rel="noopener nofollow ugc">Тестовый скрипт</a> для проверки адреса на наличие Outline сервера бумаги vpn по списку.</p>
+<blockquote>
+<p>pip install pyargon2<br>
+python check_paper.py &lt;ip_addr&gt;</p>
+</blockquote>
+<p>Тестовый вектор: 8.8.8.8</p>
+<blockquote>
+<p>python check_paper.py 8.8.8.8<br>
+Test vector detected!<br>
+YES!</p>
+</blockquote></td><td>2023-12-02T18:37:18.994Z</td></tr><tr><td>PANDORUM_666</td><td><p>"Полной блокировки VPN в России не планируется, заявил Хинштейн</p>
+<p>МОСКВА, 6 дек – РИА Новости. О полном запрете VPN в России речи нет, при этом запрещенная информация активно выявляется и блокируется регулятором, сообщил глава думского комитета по информполитике Александр Хинштейн в своем Telegram-канале.</p>
+<p>“Пользоваться этой технологией или нет - личное дело каждого, как и ответственность за последствия, о полном запрете VPN в России речи нет. А вот запрещенная информация, активно выявляется и блокируется регулятором”, - написал он."</p>
+<p>Как всё интересно…</p></td><td>2023-12-06T14:48:22.462Z</td></tr><tr><td>Hetvel6947</td><td><p>Значит точно будут ПОЛНОСТЬЮ блокировать и криминализировать.</p></td><td>2023-12-06T15:10:42.705Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>к 8 утра перестал работать ovpn и wg, с goodbyedpi работает ovpn</p></td><td>2023-12-15T05:22:29.631Z</td></tr><tr><td>0ka(0ka)</td><td><p>что такое “антизапретовский протокол”?</p></td><td>2023-12-18T17:47:58.151Z</td></tr><tr><td>anon57137390</td><td><p>del</p></td><td>2023-12-18T18:24:48.192Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Банально заходил на <a href="http://speedtest.net">speedtest.net</a> и тестировал до разных серверов.<br>
+С OpenVPN + SS сайт <a href="http://speedtest.net">speedtest.net</a> полностью не может прогрузиться.</p></td><td>2023-12-19T00:28:47.180Z</td></tr><tr><td>user96</td><td><p>А где рабочие сервера Outline взять? Из телеграмма ни один не работает</p></td><td>2023-12-19T01:08:09.334Z</td></tr><tr><td>anon57137390</td><td><p>del</p></td><td>2023-12-19T08:53:04.738Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Провел диванный эксперимент у Мoбильногo Рocтeлекoмa:</p>
+<ol>
+<li>Установил соединение OpenVPN + SS, скорость передачи данных всё на том же <a href="http://speedtest.net">speedtest.net</a> - <a href="https://imageup.ru/img63/4673060/before.png.html" class="inline-onebox">before.png - Бесплатный хостинг для фото и изображений</a>. Ограничений по скорости <strong>нет</strong>, в том числе для MTProxy (с параметром dd).</li>
+<li>Отключил OpenVPN + SS.</li>
+<li>Запустил torrent клиент. При определении протокола BitTorrent срабатывает правило по ограничению скорости. Выгрузил torrent клиент.</li>
+<li>Установил соединение OpenVPN + SS. Проверил скорость передачи данных - <a href="https://imageup.ru/img280/4673061/after.png.html" class="inline-onebox">after.png - Бесплатный хостинг для фото и изображений</a>. Ограничение скорости сохраняется, в том числе для MTProxy (с параметром dd).</li>
+</ol>
+<p>В итоге, как понял, DPI после обнаружения использования BitTorrent протокола ограничивает скорость на любые не известные для него протоколы в текущей установленной пользовательской сессии. Отключение/включение передачи данных в телефоне сбрасывает наложенные ранее ограничения, до очередного использования протокола BitTorrent.</p></td><td>2023-12-20T07:24:01.251Z</td></tr><tr><td>bolvan</td><td><p>BT с шифрованием как я понимаю можно отличить только статистически. Сигнатурно не детектится.<br>
+Статистика сложнее и тяжелее для DPI, не все умеют</p></td><td>2023-12-20T07:31:29.393Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>В torrent-клиенте установлено “Требовать шифрование”, порт по умолчанию изменен.</p></td><td>2023-12-20T08:08:10.530Z</td></tr><tr><td>bolvan</td><td><p>Шифрование идет между клиентами, но все остальное типа DHT и анонсеров не шифруется<br>
+Этого достаточно , чтобы зачислить в торренщики</p></td><td>2023-12-20T08:09:51.463Z</td></tr><tr><td>anon57137390</td><td><p>del</p></td><td>2023-12-20T09:11:00.871Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Меня гложет вопрос, почему на чистый SS ограничения по скорости передачи/отправке не накладываются, а на OpenVPN + SS срабатывает фильтр. Как они определяют различия.</p></td><td>2023-12-20T10:31:24.526Z</td></tr><tr><td>413xk</td><td><p>Свердловская обл.</p>
+<p>Мобильный Теле2 и мобильный Билайн режут до местных серверов (у местного ЕКБ хостера):<br>
+OpenVPN<br>
+PPTP<br>
+Wireguard</p>
+<p>Использовались тоннели для корпоративной сети.</p>
+<p>С проводных (в т.ч Билайн) всё ок</p></td><td>2023-12-21T06:57:07.765Z</td></tr><tr><td>pukoid(Pukoid)</td><td><p>Новосибирский мегафон почти весь день булькал openvpn до сервера в Транстелекоме. С нескольких проводных ipsec/openvpn по всей России проблем не было.<br>
+<a href="https://i.ibb.co/sRDcgx4/proval.png" rel="noopener nofollow ugc">proval</a></p></td><td>2023-12-21T15:32:08.593Z</td></tr><tr><td>mafiacheb(Александр)</td><td><p>Del</p></td><td>2023-12-21T18:29:28.566Z</td></tr><tr><td>P4H</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://kod.ru/rkn-operativno-block-internet">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/3/363beb1a44b92b3aa2e40b1dceb3ed4f9e467286.svg" class="site-icon" data-dominant-color="" width="500" height="500">
+
+      <a href="https://kod.ru/rkn-operativno-block-internet" target="_blank" rel="noopener nofollow ugc" title="10:01AM - 08 January 2024">Код Дурова – 8 Jan 24</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://kod.ru/rkn-operativno-block-internet" target="_blank" rel="noopener nofollow ugc">В России подготовили закон об оперативной блокировке контента в интернете</a></h3>
+
+  <p>Система будет искать в Интернете контент, который сочтен противоправным, используя технологии ИИ.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-01-08T11:13:16.322Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Как минимум одно различие в том, что чистый SS на каждое проксируемое TCP-соединение создаёт новое подключение к прокси (то есть они живут довольно короткое время, и объемы информации через каждое подключение не такие уж большие), а в случае с OpenVPN у вас будет одно-единственное долгоживущее соединение, через которое ходит весь трафик. Я бы в эту сторону копал.</p></td><td>2024-01-08T16:28:17.343Z</td></tr><tr><td>ValdikSS</td><td><p>8 posts were merged into an existing topic: <a href="/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/370">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2024-01-15T15:51:21.558Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote" data-post="396" data-topic="5124">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/9f8e36/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/396">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Москва (РТК), Самара (провайдера не знаю). wg и outline до Хецнера (Финляндия) сдох
+  </blockquote>
+</aside>
+<p>
+вы уверены что не ваш vps сдох? про outline слабо верится</p></td><td>2024-01-18T05:31:18.175Z</td></tr><tr><td>Fomichok</td><td><p>А SSTP протокол сейчас блочат, или он ещё работает?</p></td><td>2024-02-01T13:54:19.124Z</td></tr><tr><td>Sick</td><td><p>у меня на нём работают микротики там где openvpn резали</p></td><td>2024-02-01T15:44:29.761Z</td></tr><tr><td>Krusty-the-Clown(Krusty The Clown)</td><td><aside class="quote no-group" data-username="Fomichok" data-post="189" data-topic="5239" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/f19dbf/48.png" class="avatar"> Fomichok:</div>
+<blockquote>
+<p>А SSTP протокол сейчас блочат, или он ещё работает?</p>
+</blockquote>
+</aside>
+<p>раньше работал. Теперь нет.</p></td><td>2024-02-01T16:40:52.760Z</td></tr><tr><td>Fomichok</td><td><p>Блокируют через сотовую сеть или и с проводного интернет?<br>
+Что сейчас осталось из того, к чему можно с телефона подключиться?</p></td><td>2024-02-01T16:48:31.957Z</td></tr><tr><td>anon57137390</td><td><p>del</p></td><td>2024-02-02T11:45:49.136Z</td></tr><tr><td>P4H</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://ura.news/news/1052730042">
+  <header class="source">
+      <img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/61ec0384b760d267b04e57b1cc4e4077527f05e5.png" class="site-icon" data-dominant-color="1964E7" width="48" height="48">
+
+      <a href="https://ura.news/news/1052730042" target="_blank" rel="noopener nofollow ugc">ura.news</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/2afaadd4c78ae4ee9935cf2138195066a32ac0e6_2_690x362.jpeg" class="thumbnail" data-dominant-color="373B44" width="690" height="362"></div>
+
+<h3><a href="https://ura.news/news/1052730042" target="_blank" rel="noopener nofollow ugc">Мизулина рассказала о блокировке VPN в России</a></h3>
+
+  <p>Видео</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-02-05T13:01:50.785Z</td></tr><tr><td>P4H</td><td><p><em>С 1 марта вводится норма, которая запрещает именно популяризацию VPN-сервисов. То есть, например, сайты, на которых есть информация о том, как обходить блокировки, могут быть заблокированы.</em></p>
+<p><em>Использование же самих VPN-сервисов пока не запрещается.</em></p>
+<p><em>Пресс-секретарь Кремля Дмитрий Песков заявил, что сейчас полностью запрещать VPN-сервисы не собираются.</em></p></td><td>2024-02-06T10:34:16.877Z</td></tr><tr><td>ejoe</td><td><p>Мобильный Билайн Краснодар – то же самое до московского сервера.</p></td><td>2024-02-08T12:25:45.775Z</td></tr><tr><td>Krusty-the-Clown(Krusty The Clown)</td><td><p>Если подключение по блокируемым протоколам идет в обратном направлении (извне в РФ), то это не решает вопрос?</p></td><td>2024-02-11T12:41:56.298Z</td></tr><tr><td>P4H</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://dtf.ru/life/2502517-saity-runeta-nachali-udalyat-instrukcii-ob-ispolzovanii-vpn">
+  <header class="source">
+      <img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/e4373e490c6776cfcedae796fca16e52a6fab99f.png" class="site-icon" data-dominant-color="A5BCC2" width="64" height="64">
+
+      <a href="https://dtf.ru/life/2502517-saity-runeta-nachali-udalyat-instrukcii-ob-ispolzovanii-vpn" target="_blank" rel="noopener nofollow ugc">DTF</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:600/315;"><img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/e600d283204e9b073e6f04fb587d581c84680004_2_690x362.jpeg" class="thumbnail" data-dominant-color="30353C" width="690" height="362"></div>
+
+<h3><a href="https://dtf.ru/life/2502517-saity-runeta-nachali-udalyat-instrukcii-ob-ispolzovanii-vpn" target="_blank" rel="noopener nofollow ugc">Сайты рунета начали удалять инструкции об использовании VPN — Жизнь на DTF</a></h3>
+
+  <p>Перед вступлением в силу запрета на популяризацию средств обхода блокировок, за которую грозит штраф до четырёх миллионов рублей.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-02-19T14:13:52.738Z</td></tr><tr><td>PANDORUM_666</td><td><p>Я так понимаю ntc.party будет заблокирован 1 марта?</p></td><td>2024-02-22T15:39:46.358Z</td></tr><tr><td>P4H</td><td><p>очень надеюсь, что НЕТ! Сайт вроде для энтузиастов и не супер популярный, что бы его сразу прикрыли, а там хз конечно что и как будет</p></td><td>2024-02-22T15:47:45.880Z</td></tr><tr><td>Ugulchak(Konstantin)</td><td><p>Добрый день коллеги.</p>
+<p>Имею softether сервер в Нидерландах. Пока обычного openvpn хватало<br>
+Сейчас же мобильные операторы рвут соединение каждые 15 сек если UDP и моментально вылетает в transport error network_recv_error если TCP. Номер порта роли не играет уже, хотя для теле 2 сперва помогло, видимо 1199 не нравился. Теле2, Тинькофф, МТС. На домашнем Ростелекоме - работает, пока.</p>
+<p>Судя по сообщениям я так понимаю это массово и везде. Обходить только инкапсуляцией трафика? Или wireguard ещё живёт?  L2TP и IKEv2 полагаю уже не варианты</p></td><td>2024-02-25T12:38:20.271Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>SoftEther же умеет SSTP и свой протокол, которые к блокировкам, по крайней мере на текущем этапе, стойкие. Всё остальное из перечисленного Вами - лотерея, где-то работает, где-то нет, но прецеденты блокировки уже были.</p></td><td>2024-02-25T13:01:32.912Z</td></tr><tr><td>move-approve</td><td><p>Мск, домашний РТК и мобильный теле2.<br>
+По состоянию на сейчас домашний интернет отвалился, при этом хорошо работают некоторые российские сайты (вк, яндекс, дзен, сбербанк без https, другие не проверялись). Прокси все не работают (в т.ч. xtls-reality), из проверявшихся заграничных сайтов не работали гугл, ютуб, microsoft, discord, github.<br>
+На мобильном интернете на этом же месте было то же самое, но включилось позже, и отключилось раньше, похоже - как раз с мобильного пишу сейчас. С другого конца города также сообщали об отвале мобильного интернета.<br>
+Похоже на шатдаун с отсечением всего заграничного траффика.<br>
+Не знаю, подходящий ли топик. Задача - рассказать о проблеме как можно быстрее, до потенциального следующего отвала.<br>
+Извините за небольшой оффтоп.</p>
+<p>upd: Вижу, в различных медиа появляются сообщения о сбоях telegram и youtube. Наверное, имеет смысл, что жалуются прежде всего на их неработоспособнось. Хотя также вижу и сообщения о том, что “впн помогает” - в моем случае это было совсем не так, имею кучу разных проксей, и не удалось подключиться ни к одной.<br>
+Видимо, “строгость” блокировок разнилась.</p></td><td>2024-02-27T10:00:58.356Z</td></tr><tr><td>akumanokuma</td><td><p>Ростелеком (СЗФО), udp2raw поверх wireguard работает как и прежде, как и shadowsocks со старым v2ray плагином.</p></td><td>2024-02-27T10:16:53.175Z</td></tr><tr><td>move-approve</td><td><p>Ладно, тема закрыта, i guess</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://t.me/zatelecom/27669">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/6/60a0dd1195aa91677b6f00e7a4eb29555e45506b.svg" class="site-icon" data-dominant-color="" width="16" height="16">
+
+      <a href="https://t.me/zatelecom/27669" target="_blank" rel="noopener nofollow ugc">Telegram</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="320" height="320" src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/a718b9239f9b91dcf4473448b6b4da49b6283ff8.jpeg" class="thumbnail onebox-avatar" data-dominant-color="CECECE">
+
+<h3><a href="https://t.me/zatelecom/27669" target="_blank" rel="noopener nofollow ugc">ЗаТелеком 🌐</a></h3>
+
+  <p>Сбой в работе рунета 27.02 это косяк ДЦОА и ТСПУ
+ДЦОА признали. ТСПУ перевели в bypass, всё стало ок</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-02-27T10:32:11.333Z</td></tr><tr><td>sakontwist</td><td><p>Тула, Домру + Билайн, прокси на xray работали исправно. Без них не работало ничего</p></td><td>2024-02-27T11:26:53.948Z</td></tr><tr><td>AlexeyD</td><td><p>Аналогичная ситуация, использую outline + Dns over TLS STUBBY, внутри openvpn tcp. Две точки в разных частях города, одна на мобильном мегафоне, вторая на проводном ростелекоме, сервера Outline разные. Сначала на мегафоне переодически vpn отваливался с декабря по январь. Потом сатало на проводном интернете тормозить все, скорость падала до черепашьей. Думал сервера outline заблочили. Но в итоге выяснил, что блокировке подвергается DOT ДНС от Cloudflare, полностью перестал подключаться к их серверам, после замены на менее известного провайдера днс, все заработало. Точно блокируют шифрованный DNS over TLS от cloudflare, DOH и DNS crypt не тестировал.</p></td><td>2024-02-28T13:04:41.223Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="Uporoty" data-post="186" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/ed655f/48.png" class="avatar"> Uporoty:</div>
+<blockquote>
+<p>а в случае с OpenVPN у вас будет одно-единственное долгоживущее соединение, через которое ходит весь трафик. Я бы в эту сторону копал.</p>
+</blockquote>
+</aside>
+<p>Даже когда OpenVPN <strong>UDP</strong>?</p></td><td>2024-02-29T17:35:14.927Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>А если у вас OpenVPN через UDP, то зависит от того, включен ли в SS режим UoT или нет. Если включен, то все так же будет одно TCP-соединение (потому что UoT это UDP over TCP), а если не включен, то SS будет слать OpenVPN UDP как UDP,  и в итоге со стороны это будет ну оооочень сильно отличаться от обычного SS.</p></td><td>2024-02-29T18:04:17.226Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>В конфиге не прописан был данный параметр, по умолчанию не нашел вкл/выкл UoT.<br>
+Теперь принудительно прописал <code>"uot": false</code></p></td><td>2024-02-29T18:21:45.428Z</td></tr><tr><td>G7ZmNT(G7ZmNT)</td><td><p>После 29.02, когда произошёл “глобальный” сбой в работе ТСПУ у моего мобильного провайдера ещё буквально несколько дней подряд (с 1 по 4 марта) были моменты, когда тспу полностью отключали и работали все впн-сервисы.<br>
+Сейчас же на момент 12 марта с 12:00 по московскому времени подобное повторяется - тспу в режиме bypass, работают многие впн сервисы с wireguard и openvpn протоколами.<br>
+Так что это не “временная халява”, а внедряют новые блокировки и не возникло проблем в работе мобильного интернета. Если потребуется, то AS и город скину команде данного форума.</p></td><td>2024-03-12T10:22:18.916Z</td></tr><tr><td>Plus123</td><td><p>Хм, а кто-нибудь знает, в чем глубокий смысл блокировки туннелей внутри РФ? <img src="https://ntc.party/images/emoji/twitter/confused.png?v=12" title=":confused:" class="emoji" alt=":confused:" loading="lazy" width="20" height="20"><br>
+Последние несколько недель имею проблему с подключеним к openvpn серверу на своем VPS (в MSK).<br>
+Но только через мобильную связь (проводная нормально).<br>
+И в каком направлении решать эту проблему, через ОПСОС`а или через хостера. <img src="https://ntc.party/images/emoji/twitter/face_with_monocle.png?v=12" title=":face_with_monocle:" class="emoji" alt=":face_with_monocle:" loading="lazy" width="20" height="20"><br>
+Пока нашел workaround в виде завертывания туннеля в ssh-прокси.</p></td><td>2024-03-14T11:44:06.157Z</td></tr><tr><td>pepe</td><td><p>Такая же херня.<br>
+Причем не работает только через ОПСОСы.<br>
+Те же операторы с домашним интернетом через оптоволокно нормально работает с OpenVPN где бы он не стоял - хоть РФ, хоть Европа, хоть США.</p></td><td>2024-03-14T12:23:06.332Z</td></tr><tr><td>Limping</td><td><aside class="quote no-group" data-username="Plus123" data-post="212" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/p/b77776/48.png" class="avatar"> Plus123:</div>
+<blockquote>
+<p>Последние несколько недель имею проблему с подключеним к openvpn серверу на своем VPS (в MSK).</p>
+</blockquote>
+</aside>
+<p>У меня на этой неделе стал очень медленно работать OpenVPN Antizapret.<br>
+Подозреваю, что шейпят протокол. Не блокируют целиком, но скорость снижают так, что картинки не прогружаются <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p></td><td>2024-03-14T13:34:20.671Z</td></tr><tr><td>Plus123</td><td><aside class="quote no-group" data-username="Limping" data-post="214" data-topic="5239" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/limping/48/4434_2.png" class="avatar"> Limping:</div>
+<blockquote>
+<p>У меня на этой неделе стал очень медленно работать OpenVPN Antizapret.</p>
+</blockquote>
+</aside>
+<p>я не про сервисы OpenVPN Antizapret. У меня поднят свой OpenVPN сервер внутри РФ и используется по прямому назначению, так сказать (для организации локальной сети между несколькими локациями в РФ).</p></td><td>2024-03-14T13:56:51.685Z</td></tr><tr><td>anon57137390</td><td><p>Вы знали, что многие бренды удалили свои VPN приложения из аппсторов для россиян. Например Nord, HMA, Avast, Avira. Но их много больше. Причем часть из них активировала ещё и серверные блокировки для российских (по их мнению) адресов, отправляя приложению ошибку или игнорируя запросы.</p></td><td>2024-03-16T17:34:35.413Z</td></tr><tr><td>alec(alec)</td><td><p>Кстати реально, проверил в плеймаркете норда нет.</p></td><td>2024-03-16T19:04:11.586Z</td></tr><tr><td>Plus123</td><td><p>После неудачи с tele2 и beeline, решил попробовать yota (который MVNO megafon`а), и внезапно через йоту связь с моим OpenVPN сервером отличная. У них кстати и опция бесплатного VPN трафика есть (правда доступна, только если более 30GB трафика брать).</p></td><td>2024-03-17T14:13:44.407Z</td></tr><tr><td>Mukk</td><td><p>Таттелеком. Как-то странно блокируют. Есть 2 сервера в Финляндии у хецнера. До одного л2тп нормально работает, до другого не может подняться никак, теряются хендшейки. Wireguard давно зарезали до нуля вместе с OpenVPN. Надо придумать какое-то site-to-site решение, а уже ничего в голову не идет.</p></td><td>2024-03-27T05:26:17.540Z</td></tr><tr><td>sakontwist</td><td><p>WG от amnezia, GOST в режиме tun, openvpn поверх xtls -  тестировал, работает</p>
+<p>upd: openvpn поверх cloak - тоже вполне рабочее решение.</p></td><td>2024-03-27T09:12:44.113Z</td></tr><tr><td>PANDORUM_666</td><td><p>И тем не менее - заблокировали.</p></td><td>2024-03-27T13:16:11.518Z</td></tr><tr><td>P4H</td><td><p>к сожалению <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p></td><td>2024-03-27T13:22:52.900Z</td></tr><tr><td>G7ZmNT(G7ZmNT)</td><td><aside class="quote quote-modified" data-post="211" data-topic="5239">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/g/c89c15/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/211">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    После 29.02, когда произошёл “глобальный” сбой в работе ТСПУ у моего мобильного провайдера ещё буквально несколько дней подряд (с 1 по 4 марта) были моменты, когда тспу полностью отключали и работали все впн-сервисы. 
+Сейчас же на момент 12 марта с 12:00 по московскому времени подобное повторяется - тспу в режиме bypass, работают многие впн сервисы с wireguard и openvpn протоколами. 
+Так что это не “временная халява”, а внедряют новые блокировки и не возникло проблем в работе мобильного интернет…
+  </blockquote>
+</aside>
+<p>
+Повтор ситуации от прошлого сообщения 12 марта. Сегодня 29 марта с 9:00 по московскому времени ТСПУ снова выключили на непродолжительное время в сегменте мобильного интернета - вновь подключается к заблокированным VPN сервисам по Wireguard подключению. OpenVPN не проверял.<br>
+В тот раз, после того как вновь включили блокировки был заблокирован protonvpn по wireguard соединению на Ростелеком провайдере. Что в этот раз будет подвергнуто блокировке скоро узнаем.</p></td><td>2024-03-29T08:14:41.104Z</td></tr><tr><td>anonymous133(anonymous133)</td><td><aside class="quote no-group" data-username="anon57137390" data-post="216" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="/letter_avatar_proxy/v4/letter/a/258eb7/48.png" class="avatar"> anon57137390:</div>
+<blockquote>
+<p>VPN приложения из аппсторов</p>
+</blockquote>
+</aside>
+<p>Краткие итоги битвы при гугльплее.</p>
+<p>В магазинах гугла ~800 приложений, которыми может интересоваться РКН. Примерно, потому что гугл не даст вам сграбить все приложения, а разработчики не всегда выбирают логичные категории для размещения (может быть коммуникации, продуктивность и прочий шопинг), описание может выдавать ложные совпадения, а ещё все динамично ибо там кипит жизнь.  Из них ~100 приложений не доступны россиянам.</p>
+<p>С учетом блокировки протоколов, рабочими полностью или частично остаются ~150 приложений. Из них больше половины выглядит как одноразовая поделка. Ограничение по времени, единственный сервер и тот в кванмене, реклама , реклама, реклама, прогрев при отключении и включении, это большинство. По настоящему юзабельных, не напоминающих атаку клонов, пара десятков, не больше.</p>
+<p>И эта славная двадцатка чаще мерцает, чем работает. Славные воскрешения или эпичные отстрелы своей ноги РКНом создают иллюзию, но по факту лучшее приложение перестанет работать в самый лучший для вас момент. И это не считая операторов со своей цензурой, как йота, у которых работает и того меньше.</p></td><td>2024-04-05T21:51:46.884Z</td></tr><tr><td>Plus123</td><td><p>Хм, блокировка, похоже, связана с диапазоном IP моего хостинга VPS.<br>
+Жаль, что я это сообщение раньше не обнаружил <img src="https://ntc.party/images/emoji/twitter/confused.png?v=12" title=":confused:" class="emoji" alt=":confused:" loading="lazy" width="20" height="20">:</p>
+<aside class="quote no-group quote-modified" data-username="ValdikSS" data-post="32" data-topic="5124" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/32">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<aside class="quote no-group" data-username="ValdikSS" data-post="7" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/7">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></div>
+<blockquote>
+<p>возможно, по географической принадлежности AS: если диапазон закреплён не за Россией, то соединение подвергается фильтрации.</p>
+</blockquote>
+</aside>
+<p>Нашел подтверждение фильтрации по информации в AS, а не диапазоне.<br>
+Сеть <a href="https://bgp.he.net/net/185.255.134.0/24#_whois" rel="noopener nofollow ugc">185.255.134.0/24</a> помечена как российская (и действительно находится в России):</p>
+<pre><code class="lang-auto">inetnum:        185.255.134.0 - 185.255.134.255
+org:            ORG-FA790-RIPE
+netname:        FirstByte
+country:        RU
+</code></pre>
+<p>А <a href="https://bgp.he.net/AS204997#_whois" rel="noopener nofollow ugc">AS</a> как британская:</p>
+<pre><code class="lang-auto">organisation:   ORG-FSL27-RIPE
+org-name:       FIRST SERVER LIMITED
+country:        GB
+</code></pre>
+<p>VPN в этом диапазоне блокировался, несмотря на трафик россия-россия.</p>
+</blockquote>
+</aside>
+<p>P.S. на йоте тоже стало блокировать через несколько недель. Но она хотя бы дешевле, не зря переходил <img src="https://ntc.party/images/emoji/twitter/laughing.png?v=12" title=":laughing:" class="emoji" alt=":laughing:" loading="lazy" width="20" height="20"></p></td><td>2024-04-17T00:46:27.087Z</td></tr><tr><td>c5sa(c5sa)</td><td><p>Подскажите пожалуйста, где можно про openvpn over xtls почитать? Как настроить такое?</p></td><td>2024-04-17T03:36:39.405Z</td></tr><tr><td>sakontwist</td><td><p>Для начала надо запустить работающий канал xtls, вот примеры <a href="https://github.com/XTLS/Xray-examples/tree/main/VLESS-TCP-XTLS-Vision-REALITY" class="inline-onebox" rel="noopener nofollow ugc">Xray-examples/VLESS-TCP-XTLS-Vision-REALITY at main · XTLS/Xray-examples · GitHub</a><br>
+Затем на сервере нужно повесить wireguard или openvpn на локальный порт (можно добавить на loopback дополнительный IP или просто на 127.0.0.1)<br>
+Затем на клиенте сделать listener и отправлять его в xtls-туннель. Цепляться нужно соответственно на этот listener. Пример на Xray:</p>
+<pre><code class="lang-auto">{
+  "inbounds": [
+    {
+      "tag":"in_wg",
+      "listen": "127.0.0.1","port": "8086",
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1",
+        "port": 8085,
+        "network": "udp"
+      }
+    }
+  ]
+}
+
+</code></pre>
+<p>Здесь address - это уже точка подключения на сервере. Затем через routing отправляем этот порт на сервер через xtls:</p>
+<pre><code class="lang-auto">          {
+                "inboundTag": ["in_wg"],
+                "outboundTag": "vless-vps6"
+          }
+</code></pre>
+<p>После этого просто подключаемся к локальному порту клиента и происходит магия:</p>
+<pre><code class="lang-auto">[Peer]
+PublicKey = xxx
+AllowedIPs = xxx
+Endpoint = 127.0.0.1:8086
+PersistentKeepalive = 15 # это чтобы не падал туннель и проходила "обратка"
+</code></pre>
+<p>Кстати удобно на сервере на loopback повесить адрес из диапазона AllowedIPs - тогда он будет сразу маршрутиться корректно и можно достигать сервера и портов на нем без дополнительных плясок. И xray/vpn не будут падать из-за отсутствия адресов, потому что адреса физических и vpn-адаптеров не используются.</p></td><td>2024-04-17T06:50:16.745Z</td></tr><tr><td>sakontwist</td><td><p>Ну и кстати, на openvpn все проще, клиента можно настроить подключаться через socks-inbound, который уже уходит в туннель xtls.</p>
+<pre><code class="lang-auto">remote 127.0.0.1 1096
+proto udp
+dev tun
+fast-io
+
+topology subnet
+ifconfig xxxxx
+
+socks-proxy &lt;socks-ip&gt; 1080
+</code></pre></td><td>2024-04-17T06:54:56.794Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>На таттелекоме с сегодняшнего дня режется sstp, похоже в ходе борьбы с дудосерами…<br>
+<img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/a65ed86978d154599a4e02d9c4b0a5f0544911c2.png" alt="image" data-base62-sha1="nJMsQLvFHMGFOjJqvvhHsW9NxsK" width="472" height="84"></p></td><td>2024-05-07T20:13:44.830Z</td></tr><tr><td>P4H</td><td><p>OVPN через Surfshark не работает сегодня. Заблочили совсем или временно в честь праздника?<br>
+TCP/UDP ничего не коннектит</p></td><td>2024-05-09T16:08:56.485Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Фигня какая-то написана. Через 443 порт работает так же обычный HTTPS. Без active probing’а или ещё какого-либо очень нетривиального анализа SSTP от HTTPS со стороны не отличить, одного только факта коннекта на 443 порт явно недостаточно (они таким образом заблокируют буквально <em>весь</em> интернет).</p>
+<p>Скорее всего, имеется в виду что они порезали коннекты на 443 на абонентские адреса.</p></td><td>2024-05-09T18:26:16.688Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/594c94dc943c07dc13dd0945194c47b983081ed8.png" data-download-href="https://ntc.party/uploads/default/594c94dc943c07dc13dd0945194c47b983081ed8" title="image"><img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/594c94dc943c07dc13dd0945194c47b983081ed8.png" alt="image" data-base62-sha1="cJYzkULzht0VIS7rNzvgdPHlEuc" width="690" height="128" data-dominant-color="363434"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">712×133 18.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<img src="обсуждение-блокировка-vpn-протоколов-на-тспу-05082023-xxxx2024/4c174499c031dfa12d243548190afa4820afab34.jpeg" alt="image" data-base62-sha1="aR88CTRxaE6T2KKrfPYUTRDQNTK" width="416" height="460"></p></td><td>2024-05-09T21:12:20.692Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Опять же, брехню пишут. Что значит “возможно в исключениях”? SSTP - это <em><a href="https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sstp/c50ed240-56f3-4309-8e0c-1644898f0ea8" rel="noopener nofollow ugc">и есть HTTPS-трафик</a></em>. Снаружи неотличим. И тоже 443 порт.</p>
+<p>В любом случае, без информации о том, откуда именно и куда именно идёт подключение (какие AS и в каком именно направдении), каким именно клиентом, помогает ли смена порта, ходит ли на тот же порт простой HTTPS например к Nginx/Caddy, и дампов трафика рассуждать по одному шакальному скриншоту и ответам бестолковой техподдержки (SSTP связан с DDoS, охотно верим, ага), нет смысла.</p></td><td>2024-05-09T21:21:24.803Z</td></tr><tr><td>Momoro(Momoro)</td><td><p>у нескольких провайдеров, которыми пользовался, сегодня тоже surfshark перестал работать через openvpn</p></td><td>2024-05-09T22:57:15.887Z</td></tr><tr><td>P4H</td><td><p>написал им в суп, сказали что знают о проблеме, предложили с их китайского сайта скачать файлы коннекта и так же попробовать WG, но у меня все по нулям, так же в их оф дискорде народ активно пишет из РФ, надеюсь на скорое решение</p></td><td>2024-05-10T07:10:18.428Z</td></tr><tr><td>P4H</td><td><p>Может быть кто-то подскажет, ставлю WireGuard, заливаю туда SurShark профиль (проверяли люди из г. Киров, провайдер Ростелеком как и у меня, работает Таиланд-Бангкок и Англия-Манчестер), все по инструкции и только я нажимаю activate, как прога коннектится (зеленая галка), а интернет обрубает в ноль, как будто провод выдернули из компа. Как только отключаю - интернет появляется снова. VPN само собой не работает ни так ни сяк.</p>
+<p>Чел в оф дискорде шарка сказал что у него (он в Китае) завелся VPN через фирменное приложение SurfShark на телефоне, выставил профиль WG и сервер Хьюстон. Попровал у себя, у меня завелся так же (Москва МТС мобильный, Ростелеком дома), но только на протоколе IKEv2, Хьюстон сервак.</p>
+<p>Думаю ок, попробую скачаю фирменную прогу шарка на комп. Поставил, выбрал Хьюстон, профиль WG (IKEv2 отсутствует) и у меня так же произошла обрубка интернета. Такое впечатление что у меня комп не воспринимает WG или что то надо в настройках где то подкрутить, я просто не разбираюсь в этом. Может кто подскажет?</p></td><td>2024-05-10T16:03:52.334Z</td></tr><tr><td>artenox</td><td><p>Коннект есть, интернета нет - типичный симптом блокировки wireguard протокола провайдером. wireguard шлюз не отпускает даже в случае таких затыков, чем и хорош. Соответственно интернет пропадает, т.к. протокол блокируется.<br>
+Просто провайдер видимо несколько первых пакетов разрешает, соединение (handshake/рукопожатие) успевает установиться, а потом блок.</p></td><td>2024-05-10T16:14:26.242Z</td></tr><tr><td>P4H</td><td><p>Принял, спасибо за разъяснение</p></td><td>2024-05-10T16:16:27.516Z</td></tr><tr><td>Momoro(Momoro)</td><td><p>насколько я понимаю, через openvpn и wireguard одинакого, к surfshark сейчас можно подключиться только по нескольким предоставляемым surfshark’ом айпи.<br>
+поэтому есть смысл поставить wireguard (имхо, он для этого удобнее) и проверять все айпи из всех стран, что предоставляет surfshark</p></td><td>2024-05-10T16:55:55.673Z</td></tr><tr><td>P4H</td><td><p>у меня WG рубит на корню любые сервера Серфа даже рабочие, как я написал, отрубка интернета на корню куда бы не присоединялся при соединении через WG, везде где есть WG профиль, программа и что то с ней связанное, то сразу словно интернет из сети в ноль, как сказали выше это вина провайдера, заблочил все, спасибо Ростелеком )) Если что то мастерить кастомное, то я тупой и не разбираюсь ни в чем, если Серф не найдет возможность как то обойти через OpenVPN как это всегда было до вчерашнего дня, то возьму другого платника, hidemy.name VPN пока тестирую бесплатный период</p></td><td>2024-05-10T17:07:28.113Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Если не разбираетесь, но есть желание заиметь что-то более кастомное и устойчивое к блоктровкам, то см. Amnezia</p></td><td>2024-05-10T18:42:53.571Z</td></tr><tr><td>P4H</td><td><p>спасибо, надо будет почитать что это и как это работает</p></td><td>2024-05-10T18:59:00.475Z</td></tr><tr><td>P4H</td><td><p>SurfShark (iOS), протокол IKEv2, по вафле к домашнему Ростелекому - РАБОТАЕТ!!!<br>
+SurfShark (iOS), протокол IKEv2, мобильный MTS - НЕ РАБОТАЕТ!!!</p>
+<p>Если выставить протоколы OVPN UDP/TCP и WG - НЕ РАБОТАЕТ!!!</p>
+<p>Интересно, на долго ли Ростелеком разблокировал протокол IKEv2 и как жалко, что его нет на компе в SurfShark приложении</p></td><td>2024-05-10T21:46:02.943Z</td></tr><tr><td>P4H</td><td><p>Удалось запустить SurfShark по протоколу IKEv2 в Win 11 через ручную настройку, теперь вопрос как долго это все проработает <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p>
+<p>Если после создания при коннекте будет ошибка Policy match, то делаем следующее</p>
+<p><strong>If you are not able to connect and get “Policy match error” follow these steps:</strong><br>
+Open “Run” window while pressing <strong>Windows button+R</strong> on your keyboard at the same time. Type in <strong>regedit</strong>.<br>
+Then, navigate to this directory – <strong>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\RasMan\Parameters</strong><br>
+Now right click on right side empty space and create a new DWORD (32bit) file named <strong>NegotiateDH2048_AES256</strong><br>
+Right click on new created registry file and click on “<strong>Modify…</strong> “, then in the value data field enter the value of <strong>2</strong> and click OK.</p></td><td>2024-05-11T08:32:27.541Z</td></tr><tr><td>khorovodoved</td><td><p>Попробуйте AmneziaWG клиент поставить, импортировать туда ваш конфиг и выставить в нем JC, Jmin и Jmax как тут советуют: <a href="https://habr.com/ru/companies/amnezia/articles/807539/" class="inline-onebox" rel="noopener nofollow ugc">Мы добрались до ядра, или новые возможности AmneziaWG / Хабр</a><br>
+По идее, должно заработать тогда.</p></td><td>2024-05-12T05:12:03.888Z</td></tr><tr><td>P4H</td><td><p>СРАБОТАЛО!!! АХРИНЕТЬ!! и на Ростелекоме и на МТС, кайф!!!<br>
+спасибо за наводку!!! только пришлось руками все вбивать, не захотел он файлик “кушать” WGшный</p>
+<p>а еще почему то сайт <a href="https://amnezia.org/ru/learn-more/31_amneziawg" class="inline-onebox" rel="noopener nofollow ugc">AmneziaWG | Amnezia Docs</a> не открывает даже на Серфшарковском VPN, только на каком то бесплатном аддоне прокси в хроме я могу открыть этот сайт, он видимо супер пиратский даже для Серфшарка ))))))</p>
+<p>только я не вижу на Винду их прогу, только на мобилку есть, а как на компе завести, через обычную Амнезию?</p>
+<p>поставил обычную Амнезию на Винду, она не коннектит, блокирует соединение даже если руками дописать необходимые строчки, как в статье, нужна WG версия</p></td><td>2024-05-12T06:18:58.706Z</td></tr><tr><td>khorovodoved</td><td><p>А на Винду пока не готово ещё. Можно самому собрать отсюда: <a href="https://github.com/amnezia-vpn/amneziawg-windows-client" class="inline-onebox" rel="noopener nofollow ugc">GitHub - amnezia-vpn/amneziawg-windows-client: AmneziaWG client for Windows</a></p></td><td>2024-05-12T08:35:50.293Z</td></tr><tr><td>P4H</td><td><p>знать бы как )))) я в этом ничего не понимаю ))</p></td><td>2024-05-12T08:42:41.069Z</td></tr><tr><td>khorovodoved</td><td><p>Тогда советую пока не трогать, если нет срочности, и подождать релиза.</p>
+<p>Но если прям надо, то:</p>
+<ol>
+<li>По ссылке выше жмёте Code и  Download ZIP</li>
+<li>распаковываете скачанный zip</li>
+<li>запускаете quickinstall.bat</li>
+<li>Ждёте</li>
+<li>Profit</li>
+</ol></td><td>2024-05-12T09:01:18.510Z</td></tr><tr><td>P4H</td><td><p>спасибо Вам огромное!!! Все скачалось, установил, залил файлик и по клику подключился!!! Благодарю за помощь!!!</p>
+<p>я так понимаю теперь надо курить гитхаб на предмет обновления программы если что</p></td><td>2024-05-12T09:20:33.842Z</td></tr><tr><td>mrB4el(Oleg L)</td><td><p>Есть провайдер Авантел в Сибири и, начиная с прошлого четверга (30.05) их ддосят (по их же заявлениям), от чего подключили какую-то особую “защиту”. По косвеным признакам есть подозрение, что тупо пустили трафик через ТСПУ с жестким фильтром. Коллеги, подскажите, как бы проверить и удостовериться?</p>
+<p>Из симптомов: любые ходовые протоколы VPN режутся в интервале 5-7 минут (WG, L2TP до ру-сервера), либо вообще не подключаются до зарубежных. Недоступны домены *.azure.com, *.aws.com, тытруб троттлит до минуты открытия главной, ворох простых ресурсов недоступны. Есть явная попытка подмены сертификатов https: почти гарантированно <a href="http://mts.ru" rel="noopener nofollow ugc">mts.ru</a> (почему-то), часть наших собственных ресурсов (серты от letsencrypt, но при заходе на них подсовываются от globalsign).</p>
+<p>В общем, если это не чебурнет “на кошках”, то точно максимально приближенное к нему. Нид хелп</p></td><td>2024-06-03T11:38:19.457Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Помимо предположений есть серты, запись трафика? Если это выжимка из наблюдений, то такое себе утверждение на данный момент. Отвалы на забитом канале, например, так что не полностью “чебурнет”.</p>
+<p>И, нет, это не охранительство, но лишь попытка не разгонять панику.</p></td><td>2024-06-03T13:34:18.594Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="mrB4el" data-post="251" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/mrb4el/48/1434_2.png" class="avatar"> mrB4el:</div>
+<blockquote>
+<p>их ддосят (по их же заявлениям)</p>
+</blockquote>
+</aside>
+<p>30 и 31 мая у них действительно был серьезный BGP flapping. Такое вполне может наблюдаться при перегрузке канала и/или маршрутизатора из-за возросшего трафика.</p>
+<p><a href="https://radar.cloudflare.com/routing/AS8711" class="onebox" target="_blank" rel="noopener nofollow ugc">https://radar.cloudflare.com/routing/AS8711</a></p></td><td>2024-06-03T16:00:03.637Z</td></tr><tr><td>anon60595749</td><td><p>Сейчас это продолжается, но в меньшем масштабе. На месячном интервале хорошо видно: <a href="https://radar.cloudflare.com/routing/AS8711?dateRange=28d" rel="noopener nofollow ugc">https://radar.cloudflare.com/routing/AS8711?dateRange=28d</a></p></td><td>2024-06-03T16:09:46.614Z</td></tr><tr><td>0ka(0ka)</td><td><p>вчера поднимал ipip fou туннель в европу на моб мегафоне сз и рт сз без проблем, сегодня на обеих блочится после первого пакета от клиента, ответ от сервера уже не приходит на клиент, если перед первым fou пакетом запустить nping с теми же портами что и для fou, то туннель успешно поднимается</p>
+<p>upd: ~19:10 блока уже нет, еще заметил что сегодня на рт был необычно высокий пинг</p></td><td>2024-06-12T15:29:53.756Z</td></tr><tr><td>nihilistimus(nihilistimus)</td><td><p>Походу стали блочить AmneziaWG на мобильном билайне - Алтайский край. На проводном все ок. На мобилке цепляется, но не идут входящие пакеты. Если пробовать переподключаться, но может заработать с 3-5 попытки, что странно.</p></td><td>2024-06-13T00:20:12.219Z</td></tr><tr><td>artenox</td><td><aside class="quote no-group" data-username="nihilistimus" data-post="256" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/3d9bf3/48.png" class="avatar"> nihilistimus:</div>
+<blockquote>
+<p>Походу стали блочить AmneziaWG на мобильном билайне</p>
+</blockquote>
+</aside>
+<p>AmneziaWG рекомендовали для разблокировки Surfshark на одном небезызвестном форуме. Может быть поэтому.</p></td><td>2024-06-13T00:56:05.962Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Сервер свой? AWG на сервере? Добавьте junc пакетов, измените диапазон размеров.</p>
+<p>Если AWG приложение, клиентское, тогда без вариантов. Блокируют по входящим.</p></td><td>2024-06-13T09:21:24.793Z</td></tr><tr><td>nihilistimus(nihilistimus)</td><td><p>Сервер свой (self-hosted на нидерландском vps).<br>
+" Добавьте junc пакетов, измените диапазон размеров." - это где то через нативную программу AmneziaWG можно сделать? Или самому в конфиге на сервере лезть нужно?</p></td><td>2024-06-13T09:46:59.694Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Похоже я ошибся, содержимое ответов не влияет.</p>
+<p>Блок вероятностный, похож на <a href="https://ntc.party/t/%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-%D1%88%D0%B8%D1%84%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%BD%D1%8B%D1%85-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-shadowsocksvmess-25042024/7776">блокировку SS</a> и других, теперь для UDP. Блокировку потестируют (или зачем оно там) и откатят, возможно. Но в перспективе протоколы с белым шумом (или неизвестным протоколом) становятся бесполезны. AWG это тупик.</p></td><td>2024-06-13T11:59:38.477Z</td></tr><tr><td>ValdikSS</td><td><p>Что у вас за провайдер? Запишите дамп трафика.<br>
+<a class="mention" href="/u/nihilistimus">@nihilistimus</a>, и вы тоже запишите, пожалуйста.</p></td><td>2024-06-13T12:11:50.208Z</td></tr><tr><td>nihilistimus(nihilistimus)</td><td><p>Похоже на то, ибо логики, как блочится особой не увидел. Бывает сразу после подключения работает, бывает приходится 4-5 раз переподключаться.<br>
+С другой стороны сейчас ради интереса вернулся на обычный OpenVPN (тоже self-hosted), с которого давно пересел, когда часто отрубать стали. Там такая же шляпа, соединение устанавливается, но дальше пакеты не идут. Если переподключаться, раза с 3-5 начинает работать. Хотя он то вообще спокойно детектируется. Может тестируют что-то.</p>
+<p><a class="mention" href="/u/valdikss">@ValdikSS</a> Провайдер - мобильный Билайн. Дамп попробую записать, надо разобраться, как с телефона это сделать.</p></td><td>2024-06-13T12:28:19.804Z</td></tr><tr><td>username145468</td><td><p>Кто-то еще остался на OpenVPN? С начала июня Теле2 начал блочить его, а с сегодняшнего дня разные мобильные операторы в разных регионах подключились. Есть у кого-нибудь подобные проблемы?</p></td><td>2024-06-23T10:56:54.143Z</td></tr><tr><td>profiton</td><td><p>Подтверждаю.<br>
+Сегодня примерно с 8:00 МСК на мобильных операторах стади блокировать openvpn ВНУТРИ РФ, так и за пределы РФ.<br>
+Внутри РФ, до своего сервера в одном городе, по TCP соединение устанавливается, и тут же сбрасывается. По UDP также блокируется.<br>
+С домашнего интернета за пределы РФ openvpn пока работает.</p></td><td>2024-06-23T11:08:58.782Z</td></tr><tr><td>Plus123</td><td><p>Не наблюдаю проблем с OpenVPN внутри РФ на мобильных операторах: проверил yota, beeline, tele2. На билайне даже почему-то стало на сервер из иностранной AS пускать (впрочем я долго не тестил - несколько минут подождал).</p></td><td>2024-06-24T00:18:49.910Z</td></tr><tr><td>profiton</td><td><p>В данный момент видимо блокировку сняли. Проверил, тоже внутри РФ заработало.<br>
+На момент моего предыдущего сообщения блокировали на мобильных операторах, как внутри РФ, так и за пределы РФ.<br>
+Проверено на МТС, Билайн.</p></td><td>2024-06-24T00:43:56.381Z</td></tr><tr><td>Gamber</td><td><p>Да, подтверждаю. Вчера лежал OVPN на мобильном - Мегафон, Т2, Билайн. При подключении на внутренние сервера размещенные в сетях двух фиксированных операторов, один из которых МТС, поведение везде одинаковое - поднятие сессии, около трех секунд и сервер фиксирует hard_reset со стороны клиента. Это на TCP, UDP не проверял, но подозреваю картина была бы похожей. WG работал. Видимо уже нужно смотреть в сторону других протоколов и для внутрироссийских подключений, уже не первый раз с OVPN подобное.</p></td><td>2024-06-24T13:16:49.461Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>РКН поздравил пользователей Эппл с 4 июля и объявил о блокировке 25 приложений сразу в магазине.<br>
+Далее частичный список приложений недоступных в российском App Store. Норд и прочие авиры ушли до запроса РКН.</p>
+<details>
+<summary>
+Summary</summary>
+<p><a href="https://apps.apple.com/us/app/alien-vpn-wifi-security/id1545927553" rel="noopener nofollow ugc">‎Alien VPN: WiFi Security</a><br>
+<a href="https://apps.apple.com/us/app/alpha-vpn-secure-unlimited/id1594310803" rel="noopener nofollow ugc">‎Alpha VPN - Secure &amp; Unlimited</a><br>
+<a href="https://apps.apple.com/us/app/avast-secureline-vpn-proxy/id793096595" rel="noopener nofollow ugc">‎Avast Secureline VPN Proxy</a><br>
+<a href="https://apps.apple.com/us/app/avg-secure-vpn-proxy-server/id1223470521" rel="noopener nofollow ugc">‎AVG Secure VPN &amp; Proxy server</a><br>
+<a href="https://apps.apple.com/us/app/avira-phantom-vpn-wifi-proxy/id1112484006" rel="noopener nofollow ugc">‎Avira Phantom VPN &amp; Wifi Proxy</a><br>
+<a href="https://apps.apple.com/us/app/appvpn/id6444089009" rel="noopener nofollow ugc">‎Appvpn©</a><br>
+<a href="https://apps.apple.com/us/app/bitdefender-vpn-fast-secure/id1499633482" rel="noopener nofollow ugc">‎Bitdefender VPN: Fast &amp; Secure</a><br>
+<a href="https://apps.apple.com/us/app/cargo-vpn-unlimited-vpn-proxy/id1241978879" rel="noopener nofollow ugc">‎Cargo VPN: Unlimited VPN Proxy</a><br>
+<a href="https://apps.apple.com/us/app/clearvpn-secure-and-fast-vpn/id1532377665" rel="noopener nofollow ugc">‎ClearVPN - Secure and Fast VPN</a><br>
+<a href="https://apps.apple.com/us/app/dream-fly-secure-vpn/id6476251251" rel="noopener nofollow ugc">‎Dream Fly - Secure VPN</a><br>
+<a href="https://apps.apple.com/us/app/easy-click-vpn-x-proxy-master/id6473896759" rel="noopener nofollow ugc">‎Easy Click VPN x Proxy Master</a><br>
+<a href="https://apps.apple.com/us/app/evpn-x-super-vpn-for-iphone/id6446501128" rel="noopener nofollow ugc">‎EVPN x Super VPN for iPhone</a><br>
+<a href="https://apps.apple.com/us/app/fire-vpn-vpn-proxy-browser/id6443735823" rel="noopener nofollow ugc">‎Fire VPN - Vpn Proxy Browser</a><br>
+<a href="https://apps.apple.com/us/app/forticlient-vpn/id1475674905" rel="noopener nofollow ugc">‎FortiClient VPN</a><br>
+<a href="https://apps.apple.com/us/app/free-vpn-proxy-by-planet-vpn/id1410235921" rel="noopener nofollow ugc">‎Free VPN Proxy by Planet VPN</a><br>
+<a href="https://apps.apple.com/us/app/f-secure-freedome-vpn/id771791010" rel="noopener nofollow ugc">‎F-Secure FREEDOME VPN</a><br>
+<a href="https://apps.apple.com/us/app/hide-me-vpn/id953040671" rel="noopener nofollow ugc">‎hide.me VPN</a><br>
+<a href="https://apps.apple.com/us/app/hidemy-name-vpn/id1200692581" rel="noopener nofollow ugc">‎hidemy.name VPN</a><br>
+<a href="https://apps.apple.com/us/app/hidy-vpn-fast-proxy/id6478166096" rel="noopener nofollow ugc">‎Hidy VPN: Fast Proxy</a><br>
+<a href="https://apps.apple.com/us/app/hma-hotspot-vpn-proxy/id675102189" rel="noopener nofollow ugc">‎HMA Hotspot VPN &amp; Proxy</a><br>
+<a href="https://apps.apple.com/us/app/hola-vpn-privacy-security/id903869356" rel="noopener nofollow ugc">‎Hola VPN Privacy &amp; Security</a><br>
+<a href="https://apps.apple.com/us/app/idnotify-vpn/id1583632832" rel="noopener nofollow ugc">‎IDNotify: VPN</a><br>
+<a href="https://apps.apple.com/us/app/ip-changer-fast-vpn-servers/id1634595895" rel="noopener nofollow ugc">‎IP changer Fast VPN Servers</a><br>
+<a href="https://apps.apple.com/us/app/ivpn-secure-vpn-for-privacy/id1193122683" rel="noopener nofollow ugc">‎IVPN - Secure VPN for Privacy</a><br>
+<a href="https://apps.apple.com/us/app/letvpn-secure-fast/id1640850361" rel="noopener nofollow ugc">‎LetVPN - Secure &amp; Fast</a><br>
+<a href="https://apps.apple.com/us/app/linsoc/id6448051686" rel="noopener nofollow ugc">‎Linsoc</a><br>
+<a href="https://apps.apple.com/us/app/le-vpn-proxy-vpn-for-iphone/id792864867" rel="noopener nofollow ugc">‎Le VPN: Proxy VPN for iPhone</a><br>
+<a href="https://apps.apple.com/us/app/maas360-vpn/id1169084427" rel="noopener nofollow ugc">‎MaaS360 VPN</a><br>
+<a href="https://apps.apple.com/us/app/malwarebytes-privacy-vpn/id1504101226" rel="noopener nofollow ugc">‎Malwarebytes Privacy VPN</a><br>
+<a href="https://apps.apple.com/us/app/mix-vpn-fast-unlimited/id6463403383" rel="noopener nofollow ugc">‎Mix VPN - Fast &amp; Unlimited</a><br>
+<a href="https://apps.apple.com/us/app/mozilla-vpn-secure-private/id1489407738" rel="noopener nofollow ugc">‎Mozilla VPN - Secure &amp; Private</a><br>
+<a href="https://apps.apple.com/us/app/mysudo-vpn-anonymous-secure/id1640642074" rel="noopener nofollow ugc">‎MySudo VPN: Anonymous &amp; Secure</a><br>
+<a href="https://apps.apple.com/us/app/newnode-vpn/id1473074621" rel="noopener nofollow ugc">‎NewNode VPN</a><br>
+<a href="https://apps.apple.com/us/app/nolog-vpn-fast-stable-proxy/id1516805757" rel="noopener nofollow ugc">‎Nolog VPN - Fast Stable Proxy</a><br>
+<a href="https://apps.apple.com/us/app/nordvpn-vpn-fast-secure/id905953485" rel="noopener nofollow ugc">‎NordVPN: VPN Fast &amp; Secure</a><br>
+<a href="https://apps.apple.com/us/app/norton-360-security-vpn/id1278474169" rel="noopener nofollow ugc">‎Norton 360 Security &amp; VPN</a><br>
+<a href="https://apps.apple.com/us/app/norton-vpn-fast-secure/id1095519285" rel="noopener nofollow ugc">‎Norton VPN – Fast &amp; Secure</a><br>
+<a href="https://apps.apple.com/us/app/notvpn-lite-vpn-for-privacy/id1626015311" rel="noopener nofollow ugc">‎NotVPN Lite | VPN for privacy</a><br>
+<a href="https://apps.apple.com/us/app/opticalvpn-vpn-mobile-proxy/id1580064420" rel="noopener nofollow ugc">‎OpticalVPN: VPN Mobile Proxy</a><br>
+<a href="https://apps.apple.com/us/app/osari-vpn-simple-secure/id1440130022" rel="noopener nofollow ugc">‎OSARi VPN: Simple Secure</a><br>
+<a href="https://apps.apple.com/us/app/pairvpn/id1347012179" rel="noopener nofollow ugc">‎PairVPN</a><br>
+<a href="https://apps.apple.com/us/app/plato-vpn-best-app-vpn-master/id6444485605" rel="noopener nofollow ugc">‎Plato VPN: Best App VPN Master</a><br>
+<a href="https://apps.apple.com/us/app/privadovpn-fast-vpn-and-proxy/id1498920805" rel="noopener nofollow ugc">‎PrivadoVPN Fast VPN and Proxy</a><br>
+<a href="https://apps.apple.com/us/app/privatix-vpn/id1106910668" rel="noopener nofollow ugc">‎Privatix VPN</a><br>
+<a href="https://apps.apple.com/us/app/proton-vpn-fast-secure/id1437005085" rel="noopener nofollow ugc">‎Proton VPN: Fast &amp; Secure</a><br>
+<a href="https://apps.apple.com/us/app/red-shield-vpn/id1476245357" rel="noopener nofollow ugc">‎Red Shield VPN</a><br>
+<a href="https://apps.apple.com/us/app/remote-access-vpn-tracker/id1552188254" rel="noopener nofollow ugc">‎Remote Access – VPN Tracker</a><br>
+<a href="https://apps.apple.com/us/app/safevpn-easy-ip-changer/id1333668254" rel="noopener nofollow ugc">‎SafeVPN－Easy ip changer</a><br>
+<a href="https://apps.apple.com/us/app/sectra-mobile-vpn/id1496746221" rel="noopener nofollow ugc">‎Sectra Mobile VPN</a><br>
+<a href="https://apps.apple.com/us/app/securepoint-vpn-client/id1436024470" rel="noopener nofollow ugc">‎Securepoint VPN Client</a><br>
+<a href="https://apps.apple.com/us/app/sensor-vpn-fast-secure/id6502996302" rel="noopener nofollow ugc">‎Sensor VPN - Fast &amp; Secure</a><br>
+<a href="https://apps.apple.com/us/app/super-vpn-secure-vpn-master/id1490819262" rel="noopener nofollow ugc">‎Super VPN - Secure VPN Master</a><br>
+<a href="https://apps.apple.com/us/app/surfeasy-vpn-wifi-proxy/id633495655" rel="noopener nofollow ugc">‎SurfEasy VPN - WiFi Proxy</a><br>
+<a href="https://apps.apple.com/us/app/surfshark-vpn-fast-reliable/id1391782046" rel="noopener nofollow ugc">‎Surfshark VPN: Fast &amp; Reliable</a><br>
+<a href="https://apps.apple.com/us/app/tailscale/id1470499037" rel="noopener nofollow ugc">‎Tailscale</a><br>
+<a href="https://apps.apple.com/us/app/teleport-vpn/id1568048467" rel="noopener nofollow ugc">‎Teleport VPN</a><br>
+<a href="https://apps.apple.com/us/app/top-vpn-easy-fast-secure/id1661127857" rel="noopener nofollow ugc">‎TOP VPN - Easy Fast Secure</a><br>
+<a href="https://apps.apple.com/us/app/touch-vpn-secure-hotspot-proxy/id991744383" rel="noopener nofollow ugc">‎Touch VPN Secure Hotspot Proxy</a><br>
+<a href="https://apps.apple.com/us/app/travelvpn-outline-v2rayng-vpn/id1444227973" rel="noopener nofollow ugc">‎TravelVPN: Outline v2rayng VPN</a><br>
+<a href="https://apps.apple.com/us/app/triple-ape-vpn/id6479256177" rel="noopener nofollow ugc">‎Triple Ape VPN</a><br>
+<a href="https://apps.apple.com/us/app/vpn-7/id1486830704" rel="noopener nofollow ugc">‎VPN 7</a><br>
+<a href="https://apps.apple.com/us/app/vpn-ad-blocker-for-safari/id1584644148" rel="noopener nofollow ugc">‎VPN &amp; Ad Blocker for Safari</a><br>
+<a href="https://apps.apple.com/us/app/vpn-ai-private-browser/id1441297895" rel="noopener nofollow ugc">‎VPN Ai + Private Browser</a><br>
+<a href="https://apps.apple.com/us/app/vpn-app/id1606895095" rel="noopener nofollow ugc">‎VPN App ·</a><br>
+<a href="https://apps.apple.com/us/app/vpn-by-private-internet-access/id955626407" rel="noopener nofollow ugc">‎VPN by Private Internet Access</a><br>
+<a href="https://apps.apple.com/us/app/vpn-for-telegram/id6448276574" rel="noopener nofollow ugc">‎VPN for Telegram</a><br>
+<a href="https://apps.apple.com/us/app/vpn-france-fast-private/id6475051757" rel="noopener nofollow ugc">‎VPN France - Fast &amp; Private</a><br>
+<a href="https://apps.apple.com/us/app/vpn-germany-super-fast-proxy/id6477940802" rel="noopener nofollow ugc">‎VPN Germany - Super Fast Proxy</a><br>
+<a href="https://apps.apple.com/us/app/vpn-hotspot-best-vpn-proxy/id1467375203" rel="noopener nofollow ugc">‎VPN Hotspot | Best VPN Proxy</a><br>
+<a href="https://apps.apple.com/us/app/vpn/id6473779563" rel="noopener nofollow ugc">‎VPN ™</a><br>
+<a href="https://apps.apple.com/us/app/vpn-india/id6477943653" rel="noopener nofollow ugc">‎VPN India</a><br>
+<a href="https://apps.apple.com/us/app/vpn-ip-changer-security-id/id1592294885" rel="noopener nofollow ugc">‎VPN - ip changer &amp; security id</a><br>
+<a href="https://apps.apple.com/us/app/vpn-lat-unlimited-and-secure/id1526622816" rel="noopener nofollow ugc">‎VPN.lat: unlimited and secure</a><br>
+<a href="https://apps.apple.com/us/app/vpn-lite-without-registration/id1424247267" rel="noopener nofollow ugc">‎VPN Lite Without Registration</a><br>
+<a href="https://apps.apple.com/us/app/vpn-lumos-secure-fast-proxy/id1373844471" rel="noopener nofollow ugc">‎VPN Lumos: Secure, Fast Proxy</a><br>
+<a href="https://apps.apple.com/us/app/vpn-master-secure-proxy/id1666665273" rel="noopener nofollow ugc">‎VPN Master Secure Proxy</a><br>
+<a href="https://apps.apple.com/us/app/vpn-master-secure-vpn-proxy/id1471664114" rel="noopener nofollow ugc">‎VPN Master Secure VPN proxy</a><br>
+<a href="https://apps.apple.com/us/app/vpn-mobisec-lightning-proxy/id1577059519" rel="noopener nofollow ugc">‎VPN Mobisec - Lightning Proxy</a><br>
+<a href="https://apps.apple.com/us/app/vpn-nomad-express-wifi-proxy/id1614170373" rel="noopener nofollow ugc">‎VPN Nomad - Express WiFi Proxy</a><br>
+<a href="https://apps.apple.com/us/app/vpn-point-fast-safe-vpn/id1476514140" rel="noopener nofollow ugc">‎VPN Point - Fast &amp; Safe VPN</a><br>
+<a href="https://apps.apple.com/us/app/vpn-potato-super-proxy-x-vpn/id1473774730" rel="noopener nofollow ugc">‎VPN Potato - Super Proxy x VPN</a><br>
+<a href="https://apps.apple.com/us/app/vpn-proxy-master/id1456731716" rel="noopener nofollow ugc">‎VPN - Proxy Master</a><br>
+<a href="https://apps.apple.com/us/app/vpn-proxy-ovpnspider/id928941628" rel="noopener nofollow ugc">‎VPN Proxy OvpnSpider</a><br>
+<a href="https://apps.apple.com/us/app/vpn-proxy-secure-vpn/id1483773193" rel="noopener nofollow ugc">‎VPN Proxy - Secure VPN</a><br>
+<a href="https://apps.apple.com/us/app/vpn-service-by-veepn/id1246703610" rel="noopener nofollow ugc">‎VPN Service by VeePN</a><br>
+<a href="https://apps.apple.com/us/app/vpn-sunrise/id1575180748" rel="noopener nofollow ugc">‎VPN Sunrise</a><br>
+<a href="https://apps.apple.com/us/app/vpn-uk-turbo-vpn-and-browser/id1091630931" rel="noopener nofollow ugc">‎VPN UK: Turbo VPN and Browser</a><br>
+<a href="https://apps.apple.com/us/app/vpn-usa-fast-x-unlimited-vbn/id1460571281" rel="noopener nofollow ugc">‎VPN USA™  Fast x Unlimited VBN</a><br>
+<a href="https://apps.apple.com/us/app/vpn-usa/id6475051414" rel="noopener nofollow ugc">‎VPN USA</a><br>
+<a href="https://apps.apple.com/us/app/vpn-vault-super-proxy-app/id1359212059" rel="noopener nofollow ugc">‎VPN Vault - Super Proxy App</a><br>
+<a href="https://apps.apple.com/us/app/vpn-youtu/id6470781573" rel="noopener nofollow ugc">‎VPN-Youtu</a><br>
+<a href="https://apps.apple.com/us/app/vpn-%E9%80%9F%E8%B1%B9vpn%E5%8A%A0%E9%80%9F%E5%99%A8-vpn%E5%85%A8%E7%90%83%E7%BD%91%E7%BB%9C%E5%8A%A0%E9%80%9F%E5%99%A8/id6474973544" rel="noopener nofollow ugc">‎VPN - 速豹VPN加速器&amp;VPN全球网络加速器</a><br>
+<a href="https://apps.apple.com/us/app/webroot-wifi-security-vpn/id1431626168" rel="noopener nofollow ugc">‎Webroot WiFi Security &amp; VPN</a><br>
+<a href="https://apps.apple.com/us/app/wizzvpn-fast-vpn-services/id1598393107" rel="noopener nofollow ugc">‎WizzVPN, Fast VPN Services</a><br>
+<a href="https://apps.apple.com/us/app/xiyou-vpn/id1587121262" rel="noopener nofollow ugc">‎XiYOU VPN</a><br>
+<a href="https://apps.apple.com/us/app/zorro-vpn-vpn-wifi-proxy/id1466972350" rel="noopener nofollow ugc">‎Zorro VPN: VPN &amp; Wifi Proxy</a><br>
+<a href="https://apps.apple.com/us/app/%E7%81%AB%E7%AE%AD%E5%8A%A0%E9%80%9F%E5%99%A8-vpn%E5%85%A8%E7%90%83%E6%B5%B7%E5%A4%96%E5%8A%A0%E9%80%9F/id6494987327" rel="noopener nofollow ugc">‎火箭加速器- VPN全球海外加速</a></p>
+</details>
+<details>
+<summary>
+Потеряшки за 10 июля, по сравнению с замерами от 4 июля</summary>
+<p><a href="https://apps.apple.com/us/app/adguard-vpn-unlimited-fast/id1525373602" rel="noopener nofollow ugc">‎AdGuard VPN – Unlimited &amp; Fast</a><br>
+<a href="https://apps.apple.com/us/app/browsec-vpn-fast-ads-free/id978583103" rel="noopener nofollow ugc">‎Browsec VPN: Fast &amp; Ads Free</a><br>
+<a href="https://apps.apple.com/us/app/cyberghost-vpn-safe-wifi/id583009522" rel="noopener nofollow ugc">‎CyberGhost VPN: Safe WiFi</a><br>
+<a href="https://apps.apple.com/us/app/free-vpn-planet-secure-proxy/id6503638628" rel="noopener nofollow ugc">‎Free VPN Planet - Secure Proxy</a><br>
+<a href="https://apps.apple.com/us/app/ru-vpn-vpn-russia-vice-versa/id6449165591" rel="noopener nofollow ugc">‎Ru VPN: VPN Russia vice versa</a><br>
+<a href="https://apps.apple.com/us/app/tor-browser-onion-web-vpn/id1263248141" rel="noopener nofollow ugc">‎TOR Browser - Onion Web VPN</a> <code>*</code><br>
+<a href="https://apps.apple.com/us/app/tor-browser-ornet-onion-vpn/id1177964608" rel="noopener nofollow ugc">‎TOR Browser: OrNET Onion + VPN</a> <code>*</code><br>
+<a href="https://apps.apple.com/us/app/turbo-vpn-private-browser/id1365309175" rel="noopener nofollow ugc">‎Turbo VPN Private Browser</a><br>
+<a href="https://apps.apple.com/us/app/ultimate-vpn-master/id1603829227" rel="noopener nofollow ugc">‎Ultimate VPN Master</a><br>
+<a href="https://apps.apple.com/us/app/unblock-master-vpn-hotspot/id1384170220" rel="noopener nofollow ugc">‎Unblock Master VPN Hotspot</a><br>
+<a href="https://apps.apple.com/us/app/vpn-expressvpn-fast-secure/id886492891" rel="noopener nofollow ugc">‎VPN ExpressVPN - Fast &amp; Secure</a><br>
+<a href="https://apps.apple.com/us/app/vpn-free-vpn-super/id1528940523" rel="noopener nofollow ugc">‎VPN - Free VPN Super ™</a><br>
+<a href="https://apps.apple.com/us/app/vpnify-unlimited-vpn/id1503251395" rel="noopener nofollow ugc">‎VPNIFY - Unlimited VPN</a><br>
+<a href="https://apps.apple.com/us/app/vpn-proxy-by-seed4-me-vpn/id860180339" rel="noopener nofollow ugc">‎VPN Proxy by Seed4.Me VPN</a><br>
+<a href="https://apps.apple.com/us/app/vpn-proxy-master-super-vpn/id1025707485" rel="noopener nofollow ugc">‎VPN Proxy Master - Super VPN</a><br>
+<a href="https://apps.apple.com/us/app/vpn-proxy-tiptop-vpn/id6454190738" rel="noopener nofollow ugc">‎VPN proxy - TipTop VPN</a></p>
+<p><code>*</code> – суррогаты<a href="https://support.torproject.org/tormobile/tormobile-3/" rel="noopener nofollow ugc">.</a></p>
+</details></td><td>2024-07-04T22:46:09.098Z</td></tr><tr><td>AMajor-C(Artemis)</td><td><p>16.07.2024 былая якобы мощная ддос атака от которой у локальных провадеров отваливались каналы на магистрали. Однако, суть не в этом, после восстановления работы обнаружил у себя (Север телеком) и на Билайн Краснодар отвал туннелей использующих PPP. Любой протокол с PPP внутри возвращает auth failed, хотя на сервере в логе прекрасно видно, что клиент успешно аутентифицирован. IPsec с psk тоже не работал, но после жалоб провайдеру раздуплился.</p></td><td>2024-07-19T11:06:18.696Z</td></tr><tr><td>kelly(Kelly)</td><td><p>Локация в ЦФО, где-то 500 км от Москвы.<br>
+Ростелеком развлекается, сдохли: wg + v2ray (vmess/quic и vmess/tcp), ovpn + obfs4 (iat1/iat2). Пока ещё живы чистые wg и ovpn.</p></td><td>2024-07-23T16:29:41.831Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>del</p></td><td>2024-07-23T17:20:38.769Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>По ощущениям сломали всё что не похоже на https…</p></td><td>2024-07-23T17:50:12.851Z</td></tr><tr><td>Zerogoki(Zero Goki)</td><td><p>Что насчёт amneziawg?</p></td><td>2024-07-23T18:04:22.218Z</td></tr><tr><td>Zerogoki(Zero Goki)</td><td><p>На мобильном интернете мне помогает включить openvpn, а затем включить и выключить режим полета (не отключая впн). С</p></td><td>2024-07-23T18:06:47.619Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="Zerogoki" data-post="273" data-topic="5239" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/zerogoki/48/5403_2.png" class="avatar"> Zerogoki:</div>
+<blockquote>
+<p>Что насчёт amneziawg?</p>
+</blockquote>
+</aside>
+<p>AmneziaVPN работает, но не стабильно.</p>
+<aside class="quote no-group" data-username="Anonimno" data-post="272" data-topic="5239" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a88e57/48.png" class="avatar"> Anonimno:</div>
+<blockquote>
+<p>По ощущениям сломали всё что не похоже на https…</p>
+</blockquote>
+</aside>
+<p>upd: откатили</p></td><td>2024-07-23T18:15:27.769Z</td></tr><tr><td>Zerogoki(Zero Goki)</td><td><p>По идее если они будут блочить все unknown по UDP, то тогда почти все онлайн-игры убьют, ибо там трафик шифруется обычно и тоже выглядит как рандомные байты по UDP</p></td><td>2024-07-23T18:46:58.374Z</td></tr><tr><td>kelly(Kelly)</td><td><p><a class="mention" href="/u/zerogoki">@Zerogoki</a> поверьте их это волнует меньше всего.<br>
+|||<br>
+Не проверяла до этого, ovpn + obfs3 как ни странно работает, но ну его нафиг с такой черепашьей скоростью. Пойду куплю vps’ку с Amnezia, проверю что будет в моем случае.</p>
+<p>UPD купила, проверила:<br>
+AmneziaWG - работает, ovpn over cloak - работает, SS - не работает.</p>
+<p>Хотела ещё XRay попробовать, но через приложение амнезии нельзя для него выбрать какой-то другой порт кроме 443, а установка отваливается с ошибкой дескать порт уже занят выберите другой =)</p></td><td>2024-07-23T19:05:16.161Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><aside class="quote no-group" data-username="kelly" data-post="277" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/ac91a4/48.png" class="avatar"> kelly:</div>
+<blockquote>
+<p>но через приложение амнезии нельзя для него выбрать какой-то другой порт кроме 443, а установка отваливается с ошибкой дескать порт уже занят выберите другой =)</p>
+</blockquote>
+</aside>
+<p>Ну XRay и должен всегда быть на 443 порту, правильно.</p>
+<p>У вас там наверное уже Cloak установлен, который тоже на нем должен быть. Как вариант, удалить все и развернуть заново, а вообще, по-хорошему зарепортьте это как баг разработчикам, думаю поправят.</p></td><td>2024-07-23T21:10:14.818Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>del</p></td><td>2024-07-24T09:47:12.787Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>del</p></td><td>2024-07-25T13:04:16.543Z</td></tr><tr><td>Xunlei</td><td><p>Тут отдельная тема есть:</p><aside class="quote" data-post="1" data-topic="6142">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/b9bd4f/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142">Обсуждение: неработоспособность ShadowSocks (30.10.2023 +)</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Похоже началась блокировка Shadowsocks: Ставропольский край, проводной Ростелеком и мобильный Билайн. 
+Любопытно, что утром билайн дал пару минут интернета через SS, затем разом перестали работать все SS-подключения. 
+Попробовал с десяток разных серверов - не работают все, включая Shadowsocks-2022 (2022-blake3-aes-256-gcm). С теми же серверами по обфусцированным протоколам связь стабильная.
+  </blockquote>
+</aside>
+<p>
+Блокировать умеют. У меня пока работает.</p></td><td>2024-07-25T13:29:30.589Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="Zerogoki" data-post="273" data-topic="5239" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/zerogoki/48/5403_2.png" class="avatar"> Zerogoki:</div>
+<blockquote>
+<p>Что насчёт amneziawg?</p>
+</blockquote>
+</aside>
+<p>Не работает, подключение устанавливается, дальше затык.</p></td><td>2024-08-04T09:46:23.576Z</td></tr><tr><td>ValdikSS</td><td><p>3 posts were merged into an existing topic: <a href="/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5124/422">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2024-08-09T19:11:19.083Z</td></tr><tr><td>0anton</td><td><p>Сегодня перестал работать zerotier через Теле2 (ленобл).<br>
+Как у вас?</p>
+<p>Попытки клиента поговорить с “планетами” (основные сервера zeroscale) неуспешны:</p>
+<p>14:32:02.569376 IP x.x.x.x.50813 &gt; 104.194.8.134.9993: UDP, length 137<br>
+14:32:02.570250 IP x.x.x.x.55796 &gt; 104.194.8.134.9993: UDP, length 137<br>
+14:32:07.557767 IP x.x.x.x.9993 &gt; root-mia-01.zerotier.com.9993: UDP, length 137<br>
+14:32:07.557947 IP x.x.x.x.50813 &gt; root-mia-01.zerotier.com.9993: UDP, length 137<br>
+14:32:07.558168 IP x.x.x.x.55796 &gt; root-mia-01.zerotier.com.9993: UDP, length 137<br>
+14:32:07.558837 IP x.x.x.x.9993 &gt; root-zrh-01.zerotier.com.9993: UDP, length 137<br>
+14:32:07.559048 IP x.x.x.x.50813 &gt; root-zrh-01.zerotier.com.9993: UDP, length 137<br>
+14:32:07.559200 IP x.x.x.x.55796 &gt; root-zrh-01.zerotier.com.9993: UDP, length 137<br>
+14:32:07.559908 IP x.x.x.x.9993 &gt; root-sgp-01.zerotier.com.9993: UDP, length 137</p>
+<p>При этом тот же самый клиент для ДомРу работает…</p></td><td>2024-08-10T11:33:16.500Z</td></tr><tr><td>Xunlei</td><td><aside class="quote quote-modified" data-post="1" data-topic="8842">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/4joke/48/6211_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BF%D0%B5%D1%80%D0%B5%D1%81%D1%82%D0%B0%D0%BB-%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%D1%82%D1%8C-zerotier-%D0%BD%D0%B0-%D0%B9%D0%BE%D1%82%D0%B5/8842">Перестал работать zerotier на йоте</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Пользуюсь zerotier для связи с домашним сервером. Обнаружил, что перестал подключаться мобильный клиент. Оператор Йота. Дома через Ростелеком работает. Москва. 
+У них сигнатура как у wireguard, и поэтому попал под раздачу? 
+Если начали блокировать посоветуйте альтернативу. Есть впс. Раньше был wireguard, но когда его стали блокировать - отказался в пользу zerotier. Про cloak слышал, но у меня на сервере работают приложения через реверс прокси со своим доменом на 443 порту. Хотелось бы сохранить …
+  </blockquote>
+</aside>
+</td><td>2024-08-10T11:38:21.480Z</td></tr><tr><td>artenox</td><td><p>На ростелекоме psiphon соединяется только через 5 минут, а на йоте вообще не соединяется. Жалобы были и от других людей.</p></td><td>2024-08-10T13:06:11.699Z</td></tr><tr><td>Dhohbr</td><td><p>Последние 2-3 дня начали замедлять openvpn, tcp и udp.<br>
+Ростелеком, ДВ.</p>
+<p>Прямой тест с россии до сервера, где находится мой vps. Выбирает все 100Мбит как по тарифу. Отдача только почему-то 33Мбит.</p>
+<pre><code class="lang-auto">      Server: Studenten Net Twente - Enschede (id: 24887)
+         ISP: Rostelecom
+Idle Latency:   153.84 ms   (jitter: 0.45ms, low: 153.67ms, high: 154.49ms)
+    Download:   114.51 Mbps (data used: 196.7 MB)
+                430.77 ms   (jitter: 82.29ms, low: 174.74ms, high: 1235.52ms)
+      Upload:    33.70 Mbps (data used: 38.4 MB)
+                226.62 ms   (jitter: 67.53ms, low: 152.92ms, high: 305.48ms)
+</code></pre>
+<p>Тест через чистый openvpn:</p>
+<pre><code class="lang-auto">      Server: Studenten Net Twente - Enschede (id: 24887)
+         ISP: NovoServe B.V.
+Idle Latency:   521.50 ms   (jitter: 110.17ms, low: 329.50ms, high: 598.38ms)
+    Download:     4.25 Mbps (data used: 5.5 MB)
+               1043.83 ms   (jitter: 82.87ms, low: 222.12ms, high: 4461.14ms)
+      Upload:    13.88 Mbps (data used: 18.7 MB)
+                392.21 ms   (jitter: 77.73ms, low: 187.79ms, high: 1213.40ms)
+</code></pre>
+<p>Через openvpn+cloak:</p>
+<pre><code class="lang-auto">      Server: Studenten Net Twente - Enschede (id: 24887)
+         ISP: NovoServe B.V.
+Idle Latency:   163.78 ms   (jitter: 0.92ms, low: 163.59ms, high: 167.22ms)
+    Download:    37.60 Mbps (data used: 65.5 MB)
+                798.36 ms   (jitter: 92.23ms, low: 185.83ms, high: 2341.19ms)
+      Upload:    25.09 Mbps (data used: 44.0 MB)
+                290.73 ms   (jitter: 73.77ms, low: 174.98ms, high: 675.25ms)
+</code></pre>
+<p>Через openvpn +kcptun:</p>
+<pre><code class="lang-auto">      Server: Studenten Net Twente - Enschede (id: 24887)
+         ISP: NovoServe B.V.
+Idle Latency:   166.39 ms   (jitter: 2.05ms, low: 165.68ms, high: 169.61ms)
+    Download:    35.71 Mbps (data used: 52.6 MB)
+                735.29 ms   (jitter: 90.07ms, low: 173.31ms, high: 1231.17ms)
+      Upload:     6.07 Mbps (data used: 6.9 MB)
+               1147.34 ms   (jitter: 98.55ms, low: 217.99ms, high: 2225.70ms)
+</code></pre>
+<p>Чистый wireguard:</p>
+<pre><code class="lang-auto">      Server: Studenten Net Twente - Enschede (id: 24887)
+         ISP: NovoServe B.V.
+Idle Latency:   156.13 ms   (jitter: 0.46ms, low: 155.76ms, high: 157.07ms)
+    Download:    70.10 Mbps (data used: 107.9 MB)
+                341.41 ms   (jitter: 79.63ms, low: 154.98ms, high: 1142.28ms)
+      Upload:    28.06 Mbps (data used: 26.0 MB)
+                233.69 ms   (jitter: 68.28ms, low: 155.71ms, high: 337.15ms)
+</code></pre>
+<p>Через xtls+reality тоже проблем со скоростью не наблюдаю.</p></td><td>2024-08-28T11:21:29.524Z</td></tr><tr><td>kivuto</td><td><p>Ростелеком, Москва (бывший Onlime).<br>
+Научились замедлять SSTP, скорость загрузки ограничивается до 128 кбит/сек. С исходящей при этом проблем нету.</p>
+<p>Получается, теперь еще один протокол непригоден для использования…</p></td><td>2024-09-09T19:22:21.306Z</td></tr><tr><td>helcoder</td><td><p>Никто часом не знает как замаскировать рабочий OpenVPN с помощью xray? Всё что нахожу в интернете на эту тему подразумевает что OpenVPN сервер мы менеджим сами, но это не совсем то что нужно. Пока удалось замаскировать только через Shadowsocks, а вот через VLESS, VLESS-Reality и VLESS-WebSockets никак не получается. Притом такое ощущение складывается что именно ТСПУ как-то это палит, т.к. сам VPN коннектится одинаково что с VLESS что напрямую, просто постоянно рестартует.</p></td><td>2024-09-11T12:45:08.486Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Завернуть OVРN в Xrаy, указав в настройках <code>socks-proxy 127.0.0.1 1080</code> не подходит?</p></td><td>2024-09-11T13:08:07.447Z</td></tr><tr><td>helcoder</td><td><p>Я так и делаю. Ещё пробовал в режиме TUN через NekoBox, тоже не работает.</p></td><td>2024-09-11T13:36:58.838Z</td></tr><tr><td>omgiafs(omgiafs)</td><td><p>Значит пришла пора разворачивать свой Zerotier-подобный контроллер, например <a href="https://github.com/juanfont/headscale" rel="noopener nofollow ugc">Headscale</a>.</p></td><td>2024-09-11T16:25:46.005Z</td></tr><tr><td>sakontwist</td><td><p>Можно прокинуть порт для openvpn через xray, тестировал такую схему и для openvpn и для WG, для WG описана тут <a href="https://ntc.party/t/wireguard-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-sing-box/9882" class="inline-onebox">Wireguard через sing-box</a></p></td><td>2024-09-11T17:07:18.023Z</td></tr><tr><td>sakontwist</td><td><p>Но честно говоря, поверх vless и WG и OpenVPN работают весьма посредственно. OPenVPN лучше пустить поверх Cloak или OBFS4 - результат будет лучше…</p></td><td>2024-09-11T17:15:30.797Z</td></tr><tr><td>RandomRND</td><td><p>В последнюю неделю начал тормозить ssh (scp’шчкой файлы туда-сюда хотят со скоростью в сотни килобит) и рваться спустя несколько минут к зарубежным серверам. Через vpn скорости полные.<br>
+ЮФО, домру, на мобильном билайн вобще перестал работать.</p></td><td>2024-09-11T19:05:31.647Z</td></tr><tr><td>gfqwdgecewgcdw</td><td><p>Ох, тебе ещё повезло. У меня на TTK ssh сессия дольше 30 мин не живёт</p></td><td>2024-09-11T19:26:00.680Z</td></tr><tr><td>Estintax(Maksim)</td><td><p>Да, имеется такая проблема и в Кемеровской области. Клонирование больших Git-репозиториев по SSH очень медленное, и в итоге процедура обрывается через несколько минут.</p></td><td>2024-09-11T20:09:43.854Z</td></tr><tr><td>artenox</td><td><p>В клиенте github-cli?</p></td><td>2024-09-11T22:21:39.843Z</td></tr><tr><td>Estintax(Maksim)</td><td><p>Нет, просто git ванильный</p></td><td>2024-09-12T04:14:18.313Z</td></tr><tr><td>helcoder</td><td><p>Реализации для sing-box как я понял там как раз и нет. Реализацию с dokodemo-door я тоже где-то находил, но не совсем понял как мне это использовать.</p></td><td>2024-09-12T10:21:49.644Z</td></tr><tr><td>sakontwist</td><td><p>dokodemo это просто проброс порта на другой адрес и порт, аналогично port-mapping на обычном firewall, только можно этот проброс направить поверх любого протокола через routing внутри xray, так как это inbound</p></td><td>2024-09-12T10:28:24.968Z</td></tr><tr><td>helcoder</td><td><p>Ещё бы понять как это всё конфигурится правильно, по их документации что-то у меня не получается. Все эти inbounds, outbounds, тэги, где сервер где клиент. Достаточно на клиенте dokodemo-door сконфигурить чтобы его можно было использовать как socks-proxy до рабочего OpenVPN или на сервере тоже нужно что-то менять?</p></td><td>2024-09-13T10:03:23.904Z</td></tr><tr><td>sakontwist</td><td><p>Dokodemo-door должен упираться в адрес openvpn-сервера уже на vps, никакой socks не нужен</p></td><td>2024-09-13T12:16:35.336Z</td></tr><tr><td>helcoder</td><td><p>Не совсем понял, т.е. dokodemo-door настраивается на сервере?</p></td><td>2024-09-13T12:52:34.286Z</td></tr><tr><td>sakontwist</td><td><p>Так, по порядку. Вам надо пустить openvpn поверх Xray. Значит у вас условно два узла с Xray - клиент и сервер</p>
+<p>На сервере вы поднимаете сервер openvpn и вешаете на какой-то локальный порт, хоть на 127.0.0.1:1194.</p>
+<p>На клиенте вы делаете inbound dokodemo-door, routing и outbound до сервера - например по vless или shadowsocks.</p>
+<p>Inbound на клиенте можно сделать даже таким:</p>
+<pre><code class="lang-auto">"inbounds": [
+    {
+      "tag": "in-vpn",
+      "listen": "127.0.0.1","port": 1190,
+      "protocol": "dokodemo-door",
+      "settings": {
+        	"address": "127.0.0.1",
+	    	"port": 1194,
+	    	"network": "udp"
+      }
+    },
+</code></pre>
+<p>То есть на клиенте у вас поднят порт 1190, и вы цепляете клиентский openvpn на свой локальный адрес и порт 127.0.0.1:1090, пакеты будут попадать на dokodemo, адрес назначения и порт сразу заменяются на указанные в settings, затем Xray идет в routing, чтобы определить - куда их отправлять, поэтому делаете так:</p>
+<pre><code class="lang-auto">"routing": {
+		{
+			"inboundTag": ["in-vpn"],
+			"outboundTag": "vless-vps1", # куда-то по нужному вам протоколу обфускации
+		},
+</code></pre>
+<p>Поэтому в итоге клиент openvpn будет подключаться не к локальному порту, а к порту на удаленном сервере, пройдя по туннелю vless…</p>
+<p>Само собой, что на клиентском узле в Xray надо настроить outbound с vless (который vless-vps1), а на сервере настроить на Xray inbound соответствующий на белом адреса, чтобы узлы могли установить соединение, по которому уже пойдет подключение openvpn… То есть Xray на клиенте должен достигать внутренние адреса сервера поверх vless.</p></td><td>2024-09-13T13:06:24.390Z</td></tr><tr><td>helcoder</td><td><p>Вроде понял теперь что к чему, спасибо. Единственное OpenVPN сервер я не смогу поднять у себя, т.к. идея именно проксировать до рабочего VPN который уже поднят на другом сервере и я его не могу менеджить никак, но я так понимаю это не особо что-то меняет, можно просто вместо 127.0.0.1 указать его доменное имя.</p></td><td>2024-09-13T16:06:25.192Z</td></tr><tr><td>sakontwist</td><td><p>Да. Даже если на “том конце” сервер не на одном узле с xray, все будет работать.</p></td><td>2024-09-13T16:54:49.792Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Наблюдаю SS+prefix работает на мобильных операторах (вновь?)</p></td><td>2024-09-14T15:57:29.874Z</td></tr><tr><td>helcoder</td><td><p>В общем я попробовал dokodemo-door, сначала обрадовался что заработало, но на деле та же проблема что и через socks-proxy и напрямую, т.е. оно вроде как коннектится, но потом в логах впн постоянно идёт вот это:</p>
+<p>Connection reset, restarting [0]</p></td><td>2024-09-16T12:29:18.645Z</td></tr><tr><td>sakontwist</td><td><p>Да, xray сам по себе (policy) и протоколы имеют дефолтные таймауты, после которых сессия просто рвется. Нужно поднастроить и в openvpn включить посылку keepalive-пингов, чтобы сессия не падала</p></td><td>2024-09-16T13:28:52.116Z</td></tr><tr><td>helcoder</td><td><p>Изначально было вот так:</p>
+<p>ping 10<br>
+ping-restart 60</p>
+<p>сделал ping 3, но как-то особо ничего не поменялось</p></td><td>2024-09-16T13:38:24.224Z</td></tr><tr><td>sakontwist</td><td><p>Нужно проверять всю цепочку и логи xray: точно ли подключение уходит в Xray, а не мимо и нет ли проблемы на последнем участке, где он выходит с сервера и подключается к серверу Openvpn.</p>
+<p>У меня такая схема работала несколько суток и на wireguard и на openvpn вполне успешно. Задумчиво конечно, но работала.</p>
+<p>Врубайте все логи и на клиенте и на сервере Xray, чекайте что происходит.</p>
+<pre><code class="lang-auto">{
+  "log": {
+    "access": "/var/log/xray/access.log",
+        "error": "/var/log/xray/error.log",
+        "loglevel": "info",
+        "dnsLog": true,
+  }
+}
+</code></pre></td><td>2024-09-16T13:47:46.989Z</td></tr><tr><td>helcoder</td><td><p>Вот так выглядит на клиенте:</p>
+<pre><code class="lang-auto">2024/09/18 14:28:02 [Info] [1646436414] proxy/socks: TCP Connect request to tcp:myvpn:16147
+2024/09/18 14:28:02 [Info] [1646436414] app/dispatcher: default route for tcp:myvpn:16147
+2024/09/18 14:28:02 [Info] [1646436414] transport/internet/tcp: dialing TCP to tcp:myvps:443
+2024/09/18 14:28:02 from tcp:127.0.0.1:59134 accepted tcp:myvpn:16147 [proxy]
+2024/09/18 14:28:02 [Info] [1646436414] proxy/vless/outbound: tunneling request to tcp:myvpn:16147 via myvps:443
+2024/09/18 14:28:02 [Info] [1646436414] proxy: XtlsPadding 88 105 0
+2024/09/18 14:28:02 [Info] [1646436414] proxy: Xtls Unpadding new block, content 100 padding 0 command 0
+2024/09/18 14:28:02 [Info] [1646436414] proxy: XtlsPadding 96 178 0
+2024/09/18 14:28:02 [Info] [1646436414] proxy: XtlsPadding 365 123 0
+2024/09/18 14:28:02 [Info] [1646436414] proxy: Xtls Unpadding new block, content 4022 padding 211 command 0
+2024/09/18 14:28:02 [Info] [1646436414] proxy: XtlsPadding 96 45 1
+2024/09/18 14:28:02 [Info] [1646436414] proxy: XtlsFilterTls stop filtering1655
+2024/09/18 14:28:02 [Info] [1646436414] proxy: Xtls Unpadding new block, content 278 padding 212 command 0
+2024/09/18 14:28:02 [Info] [1646436414] proxy: Xtls Unpadding new block, content 96 padding 23 command 1
+2024/09/18 14:28:08 [Info] [1646436414] app/proxyman/inbound: connection ends &gt; proxy/socks: connection ends &gt; context canceled
+</code></pre>
+<p>Вот так на сервере:</p>
+<pre><code class="lang-auto">2024/09/18 18:28:26 [Info] [2568750180] proxy/vless/encoding: Xtls Unpadding new block0 0 content 96 padding 106 0
+2024/09/18 18:28:26 [Info] [2568750180] proxy/vless/encoding: Xtls Unpadding new block0 0 content 365 padding 233 0
+2024/09/18 18:28:26 [Info] [2568750180] proxy/vless/encoding: XtlsPadding 4022 165 0
+2024/09/18 18:28:26 [Info] [2568750180] proxy/vless/encoding: XtlsPadding 278 85 0
+2024/09/18 18:28:26 [Info] [2568750180] proxy/vless/encoding: Xtls Unpadding new block0 0 content 96 padding 134 0
+2024/09/18 18:28:26 [Info] [2568750180] proxy/vless/encoding: Xtls Unpadding new block0 0 content 96 padding 176 1
+2024/09/18 18:28:26 [Info] [2568750180] proxy/vless/encoding: XtlsFilterTls stop filtering96
+2024/09/18 18:28:26 [Info] [2568750180] proxy/vless/encoding: XtlsPadding 96 106 1
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/inbound: firstLen = 254
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/inbound: received request for tcp:myvpn:16147
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/encoding: Xtls Unpadding new block0 16 content 88 padding 82 0
+2024/09/18 18:28:37 [Info] [1640820586] app/dispatcher: default route for tcp:myvpn:16147
+2024/09/18 18:28:37 [Info] [1640820586] transport/internet/tcp: dialing TCP to tcp:myvpn:16147
+2024/09/18 18:28:37 172.23.0.6:35042 accepted tcp:myvpn:16147 [vless_tls &gt;&gt; direct] email: my@email.com
+2024/09/18 18:28:37 [Info] [1640820586] proxy/freedom: connection opened to tcp:myvpn:16147, local endpoint 172.23.0.9:37026, remote endpoint 54.175.35.115:16147
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/encoding: XtlsPadding 100 153 0
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/encoding: Xtls Unpadding new block0 0 content 96 padding 39 0
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/encoding: Xtls Unpadding new block0 0 content 365 padding 77 0
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/encoding: XtlsPadding 4022 38 0
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/encoding: XtlsPadding 278 130 0
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/encoding: Xtls Unpadding new block0 0 content 96 padding 223 0
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/encoding: Xtls Unpadding new block0 0 content 96 padding 68 1
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/encoding: XtlsFilterTls stop filtering96
+2024/09/18 18:28:37 [Info] [1640820586] proxy/vless/encoding: XtlsPadding 96 63 1
+2024/09/18 18:28:48 [Info] [2859029822] proxy/vless/inbound: firstLen = 188
+2024/09/18 18:28:48 [Info] [2859029822] proxy/vless/inbound: received request for tcp:myvpn:16147
+2024/09/18 18:28:48 [Info] [2859029822] proxy/vless/encoding: Xtls Unpadding new block0 16 content 88 padding 16 0
+2024/09/18 18:28:48 [Info] [2859029822] app/dispatcher: default route for tcp:myvpn:16147
+2024/09/18 18:28:48 [Info] [2859029822] transport/internet/tcp: dialing TCP to tcp:myvpn:16147
+2024/09/18 18:28:48 172.23.0.6:56666 accepted tcp:myvpn:16147 [vless_tls &gt;&gt; direct] email: my@email.com
+</code></pre>
+<p>Только вот какие ещё выводы можно из этих логов сделать, явно подключение идёт не мимо xray, а вот почему обрывается не понятно.</p></td><td>2024-09-18T10:39:26.356Z</td></tr><tr><td>sakontwist</td><td><p>В логе не видно никакх обрывов по timeout или failed connection, можно погрепать всю жизнь конкретной сессии по [session_id]</p>
+<pre><code class="lang-auto">2024/09/18 18:28:37 [Info] [1640820586] proxy/freedom: connection opened to tcp:myvpn:16147, local endpoint x.x.x.x:37026, remote endpoint x.x.x.x:16147
+</code></pre>
+<p>Здесь на сервере Xray не заблокированы файерволом ответы от openvpn-сервера?</p></td><td>2024-09-18T10:51:24.602Z</td></tr><tr><td>sakontwist</td><td><p>Еще можно попробовать подкрутить policy 0 (если конечно вы явно не используете какие-то другие номера политик) <a href="https://github.com/XTLS/Xray-docs-next/blob/main/docs/ru/config/policy.md" class="inline-onebox">Xray-docs-next/docs/ru/config/policy.md at main · XTLS/Xray-docs-next · GitHub</a></p>
+<p>Особенно в части <code>connIdle</code> и <code>downlinkOnly</code>. Например <code>uplinkOnly</code> по умолчанию всего 2 секунды</p></td><td>2024-09-18T10:58:55.396Z</td></tr><tr><td>helcoder</td><td><p>На том же сервере прекрасно проксирует shadowsocks, т.ч. файервол отпадает. К тому же до обрыва можно даже успеть открыть какой-нибудь ресурс который доступен только из под этого VPN, притом как я уже говорил поведение одинаковое что с xray что напрямую, поэтому складывается впечатление что через xray никакой обфускации нет для OpenVPN и его точно также рубит ТСПУ. Жаль у меня нет простого способа проверить подключение через xray с какой-нибудь ноды вне РФ.</p>
+<p>Policy на сервере или на клиенте нужно настраивать?</p></td><td>2024-09-18T11:16:33.994Z</td></tr><tr><td>sakontwist</td><td><p>Обфускация конечно есть, по логам мы видим, что трафик “превращается” в https (xtls padding). Другое дело, если ТСПУ действительно отсекает вам или сессию https по каким-то своим критериям или сессию на последнем куске (xray server - openvpn-сервер) - тогда дело дрянь, конечно.</p>
+<p>Таймауты лучше увеличить на обоих узлах на время отладки.</p>
+<p>Можно конечно попробовать Cloak или obfs4, но тут надо и сервер openvpn прятать “за них”, это как я понял, не вариант</p></td><td>2024-09-18T11:27:31.136Z</td></tr><tr><td>helcoder</td><td><pre><code class="lang-auto">"policy": {
+		"levels": {
+		  "0": {
+			"uplinkOnly": 300,
+			"downlinkOnly": 300
+		  }
+		}
+	},
+</code></pre>
+<p>Попробовал вот так сделать на клиенте и сервере, ничего особо не поменялось.</p>
+<p>А Cloak разве не получится использовать таким же образом?</p></td><td>2024-09-18T11:41:13.448Z</td></tr><tr><td>sakontwist</td><td><p>Если предположить, что трафик openvpn ломается где-то на участке xray-сервер - openvpn-сервер, то Cloak надо в идеале ставить прямо на хосте с openvpn.</p></td><td>2024-09-18T11:48:06.718Z</td></tr><tr><td>helcoder</td><td><p>А почему он должен ломаться? Ведь shadowsocks-сервер (тот же VPS) - openvpn-сервер работает без проблем.</p></td><td>2024-09-18T11:50:47.970Z</td></tr><tr><td>sakontwist</td><td><p>В таком случае пускайте openvpn по shadowsocks вместо vless</p></td><td>2024-09-18T11:52:33.851Z</td></tr><tr><td>helcoder</td><td><p>Я в общем так и делаю <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> Просто хотел разобраться почему не работает через VLESS, т.к. может пригодиться на случай если shadowsocks начнут блочить, что насколько я помню вполне возможно.</p></td><td>2024-09-18T11:54:36.729Z</td></tr><tr><td>abcd00</td><td><p>Москва, Интек-М. Наблюдается нестабильная работа XRay. Подключение есть - дальше в интернет не ходит, собственно как иногда при использовании OpenVPN. Неужели и до XRay добрались.</p></td><td>2024-09-18T12:06:06.674Z</td></tr><tr><td>0ka(0ka)</td><td><p>у проксей типа xray не существует состояния подключено/отключено, каждый новый сайт - новое подключение к серверу, к тому же вы не назвали какой у вас конфиг, непонятно вообще ничего</p></td><td>2024-09-19T16:59:28.081Z</td></tr><tr><td>gotoro(A)</td><td><p>Это же не совсем так, есть же mux который должен переиспользовать существующие подключения?</p></td><td>2024-09-21T22:55:11.482Z</td></tr><tr><td>zzr</td><td><p>ну штош там опенвпн(наружу) на ростиликоме блочат или што яне пойму у мен антизапрет коньтейнер днсы отваливаются тока включаш работат секунд 10 потом идёт tcp retransmission на адреса 10.хх.хх.хх притом что ссш(туда) работат, помогает(пока что)) тока полное проксерование через ss, vless не делал но наверн тож буит казать, индиресное наблюдение что телега работает но в браузере ничё не кажет в етот момент (когда днсы через коньтейер антизапрета стоят)</p></td><td>2024-09-23T17:44:52.508Z</td></tr><tr><td>sakontwist</td><td><p>Mux не переиспользует существующие, а группирует несколько в одно при их создании. Фактически mux только позволяет уменьшить количество запросов, чем немного маскирует использование vless. Но я сталкивался с тем, что mux вызывает на сервере утечку памяти (вроде уже поправили). И mux вроде бы не работает с reality - для него нужно использовать транспорт H2</p></td><td>2024-09-24T06:08:15.068Z</td></tr><tr><td>Frrienwrvale</td><td><aside class="quote no-group" data-username="zzr" data-post="326" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/zzr/48/14949_2.png" class="avatar"> zzr:</div>
+<blockquote>
+<p>ну штош там опенвпн(наружу) на ростиликоме блочат или што яне пойму</p>
+</blockquote>
+</aside>
+<p>Отказался от использования OpenVPN (как средства обхода) около года назад, когда начались первые успешные блокировки на мобильных операторах. Тем не менее, оставалась пара-тройка сетевых устройств, ВНЕЗАПНО использующих OpenVPN (tcp протокол, без tls-crypt и tls-auth) по его прямому назначению, а не как это принято в современных реалиях. Они были подключены к системе мониторинга snmp на европейском сервере. Переделывать было лень +  хотелось дождаться того момента когда блокировки OpenVPN затронут и провод. Пару недель назад начал замечать странное поведение этих устройств. Они не работают в режиме 24/7, поэтому после их включения OpenVPN канал то поднимался то падал каждые 2-3 минуты в течение 2х-3х часов (провайдер ЭР-Телеком, он же Дом.ру), после чего начинал работать стабильно. Думаю не надо говорить о том, что xray и прочие прелести, использующие мимикрию под легитимные протоколы на том же сервере, к которому подключались сетевые устройства по OpenVPN, продолжали работать без сбоев.<br>
+В итоге пришлось перенастроить устройства на работу по белым спискам. А OpenVPN (за кордон) походу, да. Всё.</p></td><td>2024-09-25T10:02:52.840Z</td></tr><tr><td>zzr</td><td><p>ето коньтейнер у меня насроен на мемекротике настроен ещё на другом мемекротике там провайдер местечковый но втыкается к ТТК, у их уже давно зарезан обычный виригуард например (амнезия робит)) но там почему то опенвпн коньтейнер к тому же серверу за гороницу работает я хз</p></td><td>2024-09-25T13:04:34.950Z</td></tr><tr><td>zzr</td><td><p>кароч расказывайю всё как есь - вчера вечром ттк\тпсу кароч зарезали мне все понтключения к моей арендуенемой заграничной впске я хз овпн, SS, vless даже ссаш тормозил аваершакр показывал сплошные ретрансмишны на етот адрес, думал началось накатил ети запреты\гудбайи кое как прорвался сюда а тут тишина… может конечн у хостера какие то роботы велись я хз, но если так понтдумать токда б он ваще не отвечал, вот вам и ответ на вопрос нах нужна впска внутри россии - сначала конектимся до её (тпсу у провайдера не должна тригирица ойпи адрес то росийский) а потом уже у того хостера наверняка прямые конекты к какой небудь IX а дальше уже zogраницу ну или сидеть насраивать ети автономные решения (такойе себе занятие)</p></td><td>2024-09-30T07:00:15.365Z</td></tr><tr><td>zzr</td><td><p>у кого нето amneziaWG на мегафоне работает? потому что у меня даж не хендшекается менял ети параметры которые результат тот же</p></td><td>2024-10-02T06:51:19.136Z</td></tr><tr><td>0ka(0ka)</td><td><p>да работает, даже то о чём <a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx202x/5124/430">здесь</a> писал теперь работает, откатили блок, хотя крупные мусорные пакеты всё еще блочат протокол (либо без них либо с мелкими работает), 1 хендшейк проходит даже если протокол блочится</p></td><td>2024-10-02T07:02:09.374Z</td></tr><tr><td>ani917(ani)</td><td><p>амнезия кажется разбанивается если не пользоваться, потом все равно блокируется</p></td><td>2024-10-02T07:10:15.028Z</td></tr><tr><td>zzr</td><td><p>спасибо за информацийю!</p></td><td>2024-10-02T07:32:59.348Z</td></tr><tr><td>zzr</td><td><p>кароч на мегафоне суде по моим тестам не кажет шадовсокс (шифор 2022-blake3-chacha20-poly1305 между прочим) влесс-хтлс-реалити-хуё-моё работает норм (на той же впске) (продолжайю вести наблюдение))</p></td><td>2024-10-04T10:31:43.101Z</td></tr><tr><td>Anyuta1166</td><td><p>Начата блокировка OpenVPN как протокола на нативном IPv6, в частности, от Ростелекома.<br>
+До сегодняшнего дня через IPv6 никаких блокировок VPN-протоколов не было, блокировались только подключения через IPv4. Минус одна лазейка <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p></td><td>2024-10-07T13:49:48.349Z</td></tr><tr><td>KDS</td><td><aside class="quote no-group" data-username="bolvan" data-post="3" data-topic="5239">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>это выглядит так : --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d2 --dpi-desync-repeats=10 --dpi-desync-ttl=3</p>
+</blockquote>
+</aside>
+<p>Здорово, работает! Ваша программа - просто чудо, столько всего оживляет. Я уж думал под оберткой опенвпна придется сидеть теперь всю жизнь ) И даже скорость не упала ни на йоту.</p></td><td>2024-10-09T02:21:00.892Z</td></tr><tr><td>0anton</td><td><p>С позавчера Tele2 (Ленобл) для мобильных соединений снова включил правила блокирующие Zerotier. До этого (после моего сообщения в нач. сентября) как-то заработало, и вот - все…</p></td><td>2024-10-09T12:26:19.281Z</td></tr>
+    </table>
+      </body>
+    </html>

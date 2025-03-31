@@ -1,0 +1,299 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>странный-certdomain-в-realitlscanner</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>flynt-3650</td><td><p>всем привет, имеется self-hosted VPN на VLESS + REALITY с мимикрией под <a href="http://hbo.com" rel="noopener nofollow ugc">hbo.com</a>. при попытке прозвонить мой IP через RealiTLScanner, вылазит какой-то вообще левый домен не имеющиий никакого отношения к HBO (наверное). в чём может быть проблема или всё так и должно быть? настройка инбаунда и результат скана на скринах. Flow у клиента, естественно XTLS RPRX VISION<br>
+<img src="странный-certdomain-в-realitlscanner/7ae1015f6083aa362dce8b3244a0c570b6d85826.png" alt="image" data-base62-sha1="hx2k2dLslmwN7bRVmI66HbQ6luu" width="477" height="301"><br>
+<img src="странный-certdomain-в-realitlscanner/22ea0cd19583b26dd52a5f416d7f730d0956ef97.png" alt="image" data-base62-sha1="4YRGp9LWTuZGmTsJTFr3MXQmtLh" width="648" height="56"></p></td><td>2024-12-26T09:29:09.252Z</td></tr><tr><td>spotted_giraffe</td><td><p>curl -v --resolve <a href="http://hbo.com:443" rel="noopener nofollow ugc">hbo.com:443</a>:&lt;ваш IP&gt; <a href="https://hbo.com" rel="noopener nofollow ugc">https://hbo.com</a></p>
+<p>А это команда хорошо отрабатывает?</p></td><td>2024-12-26T09:56:43.968Z</td></tr><tr><td>flynt-3650</td><td><p>ну вроде как да</p>
+<pre data-code-wrap="bash"><code class="lang-bash">λ ~/ curl -v --resolve hbo.com:443:&lt;IP_REMOVED&gt; https://hbo.com
+* Added hbo.com:443:&lt;IP_REMOVED&gt; to DNS cache
+* Hostname hbo.com was found in DNS cache
+*   Trying &lt;IP_REMOVED&gt;:443...
+* Connected to hbo.com (&lt;IP_REMOVED&gt;) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+* TLSv1.0 (OUT), TLS header, Certificate Status (22):
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.2 (IN), TLS header, Certificate Status (22):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS header, Finished (20):
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.2 (OUT), TLS header, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_128_GCM_SHA256
+* ALPN, server accepted to use h2
+* Server certificate:
+*  subject: CN=hbo.com
+*  start date: May 18 17:15:33 2024 GMT
+*  expire date: Jun 19 17:15:32 2025 GMT
+*  subjectAltName: host "hbo.com" matched cert's "hbo.com"
+*  issuer: C=BE; O=GlobalSign nv-sa; CN=GlobalSign Atlas R3 DV TLS CA 2024 Q2
+*  SSL certificate verify ok.
+* Using HTTP2, server supports multiplexing
+* Connection state changed (HTTP/2 confirmed)
+* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+* Using Stream ID: 1 (easy handle 0x557aa4481eb0)
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+&gt; GET / HTTP/2
+&gt; Host: hbo.com
+&gt; user-agent: curl/7.81.0
+&gt; accept: */*
+&gt;
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+&lt; HTTP/2 308
+&lt; server: Varnish
+&lt; retry-after: 0
+&lt; location: https://www.hbo.com/
+&lt; accept-ranges: bytes
+&lt; date: Thu, 26 Dec 2024 10:36:13 GMT
+&lt; via: 1.1 varnish
+&lt; x-served-by: cache-fra-eddf8230081-FRA
+&lt; x-cache: HIT
+&lt; x-cache-hits: 0
+&lt; x-timer: S1735209374.538981,VS0,VE0
+&lt; set-cookie: countryCode=DE; Domain=.hbo.com; Path=/; SameSite=Lax
+&lt; set-cookie: stateCode=HE; Domain=.hbo.com; Path=/; SameSite=Lax
+&lt; set-cookie: geoData=frankfurt am main|HE|60313|DE|EU|100|broadband|50.110|8.680; Domain=.hbo.com; Path=/; SameSite=Lax
+&lt; x-gep-countrycode: DE
+&lt; strict-transport-security: max-age=31536000;
+&lt; normalized-language: en
+&lt; alt-svc: h3=":443";ma=86400,h3-29=":443";ma=86400,h3-27=":443";ma=86400
+&lt; content-length: 0
+&lt;
+* Connection #0 to host hbo.com left intact
+</code></pre></td><td>2024-12-26T10:40:23.784Z</td></tr><tr><td>spotted_giraffe</td><td><p>Да вроде все в порядке, по крайней мере так проверяют корректность реалити если не ошибаюсь. Можно попробовать еще в файл hosts прописать IP вашего VPS и url сайта. Если в браузере откроется, то настроено все правильно</p></td><td>2024-12-26T11:16:40.210Z</td></tr><tr><td>spotted_giraffe</td><td><aside class="onebox githubissue" data-onebox-src="https://github.com/pypi/support/issues/3462">
+  <header class="source">
+
+      <a href="https://github.com/pypi/support/issues/3462" target="_blank" rel="noopener nofollow ugc">github.com/pypi/support</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row">
+  <div class="github-icon-container" title="Issue" data-github-private-repo="false">
+	  <svg width="60" height="60" class="github-icon" viewBox="0 0 14 16" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+  </div>
+
+  <div class="github-info-container">
+    <h4>
+      <a href="https://github.com/pypi/support/issues/3462" target="_blank" rel="noopener nofollow ugc">files.pythonhosted.org serves invalid certificate</a>
+    </h4>
+
+    <div class="github-info">
+      <div class="date">
+        opened <span class="discourse-local-date" data-format="ll" data-date="2023-12-14" data-time="09:57:49" data-timezone="UTC">09:57AM - 14 Dec 23 UTC</span>
+      </div>
+
+        <div class="date">
+          closed <span class="discourse-local-date" data-format="ll" data-date="2023-12-20" data-time="15:34:21" data-timezone="UTC">03:34PM - 20 Dec 23 UTC</span>
+        </div>
+
+      <div class="user">
+        <a href="https://github.com/arnaudsjs" target="_blank" rel="noopener nofollow ugc">
+          <img alt="arnaudsjs" src="странный-certdomain-в-realitlscanner/2dc455ca5e18efe56d2b4ab0feba73633a8fc850.png" class="onebox-avatar-inline" width="20" height="20" data-dominant-color="A3ACE4">
+          arnaudsjs
+        </a>
+      </div>
+    </div>
+
+    <div class="labels">
+        <span style="display:inline-block;margin-top:2px;background-color: #B8B8B8;padding: 2px;border-radius: 4px;color: #fff;margin-left: 3px;">
+          network
+        </span>
+    </div>
+  </div>
+</div>
+
+  <div class="github-row">
+    <p class="github-body-container">&lt;!--
+    NOTE: This issue should be for problems with PyPI itself, including:
+<span class="show-more-container"><a href="" rel="noopener" class="show-more">…</a></span><span class="excerpt hidden">    * pypi.org
+    * test.pypi.org
+    * files.pythonhosted.org
+
+    This issue should NOT be for a project installed from PyPI. If you are
+    having an issue with a specific package, you should reach out to the
+    maintainers of that project directly instead.
+
+    Furthermore, this issue should NOT be for any non-PyPI properties (like
+    python.org, docs.python.org, etc.)
+
+    If your problem is related to search (a new or updated project doesn't
+    appear in the PyPI search results), please wait for a couple of hours
+    and check again before reporting it. The search index may take some
+    time to be updated.
+--&gt;
+
+**Describe the bug**
+
+Executing pip sometimes fails with the following warning/error:
+
+```
+08:56:41    python3.11 -m venv /opt/venv
+08:56:41 + /opt/venv/bin/pip3 install -U pip wheel setuptools
+08:56:41 Requirement already satisfied: pip in /opt/venv/lib64/python3.11/site-packages (22.3.1)
+08:56:41 Collecting pip
+08:56:41   WARNING: Certificate did not match expected hostname: files.pythonhosted.org. Certificate: {'subject': ((('commonName', 'm.sni-311-default.ssl.fastly.net'),),), 'issuer': ((('countryName', 'US'),), (('organizationName', 'Certainly'),), (('commonName', 'Certainly Intermediate R1'),)), 'version': 3, 'serialNumber': 'DB3FF7E06E8CBBFC07727137DF9FB698A0B4', 'notBefore': 'Nov 28 05:32:06 2023 GMT', 'notAfter': 'Dec 28 05:32:05 2023 GMT', 'subjectAltName': (('DNS', 'm.sni-311-default.ssl.fastly.net'),), 'OCSP': ('http://ocsp.int-r1.certainly.com/',), 'caIssuers': ('http://int-r1.certainly.com/',)}
+08:56:41   WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(CertificateError("hostname 'files.pythonhosted.org' doesn't match 'm.sni-311-default.ssl.fastly.net'"))': /packages/47/6a/453160888fab7c6a432a6e25f8afe6256d0d9f2cbd25971021da6491d899/pip-23.3.1-py3-none-any.whl
+08:56:42   WARNING: Certificate did not match expected hostname: files.pythonhosted.org. Certificate: {'subject': ((('commonName', 'm.sni-311-default.ssl.fastly.net'),),), 'issuer': ((('countryName', 'US'),), (('organizationName', 'Certainly'),), (('commonName', 'Certainly Intermediate R1'),)), 'version': 3, 'serialNumber': 'DB3FF7E06E8CBBFC07727137DF9FB698A0B4', 'notBefore': 'Nov 28 05:32:06 2023 GMT', 'notAfter': 'Dec 28 05:32:05 2023 GMT', 'subjectAltName': (('DNS', 'm.sni-311-default.ssl.fastly.net'),), 'OCSP': ('http://ocsp.int-r1.certainly.com/',), 'caIssuers': ('http://int-r1.certainly.com/',)}
+08:56:42   WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(CertificateError("hostname 'files.pythonhosted.org' doesn't match 'm.sni-311-default.ssl.fastly.net'"))': /packages/47/6a/453160888fab7c6a432a6e25f8afe6256d0d9f2cbd25971021da6491d899/pip-23.3.1-py3-none-any.whl
+08:56:42   WARNING: Certificate did not match expected hostname: files.pythonhosted.org. Certificate: {'subject': ((('commonName', 'm.sni-311-default.ssl.fastly.net'),),), 'issuer': ((('countryName', 'US'),), (('organizationName', 'Certainly'),), (('commonName', 'Certainly Intermediate R1'),)), 'version': 3, 'serialNumber': 'DB3FF7E06E8CBBFC07727137DF9FB698A0B4', 'notBefore': 'Nov 28 05:32:06 2023 GMT', 'notAfter': 'Dec 28 05:32:05 2023 GMT', 'subjectAltName': (('DNS', 'm.sni-311-default.ssl.fastly.net'),), 'OCSP': ('http://ocsp.int-r1.certainly.com/',), 'caIssuers': ('http://int-r1.certainly.com/',)}
+08:56:43   WARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(CertificateError("hostname 'files.pythonhosted.org' doesn't match 'm.sni-311-default.ssl.fastly.net'"))': /packages/47/6a/453160888fab7c6a432a6e25f8afe6256d0d9f2cbd25971021da6491d899/pip-23.3.1-py3-none-any.whl
+08:56:43   WARNING: Certificate did not match expected hostname: files.pythonhosted.org. Certificate: {'subject': ((('commonName', 'm.sni-311-default.ssl.fastly.net'),),), 'issuer': ((('countryName', 'US'),), (('organizationName', 'Certainly'),), (('commonName', 'Certainly Intermediate R1'),)), 'version': 3, 'serialNumber': 'DB3FF7E06E8CBBFC07727137DF9FB698A0B4', 'notBefore': 'Nov 28 05:32:06 2023 GMT', 'notAfter': 'Dec 28 05:32:05 2023 GMT', 'subjectAltName': (('DNS', 'm.sni-311-default.ssl.fastly.net'),), 'OCSP': ('http://ocsp.int-r1.certainly.com/',), 'caIssuers': ('http://int-r1.certainly.com/',)}
+08:56:45   WARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(CertificateError("hostname 'files.pythonhosted.org' doesn't match 'm.sni-311-default.ssl.fastly.net'"))': /packages/47/6a/453160888fab7c6a432a6e25f8afe6256d0d9f2cbd25971021da6491d899/pip-23.3.1-py3-none-any.whl
+08:56:45   WARNING: Certificate did not match expected hostname: files.pythonhosted.org. Certificate: {'subject': ((('commonName', 'm.sni-311-default.ssl.fastly.net'),),), 'issuer': ((('countryName', 'US'),), (('organizationName', 'Certainly'),), (('commonName', 'Certainly Intermediate R1'),)), 'version': 3, 'serialNumber': 'DB3FF7E06E8CBBFC07727137DF9FB698A0B4', 'notBefore': 'Nov 28 05:32:06 2023 GMT', 'notAfter': 'Dec 28 05:32:05 2023 GMT', 'subjectAltName': (('DNS', 'm.sni-311-default.ssl.fastly.net'),), 'OCSP': ('http://ocsp.int-r1.certainly.com/',), 'caIssuers': ('http://int-r1.certainly.com/',)}
+08:56:49   WARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(CertificateError("hostname 'files.pythonhosted.org' doesn't match 'm.sni-311-default.ssl.fastly.net'"))': /packages/47/6a/453160888fab7c6a432a6e25f8afe6256d0d9f2cbd25971021da6491d899/pip-23.3.1-py3-none-any.whl
+08:56:49   WARNING: Certificate did not match expected hostname: files.pythonhosted.org. Certificate: {'subject': ((('commonName', 'm.sni-311-default.ssl.fastly.net'),),), 'issuer': ((('countryName', 'US'),), (('organizationName', 'Certainly'),), (('commonName', 'Certainly Intermediate R1'),)), 'version': 3, 'serialNumber': 'DB3FF7E06E8CBBFC07727137DF9FB698A0B4', 'notBefore': 'Nov 28 05:32:06 2023 GMT', 'notAfter': 'Dec 28 05:32:05 2023 GMT', 'subjectAltName': (('DNS', 'm.sni-311-default.ssl.fastly.net'),), 'OCSP': ('http://ocsp.int-r1.certainly.com/',), 'caIssuers': ('http://int-r1.certainly.com/',)}
+08:56:49 ERROR: Could not install packages due to an OSError: HTTPSConnectionPool(host='files.pythonhosted.org', port=443): Max retries exceeded with url: /packages/47/6a/453160888fab7c6a432a6e25f8afe6256d0d9f2cbd25971021da6491d899/pip-23.3.1-py3-none-any.whl (Caused by SSLError(CertificateError("hostname 'files.pythonhosted.org' doesn't match 'm.sni-311-default.ssl.fastly.net'")))
+08:56:49
+```
+
+It doesn't consistently fails, sometimes the certificate validation also just works.
+
+**Expected behavior**
+
+The certificate validation succeeds consistently.
+
+**To Reproduce**
+
+See output snippet above.
+
+**My Platform**
+
+* OS: Rocky Linux 8
+* Version openssl package: openssl==1:1.1.1k-9.el8_7</span></p>
+  </div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Вот тут обсуждалось что-то похожее, связали с проблемой DNS, возвращает неверный сертификат для <a href="http://files.pythonhosted.org" rel="noopener nofollow ugc">files.pythonhosted.org</a></p>
+<p>Выполните dig <a href="http://hbo.com" rel="noopener nofollow ugc">hbo.com</a> для интереса</p></td><td>2024-12-26T11:20:43.398Z</td></tr><tr><td>flynt-3650</td><td><p>т.е. если РКН захочет пробить мой сервер, то там его будут ждать всё-таки валидные серты от HBO?</p></td><td>2024-12-26T11:28:27.149Z</td></tr><tr><td>flynt-3650</td><td><pre data-code-wrap="bash"><code class="lang-bash">λ ~/ dig hbo.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.28-0ubuntu0.22.04.1-Ubuntu &lt;&lt;&gt;&gt; hbo.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 48481
+;; flags: qr rd ra; QUERY: 1, ANSWER: 4, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;hbo.com.                       IN      A
+
+;; ANSWER SECTION:
+hbo.com.                295     IN      A       151.101.65.55
+hbo.com.                295     IN      A       151.101.129.55
+hbo.com.                295     IN      A       151.101.1.55
+hbo.com.                295     IN      A       151.101.193.55
+
+;; Query time: 10 msec
+;; SERVER: 10.255.255.254#53(10.255.255.254) (UDP)
+;; WHEN: Thu Dec 26 14:24:15 EAT 2024
+;; MSG SIZE  rcvd: 100
+
+</code></pre></td><td>2024-12-26T11:29:06.495Z</td></tr><tr><td>spotted_giraffe</td><td><p>Не должно их смущать, ресолвится на ваш адрес все как нужно. А вы curl и dig где выполняли, на своей машине или на VPS где запущена панель?</p>
+<p>На всякий случай упомяну, что в случае серьезного Active Probing озаботится только ресолвом хоста это не все. Должны совпадать при сканировании порты, все что открыто открыто так же, что закрыто, аналогично. Реалити работает на порте 443, но если например сайт под который вы мимикрируете работает на 80 порту, то его тоже придется держать открытым и настроить iptables, чтобы трафик с него гоняло на реальный сервер hbo</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://habr.com/ru/articles/731608/">
+  <header class="source">
+      <img src="странный-certdomain-в-realitlscanner/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://habr.com/ru/articles/731608/" target="_blank" rel="noopener nofollow ugc">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="странный-certdomain-в-realitlscanner/98c7f04875e55429874ae0804a3c0711447c0e06.png" class="thumbnail" data-dominant-color="516F80" width="690" height="362"></div>
+
+<h3><a href="https://habr.com/ru/articles/731608/" target="_blank" rel="noopener nofollow ugc">Bleeding-edge обход блокировок с полной маскировкой: настраиваем сервер и...</a></h3>
+
+  <p>Статья опубликована под лицензией Creative Commons BY-NC-SA . В серии предыдущих статей я описывал, почему повсеместно используемые VPN- и прокси-протоколы такие как Wireguard и L2TP очень уязвимы к...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-12-26T11:42:12.267Z</td></tr><tr><td>flynt-3650</td><td><aside class="quote no-group" data-username="spotted_giraffe" data-post="8" data-topic="14151">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/spotted_giraffe/48/12771_2.png" class="avatar"> spotted_giraffe:</div>
+<blockquote>
+<p>А вы curl и dig где выполняли, на своей машине или на VPS где запущена панель?</p>
+</blockquote>
+</aside>
+<p>на своей. спасибо за статью, ознакомлюсь)</p></td><td>2024-12-26T11:47:45.306Z</td></tr><tr><td>spotted_giraffe</td><td><p>А попробуйте на самом сервере, если панель конечно не в докере каком-нибудь. Может он там вернет лишний серт, а панель просто подхватывает последний что находит</p></td><td>2024-12-26T11:50:19.610Z</td></tr><tr><td>flynt-3650</td><td><p>ну вообще панель в докере, это может быть проблемой?</p></td><td>2024-12-26T11:51:26.451Z</td></tr><tr><td>flynt-3650</td><td><p>а, ну да</p>
+<pre data-code-wrap="bash"><code class="lang-bash">/app # dig hbo.com
+sh: dig: not found
+/app # apt install dig
+sh: apt: not found
+/app #
+</code></pre></td><td>2024-12-26T11:54:43.570Z</td></tr><tr><td>spotted_giraffe</td><td><p>Ну в теории можно туда поставить все, но геморно. Оставьте тогда как есть, главное в остальных случаях ресолвится</p></td><td>2024-12-26T12:08:07.545Z</td></tr><tr><td>flynt-3650</td><td><p>т.е. в целом всё норм?</p>
+<p>проверил порты, собственно, у HBO открыты 80 и 443, надо будет тоже открыть))</p>
+<p>огромное спасибо за оказанную помощь!</p></td><td>2024-12-26T12:17:43.016Z</td></tr><tr><td>spotted_giraffe</td><td><p>Норм. Откройте и настройте прероутинг, в статье написано как это можно сделать. Ну и 22 порт надеюсь у вас будет где-то повыше)</p></td><td>2024-12-26T12:21:25.806Z</td></tr><tr><td>flynt-3650</td><td><p>окей))<br>
+порт естественно сильно выше, но я его там как-нибудь сокрою тоже</p></td><td>2024-12-26T12:23:31.239Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,72 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>cloudflare-warp-первый-среди-всех</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>alk2ntc(Alk2ntc)</td><td><p>Цель данной статьи - рассказать как пользоваться CloudFlare Warp везде, где только можно и нельзя.<br>
+Это мощнейший сервис, и на фоне только что прошедших “учений” может показаться, что не ровен час, и мы его потеряем. Но не будем опускать руки и посмотрим на то, как можно гибко настраивать Warp.<br>
+Я опишу довольно тяжелый случай внедрения Warp в организации, где на корпоративном уровне сделано многое, чтобы пользоваться было нельзя. А именно. Доступ к сайту <a href="https://1.1.1.1" rel="noopener nofollow ugc">https://1.1.1.1</a> закрыт, доступ ко всем четырем рекомендуемым в Chrome/Edge серверам DoH закрыт. QUIC полностью вырублен. Но при этом nslookup через 1.1.1.1 спокойно работает.<br>
+Начнем с установки. Прежде всего рассмотрим Windows. Если нет доступа на сайт 1.1.1.1, то клиент можно скачать с другого <a href="https://install.appcenter.ms/orgs/cloudflare/apps/1.1.1.1-windows-1/distribution_groups/release" rel="noopener nofollow ugc">App Center</a>. Клиент огромный, 120 Мб по сравнению с трехмегабайтным WG - просто монстр, но много у него под капотом. После установки первый и важный этап - регистрация. Здесь как раз цензор установил запрет. Не удается получить нужный отклик tcp с сайта <a href="http://api.cloudflareclient.com" rel="noopener nofollow ugc">api.cloudflareclient.com</a>, чтобы завершить регистрацию нового клиента. Здесь администратору компьютера нужно преодолеть блокировку (я описываю случай, когда в организации сотрудники работают в доменной среде ActiveDirectory, есть администратор, который настраивает Warp на компьютере, а затем сотрудники без админправ входят на него и работают). Простейший вариант - использовать zapret для Windows, а именно запустить скрипт blockcheck с прицелом на сайт <a href="http://cloudflareclient.com" rel="noopener nofollow ugc">cloudflareclient.com</a> и посмотреть, какая стратегия сработает. В моем случае получается такая строка для запуска winws:<br>
+–wf-tcp=443 --filter-tcp=443 --hostlist-domains=<a href="http://cloudflareclient.com" rel="noopener nofollow ugc">cloudflareclient.com</a> --dpi-desync=multidisorder --dpi-desync-split-pos=2<br>
+После запуска winws регистрация Warp проходит без проблем, и в обычном случае это всё, конец истории. CF Warp дальше все берет на себя и работает. Но в описанной выше среде это только первый этап. Подключение с параметрами Warp по умолчанию не работает ни в какую. Тут на помощь приходит изучение в командной строке утилиты warp-cli, у которой множество параметров.<br>
+Чтобы сократить повествование, опишу, что пришлось сделать мне. Прежде всего переключить протокол работы с MASQUE (который QUIC) на Wireguard:<br>
+warp-cli  tunnel protocol set WireGuard (регистр важен)<br>
+Затем меняем endpoint, поскольку <a href="http://engage.cloudflare.com" rel="noopener nofollow ugc">engage.cloudflare.com</a> недоступен:<br>
+warp-cli tunnel endpoint set 188.114.9x.xx:yyy<br>
+Какой endpoint вам доступен, легко определить при помощи утилиты <a href="https://github.com/peanut996/CloudflareWarpSpeedTest/tree/master" rel="noopener nofollow ugc">peanut996/CloudflareWarpSpeedTest: <img src="https://ntc.party/images/emoji/twitter/star.png?v=12" title=":star:" class="emoji" alt=":star:" loading="lazy" width="20" height="20">WARP IP 优选工具</a>, благо она есть под все платформы. Пытливый ум, посмотрев код на гитхабе, легко увидит, что именно пингует утилита<br>
+<a href="https://github.com/peanut996/CloudflareWarpSpeedTest/blob/master/task/warping.go" rel="noopener nofollow ugc">CloudflareWarpSpeedTest/task/warping.go at master · peanut996/CloudflareWarpSpeedTest</a><br>
+Программа на выходе выдаст result.csv, уже отсортированный по наименьшей задержке. Берем пару ip;порт и вставляем в строку с установкой endpoint’а. Перезапускаем сервис CloudflareWARP (возможно, и не раз) и пробуем выполнить подключение в клиенте Warp - двигаем оранжевый рычаг. Запущенный winws можно пока не закрывать. Наблюдаем процесс подключения - он не быстрый. Если не вышло с первого раза, пробуем снова. Иногда может потребоваться поменять endpoint, перезапустить сервис и снова попробовать. Если подключение произошло, всё, оно теперь будет работать. Это настолько комфортно, что забываешь про то, что какие-то сайты заблокированы, мы не говорим о тех, кто не пускает из РФ, потому что мы продолжаем оставаться в РФ. Вспоминаешь только тогда, когда не удается получить доступ к российскому сайту, который боится непонятного ip-адреса CF (а включается и ipv4, и ipv6, и QUIC заодно). Пусть это сайт <a href="http://mos.ru" rel="noopener nofollow ugc">mos.ru</a>. Вот тут начинаешь ценить монстра. Warp позволяет добавлять “на лету” исключения. И не только по ip-адресу, хоть так лучше, но и по имени домена. И не только по имени домена, но и по имени домена с поддоменами. Честно добавляем и <a href="http://mos.ru" rel="noopener nofollow ugc">mos.ru</a>, и *.mos.ru, потому что мне надо получать доступ на всякие там <a href="http://school.mos.ru" rel="noopener nofollow ugc">school.mos.ru</a> - и все буквально через секунды начинает работать. Warp умеет прямо на ходу перехватывать вызовы к поддоменам и тут же добавлять нужный пункт в таблицу маршрутизации. Это работает так на Windows/Mac/Linux и не работает так на iOS/Android/ChromeOS. Подробности в не очень подробной документации от CF:<br>
+<a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/configure-warp/route-traffic/split-tunnels/" rel="noopener nofollow ugc">Split Tunnels · Cloudflare Zero Trust docs</a><br>
+Позаботились о доменных пользователях. Функция Local Domain Fallback позволяет добавить в таблицу исключений локальные домены, чтобы продолжало правильно работать разрешение имен в локальной сети. Мне приходилось после добавления локального домена в исключение перезапускать сервис, чтобы оно начинало работать. Потом опять же все работало без проблем.<br>
+Для добавление доменов/ip в исключения для раздельного туннелирования в GUI Warp нужно нажать в шестеренку, Настройки, Дополнительно, Исключить разделенные туннели. Там же пункт для добавления исключений локальных доменов. В warp-cli для этого выполняется:<br>
+warp-cli tunnel host add (или warp-cli tunnel ip add)<br>
+Напомню, задача не просто запустить Warp на локальном компьютере у админа, а сделать так, чтобы работало у любого другого пользователя, вошедшего на комп с обычными правами. Здесь сценарий следующий. Пользователь входит на комп, сервис Warp уже работает, но новому пользователю нужно выполнить регистрацию. Админ потребуется, чтобы запустить winws (если мы используем zapret), после этого регистрация нового пользователя произойдет, и дальше Warp уже сам подключится и заработает. Для данного пользователя дальше все будет работать без участия админа, без winws. Если юзеру требуются свои исключения в туннелировании, он добавляет их через настройки клиента самостоятельно. Единственная проблема - если этот юзер носит свой ноутбук с работы домой. Дома Warp может не подключиться, потому что дома, например, заработает MASQUE и не заработает Wireguard. Для изменения параметров warp-cli требуются права администратора. В этом случае, лучше избрать разные решения для дома и офиса. Warp позволяет отключить себя из автозагрузки Windows, чтобы не включаться сразу после входа пользователя в систему.<br>
+Что с Линукс? Cloudflare выкатывает весьма сжатые инструкции для линуксоидов. В госорганизациях встречается Astra Linux, которая deb, и для которой потребуется немного поменять скрипт установки.<br>
+Здесь <a href="https://pkg.cloudflareclient.com/" rel="noopener nofollow ugc">pkg.cloudflareclient.com</a> слишком смело указано<br>
+echo “deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] <a href="https://pkg.cloudflareclient.com/" rel="noopener nofollow ugc">https://pkg.cloudflareclient.com/</a> $(lsb_release -cs) main” | sudo tee /etc/apt/sources.list.d/cloudflare-client.list<br>
+Астра такого не понимает, ей надо так<br>
+deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] <a href="https://pkg.cloudflareclient.com/" rel="noopener nofollow ugc">https://pkg.cloudflareclient.com/</a> jammy main | sudo tee /etc/apt/sources.list.d/cloudflare-client.list<br>
+Тогда все устанавливается как надо.<br>
+Для Rosa Linux (которая в Москве распространена как MOS12), поскольку она rpm, все работает прямо из коробки. Никакого GUI от CF для обычного Warp не предусмотрено, предусмотрен только для Warp+, но есть под Линукс несколько GUI, один из которых у меня завелся, он есть в репозитории Rosa<br>
+<a href="https://github.com/AKotov-dev/warpgui" rel="noopener nofollow ugc">AKotov-dev/warpgui: GUI for Cloudflare ™ WARP</a><br>
+Для преодоления блокировки при регистрации могу рекомендовать также zapret. Устанавливать даже необязательно. Достаточно вызвать ./nfqws --filter-tcp=443 --hostlist-domains=<a href="http://cloudflareclient.com" rel="noopener nofollow ugc">cloudflareclient.com</a> (далее все те же параметры) --qnum=1<br>
+Дальше все из той же командной строки запускаем /usr/bin/warp-cli с теми же параметрами, что для Windows. B конце даем warp-cli connect и получаем работающий Warp.<br>
+Для MacOS все то же самое, только вместо nfqws надо использовать tpws (и разбираться с прозрачным прокси), но здесь я пас, потому что мака подходящего у меня нет, а на старый встает только довольно древняя версия Warp. в которой у warp-cli нет еще параметра tunnel<br>
+Приведу на всякий случай ссылку на хранилище с разнообразными версиями под Mac<br>
+<a href="https://install.appcenter.ms/orgs/cloudflare/apps/1.1.1.1-macos/distribution_groups/beta" rel="noopener nofollow ugc">App Center</a><br>
+Для iOS и Android клиентов не предусмотрен клиент командной строки, здесь без смены протокола и Endpoint сделать ничего в компании нельзя. Ну что же, AmneziaWG и warp.llimonix.pw выручают, только вот endpoint в conf-файле лучше исправить на свой, поближе.</p></td><td>2025-03-21T11:05:02.172Z</td></tr>
+    </table>
+      </body>
+    </html>

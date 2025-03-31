@@ -1,0 +1,78 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>настройка-балансировщика-xray</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>inemig</td><td><p>Собственно, хочу настроить следующее: один сервер в качестве входной точки с балансировкой нагрузки.<br>
+<img src="настройка-балансировщика-xray/dd69de6d7697282b4f3687c7fcf7b8e8230486b0.png" alt="xray-lb" data-base62-sha1="vAIlk98w5ZY0QORyQqOJPSBjXzi" width="467" height="465"></p>
+<p>В документации есть <a href="https://xtls.github.io/ru/config/routing.html#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80%D1%8B-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D1%83%D1%80%D0%B0%D1%86%D0%B8%D0%B8-%D0%B1%D0%B0%D0%BB%D0%B0%D0%BD%D1%81%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8-%D0%BD%D0%B0%D0%B3%D1%80%D1%83%D0%B7%D0%BA%D0%B8" rel="noopener nofollow ugc">пример настройки балансировки</a>, но до конца непонятно, что прописать в outbound’ах (нужно ли например так прописывать клиентов итд). Есть у кого пример рабочего конфига?<br>
+И еще вопрос походу, может для этой задачи лучше использовать для балансировки не сам xray, а nginx/haproxy/etc? Какие плюсы/минусы?</p></td><td>2024-10-26T14:05:58.524Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Да вроде там всё понятно, outbound-ы - это теги клиенстких подключений к вашим 3 серверамм. Селектор их сравнивает с шаблоном, и определяет, куда балансить. Типа если у вас три подключения с тегами VLESS-OUT1, VLESS-OUT2 и VLESS3-OUT, то селектор с шаблоном VLESS-OUT будет балансить на первые два, а на третий не будет.<br>
+Тут было обсуждение с примером конфига с весами</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://github.com/XTLS/Xray-core/discussions/2194">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/b/bad3e5f9ad67c1ddf145107ce7032ac1d7b22563.svg" class="site-icon" data-dominant-color="" width="32" height="32">
+
+      <a href="https://github.com/XTLS/Xray-core/discussions/2194" target="_blank" rel="noopener nofollow ugc">GitHub</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/344;"><img src="настройка-балансировщика-xray/6137a6d276f8e1902abe593a8b436d6bf5e457c8_2_690x345.png" class="thumbnail" data-dominant-color="F2F7F7" width="690" height="345"></div>
+
+<h3><a href="https://github.com/XTLS/Xray-core/discussions/2194" target="_blank" rel="noopener nofollow ugc">balancer in xray · XTLS/Xray-core · Discussion #2194</a></h3>
+
+  <p>Please give an explanation about the type of function of the balancer in Xray Is there a turn-by-turn config selection method? It means it divides the weight between different configurations? Does ...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Ну а вообще всегда можно на каждый исходящий OUT настроить 1к1 входящий интерфейс WireGuard и балансить уже трафиик до WG интерфейсов.</p></td><td>2024-10-27T00:49:31.874Z</td></tr><tr><td>inemig</td><td><aside class="quote no-group" data-username="s.v.d" data-post="2" data-topic="12325">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/s.v.d/48/6091_2.png" class="avatar"> s.v.d:</div>
+<blockquote>
+<p>Да вроде там всё понятно, outbound-ы - это теги клиенстких подключений к вашим 3 серверамм.</p>
+</blockquote>
+</aside>
+<p>Т.е настраиваем outbound’ы на LB аналогично как мы делаем на клиенте? Для VLESS uuid’ы всех пользователей в них прописываем? Непонятно, где должна происходить авторизация в данной схеме</p></td><td>2024-10-27T03:46:24.612Z</td></tr><tr><td>sakontwist</td><td><p>Авторизация прописывается в настройках каждого outbound. Балансер только определяет выбор между ними. Но для его использования вместо outboundTag пишете balancerTag в routing. Как только вы добавили в правило balancerTag он имеет приоритет над outboundTag.</p></td><td>2024-10-27T06:56:23.647Z</td></tr><tr><td>inemig</td><td><p>В принципе, я так и предполагал. А на inbound’ах proxy-* нужно также настраивать авторизацию?</p></td><td>2024-10-27T07:29:07.577Z</td></tr><tr><td>sakontwist</td><td><p>На всех proxy нужно настроить авторизацию в inbound для балансировщика. В принципе на них же можно также настроить и дополнительного пользователя для прямой проверки.</p></td><td>2024-10-27T20:39:50.149Z</td></tr><tr><td>inemig</td><td><p>Ок, попробую настроить с учетом вышеуказанных замечаний. Спасибо за ответы.</p></td><td>2024-10-28T02:43:41.331Z</td></tr>
+    </table>
+      </body>
+    </html>

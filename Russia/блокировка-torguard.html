@@ -1,0 +1,101 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-torguard</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>akumanokuma</td><td><p>Ростелеком (Северо-Запад). Наблюдаю нерабочее соединение с VPN-сервисом <a href="https://torguard.net/" rel="noopener nofollow ugc">TorGuard</a> по протоколу Wireguard. Если запустить <code>wg</code>, то видно:<br>
+<code>transfer: 0 B received, 14.5 KiB sent</code><br>
+Что намекает на то, что пакеты банально не проходят. Traceroute до любого сервера показывает, что пакеты не проходят дальше первого хопа после роутера:</p>
+<pre><code class="lang-auto">traceroute to tw.torguard.com (45.133.181.66), 30 hops max, 60 byte packets
+ 1  OpenWrt.lan (192.168.1.1)  0.255 ms  0.241 ms  0.241 ms
+ 2  ptzv-bras3.sz.ip.rostelecom.ru (212.48.195.252)  3.472 ms  3.534 ms  3.562 ms
+ 3  * * *
+ 4  * * *
+[...]
+29  * * *
+30  * * *
+</code></pre>
+<p>Пинги при этом идут нормально и имеют реалистичное время ответа, по всей видимости, блокируется лишь UDP.</p>
+<pre><code class="lang-auto">PING tw.torguard.com (45.133.181.66) 56(84) bytes of data.
+64 bytes from 45.133.181.66 (45.133.181.66): icmp_seq=1 ttl=50 time=302 ms
+64 bytes from 45.133.181.66 (45.133.181.66): icmp_seq=2 ttl=50 time=301 ms
+64 bytes from 45.133.181.66 (45.133.181.66): icmp_seq=3 ttl=50 time=304 ms
+64 bytes from 45.133.181.66 (45.133.181.66): icmp_seq=4 ttl=50 time=303 ms
+
+--- tw.torguard.com ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3000ms
+rtt min/avg/max/mdev = 300.934/302.483/303.543/1.037 ms
+</code></pre>
+<p>Проверял с тремя разными локациями, результат одинаков. Кто-нибудь ещё может подтвердить?</p></td><td>2022-04-03T19:23:23.402Z</td></tr><tr><td>zinoid</td><td><p>Ваше наблюдение подтверждают последние отзывы на <a href="https://play.google.com/store/apps/details?id=net.torguard.openvpn.client&amp;hl=ru&amp;showAllReviews=true" rel="noopener nofollow ugc">Google Play</a>.</p></td><td>2022-04-03T19:58:50.817Z</td></tr><tr><td>diwenx</td><td><blockquote>
+<p>Pings at the same time go well and have a realistic response time, apparently, only UDP is blocked.</p>
+</blockquote>
+<p>For 45.133.181.66, on my tested network, outgoing TCP packets are also dropped at the TSPU hop. incoming TCP packets (spoofed) passed through.<br>
+This is very similar to <a href="https://ntc.party/t/topic/2142/2">another IP</a> which is also blocked by TSPU (outgoing packets dropped at the TSPU hop, incoming packets unaffected). The difference is that for the other IP, ICMP echo is also dropped in addition to TCP.</p></td><td>2022-04-04T06:08:46.177Z</td></tr><tr><td>neur0tx</td><td><p>Такое случалось и раньше. Но блокировалось вообще все: ни stunnel, ни разные порты, ни разные протоколы - ничего не помогало подключиться. Даже OpenConnect не помогал какое-то время. Лишь позже по OpenConnect удалось таки подключиться.</p>
+<p>UPD: Проверил. Сейчас работает только OpenConnect на 443-м порту (такие серверы в приложении отдельно указаны).</p></td><td>2022-04-04T08:40:38.523Z</td></tr><tr><td>tango</td><td><p>Quoting some recent Google Play reviews for posterity:</p>
+<p><a href="https://play.google.com/store/apps/details?id=net.torguard.openvpn.client&amp;hl=ru&amp;reviewId=gp%3AAOqpTOFJIk1B5eCRjQ95JiKKGZu8wo_kAxE5CZmPvJ5TvuZBhzg-hClaq9is4ubB-A3M1xTpwEvkypE2g35y_Q">2022-03-29</a></p>
+<blockquote>
+<p>Это проверенный временем сервис! Если проблемы с подключением в России то его блокируют специально как надёжного поставщика услуг! Я пользуюсь и другим впн у которого такие же проблемы начались в России. Но решения есть! Обращайтесь к поддержки они подскажут решения!</p>
+<p><em>It is time tested service! If problems with connection in Russia, it is blocked specifically as a reliable service provider! I also use another VPN that has the same problems in Russia. But there are solutions! Contact support, they will advise solutions!</em></p>
+<blockquote>
+<p><em><strong>TorGuard:</strong></em> Thank you for your review <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p>
+</blockquote>
+</blockquote>
+<p><a href="https://play.google.com/store/apps/details?id=net.torguard.openvpn.client&amp;hl=ru&amp;reviewId=gp%3AAOqpTOGWlXUTm3wQD6PoyJJ1qf0KL0svmNUHly8g-2AaJhvE2yREwF4UXUTkVhxMwXpFUudQUC_L2YpLb7Ctvg">2022-03-29</a></p>
+<blockquote>
+<p>Не работает</p>
+<p><em>It doesn’t work</em></p>
+<blockquote>
+<p><em><strong>TorGuard:</strong></em> Hello, Please be sure to use direct IPs, querying hostnames will not work. Regards</p>
+</blockquote>
+</blockquote>
+<p><a href="https://play.google.com/store/apps/details?id=net.torguard.openvpn.client&amp;hl=ru&amp;reviewId=gp%3AAOqpTOGOnU1IK5bn8JiRA8cPl1a2ePotWOgIyqnTgGp11xogqtOrwpEmHqD-0q-f-AxbGQXFHbfQka_oi_4oBQ">2022-03-27</a></p>
+<blockquote>
+<p>Скорость заметно просела, пинг увеличился на всех серверах.</p>
+<p><em>The speed dropped noticeably, the ping increased on all servers.</em></p>
+<blockquote>
+<p><em><strong>TorGuard:</strong></em> Hello, From within Russia, you have to use direct IPs which you can do so inside the app - DNS querying our hostnames will not work. Regards</p>
+</blockquote>
+</blockquote>
+<p><a href="https://play.google.com/store/apps/details?id=net.torguard.openvpn.client&amp;hl=ru&amp;reviewId=gp%3AAOqpTOHhaBQZbvG3zf-qW5TDY5L1Tzg7VL5K5WtxnINr49RI7jMhWkP4OnHDmnqgupZeKRJeOABQroOa4w3Plw">2022-03-17</a></p>
+<blockquote>
+<p>В России перестал работать на Билайне и Мегафон. С компа тоже. Сайт не доступен.</p>
+<p><em>In Russia stopped working on Beeline and Megafon. From my computer, too. The site is not available.</em></p>
+<blockquote>
+<p><em><strong>TorGuard:</strong></em> Hello Andrew, please use direct IPs - hostnames will be blocked.</p>
+</blockquote>
+</blockquote></td><td>2022-04-05T05:39:29.285Z</td></tr>
+    </table>
+      </body>
+    </html>

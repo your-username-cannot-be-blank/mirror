@@ -1,0 +1,1059 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>ddos-атака-на-vps-с-vlessreality</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>dyxiwiny</td><td><p>Столкнулся с тем, что моя впска в РФ подвергается SYN-флуд атакам по 443 порту с последней недели 2024 года. Подсети атакующих оперативно добавляю в правила iptables. Так то понятно, что просто whitelist фаервол с моей провайдерской подсетью и всё, но боюсь что могу потерять доступ когда-нибудь и придётся через панельку хостинга залезать. Да ещё и личный интерес представляют ip ддосеров. Атаки идут с ip в подсетях /24 или /22.<br>
+Прилагаю свой банлист:</p>
+<pre><code class="lang-auto">91.234.16.0/24
+82.118.129.0/24
+95.171.233.0/24
+194.226.45.0/24
+170.231.29.0/24
+170.231.30.0/24
+170.231.28.0/24
+170.231.31.0/24
+170.245.237.0/24
+170.245.238.0/24
+170.245.239.0/24
+148.113.163.0/24
+185.170.204.0/22
+45.174.16.0/22
+45.190.252.0/22
+45.164.202.0/23
+45.173.88.0/22
+170.246.212.0/22
+213.87.75.0/24
+213.87.46.0/24
+212.188.1.0/24
+212.188.16.0/24
+189.127.184.0/22
+</code></pre>
+<p>Посмотрел вывод whois по этим адресам. Не зря:</p>
+<pre><code class="lang-auto">inetnum:        91.234.16.0 - 91.234.16.255
+netname:        LICARD-NET
+</code></pre>
+<pre><code class="lang-auto">inetnum:        82.118.128.0 - 82.118.129.255
+netname:        LUKOIL-INFORM-PERM
+</code></pre>
+<pre><code class="lang-auto">inetnum:        185.170.204.0 - 185.170.204.255
+netname:        DATA-CENTRE-DATALINE
+</code></pre>
+<pre><code class="lang-auto">inetnum:     170.231.28.0/22
+owner:       GPP SOLUCOES EM INFORMATICA
+country:     BR
+</code></pre>
+<pre><code class="lang-auto">inetnum:        213.87.72.0 - 213.87.75.15
+netname:        MTSNET-URAL
+</code></pre>
+<p>И так далее. Одинаковые SYN-флуд атаки с RU и BR ip-адресов. Для меня показалось очевидным, что атаки проводятся Всевышним РКНом в рамках борьбы с прокси нового поколения. Под вопросом только смысл этих атак, когда в нашем современном мире существуют SYN-cookies. Написал сюда, чтобы поинтересоваться, есть ли другие люди, сервера которых долбят структуры?</p></td><td>2025-01-06T13:41:19.900Z</td></tr><tr><td>0ka(0ka)</td><td><p>стоило бы указать какие именно ip адреса. у меня тоже ру впс, сильно не смотрел, но видел этот <em>45.190.252.180</em> и еще соседние с ним, на сервере открыт только 443 порт, из россии трафика 0 байт, т.е. впс русская но подключений из рф никогда не делал</p></td><td>2025-01-06T13:59:33.797Z</td></tr><tr><td>dyxiwiny</td><td><p>Сейчас с этого диапазона атаки не летят, но взял список из записи tcpdump, которую сделал только что, если кому-то понадобится</p>
+<details>
+<summary>
+адреса</summary>
+<pre><code class="lang-auto">213.87.46.235
+189.127.184.246
+212.188.1.46
+212.188.1.162
+189.127.184.113
+212.188.1.43
+213.87.46.91
+212.188.1.191
+213.87.75.167
+189.127.186.181
+213.87.75.11
+212.188.1.165
+213.87.75.100
+212.188.16.64
+189.127.186.211
+212.188.1.185
+213.87.46.131
+213.87.75.251
+213.87.46.92
+212.188.16.200
+212.188.16.107
+212.188.1.45
+212.188.1.67
+212.188.16.110
+212.188.16.17
+189.127.184.236
+212.188.1.178
+189.127.185.233
+189.127.185.27
+212.188.16.252
+212.188.16.145
+213.87.75.34
+212.188.16.24
+189.127.185.148
+212.188.16.92
+189.127.184.68
+213.87.75.192
+213.87.75.138
+213.87.75.183
+213.87.46.102
+213.87.75.224
+212.188.1.60
+189.127.185.67
+213.87.75.136
+189.127.186.200
+212.188.1.205
+213.87.46.188
+189.127.185.126
+213.87.75.150
+212.188.1.92
+213.87.46.70
+212.188.1.99
+213.87.75.105
+213.87.75.59
+213.87.46.220
+213.87.75.171
+189.127.184.254
+212.188.1.2
+189.127.185.90
+212.188.1.184
+189.127.186.182
+212.188.1.208
+213.87.46.114
+213.87.46.242
+213.87.75.141
+189.127.184.244
+212.188.16.163
+212.188.16.250
+189.127.184.2
+212.188.1.173
+212.188.1.73
+212.188.16.133
+212.188.16.20
+213.87.46.194
+212.188.16.65
+189.127.184.70
+189.127.185.144
+213.87.46.62
+189.127.184.237
+212.188.16.211
+212.188.1.213
+189.127.186.65
+213.87.75.33
+189.127.184.168
+213.87.75.108
+212.188.16.164
+213.87.75.16
+189.127.185.123
+189.127.186.225
+212.188.1.148
+212.188.1.249
+212.188.1.220
+212.188.1.93
+212.188.16.78
+212.188.1.6
+213.87.46.210
+213.87.75.42
+213.87.75.21
+212.188.16.53
+213.87.75.210
+213.87.46.148
+213.87.75.182
+213.87.46.207
+212.188.1.156
+189.127.184.160
+189.127.185.194
+189.127.186.26
+212.188.16.31
+212.188.1.248
+212.188.1.69
+213.87.46.168
+213.87.46.104
+212.188.16.94
+213.87.75.169
+212.188.1.27
+212.188.1.59
+213.87.46.83
+213.87.75.20
+189.127.184.180
+212.188.1.187
+212.188.1.251
+189.127.185.252
+189.127.186.83
+212.188.16.178
+212.188.16.135
+213.87.46.149
+189.127.184.27
+189.127.186.62
+212.188.1.138
+</code></pre>
+</details></td><td>2025-01-06T14:13:09.541Z</td></tr><tr><td>Xunlei</td><td><p>А сколько ГиБ SYN трафика набегает или какой packets per second или загрузка CPU во сколько раз выросла?</p></td><td>2025-01-06T15:05:20.944Z</td></tr><tr><td>0ka(0ka)</td><td><p>про свои ip могу сказать что было около 4pps</p>
+<p>а не, только что начались запросы 20pps</p>
+<details>
+<summary>
+ips</summary>
+<p>212.188.1.210<br>
+213.87.75.128<br>
+212.188.16.252<br>
+212.188.1.66<br>
+212.188.16.60<br>
+212.188.16.56<br>
+212.188.1.205<br>
+212.188.16.200<br>
+212.188.16.160<br>
+212.188.1.248<br>
+212.188.1.145<br>
+213.87.46.211<br>
+213.87.75.81<br>
+212.188.16.13<br>
+212.188.16.4<br>
+213.87.75.132<br>
+212.188.16.151<br>
+212.188.1.126<br>
+212.188.16.225<br>
+213.87.75.14<br>
+213.87.75.215<br>
+213.87.46.218<br>
+212.188.16.152<br>
+213.87.46.243<br>
+213.87.75.23<br>
+213.87.46.246<br>
+212.188.1.236<br>
+213.87.75.87<br>
+213.87.75.84<br>
+213.87.75.5<br>
+213.87.46.72<br>
+212.188.1.244<br>
+213.87.46.110<br>
+212.188.16.176<br>
+213.87.75.205<br>
+213.87.46.115<br>
+213.87.75.211<br>
+212.188.1.150<br>
+213.87.75.159<br>
+212.188.16.130<br>
+213.87.75.254<br>
+212.188.1.8<br>
+213.87.46.245<br>
+213.87.75.112<br>
+213.87.46.55<br>
+212.188.16.83<br>
+213.87.75.175<br>
+212.188.16.105<br>
+212.188.1.178<br>
+213.87.46.66<br>
+212.188.16.196<br>
+212.188.16.55<br>
+213.87.75.180<br>
+213.87.46.206<br>
+213.87.46.183<br>
+213.87.75.157<br>
+212.188.16.116<br>
+212.188.16.221<br>
+212.188.16.76<br>
+213.87.46.69<br>
+212.188.16.34<br>
+212.188.1.96<br>
+212.188.1.27<br>
+213.87.75.97<br>
+213.87.75.68<br>
+212.188.16.70<br>
+213.87.75.93<br>
+212.188.1.107</p>
+</details>
+<p>кому интересно то можете смотреть командой <code>tcpdump -n -f "port 443 and inbound and tcp[tcpflags] &amp; (tcp-syn) != 0"</code></p></td><td>2025-01-06T15:06:59.588Z</td></tr><tr><td>dyxiwiny</td><td><p>На ГиБ не смотрю, как и на CPU load. Сейчас замер сделал, 13 pps средний, в пике 28</p></td><td>2025-01-06T15:23:16.867Z</td></tr><tr><td>spotted_giraffe</td><td><p>Очень странно, решил проверить у себя. Много запросов на 443 порт, правда из Бразилии</p></td><td>2025-01-06T15:28:46.150Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Аналогично, тоже уйма запросов из Бразилии такого вида:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="ddos-атака-на-vps-с-vlessreality/d3e4e91cd510ea1d56ce7416bda9d22e61ce75a1.png" data-download-href="https://ntc.party/uploads/default/d3e4e91cd510ea1d56ce7416bda9d22e61ce75a1" title="изображение"><img src="ddos-атака-на-vps-с-vlessreality/d3e4e91cd510ea1d56ce7416bda9d22e61ce75a1_2_517x178.png" alt="изображение" data-base62-sha1="uevbsY0uabMx0Kl5r3P5sCANBU5" width="517" height="178" srcset="ddos-атака-на-vps-с-vlessreality/d3e4e91cd510ea1d56ce7416bda9d22e61ce75a1_2_517x178.png, ddos-атака-на-vps-с-vlessreality/d3e4e91cd510ea1d56ce7416bda9d22e61ce75a1_2_775x267.png 1.5x, ddos-атака-на-vps-с-vlessreality/d3e4e91cd510ea1d56ce7416bda9d22e61ce75a1_2_1034x356.png 2x" data-dominant-color="DDF2ED"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1494×517 80.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2025-01-06T17:39:12.996Z</td></tr><tr><td>aboba33(aboba33)</td><td><p>только что проверил у себя. Точно так же из Бразилии летят<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="ddos-атака-на-vps-с-vlessreality/ffd7043c64f49097672072a2af11856633799b79.jpeg" data-download-href="https://ntc.party/uploads/default/ffd7043c64f49097672072a2af11856633799b79" title="image"><img src="ddos-атака-на-vps-с-vlessreality/ffd7043c64f49097672072a2af11856633799b79_2_690x262.jpeg" alt="image" data-base62-sha1="AvgqoJTfukeCjhWAYUw0M0pNfdf" width="690" height="262" srcset="ddos-атака-на-vps-с-vlessreality/ffd7043c64f49097672072a2af11856633799b79_2_690x262.jpeg, ddos-атака-на-vps-с-vlessreality/ffd7043c64f49097672072a2af11856633799b79_2_1035x393.jpeg 1.5x, ddos-атака-на-vps-с-vlessreality/ffd7043c64f49097672072a2af11856633799b79_2_1380x524.jpeg 2x" data-dominant-color="EBEEEE"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1705×648 194 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2025-01-06T17:58:35.940Z</td></tr><tr><td>TikTak(TikTak)</td><td><aside class="quote no-group" data-username="dyxiwiny" data-post="1" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/4491bb/48.png" class="avatar"> dyxiwiny:</div>
+<blockquote>
+<p>Одинаковые SYN-флуд атаки с RU</p>
+</blockquote>
+</aside>
+<p>Наверное ркн <a href="https://t.me/usher2/3081" rel="noopener nofollow ugc">снова</a> active probing тестирует</p></td><td>2025-01-06T18:01:16.034Z</td></tr><tr><td>skyrunner(name)</td><td><p>Удивительно, но у меня тоже самое</p></td><td>2025-01-06T18:15:50.585Z</td></tr><tr><td>dyxiwiny</td><td><p>Да нет, насколько я знаю active probing это про другое. Тут просто флуд SYN пакетами, а если бы и был active probing, то смысла 0, так как это обычный https для них</p></td><td>2025-01-06T18:18:35.827Z</td></tr><tr><td>dyxiwiny</td><td><p>Взял IP-адреса, которые сейчас атакуют. Есть совпадение с постами выше. Можно сделать вывод, что у атакующих единовременно доступ к общему оборудованию, которым единовременно атакуют нас. Остаётся 2 вопроса: в чем смысл атаки и как определяют цели</p>
+<details>
+<summary>
+новый список</summary>
+<pre><code class="lang-auto">170.81.237.246
+170.81.238.146
+170.81.239.136
+212.188.42.152
+212.188.42.217
+212.188.42.45
+212.188.42.239
+170.81.238.50
+212.188.42.99
+170.81.238.74
+212.188.42.210
+170.81.238.147
+212.188.42.60
+170.81.236.234
+170.81.239.19
+212.188.42.82
+170.81.236.254
+212.188.42.78
+212.188.42.242
+212.188.42.193
+170.81.239.18
+170.81.236.18
+170.81.238.32
+170.81.239.94
+170.81.239.59
+212.188.42.209
+170.81.238.236
+212.188.42.199
+170.81.237.162
+212.188.42.226
+170.81.237.233
+212.188.42.53
+170.81.238.191
+212.188.42.148
+212.188.42.61
+170.81.237.250
+170.81.237.187
+212.188.42.71
+170.81.236.74
+170.81.238.202
+212.188.42.95
+170.81.236.224
+212.188.42.252
+212.188.42.111
+170.81.239.228
+170.81.237.35
+212.188.42.62
+212.188.42.52
+170.81.236.33
+170.81.239.234
+212.188.42.157
+170.81.238.8
+212.188.42.13
+170.81.239.212
+170.81.239.97
+212.188.42.97
+170.81.236.212
+170.81.239.125
+212.188.42.116
+170.81.236.131
+212.188.42.136
+212.188.42.228
+170.81.239.144
+212.188.42.84
+212.188.42.204
+212.188.42.24
+212.188.42.174
+212.188.42.208
+212.188.42.182
+212.188.42.153
+212.188.42.167
+170.81.239.252
+170.81.239.15
+170.81.238.198
+212.188.42.144
+170.81.239.69
+170.81.237.196
+212.188.42.120
+212.188.42.81
+170.81.237.178
+170.81.239.98
+212.188.42.240
+212.188.42.177
+170.81.238.112
+212.188.42.66
+170.81.239.132
+170.81.236.170
+212.188.42.192
+212.188.42.17
+212.188.42.51
+212.188.42.221
+212.188.42.220
+170.81.238.140
+212.188.42.117
+170.81.238.231
+212.188.42.101
+170.81.237.104
+212.188.42.200
+170.81.236.109
+212.188.42.155
+170.81.237.128
+170.81.237.169
+170.81.238.47
+170.81.239.121
+170.81.239.58
+212.188.42.12
+170.81.239.157
+212.188.42.235
+212.188.42.25
+170.81.237.181
+212.188.42.175
+170.81.236.149
+</code></pre>
+</details></td><td>2025-01-06T18:31:18.897Z</td></tr><tr><td>skyrunner(name)</td><td><p>Вы используете nekoray/nekobox?</p></td><td>2025-01-06T18:31:45.217Z</td></tr><tr><td>dyxiwiny</td><td><p>Нет, 3x-ui панель на сервере (порт панели закрыт, все операции через ssh туннель), v2rayn клиент на PC и Streisand на iOS</p></td><td>2025-01-06T18:36:07.445Z</td></tr><tr><td>skyrunner(name)</td><td><p>У меня тоже какое-то время была панель 3x-ui и x-ui, но  не зашло и поменял на голый сингбокс. Возможно корень в 3x-ui ? <a class="mention" href="/u/aboba33">@aboba33</a> , <a class="mention" href="/u/xx_rup3r7_p4ul50n_xx">@xX_RUP3R7_P4UL50N_Xx</a> - Вы когда-нибудь использовали с этого vps 3x-ui?</p></td><td>2025-01-06T18:38:21.121Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>3x-ui использую, но она слушает только 127.0.0.1 и находится на кастомном порту, сомневаюсь что в ней дело (к тому же максимально её задушил по правам). SSH находится высоко, вход только ключом и под своим именем (root запрещён).</p>
+<p>Из прочего - steal oneself на поддомене с <a href="http://duckdns.org">duckdns.org</a> через vless-reality, маршрутизация RU трафика в WARP в панели и блок всех сомнительных айпишников через iptables, основанный на этом репозитории - <a href="https://github.com/C24Be/AS_Network_List/tree/main" class="inline-onebox">GitHub - C24Be/AS_Network_List: Blacklists generator of subnets of Russian government agencies for blocking them on one's servers.</a></p></td><td>2025-01-06T18:45:03.081Z</td></tr><tr><td>skyrunner(name)</td><td><p>Но сама 3x-ui то может знать о ip впски, да и к тому же, тыж её когда устанавливаешь изначально, она со стандартными настройками. Скорее всего дело действительно в этих панелях. Но для более точных выводов нужен сервер который не засорен панелями никак, так сможем оперделить точно</p></td><td>2025-01-06T18:46:51.897Z</td></tr><tr><td>0ka(0ka)</td><td><p>1 пост прочитай… У меня там только nginx</p></td><td>2025-01-06T18:48:43.639Z</td></tr><tr><td>skyrunner(name)</td><td><p>И никогда не было 3x-ui? У вас тоже с бразильских айпишек?<br>
+Что на клиенте?</p></td><td>2025-01-06T18:49:57.572Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Интересно… Помимо бразильцев, пошла куча запросов с айпишников MTS из разных регионов. Связанно ли это как-то с их сегодняшними траблами?</p>
+<p>P.s. получил их командой <code>sudo timeout 15s tcpdump -nq -f "port 443 and inbound and tcp[tcpflags] &amp; (tcp-syn) != 0" | awk '{print $3}' | cut -d'.' -f1-4 | sort | uniq</code></p>
+<details>
+<summary>
+Скрин</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="ddos-атака-на-vps-с-vlessreality/21d6df6ad1abd0fe66101d74ae9be03a87a2dc81.jpeg" data-download-href="https://ntc.party/uploads/default/21d6df6ad1abd0fe66101d74ae9be03a87a2dc81" title="изображение"><img src="ddos-атака-на-vps-с-vlessreality/21d6df6ad1abd0fe66101d74ae9be03a87a2dc81_2_127x500.jpeg" alt="изображение" data-base62-sha1="4Pm7ofAvhk9KbYzXIWKREKnr38J" width="127" height="500" srcset="ddos-атака-на-vps-с-vlessreality/21d6df6ad1abd0fe66101d74ae9be03a87a2dc81_2_127x500.jpeg, ddos-атака-на-vps-с-vlessreality/21d6df6ad1abd0fe66101d74ae9be03a87a2dc81_2_190x750.jpeg 1.5x, ddos-атака-на-vps-с-vlessreality/21d6df6ad1abd0fe66101d74ae9be03a87a2dc81_2_254x1000.jpeg 2x" data-dominant-color="DEF0ED"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1511×5913 554 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<details>
+<summary>
+Список</summary>
+<p>142.250.185.206<br>
+142.250.186.142<br>
+142.250.186.42<br>
+142.250.186.65<br>
+170.81.236.137<br>
+170.81.236.156<br>
+170.81.236.167<br>
+170.81.236.195<br>
+170.81.236.253<br>
+170.81.237.187<br>
+170.81.237.24<br>
+170.81.237.37<br>
+170.81.237.87<br>
+170.81.238.112<br>
+170.81.238.179<br>
+170.81.239.183<br>
+170.81.239.188<br>
+170.81.239.198<br>
+170.81.239.53<br>
+212.188.16.123<br>
+212.188.16.132<br>
+212.188.16.161<br>
+212.188.16.183<br>
+212.188.16.19<br>
+212.188.16.199<br>
+212.188.16.201<br>
+212.188.16.205<br>
+212.188.16.213<br>
+212.188.16.225<br>
+212.188.16.240<br>
+212.188.16.63<br>
+212.188.16.70<br>
+212.188.16.91<br>
+212.188.42.131<br>
+212.188.42.154<br>
+212.188.42.216<br>
+212.188.42.233<br>
+212.188.42.243<br>
+213.87.46.109<br>
+213.87.46.194<br>
+213.87.46.215<br>
+213.87.46.220<br>
+213.87.46.82<br>
+213.87.75.111<br>
+213.87.75.139<br>
+213.87.75.14<br>
+213.87.75.155<br>
+213.87.75.198<br>
+213.87.75.244<br>
+213.87.75.249<br>
+213.87.75.31<br>
+213.87.75.64<br>
+213.87.75.87<br>
+216.58.206.42<br>
+80.77.172.12<br>
+80.77.172.15<br>
+80.77.172.16</p>
+</details></td><td>2025-01-06T19:20:25.074Z</td></tr><tr><td>skyrunner(name)</td><td><p>Ещё интересней</p></td><td>2025-01-06T19:28:59.980Z</td></tr><tr><td>dyxiwiny</td><td><p>Информация не новая))</p>
+<aside class="quote no-group" data-username="dyxiwiny" data-post="1" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/4491bb/48.png" class="avatar"> dyxiwiny:</div>
+<blockquote>
+<pre><code class="lang-auto">inetnum:        213.87.72.0 - 213.87.75.15
+netname:        MTSNET-URAL
+</code></pre>
+</blockquote>
+</aside></td><td>2025-01-06T19:30:12.696Z</td></tr><tr><td>skyrunner(name)</td><td><p>Но вы уже не 1)</p></td><td>2025-01-06T19:58:19.452Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Минимальные правки для улучшения работы сервера в данной ситуации:</p>
+<p><code>sudo nano /etc/sysctl.conf</code></p>
+<pre><code class="lang-auto"># BBR для улучшения пропускной способности
+net.ipv4.tcp_congestion_control = bbr
+net.core.default_qdisc = fq
+
+# Противодейсивме SYN-атакам
+net.ipv4.tcp_syncookies = 1
+
+# Противодейсивме Smurf-атакам
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+
+</code></pre>
+<p>Upd. убрал лишние (не работающие) рекомендации</p>
+<p>Upd.2 убрал дублирующиеся / лишние параметры, т.к. зачастую по умолчанию в системе уже стоят оптимальные</p></td><td>2025-01-06T20:25:37.424Z</td></tr><tr><td>No_nameuser</td><td><p>Зарегался чтобы отписать<br>
+Решил проверить, и тоже много бразильских ip-шников<br>
+Как пример:<br>
+170.81.236.115<br>
+170.81.236.138<br>
+170.81.236.45<br>
+170.81.237.0<br>
+170.81.237.227<br>
+170.81.237.5<br>
+170.81.238.114<br>
+170.81.238.122<br>
+170.81.238.209<br>
+170.81.238.47<br>
+170.81.239.42<br>
+170.81.239.70<br>
+170.81.239.85<br>
+170.81.236.140<br>
+170.81.236.178<br>
+170.81.236.22<br>
+170.81.237.0<br>
+170.81.237.133<br>
+170.81.237.214<br>
+170.81.237.47<br>
+170.81.238.207<br>
+170.81.238.222<br>
+170.81.238.32</p>
+<p>Отравил их сразу по подсетям в бан, интересно что не на всех vps такое, только на некоторых, где-то вообще пусто<br>
+Панели никакие не использую, голый xray-core с Vless+Reality с маскировкой под свой домен и на некоторых VLESS +XTLS -Vision тоже с маскировкой под свой домен</p></td><td>2025-01-06T21:05:00.368Z</td></tr><tr><td>rewhat</td><td><p>Подтверждаю, у меня абсолютно тоже самое. Спасибо всем за советы, сделал конфиг, забанил айпишники, даже Ютуб быстрее стал грузить вроде</p></td><td>2025-01-06T22:54:37.422Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="xX_RUP3R7_P4UL50N_Xx" data-post="27" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/xx_rup3r7_p4ul50n_xx/48/13752_2.png" class="avatar"> xX_RUP3R7_P4UL50N_Xx:</div>
+<blockquote>
+<p><code>sudo nano /etc/sysctl.conf</code></p>
+</blockquote>
+</aside>
+<p>Вы делаете хуже/так же как и по дефолту. (Да и некоторые параметры ниже тоже хуже дефолтных и даже не относятся к отражению флуда, например про буферы, fastopen, mtu probing, slow start). То что происходит в теме на атаку вообще не походит, просто флуд, неизвестно только зачем он</p></td><td>2025-01-07T04:27:33.519Z</td></tr><tr><td>wsvall</td><td><p>тоже самое</p>
+<details>
+<summary>
+чпок</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="ddos-атака-на-vps-с-vlessreality/adebc4c0c98839ded2a548a3ab1ff9c770fbc8c8.png" data-download-href="https://ntc.party/uploads/default/adebc4c0c98839ded2a548a3ab1ff9c770fbc8c8" title="image"><img src="ddos-атака-на-vps-с-vlessreality/adebc4c0c98839ded2a548a3ab1ff9c770fbc8c8.png" alt="image" data-base62-sha1="oOzJwjk7GiHc6OxQOjI8uPjcjva" width="83" height="500" data-dominant-color="272627"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">172×1028 7.86 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2025-01-07T14:15:00.686Z</td></tr><tr><td>wsvall</td><td><p>Ребята, а как подсеть забанить, ввожу<br>
+<code>sudo ufw insert 1 deny from 170.81.0.0/16</code><br>
+<code>sudo ufw reload</code><br>
+все равно прет от них трафик.</p>
+<p>У меня xray в docker, что еще ввести?</p></td><td>2025-01-07T15:16:24.328Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>У вас через VPS данные с торрент-клиента не пересылаются ли на анонсеры или DHT (не путать с “соединение с пиром”)?<br>
+Есть раздача, на которой много бразильцев присутствует. Отдача им не идет, но в обмене данными присутствуют постоянно.</p>
+<p><img src="ddos-атака-на-vps-с-vlessreality/8b0b8544f524c39aad6b9eb0758920467666d900.png" alt="Снимок экрана" data-base62-sha1="jQ33axo1QaUymqIrUFurrGuiTwk" width="114" height="234"></p>
+<p>ps: в результатах <code>tcpdump -n -f "port 443 and inbound and tcp[tcpflags] &amp; (tcp-syn) != 0"</code> был в том числе мой ip провайдера.</p></td><td>2025-01-07T15:17:36.293Z</td></tr><tr><td>dyxiwiny</td><td><aside class="quote no-group" data-username="Anonimno" data-post="33" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a88e57/48.png" class="avatar"> Anonimno:</div>
+<blockquote>
+<p>У вас через VPS данные с торрент-клиента не пересылаются ли на анонсеры или DHT (не путать с “соединение с пиром”)?</p>
+</blockquote>
+</aside>
+<p>Если правильно понял вопрос, то я вообще не использую торрент с впном</p>
+<aside class="quote no-group" data-username="Anonimno" data-post="33" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a88e57/48.png" class="avatar"> Anonimno:</div>
+<blockquote>
+<p>в результатах <code>tcpdump -n -f "port 443 and inbound and tcp[tcpflags] &amp; (tcp-syn) != 0"</code> был в том числе мой ip провайдера.</p>
+</blockquote>
+</aside>
+<p>Потому что эта команда выводит информацию о всех входящих TCP пакетах на порт 443 с флагом SYN, среди которых могут быть и ваши соединения</p></td><td>2025-01-07T18:13:36.292Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="dyxiwiny" data-post="34" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/4491bb/48.png" class="avatar"> dyxiwiny:</div>
+<blockquote>
+<p>Если правильно понял вопрос, то я вообще не использую торрент с впном</p>
+</blockquote>
+</aside>
+<p>Про эти параметры писал, в разных торрент-клиентах может быть по разному.</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="ddos-атака-на-vps-с-vlessreality/a43b588649e5a07415a932c318d91dd23f800eef.png" data-download-href="https://ntc.party/uploads/default/a43b588649e5a07415a932c318d91dd23f800eef" title="Снимок экрана"><img src="ddos-атака-на-vps-с-vlessreality/a43b588649e5a07415a932c318d91dd23f800eef.png" alt="Снимок экрана" data-base62-sha1="nqRs56HUYsBK1V0h1XfLHYexocf" width="690" height="345" data-dominant-color="E7E7E7"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Снимок экрана</span><span class="informations">701×351 9.42 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>Пару ip глазами “поймал” из списка tcpdump и в торрент-клиенте.</p></td><td>2025-01-07T18:56:42.792Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><aside class="quote no-group" data-username="0ka" data-post="30" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>Вы делаете хуже/так же как и по дефолту.</p>
+</blockquote>
+</aside>
+<p>Понял, благодарю за замечания (сам в этой сфере можно сказать новичок-самоучка, многого не понимаю как следует, а ChatGPT больно часто ошибается), поправил коммент и оставил только оптимально-минимальные параметры.</p>
+<aside class="quote no-group" data-username="wsvall" data-post="32" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wsvall/48/14315_2.png" class="avatar"> wsvall:</div>
+<blockquote>
+<p>все равно прет от них трафик.</p>
+</blockquote>
+</aside>
+<p>Насколько я понимаю это нормально. При добавлении адреса в блэклист трафик от него всё-рано продолжает поступать, но дальше файервола он никуда идёт (сужу в том числе и по своим настройкам в iptables, в котором видно сколько трафика было заблокировано с определённых адресов).</p>
+<aside class="quote no-group" data-username="Anonimno" data-post="33" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a88e57/48.png" class="avatar"> Anonimno:</div>
+<blockquote>
+<p>У вас через VPS данные с торрент-клиента не пересылаются ли на анонсеры или DHT</p>
+</blockquote>
+</aside>
+<p>Точно не скажу, но неделю-две назад качал через торрент в качестве эксперимента парочку раздач, как раз со включенным DHT, поиском локальных пиров и т.д. (хостер VPS такой трафик разрешает, а мой ОпСоС в свою очередь блокирует торренты в любом виде). Вот только не помню, чтобы на тех раздачах присутствовали бразильцы.</p>
+<p>BTW, мне кажется что в причинах данного флуда РКН всё-же не при чём, слишком странно для них это выглядит.</p></td><td>2025-01-07T19:30:54.618Z</td></tr><tr><td>throwaway1</td><td><p>Подтверждаю, у меня на сервере тоже самое происходит, сначало шло с 177.0.0.0/8 и 170.81.0.0/16 , боролся просто заблокировав эти подсети через iptables:</p>
+<pre><code class="lang-auto">iptables -t raw -A PREROUTING -s 170.81.0.0/16 -j DROP
+iptables -t raw -A PREROUTING -s 177.0.0.0/8 -j DROP
+</code></pre>
+<p>Но теперь они вообще с абсолютно разных подсетей дудосят, что с этим делать не знаю, мне к сожалению не хватает знаний.</p>
+<details>
+<summary>
+Screenshot</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="ddos-атака-на-vps-с-vlessreality/caf320ae1b651d5f1a65868c7bab742534d0f3ca.jpeg" data-download-href="https://ntc.party/uploads/default/caf320ae1b651d5f1a65868c7bab742534d0f3ca" title="Untitled"><img src="ddos-атака-на-vps-с-vlessreality/caf320ae1b651d5f1a65868c7bab742534d0f3ca_2_690x388.jpeg" alt="Untitled" data-base62-sha1="sXnlyiCiEgD7nU0cYwneTUMTr5w" width="690" height="388" srcset="ddos-атака-на-vps-с-vlessreality/caf320ae1b651d5f1a65868c7bab742534d0f3ca_2_690x388.jpeg, ddos-атака-на-vps-с-vlessreality/caf320ae1b651d5f1a65868c7bab742534d0f3ca_2_1035x582.jpeg 1.5x, ddos-атака-на-vps-с-vlessreality/caf320ae1b651d5f1a65868c7bab742534d0f3ca.jpeg 2x" data-dominant-color="33322F"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Untitled</span><span class="informations">1280×720 82.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>UPD:<br>
+Чуть более конкретные подсети:</p>
+<pre><code class="lang-auto">177.128.0.0/16
+177.72.0.0/16
+</code></pre>
+<details>
+<summary>
+tcpdump</summary>
+<pre><code class="lang-auto">177.128.120.115
+177.128.120.228
+177.128.120.37
+177.128.121.242
+177.128.121.58
+177.128.121.75
+177.128.122.117
+177.128.122.143
+177.128.122.196
+177.128.122.208
+177.128.122.39
+177.128.123.152
+177.128.123.155
+177.128.123.238
+177.128.123.6
+177.128.123.65
+177.128.123.99
+177.72.152.122
+177.72.152.140
+177.72.152.158
+177.72.152.17
+177.72.152.178
+177.72.152.98
+177.72.153.100
+177.72.153.156
+177.72.153.185
+177.72.153.253
+177.72.153.66
+177.72.154.113
+177.72.154.138
+177.72.154.180
+177.72.154.187
+177.72.154.49
+177.72.154.73
+177.72.155.0
+177.72.155.113
+177.72.155.28
+177.72.155.60
+</code></pre>
+</details></td><td>2025-01-07T20:45:04.534Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Как вариант - установить GeoIP модуль и блокировать все подключения из Бразилии / всех стран, кроме России + США + Европы + *страны расположения самого сервера*</p></td><td>2025-01-07T22:15:22.711Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>У меня в управлении четыре сервера у хостера H2NEXUS.<br>
+На три из них идёт такая «спам» атака с подсетей 177.0.0.0 и ряда других которые тут указывали.<br>
+И самое важное - на них как раз есть 3X-UI.<br>
+На которого нет атаки - не установлен 3X-UI.</p>
+<p>Чем грозит в теории такие сканы кроме нагрузки на процессор/скорость сервера?</p>
+<p>Если такими атаками можно найти сервера для взлома и дальнейшей эксплуатации, то видимо кто-то решил просканировать интернет для расширения своей базы «ботнетов».</p></td><td>2025-01-07T23:15:50.768Z</td></tr><tr><td>wsvall</td><td><aside class="quote no-group" data-username="1unknown" data-post="39" data-topic="14359" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>И самое важное - на них как раз есть 3X-UI.</p>
+</blockquote>
+</aside>
+<p>Порт панели доступен на внешке?<br>
+У меня закрыт, хожу на нее по ssh, но все равно ддосят.</p></td><td>2025-01-08T10:42:53.885Z</td></tr><tr><td>abc555</td><td><p>Если есть возможность, то заблокируйте весь icmp трафик у себя на сервере, по типу<br>
+в raw_prerouting<br>
+iifname “eth0.2” ip protocol icmp drop<br>
+и в raw_output<br>
+oifname “eth0.2” ip protocol icmp drop<br>
+а так же на вход, выход и переадресацию<br>
+это вас избавит от многих проблем, но если нет такой возможности, то значит вам не повезло )<br>
+Конечно если захотят, то начнут использовать и другие пути, но это ведь надо захотеть, а с другой стороны зачем, если и так полно всего, то вероятность что отвяжутся, ну или оставят на закуску, так, чисто для тренировки )</p></td><td>2025-01-08T11:31:45.259Z</td></tr><tr><td>1unknown(Unknown)</td><td><aside class="quote no-group" data-username="wsvall" data-post="40" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wsvall/48/14315_2.png" class="avatar"> wsvall:</div>
+<blockquote>
+<p>Порт панели доступен на внешке?</p>
+</blockquote>
+</aside>
+<p>Закрыт везде, тоже только по ssh.</p></td><td>2025-01-08T12:51:22.530Z</td></tr><tr><td>wsvall</td><td><p>Так странно…<br>
+Добавил правила:</p>
+<pre><code class="lang-auto">sudo iptables -t raw -A PREROUTING -i ens3 -p icmp -j DROP
+sudo iptables -t raw -A OUTPUT -o ens3 -p icmp -j DROP
+sudo iptables -A INPUT -p icmp -j DROP
+sudo iptables -A OUTPUT -p icmp -j DROP
+sudo iptables -A FORWARD -p icmp -j DROP
+</code></pre>
+<p>Но сервер все равно пингуется (сервер от Aeza), решил переустановить все, запустил переустановку и во время переустановки пинги не прекращались… что за система такая.</p></td><td>2025-01-08T17:49:55.799Z</td></tr><tr><td>0x99(Jabas)</td><td><p>Тоже бразильские мучачосы решили постучаться на открытый 443 порт</p>
+<pre><code class="lang-auto">3     8968  466K DROP       0    --  *      *       177.72.0.0/16        0.0.0.0/0
+4     8794  457K DROP       0    --  *      *       177.128.0.0/16       0.0.0.0/0
+5      277 14404 DROP       0    --  *      *       45.190.148.0/24      0.0.0.0/0
+6      252 13104 DROP       0    --  *      *       45.190.151.0/24      0.0.0.0/0
+7      207 10764 DROP       0    --  *      *       45.190.150.0/24      0.0.0.0/0
+8        0     0 DROP       0    --  *      *       45.190.148.0/24      0.0.0.0/0
+9      186  9672 DROP       0    --  *      *       45.190.149.0/24      0.0.0.0/0
+</code></pre>
+<p>Началось это оказывается еще в октябре, но как-то не обращал внимания на это<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="ddos-атака-на-vps-с-vlessreality/77ff7e80999e10da6c53f2b8280a7f7b777eb2ec.png" data-download-href="https://ntc.party/uploads/default/77ff7e80999e10da6c53f2b8280a7f7b777eb2ec" title="image"><img src="ddos-атака-на-vps-с-vlessreality/77ff7e80999e10da6c53f2b8280a7f7b777eb2ec_2_690x118.png" alt="image" data-base62-sha1="h7ydbwmaHF3ObA5wmvGoGQsagtS" width="690" height="118" srcset="ddos-атака-на-vps-с-vlessreality/77ff7e80999e10da6c53f2b8280a7f7b777eb2ec_2_690x118.png, ddos-атака-на-vps-с-vlessreality/77ff7e80999e10da6c53f2b8280a7f7b777eb2ec_2_1035x177.png 1.5x, ddos-атака-на-vps-с-vlessreality/77ff7e80999e10da6c53f2b8280a7f7b777eb2ec_2_1380x236.png 2x" data-dominant-color="1B2122"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1950×335 49 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2025-01-08T18:23:04.382Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="wsvall" data-post="43" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wsvall/48/14315_2.png" class="avatar"> wsvall:</div>
+<blockquote>
+<p>сервер от Aeza</p>
+</blockquote>
+</aside>
+<p>на аезе входящие icmp до сервера не доходят, ответы посылает их anti-ddos, т.е. отключить невозможно, да и не нужно по моему мнению (a полная блокировка icmp это вредно, особенно на аезе с их заниженным mtu)</p></td><td>2025-01-08T18:58:57.548Z</td></tr><tr><td>Xunlei</td><td><p>По IPv6 у меня до клиентов VPN доходят ICMPv6.</p></td><td>2025-01-08T19:04:35.826Z</td></tr><tr><td>0ka(0ka)</td><td><p>значит на ipv6 нету anti-ddos (называю так т.к. хз что у них там за туннель стоит), такое и у другого провайдера видел. по ipv4 все их ip отвечают на icmp, даже где впс выключены</p></td><td>2025-01-08T19:06:10.433Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>Как вы получили данный график TCP?</p></td><td>2025-01-09T11:48:24.118Z</td></tr><tr><td>0x99(Jabas)</td><td><p>grafana их строит, telegraf собирает, influxdb хранит.</p></td><td>2025-01-09T13:12:05.028Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>В sudo nano /etc/sysctl.conf добавил эти строки:</p>
+<pre><code class="lang-auto">net.ipv4.icmp_echo_ignore_all=1
+net.ipv4.tcp_syncookies=1
+net.ipv4.icmp_echo_ignore_broadcasts=1
+</code></pre>
+<p>После чего два раза за два дня собирал дамп командой:</p>
+<p><code>tcpdump -n -f "port 443 and inbound and tcp[tcpflags] &amp; (tcp-syn) != 0" -w /tmp/tcpdump_output.log &amp;&amp; echo "Процесс завершен, лог готов: /tmp/tcpdump_output.log"</code></p>
+<p>И после смотрел результаты командами:</p>
+<pre><code class="lang-auto">sudo chown root:root /tmp/tcpdump_output.log
+
+sudo tcpdump -n -r /tmp/tcpdump_output.log | awk '{split($3, ip, "."); subnet=ip[1]"."ip[2]; count[subnet]++; if (!first_time[subnet]) first_time[subnet]=$1; last_time[subnet]=$1} END {for (s in count) print count[s], s, substr(first_time[s],1,8), substr(last_time[s],1,8)}' | sort -k1,1nr
+</code></pre>
+<p>SYN атаки продолжаются, как с ними бороться не знаю. Влияние на сервер вроде бы не оказывают.</p></td><td>2025-01-10T21:16:45.201Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><p>Тоже самое:</p>
+<p>187.33.128.179<br>
+187.33.128.199<br>
+187.33.128.66<br>
+187.33.129.160<br>
+187.33.129.198<br>
+187.33.129.240<br>
+187.33.129.38<br>
+187.33.129.40<br>
+187.33.130.47<br>
+187.33.130.52<br>
+187.33.131.205<br>
+187.33.131.62</p>
+<p>Подскажите, плз, как эту подсеть заблокировать? У меня в докере 3x-ui</p></td><td>2025-01-13T19:05:17.175Z</td></tr><tr><td>skyrunner(name)</td><td><p>я так понимаю iptables -t raw -A PREROUTING -s 187.33.0.0/8 -j DROP</p></td><td>2025-01-13T19:18:41.379Z</td></tr><tr><td>throwaway1</td><td><p>Неверно, за место /8, нужно использовать /16.</p>
+<p>Если использовать /8, то это будет охватывать диапазон от 187.0.0.0 до 187.255.255.255, если же /16, то это охватит диапазон от 187.33.0.0 до 187.33.255.255.</p></td><td>2025-01-13T19:39:17.922Z</td></tr><tr><td>0ka(0ka)</td><td><p>Можно не блокировать а забить, вреда нет (и даже с флудом в 100 pps не будет). С блокировкой /8 подсети случайно себя или нужные сайты можете заблокировать</p></td><td>2025-01-13T19:40:49.147Z</td></tr><tr><td>throwaway1</td><td><p>Тоже верно, мне например лично помог совет с включением параметра:</p>
+<pre><code class="lang-auto">net.ipv4.tcp_syncookies = 1
+</code></pre>
+<p>До этого сервер заметно лагал, особенно при подключении через ssh.</p></td><td>2025-01-13T19:44:22.062Z</td></tr><tr><td>0ka(0ka)</td><td><p>Как минимум на ubuntu/debian этот параметр уже такой по дефолту. И срабатывает он только если в dmesg появляются сообщения “sending cookies”, если сообщений нет то значит он не срабатывает, а если сообщения появляются то не факт что это из-за внешнего флуда, если качать торренты через vless то они могут начать появляться</p></td><td>2025-01-13T19:45:51.502Z</td></tr><tr><td>skyrunner(name)</td><td><p>Дыа? Ну я себя ещё не заблокировал, так что ничего страшного)</p></td><td>2025-01-13T20:16:55.834Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><p>Спасибо, сработало</p></td><td>2025-01-13T23:11:01.014Z</td></tr><tr><td>Dhohbr</td><td><p>Судя по количеству пакетов, это обычный флуд, а не ддос.<br>
+Если у вас на столько слабый впс, что не справляется с таким количеством пакетов, то можно в iptables настроить защиту от syn flood, а не добавлять целые сети.</p>
+<blockquote>
+<p>iptables -N syn_flood<br>
+iptables -A INPUT -p tcp --syn -j syn_flood<br>
+iptables -A syn_flood -m limit --limit 1/s --limit-burst 3 -j RETURN<br>
+iptables -A syn_flood -j DROP</p>
+</blockquote></td><td>2025-01-14T12:59:53.544Z</td></tr><tr><td>0ka(0ka)</td><td><p>себя сколько раз заблокировали?</p></td><td>2025-01-14T13:20:52.632Z</td></tr><tr><td>Dhohbr</td><td><p>У меня белый список. Это пример из интернета. Понятное дело, что лимиты нужно подбирать.</p></td><td>2025-01-14T14:57:59.216Z</td></tr><tr><td>throwaway1</td><td><p>Пробовал это делать ранее, но vless сразу отваливался (вполне допускаю, что что-то сделал не так)</p></td><td>2025-01-14T16:41:53.969Z</td></tr><tr><td>A.g(A.g)</td><td><p>Вот ещё бразильские братушки:</p>
+<p>45.166.196.244<br>
+45.166.196.95<br>
+45.166.197.159<br>
+45.166.197.220<br>
+45.166.197.35<br>
+45.166.197.44<br>
+45.166.197.7<br>
+45.166.198.132<br>
+45.166.198.6<br>
+45.166.199.172<br>
+45.166.199.193<br>
+45.166.199.246<br>
+45.166.199.247<br>
+45.166.199.73</p></td><td>2025-01-14T18:28:30.194Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><p>И все-таки совсем не блочится. У меня Debian с 3x-ui в Docker. Подскажите, плз, таблицы raw там, я так понимаю нет, и находил инфу, что используется nftables вместо iptables. Есть знатоки? =)</p></td><td>2025-01-16T10:30:44.836Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Так ведь правила iptables работают на всю систему, в том числе и на Docker, разве нет? По крайней мере у меня тоже Debian 12 с 3X-UI (правда без докера, не вижу особого смысла в его применении в моём случае) и правила iptables отрабатывают как надо. Да, в выводе всё равно будут видны запросы от заблоченных айпишников, но дальше iptables они не идут, соответственно лишний раз не нагружают ресурсы сервера (хоть и нагрузка там мизерная).</p></td><td>2025-01-16T10:39:06.903Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><pre><code class="lang-auto">root@localhost:~# iptables -t raw -A PREROUTING -s 181.191.0.0/16 -j DROP
+
+</code></pre>
+<pre><code class="lang-auto">root@localhost:~# iptables -t raw -L
+Chain PREROUTING (policy ACCEPT)
+target     prot opt source               destination
+DROP       all  --  181-191-0-0.uplinkx.com.br/16  anywhere
+</code></pre>
+<pre><code class="lang-auto">root@localhost:~# sudo timeout 15s tcpdump -nq -f "port 443 and inbound and tcp[tcpflags] &amp; (tcp-syn) != 0" | awk '{print $3}' | cut -d'.' -f1-4 | sort | uniq
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on ens1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+20 packets captured
+25 packets received by filter
+0 packets dropped by kernel
+
+181.191.40.10
+181.191.40.138
+181.191.40.158
+181.191.41.70
+181.191.43.166
+181.191.43.238
+181.191.43.76
+
+</code></pre>
+<p>Выглядит так, что не блочится, и жрет ресурсы CPU</p></td><td>2025-01-16T10:58:13.490Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Хм, а какой вывод даст эта комманда?</p>
+<p><code>iptables -t raw -L -n -v</code></p></td><td>2025-01-16T11:06:08.251Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><pre><code class="lang-auto">root@localhost:~# iptables -t raw -L -n -v
+
+Chain PREROUTING (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination 
+ 2761  144K DROP       0    --  *      *       181.191.0.0/16       0.0.0.0/0   
+
+Chain OUTPUT (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination 
+</code></pre></td><td>2025-01-16T11:55:27.800Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Я далеко не эксперт в таких делах, но вроде бы правило работает как надо:</p>
+<pre><code class="lang-auto"> 2761  144K DROP       0    --  *      *       181.191.0.0/16       0.0.0.0/0   
+</code></pre>
+<p>Расшифровка - <code>ВХОДЯЩИЙ АДРЕС 181.191.0.0/16; ОТКЛОНЕНО: 2761 пакет, общим размером 144 килобайт</code></p>
+<p>А следующее:</p>
+<pre><code class="lang-auto">Chain PREROUTING (policy ACCEPT 0 packets, 0 bytes)
+</code></pre>
+<p>Говорит о том, что никакой трафик из этой цепочки не прошёл дальше iptables.</p></td><td>2025-01-16T12:11:57.188Z</td></tr><tr><td>Dhohbr</td><td><p>Используйте input в таблице фильтров<br>
+iptables -A INPUT -s 181.191.0.0/16 -j DROP</p></td><td>2025-01-16T12:13:01.281Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Разве таблица FILTER не идёт после RAW? Просто кмк в случае RAW трафик будет блокироваться ещё раньше, тем самым минимально соприкасаясь с адресами в статусе DROP</p></td><td>2025-01-16T12:17:30.741Z</td></tr><tr><td>Derulme(Derulme)</td><td><p>Пробуй:<br>
+iptables -D INPUT -p tcp --syn -j syn_flood 2&gt;/dev/null<br>
+iptables -F syn_flood 2&gt;/dev/null<br>
+iptables -X syn_flood 2&gt;/dev/null<br>
+iptables -N syn_flood<br>
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT<br>
+iptables -A INPUT -p tcp --syn -j syn_flood<br>
+iptables -A syn_flood -m limit --limit 100/s --limit-burst 170 -j RETURN<br>
+iptables -A syn_flood -j DROP</p>
+<p>Сделал максимум запросов 100 за 170 прыжков, и нагрузка на сервер заметно снизилась. Поправьте, если где-то накосячил</p></td><td>2025-01-16T12:44:03.889Z</td></tr><tr><td>0ka(0ka)</td><td><p>вы уверены что ваше правило вообще срабатывает? я не вижу в нём никакого смысла и только потенциальный вред. <code>iptables -vnL</code></p></td><td>2025-01-16T12:51:28.183Z</td></tr><tr><td>Dhohbr</td><td><p>Вообще, да. Но похоже что у него действительно адреса блокируются. Просто в tcpdump поступают пакеты с интерфейса, а не с iptables, поэтому он их видит.</p></td><td>2025-01-16T12:51:29.823Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><p>Если так, то печаль. Нагрузка на CPU не снизилась <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> Но спасибо за разъяснения <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2025-01-16T12:58:46.844Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="KirillSpatial" data-post="75" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kirillspatial/48/14924_2.png" class="avatar"> KirillSpatial:</div>
+<blockquote>
+<p>Нагрузка на CPU не снизилась</p>
+</blockquote>
+</aside>
+<p>какая у вас нагрузка от флуда 10 пакетов/сек? у меня почти нулевая</p></td><td>2025-01-16T12:59:17.775Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><p>100% на CPU. Одно ядро с 2.0 MHz</p></td><td>2025-01-16T13:00:05.878Z</td></tr><tr><td>0ka(0ka)</td><td><p>что в top? в iptables сколько правил?<br>
+<code>iptables -S</code><br>
+<code>iptables -S -t nat</code><br>
+<code>iptables -S -t raw</code><br>
+<code>iptables -S -t mangle</code><br>
+может их там у вас слишком много, поэтому даже малейший флуд долбит цп в 100%</p></td><td>2025-01-16T13:00:20.013Z</td></tr><tr><td>Dhohbr</td><td><p>У него там докер, который создает простыню из цепочек iptables. А в докере 3x-ui <img src="https://ntc.party/images/emoji/twitter/laughing.png?v=12" title=":laughing:" class="emoji" alt=":laughing:" loading="lazy" width="20" height="20"></p></td><td>2025-01-16T13:19:01.935Z</td></tr><tr><td>0ka(0ka)</td><td><p>я не про докер, тут на форуме кто-то выкладывал скрипт который банит все ip из AS, с ним можно получить несколько тысяч правил с которыми нагрузка на цп очень сильно возрастает, может у него что-то подобное</p></td><td>2025-01-16T13:21:55.478Z</td></tr><tr><td>0ka(0ka)</td><td><p>симулировал syn flood на ноут 2008г (<code>sysbench cpu run</code> выдаёт 350 events per second).<br>
+на атакующем компе <code>hping3 -i u100 -S -p 80 192.168.1.1</code> выдаёт около 5000 пакетов/сек, нагрузка на ЦП ноута не превышает 15%.<br>
+<code>hping3 -i u10 -S -p 80 192.168.1.1</code> выдаёт 10000 пакетов/сек, нагрузка на цп ноута ровно 50%.<br>
+5000 пакетов/сек это далеко от рекордных 120 пакетов/сек которые тут выкладывали <a href="https://ntc.party/t/ddos-%D0%B0%D1%82%D0%B0%D0%BA%D0%B0-%D0%BD%D0%B0-vps-%D1%81-vlessreality/14359/44" class="inline-onebox">DDOS атака на VPS с VLESS+REALITY - #44 by 0x99</a></p>
+<p>на самой днищенской впс которая у меня есть <code>sysbench cpu run</code> выдаёт 600 events per second</p></td><td>2025-01-16T13:41:25.094Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><p>Краткосрочные пики до 100%, потом падение до 0%</p>
+<p><code>    1157 root      20   0 1257540  57696  22656 S  27.0   6.3 143:31.92 xray-li+</code></p>
+<pre><code class="lang-auto">root@localhost:~# iptables -S
+iptables -S -t nat
+iptables -S -t raw
+iptables -S -t mangle
+-P INPUT ACCEPT
+-P FORWARD DROP
+-P OUTPUT ACCEPT
+-N DOCKER
+-N DOCKER-ISOLATION-STAGE-1
+-N DOCKER-ISOLATION-STAGE-2
+-N DOCKER-USER
+-A INPUT -i lo -j ACCEPT
+-A FORWARD -j DOCKER-USER
+-A FORWARD -j DOCKER-ISOLATION-STAGE-1
+-A FORWARD -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -o docker0 -j DOCKER
+-A FORWARD -i docker0 ! -o docker0 -j ACCEPT
+-A FORWARD -i docker0 -o docker0 -j ACCEPT
+-A DOCKER-ISOLATION-STAGE-1 -i docker0 ! -o docker0 -j DOCKER-ISOLATION-STAGE-2
+-A DOCKER-ISOLATION-STAGE-1 -j RETURN
+-A DOCKER-ISOLATION-STAGE-2 -o docker0 -j DROP
+-A DOCKER-ISOLATION-STAGE-2 -j RETURN
+-A DOCKER-USER -j RETURN
+-P PREROUTING ACCEPT
+-P INPUT ACCEPT
+-P OUTPUT ACCEPT
+-P POSTROUTING ACCEPT
+-N DOCKER
+-A PREROUTING -m addrtype --dst-type LOCAL -j DOCKER
+-A OUTPUT ! -d 127.0.0.0/8 -m addrtype --dst-type LOCAL -j DOCKER
+-A POSTROUTING -s 172.17.0.0/16 ! -o docker0 -j MASQUERADE
+-A DOCKER -i docker0 -j RETURN
+-P PREROUTING ACCEPT
+-P OUTPUT ACCEPT
+-A PREROUTING -s 181.191.0.0/16 -j DROP
+-A PREROUTING -s 177.93.0.0/16 -j DROP
+-P PREROUTING ACCEPT
+-P INPUT ACCEPT
+-P FORWARD ACCEPT
+-P OUTPUT ACCEPT
+-P POSTROUTING ACCEPT
+
+</code></pre>
+<pre><code class="lang-auto">
+root@localhost:~# iptables -L
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination
+ACCEPT     all  --  anywhere             anywhere
+
+Chain FORWARD (policy DROP)
+target     prot opt source               destination
+DOCKER-USER  all  --  anywhere             anywhere
+DOCKER-ISOLATION-STAGE-1  all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere             ctstate RELATED,ESTABLISHED
+DOCKER     all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination
+
+Chain DOCKER (1 references)
+target     prot opt source               destination
+
+Chain DOCKER-ISOLATION-STAGE-1 (1 references)
+target     prot opt source               destination
+DOCKER-ISOLATION-STAGE-2  all  --  anywhere             anywhere
+RETURN     all  --  anywhere             anywhere
+
+Chain DOCKER-ISOLATION-STAGE-2 (1 references)
+target     prot opt source               destination
+DROP       all  --  anywhere             anywhere
+RETURN     all  --  anywhere             anywhere
+
+Chain DOCKER-USER (1 references)
+target     prot opt source               destination
+RETURN     all  --  anywhere             anywhere
+
+</code></pre></td><td>2025-01-16T15:48:36.461Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><pre><code class="lang-auto">root@localhost:~# iptables -t raw -L -n -v                                      
+Chain PREROUTING (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination 
+ 2779  145K DROP       0    --  *      *       181.191.0.0/16       0.0.0.0/0   
+10519  547K DROP       0    --  *      *       177.93.0.0/16        0.0.0.0/0
+</code></pre></td><td>2025-01-16T15:52:41.137Z</td></tr><tr><td>0ka(0ka)</td><td><p>Видно же что команды не сработали. Буду полагать что вы сами ничего крупного туда не добавляли.<br>
+Пики до 100% от чего? от процессов или ядра? Если остановить докер?</p></td><td>2025-01-16T16:00:10.953Z</td></tr><tr><td>Derulme(Derulme)</td><td><p>Да, проверял на своём сервере, который тоже попал под флуд-атаку (в подарок со своими активными клиентами, которые хотят посмотреть ютуб). Писал-крутил настройки 1.5 часа, применил, никто не пожаловался… От 4600+ TCP запросов до 1600 максимум…</p>
+<p>В любом случае надо поискать более рациональное решение, чтобы не загрязнять iptables…</p></td><td>2025-01-16T16:15:31.306Z</td></tr><tr><td>Dhohbr</td><td><aside class="quote no-group" data-username="KirillSpatial" data-post="82" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kirillspatial/48/14924_2.png" class="avatar"> KirillSpatial:</div>
+<blockquote>
+<p>Краткосрочные пики до 100%, потом падение до 0%</p>
+</blockquote>
+</aside>
+<p>Обычно у хостера есть графики нагрузки на CPU и загрузки канала связи. Покажите их за последние сутки.<br>
+И покажите вывод <code>top -o %CPU</code> в пиках</p></td><td>2025-01-16T17:57:21.176Z</td></tr><tr><td>0ka(0ka)</td><td><p>непонятно кому ответ и про что, мне вы так и не ответили и не показали сколько у вас срабатываний на этом правиле.</p>
+<aside class="quote no-group" data-username="Derulme" data-post="85" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8491ac/48.png" class="avatar"> Derulme:</div>
+<blockquote>
+<p>От 4600+ TCP запросов до 1600 максимум</p>
+</blockquote>
+</aside>
+<p>совершенно непонятно о чём речь</p></td><td>2025-01-16T19:43:02.557Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><p>Проблема решилась переустановкой Docker и 3X-UI. SYN Flood никуда не делся, но загрузка CPU скакать перестала</p>
+<p>Узнал у ребят и Hostkey, CPU не ведут подсчет, канал почти не загружен:</p>
+<p><img src="ddos-атака-на-vps-с-vlessreality/4a943f70198bcbc6d82d4204e96ee3d9b996d88b.png" alt="image" data-base62-sha1="aDKX2wmMKD3BxEPwSE0kR7Vd003" width="359" height="325"></p>
+<p>А вот как это выглядело, постоянные скачки загрузки CPU до 100% с оповещением в тг-бот о превышении допустимого предела загрузки:</p>
+<pre><code class="lang-auto">root@localhost:~# top -o %CPU
+top - 21:13:23 up 1 day, 22:10,  1 user,  load average: 1.19, 0.70, 0.64
+Tasks: 115 total,   1 running, 114 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  4.2 us,  5.4 sy,  0.0 ni, 45.4 id,  0.0 wa,  0.0 hi,  7.2 si, 37.9 st
+MiB Mem :    892.3 total,     68.2 free,    544.2 used,    414.9 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used.    348.1 avail Mem
+
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+     14 root      20   0       0      0      0 S  16.4   0.0  30:40.15 ksoftirqd/0
+   1157 root      20   0 1257540  64864  22656 S  16.1   7.1 158:09.34 xray-linux-amd6
+  20331 root      20   0       0      0      0 I   4.0   0.0   0:01.57 kworker/0:2-events
+   1114 root      20   0 1284696  71512  32580 S   3.8   7.8  46:40.03 x-ui
+  19846 root      20   0   17996  11220   9280 S   1.6   1.2   0:05.10 sshd
+  20084 root      20   0   11684   5172   3040 R   1.6   0.6   0:25.20 top
+    628 root      20   0 1204988  47200  27256 S   0.4   5.2   4:51.98 containerd
+     15 root      20   0       0      0      0 I   0.2   0.0   1:56.23 rcu_preempt
+     28 root      20   0       0      0      0 S   0.2   0.0   0:17.58 kcompactd0
+  20225 root      20   0       0      0      0 I   0.2   0.0   0:00.53 kworker/u32:2-events_unbound
+      1 root      20   0  102156  11560   8444 S   0.0   1.3   0:04.60 systemd
+      2 root      20   0       0      0      0 S   0.0   0.0   0:00.30 kthreadd
+      3 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_gp
+      4 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_par_gp
+      5 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 slub_flushwq
+      6 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 netns
+     10 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 mm_percpu_wq
+     11 root      20   0       0      0      0 I   0.0   0.0   0:00.00 rcu_tasks_kthread
+     12 root      20   0       0      0      0 I   0.0   0.0   0:00.00 rcu_tasks_rude_kthread
+     13 root      20   0       0      0      0 I   0.0   0.0   0:00.00 rcu_tasks_trace_kthread
+     16 root      rt   0       0      0      0 S   0.0   0.0   0:04.00 migration/0
+     18 root      20   0       0      0      0 S   0.0   0.0   0:00.00 cpuhp/0
+     20 root      20   0       0      0      0 S   0.0   0.0   0:00.00 kdevtmpfs
+     21 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 inet_frag_wq
+     22 root      20   0       0      0      0 S   0.0   0.0   0:00.00 kauditd
+     23 root      20   0       0      0      0 S   0.0   0.0   0:00.19 khungtaskd
+     24 root      20   0       0      0      0 S   0.0   0.0   0:00.00 oom_reaper
+     27 root       0 -20       0      0      0 I   0.0   0.0   0:00.02 writeback
+     29 root      25   5       0      0      0 S   0.0   0.0   0:00.00 ksmd
+     30 root      39  19       0      0      0 S   0.0   0.0   0:29.47 khugepaged
+     31 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kintegrityd
+     32 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kblockd
+     33 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 blkcg_punt_bio
+     34 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 tpm_dev_wq
+     35 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 edac-poller
+     36 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 devfreq_wq
+     37 root       0 -20       0      0      0 I   0.0   0.0   0:23.03 kworker/0:1H-kblockd
+     38 root      20   0       0      0      0 S   0.0   0.0   0:00.73 kswapd0
+     44 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kthrotld
+     46 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/24-aerdrv
+     47 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/25-aerdrv
+     48 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/26-aerdrv
+     49 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/27-aerdrv
+     50 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/28-aerdrv
+     51 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/29-aerdrv
+     52 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/30-aerdrv
+     53 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/31-aerdrv
+     54 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/32-aerdrv
+     55 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/33-aerdrv
+     56 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/34-aerdrv
+     57 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/35-aerdrv
+     58 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/36-aerdrv
+     59 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/37-aerdrv
+     60 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/38-aerdrv
+     61 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 irq/39-aerdrv
+
+</code></pre></td><td>2025-01-17T08:22:03.280Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><p>От флуда помогла вот эта инструкция:</p>
+<ol>
+<li>
+<p>Активация SYN cookies<br>
+SYN cookies — это механизм, который позволяет серверу не хранить состояние полуоткрытого соединения, а вместо этого кодирует информацию о соединении в самом пакете SYN/ACK. Когда клиент отвечает ACK, сервер проверяет эту информацию и восстанавливает соединение. Для активации SYN cookies выполните команду:<br>
+<code>sysctl -w net.ipv4.tcp_syncookies=1</code><br>
+Чтобы изменения сохранились после перезагрузки системы, добавьте строку в файл /etc/sysctl.conf:<br>
+<code>net.ipv4.tcp_syncookies = 1</code></p>
+</li>
+<li>
+<p>Настройка параметров TCP-стека<br>
+Вы также можете настроить параметры TCP-стека для управления поведением сервера при атаках Syn flood. Эти настройки уменьшают время ожидания полуоткрытых соединений и увеличивают размер очереди для обработки новых запросов:</p>
+</li>
+</ol>
+<ul>
+<li>Уменьшение таймаута для полуоткрытых соединений<br>
+<code>sysctl -w net.ipv4.tcp_fin_timeout=30</code></li>
+<li>Увеличение размера очереди для входящих соединений<br>
+<code>sysctl -w net.ipv4.tcp_max_syn_backlog=4096</code></li>
+<li>Ограничение количества попыток повторной отправки SYN+ACK<br>
+<code>sysctl -w net.ipv4.tcp_synack_retries=2</code></li>
+</ul></td><td>2025-01-22T23:14:12.922Z</td></tr><tr><td>skyrunner(name)</td><td><p>Chat-gpt?</p></td><td>2025-01-23T07:30:53.823Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><p>Рабочий чат с бородатыми ойтишнегами )</p></td><td>2025-01-23T08:39:54.023Z</td></tr><tr><td>00x11(etwtwetwetwet)</td><td><p>100% ChatGPT “Вы также можете настроить параметры”, “Эти настройки уменьшают время ожидания полуоткрытых соединений и увеличивают размер очереди для обработки новых запросов:”</p>
+<p>Люди так писать не будут)</p></td><td>2025-01-23T08:58:55.095Z</td></tr><tr><td>skyrunner(name)</td><td><p>Видать вам в чате рабочем скинули ответ нейронки)</p></td><td>2025-01-23T09:55:46.187Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="KirillSpatial" data-post="89" data-topic="14359">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kirillspatial/48/14924_2.png" class="avatar"> KirillSpatial:</div>
+<blockquote>
+<ul>
+<li>Увеличение размера очереди для входящих соединений<br>
+<code>sysctl -w net.ipv4.tcp_max_syn_backlog=4096</code></li>
+<li>Ограничение количества попыток повторной отправки SYN+ACK<br>
+<code>sysctl -w net.ipv4.tcp_synack_retries=2</code></li>
+</ul>
+</blockquote>
+</aside>
+<p>кажется единственный нормальный совет в теме, первый может быть почти полностью бесполезен, но пусть будет, а tcp_synack_retries=2 может действительно помочь (у меня при тесте выше он таким и был, не из-за syn-flood, а для удобства, поэтому забыл упомянуть)</p></td><td>2025-01-23T10:09:11.733Z</td></tr><tr><td>KirillSpatial(Kirill Spatial)</td><td><p>Вполне, вполне )</p></td><td>2025-01-23T18:19:29.772Z</td></tr><tr><td>CyberScopeToday(xuaz)</td><td><p>Что за софт?</p></td><td>2025-01-26T14:12:39.554Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p><a href="https://www.infobyip.com/ipbulklookup.php" class="onebox" target="_blank" rel="noopener">https://www.infobyip.com/ipbulklookup.php</a></p></td><td>2025-01-26T14:18:43.589Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Возможно с “бразильскими ботами” продолжение:</p>
+<blockquote>
+<p>В проекте Fedora из-за запросов ИИ-индексаторов <a href="https://www.scrye.com/blogs/nirik/posts/2025/03/15/mid-march-infra-bits-2025/">наблюдаются</a> <a href="https://fosstodon.org/@Conan_Kudo/114190797503456984">сбои</a> с работой платформы совместной разработки <a href="https://pagure.io/">Pagure</a>. <strong>В процессе противостояния с ИИ-ботами пришлось заблокировать множество подсетей, включая весь диапазон IP-адресов Бразилии</strong>, что привело к блокировке и некоторых пользователей.<br>
+<a href="https://www.opennet.ru/opennews/art.shtml?num=62925">Источник</a></p>
+</blockquote>
+<p>На vps так же перестали бразильские ip отсвечивать.</p></td><td>2025-03-22T18:35:00.021Z</td></tr>
+    </table>
+      </body>
+    </html>

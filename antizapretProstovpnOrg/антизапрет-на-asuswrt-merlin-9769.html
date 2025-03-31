@@ -1,0 +1,136 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>антизапрет-на-asuswrt-merlin-9769</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>JewB</td><td><p>Как побороть, двойной ответ  DNS? <a href="https://i.imgur.com/Uq8n1qg.png" rel="noopener nofollow ugc">nslookup</a><br>
+Роутер Asus.  <a href="https://i.imgur.com/YHquRtD.png" rel="noopener nofollow ugc">Лог запуска OPENVPN на Asus AX88U</a></p></td><td>2024-08-25T16:52:26.310Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Убедитесь, что настроено <a href="https://ntc.party/t/%D0%BD%D0%B5-%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%D0%B5%D1%82-antizapret-%D0%BD%D0%B0-asus-ax88u/7985/7">так</a></p></td><td>2024-08-25T17:39:33.898Z</td></tr><tr><td>JewB</td><td><p>К сожалению у меня так не пройдет. Соединение с провайдером по VPN, кроме как автоматом получения DNS не проходит,  иначе vpn не соединиться…unknow vpn.*.ru</p></td><td>2024-08-25T17:50:07.446Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Если на эту модель есть прошивка ASUSWrt-Merlin, то в ней можно где-то в настройках DNS добавить запись <code>server=/vpn.example.com/x.x.x.x</code>, где x.x.x.x - DNS провайдера. Стоковая прошивка такого не позволяет.</p>
+<p>Это заставит резолвить конкретно <a href="http://vpn.example.com">vpn.example.com</a> через DNS провайдера (по-видимому, этот домен резолвится исключительно через DNS провайдера). А дальше уже можно настроить по инструкции.</p></td><td>2024-08-25T18:48:19.387Z</td></tr><tr><td>JewB</td><td><p>Спаcибо, Merlin стоит, но где это прописывать? В вэб морде такого не видел.<br>
+<a href="https://www.asuswrt-merlin.net/features" rel="noopener nofollow ugc">https://www.asuswrt-merlin.net/features</a>, здесь ни где не нашел, ну или не совсем понимаю, что искать.</p></td><td>2024-08-25T19:31:42.230Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Нужно <a href="https://github.com/RMerl/asuswrt-merlin.ng/wiki/Custom-domains-with-dnsmasq#adjust-router-configuration">включить поддержку скриптов</a> (первые три пункта, остальное не нужно)</p>
+<p>Затем <a href="https://github.com/RMerl/asuswrt-merlin.ng/wiki/Custom-domains-with-dnsmasq#connect-to-your-router">зайти по SSH</a> и <a href="https://github.com/RMerl/asuswrt-merlin.ng/wiki/Custom-domains-with-dnsmasq#edit-dnsmasq-config-options">вписать в файл</a> то, что я показывал выше:</p>
+<p><code>server=/vpn.example.com/x.x.x.x</code></p>
+<p>где <code>vpn.example.com</code> это VPN провайдера, а <code>x.x.x.x</code> - DNS провайдера. Не забыв сохранить фвйл.</p>
+<p>После этого можно отключить получение DNS провайдера и перезагрузить роутер. В теории, после перезагрузки VPN-подключение к провайдеру должно подключиться корректно. Если это так, дальше уже можно настраивать АнтиЗапрет.</p>
+<p>Вернуть всё, как было (на случай, если не заработает), можно, проделав всё в обратном порядке: включив получение DNS от провайдера и отключив поддержку скриптов.</p></td><td>2024-08-25T20:05:09.878Z</td></tr><tr><td>JewB</td><td><p>Спасибо, но к сожалению pptp[1436]: PPTP: Unknown host <a href="http://vpn.xxxxx.ru" rel="noopener nofollow ugc">vpn.xxxxx.ru</a><br>
+Строка в dnsmasq.conf.add  server=/vpn.XXXX.ru/ x.x.x.x<br>
+пробовал и  address=/vpn.XXXX.ru/x.x.x.x<br>
+Перезагружал</p></td><td>2024-08-25T20:32:57.904Z</td></tr><tr><td>JewB</td><td><p>Кое что получилось. Надо было сразу не прописывать DNS, а оставить поля пустыми. Роутер завелся.<br>
+DNS Privacy mode Disabled<br>
+<img src="антизапрет-на-asuswrt-merlin-9769/4429e0f05d599342c16e40a5ce2c272694f8be3a.png" alt="image" data-base62-sha1="9J0bWrgEj1TAQ27AALDkkhWjOTU" width="615" height="452"></p></td><td>2024-08-25T20:47:18.011Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="JewB" data-post="7" data-topic="9769">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/j/838e76/48.png" class="avatar"> JewB:</div>
+<blockquote>
+<p>пробовал и address=/vpn.XXXX.ru/x.x.x.x</p>
+</blockquote>
+</aside>
+<p>Это совершенно точно не работает.</p>
+<p>Директива <code>address</code> указывает “не резолвить домен через апстрим DNS, а сразу сопоставить домену вот этот IP-адрес” (а-ля hosts в Windows). Не наш случай.</p>
+<p>А директива <code>server</code> указывает “этот домен резолвить с помощью вот этого DNS”</p></td><td>2024-08-25T20:54:46.973Z</td></tr><tr><td>JewB</td><td><p>Теперь другая задача, если я выберу DNS, роутер не подлючится к wan…есть еще в вэб морде,  direct dns и в dhcp dns<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="антизапрет-на-asuswrt-merlin-9769/10abeaf64cabe4c9160a5610807728dc04bda43c.png" data-download-href="https://ntc.party/uploads/default/10abeaf64cabe4c9160a5610807728dc04bda43c" title=""><img src="антизапрет-на-asuswrt-merlin-9769/10abeaf64cabe4c9160a5610807728dc04bda43c_2_559x500.png" alt="" data-base62-sha1="2ntYfrt0H6eLwF0dzjC6rkuPt9i" role="presentation" width="559" height="500" srcset="антизапрет-на-asuswrt-merlin-9769/10abeaf64cabe4c9160a5610807728dc04bda43c_2_559x500.png, антизапрет-на-asuswrt-merlin-9769/10abeaf64cabe4c9160a5610807728dc04bda43c_2_838x750.png 1.5x, антизапрет-на-asuswrt-merlin-9769/10abeaf64cabe4c9160a5610807728dc04bda43c_2_1118x1000.png 2x" data-dominant-color="4D5B5F"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename"></span><span class="informations">1852×1656 198 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-08-25T21:05:10.105Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Тогда приведите <code>dnsmasq.conf.add</code> к следующему виду:</p>
+<pre><code class="lang-auto">nameserver 1.1.1.1
+nameserver 77.88.8.8
+server=/vpn.example.com/x.x.x.x
+</code></pre></td><td>2024-08-25T21:24:06.590Z</td></tr><tr><td>JewB</td><td><p>DNS ответ только завелся при прописывании еще и сюда.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="антизапрет-на-asuswrt-merlin-9769/0bbf103f52c6b83bd4d5bddd57e28130678df4cd.png" data-download-href="https://ntc.party/uploads/default/0bbf103f52c6b83bd4d5bddd57e28130678df4cd" title=""><img src="антизапрет-на-asuswrt-merlin-9769/0bbf103f52c6b83bd4d5bddd57e28130678df4cd_2_598x500.png" alt="" data-base62-sha1="1FUBqRJw4yw7syoT65ko4OJIMod" role="presentation" width="598" height="500" srcset="антизапрет-на-asuswrt-merlin-9769/0bbf103f52c6b83bd4d5bddd57e28130678df4cd_2_598x500.png, антизапрет-на-asuswrt-merlin-9769/0bbf103f52c6b83bd4d5bddd57e28130678df4cd_2_897x750.png 1.5x, антизапрет-на-asuswrt-merlin-9769/0bbf103f52c6b83bd4d5bddd57e28130678df4cd_2_1196x1000.png 2x" data-dominant-color="515F62"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename"></span><span class="informations">1690×1411 183 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-08-25T21:37:52.968Z</td></tr><tr><td>JewB</td><td><p>Запустил ovpn<br>
+remote-cert-tls server<br>
+cipher AES-128-GCM<br>
+resolv-retry infinite<br>
+setenv FRIENDLY_NAME “AntiZapret VPN TCP”<br>
+route 1.1.1.1 255.255.255.255 vpn_gateway<br>
+route 77.88.8.8 255.255.255.255 vpn_gateway<br>
+mute-replay-warnings<br>
+auth-nocache<br>
+Тест nslookup не проходит<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="антизапрет-на-asuswrt-merlin-9769/4836be7cf1cfef3fc06a83828744e48689067f70.png" data-download-href="https://ntc.party/uploads/default/4836be7cf1cfef3fc06a83828744e48689067f70" title=""><img src="антизапрет-на-asuswrt-merlin-9769/4836be7cf1cfef3fc06a83828744e48689067f70.png" alt="" data-base62-sha1="aiPFkecbDkreUf8QfII5rqCDrIQ" role="presentation" width="690" height="448" data-dominant-color="171717"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename"></span><span class="informations">1056×686 16.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<a href="https://dnsleaktest.com/" rel="noopener nofollow ugc">https://dnsleaktest.com/</a> тоже не проходит.<br>
+СhatGpt работает ютюб тоже вроде как, но не понятно как кэш dns почистил</p></td><td>2024-08-25T21:44:30.863Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="JewB" data-post="13" data-topic="9769">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/j/838e76/48.png" class="avatar"> JewB:</div>
+<blockquote>
+<p>не понятно как кэш dns почистил</p>
+</blockquote>
+</aside>
+<p><code>ipconfig /flushdns</code> - очистка кэша DNS в Windows.</p></td><td>2024-08-25T21:57:04.286Z</td></tr><tr><td>JewB</td><td><p>Немного напортачил. Спасибо за помощь!<br>
+В общем<br>
+custom_config: Appending content of /jffs/configs/dnsmasq.conf.add.<br>
+dnsmasq[2335]: bad option at line 35 of /etc/dnsmasq.conf</p>
+<p>С первыми 2 строчками, соединение wan не подымается.<br>
+nameserver 1.1.1.1<br>
+nameserver 77.88.8.8<br>
+server=/vpn.example.com/x.x.x.x</p>
+<p>Пробовал наверх server=/vpn.example.com/x.x.x.x, в общем это строчка работает одна.<br>
+Убираю 2 строки с днсами и запись bad option at line 35 of /etc/dnsmasq.conf , больше не появляется</p></td><td>2024-08-25T22:07:01.825Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Я идиот, замените <code>nameserver</code> на <code>server=</code><br>
+(нельзя полагаться на свою память, надо читать документацию…)</p>
+<pre><code class="lang-auto">server=1.1.1.1
+server=77.88.8.8
+server=/vpn.example.com/x.x.x.x
+</code></pre></td><td>2024-08-25T22:19:31.042Z</td></tr><tr><td>JewB</td><td><p>пепелац поднял wan и днс. Запустил ovpn, почистил `ipconfig /flushdns, ни один тест не проходит. Зато chatgpt паботает и ютюб, я фиг его знает как.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="антизапрет-на-asuswrt-merlin-9769/152c5f1508271c6ab55ef1f09321ef66dc64021f.png" data-download-href="https://ntc.party/uploads/default/152c5f1508271c6ab55ef1f09321ef66dc64021f" title=""><img src="антизапрет-на-asuswrt-merlin-9769/152c5f1508271c6ab55ef1f09321ef66dc64021f_2_690x247.png" alt="" data-base62-sha1="31j5Ip6K8rJOfgbp3ncy5x51TIP" role="presentation" width="690" height="247" srcset="антизапрет-на-asuswrt-merlin-9769/152c5f1508271c6ab55ef1f09321ef66dc64021f_2_690x247.png, антизапрет-на-asuswrt-merlin-9769/152c5f1508271c6ab55ef1f09321ef66dc64021f_2_1035x370.png 1.5x, антизапрет-на-asuswrt-merlin-9769/152c5f1508271c6ab55ef1f09321ef66dc64021f_2_1380x494.png 2x" data-dominant-color="EBEBEA"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename"></span><span class="informations">2211×793 62.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="антизапрет-на-asuswrt-merlin-9769/f7f1474b53a963c4b528c738f0d7d10e33443185.png" data-download-href="https://ntc.party/uploads/default/f7f1474b53a963c4b528c738f0d7d10e33443185" title=""><img src="антизапрет-на-asuswrt-merlin-9769/f7f1474b53a963c4b528c738f0d7d10e33443185_2_690x365.png" alt="" data-base62-sha1="znoS3VfuVl2NNAKiZ9QxiDN6WQ5" role="presentation" width="690" height="365" srcset="антизапрет-на-asuswrt-merlin-9769/f7f1474b53a963c4b528c738f0d7d10e33443185_2_690x365.png, антизапрет-на-asuswrt-merlin-9769/f7f1474b53a963c4b528c738f0d7d10e33443185_2_1035x547.png 1.5x, антизапрет-на-asuswrt-merlin-9769/f7f1474b53a963c4b528c738f0d7d10e33443185_2_1380x730.png 2x" data-dominant-color="0F0F0F"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename"></span><span class="informations">2040×1080 55 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Большое Вам Спасибо!<br>
+ЗЫ возможно завтра я опять к вам прийду)<br>
+ТВ то тоже показывает ютюб в 4к).</p></td><td>2024-08-25T22:33:48.809Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Всё правильно, судя по результатам.</p>
+<ul>
+<li>dnsleaktest показывает, что используется DNS вашего АнтиЗапрета</li>
+<li><a href="http://ya.ru">ya.ru</a> в России не заблокирован, поэтому он не проксируется</li>
+</ul>
+<p><img src="антизапрет-на-asuswrt-merlin-9769/00666f5df76c8729ec343c121a4d34670a546d17.jpeg" alt="E4AAAgKLneA-9601" data-base62-sha1="3xsTr2KUFgy3DFgp7BomMHiHAj" width="480" height="360"></p></td><td>2024-08-25T22:45:18.559Z</td></tr><tr><td>JewB</td><td><p>Благодарю вас. Все пока работает!</p></td><td>2024-08-26T04:29:23.759Z</td></tr><tr><td>JewB</td><td><aside class="quote no-group" data-username="dartraiden" data-post="18" data-topic="9769">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>Всё правильно, судя по результатам.</p>
+</blockquote>
+</aside>
+<p>Может подскажите. Как разрулить клиентов OVPN (Антизапрет vps-FIN) и WG(vps-РФ), которые установлены вместе на прошивке Merlin.<br>
+Суть такова, надо чтоб 2 клиента ходили на WG остальные на антизапрет. По одному запущенному клиенту будто ovpn или WG. все работает, вместе билеберда, в утечке ДНС показывает и РФ и Финляндию и Швецию…<br>
+Указываю в VPN - Director, клиентов кому через WG кому через ovpn, толку нет. Два клиента это ТВ, чтоб реклама на Youtube не шла использую vps-рф. На 2 клиентах, где указано в VPN Director идти на WG. все равно идут через антизапрет, вместо vpn WG.</p></td><td>2024-09-24T19:21:25.127Z</td></tr><tr><td>Zhaleksey</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="антизапрет-на-asuswrt-merlin-9769/f53134164cb02fd94955e722faefa78e2ee082f1.jpeg" data-download-href="https://ntc.party/uploads/default/f53134164cb02fd94955e722faefa78e2ee082f1" title="Screenshot_2025-03-10-08-12-30-417_com.android.chrome-edit"><img src="антизапрет-на-asuswrt-merlin-9769/f53134164cb02fd94955e722faefa78e2ee082f1_2_285x500.jpeg" alt="Screenshot_2025-03-10-08-12-30-417_com.android.chrome-edit" data-base62-sha1="yZ4oGFLS7cDGhbclZ9qj0vsqg4F" width="285" height="500" srcset="антизапрет-на-asuswrt-merlin-9769/f53134164cb02fd94955e722faefa78e2ee082f1_2_285x500.jpeg, антизапрет-на-asuswrt-merlin-9769/f53134164cb02fd94955e722faefa78e2ee082f1_2_427x750.jpeg 1.5x, антизапрет-на-asuswrt-merlin-9769/f53134164cb02fd94955e722faefa78e2ee082f1_2_570x1000.jpeg 2x" data-dominant-color="404C50"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_2025-03-10-08-12-30-417_com.android.chrome-edit</span><span class="informations">1220×2138 186 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Подскажите, что не так? Тест не проходит (((<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="антизапрет-на-asuswrt-merlin-9769/d824266c9f1bef49f491ba80d0841f4020f783a5.jpeg" data-download-href="https://ntc.party/uploads/default/d824266c9f1bef49f491ba80d0841f4020f783a5" title="IMG_20250310_083150"><img src="антизапрет-на-asuswrt-merlin-9769/d824266c9f1bef49f491ba80d0841f4020f783a5_2_388x500.jpeg" alt="IMG_20250310_083150" data-base62-sha1="uQ4Ag7jzjMPqdojx2vEUvM9mvzf" width="388" height="500" srcset="антизапрет-на-asuswrt-merlin-9769/d824266c9f1bef49f491ba80d0841f4020f783a5_2_388x500.jpeg, антизапрет-на-asuswrt-merlin-9769/d824266c9f1bef49f491ba80d0841f4020f783a5_2_582x750.jpeg 1.5x, антизапрет-на-asuswrt-merlin-9769/d824266c9f1bef49f491ba80d0841f4020f783a5_2_776x1000.jpeg 2x" data-dominant-color="576369"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">IMG_20250310_083150</span><span class="informations">1220×1569 263 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="антизапрет-на-asuswrt-merlin-9769/1a86c75faa117818c0d011cb368ecdc576d33383.jpeg" data-download-href="https://ntc.party/uploads/default/1a86c75faa117818c0d011cb368ecdc576d33383" title="Screenshot_2025-03-10-08-33-12-894_com.android.chrome-edit"><img src="антизапрет-на-asuswrt-merlin-9769/1a86c75faa117818c0d011cb368ecdc576d33383_2_584x500.jpeg" alt="Screenshot_2025-03-10-08-33-12-894_com.android.chrome-edit" data-base62-sha1="3MFaWpDHBzicFByU7lqsszu7bJF" width="584" height="500" srcset="антизапрет-на-asuswrt-merlin-9769/1a86c75faa117818c0d011cb368ecdc576d33383_2_584x500.jpeg, антизапрет-на-asuswrt-merlin-9769/1a86c75faa117818c0d011cb368ecdc576d33383_2_876x750.jpeg 1.5x, антизапрет-на-asuswrt-merlin-9769/1a86c75faa117818c0d011cb368ecdc576d33383_2_1168x1000.jpeg 2x" data-dominant-color="E1E0DF"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_2025-03-10-08-33-12-894_com.android.chrome-edit</span><span class="informations">1220×1044 107 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2025-03-10T03:34:47.150Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Посмотрите в системном журнале есть ли сообщение Initialization Sequence Completed. Если нет, то у вас OpenVPN не поднимается, поэтому и результаты теста такие.</p>
+<p>По скриншоту непонятно, в чём проблема, как вы сами видите журнал обрезан и справа и снизу. Скиньте в приват текстом всё содержимое журнала.</p></td><td>2025-03-10T20:41:05.963Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="Svinorezka" data-post="24" data-topic="9769">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/e36b37/48.png" class="avatar"> Svinorezka:</div>
+<blockquote>
+<p>А насчёт теста на вашем скрине - он пройден успешно.</p>
+</blockquote>
+</aside>
+<p>Это не так. Успешный результат - сервер АнтиЗапрета в результатах. Поскольку OpenVPN, по видимости, не стартанул, то используется fallback DNS в виде Cloudlare (чтобы хоть какой-то резолвинг был, но, естественно, и блокировки никуда не денутся).</p></td><td>2025-03-10T20:43:37.121Z</td></tr>
+    </table>
+      </body>
+    </html>

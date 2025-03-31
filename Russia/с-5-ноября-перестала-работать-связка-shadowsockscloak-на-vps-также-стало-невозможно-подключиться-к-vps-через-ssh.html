@@ -1,0 +1,203 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>с-5-ноября-перестала-работать-связка-shadowsockscloak-на-vps-также-стало-невозможно-подключиться-к-vps-через-ssh</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>JesusIsMyHomeboy</td><td><p>Доброго времени суток! Около полугода я пользовался связкой <strong>shadowsocks+cloak</strong> на своём VPS. С начала прошлой недели стало невозможно работать через shadowsocks+cloak, а также я <strong>потерял возможность подключения к своему VPS через ssh</strong>.<br>
+Я сам по-себе не злобный буратино: в феврале стало невозможно пользоваться Wireguard, а в апреле - чистым Shadowsocks (хотя я всё это списывал на свои неправильные настройки), но при этом у меня всё ещё была возможность подключения по ssh. VPS работает и оплачен. Домашний Интернет - <strong>Ростелеком</strong>. Подозреваю, что связка ss+cloak перестала работать из-за недавних РКН-овских <strong>блокировок ECH Cloudflare</strong>.</p>
+<ol>
+<li>Как обойти блокировку при условии, что ss+cloak и, судя по всему, работающие по такому же принципу инструменты не работают?</li>
+<li>Почему я не могу подключиться к своему серверу через ssh? <em>Бан IP сервера</em>? <em>Блокировка соединения по 22 порту</em>?</li>
+</ol></td><td>2024-11-10T16:33:57.773Z</td></tr><tr><td>odyxz</td><td><aside class="quote no-group" data-username="JesusIsMyHomeboy" data-post="1" data-topic="12977">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/jesusismyhomeboy/48/12731_2.png" class="avatar"> JesusIsMyHomeboy:</div>
+<blockquote>
+<p>Как обойти блокировку при условии, что ss+cloak и, судя по всему, работающие по такому же принципу инструменты не работают?</p>
+</blockquote>
+</aside>
+<p>Использовать то что работает (Xray, VLESS, etc)</p>
+<aside class="quote no-group" data-username="JesusIsMyHomeboy" data-post="1" data-topic="12977">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/jesusismyhomeboy/48/12731_2.png" class="avatar"> JesusIsMyHomeboy:</div>
+<blockquote>
+<p>Почему я не могу подключиться к своему серверу через ssh? <em>Бан IP сервера</em>? <em>Блокировка соединения по 22 порту</em>?</p>
+</blockquote>
+</aside>
+<p>На подсеть твоего VPS провайдера стоит блок хендшейка ssh.</p></td><td>2024-11-10T16:53:26.802Z</td></tr><tr><td>meeeeeh</td><td><p>Давайте немного разделим мух и котлеты.</p>
+<ol>
+<li>Блокировка ECH и вашего сервера - никак не связаны.</li>
+<li>Cloak достаточно легко детектируется. Заворачивать в него старые версии носков было достаточно наивно.</li>
+</ol>
+<p>Вот что скорее всего произошло: чёрная магия внутри ТСПУ установленном внутри сети вашего провайдера решила, мол, “вон на том адресе - VPN, роняй частично\весь трафик до него”. Сейчас не так принципиально важно как именно это работает - я думаю, вас мало интересует детально описание процесса.</p>
+<p>Ваши варианты:</p>
+<ol>
+<li>Перейти на Shadowsocks-2022 или VLESS</li>
+<li>Перейти на Amnezia-WG</li>
+</ol>
+<p>При любом раскладе, скорее всего вам придётся арендовать новую машину.</p></td><td>2024-11-10T16:55:30.352Z</td></tr><tr><td>JesusIsMyHomeboy</td><td><blockquote>
+<p>На подсеть твоего провайдера стоит блок хендшейка ssh.</p>
+</blockquote>
+<p>Они умеют определять, когда состоялся хендшейк, а потом блокируют? Смена сервера не поможет? Блокировка Wireguard по такому же принципу работает?<br>
+Как эту блокировку обойти? Нужен VPS с терминалом в клиентской панели управления сервером?</p></td><td>2024-11-10T16:58:25.232Z</td></tr><tr><td>meeeeeh</td><td><p>Нужен новый сервер. Ваш - уже засвечен, вкратце.</p>
+<p>Арендуйте новую машину, разверните на ней VLESS-прокси, и живите спокойно.</p></td><td>2024-11-10T16:59:43.809Z</td></tr><tr><td>JesusIsMyHomeboy</td><td><p>SS-2022 у нас работает без дополнительных инструментов?</p></td><td>2024-11-10T16:59:53.906Z</td></tr><tr><td>odyxz</td><td><p>При подключении ssh сервер передает свою версию в открытом виде. Её и блочит цензор. Смена адреса не поможет, а если поможет то временно.</p></td><td>2024-11-10T16:59:56.502Z</td></tr><tr><td>0ka(0ka)</td><td><p>вы уверены что сервер не лежит?</p></td><td>2024-11-10T17:01:39.012Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="JesusIsMyHomeboy" data-post="6" data-topic="12977" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/jesusismyhomeboy/48/12731_2.png" class="avatar"> JesusIsMyHomeboy:</div>
+<blockquote>
+<p>SS-2022 у нас работает без дополнительных инструментов?</p>
+</blockquote>
+</aside>
+<p>Да. Но лучше пользоваться VLESS - он маскируется под нормальный TLS-трафик, когда как SS-2022 выглядит как случайная каша. Её в первую очередь и будут ронять, если провайдер перейдёт на вайтлисты - как уже бывало в Дагестане во время местных волнений, например.</p></td><td>2024-11-10T17:02:04.336Z</td></tr><tr><td>JesusIsMyHomeboy</td><td><p>VLESS используется с чем-то или сам по-себе?</p></td><td>2024-11-10T17:06:46.639Z</td></tr><tr><td>meeeeeh</td><td><p>Вам <a href="https://habr.com/ru/articles/731608/" rel="noopener nofollow ugc">сюда</a>, <a href="https://web.archive.org/web/20240221195841/https://habr.com/ru/articles/731608/" rel="noopener nofollow ugc">сюда</a> или <a href="https://ntc.party/t/%D0%B0%D1%80%D1%85%D0%B8%D0%B2-%D0%B8%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D0%B9-%D0%BF%D0%BE-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4%D1%83-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA/7209/33">сюда</a>.</p></td><td>2024-11-10T17:08:58.997Z</td></tr><tr><td>spotted_giraffe</td><td><p>А у вас к VPS через VNC случайно нет доступа? Попробуйте для интереса перевесить ssh с 22 порта, если конечно у вас уже он не стандартный. Интересно появится доступ или нет<br>
+Так то верно, ставьте VLESS и уже и другого хостера</p></td><td>2024-11-10T17:16:20.798Z</td></tr><tr><td>Xunlei</td><td><p>У меня иногда сеть IPv4 пропадает на лоукостерах. Через веб-консоль проверяю. По прошествии несколько часов чинится само.</p></td><td>2024-11-10T19:41:54.652Z</td></tr><tr><td>Tyman</td><td><p>Может банально антиддос сработал? Несколько раз видел подобное - оказывалось что проблема в антиддосе, было и как у хостинга так и на каком то местном провайдере</p></td><td>2024-11-10T19:58:28.391Z</td></tr><tr><td>flynt-3650</td><td><p>весьма вероятно. я себя однажды Fail2ban’ом случайно забанил, так тоже думал, что меня РКН отключает)))</p></td><td>2024-11-10T20:12:32.995Z</td></tr><tr><td>flynt-3650</td><td><p>вот такую таблу сделал по хостинг провайдерам, если уж менять серв, то обрати внимание на этих. провайдеров брал из какой-то статьи на хабре</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>Hosting Provider</th>
+<th>Website</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>VDSina</strong></td>
+<td><a href="https://www.vdsina.com/pricing/standard" rel="noopener nofollow ugc">Link</a></td>
+</tr>
+<tr>
+<td><strong>AEZA</strong></td>
+<td><a href="https://aeza.net/virtual-servers" rel="noopener nofollow ugc">Link</a></td>
+</tr>
+<tr>
+<td><strong>Inferno</strong></td>
+<td><a href="https://inferno.name/" rel="noopener nofollow ugc">Link</a></td>
+</tr>
+<tr>
+<td><strong>PQ Hosting</strong></td>
+<td><a href="https://pq.hosting/" rel="noopener nofollow ugc">Link</a></td>
+</tr>
+<tr>
+<td><strong>FriendHosting</strong></td>
+<td><a href="https://friendhosting.net/ru/vps.php" rel="noopener nofollow ugc">Link</a></td>
+</tr>
+<tr>
+<td><strong>LLHost Inc.</strong></td>
+<td><a href="https://llhost-inc.eu/vps?os=linux" rel="noopener nofollow ugc">Link</a></td>
+</tr>
+<tr>
+<td><strong>ISHOSTING</strong></td>
+<td><a href="https://ishosting.com/ru/vps/linux" rel="noopener nofollow ugc">Link</a></td>
+</tr>
+<tr>
+<td><strong>NATVPS</strong></td>
+<td><a href="https://natvps.net/" rel="noopener nofollow ugc">Link</a></td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2024-11-10T20:16:04.809Z</td></tr><tr><td>Arch4Arts(Артур)</td><td><p>PQ недели 3 назад лежал тупо 2 недели подряд под доссом, администрация просто отмораживалась и удаляла комментарии, не рекомендую.</p></td><td>2024-11-10T20:51:37.502Z</td></tr><tr><td>flynt-3650</td><td><p>спасибо за информацию</p></td><td>2024-11-10T21:24:29.552Z</td></tr><tr><td>IndeecFOX(IndeecFox)</td><td><p><a href="http://hostVDS.com" class="onebox" target="_blank" rel="noopener nofollow ugc">hostVDS.com</a><br>
+<a href="https://h2.nexus/" class="onebox" target="_blank" rel="noopener nofollow ugc">https://h2.nexus/</a></p></td><td>2024-11-10T22:35:11.000Z</td></tr><tr><td>0ka(0ka)</td><td><p>Повезло, у меня сеть на сервере падала на 30 сек каждые 2 минуты с момента покупки до конца аренды, в поддержку писать бессмыссленно, они только тянут время и парят мозги, у них все работает, самый ужасный хостинг которым я “пользовался”. Лучше бы он вообще не работал т.к. тех поддержка очень удачно пинговала его в те моменты когда он работал и репортили что все норм<br>
+Напоминаю для остальных что это был недохостинг PQ</p></td><td>2024-11-11T01:34:15.493Z</td></tr><tr><td>BBS</td><td><p>pq.hosting просто снесли мой предоплаченный на несколько месяцев vps вместе с аккаунтом под надуманным предлогом. Якобы на меня пожаловался какой-то юзер, к IP которого я якобы подключался по ssh с неправильным паролем. И ещё они каждый день фигачат фейковые положительные отзывы про себя на всех популярных площадках. Никогда с ними не связывайтесь.</p></td><td>2024-11-11T02:24:38.385Z</td></tr><tr><td>BBS</td><td><aside class="quote no-group" data-username="meeeeeh" data-post="3" data-topic="12977">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/73ab20/48.png" class="avatar"> meeeeeh:</div>
+<blockquote>
+<p>Cloak достаточно легко детектируется. Заворачивать в него старые версии носков было достаточно наивно.</p>
+</blockquote>
+</aside>
+<p>Расскажите пожалуйста поподробнее. Я использую openvpn over cloak последней версии, который проходит через websocket реального сайта. Насколько велик риск обнаружения?</p></td><td>2024-11-11T02:27:03.923Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="BBS" data-post="27" data-topic="12977">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/e47774/48.png" class="avatar"> BBS:</div>
+<blockquote>
+<p>Насколько велик риск обнаружения?</p>
+</blockquote>
+</aside>
+<p>Скорее всего очень низкий (не считая active probing), в разы ниже чем у amneziaWG (который уже давно блочат, надо играться с фейками чтобы завести), непонятно чем думал тот форумчанин когда писал пост и рекомендовал амнезию вместо cloak в случае когда серверы потенциально банят (потенциально т.к. оп отказался постить минимальную инфу чтобы точно в этом убедиться)</p></td><td>2024-11-11T02:37:45.932Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="BBS" data-post="26" data-topic="12977">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/e47774/48.png" class="avatar"> BBS:</div>
+<blockquote>
+<p>Якобы на меня пожаловался какой-то юзер, к IP которого я якобы подключался по ssh с неправильным паролем.</p>
+</blockquote>
+</aside>
+<p>Проверьте свой ip адрес на abuseipdb, возможно у вас стоит ботнет брутфорсер на впс, или же у какого-то пользователя вашего прокси сервера</p></td><td>2024-11-11T02:47:04.565Z</td></tr><tr><td>BBS</td><td><aside class="quote no-group" data-username="0ka" data-post="28" data-topic="12977">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>Скорее всего очень низкий (не считая active probing)</p>
+</blockquote>
+</aside>
+<p>Спасибо. Active probing выявит реальный сайт, и на нём есть файлы различного размера для скачивания. Разве что они смогут отличить скачивание файла от websocket трафика. Кстати, смогут?</p>
+<aside class="quote no-group" data-username="0ka" data-post="29" data-topic="12977">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>Проверьте свой ip адрес на abuseipdb, возможно у вас стоит ботнет брутфорсер на впс, или же у какого-то пользователя вашего прокси сервера</p>
+</blockquote>
+</aside>
+<p>Нет, IP адрес чист. И других пользователей там не было. Видимо, не стоило оплачивать vps на пол года вперёд.</p></td><td>2024-11-11T03:05:10.054Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="0ka" data-post="29" data-topic="12977">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>Проверьте свой ip адрес на abuseipdb</p>
+</blockquote>
+</aside>
+<p>Интересный ресурс. На ip VPS который использую, висит жалоба о якобы множественных попытках подключения к ssh от <a href="https://www.abuseipdb.com/user/87994">malwarehunting.nl</a>. Судя по профилю, кидает несколько абуз в час на кого-либо.</p></td><td>2024-11-11T03:51:34.583Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="0ka" data-post="28" data-topic="12977">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>в разы ниже чем у amneziaWG (который уже давно блочат, надо играться с фейками чтобы завести)</p>
+</blockquote>
+</aside>
+<p>Амнезия вполне корректно работает наружу в большинстве случаев из коробки - по крайней мере, на данный момент. У меня в ЦФО на кажется пяти разных провайдерах подняты линки за бугор прямо на гейтвеях, для всяких автодесков и прочего нервного. Пока без проблем.</p>
+<p>С Cloak проблемы следующие: долгое время использовался фингерпринт от древней версии FF. Вроде как это с тех пор починили - но свечку не держал. Плюс к этому, большинство гайдов по заворачиванию чего-то в этот туннель полагались на одни и те же домены для фронтинга, что тоже максимально палевно. Если OP разворачивал свой конфиг по чьему-то готовому гайду - вероятность обнаружения сильно растёт.</p>
+<p>В любом случае, как я уже говорил - VLESS точно работает данном этапе развития событий. Если принимать решение исходя из устойчивости к обнаружению - естественно, я рекомендую в первую очередь его.</p>
+<p>Чуть выше по треду я залинковал мануалы (не свои), которыми можно спокойно пользоваться для референса.</p>
+<aside class="quote no-group" data-username="BBS" data-post="30" data-topic="12977">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/e47774/48.png" class="avatar"> BBS:</div>
+<blockquote>
+<p>Разве что они смогут отличить скачивание файла от websocket трафика. Кстати, смогут?</p>
+</blockquote>
+</aside>
+<p>Теоретически это возможно, умеет ли в это ТСПУ прямо сейчас - я не знаю.</p></td><td>2024-11-11T05:17:19.375Z</td></tr>
+    </table>
+      </body>
+    </html>

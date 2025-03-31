@@ -1,0 +1,303 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>dns-exchange-failed-for-local-dns</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>demike</td><td><p>linux + sing-box 1.10.2</p>
+<p>Добрый день очень простые правила. Для “.ru” доменов использовать локальный DNS, всё остальное в proxy-&gt;cloudflare. Но при запросе к <a href="http://myip.ru" rel="noopener nofollow ugc">myip.ru</a> возникает ошибка. При этом если отключить sing-box и сделать запрос, то всё работает отлично с системным локальным DNS. В чёс проблема?</p>
+<p><code>ERROR[0652] [1437494369 0ms] dns: exchange failed for myip.ru. IN HTTPS: no raw query support by current transport</code></p>
+<p>Или я не понимаю как это работает и “локальный sing-box” это ещё одна прослойка между системным стандартным DNS и sing-box? и мне нужно в address писать “127.0.0.53:53” вместо “local” ?</p>
+<p>например так?:</p>
+<pre><code class="lang-auto"> {
+        "address": "127.0.0.53:53",
+        "detour": "direct",
+        "tag": "dns-direct"
+}
+</code></pre>
+<p>И что такое <code>local</code> который указан в мануале? Это точно правильно? Не долен ли адрес быть localhost?</p>
+<pre><code class="lang-auto"> {
+        "address": "localhost",  &lt;-------???
+        "detour": "direct",
+        "tag": "dns-direct"
+}
+</code></pre>
+<p>БЕЗ sing-box что локальный dns работает идеально:<br>
+<img src="dns-exchange-failed-for-local-dns/19032fcda24b00236a04b7ae685570129173a756.png" alt="image" data-base62-sha1="3zgLnYy1LJSLQpG96PFJ6EdRNyK" width="305" height="158"><br>
+<img src="dns-exchange-failed-for-local-dns/3bedf1cc09baadd2a904a530d8936600afca0f1b.png" alt="image" data-base62-sha1="8y9XNGz44jDGFh3WbGpjRHg4mPF" width="487" height="324"></p>
+<p>Конфиг:</p>
+<pre><code class="lang-auto"> "dns": {
+    "servers": [
+      {
+        "address": "https://1.1.1.1/dns-query",
+        "address_resolver": "dns-direct",
+        "detour": "proxy",
+        "tag": "dns-remote"
+      },
+      {
+        "address": "local",
+        "detour": "direct",
+        "tag": "dns-direct"
+      }
+    ],
+    "rules": [
+      {
+        "outbound": "any",
+        "server": "direct"
+      },
+      {
+        "domain_suffix": [
+          "ru"
+        ],
+        "server": "dns-direct"
+      }
+    ]
+  },
+</code></pre></td><td>2024-11-25T10:31:28.791Z</td></tr><tr><td>0ka(0ka)</td><td><p>“local” адрес это системный днс, но там нет поддержки HTTPS запроса, а у вас в логе как раз HTTPS запрос.<br>
+127.0.0.53 это systemd-resolved</p></td><td>2024-11-25T12:16:57.824Z</td></tr><tr><td>demike</td><td><p>хорошо.<br>
+тогда если я поменяю на</p>
+<p><code>"address": "127.0.0.53:53"</code><br>
+тогда как понимаю будет локальный системный systemd-resolved, который берет DNS от моего роутера тоесть dns=192.168.50.1<br>
+И на двух последних скриншотах (без sin-box) мы видим что вроде как раз так и работает. НО по итогу с включением sin-box и <code>"address": "127.0.0.53"</code>  ничего опять не работает, таже ошибка.</p></td><td>2024-11-25T12:49:55.284Z</td></tr><tr><td>0ka(0ka)</td><td><p>повторяюсь, что в логе ошибка HTTPS записи, с local сервером так у всех, это не должно мешать работе сайтов т.к. для них достаточно А и АААА записей (на скриншотах А, АААА записи, в ошибке HTTPS запись). И я не знаю, заменяет ли sing-box лист серверов в systemd-resolved, посмотрите сами через resolvectl status. И вы не дали полный конфиг синга, непонятно какие у вас настройки inbound</p></td><td>2024-11-25T13:00:39.162Z</td></tr><tr><td>demike</td><td><p>такой конфиг, я пробовал и с<br>
+“strict_route”: true,<br>
+“strict_route”: false,<br>
+Все не .ru сайты работает прекрасно без ошибок, .ru не открываются, как в браузере , так и через CURL.</p>
+<pre><code class="lang-auto">{
+  "log": {
+    "level": "info"
+  },
+  "dns": {
+    "servers": [
+      {
+        "address": "https://1.1.1.1/dns-query",
+        "detour": "proxy",
+        "tag": "dns-remote"
+      },
+      {
+        "address": "local",
+        "detour": "direct",
+        "tag": "dns-direct"
+      },
+      {
+        "address": "rcode://success",
+        "tag": "dns-block"
+      }
+    ],
+    "rules": [
+      {
+        "domain": [],
+        "domain_keyword": [],
+        "domain_regex": [],
+        "domain_suffix": [
+          "ru"
+        ],
+        "geosite": [
+          "twitch",
+          "category-ru"
+        ],
+        "server": "dns-direct"
+      },
+      {
+        "query_type": [
+          32,
+          33
+        ],
+        "server": "dns-block"
+      },
+      {
+        "domain_suffix": ".lan",
+        "server": "dns-block"
+      }
+    ]
+  },
+  "route": {
+    "auto_detect_interface": true,
+    "final": "proxy",
+    "geoip": {
+      "path": "geoip.db"
+    },
+    "geosite": {
+      "path": "geosite.db"
+    },
+    "rules": [
+      {
+        "outbound": "dns-out",
+        "protocol": "dns"
+      },
+      {
+        "domain": [],
+        "domain_keyword": [],
+        "domain_regex": [],
+        "domain_suffix": [],
+        "geosite": [
+          "category-ads-all"
+        ],
+        "outbound": "block"
+      },
+      {
+        "domain": [],
+        "domain_keyword": [],
+        "domain_regex": [],
+        "domain_suffix": [
+          "ru"
+        ],
+        "geosite": [
+          "twitch",
+          "category-ru"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "network": "udp",
+        "outbound": "block",
+        "port": [
+          135,
+          137,
+          138,
+          139,
+          5353
+        ]
+      },
+      {
+        "ip_cidr": [
+          "224.0.0.0/3",
+          "ff00::/8"
+        ],
+        "outbound": "block"
+      },
+      {
+        "outbound": "block",
+        "source_ip_cidr": [
+          "224.0.0.0/3",
+          "ff00::/8"
+        ]
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "auto_route": true,
+      "domain_strategy": "",
+      "endpoint_independent_nat": true,
+      "address": "172.19.0.1/28",
+      "interface_name": "tun",
+      "mtu": 9000,
+      "sniff": true,
+      "sniff_override_destination": false,
+      "stack": "gvisor",
+      "strict_route": true,
+      "tag": "tun-in",
+      "type": "tun"
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "type": "vless",
+    },
+    {
+      "tag": "direct",
+      "type": "direct"
+    },
+    {
+      "tag": "block",
+      "type": "block"
+    },
+    {
+      "tag": "dns-out",
+      "type": "dns"
+    }
+  ],
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "path": "cache.db"
+    }
+  }
+}
+</code></pre></td><td>2024-11-25T13:19:47.875Z</td></tr><tr><td>demike</td><td><p>up</p></td><td>2024-11-27T08:52:03.045Z</td></tr><tr><td>andmail</td><td><blockquote>
+<p>“dns”: {<br>
+“servers”: [<br>
+{<br>
+“address”: “<a href="https://1.1.1.1/dns-query" rel="noopener nofollow ugc">https://1.1.1.1/dns-query</a>”,<br>
+“detour”: “proxy”,<br>
+“tag”: “dns-remote”<br>
+},<br>
+{<br>
+“address”: “local”,<br>
+“detour”: “direct”,<br>
+“tag”: “dns-direct”<br>
+},<br>
+{<br>
+“address”: “rcode://success”,<br>
+“tag”: “dns-block”<br>
+}<br>
+],<br>
+“rules”: [<br>
+{<br>
+“domain”: <span class="chcklst-box fa fa-square-o fa-fw"></span>,<br>
+“domain_keyword”: <span class="chcklst-box fa fa-square-o fa-fw"></span>,<br>
+“domain_regex”: <span class="chcklst-box fa fa-square-o fa-fw"></span>,<br>
+“domain_suffix”: [<br>
+“ru”<br>
+],<br>
+“geosite”: [<br>
+“twitch”,<br>
+“category-ru”<br>
+],<br>
+“server”: “dns-direct”<br>
+},<br>
+{<br>
+“query_type”: [<br>
+32,<br>
+33<br>
+],<br>
+“server”: “dns-block”<br>
+},<br>
+{<br>
+“domain_suffix”: “.lan”,<br>
+“server”: “dns-block”<br>
+}<br>
+],<br>
+<strong>“final”: “dns-direct”</strong><br>
+},</p>
+</blockquote>
+<p>Если добавить “final”: “dns-direct” работает?</p></td><td>2024-11-27T10:35:31.994Z</td></tr><tr><td>demike</td><td><p>тоже самое поведение.<br>
+Забугорные открываются отлично через прокси.<br>
+А ру нефига</p>
+<p>я тут поэкспериментировал<br>
+Интересно что если выставить и proxy и direct  = “address”: “<a href="https://1.1.1.1/dns-query%E2%80%9D" rel="noopener nofollow ugc">https://1.1.1.1/dns-query”</a>, то начинает работать. Но я бы хотел direct = выставить адрес локальный(локальный который берет dns от роутера)</p></td><td>2024-11-27T12:22:40.142Z</td></tr><tr><td>andmail</td><td><p>Чтобы выяснить, по какой причине конфиг не работает или работает не так, его нужно упростить, оставив только необходимые параметры для ru сайтов, остальное временно убрать. Убедиться, что настройки для ru сайтов работают правильно, после чего вернуть остальные части конфига на место.</p></td><td>2024-11-27T18:10:18.317Z</td></tr>
+    </table>
+      </body>
+    </html>

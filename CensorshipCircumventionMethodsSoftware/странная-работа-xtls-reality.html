@@ -1,0 +1,251 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>странная-работа-xtls-reality</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>xofamim548</td><td><p>Добрый день! Долгое время использовал reality на дешманском VPS во Франции, около года всё работало нормально (хотя и с редкими странностями), но в последнее время начались такие проблемы:</p>
+<ul>
+<li>Пинг до сервера вроде как обычно (~56 ms), скорость по speedtest тоже, крупные файлы тянет с нормальной скоростью.</li>
+<li>При этом сайты загружаются ненормально. Картинки, автары, превьюшки на youtube - либо дико долго, либо частично не догружаются совсем. Видео на youtube очень странно работают: рекламные ролики тормозят, видео поначалу тормозит, а потом вдруг как по маслу в том же качестве. Загрузка страниц иногда подтупливает. Напрямую без прокси все сайты работают нормально (ну, те что не заблокированы).</li>
+<li>Иногда как будто бы помогает реконнект в клиенте, но ненадолго. То есть сёрфинг начинает тупить, переподключаюсь - вроде становится бодрее, но через пару минут опять стухает, при этом на результаты speedtest и загрузку файлов не влияет, всё как будто бы окей.</li>
+<li>Продолжается это всё уже пару недель. Провайдер домру (эр-телеком) Нижний Новгород.</li>
+</ul>
+<p><em>Сразу скажу, что я ламер и слабо понимаю, что делаю.</em> Настраивал вот по этому <a href="https://habr.com/ru/articles/731608/" rel="noopener nofollow ugc">конфигу с хабра</a>. Также на VPS отключен ipv6 через /etc/sysctl.conf<br>
+(net.ipv6.conf.all.disable_ipv6 = 1), хотя в принципе хостер в любом случае только ipv4 выдаёт по умолчанию. На всякий случай конфиг:</p>
+<pre><code class="lang-auto">{
+  "log": {
+    "loglevel": "info"
+  },
+  "routing": {
+    "rules": [],
+    "domainStrategy": "AsIs"
+  },
+  "inbounds": [
+    {
+      "port": 443,
+      "protocol": "vless",
+      "tag": "vless_tls",
+      "settings": {
+        "clients": [
+          {
+            "id": "21780f95-a438-4847-b547-9821c4029948",
+            "email": "user1@myserver",
+            "flow": "xtls-rprx-vision"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+		"realitySettings": {
+			"show": false,
+			"dest": "vimeo.com:443",
+			"xver": 0,
+			"serverNames": [
+				"vimeo.com"
+			],
+			"privateKey": "mBuTlDwoM-hC0EUEA2ybbZCY6UoGFmBEAGsTJcp5h1E",
+			"minClientVer": "",
+			"maxClientVer": "",
+			"maxTimeDiff": 0,
+			"shortIds": [
+				"e6b7fbf2e80b6a97"
+			]
+		}
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "block"
+    }
+  ]
+}
+</code></pre>
+<p>Подключаюсь через hiddify 1.4.0, в ссылке для подключения помимо ключей, маскировочного домена и IP прописано следующее:</p>
+<pre><code class="lang-auto">security=reality
+alpn=h2
+fp=chrome
+type=tcp
+flow=xtls-rprx-vision
+encryption=none
+</code></pre>
+<p>В настройках hiddify прописал следующее (видел схожий конфиг на хабре для nekoray, если что сильно не пинайте):</p>
+<pre><code class="lang-auto">Resolve Destination = true
+IPv6 Route = Disabled
+
+Remote DNS: https://8.8.8.8/dns-query
+Remote DNS Domain Strategy: ipv4_only
+Direct DNS: 8.8.8.8
+Direct DNS Domain Strategy: ipv4_only
+Enable DNS Routing = true
+
+Service Mode = Proxy Service Only
+Strict Route = true
+</code></pre>
+<p>Браузер Firefox, подключаюсь на порт прокси через FoxyProxy. В домашнем роутере DNS-серверы от провайдера, если это имеет какое-то значение.</p>
+<p>Что пробовал делать:</p>
+<ul>
+<li>Развернуть систему на VPS с нуля и настроить всё заново</li>
+<li>Менять маскировочные домены<br>
+Разницы не увидел.</li>
+</ul>
+<p>Обращаюсь к сообществу — пожалуйста, посмотрите, всё ли нормально в конфигурации, и если нет, то что можно поправить? Лично у меня пока предположения такие:</p>
+<ul>
+<li>Я что-то делаю не так. Немного странно, потому что месяцами конфиг работал нормально.</li>
+<li>Что-то не в порядке на стороне хостера.</li>
+<li>Что-то не в порядке у Эр-Телеком с проходом трафика в направлении моего VPS. Если честно, такое уже бывало, с 2018 года пару раз менял VPS по причине “в часы пик пинг улетает в космос”. Сейчас вроде не улетает, но трассировка странная, на стыке между Москвой и Франкфуртом регулярно звёздочки вместо времени. С другой стороны не понимаю, почему скорость скачивания не проседает при этом.</li>
+<li>Что-то ещё. Совершенно не умею диагностировать подобные случаи, в этом случае нужны советы, куда копать. Как минимум, логично было бы протестировать соединение с заведомо нормальным сервером — буду благодарен, если кто-то подскажет, где взять бесплатный прокси для таких целей.</li>
+</ul></td><td>2024-07-26T09:40:14.880Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>ходят слухи что вместе с youtube стали “резать” VPNы всякие разные</p>
+<blockquote>
+<p>Вчера с утра в России массово жалуются на блокировку VPN-протоколов Outline/Shadowsocks.</p>
+</blockquote>
+<blockquote>
+<p>Вместе с носками отвалились прокси телеги. Верный признак того, что сигнатурами пытаются SS и VLESS глушить.</p>
+</blockquote></td><td>2024-07-26T09:48:20.469Z</td></tr><tr><td>xofamim548</td><td><p>Думал об этом, но вроде не особо похоже, проблема какая-то очень плавающая и нестабильны параметры замедления. <strong>Строго говоря</strong>, главное подозрение у меня на чисто технический затык со стороны домру (или Retnet, через который идёт трафик), потому что во-первых такое уже было, а во-вторых как будто бы проблема всё-таки наслаивается на пиковые часы. Я сначала не придал значения, потому что в районе 10 - 11 утра тоже подтупливает (вроде утром нелогично), но сейчас посмотрел инфу на <a href="http://transparencyreport.google.com" rel="noopener nofollow ugc">transparencyreport.google.com</a> — там как раз в районе 11 утра первый пик по трафику на многих сервисах, а второй вечером. В принципе сходится. Сейчас вот вроде вполне нормально всё работает. <strong>UPD:</strong> да хотя нет, всё равно превью на youtube не грузятся толком.</p>
+<p>Либо проблемы со стороны провайдера VPS, тоже вполне вариант.</p>
+<p>Но всё же мало ли, решил поинтересоваться, может и я что-то не так делаю. Или может как-то продеагностировать можно поточнее, я к сожалению совсем в этом не понимаю.</p></td><td>2024-07-26T09:57:34.955Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>там немного про другое<br>
+так же помню кто то жаловался на потери пакетов при определенных протоколах/направлениях.</p>
+<aside class="quote quote-modified" data-post="62" data-topic="1739">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%B2%D0%BD%D0%B5%D1%80%D0%B5%D0%B5%D1%81%D1%82%D1%80%D0%BE%D0%B2%D0%B0%D1%8F-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-google-firebase-firebaseappcom-formsgle-postsgle/1739/62">Внереестровая блокировка Google Firebase (firebaseapp.com, forms.gle, posts.gle)</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Захватите трафик с помощью Wireshark, в pcap-файл. На вашем скриншоте недостаточно информации. 
+
+Установите <a href="https://www.wireshark.org/download.html">WireShark</a>
+Выберите в нём сетевой интерфейс и укажите в строке filter: port 53 or port 443
+Запустите захват
+Откройте сервис/запустите программу, которая не работает
+Проверьте, есть ли какие-то адреса, на которые не удаётся подключение (много красных строк TCP SYN либо много повторений ClientHello).
+Остановите захват кнопкой с красным квадратом, сохраните в pcap-файл.
+
+Выложите дамп (pcap-фа…
+  </blockquote>
+</aside>
+</td><td>2024-07-26T10:03:11.767Z</td></tr><tr><td>quantalFox</td><td><aside class="quote no-group" data-username="xofamim548" data-post="1" data-topic="8219">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/a698b9/48.png" class="avatar"> xofamim548:</div>
+<blockquote>
+<p>рекламные ролики тормозят</p>
+</blockquote>
+</aside>
+<p>Используйте <a href="https://ublockorigin.com/" rel="noopener nofollow ugc">uBlock</a>. Одной проблемой будет меньше <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-07-26T10:04:35.478Z</td></tr><tr><td>xofamim548</td><td><p>Спасибо, там понятная инструкция. Проблема в том, что конкретно сейчас всё работает до безобразия нормально (что снова наводит на мысль о затыке в пиковые часы), и в wireshark ничего подозрительного не видно. Попробую сделать захват в тот момент, когда будет работать плохо.</p></td><td>2024-07-26T10:21:10.417Z</td></tr><tr><td>xofamim548</td><td><p><img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"> решает только одну из проблем, но спасибо. Но в целом реклама меня не так волнует, как рваная загрузка изображений на всех сайтах.</p></td><td>2024-07-26T10:23:01.473Z</td></tr><tr><td>0ka(0ka)</td><td><p>В пиковые часы сделайте пинг до 1.1.1.1 на впс, возможно провайдер не следит и сеть перегружена</p></td><td>2024-07-26T11:52:50.835Z</td></tr><tr><td>Dhohbr</td><td><p>А кроме Ютюба какие сайты тормозят?</p>
+<p>В браузере включите DoH или DoQ.</p>
+<p>Вот этим сканером найдите сайт в сети своего VPS хостера и впишите его как подменный домен <a href="https://github.com/XTLS/RealiTLScanner" class="inline-onebox" rel="noopener nofollow ugc">GitHub - XTLS/RealiTLScanner: A TLS server scanner for Reality</a><br>
+Vimeo тоже могут троттлить за компанию с ютубом.</p></td><td>2024-07-26T12:24:41.142Z</td></tr><tr><td>xofamim548</td><td><p>Сразу скажу, что дело видимо раскрыто, но вопрос у меня остался.</p>
+<p>Вечером снова начались тормоза, запустил wireshark. Вижу очень много вот такого при загрузке любого сайта через прокси:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="странная-работа-xtls-reality/e19f42c33fe95526d7f77a27b1c8b84d233187e6.png" data-download-href="https://ntc.party/uploads/default/e19f42c33fe95526d7f77a27b1c8b84d233187e6" title="2024-07-26 20_16_37-Захват из Ethernet (port 53 or port 443)"><img src="странная-работа-xtls-reality/e19f42c33fe95526d7f77a27b1c8b84d233187e6.png" alt="2024-07-26 20_16_37-Захват из Ethernet (port 53 or port 443)" data-base62-sha1="wbWE1onLwCMlHCC4RtgEAzrfC1U" width="690" height="232" data-dominant-color="7A7E8C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">2024-07-26 20_16_37-Захват из Ethernet (port 53 or port 443)</span><span class="informations">1080×364 21.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>А потом я зашёл на speedtest, и тут до меня дошло. По умолчанию он тестирует скорость в режиме Multi — разумеется, при таком раскладе он показывает нормальную скорость (вероятно, это же объясняет, почему Firefox с quic плохо загружает превью и рекламу на youtube, но без проблем грузит видео в высоком качестве). Начал проверять в режиме Single, и резко стало понятнее. Что сделал по итогу:</p>
+<ol>
+<li>Отключил прокси, остался на голом подключении ДомРу.</li>
+<li>Начал тестировать скорость до узлов в Страсбурге (там мой VPS) и окрестностях, в режиме Single. Везде download проваливается драматически, до 300 - 800 kbps, даже Париж в эту категорию попадает.</li>
+<li>Другие направления вроде Франкфурта и Амстердама работают нормально.</li>
+</ol>
+<p>Из вышеизложенного понимаю так, что проблема на стороне ДомРу. С этим вообще можно что-то пытаться сделать?</p>
+<p><strong>UPD</strong>: у знакомого на Ростелекоме похожая ерунда кстати с парижским сервером, download 4 mbps, upload 36 mbps. Олимпиада?</p></td><td>2024-07-26T18:07:20.878Z</td></tr><tr><td>0ka(0ka)</td><td><p>Какой сервер в спидтесте? Почему не сделали пинг на самой впс чтобы исключить проблемы на ней?</p></td><td>2024-07-26T19:12:33.746Z</td></tr><tr><td>xofamim548</td><td><p>В апдейте говорю про Paris - Virtual Technologies and Solutions. Но лично у меня откровенно плохо работает почти всё подряд. Все серверы в Karlsruhe еле шевелятся на download, Strasbourg весь кроме ORANGE (почему-то). За последний час стало заметно лучше, с 800 kbps в среднем подросло до 2 - 2,5 Mbps, и сразу прокси заметно живее заработал.</p></td><td>2024-07-26T19:24:18.438Z</td></tr><tr><td>xofamim548</td><td><p>Делал пинг на самой VPS до 1.1.1.1, средний 3,7 ms как и был днём, поэтому не стал упоминать.</p></td><td>2024-07-26T19:24:49.299Z</td></tr><tr><td>0ka(0ka)</td><td><p>bbr на сервере включен?<br>
+<a href="https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR-v100.zip" class="onebox" target="_blank" rel="noopener">https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR-v100.zip</a><br>
+В пиковый час можете сделать трассировку до сервера, 10 минут минимум</p></td><td>2024-07-26T20:30:43.748Z</td></tr><tr><td>xofamim548</td><td><aside class="quote no-group" data-username="0ka" data-post="14" data-topic="8219">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>bbr на сервере включен?</p>
+</blockquote>
+</aside>
+<p>Хороший вопрос! Нет, был отключен, включил.</p>
+<aside class="quote no-group" data-username="0ka" data-post="14" data-topic="8219">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p><a href="https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR-v100.zip" rel="noopener nofollow ugc">https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR-v100.zip </a><br>
+В пиковый час можете сделать трассировку до сервера, 10 минут минимум</p>
+</blockquote>
+</aside>
+<p>Хорошо, попробую.</p></td><td>2024-07-26T20:43:20.389Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>вчера было что то странное вечером даже на RosTelecom<br>
+например дикие тормоза acestream://<br>
+может на самом деле начали не только ютуб резать скорость а вообще все что не попадает под “белые списки” при трафике на определенные AS/CIDR</p></td><td>2024-07-27T08:10:45.402Z</td></tr><tr><td>xofamim548</td><td><aside class="quote no-group" data-username="0ka" data-post="14" data-topic="8219">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p><a href="https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR-v100.zip" rel="noopener nofollow ugc">https://github.com/White-Tiger/WinMTR/releases/download/v1.0/WinMTR-v100.zip </a><br>
+В пиковый час можете сделать трассировку до сервера, 10 минут минимум</p>
+</blockquote>
+</aside>
+<p>Насчёт пиковости часа не уверен, но вообще ситуация следующая:<br>
+<img src="странная-работа-xtls-reality/7836a6490554f765f9867843f5b092eaff8411a7.png" alt="VPS_Strasbourg_2024-07-27 12_00_22-2024-07-27 11_43_50" data-base62-sha1="h9snID9p0VWOLSBuzJ6IQfJ6brN" width="612" height="250"></p>
+<p>Дальше сделал вот что. Посмотрел список узлов в looking glass <a href="https://looking.house/company.php?id=105" rel="noopener nofollow ugc">PQ.Hosting</a> и нашел парочку, к которым трассировка по РФ идёт тем же маршрутом (конечная точка 139.45.241.200). Бегло протестировал.</p>
+<p>Вот Франкфурт. Картина схожая.<br>
+<img src="странная-работа-xtls-reality/73cf061ee0ba730c56f76048c48434ea165666ab.png" alt="PQ-Hosting_Frankfurt_2024-07-27 11_53_40" data-base62-sha1="gwusg1dfpuS5cS9SLndtKd3MERB" width="615" height="186"></p>
+<p>А вот Меппел (Нидерланды). Здесь проблемы нет.<br>
+<img src="странная-работа-xtls-reality/e29475a61401df1c2b43ee510f7fd941f9e1f39f.png" alt="PQ-Hosting_Meppel(NL)_2024-07-27 11_59_01" data-base62-sha1="wkpYQMB2LjbyS1LaiUdweQIRDwH" width="617" height="184"></p>
+<p>Не знаю, что сказать <img src="https://ntc.party/images/emoji/twitter/neutral_face.png?v=12" title=":neutral_face:" class="emoji" alt=":neutral_face:" loading="lazy" width="20" height="20"></p></td><td>2024-07-27T09:16:19.075Z</td></tr><tr><td>0ka(0ka)</td><td><p>на 1 скрине видно реальные потери только на самой впс, что может говорить о проблемах с сетью у хостера, пришлите ip в лс если тут не хотите писать.</p>
+<p>на ip от pq никогда не тестируйте, у них ужасная сеть, вы не получите реальных результатов и только запутаетесь, покупать впс у них не рекомендую никому и никогда</p></td><td>2024-07-27T09:25:27.544Z</td></tr><tr><td>xofamim548</td><td><p>IP отправил. Не могли бы чуть подробнее объяснить, что значит реальные потери при трассировке и чем они отличаются от нереальных? <img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"></p></td><td>2024-07-27T09:32:52.643Z</td></tr><tr><td>0ka(0ka)</td><td><p>потери нужно смотреть снизу вверх. у вас на скрине видно потери уже на роутере, затем в сети провайдера потери “магически восстанавливаются”, чего не может быть. на последних 6 хопах (исключая самый последний) потерь нет, значит их небыло и до них, они появились только на самом последнем хопе</p></td><td>2024-07-27T09:40:45.372Z</td></tr><tr><td>xofamim548</td><td><p>Ну да, вы правы, звучит логично <img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"> Вообще кстати давно хотел спросить: тогда получается, что “пропадающие” пакеты в середине маршрута — это потому что хост режектит часть ICMP запросов, но в реальности работает нормально? Или какая-то другая причина?</p></td><td>2024-07-27T09:46:54.836Z</td></tr><tr><td>0ka(0ka)</td><td><p>этого я не знаю. и еще одна проблема icmp трассировки в том, что маршрутов на самом деле может быть несколько, но в трассе будет видно только один. остальные маршруты можно увидеть через tcp/udp трассировку, но нормальных инструментов для этого я еще не видел, линуксовый mtr умеет, но очень плохо</p>
+<p>и еще вспомнил что на некоторых хостингах icmp пакеты не доходят до сервера из-за anti-ddos, такое есть на aeza, там ответы приходят даже если сервер выключен, в таком случае трассу надо делать от самой vps а не к ней</p></td><td>2024-07-27T09:53:27.100Z</td></tr><tr><td>xofamim548</td><td><p>Благодаря <a class="mention" href="/u/0ka">@0ka</a> удалось выяснить, что проблема всё-таки в плохой работе самого VPS (RackNerd если кому интересно, всё-таки дёшево и хорошо если и бывает, то недолго <img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"> ). Благодарю за помощь, будем искать что-то получше.</p></td><td>2024-07-29T07:41:52.790Z</td></tr><tr><td>sakontwist</td><td><p>вот этот - работает отлично <a href="https://cp.inferno.name/" rel="noopener nofollow ugc">https://cp.inferno.name/</a></p></td><td>2024-07-29T08:25:55.204Z</td></tr><tr><td>xofamim548</td><td><p>Буду иметь в виду, спасибо.</p></td><td>2024-07-29T10:31:42.724Z</td></tr><tr><td>lewsha</td><td><p>1 гб озу и 20 гб ssd для vless reality хватит или нужен побольше?</p></td><td>2024-08-07T15:22:26.896Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Работает на серваке с 1 CPU Xeon, 512 Мб ОЗУ, 10 Гб SSD. В потолок железа не упирается, запас присутствует % 30</p>
+<details>
+<summary>
+Speedtest</summary>
+<p><img src="странная-работа-xtls-reality/9b98d14e5b786dd53bb330f7050f72808698e816.png" alt="2024-08-07" data-base62-sha1="mctpVg5XgUCqdFrXor3bwqlW6Oy" width="533" height="168"></p>
+</details></td><td>2024-08-07T15:54:40.997Z</td></tr><tr><td>lewsha</td><td><p>классно, не подскажите где vps брали?</p></td><td>2024-08-07T15:56:14.248Z</td></tr><tr><td>lewsha</td><td><p>и вы используете vless reality?</p></td><td>2024-08-07T15:57:17.160Z</td></tr><tr><td>lewsha</td><td><p><img src="странная-работа-xtls-reality/63592ae06de1ce788e5592f06a5501d5caa2a236.png" alt="image" data-base62-sha1="eaSjdLRkWiS3T7kRpUAYQT8U7WK" width="543" height="171"><br>
+у меня такие цифры vps выдает хотя железо по сравнению с вашим у меня 1 cpu, 2гб озу и 30 гб ssd и 1 гбит интернет на ней, а такие плохие показатели выдает</p></td><td>2024-08-07T16:00:44.909Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="lewsha" data-post="29" data-topic="8219" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/l/5f9b8f/48.png" class="avatar"> lewsha:</div>
+<blockquote>
+<p>и вы используете vless reality?</p>
+</blockquote>
+</aside>
+<p>На сервере стоит <a href="https://github.com/XTLS/Xray-core">Xray-core</a>, настроен vless reality</p></td><td>2024-08-07T16:01:13.261Z</td></tr><tr><td>lewsha</td><td><p>панелью 3x-ui не пользуетесь?</p></td><td>2024-08-07T16:03:06.101Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Нет, не вижу смысла мониторить)</p></td><td>2024-08-07T16:04:57.110Z</td></tr><tr><td>xofamim548</td><td><p>Бросается в глаза огромный пинг, сервер где-то на западном побережье США? Ну либо вы с востока РФ куда-то далеко стучитесь. В любом случае, упирается не в ресурсы, а в сеть, он и на 512МБ с одним ядром нормально должен работать. Ищите сервер поближе к вашему местоположению, проверяйте пинг и скорость перед покупкой, у многих хостеров есть looking glass для этого.</p></td><td>2024-08-07T19:22:06.396Z</td></tr><tr><td>tempuser</td><td><p>С недавних пор со смартфона <a href="http://speedtest.net" rel="noopener nofollow ugc">speedtest.net</a> дает слабые результаты, а здесь <a href="https://fiber.google.com/speedtest/" class="inline-onebox" rel="noopener nofollow ugc">Internet Speed Test | Check Broadband Speed | Google Fiber</a> все в порядке. Странно, учитывая, что это один и тот же сервис, даже выбираю одинаковые сервера для проверки,</p></td><td>2024-08-07T21:31:01.433Z</td></tr>
+    </table>
+      </body>
+    </html>

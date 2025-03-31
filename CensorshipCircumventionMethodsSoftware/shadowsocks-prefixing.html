@@ -1,0 +1,117 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>shadowsocks-prefixing</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>aksiere(Helge)</td><td><p>Доброе! Подскажите, как в конфиге xray добавить соль для ss соединения, как <a href="https://www.reddit.com/r/outlinevpn/s/mMIZkZE8XB" rel="noopener nofollow ugc">здесь</a>?</p>
+<p>Например, чистый ss на 443 порту не работает у мобильных провайдеров, но с tls server hello префиксом - работает. Хотелось бы подобное провернуть на движке xray.</p></td><td>2024-10-13T05:24:16.666Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>По аналогии не работает? Если добавить “prefix”: в секцию для сервера</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">{
+     "inbounds": [
+         {
+             "port": 12345,
+             "protocol": "shadowsocks",
+             "settings": {
+                 "clients": [
+                     {
+                         "password": "example_user_1",
+                         "method": "aes-128-gcm"
+                         "prefix": "!!!!!!!"
+                     },
+                     {
+                         "password": "example_user_2",
+                         "method": "aes-256-gcm"
+                         "prefix": "!!!!!!!"
+                     },
+                     {
+                         "password": "example_user_3",
+                         "method": "chacha20-poly1305"
+                         "prefix": "!!!!!!!"
+                     }
+                 ],
+                 "network": "tcp,udp"
+             }
+         }
+     ],
+     "outbounds": [
+         {
+             "protocol": "freedom"
+         }
+     ]
+}
+</code></pre>
+</details>
+<p>и клиента</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">{
+     "inbounds": [
+         {
+             "port": 10801,
+             "protocol": "socks",
+             "settings": {
+                 "udp": true
+             }
+         },
+         {
+             "port": 10802,
+             "protocol": "http"
+         }
+     ],
+     "outbounds": [
+         {
+             "protocol": "shadowsocks",
+             "settings": {
+                 "servers": [
+                     {
+                         "address": "",
+                         "port": 12345,
+                         "password": "example_user_1",
+                         "method": "aes-128-gcm"
+                         "prefix": "!!!!!!!"
+                     }
+                 ]
+             }
+         }
+     ]
+}
+</code></pre>
+</details></td><td>2024-10-13T06:09:42.467Z</td></tr>
+    </table>
+      </body>
+    </html>

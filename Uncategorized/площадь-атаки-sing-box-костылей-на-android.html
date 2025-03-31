@@ -1,0 +1,594 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>площадь-атаки-sing-box-костылей-на-android</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>shiel</td><td><p>Android приложения, опирающиеся на sing-box, по своему дизайну используют открытое для всех приложений соединение на localhost. Помимо возможности обойти обход proxy соединения, приложения могут достичь DoS атаки, потенциально доведя падение до DNS утечки благодаря <a href="https://issuetracker.google.com/issues/337961996" class="inline-onebox" rel="noopener nofollow ugc">Google Issue Tracker</a>. Предлагаю сообществу изучить этот вектор атаки со мной.</p></td><td>2025-03-10T19:58:54.405Z</td></tr><tr><td>shiel</td><td><p>Мне также интересно, додумалось ли какое-либо государство до обнаружения VPN серверов таким образом.</p></td><td>2025-03-10T20:00:37.449Z</td></tr><tr><td>notcvnt</td><td><p>Интересно.<br>
+Для начала, данную уязвимость может быть реализована не только через DoS. В той же ссылке что Вы скинули чуть ниже ТС <span class="spoiler">(Топик Стартер, тот кто создал тему)</span> написал что ещё при некоторых ситуациях может такое происходить, например при Force Kill приложения.</p>
+<hr>
+<h2><a name="p-82147-h-1" class="anchor" href="#p-82147-h-1"></a><strong>А при каких условиях происходит утечка?</strong></h2>
+<ul>
+<li>При отсутствии интернет-соединения через VPN-туннель</li>
+<li>При переключении между VPN-профилями</li>
+<li>При сбое или принудительной остановке VPN-службы</li>
+<li>При использовании нативных вызовов getaddrinfo()</li>
+</ul>
+<hr>
+<h2><a name="p-82147-sing-box-2" class="anchor" href="#p-82147-sing-box-2"></a><strong>А что насчёт sing-box в этом плане?</strong></h2>
+<p>Для начала: sing-box использует TUN-интерфейс для перехвата сетевого трафика и реализует собственную DNS-подсистему. Что вроде бы должно огорождать от утечки?</p>
+<h2><a name="p-82147-h-3" class="anchor" href="#p-82147-h-3"></a>Да ведь?</h2>
+<p>Но sing-box при этом использует стандартную модель VPN на Android через API, это видно здесь:<br>
+<a href="https://github.com/SagerNet/sing-box/blob/dev-next/experimental/libbox/platform/interface.go" rel="noopener nofollow ugc">experimental/libbox/platform/interface.go</a></p>
+<pre><code class="lang-auto">12	Initialize(networkManager adapter.NetworkManager) error
+13	UsePlatformAutoDetectInterfaceControl() bool
+14	AutoDetectInterfaceControl(fd int) error
+</code></pre>
+<p>А в файле <a href="https://github.com/SagerNet/sing-box/blob/dev-next/protocol/tun/inbound.go" rel="noopener nofollow ugc">protocol/tun/inbound.go</a> вообще явно указано создание VPN конфигурации через API</p>
+<pre><code class="lang-auto">302		if C.IsAndroid &amp;&amp; t.platformInterface == nil {
+303			t.tunOptions.BuildAndroidRules(t.networkManager.PackageManager())
+304		}
+</code></pre>
+<hr>
+<h2><a name="p-82147-h-4" class="anchor" href="#p-82147-h-4"></a><strong>А что дальше?</strong></h2>
+<p>С учётом что ещё есть репорты о том же самом на <a href="https://www.reddit.com/r/ProtonVPN/comments/1c9r782/android_dns_leak/" rel="noopener nofollow ugc">Reddit</a> где представитель VPN ответил следующее (перевод):</p>
+<blockquote>
+<p>Привет! Kill Switch на Android является зависимой от операционной системы реализацией, а не зависящей от нашего клиента (поэтому другие пользователи также сообщали о подобном поведении с другими VPN, например, Mullvad и нативным WireGuard – источник).</p>
+<p>Это поведение было передано нашим разработчикам, и мы продолжаем исследовать, можем ли мы что-то сделать со своей стороны, чтобы решить эту проблему.</p>
+<p>Кроме того, существует специфическая для GrapheneOS проблема, которая может быть связана с этим:<br>
+<a href="https://github.com/GrapheneOS/os-issue-tracker/issues/3443" class="inline-onebox" rel="noopener nofollow ugc">Apps can bypass VPN with killswitch by sending multicast packets · Issue #3443 · GrapheneOS/os-issue-tracker · GitHub</a></p>
+<p>Спасибо, что сообщили. Мы обновим этот пост, если появятся новости по этому вопросу.</p>
+</blockquote>
+<details>
+<summary>
+Оригинал</summary>
+<p>Hi! Kill Switch on Android is an OS-dependent implementation, rather than dependent on our client itself (which is why other users have also reported this behavior with other VPNs, viz. Mullvad &amp; native WireGuard - <a href="https://www.reddit.com/r/mullvadvpn/comments/1c9p96y/dns_leak_with_block_connections_without_vpn_on/" rel="noopener nofollow ugc">source</a>).</p>
+<p>The behavior has been flagged to our developers, and we’re investigating further if there’s anything we can do from our end in order to address this.</p>
+<p>Additionally, there’s a GrapheneOS specific issue that might be related to this:<br>
+<a href="https://github.com/GrapheneOS/os-issue-tracker/issues/3443" class="inline-onebox" rel="noopener nofollow ugc">Apps can bypass VPN with killswitch by sending multicast packets · Issue #3443 · GrapheneOS/os-issue-tracker · GitHub</a></p>
+<p>Thanks for flagging. We’ll update this post if we have any news regarding the matter.</p>
+</details>
+<h2><a name="p-82147-grapheneos-image595x372-75uploadgbmttqxfxafbtikvpvutwdcurs5png-5" class="anchor" href="#p-82147-grapheneos-image595x372-75uploadgbmttqxfxafbtikvpvutwdcurs5png-5"></a>Разработчик GrapheneOS (ОС, который использовал реддитор выше) почти разделяет моё итоговое мнение<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="площадь-атаки-sing-box-костылей-на-android/716b98524cf38485fdfea8f958355dfcc1af49ad.png" data-download-href="https://ntc.party/uploads/default/716b98524cf38485fdfea8f958355dfcc1af49ad" title="image"><img src="площадь-атаки-sing-box-костылей-на-android/716b98524cf38485fdfea8f958355dfcc1af49ad.png" alt="image" data-base62-sha1="gbmttqxFXafBtikVPvUTWDCURS5" width="446" height="279"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">595×372 34.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></h2>
+<hr>
+<h2><a name="p-82147-h-6" class="anchor" href="#p-82147-h-6"></a><strong>Итог</strong></h2>
+<h2><a name="p-82147-h-7" class="anchor" href="#p-82147-h-7"></a>Можно ли как-то избежать этого?</h2>
+<p><strong>Да</strong>, но с достаточным ущербом.<br>
+Схема следующая: В Android устройстве ставяться фиктивные DNS сервера, например 10.172.168.1, а в самом sing-box корректные, например 8.8.8.8 или 1.1.1.1. В итоге если соединение в sing-box падает и DNS начинает идти напрямую — они не дойдут. Только придёться все приложения через VPN тунелировать или только DNS запросы что тоже выглядит подозрительно.</p>
+<h2><a name="p-82147-h-8" class="anchor" href="#p-82147-h-8"></a>А ещё?</h2>
+<p>Второй вариант решения это запрет 53 порта и другие виды надругательств через iptables/nftables и т.д</p>
+<p>Третий - возможно поднять свой DNS сервер, например AdGuard DNS Home? Тут если честно не уверен в целесобразности для “антиобнаружения VPN”, но чтобы небыло leak настоящего гео, как вариант</p>
+<h2><a name="p-82147-h-9" class="anchor" href="#p-82147-h-9"></a>А если не трогать?</h2>
+<p>Ну, будет у Вас уязвимость. Стоит ли беспокоиться? Это на Вашей совести, поступайте как знаете, ничего <strong>критичного</strong> в этом нет</p>
+<aside class="quote no-group" data-username="shiel" data-post="2" data-topic="15086" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Мне также интересно, додумалось ли какое-либо государство до обнаружения VPN серверов таким образом.</p>
+</blockquote>
+</aside>
+<p>Я думаю может и додумывались, но это забивание гвоздей микроскопом, есть другие более эффективные и менее ресурсозатратные методы по обнаружению VPN серверов. Например как в Иране путём анализа количества трафика до сервера и его паттерна.</p></td><td>2025-03-10T22:35:45.268Z</td></tr><tr><td>shiel</td><td><aside class="quote no-group" data-username="notcvnt" data-post="3" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Для начала, данную уязвимость может быть реализована не только через DoS.</p>
+</blockquote>
+</aside>
+<p>Плохая формулировка с моей стороны.</p>
+<aside class="quote no-group" data-username="notcvnt" data-post="3" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Только придёться все приложения через VPN тунелировать или только DNS запросы что тоже выглядит подозрительно.</p>
+</blockquote>
+</aside>
+<p>Ещё DoT, DoH, которые нативные с Android 13, можно выставить в качестве системных. Единственное - я предполагаю, что можно совершить даунгрейд атаку, так что лучше перестраховаться и воспользоваться сервером с ограниченным/отсутвующим незашифрованным резолвером.</p>
+<aside class="quote no-group" data-username="notcvnt" data-post="3" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Я думаю может и додумывались, но это забивание гвоздей микроскопом, есть другие более эффективные и менее ресурсозатратные методы по обнаружению VPN серверов. Например как в Иране путём анализа количества трафика до сервера и его паттерна.</p>
+</blockquote>
+</aside>
+<p>А по мне так античит доктрина, где нужно перетянуть ресурсы разработчика. Переписать интеграцию с sing-box - нетривиальная задача. К тому же, это сломает множество сделал и забыл решений.</p></td><td>2025-03-10T23:50:29.631Z</td></tr><tr><td>notcvnt</td><td><aside class="quote no-group" data-username="shiel" data-post="4" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Ещё DoT, DoH, которые нативные с Android 13, можно выставить в качестве системных.</p>
+</blockquote>
+</aside>
+<p>Как вариант кстати, но использует ли Android всегда DOH/DOT аюсолютно для всего - вопрос интересный.</p>
+<aside class="quote no-group" data-username="shiel" data-post="4" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Переписать интеграцию с sing-box</p>
+</blockquote>
+</aside>
+<p>??? А при чём тут GUI натянутая на sing-box, если это проблема sing-box, а не условного nekobox? Как вариант я описал в возможных решениях, тогда да, разработчик условного nekobox сможет у себя такое реализовать.</p>
+<p>Или может я вприницпе неправильно понял Вас?</p></td><td>2025-03-10T23:58:08.011Z</td></tr><tr><td>shiel</td><td><aside class="quote no-group" data-username="notcvnt" data-post="3" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>ничего <strong>критичного</strong> в этом нет</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="notcvnt" data-post="3" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Я думаю может и додумывались, но это забивание гвоздей микроскопом, есть другие более эффективные и менее ресурсозатратные методы по обнаружению VPN серверов.</p>
+</blockquote>
+</aside>
+<p>Думаю, вы не поняли суть костыля. Любое установленное приложение может просканировать локалхост на предмет наличия прокси, и сделать запрос через него, тем самым установив айпи адрес впн сервера. Это не ресурсозатратное решение.</p>
+<aside class="quote no-group" data-username="notcvnt" data-post="5" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>если это проблема sing-box</p>
+</blockquote>
+</aside>
+<p>Нет, это проблема именно nekobox, v2rayng и других. sing-box <a href="https://sing-box.sagernet.org/manual/proxy/client/" rel="noopener nofollow ugc">предполагает</a> использование tun интерфейса, а не прокси.</p></td><td>2025-03-10T23:58:29.514Z</td></tr><tr><td>notcvnt</td><td><aside class="quote no-group" data-username="shiel" data-post="6" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>sing-box <a href="https://sing-box.sagernet.org/manual/proxy/client/" rel="noopener nofollow ugc">предполагает</a> использование tun интерфейса, а не прокси.</p>
+</blockquote>
+</aside>
+<p>Для того чтобы использовать <strong>свой</strong> tun - пользователю нужны root права<br>
+Без root прав - только Android VPN API и мы опять возвращаемся к началу дискусии</p>
+<aside class="quote no-group" data-username="shiel" data-post="6" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>просканировать локалхост на предмет наличия прокси, и сделать запрос через него, тем самым установив айпи адрес впн сервера.</p>
+</blockquote>
+</aside>
+<p>Ну, допустим чтобы отправить запрос vless серверу нужно как минимум UUID знать? Не? Иначе он себя поведёт как обычный веб сервер, откинет HTTP 200 OK или что-то в том роде. Как приложение должно узнать UUID для подключение? Это самая интересная часть</p></td><td>2025-03-11T00:14:02.869Z</td></tr><tr><td>shiel</td><td><aside class="quote no-group" data-username="notcvnt" data-post="7" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Ну, допустим чтобы отправить запрос vless серверу нужно как минимум UUID знать?</p>
+</blockquote>
+</aside>
+<p>Речь идёт о socks/http прокси, создаваемых v2rayng, nekoray по умолчанию на порту 10808. Вы можете убедиться в этом, отправив запрос курлом.</p></td><td>2025-03-11T00:16:57.521Z</td></tr><tr><td>notcvnt</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="площадь-атаки-sing-box-костылей-на-android/4b1990e2c517d3379ec5820b5b1b274b6ea9268a.png" data-download-href="https://ntc.party/uploads/default/4b1990e2c517d3379ec5820b5b1b274b6ea9268a" title="image"><img src="площадь-атаки-sing-box-костылей-на-android/4b1990e2c517d3379ec5820b5b1b274b6ea9268a_2_690x223.png" alt="image" data-base62-sha1="aImAh7UVi2PRGQhq2YTf04FPzx8" width="690" height="223" srcset="площадь-атаки-sing-box-костылей-на-android/4b1990e2c517d3379ec5820b5b1b274b6ea9268a_2_690x223.png, площадь-атаки-sing-box-костылей-на-android/4b1990e2c517d3379ec5820b5b1b274b6ea9268a_2_1035x334.png 1.5x, площадь-атаки-sing-box-костылей-на-android/4b1990e2c517d3379ec5820b5b1b274b6ea9268a_2_1380x446.png 2x" data-dominant-color="1E1E1E"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1913×620 49.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Отправил curl’ом, получил 400 или я что-то не так делаю?</p></td><td>2025-03-11T00:24:12.467Z</td></tr><tr><td>shiel</td><td><aside class="quote no-group" data-username="notcvnt" data-post="7" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Без root прав - только Android VPN API и мы опять возвращаемся к началу дискусии</p>
+</blockquote>
+</aside>
+<p>Эта часть моего ответа касалась источника проблемы. sing-box им не является т.к в принципе не предполагает раскрытия socks/http прокси.</p>
+<p>Ещё раз: Речь идёт о прокси сервисе на локалхосте, создаваемом V2RayNG, Nekoray при старте приложения.</p>
+<p>Запустите V2RayNG на телефоне и подключитесь к любому серверу. Откройте Termux/скомпилируйте curl+busybox и отправьте запрос:</p>
+<p>curl --proxy <a href="http://localhost:10808" rel="noopener nofollow ugc">http://localhost:10808</a> “<a href="https://ipinfo.io" rel="noopener nofollow ugc">https://ipinfo.io</a>”</p></td><td>2025-03-11T00:26:34.563Z</td></tr><tr><td>notcvnt</td><td><p>Емаё, я уже сонный, пол 4-го, не сразу понял что на телефоне делать надо)) Сейчас попробую</p></td><td>2025-03-11T00:27:52.571Z</td></tr><tr><td>shiel</td><td><aside class="quote no-group" data-username="notcvnt" data-post="9" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Отправил curl’ом, получил 400 или я что-то не так делаю?</p>
+</blockquote>
+</aside>
+<p>Не интересовался ситуацией на десктопе т.к в принципе не использую Nekoray из-за постоянных утечек днс. Предполагаю, что там по умолчанию отключен прокси сервис для упоротой схемы маршрутизации/обратились не к тому порту.</p></td><td>2025-03-11T00:28:42.350Z</td></tr><tr><td>notcvnt</td><td><aside class="quote no-group" data-username="shiel" data-post="12" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>не использую Nekoray из-за постоянных утечек днс</p>
+</blockquote>
+</aside>
+<p>Ниразу не встречал пока что, ну или не замечал</p>
+<aside class="quote no-group" data-username="shiel" data-post="12" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>обратились не к тому порту.</p>
+</blockquote>
+</aside>
+<p>На скрине видно что к тому, как и на телефоне сейчас проверил если к порту 2080 обратиться то да, выдаёт ip моего сервера, но может можно просто порт повыше кинуть, как вариант?</p>
+<p>Я спать пойду всё таки, время много. Напишу в android studio apk и гляну как это будет работать сегодня</p></td><td>2025-03-11T00:39:24.327Z</td></tr><tr><td>shiel</td><td><aside class="quote no-group" data-username="notcvnt" data-post="13" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>но может можно просто порт повыше кинуть, как вариант?</p>
+</blockquote>
+</aside>
+<p>Так можно просканировать весь диапазон портов.</p></td><td>2025-03-11T00:59:03.980Z</td></tr><tr><td>0ka(0ka)</td><td><p>любое приложение на андроид может определить что в системе включен впн и видит все listen порты разом, доступ к инету без впн можно запретить в настройках для прог, но проблема ваша высосана из пальца и вообще с ней лучше на другой форум</p></td><td>2025-03-11T05:18:29.836Z</td></tr><tr><td>shiel</td><td><aside class="quote no-group" data-username="0ka" data-post="15" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>любое приложение на андроид может определить что в системе включен впн</p>
+</blockquote>
+</aside>
+<p>Да. Но к чему это?</p>
+<aside class="quote no-group" data-username="0ka" data-post="15" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>доступ к инету без впн можно запретить в настройках для прог</p>
+</blockquote>
+</aside>
+<p>Можно, но эта настройка не влияет на описанную проблему.</p>
+<aside class="quote no-group" data-username="0ka" data-post="15" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>но проблема ваша высосана из пальца и вообще с ней лучше на другой форум</p>
+</blockquote>
+</aside>
+<p>Посылаю вас с вашей грубостью и невежеством туда же.</p></td><td>2025-03-11T09:52:07.521Z</td></tr><tr><td>notcvnt</td><td><aside class="quote no-group" data-username="0ka" data-post="15" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>любое приложение на андроид может определить что в системе включен впн</p>
+</blockquote>
+</aside>
+<p>Этим и занимается всякие Ростикс и вкусно и точка, ты их не проксируешь, но пока VPN включен они ничего не загрузят.</p>
+<aside class="quote no-group" data-username="shiel" data-post="16" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Да. Но к чему это?</p>
+</blockquote>
+</aside>
+<p>Он насчёт вопроса - зачем приложению curl’ом что-то отправлять если добавляется в код следуещее:</p>
+<pre><code class="lang-auto">NetworkCapabilities caps = connectivityManager.getNetworkCapabilities(activeNetwork);
+boolean vpnInUse = caps!=null &amp;&amp; caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN);
+</code></pre>
+<p>и в boolean будет заветное значение, есть ли включенный VPN или нет.</p>
+<p><a class="mention" href="/u/shiel">@shiel</a> Я бы сказал это ничем (для пользователя) не исправавить. Если хотите поглубже заняться вопросом то можете “упаковать” L2/L3 в L4, и на этом принципе и основе сделать своё VPN приложение.</p>
+<p>Этот вопром звучит как “А вдруг хуЯндекс браузер будет проводить MITM-атаку через сертификат для прочтения нашего трафика”. Может, но дорого это ему обойдётся.</p>
+<p>Так же хочу сказать что Ваш изначальный вопрос вообще не звучит как curl на localhost, а идёт речь про утечку</p>
+<blockquote>
+<p>Помимо возможности обойти обход proxy соединения, приложения могут достичь DoS атаки, потенциально доведя падение до DNS утечки благодаря Google Issue Tracker. Предлагаю сообществу изучить этот вектор атаки со мной.</p>
+</blockquote>
+<p>Я в итоге не понял Вашего вопроса, Вы про dns или curl на localhost?</p></td><td>2025-03-11T17:59:59.241Z</td></tr><tr><td>shiel</td><td><aside class="quote no-group" data-username="notcvnt" data-post="17" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Он насчёт вопроса - зачем приложению curl’ом что-то отправлять если добавляется в код следуещее:</p>
+</blockquote>
+</aside>
+<p>Человек совершенно не понял суть проблемы. Приложение может тривиально обойти geoip и per-app tunneling правила, которые настраивают китайцы для того, чтобы не “палить” перед mainland адрес VPN сервера. Банальность вроде того, что приложения могут обнаружать друг друга 1000 и 1 способом никак не относится к модели угрозы, которую я описал.</p>
+<aside class="quote no-group" data-username="notcvnt" data-post="17" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Так же хочу сказать что Ваш изначальный вопрос вообще не звучит как curl на localhost, а идёт речь про утечку</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="notcvnt" data-post="17" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Я в итоге не понял Вашего вопроса, Вы про dns или curl на localhost?</p>
+</blockquote>
+</aside>
+<p>Я про изучение площади атаки sing-box оберток на Android.</p>
+<aside class="quote no-group" data-username="notcvnt" data-post="17" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Этот вопром звучит как</p>
+</blockquote>
+</aside>
+<p>Я не понимаю, каким образом добавление небольшого сниппета кода в WeChat, госуслуги обойдется государству коллосальными затратами.</p>
+<p>Высокий уровень дискуссии, как говорится.</p></td><td>2025-03-11T18:25:02.473Z</td></tr><tr><td>notcvnt</td><td><aside class="quote no-group" data-username="shiel" data-post="18" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Я не понимаю, каким образом добавление небольшого сниппета кода в WeChat, госуслуги обойдется государству коллосальными затратами.</p>
+<p>Высокий уровень дискуссии, как говорится.</p>
+</blockquote>
+</aside>
+<p>Вы не поняли, что я имел в виду не финансовые потери)</p>
+<aside class="quote no-group" data-username="shiel" data-post="18" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Человек совершенно не понял суть проблемы. Приложение может тривиально обойти geoip и per-app tunneling правила, которые настраивают китайцы для того, чтобы не “палить” перед mainland адрес VPN сервера. Банальность вроде того, что приложения могут обнаружать друг друга 1000 и 1 способом никак не относится к модели угрозы, которую я описал.</p>
+</blockquote>
+</aside>
+<p>Способ возможного решения проблемы я описал выше</p></td><td>2025-03-11T18:42:46.646Z</td></tr><tr><td>shiel</td><td><p>Я честно не понимаю, отчего сразу у двух пользователей развилась дислексия.</p>
+<aside class="quote no-group" data-username="notcvnt" data-post="17" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Этот вопром звучит как “А вдруг хуЯндекс браузер будет проводить MITM-атаку через сертификат для прочтения нашего трафика”. Может, но дорого это ему обойдётся.</p>
+</blockquote>
+</aside>
+<p>В сотый раз повторяю, что речь идет об установлении соединения с proxy сервисом на localhost телефона, который ведет трафик через V2RayN(G), Nekoray соединения. В этом сценарии достаточно иметь одно зловредное приложение на телефоне.</p>
+<p>Вы одновременно не понимаете и модели угрозы, и технического описания способа обойти настройки туннелирования.</p>
+<p>Модель угрозы:</p>
+<blockquote>
+<p>In Chinese proxy community, we use geosite and geoip for dns/routing strategy. You should always try your best to avoid querying known blocked domain name to local Dns Server, as it reveals the fact that you are trying to break GFW (or whatever internet enforcement put in your area). It’s called dns leakage.</p>
+</blockquote>
+<p>Приложения могут вшивать обращения к подконтрольному GFW серверу, который находится за пределами Китая (важно подпасть под geoip правила), чтобы таким образом вычислить адрес прокси сервера. Для этого в V2RayNG, Nekoray предусмотрен режим per-app туннелирования, чтобы WeChat гарантированно проходил через mainland соединение.</p>
+<p>Проблема в том, что приложение может в обход настроек туннелирования пропустить запрос через прокси.</p></td><td>2025-03-11T18:42:49.563Z</td></tr><tr><td>notcvnt</td><td><aside class="quote no-group" data-username="shiel" data-post="20" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Вы одновременно не понимаете и модели угрозы, и технического описания способа обойти настройки туннелирования.</p>
+</blockquote>
+</aside>
+<p>Понимаю, но что Вы предлагаете сделать в данном случае тогда?</p>
+<aside class="quote no-group" data-username="shiel" data-post="18" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>риложение может тривиально обойти geoip и per-app tunneling правила</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="shiel" data-post="20" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Приложения могут вшивать обращения к подконтрольному GFW серверу, который находится за пределами Китая (важно подпасть под geoip правила)</p>
+</blockquote>
+</aside>
+<p>Так Вы определитесь можно ли geoip правила обойти или нет.</p>
+<aside class="quote no-group" data-username="shiel" data-post="20" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Проблема в том, что приложение может в обход настроек туннелирования пропустить запрос через прокси.</p>
+</blockquote>
+</aside>
+<p>Я Вас понял, только не пойму что Вы хотите в итоге? Способ решение или диалог что такая проблема существует? Проблема в реализации api на стороне android. С ПК я с того же nekobox Вам выслал скрин что такая схема не прокатывает на ПК, приходит HTTP/400 и всё.</p>
+<p>Решение через конвертирование L2/L3 в L4 возможно поможет. Или гарантированно устанавливать VPN на роутер и там ставить правила, но это костыли, а не решение проблемы</p></td><td>2025-03-11T18:49:14.003Z</td></tr><tr><td>shiel</td><td><aside class="quote no-group" data-username="notcvnt" data-post="21" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>Так Вы определитесь можно ли geoip правила обойти или нет.</p>
+</blockquote>
+</aside>
+<p>Можно обойти и geoip правило, и per-app туннелирование. Подумали бы хоть немного, прежде чем писать.</p>
+<aside class="quote no-group" data-username="notcvnt" data-post="21" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>диалог что такая проблема существует</p>
+</blockquote>
+</aside>
+<p>this.</p>
+<aside class="quote no-group" data-username="notcvnt" data-post="21" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>я с того же nekobox Вам выслал скрин что такая схема не прокатывает на ПК, приходит HTTP/400 и всё.</p>
+</blockquote>
+</aside>
+<p>На ПК существование этой проблемы зависит от изоляции приложений, настроек фаерволла. На скрине, который вы вчера отправили, не было совершено запроса curl’ом через прокси, а HTTP 400 нельзя однозначно трактовать, потому что непонятно, какой тип прокси использует Nekoray.</p>
+<p>V2RayNG, Nekoray нужно по умолчанию отключить прокси сервис, добавить возможность установить методы аутентификации. Я не встречал приложений, которые бы отказывались работать из-за наличия tun интерфейса. Насколько я понимаю, по правилам GPlay такое приложение нельзя выпускать в стор. Но даже для такого эджкейса можно договориться об IPC соединениях с разработчиками, или, что проще, попросить их внедрить методы аутентификации.</p></td><td>2025-03-11T19:07:47.513Z</td></tr><tr><td>artenox</td><td><aside class="quote no-group" data-username="shiel" data-post="20" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Приложения могут вшивать обращения к подконтрольному GFW серверу, который находится за пределами Китая (важно подпасть под geoip правила), чтобы таким образом вычислить адрес прокси сервера</p>
+</blockquote>
+</aside>
+<p>Думаю, от этого можно защититься, используя double vpn. Когда входной IP не равен выходному. У некоторых коммерческих сервисов такое реализовано. Таким образом, вражий сервер узнает только выходной IP впна и не узнает входной (к которому соединяется пользователь на стороне ISP), соответственно не сможет заблокировать.</p>
+<p>К примеру, может заблокировать выходной (у местных китайских сайтов для входящих). Это приведёт к тому, что через VPN местные сайты не откроются. Хотя, на местные сайты через VPN обычно не ходят в Китае.</p>
+<p>Те, кто настраивает впски, знают ли об этом? Надёжнее защититься разнеся IP.</p></td><td>2025-03-13T03:19:28.668Z</td></tr><tr><td>shiel</td><td><aside class="quote no-group" data-username="artenox" data-post="23" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>Когда входной IP не равен выходному. У некоторых коммерческих сервисов такое реализовано. Таким образом, вражий сервер узнает только выходной IP впна и не узнает входной (к которому соединяется пользователь на стороне ISP), соответственно не сможет заблокировать.</p>
+</blockquote>
+</aside>
+<p>Не поможет, если добавить уникальности пользователям. Скажем, возьми с такого-то зарубежного сервера файл по уникальному пути. Но это действительно усложнит техническую реализацию.</p>
+<aside class="quote no-group" data-username="artenox" data-post="23" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>Те, кто настраивает впски, знают ли об этом?</p>
+</blockquote>
+</aside>
+<p>Двойной впн у Китайцев повсеместен.</p></td><td>2025-03-13T11:37:07.873Z</td></tr><tr><td>notcvnt</td><td><aside class="quote no-group" data-username="artenox" data-post="23" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>Думаю, от этого можно защититься, используя double vpn.</p>
+</blockquote>
+</aside>
+<p>Я думаю можно такое реализовать через warp от CF или через worker (BNB панель (точного названия не помню)) от того же CF. И получается напрмимер User ↔ VPS w/ VLESS ↔ WARP.</p></td><td>2025-03-13T16:18:06.309Z</td></tr><tr><td>artenox</td><td><p>Представим такую картину. Есть полезный местный сервис (в виде сайта в браузере на десктопе или мобильное приложение на смартфоне), но со злым намерением среди прочего вычислить vpn.<br>
+Предположим, сервис делает два запроса (javascript логикой).</p>
+<ol>
+<li>на местный whatsmyip сервис. на девайсе nekoray или nekobox по geoip отправляют запрос напрямую. сервис узнаёт местный ip и может идентифицировать пользователя.</li>
+<li>на зарубежный, но подконтрольный whatsmyip сервис. на девайсе nekoray или nekobox по geoip проксируют трафик через прокси. Если это double proxy (или double vpn), сервис (напомню, местное приложение или вкладка в браузере) может узнать выходной IP прокси (хотя, пользы от этого немного, разве что детектится факт обмана gfw). Какой входной IP прокси сервис вроде бы узнать не может, ведь соединениями заведует система. В браузере думаю на этом всё и ограничится. А если отдельное приложение и ему не помешает системный файервол, оно может проверить хопы по ICMP (traceroute). И в некоторых случаях посмотреть сетевые настройки. А затем сложить А и Б. Хотя, ICMP ведь через прокси не пройдёт, а через полноценный VPN пройдёт.</li>
+</ol>
+<p>Таким образом, geoip разделение не очень надёжно. Надо или per app или всё пускать через VPN/прокси. Но тогда на местные сайты не ходить (ничего критичного, вы будете как иностранец, но незачем). А если ходить, то не авторизовываться (утечка). Можно для местных завести отдельный браузер или девайс.</p>
+<p>Но это всё имеет значение, если цензор настолько мощный, что может сверять запросы со всех ISP в стране, сравнивать с логами проверочных серверов. Я думаю, непростая задача.</p></td><td>2025-03-13T16:39:59.262Z</td></tr><tr><td>notcvnt</td><td><aside class="quote no-group" data-username="artenox" data-post="26" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>на местный whatsmyip сервис. на девайсе nekoray или nekobox по geoip отправляют запрос напрямую. сервис узнаёт местный ip и может идентифицировать пользователя.</p>
+</blockquote>
+</aside>
+<p>Допустим, но помним, но  ipv4 не бесконечны, а их всего 4 млрд., людей в 2 раза больше, а устройств ещё в 5 раз больше (у большинства есть телефоны, планшеты (оба с симкой), роутеры, общественные роутеры и так далее). За NAT около нереально вычислить кто сидит, даже в офф. документе РКН про новый закон просят до NAT ставить ТСПУ.<br>
+<img src="площадь-атаки-sing-box-костылей-на-android/045a836db3696bee45839050915df4f080c309f4_2_690x83.png" alt="изображение" data-base62-sha1="CvPHD9nMQDQlvPh3XuGmX9CEsc" width="690" height="83" srcset="площадь-атаки-sing-box-костылей-на-android/045a836db3696bee45839050915df4f080c309f4_2_690x83.png, площадь-атаки-sing-box-костылей-на-android/045a836db3696bee45839050915df4f080c309f4.png 1.5x, площадь-атаки-sing-box-костылей-на-android/045a836db3696bee45839050915df4f080c309f4.png 2x" data-dominant-color="E5E5E5"></p>
+<aside class="quote no-group" data-username="artenox" data-post="26" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>оно может проверить хопы по ICMP (traceroute).</p>
+</blockquote>
+</aside>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="площадь-атаки-sing-box-костылей-на-android/609fd35c3e26a202c4a3d4a11d59d03b32f79052.png" data-download-href="https://ntc.party/uploads/default/609fd35c3e26a202c4a3d4a11d59d03b32f79052" title="изображение"><img src="площадь-атаки-sing-box-костылей-на-android/609fd35c3e26a202c4a3d4a11d59d03b32f79052.png" alt="изображение" data-base62-sha1="dMMgf56EK6AiOTC4BlslY0zvuSe" width="690" height="358" data-dominant-color="191919"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">723×376 8.84 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Я сделал tracert до <a href="http://google.com" rel="noopener nofollow ugc">google.com</a>, очень интересно от Вас узнать где ip моего vpn.<br>
+Да и фикситься это легко, пишется вот эта команда на VPS:</p>
+<pre><code class="lang-auto">sudo iptables -A INPUT -p icmp -j DROP
+</code></pre>
+<p>И выглядить Ваш VPS будет вот так:<br>
+<img src="площадь-атаки-sing-box-костылей-на-android/0bc54a09c26501d073e738101d92dec5b69d0657.png" alt="изображение" data-base62-sha1="1G7Wqr0m1fx95IsQIGoapdZkJfN" width="443" height="17"></p>
+<aside class="quote no-group" data-username="artenox" data-post="26" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>И в некоторых случаях посмотреть сетевые настройки</p>
+</blockquote>
+</aside>
+<p>Чем сетевые настройки помогут в обнаружение IP VPS? Понять что есть адаптер? Есть ещё 100500 способов понять что у юзера VPN стоит.</p>
+<aside class="quote no-group" data-username="artenox" data-post="26" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>Надо или per app или всё пускать через VPN/прокси. Но тогда на местные сайты не ходить (ничего критичного, вы будете как иностранец, но незачем). А если ходить, то не авторизовываться (утечка). Можно для местных завести отдельный браузер или девайс.</p>
+</blockquote>
+</aside>
+<p>В большинстве случаев такой вариант будет означать покупку ещё одного девайса, IMEI, Fingerprint у браузера и другие опознавательные методы никуда не деваются.</p>
+<p>UPD: насчёт curl на ПК с nekobox:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="площадь-атаки-sing-box-костылей-на-android/2644759c4c44d4176a5e78bbae71a91d0b491848.png" data-download-href="https://ntc.party/uploads/default/2644759c4c44d4176a5e78bbae71a91d0b491848" title="замазал не нужную информацию"><img src="площадь-атаки-sing-box-костылей-на-android/2644759c4c44d4176a5e78bbae71a91d0b491848_2_517x197.png" alt="замазал не нужную информацию" data-base62-sha1="5swOGt4ZyH4NyAdd3SUE8cOMgEU" width="517" height="197" srcset="площадь-атаки-sing-box-костылей-на-android/2644759c4c44d4176a5e78bbae71a91d0b491848_2_517x197.png, площадь-атаки-sing-box-костылей-на-android/2644759c4c44d4176a5e78bbae71a91d0b491848_2_775x295.png 1.5x, площадь-атаки-sing-box-костылей-на-android/2644759c4c44d4176a5e78bbae71a91d0b491848_2_1034x394.png 2x" data-dominant-color="202020"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">замазал не нужную информацию</span><span class="informations">2383×911 265 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+И выдаёт мой ip, а не ip VPS</p></td><td>2025-03-13T16:59:20.600Z</td></tr><tr><td>Crus</td><td><aside class="quote no-group" data-username="shiel" data-post="1" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Android приложения, опирающиеся на <strong>sing-box</strong>, по своему дизайну используют открытое для всех приложений соединение на localhost</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="shiel" data-post="10" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Ещё раз: Речь идёт о прокси сервисе на локалхосте, создаваемом V2RayNG, Nekoray при старте приложения.</p>
+<p>Запустите <strong>V2RayNG</strong> на телефоне и подключитесь к любому серверу. Откройте Termux/скомпилируйте curl+busybox и отправьте запрос:</p>
+</blockquote>
+</aside>
+<p>V2RayNG не использует sing-box вообще. Название ветки (<em>Площадь атаки sing-box костылей на Android</em>) вводит в заблуждение.</p>
+<p>Есть Аndroid приложения, использующие ядро sing-box, но не создающие по умолчанию прокси на локалхосте - тот же SFA.</p></td><td>2025-03-16T17:56:21.589Z</td></tr><tr><td>shiel</td><td><p>И правда, V2RayNG не использует sing-box. Я изначально использовал неправильный, но, поверьте, и костыли этим страдают.</p>
+<blockquote>
+<p>вводит в заблуждение.</p>
+</blockquote>
+<p>Я постараюсь найти время задокументировать свои тесты.</p></td><td>2025-03-16T19:39:04.925Z</td></tr><tr><td>shiel</td><td><aside class="quote no-group" data-username="artenox" data-post="26" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>Если это double proxy (или double vpn), сервис (напомню, местное приложение или вкладка в браузере) может узнать выходной IP прокси (хотя, пользы от этого немного, разве что детектится факт обмана gfw). Какой входной IP прокси сервис вроде бы узнать не может, ведь соединениями заведует система. В браузере думаю на этом всё и ограничится. А если отдельное приложение и ему не помешает системный файервол, оно может проверить хопы по ICMP (traceroute). И в некоторых случаях посмотреть сетевые настройки. А затем сложить А и Б. Хотя, ICMP ведь через прокси не пройдёт, а через полноценный VPN пройдёт.</p>
+</blockquote>
+</aside>
+<p>Не прокатит из-за возможности корреляции трафика. Провайдеры передают цензору передают пользовательские идентификаторы, злое приложение в нашем сцценарии тоже присваивает каждому пользователю уникальный идентификатор. Тогда цензору необязательно сверять трафик множества людей. Атака всё ещё экономична. А, блин, вы и так с этим согласны…</p>
+<aside class="quote no-group" data-username="notcvnt" data-post="27" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>IMEI, Fingerprint у браузера и другие опознавательные методы никуда не деваются.</p>
+</blockquote>
+</aside>
+<p>Не совсем понимаю, к чему это, если на устройстве с доступом за стену не будет зловредных приложений в принципе.</p>
+<aside class="quote no-group" data-username="notcvnt" data-post="27" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/notcvnt/48/14848_2.png" class="avatar"> notcvnt:</div>
+<blockquote>
+<p>UPD: насчёт curl на ПК с nekobox:</p>
+</blockquote>
+</aside>
+<p>Чуточку лучше, Но настройка из коробки, вероятно, следует какому-то встроенному geoip правилу, так что к ней применима наша дискуссия. Но я не готов хулить разработчика за это, потому что у десктопа в принципе по умолчанию отсутствует модель безопасности. К моменту, когда зловредное приложение окажетс на компьютере, у среднестатистического пользователя Linux/Windows будут проблемы куда хуже.</p></td><td>2025-03-16T19:57:08.170Z</td></tr><tr><td>shiel</td><td><p>На самом деле, у современных версий Android нет сетевой взаимосвязи между главным пользователем и остальными. Можно содержать государственные приложения в приватной области/профиле, тем самым отбивая нужду во втором телефоне.</p></td><td>2025-03-16T20:04:55.644Z</td></tr><tr><td>notcvnt</td><td><aside class="quote no-group" data-username="shiel" data-post="30" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Чуточку лучше, Но настройка из коробки, вероятно, следует какому-то встроенному geoip правилу, так что к ней применима наша дискуссия. Но я не готов хулить разработчика за это, потому что у десктопа в принципе по умолчанию отсутствует модель безопасности. К моменту, когда зловредное приложение окажетс на компьютере, у среднестатистического пользователя Linux/Windows будут проблемы куда хуже.</p>
+</blockquote>
+</aside>
+<p>На моём скрине видно что localhost всё таки поднят и используеться. Нет, вы не угадали, все geoip правила стоят на стороне сервера (по причинам более страшего поколения, которому 1 большую кнопку для вкл или выкл нажать - уже надо диплом получать по сис. администрированию, не суть), только private идёт напрямую, и то, я проверил и удаление всех geoip правил оставляет ситуацию прежней.<br>
+Тут всё проще, приложение просто не в тунеле. То есть если приложение не в тунели, будет отдан мой настоящий ip, а если в тунели то…? IP vps, но приложение и так через VPS идёт.</p>
+<p>Единственное сценарий как можно спалить реальный ip VPS это если только некоторые домены проксируется через CF, а другой домен - нет. На ПК это проблемма неактуальна. Приложение видит прокси на localhost, но ip он выдаёт реальный, а не VPS.</p>
+<aside class="quote no-group" data-username="shiel" data-post="30" data-topic="15086">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>Провайдеры передают цензору передают пользовательские идентификаторы, злое приложение в нашем сцценарии тоже присваивает каждому пользователю уникальный идентификатор. Тогда цензору необязательно сверять трафик множества людей. Атака всё ещё экономична. А, блин, вы и так с этим согласны…</p>
+</blockquote>
+</aside>
+<p>Ну а реальный IP vps будет скрыт в итоге. Если за каждым будут приходить космонавты с волшебными палочками, то это нанесёт общего ущерба в сотни раз больше, чем просто этого не делать. Да и не забываем про WS, gRPC и другое</p>
+<aside class="quote no-group" data-username="shiel" data-post="31" data-topic="15086" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/c57346/48.png" class="avatar"> shiel:</div>
+<blockquote>
+<p>На самом деле, у современных версий Android нет сетевой взаимосвязи между главным пользователем и остальными. Можно содержать государственные приложения в приватной области/профиле, тем самым отбивая нужду во втором телефоне.</p>
+</blockquote>
+</aside>
+<p>Не могу проверить, на моём пикселе при попытки открытия Termux в private space, появляется ошибка “Unable to install bootstrap. Termux can only be run as the primary user.”</p></td><td>2025-03-17T23:06:30.626Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,156 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>не-работает-antizapret-на-openwrt-3447</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>vadoski(Vadim)</td><td><ul>
+<li>Тип настройки: VPN</li>
+<li>Тип проблемы: не работают все заблокированные сайты</li>
+<li>Что с сайтом: получаете ошибку в браузере</li>
+<li>Используемый браузер: Chrome</li>
+</ul>
+<p>прикладываю лог из Openwrt 21.02.1</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>Thu Nov  3 23:02:48 2022 daemon.notice openvpn(antizapret)[6730]: SIGUSR1[soft,connection-reset] received, process restarting<br>
+Thu Nov  3 23:07:48 2022 daemon.warn openvpn(antizapret)[6730]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts<br>
+Thu Nov  3 23:07:48 2022 daemon.notice openvpn(antizapret)[6730]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.75.75.245:1194<br>
+Thu Nov  3 23:07:48 2022 daemon.notice openvpn(antizapret)[6730]: Attempting to establish TCP connection with [AF_INET]51.75.75.245:1194 [nonblock]<br>
+Thu Nov  3 23:07:48 2022 daemon.notice openvpn(antizapret)[6730]: TCP connection established with [AF_INET]51.75.75.245:1194<br>
+Thu Nov  3 23:07:48 2022 daemon.notice openvpn(antizapret)[6730]: TCP_CLIENT link local: (not bound)<br>
+Thu Nov  3 23:07:48 2022 daemon.notice openvpn(antizapret)[6730]: TCP_CLIENT link remote: [AF_INET]51.75.75.245:1194<br>
+Thu Nov  3 23:07:48 2022 daemon.err openvpn(antizapret)[6730]: Connection reset, restarting [0]<br>
+Thu Nov  3 23:07:48 2022 daemon.notice openvpn(antizapret)[6730]: SIGUSR1[soft,connection-reset] received, process restarting</p>
+</details>
+<p>Подскажите пожалуйста, куда копать?</p></td><td>2022-11-03T23:12:09.069Z</td></tr><tr><td>anonymous70(anonymous70)</td><td><p><a href="https://4pda.to/forum/index.php?showtopic=911457&amp;st=10000#entry112140930" class="onebox" target="_blank" rel="noopener nofollow ugc">https://4pda.to/forum/index.php?showtopic=911457&amp;st=10000#entry112140930</a></p></td><td>2022-11-04T07:23:03.087Z</td></tr><tr><td>vadoski(Vadim)</td><td><p>Дело в том что и на 19й openwrt такая же ситуация была. Способ конечно попробую, благодарю!</p></td><td>2022-11-04T08:24:32.409Z</td></tr><tr><td>anonymous70(anonymous70)</td><td><p>Если не получится с 1 пунктом, прежде чем переходить к пункту 2, проверьте вариант с удалением из конфига строки:</p>
+<blockquote>
+<p>setenv opt tls-cipher “DEFAULT:@SECLEVEL=0”</p>
+</blockquote>
+<p>В mbedtls версии никаких сообщений не предусмотрено, судя по коду (не проверял результат) просто все доступные шифронаборы обнулит.</p></td><td>2022-11-04T09:04:26.213Z</td></tr><tr><td>vadoski(Vadim)</td><td><p>после удаления строчки</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>Fri Nov  4 09:34:27 2022 daemon.warn openvpn(antizapret)[9581]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts<br>
+Fri Nov  4 09:34:27 2022 daemon.notice openvpn(antizapret)[9581]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.75.70.203:1194<br>
+Fri Nov  4 09:34:27 2022 daemon.notice openvpn(antizapret)[9581]: Attempting to establish TCP connection with [AF_INET]51.75.70.203:1194 [nonblock]<br>
+Fri Nov  4 09:34:28 2022 daemon.notice openvpn(antizapret)[9581]: TCP connection established with [AF_INET]51.75.70.203:1194<br>
+Fri Nov  4 09:34:28 2022 daemon.notice openvpn(antizapret)[9581]: TCP_CLIENT link local: (not bound)<br>
+Fri Nov  4 09:34:28 2022 daemon.notice openvpn(antizapret)[9581]: TCP_CLIENT link remote: [AF_INET]51.75.70.203:1194<br>
+Fri Nov  4 09:34:29 2022 daemon.notice openvpn(antizapret)[9581]: [antizapret-server] Peer Connection Initiated with [AF_INET]51.75.70.203:1194<br>
+Fri Nov  4 09:34:30 2022 daemon.err openvpn(antizapret)[9581]: Options error: Unrecognized option or missing or extra parameter(s) in [PUSH-OPTIONS]:4: block-outside-dns (2.5.3)<br>
+Fri Nov  4 09:34:30 2022 daemon.notice openvpn(antizapret)[9581]: TUN/TAP device tun0 opened<br>
+Fri Nov  4 09:34:30 2022 daemon.notice openvpn(antizapret)[9581]: net_iface_mtu_set: mtu 1500 for tun0<br>
+Fri Nov  4 09:34:30 2022 daemon.notice openvpn(antizapret)[9581]: net_iface_up: set tun0 up<br>
+Fri Nov  4 09:34:30 2022 daemon.notice openvpn(antizapret)[9581]: net_addr_v4_add: 192.168.119.91/21 dev tun0<br>
+Fri Nov  4 09:34:30 2022 daemon.notice openvpn(antizapret)[9581]: /usr/libexec/openvpn-hotplug up antizapret tun0 1500 1554 192.168.119.91 255.255.248.0 init<br>
+Fri Nov  4 09:34:30 2022 daemon.err openvpn(antizapret)[9581]: WARNING: Failed running command (–up/–down): could not execute external program<br>
+Fri Nov  4 09:34:30 2022 daemon.notice openvpn(antizapret)[9581]: Exiting due to fatal error</p>
+</details>
+<p>так же пробовал udp(другой конфиг антизапрета по ссылке) не сработало, удалил антизапрет.ovpn перезапустил wan<br>
+такое имею</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>Fri Nov  4 12:52:37 2022 daemon.warn openvpn(antizapret)[16147]: Multiple --up scripts defined.  The previously configured script is overridden.<br>
+Fri Nov  4 12:52:37 2022 daemon.warn openvpn(antizapret)[16147]: Multiple --down scripts defined.  The previously configured script is overridden.<br>
+Fri Nov  4 12:52:37 2022 daemon.warn openvpn(antizapret)[16147]: DEPRECATED OPTION: --cipher set to ‘AES-128-CBC’ but missing in --data-ciphers (AES-256-GCM:AES-128-GCM). Future OpenVPN version will ignore --cipher for cipher negotiations. Add ‘AES-128-CBC’ to --data-ciphers or change --cipher ‘AES-128-CBC’ to --data-ciphers-fallback ‘AES-128-CBC’ to silence this warning.<br>
+Fri Nov  4 12:52:37 2022 daemon.notice openvpn(antizapret)[16147]: OpenVPN 2.5.3 mips-openwrt-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [MH/PKTINFO] [AEAD]<br>
+Fri Nov  4 12:52:37 2022 daemon.notice openvpn(antizapret)[16147]: library versions: OpenSSL 1.1.1q  5 Jul 2022, LZO 2.10<br>
+Fri Nov  4 12:52:37 2022 daemon.warn openvpn(antizapret)[16147]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts<br>
+Fri Nov  4 12:52:37 2022 daemon.notice openvpn(antizapret)[16147]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.158.181.161:1194<br>
+Fri Nov  4 12:52:37 2022 daemon.notice openvpn(antizapret)[16147]: Attempting to establish TCP connection with [AF_INET]51.158.181.161:1194 [nonblock]<br>
+Fri Nov  4 12:52:37 2022 daemon.notice openvpn(antizapret)[16147]: TCP connection established with [AF_INET]51.158.181.161:1194<br>
+Fri Nov  4 12:52:37 2022 daemon.notice openvpn(antizapret)[16147]: TCP_CLIENT link local: (not bound)<br>
+Fri Nov  4 12:52:37 2022 daemon.notice openvpn(antizapret)[16147]: TCP_CLIENT link remote: [AF_INET]51.158.181.161:1194<br>
+Fri Nov  4 12:52:38 2022 daemon.notice openvpn(antizapret)[16147]: [antizapret-server] Peer Connection Initiated with [AF_INET]51.158.181.161:1194</p>
+</details></td><td>2022-11-04T09:35:34.008Z</td></tr><tr><td>anonymous70(anonymous70)</td><td><blockquote>
+<p>SSL (OpenSSL)</p>
+</blockquote>
+<p>Тогда все советы лишние.</p>
+<p>Разбираться надо с up/down, script-security. Они раскоментированы? Чем? Зачем? Что там записано? Оно доступно, исполняемо?</p></td><td>2022-11-04T10:45:21.582Z</td></tr><tr><td>vadoski(Vadim)</td><td><p>Вот <a href="https://4pda.to/forum/index.php?showtopic=911457&amp;st=580#entry79596814" rel="noopener nofollow ugc">так</a> делал.</p>
+<p>но ничего не заработало(к слову до позавчера пока я не сбросил роутер, заблаговременно не забекапив ничего). Сегодня сбросил роутер начисто сделал по инструкции <a href="https://4pda.to/forum/index.php?s=&amp;showtopic=911457&amp;view=findpost&amp;p=75782612" rel="noopener nofollow ugc">отсюда</a></p>
+<p>в логах сейчас вот так</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>Fri Nov  4 17:10:48 2022 daemon.warn openvpn(antizapret)[4812]: DEPRECATED OPTION: --max-routes option ignored.The number of routes is unlimited as of OpenVPN 2.4. This option will be removed in a future version, please remove it from your configuration.<br>
+Fri Nov  4 17:10:48 2022 daemon.warn openvpn(antizapret)[4812]: DEPRECATED OPTION: --cipher set to ‘AES-128-CBC’ but missing in --data-ciphers (AES-256-GCM:AES-128-GCM). Future OpenVPN version will ignore --cipher for cipher negotiations. Add ‘AES-128-CBC’ to --data-ciphers or change --cipher ‘AES-128-CBC’ to --data-ciphers-fallback ‘AES-128-CBC’ to silence this warning.<br>
+Fri Nov  4 17:10:48 2022 daemon.notice openvpn(antizapret)[4812]: OpenVPN 2.5.3 mips-openwrt-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [MH/PKTINFO] [AEAD]<br>
+Fri Nov  4 17:10:48 2022 daemon.notice openvpn(antizapret)[4812]: library versions: OpenSSL 1.1.1q  5 Jul 2022, LZO 2.10<br>
+Fri Nov  4 17:10:48 2022 daemon.warn openvpn(antizapret)[4812]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts<br>
+Fri Nov  4 17:10:48 2022 daemon.notice openvpn(antizapret)[4812]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.158.176.255:1194<br>
+Fri Nov  4 17:10:48 2022 daemon.notice openvpn(antizapret)[4812]: Attempting to establish TCP connection with [AF_INET]51.158.176.255:1194 [nonblock]<br>
+Fri Nov  4 17:10:48 2022 daemon.notice openvpn(antizapret)[4812]: TCP connection established with [AF_INET]51.158.176.255:1194<br>
+Fri Nov  4 17:10:48 2022 daemon.notice openvpn(antizapret)[4812]: TCP_CLIENT link local: (not bound)<br>
+Fri Nov  4 17:10:48 2022 daemon.notice openvpn(antizapret)[4812]: TCP_CLIENT link remote: [AF_INET]51.158.176.255:1194<br>
+Fri Nov  4 17:10:49 2022 daemon.notice openvpn(antizapret)[4812]: [antizapret-server] Peer Connection Initiated with [AF_INET]51.158.176.255:1194<br>
+Fri Nov  4 17:10:50 2022 daemon.err openvpn(antizapret)[4812]: Options error: Unrecognized option or missing or extra parameter(s) in [PUSH-OPTIONS]:4: block-outside-dns (2.5.3)<br>
+Fri Nov  4 17:10:50 2022 daemon.notice openvpn(antizapret)[4812]: TUN/TAP device tun0 opened<br>
+Fri Nov  4 17:10:50 2022 daemon.notice openvpn(antizapret)[4812]: net_iface_mtu_set: mtu 1500 for tun0<br>
+Fri Nov  4 17:10:50 2022 daemon.notice openvpn(antizapret)[4812]: net_iface_up: set tun0 up<br>
+Fri Nov  4 17:10:50 2022 daemon.notice openvpn(antizapret)[4812]: net_addr_v4_add: 192.168.116.248/21 dev tun0<br>
+Fri Nov  4 17:10:50 2022 daemon.notice openvpn(antizapret)[4812]: /usr/libexec/openvpn-hotplug up antizapret tun0 1500 1554 192.168.116.248 255.255.248.0 init<br>
+Fri Nov  4 17:10:50 2022 daemon.notice openvpn(antizapret)[4812]: Initialization Sequence Completed</p>
+</details>
+<p>Но так же ничего не работает(не открывает заблокированные сайты)</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>Сайт <strong>nnmclub.to</strong> не позволяет установить соединение.</p>
+<p>Попробуйте сделать следующее:</p>
+<ul>
+<li>Проверьте подключение к Интернету.</li>
+<li>
+<a>Проверьте настройки прокси-сервера и брандмауэра</a>.</li>
+</ul>
+</details>
+<p>при попытке проверки работоспособности вот так происходит</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>Трассировка маршрута к <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> [10.224.167.24]<br>
+с максимальным числом прыжков 30:</p>
+<p>1    &lt;1 мс    &lt;1 мс    &lt;1 мс  192.168.1.1<br>
+2  192.168.1.1  сообщает: Заданный протокол недоступен.</p>
+</details>
+<p>файл конфига для udp так же пробовал, ничего не поменялось, строчку  <strong>setenv opt tls-cipher “DEFAULT:@SECLEVEL=0”</strong> удалял, так же не принесло результатов.</p></td><td>2022-11-04T14:19:14.533Z</td></tr><tr><td>anonymous70(anonymous70)</td><td><p>Поскольку forward по дефолту ‘REJECT’, можно предположить, что правило</p>
+<blockquote>
+<p>Allow forward from source zones: lan</p>
+</blockquote>
+<p>Не сохранилось или нерабочее.</p></td><td>2022-11-04T20:08:18.498Z</td></tr>
+    </table>
+      </body>
+    </html>

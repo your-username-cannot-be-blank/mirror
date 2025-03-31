@@ -1,0 +1,213 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>https-mitm-in-kazakhstan-starting-2024-02-07</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>There’s a bug in Mozilla Bugzilla that says there’s a new HTTPS MITM in Kazakhstan since 2024-02-07. (At least, that’s when the bug was opened.)</p>
+<p><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1879046">Bug 1879046: Add New Kazakhstan Root Certificate to OneCRL</a></p>
+<blockquote>
+<p>Another MITM attempt by the KZ government.<br>
+When I visit https<a></a>://m.reactor.cc, the real certificate is replaced with the one that I attached.</p>
+<p>Many people install mandatory certificate to be able to access some government websites.<br>
+I’m not sure if the browser will let you in if you have those mandatory certificates installed.</p>
+</blockquote>
+<blockquote>
+<p>The following certificate information will be of use in adding this root certificate to OneCRL:</p>
+<p>“issuerName”: “MFMxNTAzBgNVBAMTLEluZm9ybWF0aW9uIFNlY3VyaXR5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MQ0wCwYDVQQKEwRJU0NBMQswCQYDVQQGEwJLWg==”,</p>
+<p>“serialNumber”: “MgQS30wvsQLzmAyqdrphCuYshJI=”,</p>
+<p>“pubKeyHash”: “iSjFk5iw8XHA+W/a5quN0PSO4G0XTaEMQErAAUPHp0k=”,</p>
+<p>Serial Number 320412DF4C2FB102F3980CAA76BA610AE62C8492<br>
+Subject C=KZ, O=ISCA, CN=Information Security Certification Authority<br>
+Issuer C=KZ, O=ISCA, CN=Information Security Certification Authority<br>
+Not Before 2020-02-28T06:16:40Z<br>
+Not After 2050-02-28T06:16:40Z</p>
+<p>SHA1 Hash 1375EBDCF56359AAE0423E861AC8FC6231511CE6<br>
+SHA256 Hash 89107C8E50E029B7B5F4FF0CCD2956BCC9D0C8BA2BFB6A58374ED63A6B034A30<br>
+SPKI SHA256 8928C59398B0F171C0F96FDAE6AB8DD0F48EE06D174DA10C404AC00143C7A749<br>
+Subject SPKI SHA256 6B0F6067F2FE25B0BAC6679266AE73749DC7D1044C84809398F9E37AF3F4F311<br>
+HPKP PIN-SHA256 iSjFk5iw8XHA+W/a5quN0PSO4G0XTaEMQErAAUPHp0k=<br>
+Certificate Extensions<br>
+AuthorityKeyID sgQS30wvsQLzmAyqdrphCuYshJI=<br>
+SubjectKeyId sgQS30wvsQLzmAyqdrphCuYshJI=</p>
+</blockquote>
+<p>I found this one through a meta-tracking bug for Kazakhstan MITM:</p>
+<p><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1883772">Bug 1883772: [meta] tracking blocking Kazakhstan MITM roots</a></p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>Bug</th>
+<th>Date</th>
+<th>Previous discussion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1229827">1229827</a></td>
+<td>2015-12-02</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1567114">1567114</a></td>
+<td>2019-07-18</td>
+<td>Mentioned in <a href="https://ntc.party/t/paper-summary-investigating-large-scale-https-interception-in-kazakhstan-imc-2020/1008" class="inline-onebox">Paper summary: Investigating Large Scale HTTPS Interception in Kazakhstan (IMC 2020)</a></td>
+</tr>
+<tr>
+<td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1680927">1680927</a></td>
+<td>2020-12-05</td>
+<td>Mentioned in <a href="https://ntc.party/t/paper-summary-investigating-large-scale-https-interception-in-kazakhstan-imc-2020/1008" class="inline-onebox">Paper summary: Investigating Large Scale HTTPS Interception in Kazakhstan (IMC 2020)</a></td>
+</tr>
+<tr>
+<td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1879046">1879046</a></td>
+<td>2024-02-07</td>
+<td>This thread</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2024-03-06T02:15:06.329Z</td></tr><tr><td>ValdikSS</td><td><p>At first I thought that could be just a “page blocked” redirection host which mimic the domain, but no, this is a “legitimate” certificate issued for <code>m.joyreactor.cc</code> by KZ intermediate certificate.</p>
+<pre data-code-wrap="shell"><code class="lang-shell">$ openssl verify -attime 1706797413 -CAfile kzall.crt -show_chain -verbose m-joyreactor-cc\(1\).pem 
+m-joyreactor-cc(1).pem: OK
+Chain:
+depth=0: CN = m.joyreactor.cc (untrusted)
+depth=1: C = KZ, O = ISCA, CN = Intermediate
+depth=2: CN = Information Security Certification Authority, O = ISCA, C = KZ
+</code></pre></td><td>2024-03-06T14:27:06.940Z</td></tr><tr><td>soulja(Serano)</td><td><p>Сейчас обнаружил вот такой перфоманс</p>
+<pre><code class="lang-auto">echo | openssl s_client -servername xakep.ru -connect xakep.ru:443 2&gt;/dev/null | openssl x509 -noout -issuer -subject -dates
+issuer=C = KZ, O = ISCA, CN = Intermediate
+subject=CN = xakep.ru
+notBefore=Jul 22 10:41:04 2024 GMT
+notAfter=Oct 20 10:41:03 2024 GMT
+
+</code></pre></td><td>2024-09-10T10:43:23.848Z</td></tr><tr><td>zzr</td><td><p>ето точн понтделка у их там летс енкрипт (US) а не KZ</p></td><td>2024-09-10T11:00:19.085Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><pre><code class="lang-auto">issuer=C=US, O=Let's Encrypt, CN=E5
+subject=CN=xakep.ru
+notBefore=Jul 22 10:41:04 2024 GMT
+notAfter=Oct 20 10:41:03 2024 GMT
+</code></pre></td><td>2024-09-10T15:20:58.452Z</td></tr><tr><td>soulja(Serano)</td><td><p>Да, это настоящий сертификат, у меня происходит подмена</p></td><td>2024-09-10T15:28:01.134Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>да это понятно. интересно что дата/время прям один в один<br>
+и какие то непонятные пробелы в сертификате. ошибка их “генератора” ?<br>
+смотрю везде слитно</p>
+<pre><code class="lang-auto">issuer=C=US, O=Let's Encrypt, CN=E5
+subject=CN=ntc.party
+issuer=C=US, O=Let's Encrypt, CN=R10
+subject=CN=sber.ru
+</code></pre>
+<p>issuer=C = KZ<br>
+O = ISCA<br>
+CN = Intermediate<br>
+subject=CN = <a href="http://xakep.ru" rel="noopener nofollow ugc">xakep.ru</a></p></td><td>2024-09-10T15:32:37.863Z</td></tr><tr><td>soulja(Serano)</td><td><p>Так вроде все нормально, где лишние пробелы? Подмена кстати прекратилась.</p></td><td>2024-09-10T15:50:53.385Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="soulja" data-post="3" data-topic="7405">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/958977/48.png" class="avatar"> soulja:</div>
+<blockquote>
+<p>Сейчас обнаружил вот такой перфоманс</p>
+</blockquote>
+</aside>
+<p><a href="https://ooni.org/">OONI</a>, <a href="https://ifkz.org/en">Internet Freedom Kazakhstan (IFKZ)</a>, and <a href="https://www.digitalrights.asia">Eurasian Digital Foundation</a> have a new report on Kazakhstan that documents MITM using this latest “Information Security Certification Authority” certificate since 2021. They have a list of known affected domains and various intermediate certificates that have been seen. Their analysis ends in June 2024, so it doesn’t include your <code>notBefore=Jul 22 10:41:04 2024 GMT</code>, but it’s consistent with the pattern.</p>
+<ul>
+<li><a href="https://ooni.org/post/2024-kazakhstan-report/">Kazakhstan: TLS MITM attacks and blocking of news media, human rights, and circumvention tool sites</a></li>
+<li><a href="https://ooni.org/ru/post/2024-kazakhstan-report/">Казахстан: TLS MITM атаки и блокировка сайтов новостных и правозащитных ресурсов, а также сайтов инструментов по обходу блокировок</a></li>
+</ul>
+<blockquote>
+<p>Specifically, OONI data from Kazakhstan shows that the following domains were targeted by TLS MITM attacks:</p>
+<ul>
+<li><a href="http://360tv.ru">360tv.ru</a></li>
+<li>astrakhan.sm.news</li>
+<li><a href="http://compromat.ru">compromat.ru</a></li>
+<li>cont.ws</li>
+<li>knews.kg</li>
+<li><a href="http://kz.tsargrad.tv">kz.tsargrad.tv</a></li>
+<li><a href="http://regnum.ru">regnum.ru</a></li>
+<li><a href="http://rutracker.org">rutracker.org</a></li>
+<li>sproot.it</li>
+<li><a href="http://stanradar.com">stanradar.com</a></li>
+<li><a href="http://ukraina.ru">ukraina.ru</a></li>
+<li>www.for.kg</li>
+<li><a href="http://www.pinterest.com">www.pinterest.com</a></li>
+<li><a href="http://xakep.ru">xakep.ru</a></li>
+</ul>
+</blockquote>
+<blockquote>
+<p>The specific intermediate certificate that we found to be signed by the <a href="https://isca.gov.kz/">latest root certificate</a> has as common name “Information Security Certification Authority” and has an issuance date of 28 February 2020 and expiry date of 28 February 2050.</p>
+</blockquote>
+<blockquote>
+<p>In OONI data collected from Kazakhstan between 2023 to 2024, we found <strong>6 distinct intermediate certificates</strong> being used to carry out the TLS MITM. Each of these certificates has a relatively short duration period of validity of 75 days. This means that in order for the certificate chain to continue functioning properly, they would have to re-emit a new intermediate from their root CA at least every 74 days.</p>
+<p>The specific intermediates we found in our data are the following:</p>
+<ul>
+<li><a href="https://explorer.ooni.org/m/20210808015758.022737_KZ_webconnectivity_3b9213f9ee4f2d06">https://explorer.ooni.org/m/20210808015758.022737_KZ_webconnectivity_3b9213f9ee4f2d06</a><pre><code class="lang-plaintext">Fingerprint: c0e15a945595372030f0d45938ebb6081bb39fb5
+Serial: 542829070264121061358597976201233251364726286334
+Not valid before: 2021-06-18 12:54:34
+Not valid after: 2021-09-01 12:54:34
+</code></pre>
+</li>
+<li><a href="https://explorer.ooni.org/m/20210914080702.850310_KZ_webconnectivity_88ece394d9a0fcdc">https://explorer.ooni.org/m/20210914080702.850310_KZ_webconnectivity_88ece394d9a0fcdc</a><pre><code class="lang-plaintext">Fingerprint: 90f9aa29195ecbfbf2c943ab1d5102f3ec84a68c
+Serial: 600636309019776433832878055409971857043873967144
+Not valid before: 2021-08-19 12:39:14
+Not valid after: 2021-11-02 12:39:14
+</code></pre>
+</li>
+<li><a href="https://explorer.ooni.org/m/20231016130600.035487_KZ_webconnectivity_4a5c38a0f8bea740">https://explorer.ooni.org/m/20231016130600.035487_KZ_webconnectivity_4a5c38a0f8bea740</a><pre><code class="lang-plaintext">Fingerprint: 8634ecaefb5d02463d2a9ce42178001154752561
+Serial: 293697198316360729812453916520636458008892047728
+Not valid before: 2023-08-09 06:33:35
+Not valid after: 2023-10-23 06:33:35
+</code></pre>
+</li>
+<li><a href="https://explorer.ooni.org/m/20240317052821.044604_KZ_webconnectivity_3752cbf5dac624e9">https://explorer.ooni.org/m/20240317052821.044604_KZ_webconnectivity_3752cbf5dac624e9</a><pre><code class="lang-plaintext">Fingerprint: dfcd9dcb64edd86e333ad6247e2deda7dcf10ebd
+Serial: 621829445753241691614495298860851878603068917060
+Not valid before: 2023-11-28 11:24:53
+Not valid after: 2024-02-11 11:24:53
+</code></pre>
+</li>
+<li><a href="https://explorer.ooni.org/m/20231118140134.149173_KZ_webconnectivity_a93dfc958ab79ec2">https://explorer.ooni.org/m/20231118140134.149173_KZ_webconnectivity_a93dfc958ab79ec2</a><pre><code class="lang-plaintext">Fingerprint: cb074692a22395fa615a89a86d877c9abc034867
+Serial: 203432698505598047390349427507107109607746033885
+Not valid before: 2023-11-02 09:03:07
+Not valid after: 2024-01-16 09:03:07
+</code></pre>
+</li>
+<li><a href="https://explorer.ooni.org/m/20240418133819.497733_KZ_webconnectivity_bd3a0d69cd5e8aca">https://explorer.ooni.org/m/20240418133819.497733_KZ_webconnectivity_bd3a0d69cd5e8aca</a><pre><code class="lang-plaintext">Fingerprint: 5d54c6afa4fd4685359875595565ae9f8caab914
+Serial: 499633659418679795571951434192241531137344178316
+Not valid before: 2024-03-20 05:50:15
+Not valid after: 2024-06-03 05:50:15
+</code></pre>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>What’s quite surprising from the above time ranges is that it’s quite apparent that there is a gap in between the renewal of the certificates. Based on OONI data, we were able to confirm that even if internet users in Kazakhstan were to have installed the root certificate, as directed by the government, they would still have received certificate validation errors between 2nd November 2011 and 9th August 2023. Shorter windows of invalidity for the certificate can be observed between 23rd October 2023 and 28th November 2023, and then between 11th February 2024 and 20th March 2024.</p>
+<p>What can be seen from the chart below is that these intermediate certificates were spotted in the wild and <strong>being used to perform MITM even during periods of certificate invalidity</strong>.</p>
+<p>This suggests that if users were to attempt to visit the sites affected by the MITM and had installed the root CA, they would still be getting an error.</p>
+<p>It’s unclear to us why they went through the hassle of telling users to install the root CA, but then failed to keep the intermediates up to date in order to effectively carry out a MITM attack, even when users were fully compliant with government orders. We can only speculate that this is either due to some misconfiguration in the periodic renewal task (although for the first certificate we see the time window of invalidity is almost 2 years), or that for 3 times they forgot to renew their certificates on time.</p>
+</blockquote></td><td>2024-09-20T16:27:36.821Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,124 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>testing-shadowsocks-udp-handling-with-obfuscation-enabled</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><h2>Test of Shadowsocks UDP handling in obfuscation mode</h2>
+<p>Software used: shadowsocks-libev 3.3.4 (TCP+UDP) on the server side, official Android Shadowsocks 5.0.5 client by Max Lv.</p>
+<h2>Without plugins</h2>
+<ol>
+<li>Google DNS (8.8.8.8) over TCP is used by default. Shadowsocks converts DNS UDP queries to TCP.</li>
+<li>UDP data is transferred via proxy over UDP, without UDP-in-TCP incapsulation (this is expected, documented behavior).</li>
+</ol>
+<h2>Simple-obfs</h2>
+<p>Software: simple-obfs 0.0.5 on server, Simple Obfuscation by Max LV on Android, version 0.0.5.</p>
+<ol>
+<li>DNS is handled correctly, just as without the plugin</li>
+<li>UDP data is transferred via proxy, without obfuscation (ignoring obfs settings), to the IP address and port of simple-obfs server.</li>
+<li>UDP data discarded by server as simple-obfs supports only TCP, but if you configure shadowsocks over UDP on the same port without obfs-proxy on server, UDP data would work (without obfuscation).</li>
+</ol>
+<h2>V2ray-plugin</h2>
+<p>Software: v2ray-plugin v1.3.0 on server, V2ray Plugin by Max LV 1.3.0 on Android</p>
+<p>Everything similar to simple-obfs situation: Shadowsocks ignores plugin configuration for UDP data and redirects it to the same host and port, without obfuscation by the plugin.</p>
+<h2>Resume</h2>
+<p>Shadowsocks obfuscation does not work for UDP traffic, as it was expected prior the test. However, I find it strange that UDP data does not get discarded and gets sent to server, bypassing plugin processing. This could be used as suspicious activity marker to detect proxies: common web browsers and other software won’t use UDP on port 443, except when using QUIC protocol, but in this case all further data transfer would be performed over UDP, which is not the case for Shadowsocks.</p>
+<p>Calls in IMs and other software which use UDP won’t work efficiently, if at all.</p>
+<p>P.S. during the test was found out that Firefox for Android send multiple empty UDP packets (10-20 in order, without any data), either on every connection or on every DNS query. After Shadowsocks encryption and incapsulation, these packets were seen as 10-20 55 byte UDP packets.</p></td><td>2020-05-31T13:48:09.872Z</td></tr><tr><td>ValdikSS</td><td><p>Fixed in Android version. Now it doesn’t relay UDP by default when any plugin is enabled.</p>
+<aside class="onebox githubcommit" data-onebox-src="https://github.com/shadowsocks/shadowsocks-android/commit/fbffc9841fdcb586d6929af04d8302f490f52068">
+  <header class="source">
+
+      <a href="https://github.com/shadowsocks/shadowsocks-android/commit/fbffc9841fdcb586d6929af04d8302f490f52068" target="_blank" rel="noopener">github.com/shadowsocks/shadowsocks-android</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row">
+  <div class="github-icon-container" title="Commit">
+    <svg width="60" height="60" class="github-icon" viewBox="0 0 14 16" aria-hidden="true"><path fill-rule="evenodd" d="M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z"></path></svg>
+  </div>
+
+  <div class="github-info-container">
+    <h4>
+      <a href="https://github.com/shadowsocks/shadowsocks-android/commit/fbffc9841fdcb586d6929af04d8302f490f52068" target="_blank" rel="noopener">Disable UDP relay if plugin is enabled and no fallback</a>
+    </h4>
+
+    <div class="github-info">
+      <div class="date">
+        committed <span class="discourse-local-date" data-format="ll" data-date="2020-06-01" data-time="00:03:59" data-timezone="UTC">12:03AM - 01 Jun 20 UTC</span>
+      </div>
+
+      <div class="user">
+        <a href="https://github.com/madeye" target="_blank" rel="noopener">
+          <img alt="madeye" src="testing-shadowsocks-udp-handling-with-obfuscation-enabled/c0d3e58aa70c016c99db0f89fd52a5ad0fbcce00.jpeg" class="onebox-avatar-inline" width="20" height="20" data-dominant-color="8B8B8B">
+          madeye
+        </a>
+      </div>
+
+      <div class="lines" title="changed 1 files with 1 additions and 1 deletions">
+        <a href="https://github.com/shadowsocks/shadowsocks-android/commit/fbffc9841fdcb586d6929af04d8302f490f52068" target="_blank" rel="noopener">
+          <span class="added">+1</span>
+          <span class="removed">-1</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2020-06-02T18:19:11.137Z</td></tr><tr><td>vanyaindigo</td><td><p>Интересно, если использовать QUIC вместо Websocket-TLS, будут такие же проблемы?</p></td><td>2020-06-08T13:06:26.837Z</td></tr><tr><td>ValdikSS</td><td><p>Речь про V2ray-plugin? Да, т.к. сама система плагинов поддерживает только TCP-трафик, а по какому протоколу сам плагин подключается к серверу — неважно.</p></td><td>2020-06-08T13:12:55.865Z</td></tr><tr><td>vanyaindigo</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="4" data-topic="533">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>сама система плагинов поддерживает только TCP-трафик</p>
+</blockquote>
+</aside>
+<p>это со стороны Shadowsocks или плагина такая шляпа?</p></td><td>2020-06-08T15:05:50.060Z</td></tr><tr><td>ValdikSS</td><td><p>Плагинная система Shadowsocks поддерживает только TCP<br>
+<a href="https://shadowsocks.org/en/spec/Plugin.html" class="onebox" target="_blank" rel="noopener">https://shadowsocks.org/en/spec/Plugin.html</a></p>
+<blockquote>
+<p>Restrictions</p>
+<p>a. Plugin over plugin is NOT supported. Only one plugin can be enabled when a shadowsocks service is started. If you really need this feature, implement a plugin-over-plugin transport as a SIP003 plugin. b. Only TCP traffic is forwarded. For now, there is no plan to support UDP traffic forwarding.</p>
+</blockquote></td><td>2020-06-08T15:32:40.626Z</td></tr><tr><td>vanyaindigo</td><td><p>грустненько <img src="https://ntc.party/images/emoji/twitter/roll_eyes.png?v=12" title=":roll_eyes:" class="emoji" alt=":roll_eyes:" loading="lazy" width="20" height="20"></p></td><td>2020-06-08T16:45:43.491Z</td></tr>
+    </table>
+      </body>
+    </html>

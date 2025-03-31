@@ -1,0 +1,250 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>cloudflare-blocked-ip-circumvention</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>Continuing the discussion from <a href="https://ntc.party/t/esni-encrypted-sni/68/15">Использование ESNI (Encrypted SNI) в России</a>:</p>
+<p>Cloudflare allows connection to any website (any domain/SNI) via any Cloudflare IP address which accepts connections to port 80/443. Although Cloudflare does ‘allocate’ IP addresses to the domains/websites, it does not prevent from connecting to this website using any other Cloudflare IP address.</p>
+<p><a href="https://bo0om.ru/" rel="nofollow noopener">https://bo0om.ru/</a> is allocated <code>104.28.27.13</code> and <code>104.28.26.13</code> by Cloudflare, but you can connect to it using any IP address from <a href="https://www.cloudflare.com/ips/" rel="nofollow noopener">Cloudflare IP ranges</a> which accepts connections to port 443.</p>
+<pre><code class="lang-auto">$ curl -v --resolve *:443:198.41.215.0 https://bo0om.ru
+
+* Added *:443:198.41.215.0 to DNS cache
+* RESOLVE *:443 is wildcard, enabling wildcard checks
+* Hostname bo0om.ru was found in DNS cache
+*   Trying 198.41.215.0:443...
+* TCP_NODELAY set
+* Connected to bo0om.ru (198.41.215.0) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*   CAfile: /etc/pki/tls/certs/ca-bundle.crt
+  CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
+* ALPN, server accepted to use h2
+* Server certificate:
+*  subject: OU=Domain Control Validated; OU=PositiveSSL Multi-Domain; CN=sni78855.cloudflaressl.com
+*  start date: Nov  3 00:00:00 2019 GMT
+*  expire date: May 11 23:59:59 2020 GMT
+*  subjectAltName: host "bo0om.ru" matched cert's "bo0om.ru"
+*  issuer: C=GB; ST=Greater Manchester; L=Salford; O=COMODO CA Limited; CN=COMODO ECC Domain Validation Secure Server CA 2
+*  SSL certificate verify ok.
+* Using HTTP2, server supports multi-use
+* Connection state changed (HTTP/2 confirmed)
+* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
+* Using Stream ID: 1 (easy handle 0x55559d146970)
+&gt; GET / HTTP/2
+&gt; Host: bo0om.ru
+&gt; User-Agent: curl/7.65.3
+&gt; Accept: */*
+&gt; 
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* old SSL session ID is stale, removing
+* Connection state changed (MAX_CONCURRENT_STREAMS == 256)!
+&lt; HTTP/2 200 
+&lt; date: Wed, 06 Nov 2019 02:31:33 GMT
+&lt; content-type: text/html; charset=UTF-8
+&lt; set-cookie: __cfduid=ddb14359e6733369c987d1dd0065ffe8f1573007491; expires=Thu, 05-Nov-20 02:31:31 GMT; path=/; domain=.bo0om.ru; HttpOnly
+&lt; referrer-policy: unsafe-url
+&lt; x-frame-options: SAMEORIGIN
+&lt; x-xss-protection: 1; mode=block
+&lt; x-content-type-options: nosniff
+&lt; link: &lt;https://bo0om.ru/wp-json/&gt;; rel="https://api.w.org/"
+&lt; set-cookie: icwp-wpsf=9dbb0b8c2763d9c2918931fbc94fab2a; expires=Thu, 10-Oct-2069 05:03:02 GMT; Max-Age=1575599490; path=/; secure
+&lt; expires: Fri, 06 Dec 2019 02:31:32 GMT
+&lt; cache-control: private, must-revalidate, max-age=2592000
+&lt; vary: Accept-Encoding
+&lt; cf-cache-status: DYNAMIC
+&lt; strict-transport-security: max-age=2592000
+&lt; expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+&lt; server: cloudflare
+&lt; cf-ray: 5313a6d38caf7676-ARN
+&lt; 
+&lt;!DOCTYPE html&gt;
+&lt;html lang="ru-RU" class="no-js"&gt;
+…
+</code></pre>
+<p>But Cloudflare does not allow domain fronting. You can’t use one domain in TLS SNI and another in HTTP Host, you will get 403 Forbidden.</p></td><td>2019-11-06T16:57:08.088Z</td></tr><tr><td>fortuna</td><td><p>It seems you can use any <a href="http://cloudflare.com" rel="nofollow noopener">cloudflare.com</a> IP address to access their DoH service, so you can bypass that IP blocking.</p></td><td>2019-10-26T19:32:21.875Z</td></tr><tr><td>ValdikSS</td><td><p>Yes, just with any cloudflare-hosted website really.</p></td><td>2019-10-26T22:13:53.562Z</td></tr><tr><td>tango</td><td><aside class="quote no-group quote-modified" data-username="fortuna" data-post="12" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/fortuna/48/150_2.png" class="avatar"><a href="https://ntc.party/t/%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-esni-encrypted-sni-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/68/12">Использование ESNI (Encrypted SNI) в России</a></div>
+<blockquote>
+<p>It seems you can use any <a href="http://cloudflare.com">cloudflare.com</a> IP address to access their DoH service, so you can bypass that IP blocking.</p>
+</blockquote>
+</aside>
+<p>I don’t understand what this means. I tried domain fronting and using a bare IP address, and it doesn’t work for me.</p>
+<pre data-code-wrap="shell"><code class="lang-shell">$ curl --include https://1.1.1.1/dns-query
+HTTP/2 400 
+date: Tue, 05 Nov 2019 23:53:26 GMT
+access-control-allow-origin: *
+expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+server: cloudflare
+cf-ray: 5312bf478925e202-ORD
+
+$ curl --include https://mozilla.cloudflare-dns.com/dns-query
+HTTP/2 400 
+date: Tue, 05 Nov 2019 23:53:38 GMT
+access-control-allow-origin: *
+expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+server: cloudflare
+cf-ray: 5312bf90d972e216-ORD
+
+$ curl --include https://cloudflare.com/dns-query -H 'Host: 1.1.1.1'
+HTTP/2 403 
+server: cloudflare
+date: Tue, 05 Nov 2019 23:54:09 GMT
+content-type: text/html
+content-length: 151
+cf-ray: 5312c04ebb37ed9f-SJC
+
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;cloudflare&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+$ dig +short cloudflare.com
+198.41.214.162
+198.41.215.162
+$ curl --insecure --include https://198.41.215.162/dns-query -H 'Host: 1.1.1.1'
+HTTP/2 403 
+server: cloudflare
+date: Tue, 05 Nov 2019 23:54:48 GMT
+content-type: text/html
+content-length: 151
+cf-ray: 5312c1445d389dd1-ORD
+
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;cloudflare&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre></td><td>2019-11-05T23:56:07.179Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group quote-modified" data-username="tango" data-post="14" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"><a href="https://ntc.party/t/%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-esni-encrypted-sni-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/68/14">Использование ESNI (Encrypted SNI) в России</a></div>
+<blockquote>
+<p>I tried domain fronting and using a bare IP address, and it doesn’t work for me.</p>
+</blockquote>
+</aside>
+<p>That’s because we are talking not about domain fronting.</p>
+<p>Cloudflare allows connection to any website (any domain/SNI) via any Cloudflare IP address which accepts connections to port 80/443. Although Cloudflare does ‘allocate’ IP addresses to the domains/websites, it does not prevent from connecting to this website using any other Cloudflare IP address.</p>
+<p><a href="https://bo0om.ru/">https://bo0om.ru/</a> is allocated <code>104.28.27.13</code> and <code>104.28.26.13</code> by Cloudflare, but you can connect to it using any IP address from <a href="https://www.cloudflare.com/ips/">Cloudflare IP ranges</a> which accepts connections to port 443.</p>
+<pre><code class="lang-auto">$ curl -v --resolve *:443:198.41.215.0 https://bo0om.ru
+
+* Added *:443:198.41.215.0 to DNS cache
+* RESOLVE *:443 is wildcard, enabling wildcard checks
+* Hostname bo0om.ru was found in DNS cache
+*   Trying 198.41.215.0:443...
+* TCP_NODELAY set
+* Connected to bo0om.ru (198.41.215.0) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*   CAfile: /etc/pki/tls/certs/ca-bundle.crt
+  CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
+* ALPN, server accepted to use h2
+* Server certificate:
+*  subject: OU=Domain Control Validated; OU=PositiveSSL Multi-Domain; CN=sni78855.cloudflaressl.com
+*  start date: Nov  3 00:00:00 2019 GMT
+*  expire date: May 11 23:59:59 2020 GMT
+*  subjectAltName: host "bo0om.ru" matched cert's "bo0om.ru"
+*  issuer: C=GB; ST=Greater Manchester; L=Salford; O=COMODO CA Limited; CN=COMODO ECC Domain Validation Secure Server CA 2
+*  SSL certificate verify ok.
+* Using HTTP2, server supports multi-use
+* Connection state changed (HTTP/2 confirmed)
+* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
+* Using Stream ID: 1 (easy handle 0x55559d146970)
+&gt; GET / HTTP/2
+&gt; Host: bo0om.ru
+&gt; User-Agent: curl/7.65.3
+&gt; Accept: */*
+&gt; 
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* old SSL session ID is stale, removing
+* Connection state changed (MAX_CONCURRENT_STREAMS == 256)!
+&lt; HTTP/2 200 
+&lt; date: Wed, 06 Nov 2019 02:31:33 GMT
+&lt; content-type: text/html; charset=UTF-8
+&lt; set-cookie: __cfduid=ddb14359e6733369c987d1dd0065ffe8f1573007491; expires=Thu, 05-Nov-20 02:31:31 GMT; path=/; domain=.bo0om.ru; HttpOnly
+&lt; referrer-policy: unsafe-url
+&lt; x-frame-options: SAMEORIGIN
+&lt; x-xss-protection: 1; mode=block
+&lt; x-content-type-options: nosniff
+&lt; link: &lt;https://bo0om.ru/wp-json/&gt;; rel="https://api.w.org/"
+&lt; set-cookie: icwp-wpsf=9dbb0b8c2763d9c2918931fbc94fab2a; expires=Thu, 10-Oct-2069 05:03:02 GMT; Max-Age=1575599490; path=/; secure
+&lt; expires: Fri, 06 Dec 2019 02:31:32 GMT
+&lt; cache-control: private, must-revalidate, max-age=2592000
+&lt; vary: Accept-Encoding
+&lt; cf-cache-status: DYNAMIC
+&lt; strict-transport-security: max-age=2592000
+&lt; expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+&lt; server: cloudflare
+&lt; cf-ray: 5313a6d38caf7676-ARN
+&lt; 
+&lt;!DOCTYPE html&gt;
+&lt;html lang="ru-RU" class="no-js"&gt;
+…
+</code></pre>
+<p>But Cloudflare does not allow domain fronting. You can’t use one domain in TLS SNI and another in HTTP Host, you will get 403 Forbidden.</p></td><td>2019-11-06T02:34:14.958Z</td></tr><tr><td>fortuna</td><td><p>Here is a simple example of what I meant:</p>
+<pre><code class="lang-auto">$ curl --connect-to ::cloudflare.com: -H 'accept: application/dns-json' 'https://mozilla.cloudflare-dns.com/dns-query?name=example.com&amp;type=AAAA'
+
+{"Status": 0,"TC": false,"RD": true, "RA": true, "AD": true,"CD": false,"Question":[{"name": "example.com.", "type": 28}],"Answer":[{"name": "example.com.", "type": 28, "TTL": 1918, "data": "2606:2800:220:1:248:1893:25c8:1946"}]}
+</code></pre>
+<p>As <a class="mention" href="/u/valdikss">@ValdikSS</a> said, this is not domain fronting. It doesn’t protect against SNI-triggered blocking, since you are still sending the <code>mozilla.cloudflare-dns.com</code> SNI. But it does protect against blocking of <a href="http://mozilla.cloudflare-dns.com" rel="nofollow noopener">mozilla.cloudflare-dns.com</a> by IP address.</p></td><td>2019-11-06T03:32:59.564Z</td></tr><tr><td>ValdikSS</td><td><p>A post was merged into an existing topic: <a href="/t/esni-encrypted-sni/68/13">Использование ESNI (Encrypted SNI) в России</a></p></td><td>2019-11-06T16:58:52.124Z</td></tr>
+    </table>
+      </body>
+    </html>

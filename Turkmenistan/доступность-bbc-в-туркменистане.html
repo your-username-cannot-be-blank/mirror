@@ -1,0 +1,125 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>доступность-bbc-в-туркменистане</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>abbi(abbi)</td><td><p>мы видим тесты, которые показывают, что BBC (<a href="https://www.bbc.com" rel="noopener nofollow ugc">https://www.bbc.com</a>) может быть заблокирована в Туркменистане.</p>
+<p>Может кто-нибудь проверить, правильно ли это?</p></td><td>2024-07-17T13:46:50.587Z</td></tr><tr><td>0ka(0ka)</td><td><p>fastly ip addresses are blocked since yesterday (not sure, maybe even earlier)</p></td><td>2024-07-17T13:54:31.243Z</td></tr><tr><td>ValdikSS</td><td><p>AGTS &amp; TMTelecom:</p>
+<pre><code class="lang-auto"># host www.bbc.com
+www.bbc.com is an alias for www.bbc.com.pri.bbc.com.
+www.bbc.com.pri.bbc.com is an alias for bbc.map.fastly.net.
+bbc.map.fastly.net has address 151.101.128.81
+bbc.map.fastly.net has address 151.101.192.81
+bbc.map.fastly.net has address 151.101.0.81
+bbc.map.fastly.net has address 151.101.64.81
+bbc.map.fastly.net has address 127.0.0.1
+bbc.map.fastly.net has address 127.0.0.1
+
+# curl -v https://www.bbc.com
+* Host www.bbc.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 151.101.192.81, 151.101.0.81, 151.101.64.81, 151.101.128.81
+*   Trying 151.101.192.81:443...
+* connect to 151.101.192.81 port 443 from 192.168.1.100 port 38552 failed: Connection refused
+*   Trying 151.101.0.81:443...
+* connect to 151.101.0.81 port 443 from 192.168.1.100 port 47818 failed: Connection refused
+*   Trying 151.101.64.81:443...
+* connect to 151.101.64.81 port 443 from 192.168.1.100 port 52092 failed: Connection refused
+*   Trying 151.101.128.81:443...
+* connect to 151.101.128.81 port 443 from 192.168.1.100 port 44998 failed: Connection refused
+* Failed to connect to www.bbc.com port 443 after 164 ms: Couldn't connect to server
+* Closing connection
+curl: (7) Failed to connect to www.bbc.com port 443 after 164 ms: Couldn't connect to server
+</code></pre></td><td>2024-07-17T16:33:48.122Z</td></tr><tr><td>abbi(abbi)</td><td><p><a class="mention" href="/u/0ka">@0ka</a> <a class="mention" href="/u/valdikss">@ValdikSS</a> thank you!</p>
+<p>We got in touch with Fastly they asked if we can send them the block of text in the response to this <a href="https://www.fastly-debug.com" rel="noopener nofollow ugc">https://www.fastly-debug.com</a> (in the browser). Understandable if you can’t do that.</p></td><td>2024-07-17T16:44:49.375Z</td></tr><tr><td>0ka(0ka)</td><td><p>even if you find a working ip address it won’t last for long, but the situation with the internet is very unclear and everything can change tomorrow.</p></td><td>2024-07-17T17:11:25.889Z</td></tr><tr><td>abbi(abbi)</td><td><p>I saw a post on NTC the other day saying Turkmenistan unblocked millions of IP addresses. I find it strange this is happening. So probably someone unblocked them by mistake and they are now restoring the filtering lists, which included Fastly.</p></td><td>2024-07-17T17:15:49.877Z</td></tr><tr><td>ValdikSS</td><td><p><code>www.fastly-debug.com</code> resolves to other set of IP addresses, some of which are reachable. However, bbc is still not available on these IPs due to SNI block.</p>
+<pre><code class="lang-auto"># host www.fastly-debug.com                                                                                                                                                                     
+www.fastly-debug.com is an alias for prod.f.ssl.global.fastly.net.                                                                                                                                             
+prod.f.ssl.global.fastly.net has address 151.101.0.64                                                                                                                                                          
+prod.f.ssl.global.fastly.net has address 151.101.192.64                                                                                                                                                        
+prod.f.ssl.global.fastly.net has address 151.101.128.64                                                                                                                                                        
+prod.f.ssl.global.fastly.net has address 151.101.64.64                                                                                                                                                         
+prod.f.ssl.global.fastly.net has address 127.0.0.1                                                                                                                                                             
+prod.f.ssl.global.fastly.net has address 127.0.0.1
+
+
+# curl -v https://www.bbc.com --connect-to ::151.101.64.64
+* Connecting to hostname: 151.101.64.64
+*   Trying 151.101.64.64:443...
+* Connected to 151.101.64.64 (151.101.64.64) port 443
+* mbedTLS: Connecting to www.bbc.com:443
+* mbedTLS: Set min SSL version to TLS 1.0
+* ALPN: curl offers h2,http/1.1
+^C
+</code></pre></td><td>2024-07-17T17:22:07.177Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="abbi" data-post="4" data-topic="8112">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/abbi/48/15290_2.png" class="avatar"> abbi:</div>
+<blockquote>
+<p>We got in touch with Fastly they asked if we can send them the block of text in the response to this <a href="https://www.fastly-debug.com">https://www.fastly-debug.com </a> (in the browser).</p>
+</blockquote>
+</aside>
+<p>Check DM.</p></td><td>2024-07-17T17:23:41.271Z</td></tr><tr><td>abbi(abbi)</td><td><p>Hi again, can you please try connecting to 146.75.72.81 on port 443 (another one of our Fastly IPs)? or is the Guardian website accessible (it’s also hosted on Fastly) <a href="https://www.theguardian.com/" rel="noopener nofollow ugc">https://www.theguardian.com</a></p></td><td>2024-07-18T08:18:53.809Z</td></tr><tr><td>0ka(0ka)</td><td><p>146.75.72.81 is accessible on agts/tmtelecom and doesn’t yet have a sni whitelist so <a href="http://www.bbc.com">www.bbc.com</a> is accessible.<br>
+on tmcell 146.75.72.81 is not accessible</p></td><td>2024-07-18T09:52:47.730Z</td></tr><tr><td>soulja(Serano)</td><td><p><a href="http://BBC.com" rel="noopener nofollow ugc">BBC.com</a> использовался для фронтинга на каждом втором школо впн, то, что перестал работать, нечему удивляться</p></td><td>2024-07-18T14:28:20.717Z</td></tr><tr><td>ValdikSS</td><td><p>BBC доступен с обоих провайдеров на текущую минуту.</p>
+<p>AGTS:</p>
+<pre data-code-wrap="sh"><code class="lang-sh"># host www.bbc.com
+www.bbc.com is an alias for www.bbc.com.pri.bbc.com.
+www.bbc.com.pri.bbc.com is an alias for bbc.map.fastly.net.
+bbc.map.fastly.net has address 151.101.0.81
+bbc.map.fastly.net has address 151.101.64.81
+bbc.map.fastly.net has address 151.101.128.81
+bbc.map.fastly.net has address 151.101.192.81
+bbc.map.fastly.net has address 127.0.0.1
+bbc.map.fastly.net has address 127.0.0.1
+
+# curl https://www.bbc.com -o/dev/null
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  392k  100  392k    0     0   292k      0  0:00:01  0:00:01 --:--:--  317k
+</code></pre>
+<p>TMTelecom:</p>
+<pre data-code-wrap="sh"><code class="lang-sh"># host www.bbc.com
+www.bbc.com is an alias for www.bbc.com.pri.bbc.com.
+www.bbc.com.pri.bbc.com is an alias for bbc.map.fastly.net.
+bbc.map.fastly.net has address 146.75.52.81
+bbc.map.fastly.net has address 127.0.0.1
+
+# curl https://www.bbc.com -o/dev/null
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  392k  100  392k    0     0   130k      0  0:00:03  0:00:03 --:--:--  132k
+</code></pre></td><td>2024-07-20T15:58:17.063Z</td></tr><tr><td>abbi(abbi)</td><td><p>Hi many thanks!! It looks like the website was unblocked.</p></td><td>2024-07-22T18:20:51.966Z</td></tr>
+    </table>
+      </body>
+    </html>

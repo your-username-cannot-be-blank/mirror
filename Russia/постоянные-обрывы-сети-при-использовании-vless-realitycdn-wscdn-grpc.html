@@ -1,0 +1,157 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Arch4Arts(Артур)</td><td><p>Проблема появилась месяц назад, соединения с XRay периодически стали рваться, т.е видно как в Hiddify пропало соединение и идёт 15-30 секундная попытка восстановить коннект, который в конце концов восстанавливается, и так пару раз за день, что очень беспокоит поскольку из-за этого обрываются загрузки и катки в играх.</p>
+<p>Позавчера скорость и вовсе срезало с 500мб до 70-20мб, смекнув что возможно идёт блокировка подозрительного трафика сразу же сменил домен и спрятал сервер за CDN Cloudflare, скорость восстановилась, но обрывы никуда не делись, причём без разницы что использовать, напрямую Reality, WS через CDN или gRPC через CDN.</p>
+<p>В связи с этим вопрос, может кто сталкивался с подобным и сможет подсказать что это? Проблема технологии, сервера, или например того же hiddify (есть жалобы на его работу на гитхабе).</p>
+<p>Немного информации:<br>
+Установлен 3x-ui v2.4.6, xray v24.10.31, BBR включён.<br>
+Сайт для маскировки (SNI) размешается мной на одном сервере с XRay, т.е никаких сторонних ресурсов не задействовано.<br>
+VPS арендован у liteserver.nl, скорость выдаёт заявленную и держит стабильно.</p>
+<p>P.S Хотел скинуть конфиги, но не нашел как экспортировать их в формате json.<br>
+P.P.S Также в последнее время прыгает пинг в дискорде в простое гуляя от 100 до 600.</p></td><td>2024-11-04T02:10:13.084Z</td></tr><tr><td>ani917(ani)</td><td><p>скорее всего тспу обрывает соединение</p></td><td>2024-11-04T06:52:49.685Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Возможно проблемы со стороны хостера? Хотя если после смены домена и его сокрытия за CDN скорость восстановилась, то тут уже надо думать.</p>
+<p>BTW, проблему с обрывом соединения в играх, голосовом чате, итд можно решить раздельным туннелированием. Оно будет пускать заблокированный трафик только для выбранных приложений (В Hiddify такой возможности нет, насколько я знаю) и только для определённых сайтов. Очень советую для этого использовать клиент NekoRay (он же NekoBox, в зависимости от выбранного ядра, XRay или Sing-Box меняется и название, но не суть, т.к. в последней версии XRay убрали, оставив только Sing-Box), скачать можно тут - <a href="https://github.com/MatsuriDayo/nekoray/releases/download/4.0-beta4/nekoray-4.0-beta4-2024-10-09-windows64.zip" rel="noopener nofollow ugc">ТЫК</a>. Ещё советую проверить маршрутизцию трафика на сервере в разделе XRay, весь RU трафик желательно пустить в WARP, для избежания подозрений в использовании прокси. Таблица, как это примерно должно работать:</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/5fc49a22d8f1be03b26fdca4bf5d503f9e231752.png" data-download-href="https://ntc.party/uploads/default/5fc49a22d8f1be03b26fdca4bf5d503f9e231752" title="e6c4d07d280abf0608e2fcd8d9abb798"><img src="постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/5fc49a22d8f1be03b26fdca4bf5d503f9e231752_2_677x500.png" alt="e6c4d07d280abf0608e2fcd8d9abb798" data-base62-sha1="dFczOOSHTfO9swvXoGWehpv1JHI" width="677" height="500" srcset="постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/5fc49a22d8f1be03b26fdca4bf5d503f9e231752_2_677x500.png, постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/5fc49a22d8f1be03b26fdca4bf5d503f9e231752.png 1.5x, постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/5fc49a22d8f1be03b26fdca4bf5d503f9e231752.png 2x" data-dominant-color="3A3029"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">e6c4d07d280abf0608e2fcd8d9abb798</span><span class="informations">780×576 78.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Свои настройки я выкладываю ниже, можешь использовать их и изменять их под себя (главное понимать что делаешь), в клиенте ру трафик настроен на пропускание напрямую (исключения - гугл на пропуск для определения локации например при вводе погода, все домены ютюб на прокси чтоб нормально работал и 4pda с habr тож на прокси для просмотра запрещённых страниц по обходу)</p>
+<p><a class="attachment" href="постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/uNErcVcSP9EBC717T9TNikbTtLh.zip">vless-xtls-reality_settings_for_ru_region.zip</a> (406,5 КБ)</p>
+<p>Сурсы, на которые ориентировался при настройке:</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://habr.com/ru/articles/785186/">
+  <header class="source">
+      <img src="постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://habr.com/ru/articles/785186/" target="_blank" rel="noopener nofollow ugc">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/5fc49a22d8f1be03b26fdca4bf5d503f9e231752_2_677x500.png" class="thumbnail" data-dominant-color="3A3029" width="677" height="500"></div>
+
+<h3><a href="https://habr.com/ru/articles/785186/" target="_blank" rel="noopener nofollow ugc">Личный прокси для чайников: универсальный обход цензуры с помощью VPS, 3X-UI,...</a></h3>
+
+  <p>Карта сокровищ На&nbsp;фоне прошлогоднего обострения цензуры в&nbsp;РФ, статьи автора MiraclePTR стали глотком свободы для&nbsp;многих русскоязычных айтишников. Я&nbsp;же хочу приоткрыть дверь...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://habr.com/ru/articles/770400/">
+  <header class="source">
+      <img src="постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://habr.com/ru/articles/770400/" target="_blank" rel="noopener nofollow ugc">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/43893f4223aa6d3de65022a8e49f6140fb4daa16.png" class="thumbnail" data-dominant-color="475F6F" width="690" height="362"></div>
+
+<h3><a href="https://habr.com/ru/articles/770400/" target="_blank" rel="noopener nofollow ugc">FAQ по Shadowsocks/XRay/XTLS/Reality/Nekobox/etc. для обхода блокировок</a></h3>
+
+  <p>Эта статья - сборник разных вопросов и ответов на них, которые звучали в комментариях к моим предыдущим статьям ( Современные технологии обхода блокировок: V2Ray, XRay, XTLS, Hysteria, Cloak и...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://habr.com/ru/articles/735536/">
+  <header class="source">
+      <img src="постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://habr.com/ru/articles/735536/" target="_blank" rel="noopener nofollow ugc">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/cc71484d358668ab35937a6f8c9b609de33de5f8_2_690x362.png" class="thumbnail" data-dominant-color="4B6676" width="690" height="362"></div>
+
+<h3><a href="https://habr.com/ru/articles/735536/" target="_blank" rel="noopener nofollow ugc">3X-UI: Shadowsocks-2022 &amp; XRay (XTLS) сервер с простой настройкой и...</a></h3>
+
+  <p>Статья опубликована под лицензией Creative Commons BY-NC-SA . В серии предыдущих статей я описывал, почему повсеместно используемые VPN- и прокси-протоколы такие как OpenVPN и L2TP&nbsp; очень уязвимы...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://xtls.github.io/ru/config/routing.html">
+  <header class="source">
+      <img src="постоянные-обрывы-сети-при-использовании-vless-realitycdn-wscdn-grpc/d9bcf147606ea7c8d4f3a06afd01c42c4a3672c1_2_690x215.png" class="site-icon" data-dominant-color="754544" width="690" height="215">
+
+      <a href="https://xtls.github.io/ru/config/routing.html" target="_blank" rel="noopener nofollow ugc">xtls.github.io</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://xtls.github.io/ru/config/routing.html" target="_blank" rel="noopener nofollow ugc">Маршрутизация | Project X</a></h3>
+
+  <p>Официальная документация Xray</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-11-04T06:54:51.571Z</td></tr><tr><td>Arch4Arts(Артур)</td><td><p>Вряд ли это проблема хостера, т.к у него очень хорошая репутация и он сам держит свою сеть.</p>
+<p>За NekoRay спасибо, попробую.<br>
+Маршрутизация настроена один в один как на скриншоте (за исключением чужого домена и сайта, т.к у меня свои), я применил практически все известные практики что были описаны на хабре.</p></td><td>2024-11-04T11:29:16.152Z</td></tr><tr><td>Arch4Arts(Артур)</td><td><p>Итак на сегодняшний день проблему побороть никак не получилось, пробовал даже AmneziaWG ставить чтобы точно исключить проблемы с настройкой Xray, ничего не изменилось, как были обрывы так и остались, на данный момент делаю вывод что есть проблема с каналами к моему серверу.</p>
+<p>Потому я так решил? А потому что она условном hip hosting в финляндии на котором я начинал давным давно было всё прекрасно, хотя там был настолько дохлый процессор что он уходил за 100% при трафике 15-50мб/с.<br>
+А также потому что на данном форуме нет сообщений о таковых проблемах как у меня.</p>
+<p>Буду менять хостера, т.к срок продления подошёл, отпишусь сюда если поможет.</p></td><td>2024-11-26T16:18:07.938Z</td></tr><tr><td>Posetitel(Posetitel)</td><td><p>Как ситуация? Смена хоста помогла?</p></td><td>2024-11-26T18:35:01.759Z</td></tr><tr><td>Arch4Arts(Артур)</td><td><p>Еще слишком рано говорить, разрывы могут отсутствовать в один день и присутствовать много раз в другой, надо тестить неделю как минимум, и я еще не переехал)</p></td><td>2024-11-26T18:48:51.927Z</td></tr><tr><td>Arch4Arts(Артур)</td><td><p>Переехал на Aeza, взял сервер в Финляндии, за 5 дней использования пока обрывов не было.</p>
+<p>Если что-то не дай бог появится, напишу.</p></td><td>2024-12-01T21:36:24.182Z</td></tr><tr><td>idev</td><td><p>У меня со вчерашнего дня gRPC через CloudFlare перестал работать сразу на всех устройствах и 4-х провайдерах. Соединяется, на стороне сервера статус онлайн, и соединение “застывает”.</p>
+<p>Мегафон мобильный, Т-Мобайл, Зелёная точка и Ланта (все в Тамбовской области).</p></td><td>2024-12-14T04:02:50.038Z</td></tr><tr><td>MasterYoba</td><td><p>Нужно проверить ещё вебсокеты, и также открытие простой веб-страницы. Если используете nginx на стороне сервера, просто создайте там простейшую html страничку.</p></td><td>2024-12-14T08:31:20.158Z</td></tr>
+    </table>
+      </body>
+    </html>

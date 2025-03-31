@@ -1,0 +1,109 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>не-получается-выделить-несколько-сообщений</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>denium</td><td><p>Движок Discourse запрещает это. Какое скотство.<br>
+Напримет, иногда я отправляю текст в TTS, приходится делать это из упрощённой версии с отключенным JS.</p>
+<p>Ну, хотя можно обхитрить движок. Это жать Ctrl+C не отпуская ЛКМ, тогда выделение не сбросится.<br>
+Но это надо всё выделять самому мышью. А вот Ctrl+A Ctrl+C вместе зажатые настоящий квест.</p></td><td>2024-11-12T13:54:25.943Z</td></tr><tr><td>censorliber</td><td><p><s>В процессе выделения текста, не отпуская мышь, нажимаете <code>ctrl + c</code>  и радуйтесь жизни.</s></p></td><td>2024-11-12T14:03:21.151Z</td></tr><tr><td>denium</td><td><p>Мне тут ChatGPT написал очень интересный скрипт, позволяющий по горячим клавишам в xfce озвучивать выделенный текст прямо в rhvoice. Но сброс выделения портит всю малину. Прошу Валдика подредактировать движок. Подумайте о людях, кто бережёт глаза.</p>
+<p>Конечно, я могу не отпускать ЛКМ, но это не так удобно. А может быть поведение движка можно подправить на стороне браузера? У меня Brave.</p>
+<p>Могу сказать, что вот эти скрипты нужны. Без них не грузится сайт:</p>
+<pre><code class="lang-auto">!https://ntc.party/assets/chunk*.js
+!https://ntc.party/assets/vendor*.js
+!https://ntc.party/assets/locales/ru*.js
+</code></pre>
+<p>Эти блокировал. Не влияет на выделение:</p>
+<pre><code class="lang-auto">https://ntc.party/extra-locales/overrides*
+https://ntc.party/assets/plugins/discourse-translator*.js
+https://ntc.party/assets/plugins/footnote*.js
+https://ntc.party/javascripts/magnific-popup/*.js
+https://ntc.party/assets/plugins/poll-dc*.js
+https://ntc.party/extra-locales/mf*
+https://ntc.party/assets/plugins/discourse-details*.js
+https://ntc.party/theme-javascripts/*
+https://ntc.party/highlight-js/ntc.party/*.js
+https://ntc.party/assets/plugins/checklist*.js
+https://ntc.party/assets/plugins/docker_manager_admin*.js
+https://ntc.party/svg-sprite/ntc.party/svg*.js
+https://ntc.party/assets/plugins/spoiler-alert*.js
+https://ntc.party/assets/plugins/discourse-presence*.js
+https://ntc.party/assets/plugins/discourse-local-dates*.js
+</code></pre>
+<p>Highlight часто упоминается здесь:<br>
+!<a href="https://ntc.party/assets/chunk.88acb87e1021e5c5af5b.d41d8cd9.js">https://ntc.party/assets/chunk.88acb87e1021e5c5af5b.d41d8cd9.js</a> (его блокировка стопорит сайт)<br>
+<a href="https://ntc.party/assets/chunk.2c4efc4f8c0c7e873fc8.d41d8cd9.js">https://ntc.party/assets/chunk.2c4efc4f8c0c7e873fc8.d41d8cd9.js</a> (его блокировка не влияет)<br>
+но как их править ума не приложу.</p>
+<p>Баг рапорт<br>
+<a href="https://meta.discourse.org/t/issues-using-discourse-with-text-to-speech/336047/1" rel="noopener nofollow ugc">https://meta.discourse.org/t/issues-using-discourse-with-text-to-speech/336047/</a></p></td><td>2024-11-13T23:19:34.288Z</td></tr><tr><td>astolfobestgirl</td><td><p>Попробуйте фильтр для uBlock Origin.<br>
+<code>ntc.party##+js(aopr, getSelection)</code><br>
+Не гарантирую, что половина функционала сайта после этого не сломается.</p></td><td>2024-11-14T01:02:35.958Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>Попробуйте фильтр для uBlock Origin.<br>
+<code>ntc.party##+js(aopr, getSelection)</code><br>
+Не гарантирую, что половина функционала сайта после этого не сломается.</p>
+</blockquote>
+<p>Благодарю, помогло. Да, пропала возможность отвечать с цитатой (цитировать выделенный текст). Но теперь выделение не сбрасывается.</p></td><td>2024-11-14T01:07:59.013Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>Мне тут ChatGPT написал очень интересный скрипт, позволяющий по горячим клавишам в xfce озвучивать выделенный текст прямо в rhvoice</p>
+</blockquote>
+<p>А вот скрипт. Вдруг кому пригодится:</p>
+<pre><code class="lang-auto">#!/bin/bash
+
+# Проверка наличия текста в буфере обмена
+text=$(xclip -o -selection primary)
+#text=$(xclip -o -selection clipboard)
+
+if [ -z "$text" ]; then
+    notify-send "Ошибка" "Буфер обмена пуст. Выделите текст и попробуйте снова."
+    exit 1
+fi
+
+# Очистка текста от лишних символов (опционально)
+clean_text=$(echo "$text" | sed 's/\\n/ /g' | sed 's/\\t/ /g')
+
+# Сохранение текста во временный файл
+echo "$clean_text" &gt; /tmp/rhvoice.txt
+
+# Генерация аудио с помощью RHVoice
+sed -i s/лучше/лутше/Ig /tmp/rhvoice.txt &amp;&amp; /usr/bin/RHVoice-test -i /tmp/rhvoice.txt -o - -q max -v 100 -r 100 | /usr/bin/ffmpeg -i - -af silenceremove=start_periods=1:stop_periods=-1:start_threshold=-40dB:stop_threshold=-40dB:start_silence=0.13:stop_silence=0.13 -f wav -y - | mpv --no-config --volume=70 -
+</code></pre>
+<p>Нужно установить xclip:<br>
+<code>sudo apt install xclip</code><br>
+primary значит мышиный буфер обмена (выделение), а clipboard обычный буфер обмена (копирование).<br>
+А также нужно установить rhvoice из репозитория, но можно распаковать мою негадящую portable <a href="https://github.com/artenax/rhvoice/releases" rel="noopener nofollow ugc">сборку</a> в /opt/rhvoice</p>
+<p>Скрипт сохранить в файл rhvoice.sh, сделать исполняемым. Потом в Xfce “Настройки - Клавиатура - Комбинации клавиш” создать для него горячую клавишу, например Shift + Alt + S.<br>
+И теперь, выделяете текст, жмёте Shift + Alt + S и он озвучивается. Для отмены нужно убить процесс mpv.</p></td><td>2024-11-14T14:51:44.242Z</td></tr>
+    </table>
+      </body>
+    </html>

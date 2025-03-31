@@ -1,0 +1,184 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>x-uixray-vless-не-перенаправляет-трафик-на-сзади-стоящий-caddy-по-механизму-fallback</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>kenyawest(Kenya-West)</td><td><p>Всем привет, почему не работает fallback на caddy на X-UI (XRay, VLESS+XTLS-Vision, свой домен)?<br>
+Когда захожу на свой (суб)домен по SSL без указания портов, сиречь на 443 порт, у меня ничего не загружается, хотя настроенный X-UI должен показывать ответ от caddy.</p>
+<p>Оба в одной сети находятся:</p>
+<p><strong>caddy</strong>:</p>
+<pre data-code-wrap="yaml"><code class="lang-yaml">version: "3.8"
+services:
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    container_name: caddy
+    ports:
+      # портов нет! Он внутри сети работает и expose'ит что хочет только внутри, но конкретно тут 8081 и 8082
+    # ...
+    env_file:
+      - .env
+    networks:
+      - caddy-fallback
+    # ...
+
+networks:
+  caddy-fallback:
+    external: true
+</code></pre>
+<p><strong>X-UI</strong>:</p>
+<pre data-code-wrap="yaml"><code class="lang-yaml">---
+version: "3.8"
+
+services:
+  xui:
+    image: alireza7/x-ui
+    container_name: xui
+    ports:
+      - 80:80
+      - 443:443
+      - "${XUI_DASHBOARD_PORT}:${XUI_DASHBOARD_PORT}"
+      - "${XUI_WG_PORT}:${XUI_WG_PORT}/udp"
+      - "${XUI_VLESS_PORT}:${XUI_VLESS_PORT}"
+      - "${XUI_SS2022_PORT}:${XUI_SS2022_PORT}"
+      - "${XUI_SUB_PORT}:${XUI_SUB_PORT}"
+    env_file:
+      - .env
+    networks:
+      - caddy-fallback
+    # ...
+
+networks:
+  caddy-fallback:
+    external: true
+</code></pre>
+<p><strong>Конфиг <code>Caddyfile</code></strong>:</p>
+<pre data-code-wrap="nginx"><code class="lang-nginx"># ...
+
+:{$FALLBACK_PORT_1} {
+    import logging {$FALLBACK_PORT_1};
+    respond "Handled by Caddy 1" 200
+}
+
+:{$FALLBACK_PORT_2} {
+    import logging {$FALLBACK_PORT_2};
+    respond "Handled by Caddy 2" 200
+}
+</code></pre>
+<p><strong>Результирующий конфиг XRay</strong>:</p>
+<pre data-code-wrap="json"><code class="lang-json">{
+      "listen": null,
+      "port": XXXXX,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "email": "demouser@example.tld_vless",
+            "flow": "",
+            "id": "XXXX"
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": [
+          {
+            "alpn": "",
+            "dest": "caddy:8081",
+            "name": "",
+            "path": "",
+            "xver": 1
+          },
+          {
+            "alpn": "h2",
+            "dest": "caddy:8082",
+            "name": "",
+            "path": "",
+            "xver": 2
+          }
+        ]
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls",
+          "quic",
+          "fakedns"
+        ],
+        "enabled": true,
+        "metadataOnly": false,
+        "routeOnly": false
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "tls",
+        "tcpSettings": {
+          "acceptProxyProtocol": false,
+          "header": {
+            "type": "none"
+          }
+        },
+        "tlsSettings": {
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ],
+          "certificates": [
+            {
+              "certificateFile": "/etc/letsencrypt/live/&lt;DOMAIN&gt;/fullchain.pem",
+              "keyFile": "/etc/letsencrypt/live/&lt;DOMAIN&gt;/privkey.pem",
+              "ocspStapling": 3600
+            }
+          ],
+          "cipherSuites": "",
+          "maxVersion": "1.3",
+          "minVersion": "1.2",
+          "rejectUnknownSni": true,
+          "serverName": ""
+        }
+      },
+      "tag": "inbound-XXXXX"
+    }
+</code></pre>
+<p>И он вполне себе отвечает, если пингую из-под контейнера X-UI:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">/app # wget -qO- caddy:8081
+Handled by Caddy 1/app #
+/app # wget -qO- caddy:8082
+Handled by Caddy 2/app #
+</code></pre>
+<p>Так в чём дело? <code>alpn</code> пытался настраивать (<code>h1</code>, <code>http/1.1</code>, <code>h2</code>), <code>dest</code> тоже менял с <code>8081</code> на <code>caddy:8081</code> и т. д.</p>
+<p>Вот скриншот настроек VLESS:<br>
+<img src="x-uixray-vless-не-перенаправляет-трафик-на-сзади-стоящий-caddy-по-механизму-fallback/2f5617b022a35a21d761c1395dca2c0181640221.png" alt="X-UI" data-base62-sha1="6KKToEbafuBxEDUWNEcyR46rxq9" width="518" height="460"></p>
+<p>Интересно, почему? За что мне всё это? Чем я это заслужил? Как теперь жить? Когда Дурова и Поднебесного отпустят?</p></td><td>2024-08-27T15:38:01.996Z</td></tr>
+    </table>
+      </body>
+    </html>

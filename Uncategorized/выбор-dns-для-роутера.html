@@ -1,0 +1,71 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>выбор-dns-для-роутера</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Mr.Alex</td><td><p>Здравствуйте, подскажите какой днс сервер выбрать для роутера (Google, Cloudflare, Yandex)? Какие у них плюсы и минусы и какими сами пользуетесь?</p></td><td>2023-11-17T11:33:46.469Z</td></tr><tr><td>Xunlei</td><td><p>Приветствую! Пользуюсь лет 10 DNSCrypt (одна из <a href="https://github.com/DNSCrypt/dnscrypt-proxy" rel="noopener nofollow ugc">реализаций</a>) с отключенным кэшем, DOH, ODOH серверами, с вручную добавленными серверами с DNSSEC для быстрого старта, пущенные через релеи. В качестве кэширующего сервера использую патченный <a href="https://technitium.com/dns/" rel="noopener nofollow ugc">Technitium DNS Server</a> с настроенными блок листами, OpenNIC и onion зонами и включенным <a href="https://datatracker.ietf.org/doc/rfc8767/" rel="noopener nofollow ugc">Serve Stale</a>. Разумеется, GeoDNS не работает, если это вам важно.</p></td><td>2023-11-17T13:35:40.235Z</td></tr><tr><td>Mr.Alex</td><td><p>Будет работать вместе с антизапретом?</p></td><td>2023-11-17T13:38:34.721Z</td></tr><tr><td>Xunlei</td><td><p>Навряд ли, у него настроен собственный резолвер, выдающий для заблокированных записей адреса из частной сети для проброса через туннель. Необходимо либо добавлять посещаемые адреса для форвардинга вручную, либо написать плагин для сервера (на C#) для автоматической выгрузки заблокированных записей и их форвардинга.</p></td><td>2023-11-17T13:44:44.183Z</td></tr><tr><td>0ka(0ka)</td><td><p>для самого обычного пользователя интернета, как по мне, так в данный момент лучший днс это провайдерский, т.к. он может быть более дружелюбен к РКН, т.е. будет выдавать меньше заблокированных IP. Если не учитывать РКН, то простой пользователь не увидит никакой разницы между ними</p></td><td>2023-11-17T13:54:40.046Z</td></tr><tr><td>Xunlei</td><td><p>Он и самый быстрый, если нужна скорость первого открытия сайта. Но зачастую у него не настроен Serve Stale, и бывают вылеты какого-нибудь battleye по достижении QPM Limit.</p></td><td>2023-11-17T14:00:38.917Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>С антизапретом используется лишь DNS самого антизапрета, сторонние DNS нарушают его работу.</p></td><td>2023-11-17T15:44:14.681Z</td></tr><tr><td>Mr.Alex</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="выбор-dns-для-роутера/609ad578776e8cd529411f9dc5180558f77a1a5a.png" data-download-href="https://ntc.party/uploads/default/609ad578776e8cd529411f9dc5180558f77a1a5a" title="image"><img src="выбор-dns-для-роутера/609ad578776e8cd529411f9dc5180558f77a1a5a_2_690x149.png" alt="image" data-base62-sha1="dMBzajgwsQkFeflHD4HtmRBFjUm" width="690" height="149" srcset="выбор-dns-для-роутера/609ad578776e8cd529411f9dc5180558f77a1a5a_2_690x149.png, выбор-dns-для-роутера/609ad578776e8cd529411f9dc5180558f77a1a5a.png 1.5x, выбор-dns-для-роутера/609ad578776e8cd529411f9dc5180558f77a1a5a.png 2x" data-dominant-color="483924"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">750×162 28.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Подскажите, пожалуйста. Получается, у меня тут должны быть другие данные?</p></td><td>2023-11-17T16:40:54.334Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Я не знаю, как в вашем роутере устроена работа OpenVPN.</p>
+<p>В некоторых прошивках (например, Padavan) можно выбрать что-то типа “заменить DNS на те, что прилетели от VPN-сервера”. Тогда при отключённом VPN будут использоваться указанные, а при подключенном DNS Antizapret.</p>
+<p>В других достаточно создать правильные маршруты.</p>
+<p>В третьих (например, Keenetic) нужно довольно сложно настраивать.</p>
+<p>Сделайте standard test на <a href="http://dnsleaktest.com">dnsleaktest.com</a>. Если в выхлопе у вас там кроме DNS Antizapret будут какие-то ещё серверы, то нужно что-то делать. Если там только Antizapret, то ничего менять не нужно.</p></td><td>2023-11-17T17:06:14.970Z</td></tr><tr><td>Mr.Alex</td><td><p>Спасибо, в dnsleaktest показывает только сервер антизапрета</p></td><td>2023-11-17T18:55:42.387Z</td></tr><tr><td>Muxyuji(Muxyuji)</td><td><p>Список DNS провайдеров</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://adguard-dns.io/kb/ru/general/dns-providers/">
+  <header class="source">
+      <img src="выбор-dns-для-роутера/59ddbf2507cb4443cf1585fc112c4093babe531b.png" class="site-icon" data-dominant-color="4C8BF7" width="16" height="16">
+
+      <a href="https://adguard-dns.io/kb/ru/general/dns-providers/" target="_blank" rel="noopener nofollow ugc">adguard-dns.io</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://adguard-dns.io/kb/ru/general/dns-providers/" target="_blank" rel="noopener nofollow ugc">Известные DNS-провайдеры | AdGuard DNS Knowledge Base</a></h3>
+
+  <p>Здесь вы найдёте список надёжных DNS-провайдеров. Чтобы использовать их, сначала установите на устройство Блокировщик рекламы AdGuard или AdGuard VPN. Затем на том же устройстве кликните по ссылке провайдера в этой статье</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Сам до недавнего времени использовал AdguardHome на своем VPS, сейчас на единицах.</p></td><td>2023-11-20T06:30:47.428Z</td></tr>
+    </table>
+      </body>
+    </html>

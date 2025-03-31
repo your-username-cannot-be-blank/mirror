@@ -1,0 +1,99 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>domain-name-hostname-leak-vless-3x-ui</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>User094573(Alexander)</td><td><p>Настроил на своём сервере с помощью 3x-ui подключение vless.<br>
+Работает корректно. Но на сайтах проверки ip (например том же <a href="http://2ip.ru" rel="noopener nofollow ugc">2ip.ru</a>) в строке hostname/domain выводится доменное имя от хостера. Как-то можно этого избежать?</p>
+<details>
+<summary>
+Хотелось чтобы было так</summary>
+<p><img src="domain-name-hostname-leak-vless-3x-ui/72ee1519e5c648758744560638e6ad54c0b39649.png" alt="name" data-base62-sha1="goIwifDIaNdWN9itnZvv32IHf2F" width="553" height="416"></p>
+</details></td><td>2024-12-27T12:00:27.907Z</td></tr><tr><td>rewhat</td><td><p>Настроить роутинг на клиенте и на сервере. Т.е например на проксировать все заблокированные сайты, а всё остальное напрямую. У меня на сервере такие правила:</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">    "rules": [
+      {
+        "type": "field",
+        "ip": [
+          "geoip:ru"
+        ],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:category-ru"
+        ],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "regexp:\\.ru$",
+          "regexp:\\.su$",
+          "regexp:\\.xn--p1ai$"
+        ],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:category-ads-all"
+        ],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "protocol": [
+          "bittorrent"
+        ],
+        "outboundTag": "block"
+      }
+    ]
+</code></pre>
+</details>
+<p>Т.е сервер принимает любой траффик, кроме торрентов, и ру-сайтов.</p>
+<p>А на клиенте уже более точечно делаю, чтоб проксировались только заблокированные сайты. В v2RayN например есть уже готовый набор правил для этого.</p></td><td>2024-12-27T12:07:44.467Z</td></tr><tr><td>User094573(Alexander)</td><td><p>Спасибо, посмотрю конечно подробнее этот момент.</p>
+<p>Всё же, может быть я выразился некорректно.</p>
+<p>В общем, у меня есть несколько vless, shadowsocks подключений, включая моё.<br>
+Так вот как раз на моём подключении hostname определяется, на других - нет. Настройки на клиенте одинаковые.<br>
+Сайты и ру-сегмента, и иностранные открываются правильно. Всё работает.<br>
+Вопрос только в определении hostname. Почему на одних и тех же сайтах на одних подключениях он видится, а на других - нет?</p></td><td>2024-12-27T12:22:25.208Z</td></tr><tr><td>Dhohbr</td><td><p>Запросите у хостера удаление или изменение реверсивной днс записи. Обычно это самому можно сделать, через панель управления, если хостер позволяет.<br>
+Или прямой записи, смотря что у вас в днс прописано.</p></td><td>2024-12-27T12:24:21.772Z</td></tr>
+    </table>
+      </body>
+    </html>

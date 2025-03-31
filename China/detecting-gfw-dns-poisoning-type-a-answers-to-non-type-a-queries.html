@@ -1,0 +1,84 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>detecting-gfw-dns-poisoning-type-a-answers-to-non-type-a-queries</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>I got a tip about a trick to check for <a href="https://censorbib.nymity.ch/#Anonymous2014a" rel="nofollow noopener">poisoned DNS responses</a> by the GFW. The GFW injector always responds with a single A record, even when the query is for a different record type, like TXT or AAAA.</p>
+<p>Because of the bidirectional nature of the GFW’s DNS injection, you can test this even from outside the firewall. Just send a DNS query for a blocked name to some IP address inside of China, and you will get an injected response.</p>
+<p>Example non-poisoned domain (<a href="http://example.com" rel="nofollow noopener">example.com</a>). Note <code>status: REFUSED</code> and <code>ANSWER: 0</code>.</p>
+<pre><code class="lang-auto">$ dig -t TXT @dns2.edu.cn example.com
+
+; &lt;&lt;&gt;&gt; DiG 9.11.5-P4-5.1-Debian &lt;&lt;&gt;&gt; -t TXT @dns2.edu.cn example.com
+; (2 servers found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: REFUSED, id: 22796
+;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;example.com.                   IN      TXT
+
+;; Query time: 241 msec
+;; SERVER: 2001:da8:1:100::13#53(2001:da8:1:100::13)
+;; WHEN: Wed May 06 19:59:30 MDT 2020
+;; MSG SIZE  rcvd: 40
+</code></pre>
+<p>Example poisoned domain (<a href="http://torproject.org" rel="nofollow noopener">torproject.org</a>). Note <code>status: NOERROR</code>, <code>ANSWER: 1</code>, and <code>A 4.36.66.178</code> even though we asked for <code>TXT</code>.</p>
+<pre><code class="lang-auto">$ dig -t TXT @dns2.edu.cn torproject.org
+
+; &lt;&lt;&gt;&gt; DiG 9.11.5-P4-5.1-Debian &lt;&lt;&gt;&gt; -t TXT @dns2.edu.cn torproject.org
+; (2 servers found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 37395
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
+
+;; QUESTION SECTION:
+;torproject.org.                        IN      TXT
+
+;; ANSWER SECTION:
+torproject.org.         253     IN      A       4.36.66.178
+
+;; Query time: 231 msec
+;; SERVER: 2001:da8:1:100::13#53(2001:da8:1:100::13)
+;; WHEN: Wed May 06 20:02:21 MDT 2020
+;; MSG SIZE  rcvd: 48
+</code></pre></td><td>2020-05-07T02:04:15.743Z</td></tr>
+    </table>
+      </body>
+    </html>

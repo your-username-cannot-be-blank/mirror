@@ -1,0 +1,113 @@
+[
+    {
+        "id": 1050,
+        "name": "",
+        "username": "tango",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/t/e36b37/{size}.png",
+        "created_at": "2020-03-16T18:56:09.960Z",
+        "cooked": "<p>Detecting Probe-resistant Proxies<br>\nSergey Frolov, Jack Wampler, Eric Wustrow<br>\n<a href=\"https://censorbib.nymity.ch/#Frolov2020a\" class=\"onebox\" target=\"_blank\" rel=\"nofollow noopener\">https://censorbib.nymity.ch/#Frolov2020a</a></p>\n<p>This research finds weaknesses in proxy-resistant proxy protocols, like obfs4 and Shadowsocks, that make them more prone to detection by active probing than previously thought. These are protocols that require the client to prove knowledge of a secret before using the proxy. Despite the fact that probe-resistant proxy servers are designed not to respond to unauthorized clients, they may have characteristic timeouts or disconnection behaviors that distinguish them from non-proxies.</p>\n<p>The evaluated protocols have in common that the server reads some number of bytes from the client, then checks the authentication on those bytes. A typical code pattern is the following:</p>\n<pre><code class=\"lang-auto\">client, _ := listener.Accept()\nclient.SetDeadline(30 * time.Second)\nbuf := make([]byte, 50)\n_, err = io.ReadFull(client, buf)\nif err != nil {\n\tclient.Close()\n\treturn\n}\nif !checkAuthentication(buf) {\n\tclient.Close()\n\treturn\n}\n// client is authorized, server may now respond\n</code></pre>\n<p>The server reads exactly 50 bytes from the client, then checks the client’s credentials. If the client doesn’t send 50 bytes before the timeout, the server closes the connection. If the credentials are bad, the server closes the connection. Consider what happens when a unauthorized client sends 49, 50, or 51 bytes.</p>\n<ul>\n<li>With 49 bytes, the server times out after 30 seconds and closes the connection with a FIN.</li>\n<li>With 50 bytes, the server closes the connection immediately with a FIN (<code>io.ReadFull</code> succeeds but <code>checkAuthentication</code> fails).</li>\n<li>With 51 bytes, the server closes the connection immediately, but with a RST, not a FIN.</li>\n</ul>\n<p>Why a RST in the 51-byte case? It’s a peculiarity of Linux: if a user-space process closes a socket without draining the kernel socket buffer, the kernel sends a RST instead of a FIN. Put together, these distinctive timeout and FIN/RST thresholds form a fingerprint of the probe-resistant protocol, despite the server never sending application data.</p>\n<p>The authors evaluate six protocols: <a href=\"https://gitlab.com/yawning/obfs4\" rel=\"nofollow noopener\">obfs4</a>; <a href=\"https://github.com/getlantern/lampshade\" rel=\"nofollow noopener\">Lampshade</a> (used in Lantern); Shadowsocks (the <a href=\"https://github.com/shadowsocks/shadowsocks/tree/master\" rel=\"nofollow noopener\">Python implementation</a> and the <a href=\"https://github.com/Jigsaw-Code/outline-ss-server\" rel=\"nofollow noopener\">Outline implementation</a>, both with AEAD ciphers); <a href=\"https://core.telegram.org/mtproto/\" rel=\"nofollow noopener\">MTProto</a> (used in Telegram); and <a href=\"https://github.com/Psiphon-Labs/psiphon-tunnel-core/blob/master/psiphon/common/obfuscator/obfuscatedSshConn.go\" rel=\"nofollow noopener\">obfuscated SSH</a> (used in Psiphon). They test a pool of known proxies, as well as large number of endpoints derived from a random ZMap scan (1.5 million) and from a passive ISP tap (0.4 million). They send these endpoints a selection of probes of different lengths. From these they derive simple decision trees for identifying probe-resistant proxy servers. (Where the root of the tree is always “discard endpoints that send application data in response to any probe.”)</p>\n<p>The decision trees classify a few endpoints from the ZMap and ISP tap sets as proxies. In the case of obfuscated SSH, the authors confirmed with Psiphon developers that 7 of the 8 identified proxies actually were proxies operated by the developers. In some other cases, there is corroborating evidence that the endpoints really are proxies, even if not direct confirmation. By far the most difficult protocol to identify is MTProto, because it never times out and never closes the connection. The authors recommend this strategy for the best probe resistance: when a client fails to authenticate, just keep reading from it forever.</p>\n<p>For the most part, the developers of the examined protocols have fixed the identified flaws, at least by continuing to read from the client and not closing the connection immediately when there’s an authentication failure. They may still have a timeout instead of reading forever, but the server will have identical reactions to the three cases examined above.</p>\n<p>Thanks to Sergey Frolov for commenting on a draft of this summary and providing the code sample.</p>",
+        "post_number": 1,
+        "post_type": 1,
+        "posts_count": 1,
+        "updated_at": "2020-03-16T18:56:09.960Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 48,
+        "reads": 5,
+        "readers_count": 4,
+        "score": 241.0,
+        "yours": false,
+        "topic_id": 405,
+        "topic_slug": "paper-summary-detecting-probe-resistant-proxies-ndss-20",
+        "display_username": "",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "badges_granted": [],
+        "version": 1,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": false,
+        "can_wiki": false,
+        "link_counts": [
+            {
+                "url": "https://censorbib.nymity.ch/#Frolov2020a",
+                "internal": false,
+                "reflection": false,
+                "title": "The Internet censorship bibliography",
+                "clicks": 2
+            },
+            {
+                "url": "https://core.telegram.org/mtproto/",
+                "internal": false,
+                "reflection": false,
+                "title": "﻿MTProto Mobile Protocol",
+                "clicks": 1
+            },
+            {
+                "url": "https://github.com/Psiphon-Labs/psiphon-tunnel-core/blob/master/psiphon/common/obfuscator/obfuscatedSshConn.go",
+                "internal": false,
+                "reflection": false,
+                "title": "psiphon-tunnel-core/obfuscatedSshConn.go at master · Psiphon-Labs/psiphon-tunnel-core · GitHub",
+                "clicks": 1
+            },
+            {
+                "url": "https://github.com/shadowsocks/shadowsocks/tree/master",
+                "internal": false,
+                "reflection": false,
+                "title": "GitHub - shadowsocks/shadowsocks at master",
+                "clicks": 1
+            },
+            {
+                "url": "https://github.com/Jigsaw-Code/outline-ss-server",
+                "internal": false,
+                "reflection": false,
+                "title": "GitHub - Jigsaw-Code/outline-ss-server: Outline Shadowsocks server",
+                "clicks": 0
+            },
+            {
+                "url": "https://gitlab.com/yawning/obfs4",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://github.com/getlantern/lampshade",
+                "internal": false,
+                "reflection": false,
+                "title": "GitHub - getlantern/lampshade: Obfuscated encrypted network protocol for Lantern",
+                "clicks": 0
+            },
+            {
+                "url": "https://ntc.party/t/paper-summary-httpt-a-probe-resistant-proxy-foci-2020/659",
+                "internal": true,
+                "reflection": true,
+                "title": "Paper summary: HTTPT: A Probe-Resistant Proxy (FOCI 2020)",
+                "clicks": 2
+            }
+        ],
+        "read": true,
+        "user_title": "dnstt developer",
+        "title_is_group": false,
+        "bookmarked": false,
+        "actions_summary": [],
+        "moderator": false,
+        "admin": false,
+        "staff": false,
+        "user_id": 26,
+        "hidden": false,
+        "trust_level": 3,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": false,
+        "wiki": false,
+        "post_url": "/t/paper-summary-detecting-probe-resistant-proxies-ndss-20/405/1",
+        "can_translate": false
+    }
+]

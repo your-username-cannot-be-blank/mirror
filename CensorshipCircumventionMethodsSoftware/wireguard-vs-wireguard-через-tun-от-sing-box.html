@@ -1,0 +1,58 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>wireguard-vs-wireguard-через-tun-от-sing-box</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0ka(0ka)</td><td><p>Запускаю wireguard на сервере и подключаюсь с клиента в обычной стандартной конфигурации и в итоге скорость интернета через туннель печальная, но если создать на сервере правило маршрутизации wg в tun от sing-box (freedom outbound), то скорость интернета через туннель на клиенте возрастает почти до максимальной.<br>
+Я так понимаю при таком конфиге сам сервер начинает устанавливать tcp соединения, а не просто гнать трафик по маршруту, и скорость возрастает из-за tcp congestion control (bbr). Так вот есть ли какие-то более дешевые способы сделать похожее через wireguard? Нагрузка на цп сильно возрастает из-за singbox, может есть какой-то похожий софт?</p></td><td>2023-11-01T08:28:57.284Z</td></tr><tr><td>spirt(andy)</td><td><p>Попробуйте в конфигах wg добавить MTU = 1492.  и вообще потестить на уменьшение mtu.</p></td><td>2023-11-01T09:48:55.017Z</td></tr><tr><td>0ka(0ka)</td><td><p>1492 это выход за рамки, если на интернет интерфейсе (или роутере) стоит mtu 1500, то максимальный mtu внутри ipv4 wg не может быть выше 1440 (который у меня и стоит, уменьшение только снижает скорость как и положено)</p></td><td>2023-11-01T10:11:35.382Z</td></tr><tr><td>spirt(andy)</td><td><p>у меня “чистый” wg вообще не требует манипуляций с mtu. а вот его обертки в разные штуки постоянно ругаются на оверсайсз. при этом скорость падает раза в 2-3.  уменьшение mtu в этих случаях повышает скорость, как и положено ) ваш случай просто мне показался очень похожем на проблемы с mtu )</p></td><td>2023-11-01T10:33:07.927Z</td></tr><tr><td>0ka(0ka)</td><td><p>по дефолту в wg mtu 1420 который и не требует манипуляций на большинстве сетей</p></td><td>2023-11-01T10:37:39.122Z</td></tr><tr><td>0ka(0ka)</td><td><p>ничего другого похожего не нашел и решил оставить sing-box, но часто появляется плавающий баг: новые соединения перестают устанавливаться (curl зависает на trying…), в логах системы и sing-box при этом ничего необычного. попробую поставить сокс сервер и tun2socks вместо одного sing-box</p>
+<p>upd: <a href="https://github.com/heiher/hev-socks5-tunnel">hev-socks5-tunnel</a> и <a href="https://github.com/heiher/hev-socks5-server">hev-socks5-server</a> вместе не дают нужного эффекта, как будто системный tcp или его настройки не используются. <a href="https://github.com/heiher/hev-socks5-tunnel">hev-socks5-tunnel</a> и sing-box с socks в итоге пинг на wg клиентах становится 2x, системный tcp используется но скорость все равно ужасна. Походу придётся смириться или поверх wg пускать уже какой-то другой протокол (hysteria? от wg отказываться не хочу, уж очень удобен)</p></td><td>2023-11-04T12:44:33.563Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="0ka" data-post="1" data-topic="6160">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>может есть какой-то похожий софт</p>
+</blockquote>
+</aside>
+<p>tpws zapret’а, по идее, может работать в таком режиме. Он использует splice для проксирования сокетов, должно создавать минимум нагрузки на CPU.</p></td><td>2023-11-08T23:24:19.774Z</td></tr><tr><td>0ka(0ka)</td><td><p>попробовал tpws, tcptp-booster, xray. Использовал iptables redirect, и еще сделал небольшой бенч <code>time curl https://1.1.1.1/cdn-cgi/trace</code>, который грубо говоря выдает время загрузки сайта</p>
+<p>прямое подключение: бенч выдает 330ms real</p>
+<p>tpws: маленькое потребление цп. Иногда в dmesg вижу сообщения о syn flood, решением будет запуск нескольких tpws и load balance через iptables -m statistic. На моей системе есть неопределенный баг с 100% потреблением цп если использовать iptables tproxy. бенч выдает 430ms real</p>
+<p>tcptp-booster: маленькое потребление цп (<a href="https://github.com/bol-van/zapret/issues/168#issuecomment-1868881690">спорно</a>), бенч выдает 530ms real.</p>
+<p>xray: большое потребление цп, по умолчанию нет защиты от петли (при обычном tcp подключении к порту прокси начинает потреблять 100% цп), бенч выдает 330ms</p>
+<p>sing-box с tun отбросил из-за неопределенного бага, из-за которого иногда не устанавливались новые соединения (curl рандомно зависал)</p>
+<p>решил остановиться на xray для постоянного использования</p>
+<p><small>для гугл поиска: udp vpn tcp bbr boost</small></p></td><td>2023-12-29T14:00:29.858Z</td></tr>
+    </table>
+      </body>
+    </html>

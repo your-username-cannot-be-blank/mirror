@@ -1,0 +1,291 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>ищу-совет-что-доработать-или-добавить-в-configjson</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>aggravatingbee</td><td><p>Привет!</p>
+<p>Кажется, наконец, я допилил под себя идеальный xray - с тремя протоколами и подпиской для друзей. И уже хотелось просто уйти на покой и жить в свое удовольствие - но шило в одном месте подбивает навертеть еще что-нибудь. Текущий конфиг ниже. Прописал комменты под спойлером, но продублирую тут: Ну и несколько вопросов ниже</p>
+<ul>
+<li>
+<p>Shadowsocks - какая-то бестия, которой я стараюсь не злоупотреблять. Быстрая, надежная. Ранее использовал VLESS с Reality и её - первый, в какой-то момент, начал скорее не работать, чем работать (пока я не сменил VPS), но Shadowsocks работал как часы.</p>
+</li>
+<li>
+<p>VLESS с fallback (с rprx-vision, без Reality). Тут сказать особо нечего. Разве что есть ощущение, что он работает в 3 раза медленнее, чем мой прошлый VLESS с Reality на другом серваке. Вариант с reality не заработал на клиенте, мб надо было dest писать localhost, но пока мне и так ок.</p>
+</li>
+<li>
+<p>QUIC. Дикий и непонятный для меня зверь, но ок. Главное - работает.</p>
+</li>
+<li>
+<p>VLESS с websockets ставить не стал. Слишком долго разбираться с настройкой профиля и Cloudflare (imo). И после недавних новостей - как будто бы и смысла нет. Каким бы стратегически значимым CF не был - в лучшем случае рано или поздно следом за патриотичными сертификатами минцифры последует патриотичный CDN - и CF (в лучшем случае) замедлят. Поэтому не вижу смысла играть в этот вариант.</p>
+</li>
+</ul>
+<details>
+<summary>
+config.json</summary>
+<p>{<br>
+“log”: {<br>
+“loglevel”: “info”<br>
+},<br>
+“inbounds”: [<br>
+{<br>
+“port”: 12345, <a class="hashtag-cooked" href="/tag/shadowsocks" data-type="tag" data-slug="shadowsocks" data-id="1"><span class="hashtag-icon-placeholder"><svg class="fa d-icon d-icon-square-full svg-icon svg-node"><use href="#square-full"></use></svg></span><span>shadowsocks</span></a>. Быстрый и, в отличие от VLESS с Reality, по неким причинам не отваливался вообще никогда.<br>
+“tag”: “ss-in”,<br>
+“protocol”: “shadowsocks”,<br>
+“settings”: {<br>
+“method”: “2022-blake3-aes-128-gcm”,<br>
+“password”: “рандомнаябелибердаbase64”,<br>
+“network”: “tcp,udp”<br>
+}<br>
+},</p>
+<pre><code>  {
+  "port": 443, #База - VLESS с fallback на nginx сайт на том же сервере. С Reality не заработал почему-то, мб надо было в reality settings в dest указывать localhost, а не внешний адрес.
+  "protocol": "vless",
+  "tag": "vless_tls",
+  "settings": {
+    "clients": [
+      {
+        "id": "11111111-1111-1111-1111-111111111111",
+        "email": "username@myserver",
+        "flow": "xtls-rprx-vision"
+      }        ],
+    "decryption": "none",
+    "fallbacks": [
+      {
+        "path": "/рандомнаябелиберда",
+        "dest": "@vless-ws"
+      },
+      {
+        "dest": "23456"
+      }
+    ]
+  },
+  "streamSettings": {
+    "network": "tcp",
+    "security": "tls",
+    "tlsSettings": {
+      "alpn": [
+        "http/1.1",
+        "h2"
+      ],
+      "certificates": [
+        {
+          "certificateFile": "/etc/letsencrypt/live/....ru/fullchain.pem",
+          "keyFile": "/etc/letsencrypt/live/....ru/privkey.pem"
+        }
+      ]
+    }
+  },
+  "sniffing": {
+    "enabled": true,
+    "destOverride": [
+      "http",
+      "tls"
+    ]
+  }
+},
+
+{
+  "port": 34567, #QUIC
+  "protocol": "vless",
+  "tag": "kcp-in",
+  "settings": {
+    "clients": [
+      {
+        "id": "11111111-1111-1111-1111-111111111111",
+        "email": "username@myserver"
+      }        ],
+    "decryption": "none"
+  },
+  "streamSettings": {
+    "network": "kcp",
+    "kcpSettings":  {
+      "mtu": 1350,
+      "tti": 20,
+      "uplinkCapacity": 10,
+      "downlinkCapacity": 20,
+      "congestion": false,
+      "readBufferSize": 1,
+      "writeBufferSize": 1,
+      "header": {
+        "type": "dtls"
+       },
+      "seed": "рандомнаябелиберда"
+    }
+  },
+  "sniffing": {
+    "enabled": true,
+    "destOverride": [
+      "http",
+      "tls",
+      "quic"
+    ]
+  }
+},
+</code></pre>
+<p>],<br>
+“outbounds”: [<br>
+{<br>
+“protocol”: “freedom”,<br>
+“tag”: “direct”<br>
+},<br>
+{<br>
+“protocol”: “blackhole”,<br>
+“tag”: “block”<br>
+}<br>
+]<br>
+}</p>
+</details>
+<p>Вопросы:</p>
+<ol>
+<li>
+<p>Что добавить или поправить, на ваш взгляд (желательно прям с кодом)? Я рассчитываю на какие-то решения, которые не вызовут острой боли в пятой точке, но т.к. читать это буду не только я - окей, но по возможности пометьте, что реализовать изи, а что - нет <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> Например, условный VLESS over HTTP/2 в конфиге выглядит просто, но по ходу я даже верхушку айсберга этого решения не понял.</p>
+</li>
+<li>
+<p>Нужно ли настраивать fallback под каждый inbound? И как это сделать? Я не уверен, что сейчас у меня настроена правильная йерархия.</p>
+</li>
+<li>
+<p>Пока пытался поиграть в routing понял, что ничего не понял. Есть freedom, есть block, есть условный proxy. Не понимаю интерпретацию протоколов. Freedom, по сути, дефолтное значение? Block не дает куда-то зайти с включенным VPN? Где здесь опция входа напрямую?</p>
+</li>
+<li>
+<p>Не оставляет ощущение паранойи, что если перестанут работать все мои протоколы - я не смогу использовать VPN, чтобы погуглить как настроить VPN. Раньше моим запасным вариантом была Amnezia с публичными серверами, но сейчас даже она хромает, как я понимаю. Есть что-то, что точно будет работать? Есть, конечно, SSH, но сомнительное решение. Можно в личку, как вариант, чтобы не светить в поиске гугла.</p>
+</li>
+</ol>
+<p>P.S. Отдельная благодарность UranusExplorer за статью на Хабре. С ней я когда-то узнал, что такое VPS, познакомился с терминалом в линуксе  и много больше. Первый сетап у меня занял дня три, сейчас - около получаса <img src="https://ntc.party/images/emoji/twitter/grin.png?v=12" title=":grin:" class="emoji" alt=":grin:" loading="lazy" width="20" height="20"></p></td><td>2024-12-17T14:04:23.385Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="13856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>Shadowsocks - какая-то бестия</p>
+</blockquote>
+</aside>
+<p>Теряет актуальность. Со стороны он выглядит как непонятный поток байт, и как показалась практика, в любой непонятно ситуации цензоры такое режут в первую очередь. Блокировки в Дагестане, например, в прошлом году, Shadowsocks не пережил. Плюс, если не используется UoT, то он шлет TCP как TCP, а UDP как UDP, и это прям очень характерный паттерн для детектирования.</p>
+<aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="13856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>VLESS с fallback (с rprx-vision, без Reality)</p>
+</blockquote>
+</aside>
+<p>Все-таки лучше Reality со steal-from-yourself (тот самый dest на 127.0.0.1), чтобы TLS fingerprint со стороны сервера был как у нормального web-сервера.</p>
+<aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="13856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>QUIC</p>
+</blockquote>
+</aside>
+<p>Его вы последних версиях XRay выпилили как deprecated. Если сильно нужен QUIC, то либо надо брать XHTTP с ALPN ‘h3’, либо смотреть в сторону Hysteria (но это уже не XRay)</p>
+<aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="13856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>И после недавних новостей - как будто бы и смысла нет.</p>
+</blockquote>
+</aside>
+<p>вебсокеты проксируются не только через CF, а еще через Gcore, Fastly, Azure, и много чего еще.</p></td><td>2024-12-17T15:00:57.674Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="13856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>Нужно ли настраивать fallback под каждый inbound?</p>
+</blockquote>
+</aside>
+<p>а чего вы хотите этим добиться? fallback имеет смысл только для чего-то, что слушает на 80 или 443 порту.<br>
+для SS он невозможен, да и для QUIC (в его реализации в XRay) тоже</p>
+<aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="13856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>Freedom, по сути, дефолтное значение? Block не дает куда-то зайти с включенным VPN? Где здесь опция входа напрямую?</p>
+</blockquote>
+</aside>
+<p>freedom -  выход напрямую, block - запрет подключения.</p>
+<aside class="quote no-group" data-username="aggravatingbee" data-post="1" data-topic="13856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>Есть что-то, что точно будет работать?</p>
+</blockquote>
+</aside>
+<p>Гарантий никто не даст. Тут можно надеяться только быть Неуловимым Джо, и использовать какую-нибудь редкость, про которую цензоры просто не подумают (типа транспорта поверх обычного нешифрованного HTTP). Или думать в сторону схем с двумя серверами (подсказка: подключения внутри страны фильтруются обычно гораздо слабее, чем наружу, плюс подключения фильтруются обычно только в направлении “туда”, а не “оттуда”).</p></td><td>2024-12-17T15:06:22.927Z</td></tr><tr><td>aggravatingbee</td><td><p>Можно сколько угодно сравнивать shadowsocks и vless. Но это - мой личный опыт <img src="https://ntc.party/images/emoji/twitter/man_shrugging.png?v=12" title=":man_shrugging:" class="emoji" alt=":man_shrugging:" loading="lazy" width="20" height="20"> базовый shadowocks как будто бы даже не блочат</p></td><td>2024-12-17T15:16:32.333Z</td></tr><tr><td>aggravatingbee</td><td><blockquote>
+<p>freedom - выход напрямую, block - запрет подключения.</p>
+</blockquote>
+<p>Вот в этом и вопрос - я сто раз видел именно такое определение. Freedom - подключение через vps (как я понимаю), block - никакое? Или подключение с адреса клиента? Если никакое - то как тогда, например, работает раздельная работа для отдельных приложений в клиенте? Где в рамках настроек протокол для сервера “а подключись-ка ты лучше напрямую”?</p>
+<blockquote>
+<p>Гарантий никто не даст. Тут можно надеяться только быть Неуловимым Джо, и использовать какую-нибудь редкость, про которую цензоры просто не подумают (типа транспорта поверх обычного нешифрованного HTTP). Или думать в сторону схем с двумя серверами (подсказка: подключения внутри страны фильтруются обычно гораздо слабее, чем наружу, плюс подключения фильтруются обычно только в направлении “туда”, а не “оттуда”).</p>
+</blockquote>
+<p>О варианте с двумя VPS думал, но пока жаба душит. Особенно после покупки зарубежного VPS, которого за косарь хватало на 2 года (так и не понял баг это был или акция), пока я не скомпрометировал его адрес, судя по всему). Ну а “редкость” для меня - всё-таки чересчур сложно, по крайней мере пока. Спасибо за советы)</p></td><td>2024-12-17T22:41:13.172Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><aside class="quote no-group" data-username="aggravatingbee" data-post="5" data-topic="13856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>Freedom - подключение через vps (как я понимаю), block - никакое?</p>
+</blockquote>
+</aside>
+<p>Block - никакое. Клиент получает отлуп и браузер показывает ошибку. Например, полезно в конфиге на сервере, если вы хотите запретить доступ к российским сайтам через прокси, или если хотите запретить торренты, или ещё что.<br>
+Freedom - подключение к напрямую к адресу назначения.<br>
+Соответственно, в правилах на клиенте freedom задаётся когда надо идти до ресурса без прокси (если надо через прокси, то задаётся нужный outbound), а на сервере freedom используется чтобы выпускать клиента в интернет (то есть на сервере все про умолчанию идёт на freedom, если только вам не надо делать цепочку серверов).</p>
+<aside class="quote no-group" data-username="aggravatingbee" data-post="5" data-topic="13856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>О варианте с двумя VPS думал, но пока жаба душит</p>
+</blockquote>
+</aside>
+<p>Простенький сервер в России можно и за 75 рублей в месяц взять <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-12-17T22:54:44.637Z</td></tr><tr><td>aggravatingbee</td><td><blockquote>
+<p>Block - никакое. Клиент получает отлуп и браузер показывает ошибку. Например, полезно в конфиге на сервере, если вы хотите запретить доступ к российским сайтам через прокси, или если хотите запретить торренты, или ещё что.</p>
+</blockquote>
+<p>И все еще не понял, прошу прощения. Попробую еще проще - xray не подразумевает аутбаунда, который говорит клиентскому устройству "выйди (из меня) и зайди нормально (со своего ip без моего участия), верно? И в лучшем случае можно намекнуть отключить VPN блокировкой, чтобы зайти на .ru?</p>
+<blockquote>
+<p>Простенький сервер в России можно и за 75 рублей в месяц взять <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p>
+</blockquote>
+<p>Понимаю, но после зарубежного VPS за меньшие деньги все еще дорого, пока всё и так работает <img src="https://ntc.party/images/emoji/twitter/grin.png?v=12" title=":grin:" class="emoji" alt=":grin:" loading="lazy" width="20" height="20"></p></td><td>2024-12-17T23:04:38.034Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><aside class="quote no-group" data-username="aggravatingbee" data-post="7" data-topic="13856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b2d939/48.png" class="avatar"> aggravatingbee:</div>
+<blockquote>
+<p>Попробую еще проще - xray не подразумевает аутбаунда, который говорит клиентскому устройству "выйди (из меня) и зайди нормально (со своего ip без моего участия), верно?</p>
+</blockquote>
+</aside>
+<p>Да, там нет такого, чтобы сервер мог подобное сказать клиенту. Сервер максимум что может сделать - это не пустить клиента куда не надо. А остальное все зависит от конфига клиента, то есть это ответственность конфига на клиенте разрулить, что пускать на прокси, а что напрямую.</p></td><td>2024-12-17T23:11:54.367Z</td></tr>
+    </table>
+      </body>
+    </html>

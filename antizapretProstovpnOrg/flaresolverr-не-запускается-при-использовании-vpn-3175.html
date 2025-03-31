@@ -1,0 +1,104 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>flaresolverr-не-запускается-при-использовании-vpn-3175</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>sprite</td><td><p>Всем привет.<br>
+Разворачиваю на NAS в docker окружении таким способом:</p>
+<pre><code class="lang-auto">  ovpnc:
+    container_name: ovpnc
+    image: dperson/openvpn-client:latest
+    security_opt:
+      - label:disable
+    stdin_open: true
+    tty: true
+    cap_add:
+      - net_admin # required to modify network interfaces
+    ports:
+      - 8191:8191 # port for flaresolverr
+      - 9117:9117 # port for jackett
+    environment:
+      TZ: ${TZ} # timezone, defined in .env
+      DNS: true
+      VPN_FILES: antizapret-tcp.ovpn
+    volumes:
+      - /dev/net:/dev/net:z # tun device
+      - ${ROOT}/configs/ovpnc:/vpn # OpenVPN configuration
+    tmpfs:
+      - /run
+      - /tmp
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+    restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      LOG_LEVEL: debug
+      LOG_HTML: true
+      CAPTCHA_SOLVER: none
+      TZ: ${TZ}
+    network_mode: service:ovpnc # run on the ovpnc network
+    depends_on:
+      - ovpnc
+    # ports:
+    #   - 8191:8191
+    restart: unless-stopped 
+</code></pre>
+<p>Остальные сервисы включать в компоуз не стал, jackett просто работает и ищет.<br>
+Но в логах контейнера flaresolverr есть записи<br>
+2022-09-02T20:25:34+03:00 ERROR Error: NS_ERROR_CONNECTION_REFUSED at <a href="https://www.google.com" rel="noopener nofollow ugc">https://www.google.com</a><br>
+после которых он ложится на бочок и начинает все сначала.</p>
+<p>В шелле контейнера ovpnc успешно проходят пинги до <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>. А вот пинги до <a href="http://google.com" rel="noopener nofollow ugc">google.com</a> не идут.</p>
+<p>Вы специально ограничивали пинги до гугла? Можно ли включить?</p>
+<p>До чего популярного <em>не</em> ограничили?<br>
+Полагаю, ментейнерам <a href="https://github.com/FlareSolverr/FlareSolverr" class="inline-onebox" rel="noopener nofollow ugc">GitHub - FlareSolverr/FlareSolverr: Proxy server to bypass Cloudflare protection</a> можно предложить альтернативу, лишь бы адрес “внушаел доверие”.</p></td><td>2022-09-02T17:35:36.037Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="sprite" data-post="1" data-topic="3175">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/sprite/48/3732_2.png" class="avatar"> sprite:</div>
+<blockquote>
+<p>В шелле контейнера ovpnc успешно проходят пинги до <a href="http://rutracker.org">rutracker.org</a>. А вот пинги до <a href="http://google.com">google.com</a> не идут.</p>
+<p>Вы специально ограничивали пинги до гугла?</p>
+</blockquote>
+</aside>
+<p>АнтиЗапрет маршрутизирует только заблокированные ресурсы. Если ваш OpenVPN-клиент неправильно настроен и пытается маршрутизировать весь трафик в VPN, то это, конечно, работать не будет.</p></td><td>2022-09-03T23:29:15.995Z</td></tr><tr><td>sprite</td><td><blockquote>
+<p>Если ваш OpenVPN-клиент неправильно настроен и пытается маршрутизировать весь трафик</p>
+</blockquote>
+<p>Не включал <a href="https://github.com/dperson/openvpn-client/blob/master/README.md#firewall" rel="noopener nofollow ugc">опцию</a>  <a href="https://github.com/dperson/openvpn-client/blob/master/openvpn.sh#L45" rel="noopener nofollow ugc">firewall</a>, но полагаю в сборке есть еще интересные места, которые мог пропустить.</p>
+<p>Можете порекомендовать народные докер сборки, проверенные в паре с сервисом antizapret? Или нужно методично перебирать?</p></td><td>2022-09-04T00:36:09.650Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,175 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>udp-трафик-в-xray-3x-ui</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>eQe</td><td><p>В идеале хочется иметь VLESS + Reality для TCP на порту 443(насколько верно я понимаю, для TCP - для маскировки под обычный TLS трафик)  + UDP на том же порту (так UDP трафик будет выглядеть менее подозрительным?).<br>
+Но, насколько я понял, VLESS не совместим с UDP трафиком, а 3X-UI не позволяет на два порта выставить два inbound (это решается вроде бы fallback ом в клиенте?)<br>
+Слышал также что XUDP, mKCP, Hysteria, Trojan умеют работать с UDP, это так? Обеспечивают ли они такую же безопасность сервера?</p></td><td>2024-10-09T12:34:00.069Z</td></tr><tr><td>PlavaliZnaem( )</td><td><p>да? Может я чегой-то не понимаю, но у меня вроде маршрутизируется. В логах вижу вот это:<br>
+2024/10/09 07:58:27 10.10.10.5:54107 accepted udp:142.250.203.206:443 [tproxy → reality-fr]<br>
+2024/10/09 07:58:27 10.10.10.5:2996 accepted tcp:142.250.203.206:443 [redirect → reality-fr]<br>
+2024/10/09 07:58:29 10.10.10.6:40854 accepted tcp:152.32.227.17:443 [redirect → direct]<br>
+2024/10/09 07:58:29 10.10.10.6:46526 accepted udp:142.250.203.206:443 [tproxy → reality-fr]<br>
+2024/10/09 07:58:29 10.10.10.6:43708 accepted tcp:142.250.203.206:443 [redirect → reality-fr]<br>
+2024/10/09 07:58:29 10.10.10.6:40374 accepted tcp:213.180.193.226:443 [redirect → direct]</p>
+<p>настроен xkeen на кинетике</p></td><td>2024-10-09T12:50:22.492Z</td></tr><tr><td>eQe</td><td><p>а какие были прописаны inbounds?</p></td><td>2024-10-09T13:13:43.685Z</td></tr><tr><td>PlavaliZnaem( )</td><td><p>// Исходящее соединение<br>
+{<br>
+“inbounds”: [</p>
+<pre><code>{
+  "tag": "redirect",
+  "port": 61219,
+  "protocol": "dokodemo-door",
+  "settings": {
+    "network": "tcp",
+    "followRedirect": true
+  },
+  "sniffing": {
+    "enabled": true,
+    "routeOnly": true,
+    "destOverride": [
+      "http",
+      "tls",
+      "quic"
+    ]
+  }
+},
+
+{
+  "tag": "socks",
+  "port": 18080,
+  "protocol": "socks",
+  "settings": {
+    "auth": "noauth",
+    "ip": "127.0.0.1",
+    "udp": true
+  },
+  "sniffing": {
+    "destOverride": [
+      "http",
+      "tls",
+      "quic"
+    ],
+    "enabled": true,
+    "metadataOnly": false,
+    "routeOnly": false
+  },
+  "streamSettings": null
+},
+
+{
+  "tag": "tproxy",
+  "port": 61219,
+  "protocol": "dokodemo-door",
+  "settings": {
+    "network": "udp",
+    "followRedirect": true
+  },
+  "streamSettings": {
+    "sockopt": {
+      "tproxy": "tproxy"
+    }
+  },
+  "sniffing": {
+    "enabled": true,
+    "routeOnly": true,
+    "destOverride": [
+      "http",
+      "tls",
+      "quic"
+    ]
+  }
+}
+</code></pre>
+<p>]<br>
+}</p></td><td>2024-10-09T13:20:36.919Z</td></tr><tr><td>0ka(0ka)</td><td><p>vless это TCP прокси, проксирует TCP и UDP трафик внутри множества TCP потоков. hysteria это UDP прокси, проксирует TCP и UDP трафик внутри одного UDP потока. shadowsocks проксирует TCP и UDP внутри множества TCP и UDP потоков.</p></td><td>2024-10-09T15:20:58.163Z</td></tr><tr><td>Lost</td><td><p><img src="udp-трафик-в-xray-3x-ui/17ce8ea104534346f75a75deb5ac8c79efc75219.png" alt="image" data-base62-sha1="3oBwLp70rdjXyZWb81lj0syB4xj" width="317" height="172"></p>
+<p>все прекрасно работает вот так</p></td><td>2024-10-10T08:21:36.973Z</td></tr><tr><td>korenkonder(Korenkonder)</td><td><aside class="quote no-group" data-username="0ka" data-post="5" data-topic="11321">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>vless это TCP прокси, проксирует TCP и UDP трафик внутри множества TCP потоков</p>
+</blockquote>
+</aside>
+<p>Может и внутри одного TCP потока с помощью мультиплексирования.</p></td><td>2024-10-10T09:11:06.556Z</td></tr><tr><td>0ka(0ka)</td><td><p>ну нормальной имплементации я еще не видел, yamux в sing-box ближе всего к идеалу, но крашится из-за него слишком часто</p></td><td>2024-10-10T09:23:15.955Z</td></tr><tr><td>korenkonder(Korenkonder)</td><td><p>В Xray оно вроде как нормально работает. Да и на захвате траффика с помощью WireShark, как и на просмотре активности в Procmon, я вижу только один коннект от Xray к серверу, хотя тот же Discord параллельно подключается к нескольким серверам.</p></td><td>2024-10-10T09:30:41.548Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="korenkonder" data-post="9" data-topic="11321">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/korenkonder/48/6335_2.png" class="avatar"> korenkonder:</div>
+<blockquote>
+<p>В Xray оно нормально работает</p>
+</blockquote>
+</aside>
+<p>далеко нет, во первых там ограничение на 1024 соединения внутри мультиплекса, которое применяется к каждому днс запросу из-за чего лимит быстро исчерпывается, а во вторых если начать качать какой-то файл, то остальные соединения в мультиплексе просто встанут, вы ни 1 сайт больше открыть не сможете пока файл не скачается</p></td><td>2024-10-10T09:41:39.359Z</td></tr><tr><td>korenkonder(Korenkonder)</td><td><aside class="quote no-group" data-username="0ka" data-post="10" data-topic="11321">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>далеко нет, во первых там ограничение на 1024 соединения внутри мультиплекса, которое применяется к каждому днс запросу из-за чего лимит быстро исчерпывается</p>
+</blockquote>
+</aside>
+<p>Которое тянется уже как 6 лет…</p>
+<aside class="quote no-group" data-username="0ka" data-post="10" data-topic="11321">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>а во вторых если начать качать какой-то файл, то остальные соединения в мультиплексе просто встанут, вы ни 1 сайт больше открыть не сможете пока файл не скачается</p>
+</blockquote>
+</aside>
+<p>Не замечал подобного у себя. Спокойно проходят пакеты в обе стороны при полной загрузке соединения как на скачивание, так и на отдачу.</p></td><td>2024-10-10T14:42:13.589Z</td></tr><tr><td>korenkonder(Korenkonder)</td><td><aside class="quote no-group" data-username="0ka" data-post="10" data-topic="11321">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>которое применяется к каждому днс запросу из-за чего лимит быстро исчерпывается</p>
+</blockquote>
+</aside>
+<p>Посмотрел сейчас. Да, проблемка с исчерпанием запросов есть, но она по UDP, так как там невозможно отследить закрытие подключения. С TCP же оно закрывает соединение и освобождает “сессию” внутри мультиплекса, и он может взять новое подключение.</p></td><td>2024-10-10T19:48:08.457Z</td></tr><tr><td>REM1X</td><td><p>Прошу прощения за некропостинг.<br>
+Можно немного поподробнее?</p>
+<p>Как и когда в это ограничение в 1024 чего то там случается? Нельзя его просто периодически сбрасывать, там раз в сутки например?<br>
+Или для обычного домашнего использования это например не критично вообще.</p>
+<p>А то я только вчера настроил xkeen на своей гиге, сегодня кое-как донастроил чтобы дискорд работал.<br>
+А теперь вот увидел что оказывается то все говно и надо по новой)</p>
+<p>На компе уже давненько крутится nekobox с устраивающими настройками и вроде как все норм, но хочется более универсальное и бесшовное решение.</p></td><td>2024-12-15T10:15:43.778Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="REM1X" data-post="13" data-topic="11321">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/e47c2d/48.png" class="avatar"> REM1X:</div>
+<blockquote>
+<p>А теперь вот увидел что оказывается то все говно и надо по новой</p>
+</blockquote>
+</aside>
+<p>мне кажется вы не поняли поста, да и mux по дефолту не включен и большинству пользователей не нужен. я перепроверил: mux начинает лагать при качке файлов только если у вас подключение через CDN, с прямым подключением лаг мал и sysctl параметром можно еще сильнее уменьшить. короче забей, все нормально у тебя</p></td><td>2024-12-15T11:30:42.615Z</td></tr>
+    </table>
+      </body>
+    </html>

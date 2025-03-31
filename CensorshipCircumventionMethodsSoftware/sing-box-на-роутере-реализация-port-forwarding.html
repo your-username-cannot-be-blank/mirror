@@ -1,0 +1,85 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>sing-box-на-роутере-реализация-port-forwarding</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>XALIKoff</td><td><p>Всем привет!<br>
+Использую sing-box на роутере для маршрутизации по списку доменов. Прочитал весь мануал, а также вот эту тему: <a href="https://github.com/SagerNet/sing-box/issues/743" class="inline-onebox" rel="noopener nofollow ugc">[Feature request]: sing-box port forwarding · Issue #743 · SagerNet/sing-box · GitHub</a><br>
+Поднят отдельный интерфейс через который локальные клиенты маршрутизируются напрямую/ через vless по списку доменов.<br>
+Не могу понять - возможно ли организовать проброс портов извне на один из локальных клиентов? Должен быть способ через direct inbound и direct outbound, но что я только не пробовал - не работает.</p></td><td>2024-08-25T21:12:20.492Z</td></tr><tr><td>0ka(0ka)</td><td><p>вы хотите проброс порта через прокси sing-box или через домашний инет?</p></td><td>2024-08-26T00:26:14.584Z</td></tr><tr><td>XALIKoff</td><td><blockquote>
+<p>вы хотите проброс порта через прокси sing-box или через домашний инет?</p>
+</blockquote>
+<p>при включенном sing-box проброс портов к машине, которая через него проксируется - всё что было настроено ранее на роутере логично перестает работать. я просто ищу способ как это сделать.<br>
+на данный момент я проксирую все устройства, кроме машины с сервисами (plex и прочие) - на ней локально работает nekoray.<br>
+я думаю, что это должно быть возможно реализовать в конфиге sing-box…<br>
+роутер asus на merlin.</p></td><td>2024-08-26T01:00:20.765Z</td></tr><tr><td>xray108(Xray108)</td><td><p>через inbound direct пробуйте.<br>
+Примерно так:</p>
+<p>{<br>
+“type”: “direct”,<br>
+“tag”: “forward-in”,<br>
+“listen”: “127.0.0.1”,<br>
+“listen_port”: 6450,<br>
+“override_address”: “192.168.1.1”,<br>
+“override_port”: 8443<br>
+}</p></td><td>2024-08-26T15:01:36.706Z</td></tr><tr><td>XALIKoff</td><td><p>спасибо, так пробовал, правда “listen”: “0.0.0.0” указывал - нулевой айпи работает у меня в других inbounds по крайней мере.<br>
+удаленный доступ к плексу не взлетел)<br>
+расскажите про override_address и порт - это адрес и порт машины на которую пробрасываем же? мне кажется что он туда не отправляет ничего без outbound, а просто в запросах заменит адрес и порт на эти, я так эти поля понял.<br>
+мне казалось по логике sing-box, чтобы это работало нужен еще и outbound для этого некий.</p></td><td>2024-08-26T15:10:17.659Z</td></tr><tr><td>0ka(0ka)</td><td><p>непонятно как у вас настроен роутинг, если через tun, то правило ip rule add from pc_ip table singbox_table не должно влиять на входящий трафик, проброс должен работать</p></td><td>2024-08-26T15:14:11.873Z</td></tr><tr><td>0ka(0ka)</td><td><p>outbound - direct. делайте дампы</p></td><td>2024-08-26T15:17:41.015Z</td></tr><tr><td>XALIKoff</td><td><p>пользуюсь вот этим скриптом <a href="https://github.com/Dr4tez/sing-box4asus" class="inline-onebox" rel="noopener nofollow ugc">GitHub - Dr4tez/sing-box4asus: sing-box script for Asus routers with Merlin's firmware</a> , перенастроеным под себя.<br>
+поднимается 2 интерфейса, один для устройств которые проксируются по рулсету с локальным json со списком доменов, второй интерфейс - проксируется весь трафик.<br>
+в инбаундах:<br>
+tun для 1 интерфейса<br>
+tun для 2 интерфейса<br>
+в аутбаундах:<br>
+директ<br>
+vless в др страну.</p>
+<p>все айпи устройств домашней сети вписываются в отдельном файле (у меня они все пока вписаны в 1й интерфейс) и на основании этого всего скрипт создает 2 интерфейса и 2 route table</p></td><td>2024-08-26T15:34:14.247Z</td></tr><tr><td>sakontwist</td><td><p>Удаленный доступ к плексу работает на порту 32400. Его пробрасывайте любым подходящим способом.<br>
+Немного непонятно, почему у вас перестает работать на роутере “все, что было настроено”, если вы проксируете плекс через singbox. Проксируйте только что надо, но не ответы клиентам, которые хотят зайти на него через dnat снаружи…</p></td><td>2024-08-26T17:57:09.888Z</td></tr><tr><td>XALIKoff</td><td><p>сервер плекс установлен на одном из устройств внутри сети. до установки на роутер sing-box работало правило переадресации портов на роутере, в стандартном его интерфейсе.<br>
+после установки sing-box, если я включаю айпи этого устройства в список ip для первого интерфейса (см выше ссылку на гитхаб) - проброс портов перестает работать. касается не только плекса, это пример.<br>
+вот инбаунд в который попадает устройство:<br>
+“inbounds”: [<br>
+{<br>
+“type”: “tun”,<br>
+“tag”: “tun-in-rule”,<br>
+“interface_name”: “sbtun-rule”,<br>
+“mtu”: 1500,<br>
+“inet4_address”: “172.19.0.1/24”,<br>
+“endpoint_independent_nat”: true,<br>
+“stack”: “mixed”,<br>
+“sniff”: true<br>
+}</p>
+<p>Пока писал начал подозревать, что дело в    “endpoint_independent_nat”: true</p></td><td>2024-08-26T18:09:44.921Z</td></tr><tr><td>XALIKoff</td><td><p>Да, дело было в этом, всем спасибо!)</p></td><td>2024-08-26T23:02:41.691Z</td></tr><tr><td>xray108(Xray108)</td><td><p>deleted</p></td><td>2024-08-27T06:22:54.440Z</td></tr><tr><td>XALIKoff</td><td><p>нет, всё же даже без этого параметра не пробрасывает… вчера недолгое время работало, потом перестало.</p></td><td>2024-08-27T09:21:23.949Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,46 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>linux-виртуальный-сетевой-интерфейс-для-шейпинга-прокси-сервера</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0ka(0ka)</td><td><p>есть прокси сервер и нужно как-то применить к нему sqm-scripts (cake), не могу понять как сделать сетевой интерфейс, к которому прокси сервер будет биндить исходящие подключения. Гугл выдал macvlan, ipvlan, но я не смог разобраться как гонять через них интернет трафик: у macvlan bridge интерфейса в tcpdump вижу только arp пакеты с ip адресами ресурсов которые пытаюсь пинговать, у ipvlan не работает masquerade</p></td><td>2024-05-18T16:33:10.669Z</td></tr><tr><td>Dhohbr</td><td><p>Вы это пытаетесь настроить <a href="https://github.com/tohojo/sqm-scripts" class="inline-onebox">GitHub - tohojo/sqm-scripts: SQM scripts traffic shaper</a> ?<br>
+Там вроде по инструкции нужно просто интерфейс sqm@dev создать. Про vlan речи нет, и на сколько я понял биндить ничего не надо.<br>
+Если нужно шейпить прокси, я бы зашёл с другой стороны, с помощью tc шейпил бы входящий трафик на порт прокси.</p></td><td>2024-05-18T17:16:22.576Z</td></tr><tr><td>0ka(0ka)</td><td><p>sqm@dev это не интерфейс, а systemd сервис в котором dev - уже существующий интерфейс, обычно применяют на wan интерфейсе, но мне не нужно шейпить весь wan трафик, а только прокси сервер, в идеале только исходящие от него соединения, для которых можно указать “bind_interface” в конфиге прокси сервера, т.е. входящие соединения будут из eth0, а исходящие в тот который указать в “bind_interface”.<br>
+Если шейпить порт прокси, то тогда уже исходящий, а не входящий трафик, попробую если не получится с виртуальным интерфейсом для бинда</p></td><td>2024-05-18T17:55:10.219Z</td></tr><tr><td>ValdikSS</td><td><p>Cake это queue discipline (qdisc), он не работает просто «на интерфейсе», а принимает пакеты в иерархии дисциплин, трафик в которые классифицируется фильтрами. Фильтр может быть по протоколу и порту.<br>
+<a href="https://tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.qdisc.filters.html" class="onebox" target="_blank" rel="noopener">https://tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.qdisc.filters.html</a></p>
+<p>У вас проблема XY, судя по вопросу.</p></td><td>2024-05-18T18:29:22.864Z</td></tr>
+    </table>
+      </body>
+    </html>

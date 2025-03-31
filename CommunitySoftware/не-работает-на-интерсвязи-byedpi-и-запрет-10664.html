@@ -1,0 +1,78 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>не-работает-на-интерсвязи-byedpi-и-запрет-10664</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>bropines(Sergey Pinus)</td><td><p><a href="https://github.com/bol-van/zapret/issues/419" rel="noopener nofollow ugc">Не работает blockcheck на OpenWRT · Issue #419 · bol-van/zapret (github.com)</a></p>
+<p>Через byedpi такой рофл происходит</p>
+<pre data-code-wrap="bash"><code class="lang-bash">root@OpenWrt:~# curl -v --socks5 127.0.0.1:2080 https://www.pixiv.net
+* Cert verify failed: BADCERT_CN_MISMATCH
+curl: (60) Cert verify failed: BADCERT_CN_MISMATCH
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+root@OpenWrt:~# curl -v -k --socks5 127.0.0.1:2080 https://www.pixiv.net
+* Can't complete SOCKS5 connection to www.pixiv.net. (4)
+curl: (97) Can't complete SOCKS5 connection to www.pixiv.net. (4)
+root@OpenWrt:~# curl -v -k --socks5 127.0.0.1:2080 https://www.pixiv.net
+&gt; GET / HTTP/2
+&gt; Host: www.pixiv.net
+&gt; User-Agent: curl/8.7.1
+&gt; Accept: */*
+&gt;
+&lt; HTTP/2 302
+&lt; server: nginx
+&lt; date: Mon, 23 Sep 2024 17:49:07 GMT
+&lt; content-type: text/html
+&lt; content-length: 138
+&lt; location: https://you-shall-not-pass.is74.ru/#https://www.pixiv.net/
+&lt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;302 Found&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;302 Found&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+root@OpenWrt:~
+</code></pre></td><td>2024-09-23T17:57:31.804Z</td></tr><tr><td>bropines(Sergey Pinus)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="не-работает-на-интерсвязи-byedpi-и-запрет-10664/87ca36461b6d4eb5fb6bbab3b531a3ba132bbe8a.jpeg" data-download-href="https://ntc.party/uploads/default/87ca36461b6d4eb5fb6bbab3b531a3ba132bbe8a" title="rustdesk_XiHL9okIld"><img src="не-работает-на-интерсвязи-byedpi-и-запрет-10664/87ca36461b6d4eb5fb6bbab3b531a3ba132bbe8a_2_690x371.jpeg" alt="rustdesk_XiHL9okIld" data-base62-sha1="jnfH8pRJDsOqHvwhm7tyNWnMKAG" width="690" height="371" srcset="не-работает-на-интерсвязи-byedpi-и-запрет-10664/87ca36461b6d4eb5fb6bbab3b531a3ba132bbe8a_2_690x371.jpeg, не-работает-на-интерсвязи-byedpi-и-запрет-10664/87ca36461b6d4eb5fb6bbab3b531a3ba132bbe8a_2_1035x556.jpeg 1.5x, не-работает-на-интерсвязи-byedpi-и-запрет-10664/87ca36461b6d4eb5fb6bbab3b531a3ba132bbe8a_2_1380x742.jpeg 2x" data-dominant-color="797B7F"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">rustdesk_XiHL9okIld</span><span class="informations">1920×1033 125 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Гудбай DPI тоже говорит иди в жопу. Судя по всему интерсвязь както палит это добро и редиректит на себя.</p></td><td>2024-09-23T18:16:23.819Z</td></tr><tr><td>voper</td><td><p>Скорее всего они помимо тспу блочат у себя либо по ip, либо по sni, эффективнее всего будет использовать впн</p></td><td>2024-09-23T18:33:00.750Z</td></tr><tr><td>bropines(Sergey Pinus)</td><td><p>Тут такой прикол что он не дает сертификату работать. Скорее они подменяют сертификат на тспу а потом видя что сертификат их, перенаправляют на страничку себя. Фиксы есть?</p></td><td>2024-09-23T18:36:53.884Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А dns они не подменяют, нет?</p></td><td>2024-09-23T19:00:34.825Z</td></tr><tr><td>bropines(Sergey Pinus)</td><td><p>Я пробовал с DNS redir и результат ноль.</p></td><td>2024-09-23T20:40:44.278Z</td></tr><tr><td>eeqwa</td><td><p>У меня работает через лаунчер 8.3 от топер с 4 пресетом + прокси</p></td><td>2024-09-24T05:51:55.730Z</td></tr><tr><td>bropines(Sergey Pinus)</td><td><p>Ну и что там за флаги? Типо этот лаунчер тупо флаги запускает. А прокси… Мне изи поставить прокси, моя задача без прокси заставить работать</p></td><td>2024-09-24T06:01:28.367Z</td></tr><tr><td>eeqwa</td><td><p>С прокси от антизапрета который уже там есть<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="не-работает-на-интерсвязи-byedpi-и-запрет-10664/5c6c57d634b065aafbea53eb912aa1e866eab39d.png" data-download-href="https://ntc.party/uploads/default/5c6c57d634b065aafbea53eb912aa1e866eab39d" title="image"><img src="не-работает-на-интерсвязи-byedpi-и-запрет-10664/5c6c57d634b065aafbea53eb912aa1e866eab39d.png" alt="image" data-base62-sha1="dbC3bj5JKQBuc0fZCsDSmkgzVMN" width="343" height="500" data-dominant-color="E5E5E6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">452×658 29.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-24T06:03:55.930Z</td></tr><tr><td>Ofliens</td><td><p>Достаточно в russia-blacklist.txt добавить “<a href="http://facebook.com" rel="noopener nofollow ugc">facebook.com</a>”, далее запустить service-install-russia-blacklist.cmd и заново зайти на сайт, таким способом я впервые смог зайти на ntc party</p></td><td>2024-10-04T14:20:06.491Z</td></tr><tr><td>bropines(Sergey Pinus)</td><td><p>Да там прикол провайдера с днсками был. Он каким-то чудом обходил системные DOH днски. В итоге тупо в роутере запихнул и все раздуплилось сразу. А на винде это не поможет, если провайдер тебя по днс чекает. Умные челы на мтс и интерсвязь научились подменять днс. Приходится переходить на шифрованные.</p></td><td>2024-10-07T04:03:09.481Z</td></tr><tr><td>GooseWing(GooseWing)</td><td><p>У меня на интерсвязи на роутере стоит DOH (роутер свой, не от прова), по dnsleakcheck’у вроде как идет через DOHшный, однако я перестраховался и забил в фаерфокс еще один DOH от Comss и еще держу на малинке dnscrypt-proxy с квад9 (для мобильных девайсов).<br>
+Вроде эффект есть некоторый.</p></td><td>2024-10-18T04:10:18.725Z</td></tr>
+    </table>
+      </body>
+    </html>

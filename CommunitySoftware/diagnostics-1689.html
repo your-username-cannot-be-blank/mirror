@@ -1,0 +1,64 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>diagnostics-1689</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>bolvan</td><td><p>I think your program lacks diagnostics capabilities.<br>
+verbose mode</p>
+<p>if something goes wrong its hard to understand what’s happening<br>
+For example, if client cannot go beyond handshake phase it doesnt output anything</p>
+<p>Also it would be good to have remote tls cert ignore option<br>
+to connect directly to https://ip_address not showing actual domain in the SNI</p></td><td>2022-02-09T09:48:19.925Z</td></tr><tr><td>tango</td><td><p>Thanks for the suggestions.</p>
+<p>For SNI removal, you can try this patch. It will only work with the uTLS modes. It would take additional effort to make it work with <code>-utls None</code> (<a href="https://groups.google.com/g/traffic-obf/c/G_3-1oqSCbU/m/tGsUnZD2BQAJ">for example</a>).</p>
+<pre><code class="lang-diff">diff --git a/dnstt-client/utls.go b/dnstt-client/utls.go
+index 7a6af56..4f60844 100644
+--- a/dnstt-client/utls.go
++++ b/dnstt-client/utls.go
+@@ -71,6 +71,11 @@ func utlsDialContext(ctx context.Context, network, addr string, config *utls.Con
+ 		return nil, err
+ 	}
+ 	uconn := utls.UClient(conn, config, *id)
++	err = uconn.RemoveSNIExtension()
++	if err != nil {
++		uconn.Close()
++		return nil, err
++	}
+ 	// Manually remove the SNI if it contains an IP address.
+ 	// https://github.com/refraction-networking/utls/issues/96
+ 	if net.ParseIP(config.ServerName) != nil {
+</code></pre></td><td>2022-02-09T20:55:17.940Z</td></tr>
+    </table>
+      </body>
+    </html>

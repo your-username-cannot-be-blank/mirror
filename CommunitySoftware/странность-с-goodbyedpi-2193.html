@@ -1,0 +1,93 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>странность-с-goodbyedpi-2193</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Psevdonim</td><td><p>Доброго времени суток. Заранее извиняюсь за свою слабую тех. подготовку в этом вопросе и возможно Ваше потраченное время.<br>
+Уже не первый год использовал GoodbyeDPI 0.1.6 в качестве службы. Но недели две назад, в районе двадцатых чисел марта, перестали открываться многие сайты. Потерпев недельку, решил обновить до последней версии(0.2.2). Но проблема все так же осталась. Почитав темы с “проблемами” здесь и на гитхабе, понял что есть похожие темы и случаи. Собственно решил создать свою тему не от недостатка внимания, а потому что в основном пишут GoodbyeDPI “перестал работать”. Когда в моем случае, он начал работать “странно”. Что-бы не лить много воды, сразу приведу пример.<br>
+С выключенным GoodbyeDPI: могу зайти на “anime-sharing” и “pixiv”, но не могу зайти на “dmm.co.jp”. С включенным GoodbyeDPI ситуация противоположна. На дмм заходит, а шаринг и пиксив нет. Т.е. оно работает, но…<br>
+Пытался поиграться с дописыванием “команд” как указано в “How to use” на гитхабе(прим: --dns-addr), но ничего не вышло.</p>
+<p>Свои характеристики. Win7, оператор “Ростелеком”. Тестировал всё, что есть в архиве при скачивании. Так же запускал чистый “goodbyedpi.exe”. Результат один и тот же. В системе за последние месяца ничего не менял.</p>
+<p>Не питаю надежд, что при столь слабом описании мне помогут. Но буду несказанно рад, если таки что-то выгорит. Хотя даже если ValdikSS просто отпишится в теме, что прочитал, уже будет неплохо.</p></td><td>2022-04-06T15:18:38.072Z</td></tr><tr><td>ValdikSS</td><td><ol>
+<li>Как конкретно вы запускаете программу? Каким скриптом или с какими параметрами?</li>
+<li>Как именно не открываются сайты? Если сразу выдаётся ошибка, то, возможно, дело в некорректной работе функции auto-ttl с настройками по умолчанию в вашей сети. Если загружаются бесконечно долго, то различия могут быть в IP-адресах на доменах, если вы используете функцию перенаправления DNS — другой DNS может выдавать заблокированные.<br>
+Также наблюдались проблемы с разбиением пакетов на 2 байта, по крайней мере, на МГТС. Решить эту проблему помогут параметры <code>-f 1 -e 1</code> или -f 3 -e 3`.</li>
+</ol>
+<p>В любом случае, сперва попробуйте что-то вроде:<br>
+<code>goodbyedpi.exe -f 1 -e 1 --set-ttl 4 --min-ttl 4 --reverse-frag --max-payload</code><br>
+или<br>
+<code>goodbyedpi.exe -6</code></p></td><td>2022-04-06T22:24:15.063Z</td></tr><tr><td>Psevdonim</td><td><p>Спасибо что откликнулись!</p>
+<ol>
+<li>От имени администратора. Пробовал запускать как просто через <em>ехе</em>, так и через</li>
+</ol>
+<ul>
+<li>1_russia_blacklist.cmd</li>
+<li>1_russia_blacklist_dnsredir.cmd<br>
+Также ради интереса пробовал</li>
+<li>2_any_country.cmd</li>
+<li>2_any_country_dnsredir.cmd<br>
+Собственно, пробовал все что было в архиве на гитхабе. Также пробовал менять <em>modesets</em> и <em>dns-addr</em>.</li>
+</ul>
+<ol start="2">
+<li>В случае если не заходит на <em>https</em>, пытается 5-10сек и выдает</li>
+</ol>
+<blockquote>
+<p>Ошибка при установлении защищённого соединения<br>
+При соединении с XXXX произошла ошибка. PR_END_OF_FILE_ERROR</p>
+</blockquote>
+<p>Если <em>http</em>, долго пытается, но выдает</p>
+<blockquote>
+<p>Соединение было сброшено</p>
+</blockquote>
+<ol start="3">
+<li>Ваши советы.</li>
+</ol>
+<blockquote>
+<p>goodbyedpi.exe -f 1 -e 1 --set-ttl 4 --min-ttl 4 --reverse-frag --max-payload<br>
+goodbyedpi.exe -f 3 -e 3 --set-ttl 4 --min-ttl 4 --reverse-frag --max-payload</p>
+</blockquote>
+<p>Из тех что не работали. Грузит до сброса, как <em>https</em> так и <em>http</em>.</p>
+<blockquote>
+<p>goodbyedpi.exe -6</p>
+</blockquote>
+<p>Тут заходит везде, но без <em>черного списка</em>, даже если я его прописываю. Т.е. переносит на <a href="http://warning.rt.ru" rel="noopener nofollow ugc">warning.rt.ru</a>. Само собой эти сайты есть в списке. Сам список лежит в той же папке.<br>
+Мои попытки что-то вроде такого</p>
+<ul>
+<li>goodbyedpi.exe -6 --blacklist …\russia-blacklist.txt</li>
+<li>goodbyedpi.exe -6 --dns-addr 77.88.8.8 --dns-port 1253 --dnsv6-addr 2a02:6b8::feed:0ff --dnsv6-port 1253 --blacklist …\russia-blacklist.txt</li>
+</ul></td><td>2022-04-07T14:59:49.003Z</td></tr>
+    </table>
+      </body>
+    </html>

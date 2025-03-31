@@ -1,0 +1,166 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>установка-adguard-home-на-роутер-6949</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Mr.Alex</td><td><p>Здравствуйте, хотел бы узнать могу ли я поставить Adguard Home вместе с Home Assistant? Или Adguard нужно ставить где стоит сервер с Antizapret?</p></td><td>2024-01-22T09:42:43.764Z</td></tr><tr><td>Mr.Alex</td><td><p>Дома стоит сервер с Home Assistant с дополнением Adguard</p></td><td>2024-01-22T09:43:40.405Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Без разницы, где стоит AGH, при условии, что AGH в качестве апстрима использует сервер антизапрета. Главное - кто в итоге резолвит запросы, и это должен быть антизапрет. А между антизапретом и клиентами можно располагать промежуточные серверы в этой цепочке.</p>
+<p>Пример: допустим, VPN-туннель Antizapret у вас поднят на домашнем роутере с адресом 192.168.1.1, а AGH висит на машине в этой же домашней локалке с адресом 192.168.1.5 на 53 порту.</p>
+<ul>
+<li>на клиентах вы получаете адрес DNS по DHCP от роутера, в нашем примере <code>192.168.1.1</code>. <strong>Никаких сторонних DNS на клиентах указано быть не должно.</strong></li>
+<li>в настройках DNS на роутере вы указываете адрес и порт, где у вас поднят AGH, в нашем примере это <code>192.168.1.5:53</code></li>
+<li>в настройках AGH вы указываете какие-нибудь публичные серверы в качестве апстрима, допустим, <code>8.8.8.8</code> и <code>77.88.8.8</code>. <strong>Это должны быть классические DNS-серверы, НЕ DoH/DoT/DNSCrypt.</strong></li>
+<li>в настройки VPN на роутере вы добавляете строчки</li>
+</ul>
+<pre><code class="lang-auto">route 8.8.8.8
+route 77.88.8.8
+</code></pre>
+<p>(строго те же адреса, что и на предыдущем шаге)</p>
+<p>Таким образом, когда клиенту нужно отрезолвить домен, он обращается к DNS-серверу роутера → тот обращается к AGH → AGH обращается к 8.8.8.8 и 77.88.8.8 → благодаря директивам <code>route ...</code> запросы к 8.8.8.8 и 77.88.8.8 направляются в VPN-туннель → там их перехватывает DNS антизапрета (который специально настроен таким образом, чтобы перехватывать все DNS-запросы) и отвечает на них → ответ по той же цепочке доставляется обратно клиенту. Результат: запрос клиента отрезолвил antizapret.</p></td><td>2024-01-22T13:21:38.785Z</td></tr><tr><td>Mr.Alex</td><td><p>У меня роутер находиться на адресе 192.168.50.1, а raspberry pi с Home Assistant и дополнением Adguard Home на 192.168.50.206. Я так понял что мне нужно в настройках Adguard выбрать какой DNS использовать и добавить route xx.xx.xx в конфиг файл VPN?</p></td><td>2024-01-22T13:53:02.676Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>И на роутере указать, что запросы DNS резолвить через 192.168.50.206. В общем, как я и написал, просто локальные адреса (роутера и raspberry pi) у вас иные. А общая схема такая же.</p></td><td>2024-01-22T13:54:45.701Z</td></tr><tr><td>Mr.Alex</td><td><p>Спасибо Вам большое)</p></td><td>2024-01-22T13:55:10.363Z</td></tr><tr><td>Mr.Alex</td><td><p>DNS запросы проходят, а реклама почему то не блокируется. Роутер не даёт указать порт<br>
+<img src="установка-adguard-home-на-роутер-6949/7273772c501f1e3f9e8452e478245b5257c1df8f.png" alt="image" data-base62-sha1="gktOygI46uDUSLPtjmhWsSI9bzN" width="247" height="214"><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-adguard-home-на-роутер-6949/fc5e4b6be5d00636b5f3ddc3cae20ab23fb7a17a.png" data-download-href="https://ntc.party/uploads/default/fc5e4b6be5d00636b5f3ddc3cae20ab23fb7a17a" title="image"><img src="установка-adguard-home-на-роутер-6949/fc5e4b6be5d00636b5f3ddc3cae20ab23fb7a17a.png" alt="image" data-base62-sha1="A0ylz4FruVTraGMhAQOgtU3KoWe" width="690" height="114" data-dominant-color="554125"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">747×124 23.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<img src="установка-adguard-home-на-роутер-6949/3e2ff19da4fa3442654cbec57d6fd310e8e1f622.png" alt="image" data-base62-sha1="8S8jYXFdFQWoW9WR2fAdTJuhPyy" width="235" height="173"></p></td><td>2024-01-22T14:35:46.896Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Если порт 53, то можно и не указывать.</p>
+<p>DNS запросы проходят, а статистика общего числа запросов в AGH растёт?</p>
+<p>Ну и не всю рекламу можно так заблокировать. Например, если реклама грузиться с того же домена, что и контент, то её можно лишь скрыть уже в браузере косметическими фильтрами, а средствами DNS её никак не заблокировать, иначе контент тоже будет недоступен.</p></td><td>2024-01-22T14:45:47.534Z</td></tr><tr><td>Mr.Alex</td><td><p><img src="установка-adguard-home-на-роутер-6949/1d8e9a2492aeb4daa14aa61895b6392563e7481e.png" alt="image" data-base62-sha1="4dtmXlrdP2T1m3WEy9ia2b8orQW" width="600" height="215"><br>
+когда выключаю VPN, то реклама блокируется. Проверял на сайтах по просмотру фильмов один из них lordfilm</p></td><td>2024-01-22T14:52:37.373Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Если VPN включен, то число в левом столбце (синий) растёт при сёрфинге?</p></td><td>2024-01-22T17:43:55.168Z</td></tr><tr><td>Mr.Alex</td><td><p>да, но реклама не блокируется</p></td><td>2024-01-22T19:14:18.943Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Странно. Скорее всего, при подключении VPN роутер игнорирует настроенный DNS и использует то, что прилетело от VPN-сервера, поэтому Adguard остаётся не у дел. Но числа расти не должны в таком случае.</p>
+<p>Вариантов я вижу два:</p>
+<ul>
+<li>либо где-то в настройках VPN имеется опция, позволяющая не заменять настройки DNS на те, что прилетают от сервера (например, в прошивке Padavan такая опция есть, а как там в современных асусах (судя по интерфейсу роутера это асус?) с этим, я не помню)</li>
+<li>либо в настройках LAN → DHCP прописать адрес вашего Adguard (192.168.50.206) в поле “DNS” (и переподключить/перезагрузить клиентское устройство, чтобы оно запросило актуальные настройки по DHCP)</li>
+</ul></td><td>2024-01-22T22:31:08.404Z</td></tr><tr><td>Mr.Alex</td><td><p>Хотел бы задать вопрос уже не относившийся к Adguard Home. Я видел сообщение как создатель антизапрета говорил, чтобы антизапрет правильно работал нужно в роутере поставить любой другой DNS, чтобы не было страницы заглушки. Нужно ли в кончиг файле VPN так же прописывать route и DNS которые стоят в роутере?</p></td><td>2024-01-23T10:25:24.079Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Где именно они стоят? Если речь о DNS провайдера, то их нужно отключить, а вместо них <a href="https://ntc.party/t/%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-adguard-home-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80/6949/7">указать адрес Adguard</a>.</p>
+<p>Если без Adguard, то вместо DNS провайдера указывается то, что в конфиге после route.</p></td><td>2024-01-23T12:14:36.811Z</td></tr><tr><td>Mr.Alex</td><td><p>Да, это роутер ASUS AX4200<br>
+Изменять в строке начальный пул адрессов или настройка DNS и WINS?<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-adguard-home-на-роутер-6949/43ba41840a3adde32bf0d3cea4b64c28f7e43823.png" data-download-href="https://ntc.party/uploads/default/43ba41840a3adde32bf0d3cea4b64c28f7e43823" title="image"><img src="установка-adguard-home-на-роутер-6949/43ba41840a3adde32bf0d3cea4b64c28f7e43823_2_546x500.png" alt="image" data-base62-sha1="9F92BpveANoFFMHpVuCM82oL8Kn" width="546" height="500" srcset="установка-adguard-home-на-роутер-6949/43ba41840a3adde32bf0d3cea4b64c28f7e43823_2_546x500.png, установка-adguard-home-на-роутер-6949/43ba41840a3adde32bf0d3cea4b64c28f7e43823.png 1.5x, установка-adguard-home-на-роутер-6949/43ba41840a3adde32bf0d3cea4b64c28f7e43823.png 2x" data-dominant-color="383024"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">745×682 88.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-01-23T15:01:47.819Z</td></tr><tr><td>Mr.Alex</td><td><aside class="quote no-group" data-username="dartraiden" data-post="12" data-topic="6949">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>DHCP</p>
+</blockquote>
+</aside>
+<p>Огромное Вам спасибо! Помогло в DHCP прописать DNS от Adguard и всё завелось</p></td><td>2024-01-23T20:11:54.507Z</td></tr><tr><td>Mr.Alex</td><td><p>Подскажите, пожалуйста, а можно ли Adguard поставить на сервер где стоит Антизапрет? И как это сделать</p></td><td>2024-01-25T19:15:39.424Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://github.com/AdguardTeam/AdGuardHome/wiki/VPS">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/b/bad3e5f9ad67c1ddf145107ce7032ac1d7b22563.svg" class="site-icon" data-dominant-color="" width="32" height="32">
+
+      <a href="https://github.com/AdguardTeam/AdGuardHome/wiki/VPS" target="_blank" rel="noopener">GitHub</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/344;"><img src="установка-adguard-home-на-роутер-6949/fc3f37ec5c917a2094e737f7f281aa6938c07d7c_2_690x345.png" class="thumbnail" data-dominant-color="E8EFEF" width="690" height="345"></div>
+
+<h3><a href="https://github.com/AdguardTeam/AdGuardHome/wiki/VPS" target="_blank" rel="noopener">VPS</a></h3>
+
+  <p>Network-wide ads &amp; trackers blocking DNS server. Contribute to AdguardTeam/AdGuardHome development by creating an account on GitHub.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<aside class="quote" data-post="40" data-topic="129">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%B9%D0%BD%D0%B5%D1%80-vpn-%D0%B0%D0%BD%D1%82%D0%B8%D0%B7%D0%B0%D0%BF%D1%80%D0%B5%D1%82%D0%B0-%D0%B4%D0%BB%D1%8F-%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B8-%D0%BD%D0%B0-%D1%81%D0%BE%D0%B1%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80/129/40">Контейнер VPN АнтиЗапрета для установки на собственный сервер</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/az-self-hosted/38"><span data-category-id="38" style="--category-badge-color: #0088CC; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #8C6238;" data-parent-category-id="5" data-drop-close="true" class="badge-category --has-parent" title="Вопросы и особенности работы контейнера VPN АнтиЗапрета на своих серверах"><span class="badge-category__name">АнтиЗапрет на собственном сервере (self-hosted)</span></span></a>
+  </div>
+  <blockquote>
+    Полагаю, что можно. В файл /etc/knot-resolver/kresd.conf, в самый конец добавьте следующую строку: 
+policy.add(policy.all(policy.FORWARD({'192.0.2.1'})))
+
+Где 192.0.2.1 — IP-адрес DNS-сервера AdGuard. Контейнер с VPN антизапрета должен иметь доступ до этого IP-адреса.
+  </blockquote>
+</aside>
+
+<aside class="quote quote-modified" data-post="77" data-topic="129">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/mostm/48/816_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%B9%D0%BD%D0%B5%D1%80-vpn-%D0%B0%D0%BD%D1%82%D0%B8%D0%B7%D0%B0%D0%BF%D1%80%D0%B5%D1%82%D0%B0-%D0%B4%D0%BB%D1%8F-%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B8-%D0%BD%D0%B0-%D1%81%D0%BE%D0%B1%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80/129/77">Контейнер VPN АнтиЗапрета для установки на собственный сервер</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/az-self-hosted/38"><span data-category-id="38" style="--category-badge-color: #0088CC; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #8C6238;" data-parent-category-id="5" data-drop-close="true" class="badge-category --has-parent" title="Вопросы и особенности работы контейнера VPN АнтиЗапрета на своих серверах"><span class="badge-category__name">АнтиЗапрет на собственном сервере (self-hosted)</span></span></a>
+  </div>
+  <blockquote>
+    На данный момент, чтобы Knot Resolver принимал ответы от AdGuard Home необходимо так же прописать отключение проверок DNSSEC: trust_anchors.remove('.') 
+Без этого, dig google.com @127.0.0.1 внутри контейнера возвращает SERVFAIL, соответственно работать не будет. 
+(лог запроса в моем случае: 
+[plan] plan 'google.com.' type 'A' uid [58041.00]
+[iter]   'google.com.' type 'A' new uid was assigned .01, parent uid .00
+[cach]   =&gt; skipping exact RR: rank 030 (min. 030), new TTL -9724
+[cach]   =&gt; no NSE…
+  </blockquote>
+</aside>
+</td><td>2024-01-25T19:54:54.914Z</td></tr><tr><td>Mr.Alex</td><td><p><img src="установка-adguard-home-на-роутер-6949/65e880aaddafb723419dfd6f5a57fd79113efe27.png" alt="image" data-base62-sha1="exwmgcBr6L429JkpEjcEqJQHdBR" width="581" height="314"><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-adguard-home-на-роутер-6949/227ead061b755103a2073b0aa905c70f157718df.png" data-download-href="https://ntc.party/uploads/default/227ead061b755103a2073b0aa905c70f157718df" title="image"><img src="установка-adguard-home-на-роутер-6949/227ead061b755103a2073b0aa905c70f157718df.png" alt="image" data-base62-sha1="4V9Dq21QoiX9EuC6qIJMZtBt5Ab" width="522" height="500" data-dominant-color="1A1A1A"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">578×553 10.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<img src="установка-adguard-home-на-роутер-6949/89114dc4fba0e110c23bafbf236ba82dfb2f17dd.png" alt="image" data-base62-sha1="jyyuaEV6YUobuleGYSYxS6nTUVT" width="228" height="292"><br>
+<img src="установка-adguard-home-на-роутер-6949/d53d145daa18b15bb37ebe22e2cb51236cebe831.png" alt="image" data-base62-sha1="uqoyWh1SyMoR6v7xnazdYALOUAV" width="420" height="350"><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-adguard-home-на-роутер-6949/a2ebe2ac93d1acb3db6c9cdb41784574aa3f7a74.png" data-download-href="https://ntc.party/uploads/default/a2ebe2ac93d1acb3db6c9cdb41784574aa3f7a74" title="image"><img src="установка-adguard-home-на-роутер-6949/a2ebe2ac93d1acb3db6c9cdb41784574aa3f7a74.png" alt="image" data-base62-sha1="nfgJpxfJDcz9EYjgCMvnFvSdihS" width="690" height="220" data-dominant-color="3A3022"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">750×240 7.34 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Не заработал. Я все правильно сделал?</p></td><td>2024-01-25T21:46:10.818Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Скорее всего, нет, AdguardHome же теперь является апстримом для антизапрета, поэтому из настроек роутера все адреса DNS нужно убрать, включая директивы <code>route</code>. Роутер будет использовать тот адрес DNS, который приходит от сервера в момент поднятия туннеля.</p>
+<p>А дальше уже выяснять, как заставить контейнер антизапрета в качестве апстрима использовать Adguard: вопросы об этом лучше задавать в указанной теме, там есть люди, которым это удалось.</p></td><td>2024-01-26T06:48:55.926Z</td></tr><tr><td>Mr.Alex</td><td><p>Если на сервере где стоит antizapret в файле /etc/systemd/resolved.conf прописаны DNS 1.1.1.1 и 8.8.8.8, то можно их указать так же в Adguard Home? Будет ли корректно обрабатывать запросы без конфликтов? Речь сейчас про Adguard на raspberry pi в локальной сети. На VPS мне вариант увы не подошёл</p></td><td>2024-02-01T15:56:26.877Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Можно. Пока поднят VPN-туннель, трафик до этих адресов всё равно не дойдёт, потому что будет завёрнут в туннель (при условии, что эти же адреса через <code>route</code> в конфиге ovpn завёрнуты в туннель) и перехвачен DNS Antizapret в контейнере.</p>
+<p>Поэтому, пока соблюдается правило “эти адреса должны быть указаны и в директиве <code>route</code> в конфиге”, эти адреса могут быть какими угодно.</p>
+<p>А вот когда туннель не поднят (например, сервер помер), тогда обход блокировок, конечно, работать не будет (туннеля же нет), но зато у клиентов будут работать хотя бы незаблокированные сайты, поскольку DNS-запросы будут улетать к 1.1.1.1 и 8.8.8.8.</p></td><td>2024-02-01T18:05:28.107Z</td></tr><tr><td>Mr.Alex</td><td><p>Большое спасибо. Постоянно выручаете в моих вопросах <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-02-01T18:18:23.110Z</td></tr><tr><td>Mr.Alex</td><td><p>Здравствуйте! Я поменял софт на rpi4 и теперь там стоит docker с portainer. Могу ли я поднять Adguard Home через докер в локальной сети с флагом --net=host и использовать его корректно?</p></td><td>2024-03-25T16:40:58.083Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Не знаю, я докером в жизни не пользовался.<br>
+У меня к нему, вообще, не очень хорошее отношение, потому что докер суют везде, туда, где он и не нужен. Например, я хочу поднять Tiny Tiny RSS, а там написано, мол, единственно поддерживаемый способ установки - через докер. А зачем мне докер? Я разве собираюсь каждый день развёртывать кучу инстансов? Мне всего лишь надо однократно поднять один экземпляр на своем сервере, и раньше это можно было сделать, установив руками базу данных, PHP и веб-сервер, а теперь отчего-то “ехал докер через докер”.</p>
+<p>Для каких-то задач, наверное, докер хорош, но, перефразируя известную поговорку, “когда у тебя в руках докер, всё вокруг становится контейнером” - вот это нехорошо.</p></td><td>2024-05-29T19:10:11.955Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Думаю, Докер используют, чтобы не путаться в зависимостях, потому что разные проекты могут требовать nginx-ы разных версий. Также Докер – это устанвка “из коробки”, не нужно список зависимостей тянуть из репозиториев выбранного вами дистрибутива, в которых может и не оказаться какого-то требуемого пакета.</p>
+<p>Мой ответ может быть некачественным, т.к. я сам докер почти не использовал.</p></td><td>2024-05-29T19:21:48.731Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Про Docker</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://habr.com/ru/news/818177/">
+  <header class="source">
+      <img src="установка-adguard-home-на-роутер-6949/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://habr.com/ru/news/818177/" target="_blank" rel="noopener">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="установка-adguard-home-на-роутер-6949/582e5abf6c4cf51b8fea21114bf3634293a6aa8a.png" class="thumbnail" data-dominant-color="415766" width="690" height="362"></div>
+
+<h3><a href="https://habr.com/ru/news/818177/" target="_blank" rel="noopener">Docker hub перестал работать в России</a></h3>
+
+  <p>При открытии сайта появляется надпись: 403 Forbidden Since Docker is a US company, we must comply with US export control regulations. In an effort to comply with these, we now block all IP addresses...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-05-30T09:18:05.983Z</td></tr>
+    </table>
+      </body>
+    </html>

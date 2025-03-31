@@ -1,0 +1,194 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>долгая-загрузка-сайтов-после-смены-dns</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>MOVIESTRAIFE</td><td><p>Доброго времени суток. Ситуация. В феврале у меня появилась проблема с тем, что не открываются некоторые сайты, которые до этого спокойно работали (steam, ubisoft и тд). Провайдер отвечал, что с его стороны никаких блокировок нет, хотя VPN спокойно всё открывал. Решил поменять DNS сервер (с 8-ок) через DNSJumper. Выставил 1.1.1.1 и на неделю+ всё нормализовалось.</p>
+<p><strong>Затем началась дичь.</strong> Любой сайт стал открываться спустя 5-10 секунд. На сервера в Дискорде так же пускало через время. Короче, появилась <em>странная задержка</em>. Причем вот какое наблюдение: иногда я на сайт захожу моментально, а иногда на него же - с этой задержкой. Это не зависит от времени суток и нагруженности сети. Как будто я попадаю в цикл какой-то.</p>
+<p><strong>Что я делал, чтобы пофиксить:</strong></p>
+<ul>
+<li>чистка вирусов (AVZ, Cure It)</li>
+<li>восстановление сети через cmd (dnsflush)</li>
+<li>выбор старого DNS (8-ки)</li>
+<li>использование DNSCrypt, WARP и прочих софтин</li>
+<li>смена роутера</li>
+</ul>
+<p>Результат один - чинится на 10 минут, затем всё по новой.<br>
+Местонахождение - юг России, провайдер один (AVANTA)</p>
+<p>Подскажите, что это всё-таки может быть? Винду сейчас сносить боль, переносить 500+ гб важной инфы в облако не получится (в данный момент).</p></td><td>2024-03-12T07:27:49.120Z</td></tr><tr><td>Dhohbr</td><td><p>Если сделать ipconfig /flushdns, затем nslookup &lt;какой-то сайт&gt;, как быстро ответ выдает?</p></td><td>2024-03-12T08:42:25.486Z</td></tr><tr><td>MOVIESTRAIFE</td><td><p>Мгновенно</p></td><td>2024-03-12T08:52:21.219Z</td></tr><tr><td>Dhohbr</td><td><p>Тогда может и не в днс проблема.<br>
+Посмотрите браузером через средства разработчика, если не ошибаюсь, вкладка сеть. Там можно отследить какой элемент сколько загружается.<br>
+Если копать ещё глубже, можно собрать дамп Wireshark’ом, если кто-то тут возьмётся проанализировать его.<br>
+У вас интернет роутер раздает? С других устройств такая же проблема?</p></td><td>2024-03-12T09:27:03.390Z</td></tr><tr><td>MOVIESTRAIFE</td><td><p>Да, раздает роутер. С других устройств проблему не наблюдал, но из других устройств только 2 смартфона)</p></td><td>2024-03-12T10:42:07.979Z</td></tr><tr><td>MOVIESTRAIFE</td><td><p><img src="долгая-загрузка-сайтов-после-смены-dns/b46d8ae31b02406c44514fc63064fdc4b4821a46.png" alt="image" data-base62-sha1="pK8DAfVWHvJoGxdm3wbtXZhMeR8" width="667" height="25"><br>
+По загрузке просто вот так пишет и всё, остальные элементы в норме по времени (грузил <a href="http://vk.com/feed" class="inline-onebox" rel="noopener nofollow ugc">VK | Herzlich Willkommen</a>)</p></td><td>2024-03-12T10:45:36.637Z</td></tr><tr><td>spcfox(Viktor Yudov)</td><td><p>Ну если уж подозрения на проблемы с dns, то как грузятся сайты по ip? Например <a href="https://1.1.1.1/" rel="noopener nofollow ugc">https://1.1.1.1/</a></p></td><td>2024-03-12T10:55:01.473Z</td></tr><tr><td>MOVIESTRAIFE</td><td><p>так же, как и остальные… бывает мгновенно, а бывает просадка до 10 секунд, зависит от… хз чего</p></td><td>2024-03-12T11:03:57.661Z</td></tr><tr><td>serj888</td><td><p>Слышал когда не будь про такой в винде параметр EnablePMTUDiscovery<br>
+вот он может выключить нэт, то есть какое то одно плохое соединение, потащит за собой все остальные, скорость будет падать для всех соединений, находится он по этому пути в реестре<br>
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\services\Tcpip\Parameters<br>
+попробуй выставить 0 и перезагрузить комп и понаблюдай потом за работой.<br>
+Это не выход из ситуации, так, для проверки. Есть такое понятие, как настройка сетевого стёка, что обычно практически никто этого не знает и никогда не учитывает, ищут проблемы далеко, хотя они всегда навиду.<br>
+И 500 гигов на диске С, это конечно жесть, на диске С должна быть только винда и проги и больше ничего, для игр отдельно диск ssd, для всего остального отдельно должен быть диск )</p></td><td>2024-03-12T12:07:58.940Z</td></tr><tr><td>bolvan</td><td><p>Сколько тратится усилий только, чтобы не запускать шарк<br>
+В шарке же все видно, чего гадать<br>
+Если не можете сами, кидайте дамп. Посмотрим всем народом<br>
+Все посторонние источники трафика и антивирусы отключить.<br>
+Сделать ipconfig /flushdns<br>
+Броузер запустить. Кэш почистить. Нажать старт в шарке. Зайти на тупящий сайт. Подождать окончания. Остановить шарк. Сохранить дамп</p></td><td>2024-03-12T12:45:19.309Z</td></tr><tr><td>MOVIESTRAIFE</td><td><p>не знаю, так ли я сделал, но вот<br>
+<a class="attachment" href="долгая-загрузка-сайтов-после-смены-dns/6eBnc9XM5eXOkFWsy7aNdGZXWSX.pcapng">111.pcapng</a> (6,1 МБ)</p></td><td>2024-03-12T14:29:24.359Z</td></tr><tr><td>MOVIESTRAIFE</td><td><p>Этого параметра по данному пути нет вообще<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="долгая-загрузка-сайтов-после-смены-dns/0e881bf98962514793b96e6b054e8deaf0063721.png" data-download-href="https://ntc.party/uploads/default/0e881bf98962514793b96e6b054e8deaf0063721" title="image"><img src="долгая-загрузка-сайтов-после-смены-dns/0e881bf98962514793b96e6b054e8deaf0063721.png" alt="image" data-base62-sha1="24yir4Ef8rMriUEOuq7WaRCvFdf" width="690" height="243" data-dominant-color="F3F3F3"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1096×386 30.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>UPD. Ввел его сам (DWORD), ничего не изменилось</p></td><td>2024-03-12T14:33:27.556Z</td></tr><tr><td>gfqwdgecewgcdw</td><td><p>Отдаётся днс забаненный ip и нормальные и пока браузер перебирает ip, сайт тупит</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://habr.com/ru/articles/528210/">
+  <header class="source">
+      <img src="долгая-загрузка-сайтов-после-смены-dns/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://habr.com/ru/articles/528210/" target="_blank" rel="noopener nofollow ugc">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="долгая-загрузка-сайтов-после-смены-dns/2bd9ed89b79d46dd4d425a0129f8282300ceaca6.png" class="thumbnail" data-dominant-color="496373" width="690" height="362"></div>
+
+<h3><a href="https://habr.com/ru/articles/528210/" target="_blank" rel="noopener nofollow ugc">В России сохраняются проблемы с доступностью сайтов, но никто их не замечает</a></h3>
+
+  <p>TL;DR : Из-за блокировок Роскомнадзора большое количество ресурсов, находящихся на Amazon CloudFront и Akamai, периодически становятся кратковременно недоступны. Проблема вызвана частой сменой...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-03-12T18:13:45.490Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="MOVIESTRAIFE" data-post="11" data-topic="7464">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/90db22/48.png" class="avatar"> MOVIESTRAIFE:</div>
+<blockquote>
+<p>не знаю, так ли я сделал, но вот</p>
+</blockquote>
+</aside>
+<p>Сразу могу сказать, что DNS в броузере DoH, прямых запросов к DNS нет, поэтому меняй - не меняй в системе - разницы не будет<br>
+По дампу видны регулярные потери пакетов, которые вызывают ретрансмиссии tcp<br>
+На вашем месте я бы хорошенько проверил соединение к провайдеру<br>
+Для начала погонять mtr до разных ресурсов. Посмотреть loss rate.<br>
+Далее с какими-нибудь сервером в инете прогнать iperf туда-обратно по udp с ограничением полосы до , скажем, 10M. Посмотреть на потери.<br>
+Прогнать iperf tcp туда-обратно<br>
+Если будут значительные потери, подключить кабель к компу без роутера и повторить</p>
+<pre><code class="lang-auto">iperf3 -4 -p 5200 -u -b 10M -c iperf3.moji.fr
+iperf3 -4 -p 5200 -u -b 10M -c iperf3.moji.fr -R
+iperf3 -4 -p 5200 -c iperf3.moji.fr
+iperf3 -4 -p 5200 -c iperf3.moji.fr -R
+</code></pre>
+<p>Такие проблемы бывают на кабельных провайдерах  по разным причинам. Например, проблемы с кабелем. Еще бывают проблемы с согласованием линка на 100 mbit.  На разных концах разный дуплекс<br>
+Чем подключен провайдер ? Ethernet, docsis, pon ?</p>
+<p>Еще вопрос по поводу MTU.  Судя по размеру пакетов, mtu у вас 1440. Чем вызван такой размер ? Это подключение напрямую к провайдеру или через VPN ?</p></td><td>2024-03-12T18:49:06.412Z</td></tr><tr><td>gfqwdgecewgcdw</td><td><ul>
+<li></li>
+</ul>
+<p>Я тоже живу в Ростове на Дону, у меня на TTK вечером потери тоже 10+% и на tcp и на udp</p></td><td>2024-03-12T20:07:56.132Z</td></tr><tr><td>bolvan</td><td><p>Посмотрел провайдер AVANTA. Как я понимаю там pon ?<br>
+pon - вообще такая себе технология. Ее продвигают как оптику, но это не та самая оптика от и до. На ней висит туча абонентов через сплиттеры. Достаточно трэшовый вариант. Об этом много писали. Но нужны конкретные замеры в разных ситуациях, особенно в случае проблем</p></td><td>2024-03-13T06:15:10.834Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="bolvan" data-post="15" data-topic="7464">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>По дампу видны регулярные потери пакетов, которые вызывают ретрансмиссии tcp</p>
+</blockquote>
+</aside>
+<p>Непонятно. Посмотри, например, <code>tcp.stream eq 23</code> в дампе — компьютер, по какой-то причине, не стал отвечать на SYN/ACK после совершения SYN.</p>
+<p><a class="mention" href="/u/moviestraife">@MOVIESTRAIFE</a>, у вас несколько сетевых интерфейсов на компьютере?</p></td><td>2024-03-13T07:22:04.236Z</td></tr><tr><td>MOVIESTRAIFE</td><td><p>К сожалению, мои познания по сетке весьма ограничены, так что, если возможно, распишите алгоритм действий / скиньте инструкцию, пожалуйста по действиям, которые мне нужно совершать.</p>
+<p>Как я спросил у провайдера, подключение через pon.<br>
+Подключение было напрямую к провайдеру.</p></td><td>2024-03-13T08:21:47.627Z</td></tr><tr><td>MOVIESTRAIFE</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="долгая-загрузка-сайтов-после-смены-dns/455e5ed467dc51cf3c2889bdc1103766aace7b53.jpeg" data-download-href="https://ntc.party/uploads/default/455e5ed467dc51cf3c2889bdc1103766aace7b53" title="image"><img src="долгая-загрузка-сайтов-после-смены-dns/455e5ed467dc51cf3c2889bdc1103766aace7b53_2_690x96.jpeg" alt="image" data-base62-sha1="9TF8fUxvMlFbXuW7vHN0v3UnAj1" width="690" height="96" srcset="долгая-загрузка-сайтов-после-смены-dns/455e5ed467dc51cf3c2889bdc1103766aace7b53_2_690x96.jpeg, долгая-загрузка-сайтов-после-смены-dns/455e5ed467dc51cf3c2889bdc1103766aace7b53.jpeg 1.5x, долгая-загрузка-сайтов-после-смены-dns/455e5ed467dc51cf3c2889bdc1103766aace7b53.jpeg 2x" data-dominant-color="ECEDEE"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1014×142 64.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Работает всегда только 1 (когда работаю еще OpenVPN, но он включается только по нужным сайтам).</p></td><td>2024-03-13T08:22:58.615Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="MOVIESTRAIFE" data-post="20" data-topic="7464">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/90db22/48.png" class="avatar"> MOVIESTRAIFE:</div>
+<blockquote>
+<p>Работает всегда только 1 (когда работаю еще OpenVPN, но он включается только по нужным сайтам).</p>
+</blockquote>
+</aside>
+<p>Если кабелем подключить вместо wifi, что-то меняется ?<br>
+Вижу virtualbox установлен. Если из виртуалки в момент проблем попробовать, тоже самое ? Желательно перевести виртуалку в режим сети мост (bridge)</p></td><td>2024-03-13T08:24:52.036Z</td></tr><tr><td>MOVIESTRAIFE</td><td><p>Проверить смогу только вечером.<br>
+Но пока что вот какой момент. MTU в винде стоит 1500, в роутере (TP-Link Archer AX50) 1480, но спидгайд выдает что у меня 1440. Что может влиять на это значение, кроме VPN?</p></td><td>2024-03-13T08:53:01.444Z</td></tr><tr><td>0ka(0ka)</td><td><p>дополняю после разговора с ним: curl у него тоже долго висит в момент резолва домена, но nslookup срабатывает моментально, файлы с браузера скачиваются быстро. После “сброса сети” у него винда перестала грузиться и ушла в режим восстановления, после него всё же включилась, на SSD нашлись битые и медленные сектора (у меня подозрение что повредились какие-то системные файлы)</p></td><td>2024-03-13T09:22:18.821Z</td></tr><tr><td>bolvan</td><td><p>Тогда ему стоит начинать с загрузки с образа WinPE или linux, и потестить тоже самое оттуда. Чтобы исключить проблемы основной системы.<br>
+Любую сложную систему надо разделять на звенья, и тестировать каждое отдельно, чтобы локализовать проблему<br>
+Другая ОС, другое подключение (кабель, wifi)</p>
+<p>Это может быть и битая система, и плохие/старые драйвера на wifi, и плохо подобранные параметры точки доступа (40 Мгц на 2.4, когда есть 30 соседей), и плохой провайдер с его PONом</p></td><td>2024-03-13T11:26:32.166Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="MOVIESTRAIFE" data-post="22" data-topic="7464">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/90db22/48.png" class="avatar"> MOVIESTRAIFE:</div>
+<blockquote>
+<p>. Что может влиять на это значение, кроме VPN?</p>
+</blockquote>
+</aside>
+<p>Я не удивлюсь, если в роутере жестко задана коррекция MSS, и на самом деле это не MTU, а MSS<br>
+Заводские прошивки умеют удивлять</p>
+<p>Первым делом надо сделать tracert -w 1 -d 1.1.1.1<br>
+Чтобы понять куда вообще идет трафик. На провайдера или что-то еще там есть</p>
+<p>Если это голый провайдер, то далее надо выяснить идет ли ограничение по MSS или по MTU.<br>
+Надо выполнить частично процедуру path MTU discovery.<br>
+В голой винде без сторонних средств это можно сделать несколькими командами ping<br>
+Суть в том, чтобы послать несколько проб icmp пакетов разной длины с флагом dont fragment с разным TTL.  TTL из диапазона 1 и 2 для начала.  1 - это сам роутер, 2 - это уже провайдер<br>
+Длину пакета начать с 1472. Это соответствует MTU 1500.<br>
+Потом сокращать до 1452 (MTU 1480) и 1412 (MTU 1440)<br>
+Значимый результат будет наличие или отсутствие ошибки “Packet needs to be fragmented but DF set” (на русский сами переведете).<br>
+Если ошибка есть, значит роутер на указанном хопе не пропускает пакеты означенной длины.</p>
+<p>Вот это по идее должно точно сработать (без ошибки DF)<br>
+ping -w 1 -n 1 -f -i 1 -l 1472 1.1.1.1</p>
+<p>Далее :<br>
+ping -w 1 -n 1 -f -i 2 -l 1472 1.1.1.1<br>
+ping -w 1 -n 1 -f -i 2 -l 1453 1.1.1.1<br>
+ping -w 1 -n 1 -f -i 2 -l 1452 1.1.1.1<br>
+ping -w 1 -n 1 -f -i 2 -l 1413 1.1.1.1<br>
+ping -w 1 -n 1 -f -i 2 -l 1412 1.1.1.1</p>
+<p>Так мы выясним MTU. И если он не 1440, а больше, то ограничение идет по MSS, и скорее всего это роутер так делает с его прошивкой<br>
+MSS это maximum segment size, и относится к TCP.  часто на роутерах делается clamp mss, чтобы TCP не зависал при неработающем path mtu discovery<br>
+traceroute шлет icmp, потому MSS к нему никак не относится</p>
+<p>Пример того, что творит USB модем huawei E8372</p>
+<pre><code class="lang-auto">-A PREROUTING -i wan0 -p tcp -m tcp --tcp-flags SYN,RST,ACK SYN -m tcpmss --mss 1460:1500 -j TCPMSS --set-mss 1460
+-A PREROUTING -i wan0 -p tcp -m tcp --tcp-flags SYN,RST,ACK SYN,ACK -m tcpmss --mss 1460:1500 -j TCPMSS --set-mss 1460
+-A POSTROUTING -o wan0 -p tcp -m tcp --tcp-flags SYN,RST,ACK SYN -m tcpmss --mss 1460:1500 -j TCPMSS --set-mss 1460
+-A POSTROUTING -o wan0 -p tcp -m tcp --tcp-flags SYN,RST,ACK SYN,ACK -m tcpmss --mss 1460:1500 -j TCPMSS --set-mss 1460
+</code></pre></td><td>2024-03-13T11:39:09.423Z</td></tr><tr><td>serj888</td><td><p>Если <a href="http://www.speedguide.net:8080" rel="noopener nofollow ugc">http://www.speedguide.net:8080</a> показывает mtu 1440, а на компе 1500 и в роуторе 1480, то значит включён vpn, поэтому плохо с задержками и работает )</p></td><td>2024-03-13T11:59:58.900Z</td></tr><tr><td>MOVIESTRAIFE</td><td><p>ВПН выключен 100%</p></td><td>2024-03-13T12:19:06.426Z</td></tr><tr><td>Dhohbr</td><td><p>MTU проще определить этой утилиткой <a href="https://www.elifulkerson.com/projects/mturoute.php" class="inline-onebox">mturoute.exe - official site</a><br>
+А вообще, если у вас Pon, то провайдер вам подаёт канал через туннельное соединение, соответственно MTU будет ниже 1500. У меня Pon от Ростелекома через pppoe, MTU 1492. Ваши 1480 возможно выдает вам провайдер.<br>
+Но думаю проблема всё-таки в вашей системе. MTU 1400 - возможно прокси в браузере, плагин или какой-то софт на подобии GoodbyDPI. Speedguide показывает ваш внешний IP?<br>
+Поудаляйте с системы всякие обходы блокировок. Поставьте другой браузер, которым не пользовались, проверьте на дефолтных настройках.<br>
+И как уже писали выше, проверьте на WinPE.</p></td><td>2024-03-13T16:18:05.868Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="Dhohbr" data-post="28" data-topic="7464">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> Dhohbr:</div>
+<blockquote>
+<p>если у вас Pon, то провайдер вам подаёт канал через туннельное соединение</p>
+</blockquote>
+</aside>
+<p>нет такого правила, все зависит от прова</p></td><td>2024-03-13T21:42:09.651Z</td></tr>
+    </table>
+      </body>
+    </html>

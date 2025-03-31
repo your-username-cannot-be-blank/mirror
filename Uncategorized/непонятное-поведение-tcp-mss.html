@@ -1,0 +1,117 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>непонятное-поведение-tcp-mss</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0ka(0ka)</td><td><p>Хотел оптимизировать работу wireguard через vless и столкнулся с непонятным поведением TCP MSS.</p>
+<ol>
+<li>PPPOE на роутере, mtu роутера 1492, mtu пк 1500, на пк <a href="http://witch.valdikss.org.ru">http://witch.valdikss.org.ru</a> выдает mtu 1452 (в tcpdump вижу от клиента mss 1460, от сервера 1412).</li>
+<li>pppoe на пк, mtu 1492, <a href="http://witch.valdikss.org.ru">http://witch.valdikss.org.ru</a> выдает mtu 1492 (в tcpdump вижу от клиента mss 1452, от сервера 1452)</li>
+</ol>
+<p>Мой VPS с mtu 9000 отправляет mss 8960, но до клиента доходит в 1 варианте 1412, во 2 1452. На другом роутере, пк и провайдере вообще приходит mss 1400 от сервера в 1 варианте.</p>
+<p>Это можно исправить и получить максимально возможный mss?</p></td><td>2023-09-14T14:55:03.518Z</td></tr><tr><td>bolvan</td><td><p>MTU - это максимально возможный размер пакета, начиная с ip заголовка. то есть максимальный пейлоад данных уровня L2<br>
+MSS - максимально возможная длина полезного блока данных tcp. максимальный пейлоад уровня L4.  Разница между MTU и MSS - это размер заголовков ip и tcp.<br>
+Минимальный размер ip - 20 байт, tcp - 20 байт. Отсюда и разница 40. Может быть и больше, если в tcp header включены options.</p>
+<p>Сколько бы ни было MTU на каком-либо конце, при передаче данных на другой конец выполняется процедура path mtu discovery. С помощью icmp оконечные узлы выявляют минимальный MTU всех узлов на пути пакета. Так что PMTU будет всегда самым меньшим из MTU по пути. Иначе пакет просто не дойдет.</p>
+<p>Если вдруг ICMP не ходят, то есть костыль на роутерах. clamp-mss-to-pmtu, который обычно имеется в ip или nftables. Модуль на роутере редактирует mss , выставленный исходным узлом</p>
+<p>Вручную можно выявить PMTU, попингав другой конец с разными размерами пакета и флагом DF (dont fragment). Обычно в комаде ping размер устанавливается как размер пейлоада ICMP echo, так что к нему для ipv4 надо прибавить 28 байт (20 ip + 8 icmp). Для 1500 MTU макс пинг будет 1472.</p></td><td>2023-09-14T16:38:08.515Z</td></tr><tr><td>0ka(0ka)</td><td><p>Я походу вообще непонятно написал вопрос, да? Ответа не увидел<br>
+<a href="http://witch.valdikss.org.ru/">http://witch.valdikss.org.ru/</a> сколько у тебя отображает mtu? Интернет IPOE или PPPOE?<br>
+Правильный mtu у меня отображает только на IPOE подключении к инету с mtu 1500. На pppoe интернете с натом через роутер сайт отображает mtu 1452 а не 1492. И так не только у меня</p>
+<p>И на мобильном инете мегафона с mtu 1500 сайт отображает mtu 1400<br>
+И да он реальный, пинг 1472 без фрагментации проходит, как и 1464 на pppoe</p></td><td>2023-09-14T17:35:27.952Z</td></tr><tr><td>bolvan</td><td><p>У меня отображает 1500 (ipoe).<br>
+Если он отображает что-то другое, значит ему приходят пакеты такого размера. Но почему они приходят - скорее всего из-за PMTU. Где-то режут.</p>
+<p>Надо протрейсить весь путь с макс размером и DF<br>
+как-то так<br>
+traceroute -F <a href="http://cloudflare.com">cloudflare.com</a> 1500</p></td><td>2023-09-14T17:58:49.924Z</td></tr><tr><td>0ka(0ka)</td><td><p>traceroute на мегафоне проходит c 1500 (на сайте 1400), на pppoe через нат роутера traceroute проходит c 1492 (на сайте 1452)</p></td><td>2023-09-14T18:08:53.260Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="0ka" data-post="3" data-topic="5680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>И на мобильном инете мегафона с mtu 1500 сайт отображает mtu 1400<br>
+И да он реальный, пинг 1472 без фрагментации проходит, как и 1464 на pppoe</p>
+</blockquote>
+</aside>
+<p>Ведьма может ошибаться <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"><br>
+Лично я больше верю traceroute<br>
+Это очень старый сайт</p></td><td>2023-09-14T18:14:18.864Z</td></tr><tr><td>0ka(0ka)</td><td><p>ipoe на роутере (трассировка и пинг с размером 1500 проходит)<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="непонятное-поведение-tcp-mss/397102e625924f287076f171b1f2d2b5b61bfca1.png" data-download-href="https://ntc.party/uploads/default/397102e625924f287076f171b1f2d2b5b61bfca1" title="image"><img src="непонятное-поведение-tcp-mss/397102e625924f287076f171b1f2d2b5b61bfca1_2_690x48.png" alt="image" data-base62-sha1="8c9lazKJC4NOanz79lTQWmP5UsN" width="690" height="48" srcset="непонятное-поведение-tcp-mss/397102e625924f287076f171b1f2d2b5b61bfca1_2_690x48.png, непонятное-поведение-tcp-mss/397102e625924f287076f171b1f2d2b5b61bfca1.png 1.5x, непонятное-поведение-tcp-mss/397102e625924f287076f171b1f2d2b5b61bfca1.png 2x" data-dominant-color="D1E7D4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">790×56 24.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>pppoe на роутере (трассировка и пинг с размером 1492 проходит)<br>
+<img src="непонятное-поведение-tcp-mss/8ef02689dbc71a7ed8043d7dbb1a5b4fcc91a802.png" alt="image" data-base62-sha1="koujTMX9Fab9QDXCLANl5an33pg" width="688" height="56"></p>
+<p>pppoe на компе (трассировка и пинг с размером 1492 проходит)<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="непонятное-поведение-tcp-mss/aa691389c5d3782ffe7b4b3c8be758b00fc84175.png" data-download-href="https://ntc.party/uploads/default/aa691389c5d3782ffe7b4b3c8be758b00fc84175" title="image"><img src="непонятное-поведение-tcp-mss/aa691389c5d3782ffe7b4b3c8be758b00fc84175.png" alt="image" data-base62-sha1="ojwihOe6j1V51ln5TgUvMT4Sv7n" width="690" height="56" data-dominant-color="D1E0C3"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">710×58 4.75 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>мегафон lte через андроид (трассировка и пинг с размером 1500 проходит)<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="непонятное-поведение-tcp-mss/b2445b53d5e801f8dc7430126dd2e1a47adda885.png" data-download-href="https://ntc.party/uploads/default/b2445b53d5e801f8dc7430126dd2e1a47adda885" title="image"><img src="непонятное-поведение-tcp-mss/b2445b53d5e801f8dc7430126dd2e1a47adda885.png" alt="image" data-base62-sha1="pr1rupVDZBnATez4T4AUfi9pXGB" width="690" height="53" data-dominant-color="CEE7CF"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">724×56 3.59 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>ответ сервера везде разный (и совпадает с ведьмой), так и должно быть? Мне кажется что правильный ответ только в первом случае, в остальных mss меньше чем должен быть</p>
+<p>трассировка с размером 1500 а пинг с размером 1500-28*</p></td><td>2023-09-14T18:32:21.521Z</td></tr><tr><td>bolvan</td><td><p>Я бы попробовал пинговать не 1.1.1.1, а какой-нибудь хост под своим контролем, где можно сделать дамп.<br>
+Чтобы выяснить несколько вещей</p>
+<ol>
+<li>Какой MSS отправляется клиентом (уже видно, что максимальный)</li>
+<li>Какой MSS видит роутер на внутр интерфейсе</li>
+<li>Какой MSS отсылает роутер на внешний интерфейс</li>
+<li>Какой MSS приходит приходит серверу от клиента</li>
+<li>Каким MSS сервер отвечает</li>
+<li>Какой MSS принимает роутер с внешнего</li>
+<li>Какой MSS отсылает роутер на внутр</li>
+<li>Какой MSS приходит клиенту (уже видно, что мелкий)<br>
+Надо понять на каком этапе происходит искажение.</li>
+</ol>
+<p>Я сделал такой эксперимент.<br>
+Поставил на роутере MTU 1400 внешнего интерфейса.<br>
+Снял дамп на клиенте, на сервере, на роутере с внешнего интерфейса, на роутере с внутр интерфейса. Результат такой :</p>
+<p>Клиент отсылает 1460.<br>
+Роутер получает 1460.<br>
+Роутер отправляет 1360.<br>
+Сервер получает 1360.<br>
+Сервер отправляет 1460.<br>
+Роутер получает 1460.<br>
+Роутер отправляет 1360.<br>
+Клиент получает 1360.</p>
+<p>Это результат работы клампера мсс в iptables</p>
+<p>Цель - узнать кто зарезает MSS. То ли клампер в вашем случае плохо работает, то ли на пути какие-то мидлбоксы что-то чудят</p></td><td>2023-09-14T18:50:06.320Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="0ka" data-post="1" data-topic="5680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>Хотел оптимизировать работу wireguard через vless</p>
+</blockquote>
+</aside>
+<p>А точно стоит гнать udp через tcp ?<br>
+Там же непонятно как udp фреймы будут упакованы в tcp.<br>
+1:1 пакет в пакет может и не быть.<br>
+Могут 10 мелких udp упаковать в 1 отсыл по tcp, который размажется на 2 tcp пакета. И в чем тогда смысл такой тщательной оптимизации по mss ?</p></td><td>2023-09-14T19:02:03.949Z</td></tr><tr><td>fdsadf4345</td><td><p>Максимальный mtu 1480 надо ставить на pppoe и без вариантов, а то сайты не всегда будут открываться если поставить 1492<br>
+Хочешь больше mtu, меняй провайдера )</p></td><td>2023-09-18T15:09:58.024Z</td></tr><tr><td>0ka(0ka)</td><td><p>Если у вас проблема с mtu 1492 значит вы или провайдер что-то сломали</p></td><td>2023-09-18T15:41:59.340Z</td></tr><tr><td>fdsadf4345</td><td><p>Вы знаете как работает mtu ? Думаю если бы знал, тогда бы не спрашивал. Я сказал как нужно и нет чтоб сказать спасибо, ещё и крайним меня делаешь )) Вот так вот, помогай людям, я в шоке. Учить почему так, я не собираюсь, кому надо, тот сам поймёт</p></td><td>2023-09-18T16:15:06.640Z</td></tr><tr><td>0ka(0ka)</td><td><p>спасибо за что? сообщение не по теме и никак не помогает</p></td><td>2023-09-18T16:15:57.829Z</td></tr><tr><td>fdsadf4345</td><td><p>Тогда удачи с 1492 )</p></td><td>2023-09-18T16:16:42.855Z</td></tr><tr><td>0ka(0ka)</td><td><p>команды для теста выше есть, удачи в определении проблемы</p></td><td>2023-09-18T16:17:12.382Z</td></tr>
+    </table>
+      </body>
+    </html>

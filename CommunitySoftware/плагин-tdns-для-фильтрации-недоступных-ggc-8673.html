@@ -1,0 +1,86 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>плагин-tdns-для-фильтрации-недоступных-ggc-8673</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Xunlei</td><td><p>Написал плагин для <a href="https://technitium.com/dns/" rel="noopener nofollow ugc">Technitium DNS Server</a> для фильтрации недоступных сетей GGC в РФ: <a class="attachment" href="плагин-tdns-для-фильтрации-недоступных-ggc-8673/8RHEIAb4sTw2DDOnOsaDYUUZS1G.zip">Filter Network.zip</a> (7.6 KB)</p>
+<p>Алгоритм работы:</p>
+<ol>
+<li>Проверка запроса на тип <code>A</code> или <code>AAAA</code></li>
+<li>Проверка имени ответа на содержание фильтруемой зоны</li>
+<li>Проверка на вхождения адреса в <code>RDATA</code> в фильтруемую сеть</li>
+<li>Исключение <code>A</code> и <code>AAAA</code> отфильтрованных записей из результата, если записей не осталось возврат <code>NX DOMAIN</code>.</li>
+</ol>
+<p>Использование:</p>
+<ol>
+<li>Скачать архив и установить его во вкладке Apps веб-морды сервера</li>
+<li>
+Нажать Config и вписать для домена googlevideo.com недоступные для вас сети:
+<pre>{
+	"enableFilter": true,
+	"groups": [
+		{
+			"isEnabled": true,
+			"filterZones": [
+				"googlevideo.com"
+			],
+			"filterNetworks": [
+				"203.0.113.0/24",
+				"5f00::/16"
+			]
+		}
+	]
+}
+</pre>
+</li>
+</ol>
+<p>В результате немного ускоряется загрузка видео с доступных сетей (<s>иногда необходимо обновить страницу видео, скрипт ютуба почему-то не хочет лазить на европейские серверы</s> добавил ещё сетей, вроде грузит сразу).</p>
+<p>ВАЖНО: этот способ для тех, у кого работает добавление недоступных доменов <code>*.googlevideo.com</code> в файл <code>hosts</code> (плагин просто упрощает работу), либо же необходимо <code>*.youtube.com</code> пустить через европейский/американский прокси, WARP тоже подойдёт, а <code>*.googlevideo.com</code> пустить через byedpi. Это можно сделать в расширении SwitchyOmega.</p></td><td>2024-08-04T10:06:26.315Z</td></tr><tr><td>minerfromhell</td><td><p>Внес подсеть ростелекомовского GCC, стало переключаться на гугловские IP в Москве. Внес и их - перестало грузиться вообще, иногда проскакивают подключения к IP финляндского GCC, но загрузки все равно нет (идет постоянный перебор московских адресов). Видимо нужен полный список IP GCC в России, чтобы отрезать их полностью и не давать скриптам даже пытаться к ним законнектиться.</p></td><td>2024-08-04T12:04:04.259Z</td></tr><tr><td>Xunlei</td><td><p>Проверьте ещё раз московскую сеть, возможно необходимо её ссузить, т. к. перекрываются с франкфуртскими IP. У меня грузит с амстердама и франкфурта через byedpi.</p>
+<aside class="quote no-group" data-username="minerfromhell" data-post="2" data-topic="8673">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/minerfromhell/48/5340_2.png" class="avatar"> minerfromhell:</div>
+<blockquote>
+<p>идет постоянный перебор московских адресов</p>
+</blockquote>
+</aside>
+<p>У меня такое пару раз проскакивало, но после переоткрытия вкладки запускалось норм.</p></td><td>2024-08-04T12:08:12.424Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>может и оффтопик…</p>
+<p>не проще через yt-dlp + VLC / mpv / potplayer / etc смотреть тогда ?<br>
+я так понял он вообще не использует GGC</p>
+<p>p.s. хотя если это для ТВ то понятно</p></td><td>2024-08-04T12:12:01.634Z</td></tr><tr><td>Xunlei</td><td><p>Проверил последний SMPlayer + MPV + yt-dlp — два раза пытается подключится к местному GGC и ругается. Видимо надо <code>www.youtube.com</code> и <code>manifest.googlevideo.com</code> пустить через европейский прокси, пока лень проверять.</p></td><td>2024-08-04T12:39:44.956Z</td></tr><tr><td>Xunlei</td><td><p>Перепроверил ещё раз, забыл самое важное написать:<br>
+Необходимо <code>*.youtube.com</code> пустить через прокси европейский/американский, даже работает на бесплатном WARP.  <code>*.googlevideo.com</code> идёт через byedpi. Если <code>*.youtube.com</code> идёт напрямую, то видео не грузит. Можно в SwitchyOmega это настроить.</p></td><td>2024-08-04T12:56:35.920Z</td></tr><tr><td>0ka(0ka)</td><td><p>можно же найти большинство кеш серверов через shodan например <a href="https://www.shodan.io/search?query=ssl%3A%22googlevideo.com%22+country%3A%22RU%22">https://www.shodan.io/search?query=ssl%3A"googlevideo.com"+country%3A"RU"</a>, у кого-то есть подписка чтобы получить весь список?</p></td><td>2024-08-13T13:55:42.672Z</td></tr><tr><td>Xunlei</td><td><p>Не знаю. У меня всего 5 сетей IPv4 и 2 IPv6 в фильтре, городская, московская и часть AS15169 которая трассируется в москву.</p></td><td>2024-08-13T14:03:46.489Z</td></tr><tr><td>Mehavoid</td><td><p><a class="attachment" href="плагин-tdns-для-фильтрации-недоступных-ggc-8673/tExyCbHTmUKSt0fPC7CyXhHfh57.gz">f0bf770e-b1f7-41a6-9db3-8a2cd81461bd.json.gz</a> (1.8 MB)</p></td><td>2024-08-16T19:20:26.885Z</td></tr>
+    </table>
+      </body>
+    </html>

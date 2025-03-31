@@ -1,0 +1,359 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>потери-3-на-входящий-трафик-tcpudp-в-рф-с-некоторых-хостеров-для-некоторых-портов</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>vladserg</td><td><p>В результате мониторинга и изучения проблем с рабочими VPN за последний 1.5 месяца стала примерно ясна суть еще одной проблемы.<br>
+Судя по всему вносятся потери во входящий трафик, весьма приблизительно по такой схеме: if (hash(src_ip, src_port, dst_ip, dst_port) % koef == 0)  → drop packets with 3% probability.<br>
+При этом без разницы, что за трафик там идет - хоть даже Iperf3. То видно, что пока не меняются src_ip, dst_ip, dst_port, набор проблемных портов src_port не меняется в выборке из 100 портов (сейчас в такой выборке - около 5-6 проблемных портов).<br>
+Вероятность того что порт плохой (koef) - иногда больше, иногда меньше становится.<br>
+Отсюда следует, что при установке соединения - когда src_port выбирается рандомный, то с некоторой вероятностью мы получаем потерю пакетов и тормоза.<br>
+Наблюдается такое на TCP и на UDP, в связках (hetzner, leaseweb, other) ↔ (ростелеком, транстелеком).<br>
+Схема выглядит достаточно странно.<br>
+Находятся эти проблемные порты через Iperf, 3 секунды гоняем на порту, смотрим потери UDP или ретрансмиты TCP.</p></td><td>2023-06-11T16:59:52.091Z</td></tr><tr><td>vladserg</td><td><p>Вот к примеру график потерь пакетов из Гонконга на наборе из 1000 src портов от 1300 до 65000 с шагом 65:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="потери-3-на-входящий-трафик-tcpudp-в-рф-с-некоторых-хостеров-для-некоторых-портов/aa9edbb608e3c448af6aa677043b3d4a29156cc4.png" data-download-href="https://ntc.party/uploads/default/aa9edbb608e3c448af6aa677043b3d4a29156cc4" title="hk"><img src="потери-3-на-входящий-трафик-tcpudp-в-рф-с-некоторых-хостеров-для-некоторых-портов/aa9edbb608e3c448af6aa677043b3d4a29156cc4.png" alt="hk" data-base62-sha1="olnwnkLyAihKU06dObXe20aK1p2" width="690" height="198" data-dominant-color="BDBDBD"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">hk</span><span class="informations">1741×502 5.08 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2023-06-11T17:22:33.861Z</td></tr><tr><td>Xunlei</td><td><p>А по вертикальной оси что отложено? Процент потерь?</p></td><td>2023-06-11T20:27:23.099Z</td></tr><tr><td>vladserg</td><td><p>Да, по вертикали процент потерь.</p></td><td>2023-06-12T04:35:30.065Z</td></tr><tr><td>Xunlei</td><td><p>Интересно, значит пора начать повсеместно использовать UDPspeeder и udp2raw.<br>
+Если кто-то объединит функции этих программ с, например, TunSafe с автоматическим слежением качества связи дайте мне знать — мобильные процессоры не особо справляются с такой нагрузкой.</p></td><td>2023-06-12T11:38:00.651Z</td></tr><tr><td>ValdikSS</td><td><p>У меня есть такая проблема, но только в связке с одним провайдером на моей стороне (РФ) и одним зарубежным провайдером: не доходит значимая часть TCP SYN’ов, в обе стороны (ни я не могу установить соединение, ни они ко мне), на определённых портах.<br>
+Это обычный HTTP-вебсайт, не VPN.</p>
+<p>Я пока не уверен, что это блокировки. Больше похоже либо на роутер с битой памятью где-то ближе к РФ (думал, что у моего провайдера, вы говорите, что разные каналы подвержены проблеме), либо как-то забавно настроенные фильтры BCP38.</p>
+<p>Если я отправляю себе TCP SYN’ы от <em>любого</em> IP-адреса с определённой площадки (которая позволяет подменять IP-адрес источника), вижу 100% потерей при определённых портах.<br>
+Например, ни один TCP SYN-пакет из 10 от 8.8.8.8:65248 до меня:2233 не дошел, а от 8.8.8.8:55945 — никаких проблем, все дошли.</p></td><td>2023-06-12T17:58:20.383Z</td></tr><tr><td>vladserg</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="потери-3-на-входящий-трафик-tcpudp-в-рф-с-некоторых-хостеров-для-некоторых-портов/571c2e0e25268a8c01832bcb11a5b978269f7a40.png" data-download-href="https://ntc.party/uploads/default/571c2e0e25268a8c01832bcb11a5b978269f7a40" title="htz"><img src="потери-3-на-входящий-трафик-tcpudp-в-рф-с-некоторых-хостеров-для-некоторых-портов/571c2e0e25268a8c01832bcb11a5b978269f7a40.png" alt="htz" data-base62-sha1="cqBUJCpkEFSXFnKegkVnKXnb0Hu" width="690" height="249" data-dominant-color="BCBCBC"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">htz</span><span class="informations">1677×607 8.67 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Вот еще аналогичный график потерь снятый с hetzner в сторону ростелеком. Не очень похоже на нормальный random / hash, либо используется плохая функция хэша.<br>
+Сегодня, после 3 ночи MSK, раскладка проблемных портов сменилась, хотя более суток была неизменной, с начала наблюдения.<br>
+Ранее также была зафиксирована зависимость потерь от размеров пакетов iperf (внутри vpn):<br>
+20 bytes - 0.37%<br>
+50 bytes - 0.5%<br>
+200 bytes - 0.76%<br>
+1350 bytes - 2.8%<br>
+А вообще эта байда длится уже не менее 1.5 месяцев.</p></td><td>2023-06-12T18:44:46.625Z</td></tr><tr><td>Xunlei</td><td><p>А с помощью долбёжки с TTL можно ли выяснить проблемный маршрутизатор?</p></td><td>2023-06-12T19:47:30.001Z</td></tr><tr><td>vladserg</td><td><p>Наверное можно, но mtr под линукс не поддерживает --localport, а --port работает только в tcp режиме, судя по мануалу.</p></td><td>2023-06-12T20:35:12.950Z</td></tr><tr><td>ValdikSS</td><td><p>Рабочий исходящий порт:</p>
+<pre><code class="lang-auto">% sudo tcptraceroute 94.100.24.67 80 -P 10016 -q 6
+Selected device enp2s0, address 192.168.69.10, port 10016 for outgoing packets
+Tracing the path to 94.100.24.67 on TCP port 80 (http), 30 hops max
+ 1  192.168.69.1  1.975 ms  0.749 ms  1.166 ms  2.423 ms  2.253 ms *
+ 2  95-161-156-121.obit.ru (95.161.156.121)  1.421 ms  2.675 ms  1.134 ms  4.958 ms  1.556 ms  1.889 ms
+ 3  172.29.194.72  1.304 ms  2.454 ms  18.128 ms  9.192 ms  16.138 ms  14.347 ms
+ 4  172.29.192.121  16.369 ms  12.064 ms  12.735 ms  9.513 ms  6.279 ms  3.141 ms
+ 5  172.29.194.77  1.159 ms  0.963 ms  5.978 ms  1.091 ms  0.903 ms  0.936 ms
+ 6  172.29.194.94  1.131 ms  2.890 ms  1.372 ms  1.941 ms  1.015 ms  1.064 ms
+ 7  172.29.255.197  2.567 ms  1.537 ms  1.179 ms  1.031 ms  1.103 ms  1.136 ms
+ 8  172.29.194.113  2.176 ms  1.925 ms  1.586 ms  1.224 ms  1.151 ms  1.352 ms
+ 9  172.29.194.37  5.130 ms  1.498 ms  0.911 ms  1.154 ms  1.973 ms  1.570 ms
+10  vi-xx-0150.brc2.obit.ru (85.114.1.13)  1.974 ms  2.378 ms  3.236 ms  1.887 ms  1.976 ms  7.417 ms
+11  * 109.239.136.155 15.394 ms * * * *
+12  100ge0-42.core2.ams1.he.net (184.105.65.125)  33.066 ms * * 112.909 ms * *
+13  100ge0-29.core1.ams7.he.net (184.105.213.197)  60.557 ms  58.424 ms  64.578 ms  67.975 ms  83.675 ms  35.377 ms
+14  hivelocity-ventures-corp.e0-1.switch1.ams7.he.net (184.105.27.106)  34.104 ms  48.390 ms  57.888 ms  64.501 ms  84.650 ms  105.816 ms
+15  * * * * * *
+16  * * * * * *
+17  * * * * * *
+18  94-100-24-67.static.hvvc.us (94.100.24.67) [open]  34.051 ms  35.087 ms  34.208 ms  34.867 ms  35.691 ms  34.678 ms
+</code></pre>
+<p>Нерабочий исходящий порт:</p>
+<pre><code class="lang-auto">% sudo tcptraceroute 94.100.24.67 80 -P 10009 -q 6
+Selected device enp2s0, address 192.168.69.10, port 10009 for outgoing packets
+Tracing the path to 94.100.24.67 on TCP port 80 (http), 30 hops max
+ 1  192.168.69.1  15.789 ms  2.220 ms  0.463 ms  0.513 ms  0.291 ms  0.852 ms
+ 2  95-161-156-121.obit.ru (95.161.156.121)  1.104 ms  1.795 ms  0.810 ms  2.062 ms  0.843 ms  0.860 ms
+ 3  172.29.194.72  1.588 ms  0.786 ms  0.857 ms  0.939 ms  0.791 ms  1.152 ms
+ 4  172.29.192.121  1.264 ms  4.696 ms  4.347 ms  8.515 ms  9.309 ms  5.530 ms
+ 5  172.29.194.77  1.583 ms  6.602 ms  0.909 ms  1.458 ms  2.957 ms  7.076 ms
+ 6  172.29.194.94  0.853 ms  1.583 ms  1.364 ms  2.193 ms  0.903 ms  0.938 ms
+ 7  172.29.255.197  2.833 ms  0.885 ms  1.057 ms  2.617 ms  1.297 ms  0.862 ms
+ 8  172.29.194.113  1.736 ms  0.908 ms  4.144 ms  5.369 ms  4.128 ms  1.041 ms
+ 9  172.29.194.37  1.459 ms  1.075 ms  2.203 ms  1.252 ms  1.298 ms  2.697 ms
+10  vi-xx-0150.brc2.obit.ru (85.114.1.13)  1.359 ms  4.076 ms  3.059 ms  3.332 ms  1.875 ms  1.474 ms
+11  * * * * * 109.239.136.155 70.226 ms
+12  100ge0-42.core2.ams1.he.net (184.105.65.125)  39.163 ms * * 33.007 ms * 35.631 ms
+13  100ge0-29.core1.ams7.he.net (184.105.213.197)  31.363 ms  33.058 ms  31.488 ms  32.445 ms  31.278 ms  31.369 ms
+14  hivelocity-ventures-corp.e0-1.switch1.ams7.he.net (184.105.27.106)  35.329 ms  33.458 ms  33.483 ms  34.554 ms  39.352 ms  42.495 ms
+15  * * * * * *
+16  * * * * * *
+17  * * * * * *
+18  * * * * * *
+19  * * * * * *
+20  * * * * * *
+21  * * * * * *
+22  * * * * * *
+23  * * * * * *
+24  * * * * * *
+25  * * * * * *
+26  * * * * * *
+27  * * * * * *
+</code></pre></td><td>2023-06-12T22:22:06.186Z</td></tr><tr><td>ValdikSS</td><td><p>В трёх случах из трёх проблема появляется при транзите трафика через Мегафон Поволжье/Волга.<br>
+Последние хопы с трёх каналов: 83.169.204.90 и 85.26.205.119.</p></td><td>2023-06-12T22:46:09.577Z</td></tr><tr><td>vladserg</td><td><p>Не удается с помощью tcptraceroute что то толковое определить. Тут также то доходит, то не доходит, в зависимости от порта, но прямой связи с теми портами где потери по iperf - нет.</p>
+<p>Но в ходе дальнейшего изучения также было выявлено что один хост, который сначала не давал потерь - вдруг стал давать небольшие потери на портах (0.2%), после нескольких тестов. Возможно спровоцировали это сканом.<br>
+А также в процессе скана iperf-ом, другой хост перешел из состояния малых потерь (0.2%) на некоторых портах в состояние больших потерь (3%), прямо посередине процесса скана.</p>
+<p>Учитывая то, что iperf гонит случайный трафик, возможно мы идем по китайскому сценарию, когда в нераспознаваемый трафик вносятся потери с некоторой вероятностью.</p></td><td>2023-06-13T11:09:48.937Z</td></tr><tr><td>vladserg</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="потери-3-на-входящий-трафик-tcpudp-в-рф-с-некоторых-хостеров-для-некоторых-портов/fe18e4fb871b58219c586fdf89bfb87b3cdc8d13.png" data-download-href="https://ntc.party/uploads/default/fe18e4fb871b58219c586fdf89bfb87b3cdc8d13" title="small_to_high"><img src="потери-3-на-входящий-трафик-tcpudp-в-рф-с-некоторых-хостеров-для-некоторых-портов/fe18e4fb871b58219c586fdf89bfb87b3cdc8d13.png" alt="small_to_high" data-base62-sha1="AfQC2Oq0Wg2mCKDMzLVO1V0yQ0P" width="690" height="249" data-dominant-color="B9B9B9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">small_to_high</span><span class="informations">1674×605 7.14 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>График начался с малых потерь, а потом потери стали большими. Причем есть фаза когда есть и малые и большие одновременно. Конфиги на железо может распространяются так.</p></td><td>2023-06-13T11:25:55.576Z</td></tr><tr><td>ValdikSS</td><td><p>Серверы подконтрольны вам? Сделайте с них traceroute, вдруг там тоже Мегафон.</p></td><td>2023-06-13T12:42:04.484Z</td></tr><tr><td>vladserg</td><td><p>Да, подконтрольные. Но мегафона там никогда не было в трейсах, там либо ростелеком (в основном), либо трансттелеком (реже). По поводу наличия потерь на транстелекоме возможно я ошибся, проверил, там в трейсах почти везде ростелеком сейчас.</p></td><td>2023-06-13T14:25:30.254Z</td></tr><tr><td>m0xfff</td><td><p>Возможно всё банально, и так проявляется криво работающий trunk.</p></td><td>2023-06-13T17:23:36.894Z</td></tr><tr><td>vladserg</td><td><p>Только вот проблема эта наблюдается с трафиком из разных частей света - гонконг, сша, европа, япония. Врядли везде транк криво работает.</p></td><td>2023-06-13T17:56:51.841Z</td></tr><tr><td>h7n14(H7n14je)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="потери-3-на-входящий-трафик-tcpudp-в-рф-с-некоторых-хостеров-для-некоторых-портов/76b543eaac3ec5b655cdd61fe4f006757d1de9cb.png" data-download-href="https://ntc.party/uploads/default/76b543eaac3ec5b655cdd61fe4f006757d1de9cb" title="out"><img src="потери-3-на-входящий-трафик-tcpudp-в-рф-с-некоторых-хостеров-для-некоторых-портов/76b543eaac3ec5b655cdd61fe4f006757d1de9cb.png" alt="out" data-base62-sha1="gW8HrcQB707IbMC1Xj05Qump4mf" width="690" height="97" data-dominant-color="EBEFF4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">out</span><span class="informations">1649×234 12 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>У меня такое вышло <img src="https://ntc.party/images/emoji/twitter/worried.png?v=12" title=":worried:" class="emoji" alt=":worried:" loading="lazy" width="20" height="20">, также проверял с 1300 до 65000 порта с шагом 65 по 3 секунды на UDP.<br>
+Использовал такой скрипт на питоне из под винды</p>
+<pre><code class="lang-auto">import paramiko
+import subprocess
+import json
+
+# Задайте здесь значения переменных
+hostname = 'address'  # Имя или IP-адрес сервера
+port = 22  # Порт для SSH
+username = 'username'  # Имя пользователя
+private_key_path = 'path-to-file'  # Путь к файлу с приватным ключом SSH
+iperf3_duration = 3  # Длительность теста iperf3 в секундах
+output_file = "data.txt"  # Файл для записи результатов
+results_file = "results.txt"  # Файл для записи отфильтрованных результатов
+
+# Создание SSH-соединения
+private_key = paramiko.RSAKey(filename=private_key_path) 
+client = paramiko.SSHClient()
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+client.connect(hostname, port=port, username=username, pkey=private_key)
+
+for iperf3_port in range(1300, 65001, 65):  # Цикл по портам
+    # Установка правил ufw и запуск iperf3 на сервере
+    commands = [
+        f'sudo ufw allow {iperf3_port}',
+        f'iperf3 -s -p {iperf3_port} -D'
+    ]
+    for command in commands:
+        stdin, stdout, stderr = client.exec_command(command)
+        print(stdout.read().decode())
+        print(stderr.read().decode())
+
+    # Запуск iperf3 локально.  iperf3 должен быть в PATH
+    subprocess.run(f'iperf3 -c {hostname} -p {iperf3_port} -u -t {iperf3_duration} -J &gt; {output_file}', shell=True)
+
+    # Чтение результатов из файла и запись нужных значений в другой файл
+    with open(output_file, "r") as file:
+        data = json.load(file)
+        results = {
+            "port": iperf3_port,
+            "lost_percent": data["end"]["sum"]["lost_percent"]
+        }
+        with open(results_file, "a") as results_file_obj:  
+            results_file_obj.write(json.dumps(results) + "\n")  # Запись результатов в новую строку файла
+
+    # Остановка iperf3 на сервере и удаление правил ufw
+    commands = [
+        'pkill iperf3',
+        f'sudo ufw delete allow {iperf3_port}',
+    ]
+    for command in commands:
+        stdin, stdout, stderr = client.exec_command(command)
+        print(stdout.read().decode())
+        print(stderr.read().decode())
+
+# Закрытие SSH-соединения
+client.close()
+
+</code></pre>
+<p>Может я что-то не так проверяю <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"><br>
+А так живу за двумя натами, на дальнем востоке, проверял на серваке с нидерландов</p></td><td>2023-06-17T19:29:54.875Z</td></tr><tr><td>vladserg</td><td><p>За натом наверное будет проблематично задать source port, потому что NAT назначит свой.<br>
+Если же менять порт сервера, как в вашем случае, то source port все равно будет рандомным, и воспроизводимотси результатов не будет.</p>
+<p>А так скрипт которым я проверял под линуксом, выглядит так: \</p>
+<pre><code class="lang-auto">#!/usr/bin/bash
+
+echo . &gt; outfile.txt
+
+for i in {20..1000} 
+do 
+  SPORT=$((i*65))
+  echo $SPORT
+  iperf3 -c X.X.X.X -u -b 10m -t 2 --bind src.white.ip.addr --cport $SPORT &gt;&gt; outfile.txt
+done
+</code></pre>
+<p>А на стороне сервера -  <code>iperf3 -s</code><br>
+Далее вывод в outfile.txt анализировал grep-ом на предмет потерь.</p>
+<p>Под винду там iperf3 потребует больше опций, иначе он работает просто неадекватно.<br>
+Для UDP корректно сработает такой вариант опций клиента iperf3: <code>-u -b 10m -l 1350 -w 2m -t 15</code> (это при условии что сервер - на линуксе или freebsd).</p>
+<p>Обязательно чтобы было<code> -l 1350 -w 2m</code> , иначе он просто меряет какую-то ерунду.</p>
+<p>Для tcp iperf3 под винду обязательно чтобы было <code>-w 2m</code>, иначе результаты тоже будут неакдекватные.</p>
+<p>P.S. я тоже мерял на Дальнем Востоке</p></td><td>2023-06-18T06:59:24.630Z</td></tr><tr><td>0ka(0ka)</td><td><p>виндовый iperf где брали? на <a href="http://iperf.fr">iperf.fr</a> старая версия, вот тут <a href="https://files.budman.pw/">https://files.budman.pw/</a> самый последний файл ver3.13, вроде адекватно работает</p></td><td>2023-06-18T12:28:23.799Z</td></tr><tr><td>h7n14(H7n14je)</td><td><p>Да, брал кажется там <a href="https://files.budman.pw/" rel="noopener nofollow ugc">https://files.budman.pw/</a> , версия iperf-3.1.3-win64</p></td><td>2023-06-18T12:34:37.845Z</td></tr><tr><td>0ka(0ka)</td><td><p>3.1.3 как раз на <a href="http://iperf.fr">iperf.fr</a> и очень старая, 2016г. Тоже с ней были проблемы</p></td><td>2023-06-18T12:36:20.924Z</td></tr><tr><td>h7n14(H7n14je)</td><td><p>Оо, будем знать. Поменяю iperf и добавлю еще -b 10m -l 1350. А вместе с -w 2m не хочет работать.<br>
+Но, как и <a href="https://ntc.party/u/vladserg">vladserg</a>  подметил из-за  провайдерского NAT воспроизводимости результатов не будет, и мои изыскания скорее всего не имеют особого смысла <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20">. Белый айпишник у меня в городе стоит 500р/мес может с ним у меня что-то дельное выйдет <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"> . Если руки дотянутся до этого</p></td><td>2023-06-18T12:47:45.240Z</td></tr><tr><td>0ka(0ka)</td><td><p>у меня иногда iperf выдает broken pipe, но в файле этого не видно, добавьте &amp;&gt; out.txt<br>
+вообще у меня потери иногда то есть, то нет, не знаю в чем проблема, точно так измерить мне не выйдет</p></td><td>2023-06-18T13:47:37.723Z</td></tr><tr><td>h7n14(H7n14je)</td><td><p>Теперь все по нулям. Только на одном порту 60905 был 0.0723066%.<br>
+В сам скрипт пришлось еще добавить попытки если выводит ошибку, типа “error”: “unable to read from stream socket: Resource temporarily unavailable”. Скорее всего на удаленном сервере iperf просто не успевает запуститься. Больше одной попытки не было.<br>
+Но в силу NAT, все это не имеет большого смысла. <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20"></p></td><td>2023-06-18T14:53:38.848Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="vladserg" data-post="20" data-topic="4680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/v/278dde/48.png" class="avatar"> vladserg:</div>
+<blockquote>
+<p>За натом наверное будет проблематично задать source port, потому что NAT назначит свой.<br>
+Если же менять порт сервера, как в вашем случае, то source port все равно будет рандомным</p>
+</blockquote>
+</aside>
+<p>Если NAT сохраняет порт (port-preserving NAT), то рандомным он не будет. Реализация NAT на Linux со стандартными настройками сохраняет порт.</p>
+<p>Мой провайдер не может связаться с Мегафоном, а при личном обращении меня попросили обращаться к провайдеру — NOC с частными лицами не работает.</p></td><td>2023-06-18T23:15:56.687Z</td></tr><tr><td>vladserg</td><td><p>По поводу свежего Iperf3 3.13 - на Win11 он действительно адекватно работает без доп опций, но вот на Win7  все равно глючит без добавочных опций -w 2m -l 1350, а с ними - нормально.</p></td><td>2023-06-19T14:35:11.199Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="0ka" data-post="21" data-topic="4680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>виндовый iperf где брали?</p>
+</blockquote>
+</aside>
+<p>Скомпилировал 2.1.9. Последняя версия во <a href="https://archlinux.org/packages/extra/x86_64/iperf/" rel="noopener nofollow ugc">второй линейке</a>.<br>
+<a href="https://iperf2.sourceforge.io/IperfCompare.html" rel="noopener nofollow ugc">Сравнение</a>.<br>
+<a class="attachment" href="потери-3-на-входящий-трафик-tcpudp-в-рф-с-некоторых-хостеров-для-некоторых-портов/nzEskXkk3kIthPIzjBNTZnvBCkx.exe">iperf-2.1.9-win32.exe</a> (439,5 КБ)</p></td><td>2023-06-19T16:11:44.820Z</td></tr><tr><td>vladserg</td><td><p>Пока что эта байда продолжает наблюдаться, хоть количество проблемных направлений снизилась, и вероятность того, что порт проблемный снизились где-то до 2-4%.<br>
+В целом похоже, что это потери вносятся на магистралях, а не у конечного провайдера.<br>
+Также вчера (24.06.2023) наблюдались  блокировки openvpn по протоколу, по одиночным направлениям, в течении суток. потом их убрали.<br>
+В общем, судя по всему РКН продолжает тренироваться ломать интернет.</p>
+<p>Провайдеры отвечают что мы ничего сделать с этим не можем.</p></td><td>2023-06-25T09:01:44.715Z</td></tr><tr><td>ValdikSS</td><td><p>После двухнедельных переговоров с двумя провайдерами и Мегафоном, мою проблему устранили сегодня ночью, спустя 6 недель с её появления.</p>
+<p><a class="mention" href="/u/vladserg">@vladserg</a>, у вас без изменений?</p></td><td>2023-06-30T17:50:24.367Z</td></tr><tr><td>vladserg</td><td><p>Проверил - пока проблема сохраняется. Пока не было времени репортить ее провайдеру, потому как да - обычно это занимает кучу времени и переписки. Тем более что проблема наблюдается на двух разных провайдерах, использующих магистрали ростелекома. Пока только наблюдаю, может попозже попробую пообщаться с ними на эту тему, если будет время.</p>
+<p>На вопрос - почему блокировки openvpn затрагивают бизнес пользователей, которые платят за интернет в десятки раз больше физ лиц, и как вообще предлагается работать бизнес пользователям в  условиях, когда связь могут отключить в любой момент - ответа от них нет.</p></td><td>2023-07-01T06:41:53.466Z</td></tr><tr><td>vladserg</td><td><p>Точнее время пока тратим на технические решения для обхода возможных блокировок. Потому что это дает больше гарантии результата, чем разговоры с провайдерами. Спасибо <a href="https://ntc.party/u/Xunlei">Xunlei</a> за наводку на UDPspeeder , хороший тул, который может убить двух зайцев - и потери убирать и обфускацию заодно добавить (я предполагаю, что он данные в пакетах перемешивает, плюс добавлят добавочные пакеты).  Единственное, что пинг немного увеличивает.<br>
+А вот опыт с помещением openvpn в cloak или wstunnel - плохой. Пока на канале потерь нет, то нормально. Но если будут потери на интернет канале, даже минимальные (0.1%), то при работе нескольких TCP потоков внутри одного тоннеля будет все очень плохо, поскольку внешний канал это TCP, он уменьшает окно передачи, и начинаются огромные пинги внутри тоннеля из-за buffer bloat (больше 4 секунд), т.е. недостатки схемы работы TCP поверх TCP. Когда внутренние потоки начинают влиять друг на друга, мешать друг другу, в отличие от ситуации в TCP поверх UDP, когда внутренние потоки друг на друга не влияют.<br>
+То есть когда TCP поверх TCP - у них один общий лимит скорости, связанный с потерями на канале, который вводит внешний TCP, уменьшая окно передачи, еще и очень плохо работающий в итоге. А когда TCP поверх UDP - то у каждого TCP свой независимый congestion control, как и должно быть.</p></td><td>2023-07-01T06:51:22.474Z</td></tr><tr><td>Xunlei</td><td><p>Попробуйте ещё udp2raw --raw-mode faketcp, машрутизаторы в основном приоритизируют TCP. Под виндовс нужен драйвер NPCAP, в линуксе работает из коробки с правами <code>AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN</code>. Джиттер уменьшается, по сравнению с UDP. Чтобы логи не заполнялись предудупреждениями необходио добавить параметр --mtu-warn 1500. Для уменьшения размера ежесекундного пакета heartbeat можно использовать параметр --hb-len. Правила брандмауэра при этом не работают, если включены ICMP ответы будут в начале паралельно Destination port unreachable идти от драйвера ОС.</p></td><td>2023-07-01T11:00:04.959Z</td></tr><tr><td>Limtech</td><td><p>5 августа и 26 июня наблюдалась на несколько часов в середине дня недоступность всех(или почти всех) нестандартных TCP(syn drop)/UDP портов, включая &lt;1024 и icmp echo request, кроме 22, 80, 443 vps с vpn на 5 пользователей. SSH на нестандартном порту отвалился. Идентичная ситуация как с домру, так и из дц(через Cloud-IX).<br>
+У знакомого со своим однопользовательским vpn на vps под себя в это время всё работало.</p></td><td>2023-08-09T08:22:32.124Z</td></tr><tr><td>ValdikSS</td><td><p>Вчера наблюдал блокировку UDP-пакетов на порт 443 на площадке в России, если первый байт данных пакета чётный.<br>
+Банально при отправке ASCII-цифр от 1 до 9 доходили только нечётные.</p>
+<p>Фильтр был на стороне DDOS-GUARD (подтверждено хостером), применялся примерно сутки.</p></td><td>2023-10-11T14:08:46.482Z</td></tr><tr><td>0ka(0ka)</td><td><p>wg сервер 194.180.174.4:53481<br>
+wg клиент в рф 5.142.228.х:64238(ListenPort) - iperf выдает 5% потерь на вход, на выход без потерь</p>
+<pre><code class="lang-auto">root@pc:~# iperf3 -c 10.66.66.1 -R -u -b 70000000
+Connecting to host 10.66.66.1, port 5201
+Reverse mode, remote host 10.66.66.1 is sending
+[  5] local 10.66.66.15 port 35161 connected to 10.66.66.1 port 5201
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-1.00   sec  7.87 MBytes  66.1 Mbits/sec  0.172 ms  319/6355 (5%)
+[  5]   1.00-2.00   sec  7.87 MBytes  66.0 Mbits/sec  0.160 ms  360/6394 (5.6%)
+[  5]   2.00-3.00   sec  7.91 MBytes  66.4 Mbits/sec  0.149 ms  330/6396 (5.2%)
+[  5]   3.00-4.00   sec  7.96 MBytes  66.7 Mbits/sec  0.149 ms  298/6397 (4.7%)
+[  5]   4.00-5.00   sec  7.93 MBytes  66.5 Mbits/sec  0.197 ms  319/6397 (5%)
+[  5]   5.00-6.00   sec  7.94 MBytes  66.6 Mbits/sec  0.174 ms  312/6396 (4.9%)
+[  5]   6.00-7.00   sec  7.93 MBytes  66.5 Mbits/sec  0.146 ms  321/6396 (5%)
+[  5]   7.00-8.00   sec  7.95 MBytes  66.7 Mbits/sec  0.156 ms  302/6396 (4.7%)
+[  5]   8.00-9.00   sec  7.89 MBytes  66.1 Mbits/sec  0.155 ms  352/6396 (5.5%)
+[  5]   9.00-10.00  sec  7.96 MBytes  66.8 Mbits/sec  0.139 ms  298/6398 (4.7%)
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-10.12  sec  84.4 MBytes  70.0 Mbits/sec  0.000 ms  0/64700 (0%)  sender
+[  5]   0.00-10.00  sec  79.2 MBytes  66.4 Mbits/sec  0.139 ms  3211/63921 (5%)  receiver
+
+iperf Done.
+</code></pre>
+<p>wg клиент в рф 5.142.228.х:64237 - iperf без потерь в обе стороны</p>
+<pre><code class="lang-auto">root@pc:~# iperf3 -c 10.66.66.1 -R -u -b 70000000
+Connecting to host 10.66.66.1, port 5201
+Reverse mode, remote host 10.66.66.1 is sending
+[  5] local 10.66.66.15 port 36944 connected to 10.66.66.1 port 5201
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-1.00   sec  8.34 MBytes  70.0 Mbits/sec  0.198 ms  0/6394 (0%)
+[  5]   1.00-2.00   sec  8.35 MBytes  70.0 Mbits/sec  0.161 ms  0/6397 (0%)
+[  5]   2.00-3.00   sec  8.34 MBytes  70.0 Mbits/sec  0.175 ms  0/6396 (0%)
+[  5]   3.00-4.00   sec  8.34 MBytes  70.0 Mbits/sec  0.164 ms  0/6395 (0%)
+[  5]   4.00-5.00   sec  8.35 MBytes  70.0 Mbits/sec  0.162 ms  0/6398 (0%)
+[  5]   5.00-6.00   sec  8.34 MBytes  70.0 Mbits/sec  0.176 ms  0/6394 (0%)
+[  5]   6.00-7.00   sec  8.35 MBytes  70.0 Mbits/sec  0.195 ms  0/6398 (0%)
+[  5]   7.00-8.00   sec  8.34 MBytes  70.0 Mbits/sec  0.176 ms  0/6395 (0%)
+[  5]   8.00-9.00   sec  8.34 MBytes  70.0 Mbits/sec  0.155 ms  0/6394 (0%)
+[  5]   9.00-10.00  sec  8.35 MBytes  70.0 Mbits/sec  0.173 ms  0/6399 (0%)
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-10.11  sec  84.3 MBytes  70.0 Mbits/sec  0.000 ms  0/64648 (0%)  sender
+[  5]   0.00-10.00  sec  83.4 MBytes  70.0 Mbits/sec  0.173 ms  0/63960 (0%)  receiver
+
+iperf Done.
+</code></pre>
+<p>проверил 3 раза<br>
+на клиентах не из РФ потерь нет на обеих портах<br>
+трасса от РФ клиента с потерями</p>
+<pre><code class="lang-auto">                       My traceroute  [v0.95]
+pc (192.168.1.5) -&gt; 194.180.174.4 (194.180.12023-11-06T16:26:34+0300
+Keys:  Help   Display mode   Restart statistics   Order of fields   q
+uit                         Packets               Pings
+ Host                     Loss%   Snt   Last   Avg  Best  Wrst StDev
+ 1. 192.168.1.1            0.0%    21    0.4   0.4   0.4   0.6   0.0
+ 2. 212.48.195.203         0.0%    21    3.0   3.4   2.2  11.7   1.9
+ 3. 212.48.194.218         0.0%    21    2.7   3.2   1.6  10.4   1.7
+ 4. 185.140.148.29         0.0%    20   49.7  49.5  48.6  49.9   0.3
+ 5. 194.68.123.187        20.0%    20   51.4  77.6  39.8 272.2  64.3
+ 6. 80.81.192.172         89.5%    20   72.7  87.4  72.7 102.1  20.8
+ 7. 184.105.65.54         63.2%    20   99.9  99.2  98.8  99.9   0.4
+ 8. 216.66.82.42           0.0%    20  104.8 105.4 103.7 117.3   2.9
+ 9. 185.163.44.5           0.0%    20  100.2 101.1 100.0 104.9   1.5
+10. 194.180.174.4          0.0%    20   99.3  99.7  98.3 101.3   0.7
+
+</code></pre>
+<p>от vps на oracle sweden (без потерь)</p>
+<pre><code class="lang-auto">arm1 (10.5.1.10) -&gt; 194.180.174.4 (194.182023-11-06T13:27:48+0000
+Keys:  Help   Display mode   Restart statistics   Order of fields
+  quit                   Packets               Pings
+ Host                  Loss%   Snt   Last   Avg  Best  Wrst StDev
+ 1. 140.91.246.4        0.0%     6    0.1   0.2   0.1   0.4   0.1
+ 2. 128.241.219.242     0.0%     6    0.8   0.8   0.7   0.9   0.1
+ 3. 128.241.219.241     0.0%     6    1.3   1.2   1.1   1.3   0.1
+ 4. 129.250.3.68        0.0%     6   39.3  28.4  24.8  39.3   5.9
+ 5. 129.250.7.87        0.0%     6   24.9  25.6  24.8  28.5   1.5
+ 6. 130.117.15.129      0.0%     6   24.3  24.1  23.9  24.3   0.2
+ 7. 130.117.50.5        0.0%     6   22.1  22.1  22.0  22.2   0.1
+ 8. 130.117.0.142       0.0%     6   27.8  27.9  27.5  28.3   0.2
+ 9. 154.54.36.254       0.0%     6   56.5  42.6  33.4  65.4  14.5
+10. 154.54.59.181       0.0%     6   39.0  38.8  38.7  39.0   0.1
+11. 154.54.59.186       0.0%     6   39.8  40.0  39.8  40.4   0.2
+12. 154.54.59.178       0.0%     6   42.1  44.3  42.1  54.6   5.0
+13. 154.54.38.246       0.0%     5   54.4  54.3  54.1  54.4   0.1
+14. 154.54.56.61        0.0%     5   61.2  61.2  61.1  61.3   0.1
+15. 149.14.58.90        0.0%     5   59.5  62.6  59.5  74.9   6.9
+16. 194.180.174.4       0.0%     5   61.1  61.1  61.0  61.1   0.0
+
+</code></pre></td><td>2023-11-06T13:14:31.620Z</td></tr><tr><td>0ka(0ka)</td><td><p>на другом клиенте из рф 95.182.113.x с трассой</p>
+<pre><code class="lang-auto">DietPi (192.168.1.200) -&gt; 194.180.174.4       2023-11-06T16:39:58+0300
+Keys:  Help   Display mode   Restart statistics   Order of fields   qui
+t                             Packets               Pings
+ Host                       Loss%   Snt   Last   Avg  Best  Wrst StDev
+ 1. 192.168.1.1              0.0%    14    0.5   0.5   0.4   0.5   0.0
+ 2. 95.182.113.254           0.0%    14    0.9   1.0   0.8   1.8   0.2
+ 3. 95.182.112.1             0.0%    14    0.8   0.8   0.7   0.9   0.0
+ 4. 81.211.99.61             0.0%    14    2.7   2.8   2.6   3.2   0.2
+ 5. 79.104.229.55           16.7%    13   30.6  31.4  30.5  33.7   1.1
+ 6. 194.68.123.187          91.7%    13   51.6  51.6  51.6  51.6   0.0
+ 7. 80.81.192.172           91.7%    13  103.0 103.0 103.0 103.0   0.0
+ 8. 184.105.65.54           58.3%    13   99.9 100.8  98.9 101.8   1.3
+ 9. 216.66.82.42             0.0%    13   98.3  97.3  91.7  98.3   1.8
+10. 185.163.44.5             0.0%    13   96.9 103.3  96.7 126.7  11.0
+11. 194.180.174.4            0.0%    13   97.5  97.3  97.1  97.9   0.2
+
+</code></pre>
+<p>потерь нет на любых портах</p></td><td>2023-11-06T13:41:19.240Z</td></tr><tr><td>0ka(0ka)</td><td><p>на хосте с потерями вижу что большинство портов без потерь, некоторые с потерями 0.2%, некоторые 3%, 6%… tcp протокол тоже с потерями</p>
+<p>upd: нашел другого хоста не из РФ (могу раскрыть в лс), но там маршрут к серверу (он в молдове btw) идёт через рт 188.128.126.213, 178.35.228.79, и потери на некоторых портах тоже есть</p></td><td>2023-11-06T13:58:34.606Z</td></tr><tr><td>anon57137390</td><td><p>Если подвигать порт у сервера, что-то меняется? Если не меняется, попробуйте с сервера: <code>mtr -u -n -P 64238 -s &lt;pmtu&gt; 5.142.228.х</code></p></td><td>2023-11-06T14:27:41.351Z</td></tr><tr><td>0ka(0ka)</td><td><p>сервер в молдове, клиент в рф</p>
+<p>на сервере iperf3 -s -p5000<br>
+на клиенте:<br>
+iperf3 -c server -R -u -b 10000000 -p5000 --cport 5555 - OK<br>
+iperf3 -c server -R -u -b 10000000 -p5000 --cport 5556 - 2% LOSS</p>
+<p>на сервере iperf3 -s -p5001<br>
+на клиенте:<br>
+iperf3 -c server -R -u -b 10000000 -p5001 --cport 5555 - 2% LOSS<br>
+iperf3 -c server -R -u -b 10000000 -p5001 --cport 5556 - 2% LOSS</p>
+<p>на сервере iperf3 -s -p5002<br>
+на клиенте:<br>
+iperf3 -c server -R -u -b 10000000 -p5002 --cport 5555 - OK<br>
+iperf3 -c server -R -u -b 10000000 -p5002 --cport 5556 - OK</p>
+<p>повторяемость 100% (не в % а в есть/нет потерь)<br>
+ps порт клиента отображается на сервере, nat его не меняет, проверял каждый раз</p></td><td>2023-11-06T14:46:46.698Z</td></tr><tr><td>0ka(0ka)</td><td><p>а что мне для этого запускать на рф хосте? какой сервис будет отвечать на udp пинги?</p></td><td>2023-11-06T15:08:25.727Z</td></tr><tr><td>anon57137390</td><td><p>Ответы хоста не нужны. Идея в том чтобы найти хоп, который дропает входящие. Но mtr нужны переменные порты (исходящий или входящий).</p></td><td>2023-11-06T15:45:10.307Z</td></tr><tr><td>0ka(0ka)</td><td><p>потерь уже нет, но я тестил вечером от рф хоста к серверу, и потери были уже на 2, 3 хопах. щас их нет, но там очень непонятно т.к. показывает потери на последнем хопе, а iperf3 показывает 0% loss на тех же портах</p></td><td>2023-11-07T00:04:43.250Z</td></tr><tr><td>anon57137390</td><td><p>Если блокируют входящие от сервера, тесты исходящими к серверу покажут что-то другое. Маршрутизаторы не всегда уведомляют о произошедшем (через ICMP), из-за нагрузки или просто rate-limit. Потери с точки зрения тестов (mtr) не всегда означают потерю актуального трафика. Но если хоп систематически дропает часть трафика, тогда и все последующие по трассе будут тоже показывать потери. Быть может не через логику mtr (инкремент ttl на каждый отправленный пакет), но можно попытаться выявить хоп с потерями даже с учетом хрупкости ICMP уведомлений.</p></td><td>2023-11-07T08:34:21.213Z</td></tr><tr><td>0ka(0ka)</td><td><p>это все еще продолжается. когда делаю traceroute с определенными sport-dport, то маршрут никогда не меняется, но потери на них то пропадают то появляются</p></td><td>2023-11-25T18:49:34.453Z</td></tr><tr><td>vladserg</td><td><p>Проблема пропадала на длительное время, но 29 октября 2024 г. - снова появилась, и до настоящего момента присутсвует.</p></td><td>2024-11-11T19:41:35.696Z</td></tr>
+    </table>
+      </body>
+    </html>

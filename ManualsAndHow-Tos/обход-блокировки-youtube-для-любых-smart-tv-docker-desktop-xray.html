@@ -1,0 +1,127 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>xxphantom(Dmitriy)</td><td><p>Идею навеял пост <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8-youtube-%D0%B4%D0%BB%D1%8F-%D0%BB%D1%8E%D0%B1%D1%8B%D1%85-smart-tv-%D1%81-goodbyedpi-v2ray-maradns/9415">Обход блокировки YouTube для любых Smart TV с GoodbyeDPI + V2ray + MaraDNS</a> который поманил рабочей схемой без покупки нового роутера/приставки, но не захотел нормально работать - DNS сервер капризный (или у меня руки крюки). Естественно лучше сначала прочитать пост и комментарии по ссылке, там есть нюансы, которые я не описывал.</p>
+<p>Плюс я хотел ютуб сразу направлять в свой VLESS VPN, а не в GoodbyeDPI (хотя его тоже можно использовать)</p>
+<p>Архив с файлами, о которых я тут рассказываю <a href="https://cloud.mail.ru/public/VZFt/MuWwLhgwd" rel="noopener nofollow ugc">скачать можно тут</a>.</p>
+<p>Схема такая же, как по ссылке выше, но есть отличия - в качестве DNS сервера выступает Docker контейнер с dnsmasq, а дальше уже вступает в дело Xray.</p>
+<p><strong>В первую очередь требуется установить <a href="https://docs.docker.com/desktop/install/windows-install/" rel="noopener nofollow ugc">Docker Desktop</a></strong></p>
+<p>Далее нужно проверить, какой у вашего ПК ip адрес (его можно посмотреть в настройках сетевого адаптера, либо командой <code>ipconfig</code> ) и вписать его сюда:</p>
+<p><img src="обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/6ecaa0444f5405c3ded24e8a5ee41f15556a465b.png" alt="" data-base62-sha1="fO6E3o7fq7NN7c100LCWBOmqv1h" role="presentation" width="634" height="157"></p>
+<p>Не забудьте поменять ip на свой!</p>
+<p><strong>Далее переходим к настройке конфига Xray:</strong></p>
+<p>Настраивать и что-то менять тут надо только если хотите перенаправлять с помощью Xray трафик в ваш VPN и у вас он уже есть.</p>
+<p><code>local-docker-dns\xray</code></p>
+<p>Тут требуется модифицировать под вас Outbound c данными вашего <a href="https://habr.com/ru/articles/799751/" rel="noopener nofollow ugc">VLESS VPN:</a></p>
+<p>Вот эту часть надо подменить под ваши параметры (тут выдуманные данные):</p>
+<pre><code class="lang-auto">    {
+      "domainStrategy": "AsIs",
+      "flow": null,
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "103.245.67.189",
+            "port": 443,
+            "users": [
+              {
+                "encryption": "none",
+                "flow": "xtls-rprx-vision",
+                "id": "b9c31e8f-d724-4a91-9e57-3f86d2a1b0e5"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "realitySettings": {
+          "fingerprint": "firefox",
+          "publicKey": "m7bKpR2x4y9F1cNwLDsuPQWXvrZLmnRt3hG8J05ETYz",
+          "serverName": "auth.cloudservice.com",
+          "shortId": "a8e73b52",
+          "spiderX": "/"
+        },
+        "security": "reality"
+      },
+      "tag": "proxy"
+    },
+</code></pre>
+<p>Этот блок можно достать из экспорта конфига xray в программе <a href="https://github.com/MatsuriDayo/nekoray/releases/tag/3.26" rel="noopener nofollow ugc">Nekoray</a>, он будет минифицирован, можно отформатировать например <a href="https://jsonformatter.org/" rel="noopener nofollow ugc">тут</a>, там же можно будет проверить итоговый конфиг на валидность. Там выгружается весь конфиг, найдите в нем нужный outbound такого же формата, что я привел выше.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/39939c4a1cf6882772101d57b542cd98092d4230.png" data-download-href="https://ntc.party/uploads/default/39939c4a1cf6882772101d57b542cd98092d4230" title=""><img src="обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/39939c4a1cf6882772101d57b542cd98092d4230_2_619x500.png" alt="" data-base62-sha1="8dlt8acfq9kXNb6AHcmDFzqn1kc" role="presentation" width="619" height="500" srcset="обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/39939c4a1cf6882772101d57b542cd98092d4230_2_619x500.png, обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/39939c4a1cf6882772101d57b542cd98092d4230.png 1.5x, обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/39939c4a1cf6882772101d57b542cd98092d4230.png 2x" data-dominant-color="D8E2E6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename"></span><span class="informations">639×516 160 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Естественно, что перед тем как его оттуда экспортировать, надо его туда импортировать (для этого вам нужно иметь ссылку вида vless://</p>
+<p><img src="обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/96e22fb395f42671ee7eb5166c4f400d10a1e0ec.png" alt="image" data-base62-sha1="lwMdNuC9hEokFKSGbw6AbtgUmOo" width="373" height="348"></p>
+<p>Важно! По умолчанию конфиг не использует outbound “proxy”, который описан выше, и все гонит через вашего провайдера. Это сделано для упрощения - если у вас нет своего VPN или вы не хотите с этим возиться, просто отправляете трафик напрямую, а дальше уже запускаете на ПК сторонний VPN или GoodbyeDPI.</p>
+<p>Но если вы решите использовать его и пропишите в конфиге Xray свой VPN, то надо будет “direct” поменять на “proxy” в роутинге, причем я на скриншоте показал, где прописывать “proxy” если нужно через VPN пускать только ютуб, и где если все остальное тоже хотите через VPN.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/ab53fb6e540c954b17a804e4a20c74b6fd967d0f.png" data-download-href="https://ntc.party/uploads/default/ab53fb6e540c954b17a804e4a20c74b6fd967d0f" title=""><img src="обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/ab53fb6e540c954b17a804e4a20c74b6fd967d0f.png" alt="" data-base62-sha1="orDzRhH9s9V5ncoLPQLU7sgp7Lp" role="presentation" width="344" height="500" data-dominant-color="F3F3F3"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename"></span><span class="informations">558×809 10.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Убедитесь, что конфиг содержит все скобки и нужное кол-во запятых в нужных местах.</p>
+<p>Окей, Xray настроили, при запуске он выводит нечто такое (может чуть отличаться в зависимости от настроек уровня логирования):</p>
+<p><img src="обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/d6fc79d82c7d8bd865cae74639c6c4c7515f5adb.png" alt="" data-base62-sha1="uFR6z8oDNkYQfc3P79bh7yGuaZZ" role="presentation" width="640" height="136"></p>
+<p><strong>Далее запускаем всё это добро.</strong></p>
+<p>Заранее положите папку local-docker-dns в такое место, в котором она не будет вам мешать, если оставить надолго.</p>
+<p>Запустите терминал в директории local-docker-dns. Это можно сделать так - правой кнопкой мыши внутри нужной папки и там выбрать пункт “Открыть терминал”.</p>
+<p>Либо <strong>Win + R</strong>, введите <strong>cmd</strong> а далее команда c путем до папки (поменяйте на ваш путь) “cd C:\Users\User\Documents\local-docker-dns”</p>
+<p>В терминале запускаем наш докер контейнер с локальным DNS сервером:</p>
+<p><code>docker-compose up -d</code></p>
+<p><img src="обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/98f7d84087a569b1820864c81b4d080913089f21.png" alt="" data-base62-sha1="lPdzZ4lJJkcsBVgs9Nc9G3ivM6B" role="presentation" width="637" height="117"></p>
+<p>Далее запускаем xray:</p>
+<p><code>local-docker-dns\xray\xray.exe</code></p>
+<p>Теперь осталось указать свой ip в качестве DNS сервера в настройках сети телевизора.</p>
+<p>Docker можно настроить так, чтобы он загружался вместе с системой:</p>
+<p><img src="обход-блокировки-youtube-для-любых-smart-tv-docker-desktop-xray/2aecf971b04b54e1262a14a317714798be867d21.png" alt="" data-base62-sha1="67JLGe9wU7vn1AD3jyqzxQIL9Tz" role="presentation" width="639" height="361"></p>
+<p>Ярлык на xray.exe можно закинуть в автозагрузку:</p>
+<p>Нажмите Win+R, введите “shell:startup” и нажмите Enter.</p></td><td>2024-08-22T22:12:08.478Z</td></tr><tr><td>Igor</td><td><p>Добрый день, подскажите совместим ли ваш метод и метод описанный в теме <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8-youtube-%D0%B4%D0%BB%D1%8F-%D0%BB%D1%8E%D0%B1%D1%8B%D1%85-smart-tv-%D1%81-goodbyedpi-v2ray-maradns/9415">https://ntc.party/t/обход-блокировки-youtube-для-любых-smart-tv-с-goodbyedpi-v2ray-maradns/9415</a> с уже настроенным обходом блокировки через Антизапрет по теме <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-%D0%B0%D0%BD%D1%82%D0%B8%D0%B7%D0%B0%D0%BF%D1%80%D0%B5%D1%82-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic/7768">https://ntc.party/t/обход-блокировок-в-россии-через-антизапрет-на-прошивке-keenetic/7768</a>? Сделал все по вашей инструкции, настройку Xray пропустил, так как решил через goodbyedpi на компьютере все пропускать. Запускаю Stube на телевизоре, выбираю видео, и начинается очень долгое ожидание (около 2 минут) после чего видео запускается, но бывает, что вылезает ошибка при запуске видео.<br>
+Не знаю важно это или нет через Docker Desktop у меня еще настроен Immich.</p></td><td>2024-08-24T13:51:48.117Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Судя по описанию - вряд ли.</p>
+<p>На Keenetic лучше поднять nfqws</p><aside class="quote quote-modified" data-post="1" data-topic="8809">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B7%D0%B0%D0%BC%D0%B5%D0%B4%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-youtube-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-nfqws-tpws-zapret/8809">Обход замедления YouTube и блокировок на прошивке Keenetic с помощью nfqws / tpws (zapret)</a> <a class="badge-category__wrapper " href="/c/manuals/42"><span data-category-id="42" style="--category-badge-color: #F7941D; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="VPN/Proxy installation and configuration instructions, censorship circumvention software tips and tricks"><span class="badge-category__name">Manuals and How-Tos</span></span></a>
+  </div>
+  <blockquote>
+    Если ваш роутер не позволяет развернуть OPKG на внешний накопитель или на внутреннюю память, то этот способ не для вас. Обязательно нужен OPKG! 
+<a name="p-29656-h-1" class="anchor" href="#p-29656-h-1"></a>Что это?
+Модификация трафика с помощью утилит, разработанных в рамках проекта <a href="https://github.com/bol-van/zapret">zapret</a>, таким образом, что оборудование Роскомнадзора и провайдера не может корректно разобрать ваш трафик и осуществить цензуру. 
+<a name="p-29656-h-2" class="anchor" href="#p-29656-h-2"></a>Для “оригинальных” (родных) роутеров
+Если у вас прошивка версии 3.0 или новее, обязательно установите компонент «Модули ядра подсистемы Netfilter»…
+  </blockquote>
+</aside>
+</td><td>2024-08-24T14:00:13.472Z</td></tr><tr><td>Igor</td><td><p>у меня Keenetic giga 1010, я правильно понимаю, что в этом случае мне не нужен будет настроенный антизапрет, так как он включен в скрипт nfqws?</p></td><td>2024-08-24T14:31:54.920Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Если сможете подобрать такие настройки, которые помогали бы не только с замедлением ютуба, но и с блокировками сайтов.</p>
+<p>Либо связка АнтиЗапрет + nfqws чисто для ютуба</p></td><td>2024-08-24T15:01:37.496Z</td></tr><tr><td>Igor</td><td><p>А есть инструкция как подружить АнтиЗапрет и nfqws?</p></td><td>2024-08-24T15:45:52.839Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Да, вроде, ничего не надо, настроить и то, и другое по инструкцции, да и всё.</p></td><td>2024-08-24T16:34:02.739Z</td></tr><tr><td>Fumo</td><td><p>Вроде настроил, но столкнулся с такой проблемой, что без добавления --fake-gen  любого значения goodbyedpi не работает, а с ним ни приложение, ни сайт на ТВ не загружаются.</p></td><td>2024-10-07T14:44:20.097Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,110 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>вопрос-о-маршрутизации-на-сервере-sing-box</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>npart</td><td><p>Пробы ради решил поставить на сервере sing-box, который умеет поттягивать базы geoip и geosite от разработчика и использовать их для настроек маршрутизации. Настроил блок в виде:</p>
+<pre><code class="lang-auto">{
+  "route": {
+	"rules": {
+	  {
+	    "rule_set": [
+		  "geoip_ru",
+		  "geosite_ru"
+		  ]
+		  "outbound": "block"
+	  }
+   }
+}
+</code></pre>
+<p>Настроив всё и подключившись через Nekobox с проксированием всего и без настроек роутинга, решил проверить, будет ли оно работать, зайдя на <a href="http://2ip.ru" rel="noopener nofollow ugc">2ip.ru</a> и <a href="http://2ip.io" rel="noopener nofollow ugc">2ip.io</a>. Адреса действительно были разные.</p>
+<p>Хотелось бы просто для ликбеза понять, что происходит с запросами к ру-зоне в этом варианте. Если при настроенном роутинге на клиенте, клиент сам определяет какие запросы ему проксировать, а какие нет, то в данном случае все запросы от клиента отправляются на сервер и фильтрация происходит уже там, так ведь? Если да, то разве “outbound”: “block” не должен просто блокировать все запросы? Или клиент после обработки ответа от сервера просто отправляет запрос напрямую?</p></td><td>2024-12-01T11:36:49.409Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="npart" data-post="1" data-topic="13477">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/c5a1d2/48.png" class="avatar"> npart:</div>
+<blockquote>
+<p>разве “outbound”: “block” не должен просто блокировать все запросы?</p>
+</blockquote>
+</aside>
+<p>так и происходит</p>
+<aside class="quote no-group" data-username="npart" data-post="1" data-topic="13477">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/c5a1d2/48.png" class="avatar"> npart:</div>
+<blockquote>
+<p>Или клиент после обработки ответа от сервера просто отправляет запрос напрямую?</p>
+</blockquote>
+</aside>
+<p>нет, на клиенте запрос так же не проходит</p>
+<aside class="quote no-group" data-username="npart" data-post="1" data-topic="13477">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/c5a1d2/48.png" class="avatar"> npart:</div>
+<blockquote>
+<pre><code class="lang-auto">"geoip_ru",
+"geosite_ru"
+</code></pre>
+</blockquote>
+</aside>
+<p>в официальном репозитории таких ruleset нету</p>
+<p>смотрите логи</p></td><td>2024-12-01T13:35:06.563Z</td></tr><tr><td>npart</td><td><aside class="quote no-group" data-username="0ka" data-post="2" data-topic="13477">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>в официальном репозитории таких ruleset нету</p>
+</blockquote>
+</aside>
+<p>База идет отсюда. Решил не писать для экономии места</p>
+<pre><code class="lang-auto">"rule_set": [
+      {
+        "type": "remote",
+        "tag": "geoip_ru",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-ru.srs"
+      },
+</code></pre>
+<aside class="quote no-group" data-username="0ka" data-post="2" data-topic="13477">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>нет, на клиенте запрос так же не проходит</p>
+</blockquote>
+</aside>
+<p>В таком случае в браузере при запросе что должно происходить? Таймаут?</p></td><td>2024-12-01T13:52:53.567Z</td></tr><tr><td>npart</td><td><p>В итоге всё встало на свои места. Как оказалось, несмотря на удаление всех правил маршрутизации в GUI Nekobox, в файле конфигурации по какой-то причине осталось правило на заворачивание .ru доменов в direct, из-за чего и возник вопрос. После пересоздания файла всё стало работать как надо. Спасибо что проконсультировали</p></td><td>2024-12-02T06:34:15.493Z</td></tr>
+    </table>
+      </body>
+    </html>

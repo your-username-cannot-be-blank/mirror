@@ -1,0 +1,127 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>warp-прерывает-соединение-vless-reality-warp</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Azazel-h(Yasuhiro)</td><td><p>Настроил на vps в Румынии, Vless Reality и SS на всякий случай. Дополнительно сделал роутинг на WARP для доменов из ру региона. Работал по всем известной статье на хабре. Проблема в том, что почему-то, именно WARP отрубается в рандомные моменты. А если эндпоинт не отрезолвить, то вообще, даже не заводится. Как только отрубается, спасает смена эндпоинта на какой-нибудь другой в той же сети. Опять таки, проблема именно с заворачиванием в него ру сегмента. Если я просто прокидываю его на Vless, все чудесно, но это уже какой-то моветон.</p>
+<p>Может кто-то подсказать, что служит причиной и возможные пути решения? Я не сетевик, но базовое представление имею. Ну и скорость оставляет желать лучшего, но это дело десятое…</p>
+<p>Выглядит оно примерно так (опять таки серверный конфиг), собственно, все достаточно дефолтно.</p>
+<pre><code class="lang-auto">"outbounds": [
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "block"
+    },
+    {
+      "protocol": "wireguard",
+      "tag": "warp",
+      "settings": {
+        "secretKey": "Секретик",
+         "address": [
+            "172.16.0.2/32",
+            "2606:4700:110:8c26:da1f:130b:28d6:e68e/128"
+          ],
+          "peers": [
+            {
+              "endpoint": "162.159.192.1:2408",
+              "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
+            }
+          ],
+        "workers": 2,
+        "mtu": 1280,
+        "reserved": "",
+        "domainStrategy": "ForceIP"
+        }
+    }
+  ],
+</code></pre>
+<p>Роутинг</p>
+<pre><code class="lang-auto">"routing": {
+    "rules": [
+        {
+                "type": "field",
+                "domain": ["geosite:openai", "geosite:category-gov-ru", "domain:ru"],
+                "outboundTag": "warp"
+        },
+        {
+                "type": "field",
+                "ip": ["geoip:ru"],
+                "outboundTag": "warp"
+
+        }
+     ],
+        "domainStrategy": "IPIfNonMatch"
+  }
+</code></pre></td><td>2024-07-12T14:10:25.237Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p><s>WARP блокируют в РФ, на ТСПУ отдельное обновляемое правило для него. Это не считая блокировки WARP как WireGuard, но с этим может повезти. Удивительно, что вообще стартует. Можете, конечно, заняться сизифовым трудом по поиску рабочего эндоинта и докручивания конфига. Но вообще, какая цель использования WARP для российских ресурсов? Скорости не добавляет, и сдаст вас по первому требованию.</s> Это серверный конфиг, коммент ошибочен</p>
+<p>CF это зло, и добрых решений у них нет.</p></td><td>2024-07-12T15:30:56.949Z</td></tr><tr><td>Azazel-h(Yasuhiro)</td><td><p>Если есть какие-либо альтернативы для таких махинаций не от CF, было бы чудесно… Формально, я просто маскирую IP.<br>
+И да, все это на сервере <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"><br>
+Вообще, взял идею как раз из статьи, цитирую:</p>
+<blockquote>
+<p>Считается, что если у вас есть прокси за границей, то лучше не ходить на него на сайты расположенные в РФ или имеющие отношение к ее компаниям. Логика простая: если цензоры могут анализировать ваш трафик, плюс трафик подконтрольных им ресурсов, то сопоставив факт «подключение от вас на иностранный IP‑адрес, и подключение с этого IP‑адреса на сайт внутри страны, ровно в один момент и с одинаковыми объемами принятых‑переданных данных во времени» почти однозначно скажет, что на этом IP‑адресе есть прокси.</p>
+</blockquote>
+<blockquote>
+<p>Зато мы можем сделать следущее. Есть Cloudflare Warp — бесплатный VPN‑сервис для всех желающих от известной телеком‑компании. Он основан на Wireguard, Wireguard блокируется в россии, но в иностранной юрисдикции, где у вас стоит сервер, проблем быть не должно. XRay может работать как wireguard‑клиент, и может переадресовывать на другие сервера запросы, попадающие под определенные критерии, следовательно, если мы сложим этот паззл, то мы сможем выпускать определенные запросы в Интернет с другого IP‑адреса, принадлежащего Cloudflare. Заодно мы можем заворачивать на WARP запросы к сервисам, которые не пускают к себе пользователей с адресов хостеров, например, ChatGPT.</p>
+</blockquote></td><td>2024-07-12T15:47:31.613Z</td></tr><tr><td>Azazel-h(Yasuhiro)</td><td><p>Все, на что у меня хватает фантазии – это аренда второго vps и роутинг через него, но это сильно повышает финансовые затраты, да и как будто бы перебор. Готовое решение в виде WARP отлично вписывалось… Еще бы блин работало.<br>
+P.S: (Напрямую ходить в ру сегмент, совсем не хочется)</p></td><td>2024-07-12T15:52:38.610Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Писали, что WARP иногда глючит, если использовать его в оригинальном WG виде. Даже когда он был похож на WG, он не был WG, часть байт из заголовка CF использовал для своей внутренней маршрутизации. Без эти байт работоспособность дело случая. Возможна даже намеренная блокировка на эндпоинтах. Заполните содержимое <code>"reserved"</code> полученное при регистрации.</p></td><td>2024-07-12T15:59:37.552Z</td></tr><tr><td>Azazel-h(Yasuhiro)</td><td><p>Про WG вид не знал, но по поводу “reserved” тоже подумал и поискал в доках и примерах.<br>
+При регистрации не через скрипт, “reserved” соответственно не выдается, видимо придется лезть в исходники и смотреть алгоритм генерации…</p>
+<p>Да и нужен он раньше был только для обхода DPI. Но похоже, с тех времен CF что-то точно намутили… Вроде на их гитхабе дальше кто-то жаловалася на похожие траблы.</p>
+<p>В <a href="https://xtls.github.io/en/document/level-2/warp.html#applying-for-a-warp-account" rel="noopener nofollow ugc">оффициальном конфиге</a> Xproject он вообще не используется под WARP, если копать еще глубже, <a href="https://xtls.github.io/en/config/outbounds/wireguard.html#outboundconfigurationobject" rel="noopener nofollow ugc">в описании настройки WG</a> –</p>
+<blockquote>
+<p>Wireguard Reserved Bytes.<br>
+Xray-core v1.8.0 New parameter.<br>
+When connecting to warp via wireguard, due to cloudflare limitations, some IPs in Hong Kong and Los Angeles need to have a <code>reserved</code> value in order to connect successfully.</p>
+</blockquote>
+<p><a href="https://github.com/chika0801/Xray-examples/issues/2" rel="noopener nofollow ugc">GitHub Issue</a></p>
+<blockquote>
+<p>They are only used on vps with Hong Kong, some LA ip’s as I said above.</p>
+</blockquote></td><td>2024-07-12T16:19:46.212Z</td></tr><tr><td>Azazel-h(Yasuhiro)</td><td><p>Если регистрировать чисто через готовые китайские тулзы – живет ровно день <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-07-12T16:20:31.547Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Nekobox отдает эти байты</p></td><td>2024-07-12T16:21:25.497Z</td></tr><tr><td>artenox</td><td><p>warp wireguard отлично работает, только заводится “с пинка”. geo блок не обходит, т.е. ip российский.</p></td><td>2024-07-12T16:32:13.883Z</td></tr><tr><td>0ka(0ka)</td><td><p>добавьте</p>
+<pre><code class="lang-auto">"keepAlive": 14
+</code></pre>
+<p>после endpoint.<br>
+у меня варп с keepalive живет месяцами, но поднимаю через wg-quick, и вы тоже можете свой конфиг переделать на outbound с interface: wg0</p></td><td>2024-07-12T16:34:18.952Z</td></tr><tr><td>Azazel-h(Yasuhiro)</td><td><p>О, спасибо огромное! Добавил.<br>
+Посмотрим, как проживет. А есть теория почему вырубается?<br>
+По поводу wg-quick, идею понял, но разве есть различия со встроенной в XRay реализацией WG?<br>
+Хотя думаю, если с “keepAlive”, сейчас не заживет, точно переделаю на роутинг через интерфейс.</p></td><td>2024-07-12T16:41:25.641Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>del</p></td><td>2024-07-12T21:26:10.489Z</td></tr><tr><td>Vova</td><td><p>У меня тоже была проблема, что WARP нестабильно работает. Нашёл причину в логах.</p>
+<p>Оказывается, почему-то не получается подключиться по IPv6-адресу. Просто убрал его из конфига, и всё заработало. Сколько Xray не перезагружаю, теперь WARP запускается всегда. Посмотрим, как дальше будет.</p>
+<p>Вот что в логах было:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="warp-прерывает-соединение-vless-reality-warp/96c5fdf1562bae8fc850aeb06b366c0025e6f7ef.png" data-download-href="https://ntc.party/uploads/default/96c5fdf1562bae8fc850aeb06b366c0025e6f7ef" title="изображение"><img src="warp-прерывает-соединение-vless-reality-warp/96c5fdf1562bae8fc850aeb06b366c0025e6f7ef.png" alt="изображение" data-base62-sha1="lvNOCdoaKK9PjdIBkwQhLyzxuq3" width="690" height="269" data-dominant-color="111111"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1679×656 52.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Теперь конфиг такой, без IPv6-адреса:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="warp-прерывает-соединение-vless-reality-warp/92181bb84011acc81fb8edb1e9f2c490e67d40df.png" data-download-href="https://ntc.party/uploads/default/92181bb84011acc81fb8edb1e9f2c490e67d40df" title="изображение"><img src="warp-прерывает-соединение-vless-reality-warp/92181bb84011acc81fb8edb1e9f2c490e67d40df_2_402x500.png" alt="изображение" data-base62-sha1="kQpmtd2q2KbSPJkpWk61zL21cSz" width="402" height="500" srcset="warp-прерывает-соединение-vless-reality-warp/92181bb84011acc81fb8edb1e9f2c490e67d40df_2_402x500.png, warp-прерывает-соединение-vless-reality-warp/92181bb84011acc81fb8edb1e9f2c490e67d40df_2_603x750.png 1.5x, warp-прерывает-соединение-vless-reality-warp/92181bb84011acc81fb8edb1e9f2c490e67d40df.png 2x" data-dominant-color="222B3D"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">747×927 49.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-08-17T09:28:25.383Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,60 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>i-need-help-bypassing-censorshipнужна-помощь-в-обходе-цензуры</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0ka(0ka)</td><td><p>I would really like possible options for circumventing censorship<br>
+Мне бы очень пригодились возможные варианты обхода цензуры<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="i-need-help-bypassing-censorshipнужна-помощь-в-обходе-цензуры/882a79f3bb73e6f508f0f61a9773b5850f28d6f4.jpeg" data-download-href="https://ntc.party/uploads/default/882a79f3bb73e6f508f0f61a9773b5850f28d6f4" title="image"><img src="i-need-help-bypassing-censorshipнужна-помощь-в-обходе-цензуры/882a79f3bb73e6f508f0f61a9773b5850f28d6f4_2_690x388.jpeg" alt="image" data-base62-sha1="jqzWlXel53BBlqxf6cIHtmE1AEY" width="690" height="388" srcset="i-need-help-bypassing-censorshipнужна-помощь-в-обходе-цензуры/882a79f3bb73e6f508f0f61a9773b5850f28d6f4_2_690x388.jpeg, i-need-help-bypassing-censorshipнужна-помощь-в-обходе-цензуры/882a79f3bb73e6f508f0f61a9773b5850f28d6f4_2_1035x582.jpeg 1.5x, i-need-help-bypassing-censorshipнужна-помощь-в-обходе-цензуры/882a79f3bb73e6f508f0f61a9773b5850f28d6f4_2_1380x776.jpeg 2x" data-dominant-color="ECEEF0"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1920×1080 206 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+So i want to access youtube from private ip. Both connections to second public ip have packet loss.<br>
+Мне нужно получить доступ к youtube с приватного ip. Оба подключения ко второму публичному айпи имеют потерю пакетов.</p></td><td>2022-05-12T06:34:55.493Z</td></tr><tr><td>ValdikSS</td><td><p>Вопрос в том, как улучшить скорость при потере пакетов? Попробуйте <a href="https://github.com/xtaci/kcptun">kcptun</a>.</p></td><td>2022-05-12T21:39:14.144Z</td></tr><tr><td>0ka(0ka)</td><td><p>Первый вопрос в том, как подключиться к vps с ноутбука через выделенный сервер. Борьба с потерей пакетов это уже второстепенно.</p></td><td>2022-05-13T05:56:38.629Z</td></tr><tr><td>ValdikSS</td><td><p>Органируйте VPN-сервер на нижнем сервере, подключитесь к нему с левого, настройте перенаправление трафика на левый сервер.</p></td><td>2022-05-13T07:11:41.074Z</td></tr><tr><td>tango</td><td><p>If I understand the problem, it is that the “Public IP” (bottom server) can receive incoming connections, but not outgoing connections.</p>
+<p>You maybe able to make something work with OpenSSH <a href="https://man.openbsd.org/ssh#L"><code>-L</code></a> and <a href="https://man.openbsd.org/ssh#R"><code>-R</code></a> forwarding.</p>
+<pre><code class="lang-nohighlight">left-server$ ssh -v -N -R 2222:127.0.0.1:22 bottom-server
+laptop$ ssh -v -N -L 2222:127.0.0.1:2222 bottom-server
+laptop$ ssh -v -N -D 8123 -p 2222 127.0.0.1
+</code></pre>
+<p>Then there will be a SOCKS proxy running on the laptop on port 8123.</p>
+<p>This does not help with packet loss, though. If the directional blocking is only for TCP, I would try setting up two <a href="https://www.wireguard.com/quickstart/">Wireguard tunnels</a> and using normal IP routing on the bottom server.</p></td><td>2022-05-16T18:12:35.106Z</td></tr><tr><td>0ka(0ka)</td><td><blockquote>
+<p>If I understand the problem, it is that the “Public IP” (bottom server) can receive incoming connections, but not outgoing connections.</p>
+</blockquote>
+<p>Partially yes, because not all, but very many ips blocked for outgoing connections (mostly popular vps providers)</p>
+<blockquote>
+<p>You maybe able to make something work with OpenSSH <a href="https://man.openbsd.org/ssh#L"><code>-L</code></a> and <a href="https://man.openbsd.org/ssh#R"><code>-R</code></a> forwarding.<br>
+I would try setting up two <a href="https://www.wireguard.com/quickstart/">Wireguard tunnels</a> and using normal IP routing on the bottom server.</p>
+</blockquote>
+<p>Unfortunately, ssh and wireguard protocols are blocked. Right now I use openvpn server with TLS on the bottom server, connect to it from vps, then do port forwarding from bottom server port 123 to 10.8.0.2:123(vps in openvpn tunnel). It’s v2ray on port 123, so i can connect to bottom server with port 123 and it would be forwarded to vps_ip:123.</p></td><td>2022-05-17T20:07:10.235Z</td></tr>
+    </table>
+      </body>
+    </html>

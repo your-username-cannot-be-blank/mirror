@@ -1,0 +1,515 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>amazon-cloudfront-заблокирован</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>miro00</td><td><p>Наблюдаю блокировку в уральском регионе. К примеру, не работают сайты <a href="https://download.docker.com" rel="noopener nofollow ugc">https://download.docker.com</a>, <a href="https://www.geeksforgeeks.org" rel="noopener nofollow ugc">https://www.geeksforgeeks.org</a>, вся сеть tailscale.</p></td><td>2025-03-20T12:18:37.564Z</td></tr><tr><td>bruh</td><td><p>Наблюдаю аналогичное явление. Недоступен CDN *.cloudfront.net, который обслуживает множество веб-ресурсов.</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">curl -vvv -4 https://hub.docker.com
+* Host hub.docker.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 54.156.14.194, 100.29.167.200, 54.208.73.48
+*   Trying 54.156.14.194:443...
+* Connected to hub.docker.com (54.156.14.194) port 443
+* ALPN: curl offers h2,http/1.1
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/pki/tls/certs/ca-bundle.crt
+*  CApath: none
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_128_GCM_SHA256 / x25519 / RSASSA-PSS
+* ALPN: server did not agree on a protocol. Uses default.
+* Server certificate:
+*  subject: CN=*.docker.com
+*  start date: Mar  5 00:00:00 2025 GMT
+*  expire date: Apr  3 23:59:59 2026 GMT
+*  subjectAltName: host "hub.docker.com" matched cert's "*.docker.com"
+*  issuer: C=US; O=Amazon; CN=Amazon RSA 2048 M03
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+&gt; GET / HTTP/1.1
+&gt; Host: hub.docker.com
+&gt; User-Agent: curl/8.9.1
+&gt; Accept: */*
+&gt; 
+* Request completely sent off
+</code></pre>
+</details></td><td>2025-03-20T13:01:12.374Z</td></tr><tr><td>0ka(0ka)</td><td><p>казань мтс, cloudflare работает, а вот cloudfront нет</p></td><td>2025-03-20T14:58:30.804Z</td></tr><tr><td>artenox</td><td><p>Новосибирск йота, наоборот.</p></td><td>2025-03-20T15:09:38.138Z</td></tr><tr><td>Mr-Ferbro(Mr Ferbro)</td><td><p>в теме “Cloudflare не работает?” уже обсуждаем данную проблему. Череда сбоев присутствует в основном за уралом, в сибире и на востоке</p></td><td>2025-03-20T15:28:24.405Z</td></tr><tr><td>ValdikSS</td><td><div class="md-table">
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>isp</th>
+<th>asn</th>
+<th>city</th>
+<th>curl https://download.docker.com/</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ru-001</td>
+<td>ТТК</td>
+<td>AS8427</td>
+<td>Magnitogorsk</td>
+<td>TIMEOUT</td>
+</tr>
+<tr>
+<td>ru-002</td>
+<td>Интерсвязь is74</td>
+<td>AS8369</td>
+<td>Yemanzhelinsk</td>
+<td>TIMEOUT</td>
+</tr>
+<tr>
+<td>ru-003</td>
+<td>МТС</td>
+<td>AS28832</td>
+<td>Chelyabinsk</td>
+<td>TIMEOUT</td>
+</tr>
+<tr>
+<td>ru-005</td>
+<td>Dom.ru</td>
+<td>AS49048</td>
+<td>Tver</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-006</td>
+<td>Dom.ru</td>
+<td>AS50544</td>
+<td>Krasnoyarsk</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-008</td>
+<td>Ростелеком (онлайм)</td>
+<td>AS42610</td>
+<td>Moscow</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-009</td>
+<td>Линклайн</td>
+<td>AS44041</td>
+<td>Moscow</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-010</td>
+<td>МГТС</td>
+<td>AS25513</td>
+<td>Moscow</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-011</td>
+<td>ENEVA/OBIT</td>
+<td>AS8492</td>
+<td>Saint Petersburg</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-012</td>
+<td>Beeline/Corbina</td>
+<td>AS8402</td>
+<td>Tula</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-013</td>
+<td>Dom.ru</td>
+<td>AS50543</td>
+<td>Saratov</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-018</td>
+<td>Evpanet</td>
+<td>AS43936</td>
+<td>Krimea</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-019</td>
+<td>JSC Ufanet</td>
+<td>AS60095</td>
+<td>Nizhny Novgorod</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-020</td>
+<td>PJSC MegaFon</td>
+<td>AS31205</td>
+<td>Khakasiya</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-021</td>
+<td>ER-Telecom Holding</td>
+<td>AS56981</td>
+<td>Tomsk</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-022</td>
+<td>Sibirskie Seti</td>
+<td>AS40995</td>
+<td>Novokuznetsk</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-024</td>
+<td>Beeline</td>
+<td>AS34038</td>
+<td>Tyumen</td>
+<td>TIMEOUT</td>
+</tr>
+<tr>
+<td>ru-025</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Kemerovo</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-026</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Kemerovo</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-027</td>
+<td>Sibirskie Seti</td>
+<td>AS47433</td>
+<td>Kemerovo</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-028</td>
+<td>Beeline</td>
+<td>AS3216</td>
+<td>Kemerovo</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-029</td>
+<td>Beeline</td>
+<td>AS16345</td>
+<td>Kemerovo</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-031</td>
+<td>Beeline</td>
+<td>AS42110</td>
+<td>Sochi</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-032</td>
+<td>Sibirskie Seti Ltd.</td>
+<td>AS34757</td>
+<td>Novosibirsk</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-033</td>
+<td>P.a.k.t LLC</td>
+<td>AS39087</td>
+<td>Saint Petersburg</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-035</td>
+<td>UBS (ubsnet.ru)</td>
+<td>AS50042</td>
+<td>Sevastopol</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-036</td>
+<td>Igra-Service</td>
+<td>AS33991</td>
+<td>Krasnoyarsk</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-038</td>
+<td>Beeline</td>
+<td>AS8402</td>
+<td>Krasnodar</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-039</td>
+<td>Luhansk Home Networks</td>
+<td>AS202619</td>
+<td>Luhansk</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-043</td>
+<td>Trusttele.com</td>
+<td>AS199214</td>
+<td>Moscow</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-045</td>
+<td>Megafon</td>
+<td>AS25159</td>
+<td>Moscow, cellular</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-051</td>
+<td>Rostelecom</td>
+<td>AS42610</td>
+<td>Moscow</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>ru-053</td>
+<td>Alliance Telecom</td>
+<td>AS49293</td>
+<td>Tomsk</td>
+<td>ok</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2025-03-20T17:19:56.051Z</td></tr><tr><td>irregular-circle</td><td><p>Кажется, тспу блочит гуглофейк, когда пытаюсь подключиться к <a href="https://www.geeksforgeeks.org" rel="noopener nofollow ugc">https://www.geeksforgeeks.org</a>, неважно, что идёт после него. Зато работает, если поставить фейк для <a href="https://chat.deepseek.com/" rel="noopener nofollow ugc">https://chat.deepseek.com/</a>, или просто на голом мультидизордере.</p></td><td>2025-03-20T17:39:48.721Z</td></tr><tr><td>Brepsi(Brepsi)</td><td><p>This post was flagged by the community and is temporarily hidden.</p></td><td>2025-03-20T18:47:36.656Z</td></tr><tr><td>krolosvin(krolosvin)</td><td><p>Не работает наверное только за уралом. А в европейской части все как раньше. Все клауды пахают нормально и фларе и фронт.</p></td><td>2025-03-20T18:50:25.788Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p><a href="https://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips">Locations and IP address ranges of CloudFront edge servers</a></p>
+<details>
+<summary>
+RAW</summary>
+<pre><code class="lang-auto">3.10.17.128/25
+3.11.53.0/24
+3.29.40.64/26
+3.29.40.128/26
+3.29.40.192/26
+3.29.57.0/26
+3.35.130.128/25
+3.101.158.0/23
+3.107.43.128/25
+3.107.44.0/25
+3.107.44.128/25
+3.128.93.0/24
+3.134.215.0/24
+3.146.232.0/22
+3.147.164.0/22
+3.147.244.0/22
+3.160.0.0/14
+3.164.0.0/18
+3.164.64.0/18
+3.164.128.0/17
+3.165.0.0/16
+3.166.0.0/15
+3.168.0.0/14
+3.172.0.0/18
+3.172.64.0/18
+3.173.0.0/17
+3.173.128.0/18
+3.174.0.0/15
+3.231.2.0/25
+3.234.232.224/27
+3.236.48.0/23
+3.236.169.192/26
+13.32.0.0/15
+13.35.0.0/16
+13.54.63.128/26
+13.59.250.0/26
+13.113.196.64/26
+13.113.203.0/24
+13.124.199.0/24
+13.203.133.0/26
+13.210.67.128/26
+13.224.0.0/14
+13.228.69.0/24
+13.233.177.192/26
+13.249.0.0/16
+15.158.0.0/16
+15.188.184.0/24
+15.207.13.128/25
+15.207.213.128/25
+18.64.0.0/14
+18.68.0.0/16
+18.154.0.0/15
+18.160.0.0/15
+18.164.0.0/15
+18.172.0.0/15
+18.175.65.0/24
+18.175.66.0/24
+18.175.67.0/24
+18.192.142.0/23
+18.199.68.0/22
+18.199.72.0/22
+18.199.76.0/22
+18.200.212.0/23
+18.216.170.128/25
+18.229.220.192/26
+18.230.229.0/24
+18.230.230.0/25
+18.238.0.0/15
+18.244.0.0/15
+34.195.252.0/24
+34.216.51.0/25
+34.223.12.224/27
+34.223.80.192/26
+34.226.14.0/24
+35.93.168.0/23
+35.93.170.0/23
+35.93.172.0/23
+35.158.136.0/24
+35.162.63.192/26
+35.167.191.128/26
+36.103.232.0/25
+36.103.232.128/26
+43.218.56.64/26
+43.218.56.128/26
+43.218.56.192/26
+43.218.71.0/26
+44.220.194.0/23
+44.220.196.0/23
+44.220.198.0/23
+44.220.200.0/23
+44.220.202.0/23
+44.222.66.0/24
+44.227.178.0/24
+44.234.90.252/30
+44.234.108.128/25
+47.129.82.0/24
+47.129.83.0/24
+47.129.84.0/24
+52.15.127.128/26
+52.46.0.0/18
+52.47.139.0/24
+52.52.191.128/26
+52.56.127.0/25
+52.57.254.0/24
+52.66.194.128/26
+52.78.247.128/26
+52.82.128.0/19
+52.84.0.0/15
+52.124.128.0/17
+52.199.127.192/26
+52.212.248.0/26
+52.220.191.0/26
+52.222.128.0/17
+54.182.0.0/16
+54.192.0.0/16
+54.230.0.0/17
+54.230.128.0/18
+54.230.200.0/21
+54.230.208.0/20
+54.230.224.0/19
+54.233.255.128/26
+54.239.128.0/18
+54.239.192.0/19
+54.240.128.0/18
+58.254.138.0/25
+58.254.138.128/26
+64.252.64.0/18
+64.252.128.0/18
+65.8.0.0/16
+65.9.0.0/17
+65.9.128.0/18
+70.132.0.0/18
+71.152.0.0/17
+99.79.169.0/24
+99.84.0.0/16
+99.86.0.0/16
+108.138.0.0/15
+108.156.0.0/14
+111.13.171.128/26
+111.13.171.192/26
+111.13.185.32/27
+111.13.185.64/27
+116.129.226.0/25
+116.129.226.128/26
+118.193.97.64/26
+118.193.97.128/25
+119.147.182.0/25
+119.147.182.128/26
+120.52.12.64/26
+120.52.22.96/27
+120.52.39.128/27
+120.52.153.192/26
+120.232.236.0/25
+120.232.236.128/26
+120.253.240.192/26
+120.253.241.160/27
+120.253.245.128/26
+120.253.245.192/27
+130.176.0.0/17
+130.176.128.0/18
+130.176.192.0/19
+130.176.224.0/20
+143.204.0.0/16
+144.220.0.0/16
+180.163.57.0/25
+180.163.57.128/26
+204.246.164.0/22
+204.246.168.0/22
+204.246.172.0/24
+204.246.173.0/24
+204.246.174.0/23
+204.246.176.0/20
+205.251.200.0/24
+205.251.201.0/24
+205.251.202.0/23
+205.251.204.0/23
+205.251.206.0/23
+205.251.208.0/20
+205.251.249.0/24
+205.251.250.0/23
+205.251.252.0/23
+205.251.254.0/24
+216.137.32.0/19
+</code></pre>
+</details></td><td>2025-03-20T18:52:17.541Z</td></tr><tr><td>Brepsi(Brepsi)</td><td><p>заработало</p></td><td>2025-03-20T21:11:19.822Z</td></tr><tr><td>miro00</td><td><p>Блокировку сняли.</p></td><td>2025-03-21T03:19:34.802Z</td></tr><tr><td>ValdikSS</td><td></td><td>2025-03-21T08:29:54.360Z</td></tr>
+    </table>
+      </body>
+    </html>

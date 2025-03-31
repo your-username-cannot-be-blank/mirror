@@ -1,0 +1,165 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>доступ-к-инстаграму-как-доработать-конфиг-чтобы-он-не-пропадал-12432</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>kotik.neko</td><td><p>Доброго дня всем!</p>
+<p>Столкнулся с занятной ситуацией: имею роутер Keenetic Giga (KN-1012), на него поставил самую свежую версию Запрета. Также настроен DoT от Гугла. Суть в том, что как только я перезапускаю Запрет, у меня на какое-то небольшое время становится доступен Инстаграм и ФБ, причем на максимальной скорости, как будто никаких блокировок нет. Но затем минут через 20-30 доступ постепенно пропадает: сначала скорость постепенно падает, а затем вообще пакеты не доходят. НО: это ровно до перезапуска Запрета командой <code>/opt/zapret/init.d/sysv/zapret restart</code>, после чего Инста снова оказывается доступна, но так же минут на 20-30. Что можно поправить в конфиге, чтобы доступ к Инсте не терялся со временем? Провайдер Дом.ру</p>
+<p>Конфиги такие:</p>
+<pre><code class="lang-auto">TPWS_OPT="
+--filter-tcp=80  --methodeol  --hostlist=/opt/zapret/user_hostlist.txt --new
+--filter-tcp=443 --split-tls=sni  --disorder --tlsrec-pos=2 --hostlist=/opt/zapret/user_hostlist.txt
+"
+
+NFQWS_OPT="
+--filter-tcp=80 --hostlist=/opt/zapret/user_hostlist.txt --dpi-desync=discorder  --dpi-desync-fooling=md5sig --new
+--filter-tcp=443 --hostlist=/opt/zapret/user_hostlist.txt --dpi-desync=fake,discorder --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_googlle_com.bin --dpi-desync-repeats=10
+--filter-udp=443 --hostlist=/opt/zapret/user_hostlist.txt --dpi-desync=fake,split --dpi-desync-any-protocol --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-quic=opt/zapret/files/fake/quic_initial_www_google_com.bin --dpi-desync-repeats=20
+--filter-udp=50000-65535 --dpi-desync=fake --dpi-desync-any-protocol  --dpi-desync-fake-quic=opt/zapret/files/fake/quic_initial_www_google_com.bin --dpi-desync-repeats=10 --new
+"
+</code></pre></td><td>2024-10-30T09:36:58.695Z</td></tr><tr><td>Ori</td><td><p>На роутерах я запрет не настраивал, но вижу у тебя целый ряд проблем в конфиге.<br>
+Во-первых, опечатки в слове disorder:</p>
+<pre><code class="lang-auto">--dpi-desync=discorder
+</code></pre>
+<pre><code class="lang-auto">--dpi-desync=fake,discorder
+</code></pre>
+<p>Во-вторых, тебе точно нужны повторы на tcp 443? Попробуй убрать.</p>
+<pre><code class="lang-auto">--filter-tcp=443 ... --dpi-desync-repeats=10
+</code></pre>
+<p>В-третьих, строка для udp. Split не работает для udp в принципе, выкидывай его и --dpi-desync-split-pos=2. Также выкидывай --dpi-desync-any-protocol, в нем нет смысла тут, т.к. ты дуришь известные протоколы. Md5sig вроде тоже только для tcp.</p>
+<pre><code class="lang-auto">--filter-udp=443 --hostlist=/opt/zapret/user_hostlist.txt --dpi-desync=fake,split --dpi-desync-any-protocol --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-quic=opt/zapret/files/fake/quic_initial_www_google_com.bin --dpi-desync-repeats=20
+</code></pre>
+<p>Строка дискорда. Порты поставь 50000-50099, дальше нет нужды. Голос в дискорде вроде не по quic идет, лучше используй --dpi-desync-fake-unknown-udp вместо --dpi-desync-fake-quic. В качестве фейка вроде хватает одного нулевого байта без повторов (обычно, но лучше протести у себя). Также нужен ограничитель в виде cutoff=d2, иначе у тебя будет бесконечное засирание канала. Ну и я не уверен нужен ли --new на последней строчке?</p>
+<pre><code class="lang-auto">--filter-udp=50000-65535 --dpi-desync=fake --dpi-desync-any-protocol  --dpi-desync-fake-quic=opt/zapret/files/fake/quic_initial_www_google_com.bin --dpi-desync-repeats=10 --new
+</code></pre>
+<p>Итог после правок:</p>
+<pre><code class="lang-auto">NFQWS_OPT="
+--filter-tcp=80 --hostlist=/opt/zapret/user_hostlist.txt --dpi-desync=disorder --dpi-desync-fooling=md5sig --new
+--filter-tcp=443 --hostlist=/opt/zapret/user_hostlist.txt --dpi-desync=fake,disorder --dpi-desync-split-pos=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_googlle_com.bin
+--filter-udp=443 --hostlist=/opt/zapret/user_hostlist.txt --dpi-desync=fake --dpi-desync-fake-quic=opt/zapret/files/fake/quic_initial_www_google_com.bin --dpi-desync-repeats=20
+--filter-udp=50000-50099 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d2 --dpi-desync-fake-unknown-udp=0x00
+"
+</code></pre>
+<p>Это из тех проблем что я вижу в конфиге. Как написал выше, сам я на роутерах запрет не поднимал.</p></td><td>2024-10-30T11:45:36.960Z</td></tr><tr><td>kotik.neko</td><td><p>Огромное спасибо! Не столько с точки зрения увеличения работоспособности (инста так и продолжает сначала работать, потом отваливается), сколько с точки зрения понимания работы скрипта, все перечисленное действительно упустил при чтении мануала. Ну и ошибка в disorder - это, конечно, эпик фейл:D</p>
+<p>Думаю проблему доступности инсты решать костыльно: смотрю, как завести cron на Кинетике и пусть он рестартует Zapret каждые 45 минут</p></td><td>2024-10-30T18:24:00.683Z</td></tr><tr><td>Ori</td><td><p>Инста по айпи заблочена на многих провайдерах, кстати. Возможно у вас сначала в незаблоченнные айпи тычется и всё работает, а потом перестает, хз.</p>
+<p>Можете попробовать сами прописать альтернативные айпи в etc/hosts или в самом роутере если там есть возможность:</p>
+<pre><code class="lang-auto">157.240.225.174 instagram.com www.instagram.com
+</code></pre>
+<p>У инсты айпишников очень много.</p></td><td>2024-10-30T18:36:05.419Z</td></tr><tr><td>MAMBA(Samatov)</td><td><p>Работает подбор стратегии после ручного добавления в hosts. Как найти дополнительные не блокированные ip и куда их добавить для zapret?</p>
+<pre><code class="lang-auto">sudo vim /etc/hosts
+157.240.9.174 instagram.com www.instagram.com
+</code></pre></td><td>2024-10-30T19:25:20.012Z</td></tr><tr><td>Ori</td><td><p>Насчет поиска айпи, я себе для этих целей <a href="https://ntc.party/t/%D0%BF%D0%BE%D0%B4%D0%B1%D0%BE%D1%80-%D1%80%D0%B0%D0%B1%D0%BE%D1%87%D0%B5%D0%B3%D0%BE-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D0%B0-%D0%B4%D0%BB%D1%8F-ggc-%D1%8E%D1%82%D1%83%D0%B1%D0%B0-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-blockcheck/10060/116">скрипт</a> писал. Это под виндоусовский cmd. На линуксе хз. Можно руками через сайт <a href="https://dns.google/query?name=instagram.com&amp;rr_type=A&amp;ecs=50.50.0.0%2F16&amp;disable_dnssec=true">гугл.днс</a> в крайнем случае. Просто рандомные subnet вставляете.</p>
+<p>Второй вопрос я не понял. Какое отношение запрет к файлу хостс имеет?</p></td><td>2024-10-30T20:31:34.826Z</td></tr><tr><td>MAMBA(Samatov)</td><td><p>Запись в Хостс позволяет достучаться до ip инстаграма, zapret позволяет обойти блокировку.</p></td><td>2024-10-30T20:42:31.414Z</td></tr><tr><td>Ori</td><td><p>Ну это и так очевидно. Я не понял вот этот вопрос:</p>
+<blockquote>
+<p>и куда их добавить для zapret?</p>
+</blockquote>
+<p>Куда вы их добавить хотите ещё? Ну кроме хостс.</p></td><td>2024-10-30T21:05:51.891Z</td></tr><tr><td>MAMBA(Samatov)</td><td><p>Главное как выявить рабочие ip для добавления. Которые будут пинговаться.</p></td><td>2024-10-30T21:54:01.589Z</td></tr><tr><td>Ori</td><td><p>Как правило, doh от комсс <code>https://dns.comss.one/dns-query</code> выдает рабочие айпи. Там у них хитрый механизм какой-то. Можно просто в браузере поставить и всё.</p></td><td>2024-10-30T21:56:54.276Z</td></tr><tr><td>MAMBA(Samatov)</td><td><p>На openwrt нужно сделать такой финт. Пока руками только 1 ip в hosts</p></td><td>2024-10-30T22:05:51.769Z</td></tr><tr><td>Ori</td><td><p>Ну так поищите руками, тем же курлом.</p>
+<pre><code class="lang-auto">curl -so /dev/null -m 2 -w "%{remote_ip}%{onerror}%{errormsg}" --doh-url https://dns.comss.one/dns-query https://instagram.com
+</code></pre>
+<p>Или дигом:<br>
+<code>dig +https @dns.comss.one instagram.com +short</code></p></td><td>2024-10-30T22:11:45.927Z</td></tr><tr><td>toxae1(Toxa)</td><td><p>Для keenetic, требуется dig<br>
+Ложим в папку /opt/root/<br>
+Даем права chmod +x dnstest.sh<br>
+Запускаем ./dnstest.sh<br>
+Можно запускать с указанием домена<br>
+./dnstest.sh ntc.party<br>
+А можно добавить свои домены внутри.<br>
+Возможно использование и на других линукс системах, только нужно прописать свои днс.<br>
+Если используете много доменов используйье grep для фильтра<br>
+./dnstest.sh ntc.party | grep yes<br>
+Будет показывать только ip на которых прошел пинг.<br>
+<a class="attachment" href="доступ-к-инстаграму-как-доработать-конфиг-чтобы-он-не-пропадал-12432/51BvcAszkpWjW4M9214tAQeaFk6.sh">dnstest.sh</a> (1,9 КБ)</p></td><td>2024-10-30T22:15:40.877Z</td></tr><tr><td>Ori</td><td><p>Не лучше ли tcping будет вместо обычного ping’а? Ну и я может слепой, но где там курл используется?</p></td><td>2024-10-30T22:19:47.865Z</td></tr><tr><td>toxae1(Toxa)</td><td><p>tcping нет в entware или я не нашел.<br>
+А так я понимаю можно пингануть 80,443,853 порты и понять что доступно что нет?</p></td><td>2024-10-30T22:55:16.020Z</td></tr><tr><td>Ori</td><td><p>Фиг знает. Просто icmp трафик на некоторых провайдерах заблочен + некоторые ресурсы на него не отвечают, поэтому ненадежно так проверять. Сам на этом споткнулся.</p>
+<hr>
+<p>От нефиг делать за пару часиков накатал прогу для поиска айпи. Нужны днс с поддержкой subnet.<br>
+Работает через командную строку, справка вызывается флагом <code>-?</code> Результат выводится в лог и консоль. Финальный результат, с выкинутыми дубликатами и отсортированный - в самом конце после разделителя <code>-------</code><br>
+Пример строки запуска:</p>
+<pre><code class="lang-auto">ipfinder -u instagram.com -d https://dns.google/dns-query
+</code></pre>
+<p><a class="attachment" href="доступ-к-инстаграму-как-доработать-конфиг-чтобы-он-не-пропадал-12432/4xISlxwqxWs9gEjsOQDmz666cG8.zip">IPfinder_win.zip</a> (6,3 МБ)</p>
+<p>Также попробовал скомпилить для линукса, но я без малейшего понятия работоспособно оно или нет.<br>
+<a class="attachment" href="доступ-к-инстаграму-как-доработать-конфиг-чтобы-он-не-пропадал-12432/67DhOZWSuc4SdpgFhUdFJr8AOGW.zip">IPfinder_linux(maybe).zip</a> (6,2 МБ)</p>
+<p>Версия супер сырая, допиливать хз буду или нет.</p></td><td>2024-10-31T01:10:18.723Z</td></tr><tr><td>toxae1(Toxa)</td><td><p>Это он с doh работает?</p></td><td>2024-10-31T05:46:38.604Z</td></tr><tr><td>MAMBA(Samatov)</td><td><pre><code class="lang-auto">~ # ./dnstest.sh ntc.party | grep yes
+dig: Couldn't parse port number
+dig: Couldn't parse port number
+</code></pre></td><td>2024-10-31T09:43:06.874Z</td></tr><tr><td>toxae1(Toxa)</td><td><p>У вас keenetic?<br>
+Doh добавлены?<br>
+Если нет doh можно через cli прописать одной командой</p>
+<p>dns-proxy https upstream <a href="https://cloudflare-dns.com/dns-query" rel="noopener nofollow ugc">https://cloudflare-dns.com/dns-query</a><br>
+dns-proxy https upstream <a href="https://dns.google/dns-query" rel="noopener nofollow ugc">https://dns.google/dns-query</a><br>
+dns-proxy https upstream <a href="https://dns.quad9.net/dns-query" rel="noopener nofollow ugc">https://dns.quad9.net/dns-query</a><br>
+dns-proxy https upstream <a href="https://common.dot.dns.yandex.net/dns-query" rel="noopener nofollow ugc">https://common.dot.dns.yandex.net/dns-query</a><br>
+dns-proxy https upstream <a href="https://dns.adguard-dns.com/dns-query" rel="noopener nofollow ugc">https://dns.adguard-dns.com/dns-query</a><br>
+dns-proxy https upstream <a href="https://dns.controld.com/comss" rel="noopener nofollow ugc">https://dns.controld.com/comss</a><br>
+dns-proxy https upstream <a href="https://dns.nextdns.io" rel="noopener nofollow ugc">https://dns.nextdns.io</a><br>
+dns-proxy https upstream <a href="https://dns.alidns.com/dns-query" rel="noopener nofollow ugc">https://dns.alidns.com/dns-query</a></p></td><td>2024-10-31T09:50:28.401Z</td></tr><tr><td>MAMBA(Samatov)</td><td><aside class="quote no-group" data-username="Ori" data-post="16" data-topic="12432">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p><code>https://dns.google/dns-query</code></p>
+</blockquote>
+</aside>
+<p>Да. Keenetic. Добавил DOH google, но в отличии от Ipfinder выдает только один нерабочий ip.</p>
+<pre><code class="lang-auto">~ # ./dnstest.sh instagram.com
+127.0.0.1:40508 instagram.com 31.13.72.174 no
+</code></pre>
+<p><a class="attachment" href="доступ-к-инстаграму-как-доработать-конфиг-чтобы-он-не-пропадал-12432/yqpxJVQ8GAvWJ6VbRuevOapvyvM.txt">instagram.txt</a> (1,0 КБ)</p></td><td>2024-10-31T10:04:59.195Z</td></tr><tr><td>toxae1(Toxa)</td><td><p>Вы добавили один doh. Добавьте все 8<br>
+И он вам потом покажет какой из днс выдает какой ip</p></td><td>2024-10-31T10:12:05.692Z</td></tr><tr><td>kotik.neko</td><td><p>Дополняю тред: удалось добиться стабильной разблокировки ВСЕХ заблокированных на территории РФ ресурсов и при этом сохранения работоспособности незаблокированных. То есть даже белые/черные списки настраивать не пришлось.</p>
+<p>Во-первых поменял Кинетик на GL.iNet GL-MT6000 (он же  Flint 2). На ванильную OpenWRT его не шил, за глаза хватило китайской корчеванной версии 21.02-SNAPSHOT (последняя доступная на данный момент). Важная деталь: для разблокировки всего и вся настроил Oblivious DNS over HTTPS, благо настройки базовых бесплатных серверов уже вшиты в роутер, выбрал odoh-cloudflare (см. скрин). пробовал без него - разблокировка работала только частично, либо вообще не работала. И только после этого установил Zapret.</p>
+<p>Тыкаться пришлось не долго, настройки почти базовые, для дискорда прописал конфиги, поправленные <a class="mention" href="/u/ori">@Ori</a> , за что ему бесконечно благодарен:</p>
+<pre><code class="lang-auto">TPWS_ENABLE=1
+TPWS_PORTS=80,443
+# use &lt;HOSTLIST&gt; and &lt;HOSTLIST_NOAUTO&gt; placeholders to engage standard hostlists and autohostlist in ipset dir
+# hostlist markers are replaced to empty string if MODE_FILTER does not satisfy
+# &lt;HOSTLIST_NOAUTO&gt; appends ipset/zapret-hosts-auto.txt as normal list
+TPWS_OPT="
+--filter-tcp=80 --methodeol &lt;HOSTLIST&gt; --new
+--filter-tcp=443 --tlsrec=sni --split-pos=2 --disorder &lt;HOSTLIST&gt;
+"
+</code></pre>
+<pre><code class="lang-auto">NFQWS_OPT="
+--filter-tcp=80 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig &lt;HOSTLIST&gt; --new
+--filter-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig &lt;HOSTLIST&gt; --new
+--filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6 &lt;HOSTLIST_NOAUTO&gt;
+--filter-udp=50000-50099 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d2 --dpi-desync-fake-unknown-udp=0x00
+"
+</code></pre>
+<p>ВАЖНО: конкретно у меня роутер отрубал доступ в интернет при настройке IPv6 в самом роутере и указании поддержки данного протокола при начальной настройке Zapret. И даже при обратном переключении на IPv4 было все так же глухо. Как ни тыкался, победить это не смог - списал на баг. Ну да ладно, и на IPv4 все прекрасно работает.</p>
+<p>В общем, сижу довольный в свободном интернете, чего всем здесь желаю! Спасибо за помощь и наводки. Кинетик уедет к маме, там его еще потыкаю на предмет возможности настройки аналогичного конфига.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="доступ-к-инстаграму-как-доработать-конфиг-чтобы-он-не-пропадал-12432/90a69d1d7512a8d2f818d6fcc8b49bcf15a148c7.png" data-download-href="https://ntc.party/uploads/default/90a69d1d7512a8d2f818d6fcc8b49bcf15a148c7" title="image"><img src="доступ-к-инстаграму-как-доработать-конфиг-чтобы-он-не-пропадал-12432/90a69d1d7512a8d2f818d6fcc8b49bcf15a148c7_2_678x500.png" alt="image" data-base62-sha1="kDDIT7oaFTKAKhu3IHQ4jt9U8zZ" width="678" height="500" srcset="доступ-к-инстаграму-как-доработать-конфиг-чтобы-он-не-пропадал-12432/90a69d1d7512a8d2f818d6fcc8b49bcf15a148c7_2_678x500.png, доступ-к-инстаграму-как-доработать-конфиг-чтобы-он-не-пропадал-12432/90a69d1d7512a8d2f818d6fcc8b49bcf15a148c7_2_1017x750.png 1.5x, доступ-к-инстаграму-как-доработать-конфиг-чтобы-он-не-пропадал-12432/90a69d1d7512a8d2f818d6fcc8b49bcf15a148c7.png 2x" data-dominant-color="CBCECF"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1195×881 59.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-11-01T20:04:13.644Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,59 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проверка-доступности-ресурса</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>soulja(Serano)</td><td><p>Как можно определить, ресурс недоступен по причине блока со стороны провайдера, либо сам ресурс ограничивает доступ с моего адреса?<br>
+mtr ходит, curl один сайт отвечает по http, но по https уже нет, другой сайт отвечает на оба.</p></td><td>2023-11-21T12:02:39.791Z</td></tr><tr><td>0ka(0ka)</td><td><p>запустите goodbyedpi</p></td><td>2023-11-21T12:05:28.548Z</td></tr><tr><td>soulja(Serano)</td><td><p>Не подходит для меня</p></td><td>2023-11-21T12:07:29.644Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Попробуйте через <a href="https://ping-admin.com">https://ping-admin.com</a>.</p></td><td>2023-11-21T12:09:02.039Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Или <a href="https://globalcheck.net/ru" class="inline-onebox">GlobalCheck - сеть мониторинга блокировок</a>.</p></td><td>2023-11-21T12:16:32.291Z</td></tr><tr><td>soulja(Serano)</td><td><p>Спасибо, есть варианты у себя проверять? Чекеры актуальны для РФ больше я думаю</p></td><td>2023-11-21T15:07:21.572Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Обычно блокировщки ведут себя так:</p>
+<ul>
+<li>Ошибка RESET – блок на провайдере.</li>
+<li>Ошибка TIMEOUT – блок на ТСПУ</li>
+<li>Ошибка 403 или аналогичная ошибка CloudFlare – заблочен ваш IP или его признаки (страна).</li>
+</ul></td><td>2023-11-21T15:17:26.232Z</td></tr><tr><td>soulja(Serano)</td><td><p>Я правильно понял RESET == REFUSED?</p></td><td>2023-11-21T15:47:59.391Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Нет, <code>ERR_CONNECTION_RESET</code> и <code>ERR_CONNECTION_REFUSED</code> – это разные ошибки.</p>
+<p>Какую ошибку вам выдаёт FireFox?</p></td><td>2023-11-21T16:02:00.099Z</td></tr><tr><td>soulja(Serano)</td><td><p>Не помню что было раньше, сейчас <code>NS_ERROR_CONNECTION_REFUSED</code><br>
+Отдает не сразу, через секунд 10+</p>
+<details>
+<summary>
+Картинка</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="проверка-доступности-ресурса/2686c712523a52f3a70ab613b481add28413c4fe.png" data-download-href="https://ntc.party/uploads/default/2686c712523a52f3a70ab613b481add28413c4fe" title="изображение"><img src="проверка-доступности-ресурса/2686c712523a52f3a70ab613b481add28413c4fe_2_690x304.png" alt="изображение" data-base62-sha1="5uOU1rXmrKOGTbSZjGjgMUmX2qy" width="690" height="304" srcset="проверка-доступности-ресурса/2686c712523a52f3a70ab613b481add28413c4fe_2_690x304.png, проверка-доступности-ресурса/2686c712523a52f3a70ab613b481add28413c4fe_2_1035x456.png 1.5x, проверка-доступности-ресурса/2686c712523a52f3a70ab613b481add28413c4fe_2_1380x608.png 2x" data-dominant-color="766869"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1903×841 97.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2023-11-22T04:21:51.495Z</td></tr><tr><td>bolvan</td><td><p>connection refused - это RST в ответ на SYN. активное сообщение сервера, что на порту нет листенера.<br>
+connection reset - RST после успешного tcp 3-way handshake</p></td><td>2023-11-22T07:46:29.644Z</td></tr><tr><td>anon57137390</td><td><details>
+<summary>
+Анализ картинки</summary>
+<p>Клиент посылает TCP сегменты с <code>Client Hello</code> не получая подтверждения. Подключение к apkpure заблокировано по SNI (или TLS отпечаткам приложения). Но возможно, блокировщик просто ждет первый сегмент с датой.  На стороне сервера так блокировать вряд ли будут.</p>
+</details></td><td>2023-11-22T08:30:11.951Z</td></tr><tr><td>0ka(0ka)</td><td><p>на скрине вижу винду, чем вам не подходит goodbyedpi непонятно</p></td><td>2023-11-22T15:25:07.610Z</td></tr>
+    </table>
+      </body>
+    </html>

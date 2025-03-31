@@ -1,0 +1,112 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>запуск-на-windows-11-arm-6918</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>User69</td><td><p>Правильно ли я понял, что в версии под ARM она не работает?</p></td><td>2024-01-19T01:06:21.659Z</td></tr><tr><td>bolvan</td><td><p>Собрать goodbye в visualstudio для ARM не проблема.<br>
+Проблема в другом. В подписи драйвера windivert. Вроде на текущий момент такового нет.<br>
+Так что остается вариант только режима testsigning в bcdedit.<br>
+Будет надпись на декстопе ТЕСТОВЫЙ РЕЖИМ. если это не слишком напрягает, то вариант<br>
+Ну или, например, ломать цепочку загрузки : bootmgr, winload/winresume на предмет разрешения persistent опции nointegritychecks. Я так и делаю, но это не просто, и требует периодического долома winload при обновлении, меняющем интерфейс ядра и winload</p>
+<aside class="onebox githubissue" data-onebox-src="https://github.com/ValdikSS/GoodbyeDPI/issues/155">
+  <header class="source">
+
+      <a href="https://github.com/ValdikSS/GoodbyeDPI/issues/155" target="_blank" rel="noopener">github.com/ValdikSS/GoodbyeDPI</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row">
+  <div class="github-icon-container" title="Issue" data-github-private-repo="false">
+	  <svg width="60" height="60" class="github-icon" viewBox="0 0 14 16" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+  </div>
+
+  <div class="github-info-container">
+    <h4>
+      <a href="https://github.com/ValdikSS/GoodbyeDPI/issues/155" target="_blank" rel="noopener">Arm64 Version</a>
+    </h4>
+
+    <div class="github-info">
+      <div class="date">
+        opened <span class="discourse-local-date" data-format="ll" data-date="2019-12-03" data-time="11:36:28" data-timezone="UTC">11:36AM - 03 Dec 19 UTC</span>
+      </div>
+
+
+      <div class="user">
+        <a href="https://github.com/sj6219" target="_blank" rel="noopener">
+          <img alt="sj6219" src="запуск-на-windows-11-arm-6918/b1a18550180d41c84b92bc30ac889c23b51f36e3.png" class="onebox-avatar-inline" width="20" height="20" data-dominant-color="5A584B">
+          sj6219
+        </a>
+      </div>
+    </div>
+
+    <div class="labels">
+        <span style="display:inline-block;margin-top:2px;background-color: #B8B8B8;padding: 2px;border-radius: 4px;color: #fff;margin-left: 3px;">
+          waiting for windivert
+        </span>
+        <span style="display:inline-block;margin-top:2px;background-color: #B8B8B8;padding: 2px;border-radius: 4px;color: #fff;margin-left: 3px;">
+          windivert
+        </span>
+    </div>
+  </div>
+</div>
+
+  <div class="github-row">
+    <p class="github-body-container">Please, make arm64 version for ms surface pro x.</p>
+  </div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-01-20T09:52:06.117Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Третий вариант: найти утекший просроченный сертификат, который Microsoft пока ещё не внесла в чёрный список, подписать им, затем (поскольку сертификат просрочен и его надо “реанимировать”) сгенерировать свой сертификат, поднять <a href="https://github.com/Jemmy1228/TimeStampResponder-CSharp">локальный таймштамп-сервер</a> и им заверить подпись задним числом, чтобы метка времени указывала на годы, когда просроченный сертификат был ещё действующим. После этого этот таймштамповый сертификат загоняется в корневые и Windows начинает этой метке времени полностью доверять.</p>
+<p>Благодаря тому, что своим сертификатом подписан не драйвер, а всего лишь метка времени (драйвер подписан сертификатом настоящим, например, сейчас я использую для этих целей сертификат, утекший некогда у Atheros), всё это не требует включения тестового режима (на мой взгляд, это упущение майков).</p>
+<p>В середине прошлого года очень много таких сертификатов <a href="https://blog.talosintelligence.com/old-certificate-new-signature/">улетело в чёрный список</a>, поскольку китайцы повадились подписывать таким способом всякую малварь. Майки помещают сведения о таких драйверах в Windows Kernel Vulnerable Driver Blocklist (DriverSiPolicy.p7b), обновленные версии которого прилетают с обновлениями, а хранится он на скрытом служебном разделе.</p>
+<aside class="quote no-group" data-username="bolvan" data-post="2" data-topic="6918">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Будет надпись на декстопе ТЕСТОВЫЙ РЕЖИМ. если это не слишком напрягает, то вариант</p>
+</blockquote>
+</aside>
+<p>Для ARM, наверное, не критично, а вот для x86-64 включённый тестовый режим гарантирует, что античиты популярных онлайн-игр пошлют юзера лесом.</p></td><td>2024-01-20T14:43:34.654Z</td></tr><tr><td>ValdikSS</td><td><p>Спросил разработчика, почему нет драйвера для ARM64, напишу сюда, как появится ответ.</p></td><td>2024-01-22T06:23:11.622Z</td></tr><tr><td>schmerto(Schmerto)</td><td><p>привет. как включить службу на Windows 11 ARM? чтобы GoodbyeDPI всегда работал? подскажи, пожалуйста, мил человек. с уважением</p></td><td>2024-08-20T01:25:38.274Z</td></tr>
+    </table>
+      </body>
+    </html>

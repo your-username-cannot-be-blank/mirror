@@ -1,0 +1,144 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>старый-mikrotik-mipsbe-cpu-и-vpn-для-обхода-блокировок</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>somula</td><td><p>У меня и у почти у всех друзей есть старые Mikrotik на архитектуре mipsbe (не ARM), Объем RAM почти везде по 128Mb, скажите у кого есть такие же и кто настраивал VPN для обхода блокировок что вы делали и что у вас стабильно работает?<br>
+Если что у меня забанены: OpenVPN, IPSec и Wireguard.</p>
+<p>Поднять там XRay или sing-box скорее всего не получится т.к. под эту архитектуру нет этих программ, а самостоятельно скомпилировать врятли получится. Остается что-то типа SSTP протокола или IPv6 туннелей или может что-то еще что не знаю или мало распространено.</p>
+<p>Кто что может посоветовать из рабочих вариантов VPN для старого Mikrotik (mipsbe CPU)?</p></td><td>2024-12-19T19:43:14.644Z</td></tr><tr><td>Longy(Hans)</td><td><p>Неожиданно, попахивает товарищем майором. Не так-ли?</p></td><td>2024-12-19T20:14:10.264Z</td></tr><tr><td>BBS</td><td><p>Xray бинари есть на все случаи жизни: <a href="https://github.com/XTLS/Xray-core/releases/tag/v24.12.18" class="inline-onebox">Release Xray-core v24.12.18 · XTLS/Xray-core · GitHub</a><br>
+Даже на древнем асусе wl500gpv2 запускается, правда скорость не очень.</p>
+<p><a href="https://ntc.party/u/Longy">Longy</a>, разве?</p></td><td>2024-12-19T20:27:12.197Z</td></tr><tr><td>somula</td><td><p>Ну все раскусили меня, хоть я и товарищ майор, но мне тоже нужно смотреть ютуб и ходить на рутрекет <img src="https://ntc.party/images/emoji/twitter/smile.png?v=12" title=":smile:" class="emoji" alt=":smile:" loading="lazy" width="20" height="20"></p></td><td>2024-12-19T20:34:49.312Z</td></tr><tr><td>somula</td><td><p>Проблема в том что только в теории можно запустить этот XRay бинарник на старом микротике, но в реальности нужен будет микротик с поддержкой контейнеров, а это только arm или arm64, а у меня mipsbe.</p>
+<p>Есть реальные запуски XRay на старом Mikrotik’e, может как-то через костыли запускали?</p></td><td>2024-12-19T20:42:13.294Z</td></tr><tr><td>Texsis</td><td><p>Ставьте рядом одноплатник, на нем заводите sing-box и промежуточный канал типо WireGuard. Других вариантов для некротика такого плана не существует sstp тоже блокируется переодически судя по отзывам, да и не особо он обфусцирован на мой взгляд. Эта тема на форуме уже обсуждалась, поищите.</p></td><td>2024-12-19T20:52:37.377Z</td></tr><tr><td>BBS</td><td><p>Реально, без контейнеров это весьма скучная железка. Ну тогда вот: <a href="https://openwrt.org/ru/toh/mikrotik/common" class="inline-onebox">[OpenWrt Wiki] Mikrotik RouterBoard — общие процедуры для всех моделей</a></p></td><td>2024-12-19T20:55:36.589Z</td></tr><tr><td>somula</td><td><p>Думаю пока еще рано прошивать свой Mikrotik на OpenWrt, еще не все варианты перепробованы и есть вероятность что заработает и на родной прошивке какая-то экзотика или нестандартный способ. Препрошивка это уже последний способ решения проблемы.</p></td><td>2024-12-19T21:04:23.081Z</td></tr><tr><td>bolvan</td><td><p>Если она возможна, это первый способ решения проблемы, чтобы не заниматься извращениями с тем, что для этого не создавалось</p></td><td>2024-12-20T07:58:05.738Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Одноплатник на arm64 для этой задачи - самое простое и беспроблемное решение. Настройка маршрутизации на уровне микрота при этом ни чем принципиально не отличается от случая, когда контейнер запущен на самом роутере, просто в одном случае будет физический эзернет, а в другом - виртуальный. В любом случае, 128Мб - это критически мало, чтобы тянуть и xray и функционал самого роутера, разве что полностью выключать wifi(но тогда какой смысл?)<br>
+На мой сугубо личный вкус, из одноплатников сейчас лучшее что есть сейчас по соотношению цена\производительность - это Orange Pi Zero 3 или Orange Pi 3 LTS<br>
+У Zero 3 децл более шустрый проц и есть версия на 4Гб памяти(на алике сейчас <a href="https://aliexpress.ru/item/1005005800526641.html?sku_id=12000034396754918" rel="noopener nofollow ugc">в районе 4к с БП в комплекте</a>), а у 3 LTS есть 8Гб emmc памяти(<a href="https://aliexpress.ru/item/1005006876927612.html?sku_id=12000038594308468" rel="noopener nofollow ugc">~4700 уже без БП</a>). Обеих плат с головой хватит для всевозможных VPN и роутеров в скрытосети и под инсталляцию Home Assistant ещё останется(у меня оно на Zero 3 как раз крутилось до того как я с контейнерами на самом микроте занялся), так что можно выбрать на свой вкус, что важнее. Ну или глянуть уже на Orange Pi 4 - она во всём лучше, но уже 6 с лишним тыщ. Можно так же попробовать пройтись по бомж-варианту, orange pi zero lts или RPI 2b с авито, 512RAM, дохлый проц, архитектура armv7, стоит в районе 2К, всего в притых, но потянуть в теории должно(правда придётся конкретно хлебнуть с древними версиями ОС и пакетов, а также пересборкой под armv7, я бы короче не стал туда смотреть, но вопрос финансов как всегда)</p></td><td>2024-12-20T11:58:54.994Z</td></tr><tr><td>destiny08-lab(Destiny)</td><td><p>прошить openwrt и плясать как хочешь</p></td><td>2024-12-20T12:27:52.410Z</td></tr><tr><td>PeFeD(Fedor)</td><td><aside class="quote no-group" data-username="somula" data-post="8" data-topic="13925">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/a6a055/48.png" class="avatar"> somula:</div>
+<blockquote>
+<p>пока еще рано</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="somula" data-post="8" data-topic="13925">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/a6a055/48.png" class="avatar"> somula:</div>
+<blockquote>
+<p>еще не все варианты перепробованы</p>
+</blockquote>
+</aside>
+<p>Я так <img src="https://ntc.party/images/emoji/twitter/laughing.png?v=12" title=":laughing:" class="emoji" alt=":laughing:" loading="lazy" width="20" height="20"> в своё время со скрипом бросал 500-й Асус…<br>
+И вроде совсем древний, и вроде совсем никакой, но старый же добрый старичок, бросить же жалко. А вдруг ещё каааак задышит вторым дыханием…</p>
+<p>Чтоб не в оффтоп – у меня сейчас Микротик 951-й.<br>
+Давно по периметру обвязан Кинетиком (Start, Extra) и Orange Pi Zero.<br>
+Но дело ваше. Можно ещё годик-два посидеть подождать написания кем-нибудь спасительной прошивки…</p></td><td>2024-12-20T14:10:14.090Z</td></tr><tr><td>somula</td><td><aside class="quote no-group" data-username="PeFeD" data-post="12" data-topic="13925">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/pefed/48/12355_2.png" class="avatar"> PeFeD:</div>
+<blockquote>
+<p>Давно по периметру обвязан Кинетиком (Start, Extra) и Orange Pi Zero.</p>
+</blockquote>
+</aside>
+<ol>
+<li>У вас самый первый Orange Pi Zero тот что с 512 Мб RAM?</li>
+<li>Скажите какая скорость работы VPN на вашем Orange Pi Zero и что именно за VPN стоит?</li>
+<li>Памяти хватает под все нужны? Сколько занято и сколько свободно памяти?</li>
+</ol></td><td>2024-12-20T14:24:20.078Z</td></tr><tr><td>gnom24</td><td><aside class="quote no-group" data-username="somula" data-post="1" data-topic="13925">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/a6a055/48.png" class="avatar"> somula:</div>
+<blockquote>
+<p>старого Mikrotik (mipsbe CPU)</p>
+</blockquote>
+</aside>
+<p>если есть доступ в shell микротика выполните команду cat /proc/cpuinfo и выложите сюда выхлоп, чтобы определить ваш проц</p></td><td>2024-12-20T15:02:45.549Z</td></tr><tr><td>somula</td><td><p>Если коротко то в основном у меня и у друзей:<br>
+Model: Mikrotik RB951Ui-2HnD<br>
+Architecture Name:   mipsbe<br>
+CPU: MIPS 74Kc V4.12 (AR9344)</p>
+<p>Если под этот старый проц что-то проверенно и рабочее из VPN?<br>
+Знакомый пока протестировал SSTP, сказал работает но довольно медленно, что-то около 8-12 Мбит/с при имеющемся канале в 100 Мбит/с.</p></td><td>2024-12-20T15:22:05.579Z</td></tr><tr><td>gnom24</td><td><p>Я рекомендую скачать byedpi, это так называемое serverless решение, очень хорошо себя зарекомендовала (но это не vpn)<br>
+<a href="https://github.com/hufrea/byedpi/releases" class="inline-onebox" rel="noopener nofollow ugc">Releases · hufrea/byedpi · GitHub</a>  вам нужен byedpi-15-mips.tar.gz</p>
+<p>Или попробовать xray (Xray-linux-mips32.zip)<br>
+Скачать можно отсюда <a href="https://github.com/XTLS/Xray-core" class="inline-onebox" rel="noopener nofollow ugc">GitHub - XTLS/Xray-core: Xray, Penetrates Everything. Also the best v2ray-core, with XTLS support. Fully compatible configuration.</a></p>
+<p>И ещё, есть мнение, что на вашем устройстве должны работать программы, собранные под mips_24kc</p></td><td>2024-12-20T16:05:30.437Z</td></tr><tr><td>somula</td><td><p>А есть инструкции как это запускать на старом Mikrotik? Можно было бы с Dokek контейнере в новой прошивке 7й версии от самого Mikritik но там этого нет т.к. процессор не тот.</p></td><td>2024-12-20T16:55:45.835Z</td></tr><tr><td>gnom24</td><td><p>Нет, у меня абсолютно другой роутер, и инструкций я вам дать не смогу.<br>
+Что вам нужно выяснить в первую очередь:<br>
+*есть ли у  вас root доступ к ssh микротика<br>
+*возможно ли запускать скомпилированные(скачанные) бинарники со съёмного носителя, например<br>
+*если первы 2 пункта валидны, забросить на флэшку программу, воткнуть в usb, зайти по ssh на роутер в каталог, куда смонтировалась флэшка. Сказать: chmod 755 ciadpi<br>
+А дальше запускать программу, сказав: ./ciadpi -i 0.0.0.0 -p 8080 -o1 -o25+s (у меня работает с такими настройками)<br>
+Это всё, чем я могу помочь</p></td><td>2024-12-20T17:09:35.165Z</td></tr><tr><td>destiny08-lab(Destiny)</td><td><p>откуда на микроте рут? этож анально огороженое по типу огрызка, тут только опенврт шить как выше многократно уже писалось</p></td><td>2024-12-20T18:10:05.666Z</td></tr><tr><td>Tyman</td><td><p>Есть идея, напишите в личку - дам проверить тестовое подключение по опенвпн без шифрования и которое не должны блокировать</p></td><td>2024-12-20T20:03:08.992Z</td></tr><tr><td>mipeje</td><td><p>А нельзя sstp на рф сервер, оттуда уже xray на иностранный?</p></td><td>2024-12-21T15:47:06.083Z</td></tr><tr><td>somula</td><td><p>Друг сразу тестировал SSTP до иностранного сервера и сказал что все работает, нет смысла делать два сервера, можно один за бугром.<br>
+Если у кого-то есть рабочая схема настройки SSTP прошу поделитесь, друг там что-то настроил но делал это с нескольких инструкций и методом тыка, повторить весь процесс настройки врятли получится и есть вероятность что SSTP дает низкую скорость (8-12 Мбит/с) из-за кривого конфига.</p></td><td>2024-12-21T16:21:21.471Z</td></tr><tr><td>PeFeD(Fedor)</td><td><p>Оранж у меня Zero3. С четырьмя гигами. Сейчас не используется. Только тестирую-балуюсь на нём. Всё основное сделано через Кинетик. Zapret и VPS на аезе. Типа <a href="https://github.com/Anonym-tsk/nfqws-keenetic" rel="noopener nofollow ugc">такого</a>, <a href="https://github.com/Anonym-tsk/tpws-keenetic" rel="noopener nofollow ugc">такого</a>, <a href="https://www.youtube.com/watch?v=eZJFua_L0lc" rel="noopener nofollow ugc">такого</a>.<br>
+По скоростям вроде всё ровно было. Сейчас точно не вспомню, но ютуб смотрелся, цензор_нет открывался, даже торренты некоторые блэклистовые качались. Памяти хватало на всё. И ещё нгикс, хом асистант и пр. муть “рядом” помещалась.</p>
+<p>По оранжу наверное можно в соседних <a href="https://ntc.party/t/topic/9125/28">топиках</a> поискать помощи.</p>
+<p>PS :<br>
+Да, там в ютубе, у ролика есть рефералка на аезу. Если к-л не любит таких штук – будьте осторожны.</p></td><td>2024-12-21T20:49:43.565Z</td></tr><tr><td>mipeje</td><td><p>С нынешней ситуацией в любой момент может перестать работать )</p></td><td>2024-12-21T21:01:24.928Z</td></tr><tr><td>somula</td><td><p>Протестировал работы Amnezia Wireguard через своего провайдера - работает, но чистый Wireguard блочится. В микротике пока есть только чистый Wireguard без обфускации и маскировки. Чтобы сделать из чистого Wireguard замаскированный Amnezia Wireguard нужно добавить пару параметров и поменять немного алгоритм работы. Я переписывался с разработчиками Микротика они сказали что подумают о добавлении алгоритма Amnezia Wireguard в новые версии Миротика если будут запросы от пользователей.<br>
+Если у кого-то еще есть старые или простые микротики которые не поддерживают docker, то напишити разработчикам на почту: <a href="mailto:support@mikrotik.com">support@mikrotik.com</a> и скажите чтобы добавили поддержку Amnezia Wireguard, он у нас в России по отзывам работает лучше чем чистый Wireguard.</p></td><td>2024-12-23T16:06:52.089Z</td></tr><tr><td>PeFeD(Fedor)</td><td><aside class="quote no-group" data-username="somula" data-post="25" data-topic="13925">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/a6a055/48.png" class="avatar"> somula:</div>
+<blockquote>
+<p>Я переписывался с разработчиками Микротика они сказали что подумают о добавлении алгоритма Amnezia Wireguard в новые версии Миротика если будут запросы от пользователей.</p>
+</blockquote>
+</aside>
+<p>Это вы сейчас делали? В смысле, днями?</p>
+<p>AWG появилась весной. Прямо весной микротов начали пинать. Я лично тоже пинал. В апреле. На официальном форуме.<br>
+Полная отморозка…</p></td><td>2024-12-24T02:10:04.017Z</td></tr><tr><td>BBS</td><td><p>AR9344 - это дохленький MIPS на 560 MHz. Скоростей выше 20 МБит/с (openvpn) на любой прошивке от него не ждите. Какая-нибудь сильно б/у raspberry pi 2 с авито на 1.2GHz будет заметно быстрее. Не мучайте старичка, пусть лучше wifi раздаёт.</p></td><td>2024-12-24T03:11:55.689Z</td></tr><tr><td>somula</td><td><p>Да, недавно их пинал хотел узнать как у них там дела с Amnezia Wireguard, сказали сделаем если будет много людей просить. И на форуме я видел тему про Amnezia Wireguard, это кажется самая популярная тема, там больше всего просмотров и ответов. Они что-то реально долго морозятся и не добавляют этот протокол.</p></td><td>2024-12-24T12:01:38.526Z</td></tr><tr><td>PeFeD(Fedor)</td><td><p>Для меня всегда Mikrotik почему-то являлся олицетворением известной фразы “<em>…где маркетологи победили инженеров</em>”.</p>
+<p>А вы не думали на OpenWRT прошиться?<br>
+Бинарник на сайте есть, надо только память перепроверить, чтоб не запороть.<br>
+У вас как минимум <a href="https://ntc.party/t/topic/12004">WARP</a> появится. Или свой VPS можно будет завести как в указанном выше Ютубе.</p></td><td>2024-12-25T02:31:28.797Z</td></tr><tr><td>zzr</td><td><p>нюанс тока в том что если уже успел обновится до 7 версии то походу не проканает<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="старый-mikrotik-mipsbe-cpu-и-vpn-для-обхода-блокировок/0fb42629fa77f35a0efc4d5b054d00d061e700f9.jpeg" data-download-href="https://ntc.party/uploads/default/0fb42629fa77f35a0efc4d5b054d00d061e700f9" title="Screenshot 2024-12-25 092751"><img src="старый-mikrotik-mipsbe-cpu-и-vpn-для-обхода-блокировок/0fb42629fa77f35a0efc4d5b054d00d061e700f9_2_690x88.jpeg" alt="Screenshot 2024-12-25 092751" data-base62-sha1="2eV82tvDGjzO9MQXvu03WhZ4aOB" width="690" height="88" srcset="старый-mikrotik-mipsbe-cpu-и-vpn-для-обхода-блокировок/0fb42629fa77f35a0efc4d5b054d00d061e700f9_2_690x88.jpeg, старый-mikrotik-mipsbe-cpu-и-vpn-для-обхода-блокировок/0fb42629fa77f35a0efc4d5b054d00d061e700f9_2_1035x132.jpeg 1.5x, старый-mikrotik-mipsbe-cpu-и-vpn-для-обхода-блокировок/0fb42629fa77f35a0efc4d5b054d00d061e700f9.jpeg 2x" data-dominant-color="EBB0A5"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot 2024-12-25 092751</span><span class="informations">1126×145 51.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+(хоть ето и врятли возможно учитывая что там отсилы 16Мб памяти (у меня на пример не обновляется пишит нету местов))</p>
+<p>а вобще if u ask me надо сливать ети столетние микротики на авите пока они кому нето нужны, ну или как я сделал компаньёна для (любого) роутера - прост рядом распери пи лижит на себя всё берёт все запреты, впны и прочие телодвижения</p></td><td>2024-12-25T06:34:01.153Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="zzr" data-post="30" data-topic="13925">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/zzr/48/14949_2.png" class="avatar"> zzr:</div>
+<blockquote>
+<p>прост рядом распери пи лижит на себя всё берёт все запреты, впны и прочие телодвижения</p>
+</blockquote>
+</aside>
+<p>Производительности хватает гигабит через себя прокачивать в AES-256? Если да, то какая модель?</p></td><td>2024-12-25T08:35:38.875Z</td></tr><tr><td>somula</td><td><p>Там при прошивки старого Микротика в OpenWRT куча подводных камней, кроме 7й версии прошивки может еще не работать Wi-Fi если у вас 2я ревизия железа: <a href="https://forum.openwrt.org/t/support-for-mikrotik-rb951ui-2hnd-r2/46923" class="inline-onebox" rel="noopener nofollow ugc">Support for Mikrotik rb951ui-2hnd r2 - For Developers - OpenWrt Forum</a><br>
+Я точно не хочу с таким сталкиваться, пока отложу прошивку и подумаю как решить проблему с использованием Raspberry Pi, друг обещал дать поиграть не надолго для теста и экспериментов</p></td><td>2024-12-25T15:18:49.296Z</td></tr><tr><td>zzr</td><td><aside class="quote no-group" data-username="Xunlei" data-post="31" data-topic="13925">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>AES-256</p>
+</blockquote>
+</aside>
+<p>на ето врятли у его хватит производительности, я в таком режиме не использовал (у меня четвёрка если щто) загрузить весь гигабитный канал у вас там чё дата центнер или щто <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20"> или в наше время достаточно видево в 4к запустить чтоб</p>
+<p>там армный чип consider to use чачаполи1305 вместо аеэса луче if u ask me</p></td><td>2024-12-25T16:34:45.657Z</td></tr><tr><td>zzr</td><td><p>никаких проблем (я не испытал) над прост маскарад делать и всех дел <a href="https://ntc.party/t/zapret-%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5/726/4010" class="inline-onebox">Zapret: обсуждение - #4010 by zzr</a></p></td><td>2024-12-25T16:38:14.842Z</td></tr>
+    </table>
+      </body>
+    </html>

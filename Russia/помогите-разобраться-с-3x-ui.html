@@ -1,0 +1,92 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>помогите-разобраться-с-3x-ui</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>allula</td><td><p>Всем привет. Арендовал VPS, поставил 3X-UI в докере, настроил панель слушать localhost, создал подключение.</p>
+<p>Протокол: vless<br>
+Порт: 443<br>
+Flow: xtls-rprx-vision<br>
+Протокол передачи: TCP (RAW)<br>
+Безопасность: Reality<br>
+Dest (Target) и SNI пробовал разные: и крупные, и местечковые.</p>
+<p>Однако клиент v2rayNG не может подключиться. Сначала заметил, что в сгенерированной строке подключения указан localhost (насколько понял, панель смотрит, по какому адресу к ней обратились, и подставляет этот адрес). Поменял руками на IP VPS. Подключается, но после нажатия на проверку соединения пишет:</p>
+<p>Сбой проверки интернет-соединения: io: read/write on closed pipe</p>
+<p>При этом бесплатные ключи с vless-reality работают. Предполагаю, что затык на стороне сервера, но у меня очень мало в этом компетенций, чтобы разобраться, поэтому прошу вашей помощи. Можно ли локализовать проблему хотя бы? Или я всё-таки ошибся в настройках, что-то не сделал?</p></td><td>2024-11-30T12:34:29.346Z</td></tr><tr><td>Xunlei</td><td><p>Если в сгенерированной строке локалхост, то скорее всего не настроен адрес прослушивания входящих соединений.</p>
+<p>Примерные команды терминала для проверки:</p>
+<pre><code class="lang-auto">sudo apt install net-tools
+sudo netstat -atupen
+</code></pre>
+<p>Смотрите, что на публичном адресе приложение слушает порт.</p>
+<pre><code class="lang-auto">sudo apt install tcpdump
+sudo tcpdump -n -i ens3 "not arp and not multicast and not port 22"
+</code></pre>
+<p>Смотрите, что пакеты от клиента доходят до сервера.</p></td><td>2024-11-30T12:49:54.148Z</td></tr><tr><td>allula</td><td><p>Благодарю за ответ. Вот вывод:</p>
+<pre data-code-wrap="bash"><code class="lang-bash">$ sudo ss -atupn | grep xray
+tcp   LISTEN    0      4096       127.0.0.1:62789        0.0.0.0:*     users:(("xray-linux-amd6",pid=1996,fd=3))                          
+tcp   LISTEN    0      4096               *:443                *:*     users:(("xray-linux-amd6",pid=1996,fd=6))
+</code></pre>
+<p>Если я правильно понимаю, <code>xray</code> слушает все ip на 443 порту.</p>
+<p>Через <code>tcpdump</code> вижу, что пакеты от клиента доходят.</p></td><td>2024-11-30T13:26:24.018Z</td></tr><tr><td>Xunlei</td><td><p>А в ответ сервер посылает? Может в файрволле нужно разрешить 443 порт.</p></td><td>2024-11-30T13:53:53.688Z</td></tr><tr><td>allula</td><td><p>Так точно. Вижу пакеты в обоих направлениях. У самого xray можно логи посмотреть? Не могу найти.</p></td><td>2024-11-30T14:01:19.516Z</td></tr><tr><td>NowAndThen</td><td><p>Ну, все правильно. Вы настроили xray-сервер слушать localhost, т.е. самого себя. Конечно вы не можете извне подключиться. И IP сервера вы туда ставите, то же самое и получаете, он будет ждать подключения с самого себя. Уберите из поля Listen все. Или пропишите там 0.0.0.0, т.е. слушать подключения с любых IP, что по эквивалентно пустому полю по умолчанию, тогда будет ждать поключения с любого IP.</p></td><td>2024-11-30T14:01:37.510Z</td></tr><tr><td>allula</td><td><p>В настройки xray вообще не лез. Настраивал только саму панель слушать <code>localhost</code>, чтобы не висела на весь интернет. Вывод <code>ss</code> вроде подтверждает мои слова (<code>*:443</code>). Или я что-то упускаю?</p></td><td>2024-11-30T14:05:21.571Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="allula" data-post="5" data-topic="13460">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Так точно. Вижу пакеты в обоих направлениях</p>
+</blockquote>
+</aside>
+<p>Можете сохранить пакеты в файл и открыть в Wireshark. Если там в ответ не RST пакет, а SYN+ACK и данные значит что-то не так с конфигурацией.</p>
+<aside class="quote no-group" data-username="allula" data-post="5" data-topic="13460">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>У самого xray можно логи посмотреть?</p>
+</blockquote>
+</aside>
+<p>Не знаю, не пользуюсь 3x-ui, должно быть можно.</p></td><td>2024-11-30T14:45:32.509Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="NowAndThen" data-post="6" data-topic="13460">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/c0e974/48.png" class="avatar"> NowAndThen:</div>
+<blockquote>
+<p>Вы настроили xray-сервер слушать localhost</p>
+</blockquote>
+</aside>
+<p>Там только веб морда админки на локалхосте.</p></td><td>2024-11-30T14:54:54.562Z</td></tr><tr><td>allula</td><td><p>Большое спасибо всем, кто ответил. Проблема оказалась в настройках разрешения имён (только не смейтесь): пустой <code>/etc/resolv.conf</code>. Изначально при установке системы включил <code>systemd-resolved</code>, но не знал, что <code>go</code> не умеет в <code>NSS</code>. Всё решилось одной ссылкой:</p>
+<pre data-code-wrap="bash"><code class="lang-bash"># ln -sf ../run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+</code></pre></td><td>2024-11-30T15:42:09.037Z</td></tr><tr><td>Xunlei</td><td><p>Тогда лучше какой-нибудь bind9, unbound или TDNS поставить с поддержкой ServeStale и прочих фич.</p></td><td>2024-11-30T16:48:37.097Z</td></tr>
+    </table>
+      </body>
+    </html>

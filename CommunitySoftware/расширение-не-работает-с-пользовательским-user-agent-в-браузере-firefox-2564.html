@@ -1,0 +1,86 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>jestxfot(YoutubeNotWork)</td><td><p>При смене User Agent’а в браузере Firefox через настройку “general.useragent.override” в about:config, расширение полностью отваливается и не подключается к прокси. Есть ли способ решить это или объяснить почему так происходит?<br>
+Версия Firefox 101.0b9</p></td><td>2022-05-31T22:13:24.076Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p><a href="https://antizapret.prostovpn.org/proxy.pac">https://antizapret.prostovpn.org/proxy.pac</a> блокирует некоторые проблемные user-agent’ы. Вы можете привести пример user-agent’а, который у вас не работает с расширением?</p></td><td>2022-06-06T16:01:28.848Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>Самый стандартный User Agent Chrome<br>
+<code>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36</code></p></td><td>2022-06-06T16:08:17.123Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>В расширении user-agent никак не считывается и не меняется за исключением запросов к новостям через GitHub API (<a href="https://github.com/anticensority/runet-censorship-bypass/blob/8f00516d44e3b938aa004ea5381bdb5cbc6b5355/extensions/chromium/runet-censorship-bypass/src/extension-common/pages/options/src/components/App.js#L77" class="inline-onebox">runet-censorship-bypass/App.js at 8f00516d44e3b938aa004ea5381bdb5cbc6b5355 · anticensority/runet-censorship-bypass · GitHub</a>).</p>
+<p>Передал вашу жалобу администратору <a href="http://antizapret.prostovpn.org">antizapret.prostovpn.org</a> --, может, у него будут идеи.</p></td><td>2022-06-06T16:44:31.210Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Проявляется ли проблема, если использовать PAC-скрипт “Антицензорити”? Не обязательно настраивать тор или свои прокси – просто проверьте, скачивается ли он и уставливается ли.</p></td><td>2022-06-06T16:46:37.050Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p><code>Некритичная ошибка. Всё хорошо, продолжаем работу.</code></p></td><td>2022-06-06T16:55:28.021Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Ну, значит проблема на стороне АнтиЗапрета.</p>
+<p>Для полноты картины давайте посмотрим ошибки в логах после установки “Антицензорити”:</p>
+<ol start="0">
+<li>Переключить PAC-скрипт на Антицензорити.</li>
+<li>Открыть about:debugging#/runtime/this-firefox.</li>
+<li>Найти наше расширение, нажать Inspect/Исследовать и запечатлеть красные записи (ошибки).</li>
+<li>Также можно посмотреть в Browser console: Ctrl+Shift+J. Там может быть много незначительных ошибок, не пугайтесь.</li>
+</ol>
+<blockquote>
+<p>[…]полностью отваливается и не подключается к прокси[…]</p>
+</blockquote>
+<p>Опишите более подробно, что происходит: расширение аварийно завершается и не показывает никаких ошибок?</p></td><td>2022-06-06T17:05:35.542Z</td></tr><tr><td>ValdikSS</td><td><p>У меня проблема не проявляется. При смене user-agent через изменение <code>general.useragent.override</code> на указанный в <a href="https://ntc.party/t/user-agent-firefox/2564/3" class="inline-onebox">Расширение не работает с пользовательским User Agent в браузере Firefox - #3 by jestxfot</a>, работоспособность расширения никак не меняется.<br>
+Firefox 100.0.2.</p></td><td>2022-06-06T17:09:55.543Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>Попробуйте ещё этот, через файл mozilla.cfg<br>
+<code>lockPref("general.useragent.override", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36")</code></p></td><td>2022-06-06T17:16:48.645Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>Ошибок никаких нет. Ничего не происходит.</p>            <div class="onebox imgur-album">
+              <a href="https://imgur.com/a/47SR7Cl" target="_blank" rel="noopener nofollow ugc">
+                <span class="outer-box" style="width:600px">
+                  <span class="inner-box">
+                    <span class="album-title">[Album] imgur.com</span>
+                  </span>
+                </span>
+                <img src="расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/8a0a538c23033539a45b77ec2e21428cad3f5f8c.jpeg" title="imgur.com" height="315" width="600" data-dominant-color="2B2A2F">
+              </a>
+            </div>
+</td><td>2022-06-06T17:20:30.211Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/c436b0e29fec0f8040d3133762f07dc0fc1b6424.png" data-download-href="https://ntc.party/uploads/default/c436b0e29fec0f8040d3133762f07dc0fc1b6424" title="image"><img src="расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/c436b0e29fec0f8040d3133762f07dc0fc1b6424_2_690x459.png" alt="image" data-base62-sha1="rZML3LInYQ4zqKm3hdqO0NdgpeI" width="690" height="459" srcset="расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/c436b0e29fec0f8040d3133762f07dc0fc1b6424_2_690x459.png, расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/c436b0e29fec0f8040d3133762f07dc0fc1b6424_2_1035x688.png 1.5x, расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/c436b0e29fec0f8040d3133762f07dc0fc1b6424.png 2x" data-dominant-color="5A5C64"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1093×728 42.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2022-06-06T17:20:55.906Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Если вы используете DNS-сервер от провайдера, то попробуйте сменить его на один из этих:</p>
+<ol>
+<li>От Google: 8.8.8.8 и 8.8.4.4.</li>
+<li>От CloudFlare: 1.1.1.1 и 1.0.0.1.</li>
+<li>
+<a href="http://www.quad9.net">www.quad9.net</a>.</li>
+</ol></td><td>2022-06-06T17:25:19.174Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>Стоял <code>https://dns.google/dns-query</code> - 0 реакций<br>
+<img src="расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/28197725f4235f654f35a0eceed785f55f111900.png" alt="image" data-base62-sha1="5IJEOfNjSfwpEunhFhhLwDQpdny" width="500" height="136"></p>
+<p>Убрал галочку - 0 реакций</p>
+<p>Поставил CloudFlare - 0 реакций<br>
+<img src="расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/35b089c486d1ef9e3430546b4fc666f6f04509bd.png" alt="image" data-base62-sha1="7EXxiWAxxWmjIYNWj3XPGr5V7it" width="434" height="107"></p></td><td>2022-06-06T17:33:27.256Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>Ни один из DNS не дал нужного результата<br>
+<img src="расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/51533cd5d1367c1ceabbf044b5f3230e3df7a13f.png" alt="image" data-base62-sha1="bBr0FZ7Ctt2O1lUbQlv6jpMHwXJ" width="502" height="232"></p></td><td>2022-06-06T17:38:38.473Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>При подключении к сайту висит эта загрузка<br>
+<img src="расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/5d868b301ccff43b34a6e7fb4a649e8075dd1f5c.png" alt="image" data-base62-sha1="dlmF7KkTCwK4QdGvyO7IIaMuzsU" width="33" height="63"></p></td><td>2022-06-06T17:38:59.945Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>Это всё что есть в соединениях, не знаю насколько нормальный тут пинг<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/d04dd881f9f3ccb847d0973a8448f89886a31a69.png" data-download-href="https://ntc.party/uploads/default/d04dd881f9f3ccb847d0973a8448f89886a31a69" title="image"><img src="расширение-не-работает-с-пользовательским-user-agent-в-браузере-firefox-2564/d04dd881f9f3ccb847d0973a8448f89886a31a69.png" alt="image" data-base62-sha1="tIK63381OLZIGPRaKaCK0BVDBS9" width="690" height="66" data-dominant-color="26262A"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1691×164 6.24 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2022-06-06T17:41:21.926Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Попробуйте их новый адрес: <a href="https://proton.me">https://proton.me</a>.</p></td><td>2022-06-06T17:46:13.916Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>Я знаю что он не заблокирован, я в принципе могу зайти, но это не панацея. У других сайтов зеркал то нет, мне не только протон нужен.</p></td><td>2022-06-06T17:47:36.394Z</td></tr><tr><td>ValdikSS</td><td><ol>
+<li>Создал новый профиль Firefox</li>
+<li>Установил «обход блокировок Рунета»</li>
+<li>Изменил user-agent через about:config</li>
+</ol>
+<p>Ничего не изменилось. Расширение продолжает работать, сайты продолжают проксироваться. Обновления листа не меняет поведение.<br>
+Вывод — проблема на вашей стороне, возможно, в бета-версии браузера.</p></td><td>2022-06-07T05:26:55.119Z</td></tr>
+    </table>
+      </body>
+    </html>

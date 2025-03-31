@@ -1,0 +1,47 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>on-precisely-detecting-censorship-circumvention-in-real-world-networks-ndss-2024</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>On Precisely Detecting Censorship Circumvention in Real-World Networks<br>
+Ryan Wails, George Arnold Sullivan, Micah Sherr, Rob Jansen<br>
+<a href="https://www.robgjansen.com/publications/precisedetect-ndss2024.html">https://www.robgjansen.com/publications/precisedetect-ndss2024.html</a></p>
+<p>A primary problem faced by censors is the low <em>base rate</em> of circumvention connections. Traffic classifiers must have a very low rate of false positives, or else they will end up blocking more non-circumvention traffic than circumvention traffic. This paper takes a critical look at past research on detecting circumvention systems and argues that the techniques that have been proposed have too many false positives to be practical at the base rates seen in real networks. The authors create hand-tuned and deep learning–based classifiers that improve on the state of the art, but say that even these would have unrealistically many false positives in practice. To mitigate poor per-flow precision, they suggest <em>host-based analysis</em>: aggregating many flows to the same endpoint over time. They apply their classifiers to the two transports currently available in Tor Browser, obfs4 and Snowflake; in the case of Snowflake, they consider both the <a href="https://www.bamsoftware.com/papers/snowflake/snowflake.20231003.e6e1c30d.pdf#page=3">rendezvous</a> and <a href="https://www.bamsoftware.com/papers/snowflake/snowflake.20231003.e6e1c30d.pdf#page=6">data transfer</a> phases. Empirical measurements of classifier performance use two weeks of traffic from a university network, about 60 million flows.</p>
+<p>The paper introduces a <em>λ</em> notation to quantify base rates. <em>λ</em> is how many non-circumventing flows there are for every 1 circumventing flow. For example, <em>λ</em> = 1 means an equal mix, and <em>λ</em> = 100 means approximately 1% of flows are circumventing. The 2015 paper <a href="https://censorbib.nymity.ch/#Wang2015a">“Seeing through Network-Protocol Obfuscation”</a>—which deserves credit for considering false positive rates when earlier work, like <a href="https://github.com/net4people/bbs/issues/244">“The Parrot is Dead”</a>, had not; and for using real traffic captures—used a <em>λ</em> = 1 traffic mix in evaluation. This paper claims that the results in “Seeing through…” are not as good as they seem: <a href="https://www.robgjansen.com/publications/precisedetect-ndss2024.pdf#page=6">Table I</a> shows how a precision that looks good at <em>λ</em> = 1 dwindles to uselessness at <em>λ</em> = 1000 (which is likely still an overestimate of the actual rate of occurrence of obfs4 in the wild). The authors prepare a new, hand-tuned classifier for obfs4 using expert knowledge—it scales to base rates of <em>λ</em> = 1000 but not further, and moreover it is brittle: a <a href="https://github.com/RACECAR-GU/lyrebird/commit/17d70840f8063ccbcc1888e8426ff505fccd2972">small tweak to the protocol</a> (along the lines of <a href="https://github.com/net4people/bbs/issues/136">GFW Report’s entropy-reduction patch for Shadowsocks</a>) makes the hand-tuned classifier completely ineffective.</p>
+<p>They next try a classifier based on deep learning. Deep learning has been used for website fingerprinting and encrypted traffic analysis, but has not yet been applied to circumvention detection. Their best-performing classifier, using a <a href="https://en.wikipedia.org/wiki/Convolutional_neural_network">convolutional neural network</a> on packet size and direction features, outperforms the “Seeing through…” classifiers on obfs4 and generalizes better than the hand-tuned classifier. They test it against Snowflake as well: the Snowflake data channel is easier to detect than obfs4, but the rendezvous exchange is harder. But the precision of the deep learning classifier, too, drops to zero for all protocols at about <em>λ</em> = 10000. (The performance might be improved if packet payload or endpoint addresses were taken into account.)</p>
+<p>Finally, the authors suggest a way to achieve good classification performance, even with flow classifiers that don’t scale to high base rates. The idea is to shift from classifying <em>flows</em> to classifying <em>hosts</em>. Instead of making an allow/block decision for each flow, keep a small amount of state for each remote host, aggregating observations over multiple flows. They show a simple way to convert a flow-based classifier into a host-based one: classify every flow as before, and when the flow is classified positive, increase a counter for the destination host. Label a host as a circumvention server when (1) it has received at least a certain number of flows, and (2) at least a certain percentage of those flows were positive. The number of flows needed is logarithmic in the error rate parameter: you only need to see a few dozens or hundreds to bring the host-based false positive rate almost to zero. This threshold scheme is just one way of doing host-based analysis. Other techniques may do even better, and this is a good topic for future circumvention research and development. On the defense side, host-based analysis is mitigated in circumvention systems that do not rely on proxies at stable addresses, or that have a polymorphic protocol fingerprint.</p></td><td>2023-11-30T22:07:47.849Z</td></tr><tr><td>Snawoot</td><td><p>Great read, thanks!</p></td><td>2023-12-02T12:39:17.812Z</td></tr>
+    </table>
+      </body>
+    </html>

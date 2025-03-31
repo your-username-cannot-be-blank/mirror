@@ -1,0 +1,87 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>поддержка-wireguard-2139</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>BOLNICHKA39</td><td><p>Здравствуйте, планируется ли добавление поддержки wireguard? Он же более быстрый и лёгкий, очень не плохой для установки на роутер</p></td><td>2022-04-01T14:11:33.579Z</td></tr><tr><td>gegrby</td><td><p>Плюсую. Только вот для подключения к нему нужно будет клиент делать, иначе настройка будет запарной. Ведь там обмен ключами как никак.</p></td><td>2022-04-01T17:42:27.436Z</td></tr><tr><td>bolvan</td><td><p>У wireguard нет никаких методов динамической конфигурации<br>
+там все статично прописано. ip, маршруты, ключи<br>
+не получится сделать 1 конфиг для всех<br>
+клиент и его настройки на сервере опознаются именно по предьявленным ключам. дубль логин не сработает</p></td><td>2022-04-01T18:58:52.767Z</td></tr><tr><td>BOLNICHKA39</td><td><p>Недавно пробовал настраивать wireguard на роутере, не очень сложно, проблема в том, что сервисы, которые работают с wireguard в основном платные, бесплатных очень мало</p></td><td>2022-04-01T19:34:33.875Z</td></tr><tr><td>zinoid</td><td><p>Wireguard не получилось завести на Ubuntu 16.04 с ядром 4.4 (про XP и говорить нечего, а больше у меня ничего нет, Win7 я не люблю). Новые версии Wireguard не компилятся, им надо что-то от ядра. Ядро менять не хочу. Старые компилятся, но я поставил какую-то старую deb’ку из интернета (модуль ядра тоже при установке собирается из исходников). Нашел какой-то бесплатный сервис. Исходящие пакеты уходят, а входящие не приходят. А это значит плохая обратная совместимость (как и у shadowsocks на XP). Wireguard это больше для скорости (UDP), а не для обфускации трафика. Для обеспеченных западных пользователей. Неперспективное направление для России.</p>
+<aside class="quote no-group" data-username="BOLNICHKA39" data-post="4" data-topic="2139">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/bolnichka39/48/1292_2.png" class="avatar"> BOLNICHKA39:</div>
+<blockquote>
+<p>бесплатных очень мало</p>
+</blockquote>
+</aside>
+<p>Можно найти и бесплатные, но их обычно приходится продлять дней через 7. Чтобы смотрели рекламу на сайте. Не очень удобно, но для тестов сгодится. В Telegram каналах также публикуются.</p></td><td>2022-04-02T00:24:29.238Z</td></tr><tr><td>gegrby</td><td><p>Всё таки я ошибся, на самом деле с WG всё просто. Нужен только генератор конфигов на стороне сервера, примеры реализации есть в инете.<br>
+(просто я забыл что необязательно генерировать сервер на клиентском устройстве, можно и вводить готовый)</p></td><td>2022-04-03T11:13:14.804Z</td></tr><tr><td>ValdikSS</td><td><p>Wireguard недалеко ушел от обычного IP-туннеля, вроде IPIP или GRE. Он не позволяет даже назначить клиенту IP-адрес, не говоря уже о передаче таких параметров, как маршруты и адрес DNS-сервера.<br>
+У него нет никаких преимуществ, кроме скорости шифрования и туннелирования.</p>
+<p>Поддержка Wireguard для сервиса вроде АнтиЗапрета — обуза. Гораздо более вероятно появление IPsec IKEv2 в среднесрочной перспективе — он, аналогично Wireguard, реализован в ядре и обладает высокой скоростью работы, но имеет почти такой же широкий функциональный набор, как OpenVPN.</p></td><td>2022-04-04T14:41:30.189Z</td></tr><tr><td>bolvan</td><td><p>IKEv2 - хорошее решение для настольной или мобильной системы, но не особо для домашних роутеров, где скорость наиболее актуальна в силу малой мощности процессора.<br>
+strongswan далеко не каждая прошивка имеет на борту<br>
+даже в openwrt ikev2 не проведено через интерфейс. приходится ручками настраивать strongswan</p>
+<p>на android не самых распоследних версий встроенная kernel реализация или racoon могут быть устаревшими, подключающимися с проблемами к серверу , требуют на сервере специальной конфигурации. нормально работает только приложение от strongswan, но оно работает через tun, следовательно никакой разницы с openvpn.</p></td><td>2022-04-04T19:03:47.134Z</td></tr><tr><td>BOLNICHKA39</td><td><p>Тут правильно подметили, что несмотря на все недостатки wireguard, у него есть одно достоинство - лёгкость. Он проще даётся роутерам, чем openvpn</p></td><td>2022-04-05T16:03:18.314Z</td></tr><tr><td>Joyz</td><td><p>А хотя бы сделать VPN Container на основе wireguard для собственного хостинга не планируется?</p></td><td>2022-04-21T11:13:26.045Z</td></tr><tr><td>gegrby</td><td><p>Одно другому не мешает. Хотя бы WireGuard для роутеров, учитывая разницу прожора. А на телефоне уже каждый решит, но я бы и на телефоне поставил.</p></td><td>2022-04-28T19:14:03.207Z</td></tr><tr><td>kirill</td><td><p>доброго времени суток</p>
+<p>есть подвижки в сторону IPSec<br>
+?</p></td><td>2023-08-12T21:48:29.762Z</td></tr><tr><td>xtrime</td><td><p>Добавили поддержку WG, Amnezia и ipsec в виде отдельных docker контейнеров:</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/xtrime-ru/antizapret-vpn-docker">
+  <header class="source">
+
+      <a href="https://github.com/xtrime-ru/antizapret-vpn-docker" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="поддержка-wireguard-2139/2b06b9c5689ed8174402daf1c64f5388b733901f_2_690x344.png" class="thumbnail" data-dominant-color="EBEDED">
+
+  <h3><a href="https://github.com/xtrime-ru/antizapret-vpn-docker" target="_blank" rel="noopener">GitHub - xtrime-ru/antizapret-vpn-docker: Docker container with antizapret-vpn for...</a></h3>
+
+    <p><span class="github-repo-description">Docker container with antizapret-vpn for selfhosting.</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Но в ipsec tunnelsplit клиентами плохо поддерживается. Стандартный IOS/Macos клиент не работает с ним.</p>
+<p>В WG/Amnezia список заблокированных подсетей пока захардкожен, но в след мажорной версии вынесем его в env файл. Но конфиг, конечно, придется перекачивать, если РКН будет новые подсети банить активно.</p></td><td>2024-10-03T23:14:40.750Z</td></tr>
+    </table>
+      </body>
+    </html>

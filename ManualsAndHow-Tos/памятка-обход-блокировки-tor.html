@@ -1,0 +1,100 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>памятка-обход-блокировки-tor</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0x7f</td><td><p>Памятку делаю больше для себя, но может кому ещё пригодится. Работает для линукса, скорее всего можно легко переделать и под винду но у меня нет под рукой винды.</p>
+<ol>
+<li>установить tor по <a href="https://web.archive.org/web/20240614183325/https://support.torproject.org/ru/rpm/tor-rpm-install/" rel="noopener nofollow ugc">инструкции</a></li>
+<li>открыть конфиг тора <code>nano /etc/tor/torrc</code></li>
+<li>вставить в самый конец конфига</li>
+</ol>
+<pre><code class="lang-auto">ExcludeNodes {ru},{by},{ua},{kz},{kg},{md},{tm} StrictNodes 1
+UseBridges 1
+%include /etc/tor/bridges.conf
+</code></pre>
+<ol start="4">
+<li>скачать и настроить обфускатор по <a href="https://web.archive.org/web/20241227160536/https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/raw/main/README.md?ref_type=heads" rel="noopener nofollow ugc">инструкции</a></li>
+<li>скачать валдиковский парсер с помощью</li>
+</ol>
+<pre><code class="lang-auto">cd /etc/tor &amp;&amp; wget -O torparse.pyz $(curl -s https://api.github.com/repos/ValdikSS/tor-relay-scanner/releases/latest  | jq -r '.assets[] | select(.name | contains ("pyz")) | .browser_download_url')
+</code></pre>
+<ol start="6">
+<li>создать файл <code>nano torcton.sh</code></li>
+<li>написать туда</li>
+</ol>
+<pre><code class="lang-auto">#!/bin/bash 
+        while true
+        do
+                rm -v -f /etc/tor/bridges.conf
+                python torparse.pyz --torrc --outfile /etc/tor/bridges.conf
+                systemctl restart tor
+                echo
+                echo "парсер отработал в $(date)"
+                sleep 1h
+        done
+</code></pre>
+<ol start="8">
+<li>сохранить и выйти, потом запустить <code>./torcron.sh</code></li>
+</ol>
+<p>почему не засунул в крон или не сделал модуль системды? потому что хочется видеть поток вывода, не сломалось ли чего.</p>
+<p>мосты к сожалению отваливаются в последнее время часто, не каждый час конечно но каждые несколько часов их банят, поэтому хочется ловить новые рабочие быстрее чем их банят. на данный момент этот скрипт позволяет забыть о необходимости искать мосты руками.</p></td><td>2024-12-27T15:54:53.567Z</td></tr><tr><td>denium</td><td><p>Инструкция хорошая, но</p>
+<blockquote>
+<p>systemctl restart tor</p>
+</blockquote>
+<p>А если tor что-то качает?</p></td><td>2024-12-27T18:00:42.813Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p>Спасибо за памятку. Хоть я и пользуюсь тором редко, но буду юзать, удобнее, чем релеи вручную постоянно дергать.</p></td><td>2024-12-27T19:14:00.432Z</td></tr><tr><td>0x7f</td><td><p>придётся возобновить закачку. большинство программ сейчас так делать умеют. я этот скрипт делал когда ютуб совсем прижали и запрет почти не помогал, как правило буфера хватало чтобы не замечать рестартов тора.</p></td><td>2024-12-28T06:29:14.440Z</td></tr><tr><td>Alexey104(Alexey)</td><td><aside class="quote no-group" data-username="0x7f" data-post="1" data-topic="14188">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/0x7f/48/14192_2.png" class="avatar"> 0x7f:</div>
+<blockquote>
+<p><code>ExcludeNodes {ru},{by},{ua},{kz},{kg},{md},{tm} StrictNodes 1</code></p>
+</blockquote>
+</aside>
+<p>Не нужно этого делать. Это мнимое “улучшение”. На TorProject и Whonix вики/форумах уже сто раз разжёвано. Вопреки распространённому мнению, эта опция лишь негативно влияет как на анонимность, так и на производительность до тех пор, пока вы не являетесь скилловым аналитиком сети Tor и точно не понимаете, для чего это делаете. Избегание СНГшных нод просто по причине их геолокации не добавит безопасности.</p></td><td>2024-12-28T09:30:33.356Z</td></tr><tr><td>Xunlei</td><td><p>Если цель не безопасность, а обход региональных блокировок, например для скачивания набора разработчика с <code>ti.com</code> или драйвера intel, то сойдёт. Всё-таки тематика форума это обсуждения способов обхода цензуры, а не безопасность от поимки для преступников.</p></td><td>2024-12-28T12:24:08.449Z</td></tr><tr><td>skyrunner(name)</td><td><p>Все решается одним приватным (своим) мостом. И да, ставьте iat на 2</p></td><td>2024-12-28T15:08:54.405Z</td></tr><tr><td>0x7f</td><td><p>зачем мне российские ноды если ютуб с них не посмотришь? а в средней азии большая часть трафика гонится через ростелеком. анонимность в интернете меня уже не очень интересует, я живу в таком месте где можно в окно дрон со взрывчаткой получить. в такой ситуации бояться государства, тем более находящегося на грани развала, просто смешно.</p></td><td>2024-12-28T19:18:50.198Z</td></tr><tr><td>0x7f</td><td><p>впс не вариант потому что его могут в любой момент забанить по подсетям как это было с hetzner. тем более впс ради ютуба без которого вполне можно прожить.</p></td><td>2024-12-28T19:19:55.953Z</td></tr><tr><td>skyrunner(name)</td><td><p>Могут, ага. Ежели нормальный хостинг выбрать, усе чики пуки буит</p></td><td>2024-12-28T22:51:40.905Z</td></tr><tr><td>rkn-chan</td><td><p>в таком раскладе п2п сети будут более устойчивые, и точно не тор с центральным авторитарным листом. snowflake более менее п2п, но там брокер центральный, что легко обрубается</p>
+<p>в идеале можно своего брокера поднять в тихом уголке интернета, подальше от биг теха который сейчас под прицелом</p></td><td>2024-12-29T06:50:49.800Z</td></tr><tr><td>0x7f</td><td><p>ты имеешь в виду i2p? там скорость можно спокойно делить на 10 от тора, если не на 50 - для ютуба i2p-шные аутпрокси использовать невозможно. и по-настоящему децентрализованных сетей быть не может, всегда есть точка бутстрапа. у тора по крайней мере есть относительно высокая скорость и достаточно удобный костыль в виде мостов, которые появляются быстрее чем их успевают банить.</p></td><td>2024-12-29T21:01:41.613Z</td></tr><tr><td>mipeje</td><td><p>не подскажите в чем проблема?<br>
+беру айпи адреса из этого <a href="https://secureupdates.checkpoint.com/IP-list/TOR.txt" rel="noopener nofollow ugc">списка</a> и на роутере отправляю их через впн, вроде tor должен заработать т.к это список всех входных и выходных узлов, но нет<br>
+сверил с другим списком доступных адресов и там такое же количество</p></td><td>2024-12-30T19:16:51.819Z</td></tr><tr><td>MichaelAgarkov(Михаил Агарков)</td><td><p>meek-azure у меня всегда работает без проблем. obfs4 мосты блокируют, но некоторые работают без проблем.</p></td><td>2024-12-30T23:28:35.062Z</td></tr><tr><td>0x7f</td><td><aside class="quote no-group" data-username="mipeje" data-post="13" data-topic="14188">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/b487fb/48.png" class="avatar"> mipeje:</div>
+<blockquote>
+<p>беру айпи адреса из этого <a href="https://secureupdates.checkpoint.com/IP-list/TOR.txt" rel="noopener nofollow ugc">списка </a> и на роутере отправляю их через впн</p>
+</blockquote>
+</aside>
+<p>я не очень понимаю что это значит. валдиковская перебиралка мостов которой я пользуюсь в любом случае требует json-формат файла, и по твоей ссылке как минимум фингерпринтов нет. как вообще можно засунуть мосты от тора в впн и зачем? возможно я тебя неверно понимаю но по моему ты что-то делаешь не так.</p></td><td>2024-12-31T05:42:52.558Z</td></tr><tr><td>mipeje</td><td><p>Это не мосты, а входные р выходные узлы которые по умолчанию используются если тор в стране не заблокирован<br>
+Для маршрутизации на роутере использую podkop</p></td><td>2024-12-31T09:16:20.396Z</td></tr><tr><td>0x7f</td><td><p>в таком случае я не знаю чем помочь. может узлы не принимают пакеты от впнов, может ещё что. мне это кажется каким-то костылём, я бы посоветовал использовать встроенный в тор механизм мостов. если уж хочется использовать вдс то можно там поднять свой личный мост тора и подключаться к нему.</p></td><td>2024-12-31T10:31:46.824Z</td></tr>
+    </table>
+      </body>
+    </html>

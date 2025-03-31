@@ -1,0 +1,113 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>помогите-сделать-3x-ui-vless-tls-fallback-ngnix-smartdns-proxy-на-одном-ipport-80-443</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>1unknown(Unknown)</td><td><p>Всех приветствую! Я дам два описания (так будет проще меня понять):</p>
+<ul>
+<li>что сделал;</li>
+<li>что хочу сделать.</li>
+</ul>
+<p>Что сделал:<br>
+Есть арендованный VPS сервер с Ubuntu 24.02, на нём стоит AdGuard Home на 53 порту.<br>
+Для ряда выбранных мною сайтов он перезаписывает DNS запросы на IP моего же VPS, отправляя тем самым их в Sing-box, который слушает 80 и 443 порт. То есть это аналог Smart DNS от comss, который позволяет обходить региональные ограничения (геоблокировку по IP).<br>
+В 3X-UI я создал VLESS + Realitty с маскировкой под чужой сайт на 8443 порту. Так никаких конфликтов не возникает.</p>
+<p>Теперь опишу что хочу сделать:<br>
+Я взял в аренду на год свой домен. Установил Ngnix в Ubuntu, который слушает 127.0.0.1:8080 порт, заменил HTML на свой сайт-заглушку.<br>
+После чего в 3X-UI создал VLESS + TLS с Fallbacks на мой сайт-заглушку на 443 порту чтобы провайдер, РКН или любой другой видел что я обмениваюсь данными с этим сайтом-заглушкой, например какой-нибудь <a href="http://example.com" rel="noopener nofollow ugc">example.com</a> - решит зайти на него по HTTPS и видит работающий сайт-заглушку.<br>
+Но тут возникает проблема - я не знаю как можно заменить Sing-box, который принимал запросы на 80 и 443 порту.<br>
+Куда теперь отправлять AdGuard Home перезаписанный DNS запрос?<br>
+Концептуально я пока в тупике, но может свежий взгляд даст подсказку куда копнуть.<br>
+Грубо говоря, я хочу за сайтом-заглушкой спрятать VLESS + TLS и свой DNS сервер.</p></td><td>2024-12-30T14:58:06.151Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group quote-modified" data-username="1unknown" data-post="1" data-topic="14244">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>я хочу на 443 порте сервера спрятать VLESS+TLS+fallback и smart dns сервер.</p>
+</blockquote>
+</aside>
+<p>исправил</p>
+<p>p.s. мне кажется что сделать это без компромиссов невозможно, т.е. лучше купить второй ip</p></td><td>2024-12-30T15:13:41.652Z</td></tr><tr><td>MasterYoba</td><td><p>Вам нужно расположить всё это хозяйство за nginx, чтобы именно nginx слушал 443 порт, а внутри него разруливать можно как угодно.<br>
+Например: nginx слушает 443 порт, html заглушка на юникс сокете типа listen unix:/dev/shm/nginx.sock , vless-reality на 4443 порте, в настройках реалити “target”: “/dev/shm/nginx.sock”,  а serverNames - ваш домен (а лучше субдомен). Sing-box слушает на 4444 порте. В конфиге nginx вы разруливаете, чтобы запросы на ваш (суб)домен <a href="http://example.com" rel="noopener nofollow ugc">example.com</a> proxy_pass на 4443 в реалити, а всё остальное proxy_pass на 4444 в sing-box. Такой конфиг решает поставленную задачу. По сути это вариация схемы reality “steal oneself” <a href="https://github.com/chika0801/Xray-examples/tree/main/VLESS-Vision-REALITY/steal_oneself" class="inline-onebox" rel="noopener nofollow ugc">Xray-examples/VLESS-Vision-REALITY/steal_oneself at main · chika0801/Xray-examples · GitHub</a></p>
+<p>И еще, adguard в этой схеме вообще лишний, sing-box умеет из коробки перезаписывать dns запросы “на себя”. Изучайте fakeip функционал в нём <a href="https://sing-box.sagernet.org/configuration/dns/fakeip/" class="inline-onebox" rel="noopener nofollow ugc">FakeIP - sing-box</a></p></td><td>2024-12-30T17:13:35.273Z</td></tr><tr><td>1unknown(Unknown)</td><td><aside class="quote no-group" data-username="MasterYoba" data-post="3" data-topic="14244">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/masteryoba/48/6182_2.png" class="avatar"> MasterYoba:</div>
+<blockquote>
+<p>а лучше субдомен</p>
+</blockquote>
+</aside>
+<p>Почему лучше использовать субдомен в такой схеме? То есть основной домен будет для HTML заглушки, а субдомен пустить под VLESS?</p>
+<aside class="quote no-group" data-username="MasterYoba" data-post="3" data-topic="14244">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/masteryoba/48/6182_2.png" class="avatar"> MasterYoba:</div>
+<blockquote>
+<p>adguard в этой схеме вообще лишний, sing-box умеет из коробки перезаписывать dns запросы “на себя”</p>
+</blockquote>
+</aside>
+<p>Благодарю за наводку, изучу.<br>
+Предварительно перед началом ознакомления хочу спросить один вопрос.<br>
+Если я буду таки использовать AGH, то можно ли обойтись только VLESS на порту 4443, если Ngnix будет слушать 80 и 443 порт, и будет запрос сайта по HTTP? Для чего нужен будет Sing-box, если можно будет всегда отправлять на обработку DNS запрос во VLESS?</p></td><td>2024-12-30T18:25:29.743Z</td></tr><tr><td>MasterYoba</td><td><aside class="quote no-group" data-username="1unknown" data-post="4" data-topic="14244">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>Почему лучше использовать субдомен в такой схеме</p>
+</blockquote>
+</aside>
+<p>Ну не лучше, просто “гибче”. Вы примените под эту прокси-схему субдомен вида <a href="http://test.example.com" rel="noopener nofollow ugc">test.example.com</a>, а сам <a href="http://example.com" rel="noopener nofollow ugc">example.com</a> останется свободным для других задач. Вдруг вы решите потом на нём настоящий сайт захостить, добавить ещё инбаунды, или ещё что. Если не хотите, можно и сам верхний домен использовать, разницы никакой.</p>
+<aside class="quote no-group" data-username="1unknown" data-post="4" data-topic="14244">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>То есть основной домен будет для HTML заглушки, а субдомен пустить под VLESS?</p>
+</blockquote>
+</aside>
+<p>Не, надо выбрать что-то одно, и оно будет использоваться для маскировки реалити, и заглушка будет открываться в браузере при заходе на него.</p>
+<aside class="quote no-group" data-username="1unknown" data-post="4" data-topic="14244">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>можно ли обойтись только VLESS</p>
+</blockquote>
+</aside>
+<p>Да, конечно можно. Я просто решил именно под исходные условия подогнать решение, тем более вдруг есть какая-то специфичная причина использовать именно sing-box. (Как вариант - fakeip)<br>
+И еще, я не пользовался 3x-ui, только голым xray-core, если там есть какие-то свои ограничения, они мне неизвестны. Но в теории это просто генератор конфиги для xray-core, так что должно быть всё норм.</p></td><td>2024-12-30T19:05:06.251Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>Благодарю <img src="https://ntc.party/images/emoji/twitter/handshake.png?v=12" title=":handshake:" class="emoji" alt=":handshake:" loading="lazy" width="20" height="20"></p></td><td>2025-01-01T16:14:03.219Z</td></tr>
+    </table>
+      </body>
+    </html>

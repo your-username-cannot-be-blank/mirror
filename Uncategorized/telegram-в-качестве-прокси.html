@@ -1,0 +1,82 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>telegram-в-качестве-прокси</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Seva</td><td><p>Всем привет! Появилась идея - можно ли использовать телегу в качестве своеобразного прокси? Разворачиваем на своей vps’ке “клиент” телеги (конечно, модифицированный). Звоним ему по видео/аудиосвязи, но вместо видео отправляем нужный трафик. Естественно мимикрируя его под обычный звонок. Он же делает то же самое в обратную сторону. Сервера телеги вряд ли что-то заметят, тк устанавливается p2p-соединение и трафик через них не идёт, только stun-запросы.<br>
+Какие мысли на счёт этого?)</p>
+<p>Не нашёл подобной темы, решил создать тут.</p></td><td>2024-11-11T17:08:18.200Z</td></tr><tr><td>BBS</td><td><p>Если там p2p, какой смысл использовать телегу? Можно и без неё установить медиа соединение с нужным трафиком внутри.</p></td><td>2024-11-11T17:50:55.007Z</td></tr><tr><td>denium</td><td><p>Телега при звонках как любой мессенджер пытается соединить два собеседника напрямую по их IP по протоколу webrtc, пробив NAT, если это разрешно в настройках (в этом случае можно использовать vnp over webrtc решения без телеги).<br>
+Если трафик идёт через сервера телеги, есть два варианта:</p>
+<ol>
+<li>Они по протоколу webrtc и тоже можно обойтись без телеги (разве что их IP не будут блочить, но скорее наоборот при волнениях блочат телегу)</li>
+<li>Они по своему протоколу. И вот здесь, хитро завернуть проксирование интернета вместо голосовых-видео данных можно было бы (как dialup модемы работали). Но наверняка нет готовых решений и наверняка это будет медленно. Ведь там используется opus кодирование звука и шумо/эхоподавление, что может помешать работе интернет проксирования.</li>
+</ol></td><td>2024-11-11T17:57:10.619Z</td></tr><tr><td>BBS</td><td><p>Учитывая финансирование одной известной организации, возможен такой момент, когда придётся извращаться и передавать трафик вместе с медиа данными. Хотя скорее всего всё распилят. Исследование на эту тему: <a href="http://msm.omsu.ru/jrns/jrn43/Brechka2.pdf">http://msm.omsu.ru/jrns/jrn43/Brechka2.pdf</a><br>
+Качайте пока не запретили такие исследования.</p></td><td>2024-11-11T18:03:23.855Z</td></tr><tr><td>Seva</td><td><p>стеганография - круто конечно, но думаю медленно. А телега нужна как раз по замыслу, что её типа не заблокируют. Хотя тут да - забыл про её отключения, при всяких событиях</p></td><td>2024-11-11T18:08:32.675Z</td></tr><tr><td>Seva</td><td><p>я про первый вариант - чисто выкидываем opus и загоняем туда трафик<br>
+Про vpn через webrtc не слышал просто до этого, но интересно</p></td><td>2024-11-11T18:12:35.530Z</td></tr><tr><td>CyberTailor(CyberTailor)</td><td><p>Snowflake (мост для Tor) как раз мимикрирует под WebRTC-трафик, а до этого ещё был flashproxy.</p></td><td>2024-11-11T22:05:39.933Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="CyberTailor" data-post="7" data-topic="13009">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/cybertailor/48/4822_2.png" class="avatar"> CyberTailor:</div>
+<blockquote>
+<p>а до этого ещё был flashproxy</p>
+</blockquote>
+</aside>
+<p>Можно даже попробовать завести <a href="https://rutracker.org/forum/viewtopic.php?t=6506387" rel="noopener nofollow ugc">fteproxy</a>, но нужен свой сервер.</p></td><td>2024-11-11T22:26:46.393Z</td></tr><tr><td>Xunlei</td><td><p>Похожая тема: <a href="https://ntc.party/t/%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BC%D0%B5%D1%81%D1%81%D0%B5%D0%BD%D0%B4%D0%B6%D0%B5%D1%80%D0%BE%D0%B2-%D1%82%D0%B8%D0%BF%D0%B0-skype-hangouts-%D0%B4%D0%BB%D1%8F-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4%D0%B0-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA/4623" class="inline-onebox">Использование мессенджеров типа skype, hangouts для обхода блокировок</a></p></td><td>2024-11-12T08:54:19.154Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="Seva" data-post="6" data-topic="13009">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/5e9695/48.png" class="avatar"> Seva:</div>
+<blockquote>
+<p>Про vpn через webrtc не слышал просто до этого, но интересно</p>
+</blockquote>
+</aside>
+<p>For WebRTC-based circumvention, there are some other pieces of research and even implementations.</p>
+<p>Poking a Hole in the Wall: Efficient Censorship-Resistant Internet Communications by Parasitizing on WebRTC<br>
+<a href="https://censorbib.nymity.ch/#Barradas2020a">https://censorbib.nymity.ch/#Barradas2020a</a><br>
+<a href="https://github.com/dmbb/Protozoa">https://github.com/dmbb/Protozoa</a><br>
+<a href="https://github.com/net4people/bbs/issues/55">https://github.com/net4people/bbs/issues/55</a></p>
+<p>Stegozoa: Enhancing WebRTC Covert Channels with Video Steganography for Internet Censorship Circumvention<br>
+<a href="https://censorbib.nymity.ch/#Figueira2022a">https://censorbib.nymity.ch/#Figueira2022a</a><br>
+<a href="https://github.com/GabrielCFigueira/stegozoa">https://github.com/GabrielCFigueira/stegozoa</a><br>
+<a href="https://github.com/net4people/bbs/issues/259">https://github.com/net4people/bbs/issues/259</a></p>
+<p>TorKameleon: Improving Tor’s Censorship Resistance with K-anonymization and Media-based Covert Channels<br>
+<a href="https://github.com/AfonsoVilalonga/TorKameleon">https://github.com/AfonsoVilalonga/TorKameleon</a><br>
+<a href="https://github.com/net4people/bbs/issues/331">https://github.com/net4people/bbs/issues/331</a></p>
+<p>There’s a short survey in the Snowflake paper:<br>
+<a href="https://www.bamsoftware.com/papers/snowflake/#p9">https://www.bamsoftware.com/papers/snowflake/#p9</a></p>
+<blockquote>
+<p>Other circumvention systems have used WebRTC, though without Snowflake’s focus on numerous proxies. Protozoa <a href="https://www.bamsoftware.com/papers/snowflake/#ref:Barradas2020a">[2]</a> and Stegozoa <a href="https://www.bamsoftware.com/papers/snowflake/#ref:Figueira2022a">[12]</a> demonstrate point-to-point covert tunnels over WebRTC, the former by directly replacing encoded media with its own ciphertexts, the latter using video steganography. Significantly, where Snowflake now uses WebRTC data channels, Protozoa and Stegozoa use WebRTC media streams, which may have advantages for blocking resistance. We will say more on this point in <a href="https://www.bamsoftware.com/papers/snowflake/#fingerprinting">Section 3</a>. TorKameleon <a href="https://www.bamsoftware.com/papers/snowflake/#ref:Vilalonga2023a">[40]</a> is a WebRTC-based system with the dual goals of resisting blocking and complicating traffic correlation attacks. It uses a recent draft programming interface called WebRTC Encoded Transforms to support Protozoa-like embedding of data within media streams, without invasive browser modifications.</p>
+</blockquote></td><td>2024-12-12T00:29:11.131Z</td></tr>
+    </table>
+      </body>
+    </html>

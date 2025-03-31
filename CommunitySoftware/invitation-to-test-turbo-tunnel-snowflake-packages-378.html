@@ -1,0 +1,150 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>invitation-to-test-turbo-tunnel-snowflake-packages-378</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>The Tor anti-censorship team is inviting people to try Tor Browser packages built from an experimental branch of Snowflake that is supposed to make Snowflake more reliable. There are two versions; you can try either one or both of them. If you have feedback, tell us whether you are using the “kcp” or “quic” version.</p>
+<ul>
+<li><a href="https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-kcp-9.5a5-20200223/" rel="nofollow noopener">tor-browser-snowflake-turbotunnel-kcp-9.5a5-20200223</a></li>
+<li><a href="https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-quic-9.5a5-20200223/" rel="nofollow noopener">tor-browser-snowflake-turbotunnel-quic-9.5a5-20200223</a></li>
+</ul>
+<p>Download the file appropriate for your operating system, <a href="https://tb-manual.torproject.org/installation/" rel="nofollow noopener">unpack it</a>, and run it. You have to enable Snowflake manually. The first time you run the browser:</p>
+<ol>
+<li>Click <strong>Configure</strong>
+</li>
+<li>Click <strong>Tor is censored in my country</strong>
+</li>
+<li>Click <strong>Select a built-in bridge</strong>
+</li>
+<li>Select <strong>snowflake</strong> from the menu</li>
+<li>Click <strong>Connect</strong>
+</li>
+</ol>
+<p>If the browser is already running:</p>
+<ol>
+<li>Go to <strong>about:preferences#tor</strong> (open the Preferences menu then click Tor on the left side)</li>
+<li>Click <strong>Use a bridge</strong>
+</li>
+<li>Click <strong>Select a built-in bridge</strong>
+</li>
+<li>Select <strong>snowflake</strong> from the menu</li>
+</ol>
+<p>Then you should be able to connect and use the browser pretty much like a normal Tor Browser. If you click the ⓘ icon in the address bar, it will show your first hop as <strong>Bridge: snowflake</strong>.</p>
+<h3>What is Snowflake?</h3>
+<p><a href="https://snowflake.torproject.org/" rel="nofollow noopener">Snowflake</a> is a circumvention system that uses lots of temporary proxies, running in web browsers. It communicates with the proxies using WebRTC.</p>
+<h3>What is different about this experimental branch of Snowflake?</h3>
+<p>Because Snowflake proxies run in people’s web browsers, they aren’t very stable or reliable. Until now, there wasn’t a way to switch to a new proxy when the one you are using stops working—your connection would just die. These experimental packages use the “Turbo Tunnel” idea, embedding a session protocol that enables your end-to-end connection to keep working, even after a temporary proxy dies.</p>
+<p>There are two packages because we are testing two session protocols: KCP and QUIC. For background, see <a href="https://lists.torproject.org/pipermail/anti-censorship-team/2020-February/000059.html" rel="nofollow noopener">this thread</a> and <a href="https://bugs.torproject.org/33336" rel="nofollow noopener">this ticket</a>.</p>
+<h3>What is Turbo Tunnel?</h3>
+<p>Turbo Tunnel is the name for a design pattern where you insert a session protocol (e.g., something with sequence numbers, acknowledgements, and retransmissions) under your circumvention layer, instead of transmitting raw byte streams. It means that you have a long-lived end-to-end session that is not tied to any single network connection. A circumvention system that uses the Turbo Tunnel concept can potentially resist RST attacks, multiplex on several connections simultaneously, and work over unreliable channels like UDP. In Snowflake, Turbo Tunnel allows persisting a session across a sequence of many unreliable temporary proxies.</p>
+<p>For more on the Turbo Tunnel idea and the experience of integrating it into some circumvention systems, see these threads:</p>
+<ul>
+<li><a href="https://github.com/net4people/bbs/issues/9" rel="nofollow noopener">Turbo Tunnel: let’s include a sequencing/reliability layer in our circumvention protocols</a></li>
+<li><a href="https://github.com/net4people/bbs/issues/14" rel="nofollow noopener">Turbo Tunnel candidate protocol evaluation</a></li>
+<li><a href="https://github.com/net4people/bbs/issues/14#issuecomment-544747519" rel="nofollow noopener">Turbo Tunnel in obfs4proxy (survives TCP connection termination)</a></li>
+<li><a href="https://github.com/net4people/bbs/issues/21" rel="nofollow noopener">Turbo Tunnel in meek</a></li>
+</ul>
+<h3>What to expect</h3>
+<p>These packages with Snowflake should feel similar to a normal Tor Browser. You should be able to use them for many hours or leave them idle and they will keep working. (Before now, Snowflake would stop working if you left it idle for very long.)</p>
+<p>The speed of the connection, besides being inherently limited by the speed of Tor, also depends on the speed of the temporary proxy you get assigned. Some proxies are faster than others. But it should generally be fast enough for YouTube videos.</p>
+<p>When a proxy stops working, it takes 30 seconds for the software to notice. When that happens, you won’t be able to browse for at least 30 seconds, possibly more if there is a delay in acquiring a new proxy.</p>
+<p>The Snowflake client has a debugging log enabled. The log can tell you what’s happening when you lose a proxy and connect to a new one. You can find the log file here:</p>
+<dl>
+<dt>linux</dt>
+<dd>tor-browser_en-US/torBrowser/TorBrowser/Data/Tor/pt_state/snowflake-client.log</dd>
+<dt>windows</dt>
+<dd>Browser\TorBrowser\Data\Tor\pt_state\snowflake-client.log</dd>
+<dt>mac</dt>
+<dd>Tor Browser.app/Contents/Resources/TorBrowser/Tor/pt_state/snowflake-client.log</dd>
+</dl>
+<p>Here’s a guide to reading the log file:</p>
+<dl>
+<dt><code>Traffic Bytes (in|out): 0 | 972</code></dt>
+<dd>If the number on the left stays at 0, the proxy isn't working.</dd>
+<dt><code>Traffic Bytes (in|out): 52457 | 7270</code></dt>
+<dd>When the number of the left is nonzero, the proxy is working.</dd>
+<dt><code>WebRTC: No messages received for 30s -- closing stale connection</code></dt>
+<dd>This means that the current proxy has stopped working.</dd>
+<dt><code>redialing on same connection</code></dt>
+<dd>The client is now getting a new proxy to replace the failed one.</dd>
+</dl>
+<p>These special packages <em>disable</em> the normal Tor Browser update check for 60 days. That is because an update would remove the Turbo Tunnel features. After 2020-04-23, they will begin to update again and become a normal Tor Browser alpha. (But don’t rely on it, because this part isn’t tested.)</p></td><td>2020-02-27T07:21:04.233Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="tango" data-post="1" data-topic="378">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"> tango:</div>
+<blockquote>
+<p>These special packages <em>disable</em> the normal Tor Browser update check for 60 days. That is because an update would remove the Turbo Tunnel features. After 2020-04-23, they will begin to update again and become a normal Tor Browser alpha. (But don’t rely on it, because this part isn’t tested.)</p>
+</blockquote>
+</aside>
+<p>My attempt to disable automatic updates didn’t work. If you were using one of these special packages today, you got updated to a normal Tor Browser <a href="https://blog.torproject.org/new-release-tor-browser-95a6">9.5a6</a> without Turbo Tunnel Snowflake.</p>
+<p>If this happened to you, you need to re-download the package, and the first time you run it, set <code>app.update.auto=false</code> in about:config. Alternatively, go to Preferences, General, and select “Check for updates but let you choose to install them.” The browser will tell you there is an update but won’t install it automatically.</p></td><td>2020-03-03T08:55:44.669Z</td></tr><tr><td>tango</td><td><ul>
+<li><a href="https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-kcp-9.5a8-20200319/" rel="nofollow noopener">https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-kcp-9.5a8-20200319/</a></li>
+<li><a href="https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-quic-9.5a8-20200319/" rel="nofollow noopener">https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-quic-9.5a8-20200319/</a></li>
+</ul>
+<p>Here is a small update to the experimental Snowflake packages. They fix <a href="https://bugs.torproject.org/33519" rel="nofollow noopener">a hang</a> that would happen if tor opened more than one connection through the pluggable transport client.</p>
+<p>After my failed attempt to disable automatic updates in the previous draft, these packages simply disable automatic updates. The<br>
+browser will still download updates and ask to install them, so you’ll have to click “Not Now” whenever it asks.</p></td><td>2020-03-20T00:14:34.357Z</td></tr><tr><td>tango</td><td><p>Another revision of these Snowflake packages. These are a merge candidate.</p>
+<p><a href="https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-9.5a11-20200410/" class="onebox" target="_blank" rel="nofollow noopener">https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-9.5a11-20200410/</a></p></td><td>2020-04-13T07:15:55.827Z</td></tr><tr><td>tango</td><td><aside class="quote no-group quote-modified" data-username="tango" data-post="3" data-topic="378">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"> tango:</div>
+<blockquote>
+<ul>
+<li><a href="https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-kcp-9.5a8-20200319/" class="inline-onebox">tor-browser-snowflake-turbotunnel-kcp-9.5a8-20200319 directory listing</a></li>
+<li><a href="https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-quic-9.5a8-20200319/" class="inline-onebox">tor-browser-snowflake-turbotunnel-quic-9.5a8-20200319 directory listing</a></li>
+</ul>
+</blockquote>
+</aside>
+<p>As of 2020-04-24, the server has been deployed so that the “quic” version no longer works. If you were using it, please install the newer package:<br>
+<a href="https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-9.5a11-20200410/" class="onebox" target="_blank" rel="noopener">https://people.torproject.org/~dcf/pt-bundle/tor-browser-snowflake-turbotunnel-9.5a11-20200410/</a></p></td><td>2020-04-23T23:05:44.726Z</td></tr><tr><td>tango</td><td><p><a href="https://blog.torproject.org/new-release-tor-browser-95a13" rel="nofollow noopener">Tor Browser 9.5a13</a> now has these Turbo Tunnel features included as standard. To use it,</p>
+<ol>
+<li>Click <strong>Configure</strong>
+</li>
+<li>Click <strong>Tor is censored in my country</strong>
+</li>
+<li>Click <strong>Select a built-in bridge</strong>
+</li>
+<li>Select <strong>snowflake</strong> from the menu</li>
+<li>Click <strong>Connect</strong>
+</li>
+</ol>
+<p>Logging is disabled by default. To enable Snowflake logs, edit the file Browser/TorBrowser/Data/Tor/torrc-defaults (or Contents/Resources/TorBrowser/Tor/torrc-defaults on Mac) and append the following options to the <code>ClientTransportPlugin snowflake</code> line:</p>
+<pre><code class="lang-nohighlight">-log snowflake-client.log -log-to-state-dir
+</code></pre>
+<p>The log will appear in Browser/TorBrowser/Data/Tor/pt_state/snowflake-client.log (or Contents/Resources/TorBrowser/Tor/pt_state/snowflake-client.log).</p>
+<p>Depending on what kind of NAT you have, it may take several minutes to connect (or reconnect, if your proxy disappears).</p></td><td>2020-05-23T19:13:41.120Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,350 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>dns-provider-that-has-cookies-doesnt-work-with-dnstt-7836</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Quiescence</td><td><p>As the title says, I can’t seem to connect to provider that has DNS cookies.</p>
+<p>For example this DNS <code>76.76.19.19 (Alternative DNS)</code></p>
+<p>Dig response it like this:</p>
+<pre><code class="lang-auto">;; OPT PSEUDOSECTION:                    
+; EDNS: version: 0, flags:
+; udp: 1232                                         
+; COOKIE: 8000793ce04a503d01000000663dc596613a1ccbfe1a2b5d (good)
+</code></pre>
+<p>Is there any solutions for it to work? When using a DNS provider like Quad9, it works well, but when using DNS provider that has cookies it wont work.</p></td><td>2024-05-10T07:00:43.921Z</td></tr><tr><td>tango</td><td><p>Thanks for this report. I also cannot make a tunnel work with <code>-udp 76.76.19.19:53</code>.</p>
+<p>I am not sure the problem is caused by DNS cookies, though. For one thing, when I query 76.76.19.19 without a client cookie (<code>+nocookie</code> option of dig) or without EDNS (<code>+noedns</code> option), I do not get any server cookie in the response. Because dnstt-client does not send client cookies, it should also not elicit server cookies.</p>
+<pre><code class="lang-plaintext">$ dig +nocookie @76.76.19.19 example.com
+
+; &lt;&lt;&gt;&gt; DiG 9.11.5-P4-5.1+deb10u10-Debian &lt;&lt;&gt;&gt; +nocookie @76.76.19.19 example.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 43602
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;example.com.                   IN      A
+
+;; ANSWER SECTION:
+example.com.            523     IN      A       93.184.215.14
+
+;; Query time: 29 msec
+;; SERVER: 76.76.19.19#53(76.76.19.19)
+;; WHEN: Mon May 13 02:51:32 UTC 2024
+;; MSG SIZE  rcvd: 56
+</code></pre>
+<pre><code class="lang-plaintext">$ dig +noedns @76.76.19.19 example.com
+
+; &lt;&lt;&gt;&gt; DiG 9.11.5-P4-5.1+deb10u10-Debian &lt;&lt;&gt;&gt; +noedns @76.76.19.19 example.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 64931
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
+
+;; QUESTION SECTION:
+;example.com.                   IN      A
+
+;; ANSWER SECTION:
+example.com.            496     IN      A       93.184.215.14
+
+;; Query time: 18 msec
+;; SERVER: 76.76.19.19#53(76.76.19.19)
+;; WHEN: Mon May 13 02:51:59 UTC 2024
+;; MSG SIZE  rcvd: 45
+</code></pre>
+<p>But also, I’ve only found one computer where querying 76.76.19.19 works at all. From other computers, I get <code>status: REFUSED</code> — I don’t know why.</p>
+<pre><code class="lang-plaintext">$ dig @76.76.19.19 example.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.24-1-Debian &lt;&lt;&gt;&gt; @76.76.19.19 example.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: REFUSED, id: 892
+;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 7fd0f19300a5e24b0100000066418020f0edd43b9c9d8e1d (good)
+;; QUESTION SECTION:
+;example.com.                   IN      A
+
+;; Query time: 203 msec
+;; SERVER: 76.76.19.19#53(76.76.19.19) (UDP)
+;; WHEN: Mon May 13 02:51:12 UTC 2024
+;; MSG SIZE  rcvd: 68
+</code></pre>
+<p>If I add some debugging logs to dnstt-client, I can see that its queries are getting the same kind of <code>REFUSED</code> responses. Using this patch:</p>
+<pre data-code-wrap="diff"><code class="lang-diff">diff --git a/dnstt-client/dns.go b/dnstt-client/dns.go
+index 67115c1..899e0f5 100644
+--- a/dnstt-client/dns.go
++++ b/dnstt-client/dns.go
+@@ -200,6 +200,7 @@ func (c *DNSPacketConn) recvLoop(transport net.PacketConn) error {
+                        log.Printf("MessageFromWireFormat: %v", err)
+                        continue
+                }
++               log.Printf("MessageFromWireFormat %v %+v", err, resp)
+ 
+                payload := dnsResponsePayload(&amp;resp, c.domain)
+ 
+</code></pre>
+<p>I get logs like this:</p>
+<pre><code class="lang-plaintext">MessageFromWireFormat &lt;nil&gt; {ID:54649 Flags:33029 Question:[{Name:kb4fhomhfrw5jy34uuwrvs5y45lfcacaaaaaaaaaaaaaaaaaaaaaaaqaaaaaama.t.example.com Type:16 Class:1}] Answer:[] Authority:[] Additional:[{Name:. Type:41 Class:1232 TTL:0 Data:[]}]}
+</code></pre>
+<p>The important thing to notice is <code>Flags:33029</code>. 33029 in hexadecimal is 0x8105. We can decode that using the table in <a href="https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.1">RFC 1035</a>. The low-order 4 bits are the RCODE. In this case, RCODE=5, which is “Refused - The name server refuses to perform the specified operation for policy reasons.”</p>
+<p>After a quick look, I wasn’t able to find another public recursive DNS resolver that support DNS cookies.</p>
+<p>My question for you:</p>
+<ul>
+<li>What <code>status:</code> do you get when you run dig with 76.76.19.19 as the DNS resolver? Is it <code>REFUSED</code>, or something else?</li>
+</ul></td><td>2024-05-13T03:00:17.793Z</td></tr><tr><td>Quiescence</td><td><p>I’ll try that, also i have more DNS IP that has Cookies also doesn’t work with DNSTT.<br>
+<code>124.6.190.249</code>, <code>124.6.190.88</code>… but this one <code>124.6.183.115</code> works.</p>
+<p>Could you check these too on your end?</p></td><td>2024-05-18T07:30:35.310Z</td></tr><tr><td>Quiescence</td><td><p>I tried it just now, and compared it to UDP dns ip that is working.</p>
+<p>Results <code>9.9.9.9</code>:</p>
+<pre><code class="lang-auto">...
+2024/05/18 08:48:25 MessageFromWireFormat &lt;nil&gt; {ID:52701 Flags:33152 Question:[{Name:ixfa6d2ivnvof2bctutrcr5v2zwq.***.***.*** Type:16 Class:1}] Answer:[{Name:ixfa6d2ivnvof2bctutrcr5v2zwq.***.***.*** Type:16 Class:1 TTL:60 Data:[26 0 24 117 192 155 207 82 0 64 0 198 28 0 0 32 0 0 0 33 0 0 0 0 0 0 0]}] Authority:[] Additional:[{Name:. Type:41 Class:4096 TTL:0 Data:[]}]}
+...
+(Always has numbers inside Data: [])
+</code></pre>
+<p>While on both <code>124.6.190.88</code>, <code>124.6.190.249</code>:</p>
+<pre><code class="lang-auto">...
+2024/05/18 08:52:01 MessageFromWireFormat &lt;nil&gt; {ID:27355 Flags:33154 Question:[{Name:fa5odkv7woyrzyyawdcwfycfdtefcacaaaiveaaaaaaaaaaaaaaaaaqaaaaaamh.aiuomquiaiaabcuqaaaaqaaaaaaaaaabqaaaabaliwvkguqbqzctmbqmg2idyhe.o64omumxphhemvh64i53nsrszccm75s3dxlquzi5uhxevzphaxcq.***.***.*** Type:16 Class:1}] Answer:[] Authority:[] Additional:[{Name:. Type:41 Class:1220 TTL:0 Data:[]}]}
+2024/05/18 08:52:01 MessageFromWireFormat &lt;nil&gt; {ID:17343 Flags:33154 Question:[{Name:fa5odkv7woyrz2att7i6wnuy462q.***.***.*** Type:16 Class:1}] Answer:[] Authority:[] Additional:[{Name:. Type:41 Class:1220 TTL:0 Data:[]}]}
+2024/05/18 08:52:02 MessageFromWireFormat &lt;nil&gt; {ID:56337 Flags:33154 Question:[{Name:fa5odkv7woyrz2dg7uv2oqosbbca.***.***.*** Type:16 Class:1}] Answer:[] Authority:[] Additional:[{Name:. Type:41 Class:1220 TTL:0 Data:[]}]}
+2024/05/18 08:52:04 MessageFromWireFormat &lt;nil&gt; {ID:41066 Flags:33154 Question:[{Name:fa5odkv7woyrzy43xaagfycfdtefcacaadev2aaaaaaaaaaaaaaaaaqaaaaaamh.aiuomquiaiaamsxiaaaaqaaaaaaaaaabqaaaabaliwvkguqbqzctmbqmg2idyhe.o64omumxphhemvh64i53nsrszccm75s3dxlquzi5uhxevzphaxcq.***.***.*** Type:16 Class:1}] Answer:[] Authority:[] Additional:[{Name:. Type:41 Class:1220 TTL:0 Data:[]}]}
+2024/05/18 08:52:04 MessageFromWireFormat &lt;nil&gt; {ID:8538 Flags:33154 Question:[{Name:fa5odkv7woyrz2chtm2oxehs4ioa.***.***.*** Type:16 Class:1}] Answer:[] Authority:[] Additional:[{Name:. Type:41 Class:1220 TTL:0 Data:[]}]}
+2024/05/18 08:52:05 MessageFromWireFormat &lt;nil&gt; {ID:24260 Flags:33154 Question:[{Name:fa5odkv7woyrz2h4tvs2k6sdonoq.***.***.*** Type:16 Class:1}] Answer:[] Authority:[] Additional:[{Name:. Type:41 Class:1220 TTL:0 Data:[]}]}
+...
+</code></pre>
+<p>Edit:<br>
+i got a FLAG: <code>33154</code> which decodes to <code>2 - Server Failure</code> i don’t have problems using my NS domain. It’s weird that those UDP DNS ip are not accepting DNS from my domain, while others work.</p>
+<p>Edit 1.1:<br>
+I know now, why it doesn’t work… It is probably the Resolver i used is DOESNT  allowing TXT records… it always return <code>SERVFAIL</code> when reqesting through <code>dig</code>. And also i read the code and a comment that mentions that it only supported TXT records. So i figured that, the resolver doent allowing TXT records caused it. (IDK if i’m right tho, free to correct me, i’m a newbie🔰)</p>
+<p>My question, do other DNS record would be supported in future?</p></td><td>2024-05-18T08:56:16.877Z</td></tr><tr><td>tango</td><td><p>Thank you for the detailed test results. I tested 124.6.190.249 and 124.6.190.88. The problem is that their limit on the size of is smaller than the default assumed by dnstt-server. The default is 1232 and these resolvers only support 512 or 1220. To solve the problem, provide the command line option <code>-mtu 512</code> to dnstt-server:</p>
+<pre>dnstt-server -mtu 512 -udp <i>addr</i>:<i>port</i> -privkey-file <i>filename</i> <i>domain</i> <i>upstreamaddr</i>:<i>upstreamport</i>
+</pre>
+<p>The MTU issue is lightly documented at the <a href="https://www.bamsoftware.com/software/dnstt/#server-setup">home page</a> and in the <a href="https://repo.or.cz/dnstt.git/blob/01100d2288c4c7a8d47c9d118c6f9599080b0568:/man/dnstt-server.1#l130">dnstt-server man page</a>, but reading them just now, the documentation on this point is not clear and should be improved.</p>
+<h3><a name="more-details-1" class="anchor" href="#more-details-1"></a>More details</h3>
+<p>The problem is not with TXT resource records. Both 124.6.190.249 and 124.6.190.88 can do TXT records:</p>
+<pre><code class="lang-plaintext">$ dig @124.6.190.249 -t TXT example.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.24-1-Debian &lt;&lt;&gt;&gt; @124.6.190.249 -t TXT example.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 6112
+;; flags: qr rd ra ad; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1220
+; COOKIE: 682760d4590465a4232f4c146648c75ee62c96b134f7ace1 (good)
+;; QUESTION SECTION:
+;example.com.                   IN      TXT
+
+;; ANSWER SECTION:
+example.com.            86400   IN      TXT     "v=spf1 -all"
+example.com.            86400   IN      TXT     "wgyf8z8cgvm2qmxpnbnldrcltvk4xqfn"
+
+;; Query time: 628 msec
+;; SERVER: 124.6.190.249#53(124.6.190.249) (UDP)
+;; WHEN: Sat May 18 15:21:03 UTC 2024
+;; MSG SIZE  rcvd: 137
+</code></pre>
+<pre><code class="lang-plaintext">$ dig @124.6.190.88 -t TXT example.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.24-1-Debian &lt;&lt;&gt;&gt; @124.6.190.88 -t TXT example.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 4075
+;; flags: qr rd ra ad; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1220
+; COOKIE: cb5527d58aa4ae5a6e1992c66648c792278391521e202916 (good)
+;; QUESTION SECTION:
+;example.com.                   IN      TXT
+
+;; ANSWER SECTION:
+example.com.            86400   IN      TXT     "wgyf8z8cgvm2qmxpnbnldrcltvk4xqfn"
+example.com.            86400   IN      TXT     "v=spf1 -all"
+
+;; Query time: 692 msec
+;; SERVER: 124.6.190.88#53(124.6.190.88) (UDP)
+;; WHEN: Sat May 18 15:21:54 UTC 2024
+;; MSG SIZE  rcvd: 137
+</code></pre>
+<p>The clue is actually this:</p>
+<pre>;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; <mark>udp: 1220</mark>
+</pre>
+<p>This number 1220 is the <a href="https://www.rfc-editor.org/rfc/rfc6891#section-6.2.4">maximum size of a UDP packet</a> the resolver is able to receive. The <a href="https://repo.or.cz/dnstt.git/blob/01100d2288c4c7a8d47c9d118c6f9599080b0568:/dnstt-server/main.go#l85">default assumed by dnstt-server</a> is 1232 bytes, which is a compromise between performance and compatibility.</p>
+<p>But I tried <code>-mtu 1220</code>, and it didn’t work. The reason is that while the recursive resolvers themselves may be able to receive UDP packets of 1220 bytes, when they forward queries to the authoritative resolver, the forwarded queries declare a maximum packet size of only 512. (Actually 124.6.190.249 seems to use a mix of 512 and 1220: it probably is a load balancer over multiple resolvers with different configurations.)</p>
+<p>The symptom of the MTU problem is <code>FORMERR</code> messages in the dnstt-server log. When running dnstt-server with the default MTU of 1232, and using 124.6.190.88 as a resolver, I see this:</p>
+<pre><code class="lang-plaintext">2024/05/18 15:49:30 FORMERR: requester payload size 512 is too small (minimum 1232)
+2024/05/18 15:49:31 FORMERR: requester payload size 512 is too small (minimum 1232)
+2024/05/18 15:49:31 FORMERR: requester payload size 512 is too small (minimum 1232)
+2024/05/18 15:49:31 FORMERR: requester payload size 512 is too small (minimum 1232)
+</code></pre>
+<p>With 124.6.190.249 as a resolver I see a mix of 512 and 1220:</p>
+<pre><code class="lang-plaintext">2024/05/18 15:44:35 FORMERR: requester payload size 512 is too small (minimum 1232)
+2024/05/18 15:44:35 FORMERR: requester payload size 1220 is too small (minimum 1232)
+2024/05/18 15:44:35 FORMERR: requester payload size 512 is too small (minimum 1232)
+2024/05/18 15:44:36 FORMERR: requester payload size 1220 is too small (minimum 1232)
+</code></pre>
+<p>In either case, <code>-mtu 512</code> on the server makes it work.</p>
+<p>Ideally it would be possible to have the MTU be determined dynamically on the server according to the capabilities of each resolver. I think it’s possible, but it’s not trivial to implement, because <a href="https://repo.or.cz/dnstt.git/blob/01100d2288c4c7a8d47c9d118c6f9599080b0568:/dnstt-server/main.go#l471">the MTU is a global option of KCP</a>. You can see some general discussion on this point <a href="https://github.com/net4people/bbs/issues/9#issuecomment-524095186">here</a>:</p>
+<blockquote>
+<p>It may be we can cajole the sequencing/reliability layer to give us a packet of no larger than a specific size on demand, like, “give me a packet whose total size is at most 80 bytes, or else return an error.” The libraries I’ve looked at so far seem not to be architected that way; you don’t “pull” packets from them, rather they “push” one on you via a callback, but maybe it’s possible to achieve something similar by manipulating the MTU.</p>
+</blockquote></td><td>2024-05-18T16:34:13.524Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="Quiescence" data-post="4" data-topic="7836">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/q/848f3c/48.png" class="avatar"> Quiescence:</div>
+<blockquote>
+<p>My question, do other DNS record would be supported in future?</p>
+</blockquote>
+</aside>
+<p>No, currently I have no plans to use other resource types. TXT seems to be widely supported by resolvers, and TXT permits <a href="https://www.bamsoftware.com/software/dnstt/protocol.html#response">low-overhead and high-capacity encoding</a> of downstream data.</p>
+<p>Another DNS tunnel implementation, dnscat2, <a href="https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md#dns-record-type">supports multiple resource types</a>: TXT, MX, CNAME, A, AAAA. The ones other than TXT are somewhat less efficient (A and AAAA are much less efficient). My estimation is that the potential added flexibility is not worth an increase in complexity.</p></td><td>2024-05-18T16:44:33.187Z</td></tr><tr><td>Quiescence</td><td><p>That was impormative, So the problem is the server-side, by optimizing MTU…</p>
+<p>I wouldn’t expect MTU would solve this problem, I guess my suspicion of cookies and TXT records is an utter miss, although its weird how i got SERVFAIL when querying TXT using my domain but when using other resolver doesn’t appear to have problem at all. I guess i have to grind and read more of documentations.</p>
+<p>Anyways, Thanks for this tunneling tool, it helps me bypass ISP’s firewall. I’ll just comment here after i test the MTU adjustments on my server’s end, and make it work on mine…</p>
+<p>One last Question, Do MTU affects the speed of the tunneling? Or DNS tunneling is just slow as it is? If you’re gonna compare the speed of ICMP tunneling to DNS, which of them would go smoother/faster? (Sorry if its quite unrelated)<br>
+My speed here just peaks with 4mbps+ on speedtest (using Quad9 Resolver)</p></td><td>2024-05-18T17:18:56.250Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="Quiescence" data-post="7" data-topic="7836">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/q/848f3c/48.png" class="avatar"> Quiescence:</div>
+<blockquote>
+<p>its weird how i got SERVFAIL when querying TXT using my domain but when using other resolver doesn’t appear to have problem at all.</p>
+</blockquote>
+</aside>
+<p>dnstt-server will return an NXDOMAIN for TXT queries that don’t make sense or cannot be decoded. Maybe the recursive resolver converts the NXDOMAIN to a SERVFAIL.</p>
+<aside class="quote no-group" data-username="Quiescence" data-post="7" data-topic="7836">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/q/848f3c/48.png" class="avatar"> Quiescence:</div>
+<blockquote>
+<p>Do MTU affects the speed of the tunneling? Or DNS tunneling is just slow as it is?</p>
+</blockquote>
+</aside>
+<p>DNS tunnels are just generally slower than other circumvention techniques. dnstt is faster than other tunnels, but it can never be as fast as a TCP Shadowsocks proxy, or something like that.</p>
+<p>The MTU does affect performance. That’s why the default is 1232, and not 512 which would be compatible with more resolvers by default. The MTU limits the amount of data that can be returned in each DNS response. The problem is that DNS is a 1-to-1 query–response protocol. The client needs to send a query for each response. So if less data can fit into a response, that not only means more DNS traffic in the downstream direction (responses), but also more traffic in the upstream direction (queries).</p>
+<p>DNS tunnel performance is also highly dependent on the resolver. Some resolvers are slow, some resolvers are fast. Even difference protocols from the same provider can have different performance. The last time I tested it, Google DoT was slow while Google DoH was fast. Here’s an excerpt from some <a>download speed tests in 2021</a>. The numbers may have changed since then, but this gives you an idea of how variable it can be.</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>resolver</th>
+<th>transport</th>
+<th style="text-align:right">v1.20210803.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>none</td>
+<td>UDP</td>
+<td style="text-align:right">332.5 KB/s</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>DoH</td>
+<td style="text-align:right">134.6 KB/s</td>
+</tr>
+<tr>
+<td>Cloudflare</td>
+<td>DoT</td>
+<td style="text-align:right">112.8 KB/s</td>
+</tr>
+<tr>
+<td>Cloudflare</td>
+<td>DoH</td>
+<td style="text-align:right">97.4 KB/s</td>
+</tr>
+<tr>
+<td>Comcast</td>
+<td>DoH</td>
+<td style="text-align:right">72.7 KB/s</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>UDP</td>
+<td style="text-align:right">70.4 KB/s</td>
+</tr>
+<tr>
+<td>PowerDNS</td>
+<td>DoH</td>
+<td style="text-align:right">34.9 KB/s</td>
+</tr>
+<tr>
+<td>Quad9</td>
+<td>DoH</td>
+<td style="text-align:right">31.0 KB/s</td>
+</tr>
+<tr>
+<td>Quad9</td>
+<td>UDP</td>
+<td style="text-align:right">22.2 KB/s</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>DoT</td>
+<td style="text-align:right">14.4 KB/s</td>
+</tr>
+<tr>
+<td>Quad9</td>
+<td>DoT</td>
+<td style="text-align:right">1.6 KB/s</td>
+</tr>
+<tr>
+<td>Cloudflare</td>
+<td>UDP</td>
+<td style="text-align:right">0.8 KB/s</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2024-05-18T18:17:03.506Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="Quiescence" data-post="7" data-topic="7836">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/q/848f3c/48.png" class="avatar"> Quiescence:</div>
+<blockquote>
+<p>If you’re gonna compare the speed of ICMP tunneling to DNS, which of them would go smoother/faster?</p>
+</blockquote>
+</aside>
+<p>I don’t have experience with ICMP tunnels, but I would guess an ICMP tunnel could go faster than a DNS tunnel. The main reason is the upstream data capacity: in DNS, there is not really any place to encode upstream data (<a href="https://www.bamsoftware.com/software/dnstt/survey.html#Generalobservations">that I know of</a>) other than the QNAME, and that is very limited in size. You can only send about 100 bytes of encoded data per query. Downstream is not so bad, with TXT you can encode data up to the MTU with little overhead. In ICMP, I think the data payloads can be arbitrary binary strings, and there’s no asymmetry between upstream/downstream.</p>
+<p>The reason why I think DNS is interesting for circumvention, and ICMP is not, is that with DNS there are recursive resolvers, which act as network-layer proxies so you don’t contact the circumvention server directly. As far as I know, there’s no such thing as an ICMP proxy or ICMP forwarder that could do the same for ICMP. (Even if there were such things, they would probably not be used for much, which means a censor could easily block them.) And with DNS, there are encrypted transports like DoH and DoT. encrypted DNS, which hides the contents of DNS messages from a censor. There’s nothing like that for ICMP, which means that ICMP tunneling would only work against a naive censor that doesn’t know to look at packet payloads. Without DNS encryption, it’s <a href="https://unit42.paloaltonetworks.com/dns-tunneling-in-the-wild/">easy to identify DNS tunnels by looking at the message payloads</a>.</p></td><td>2024-05-18T18:37:29.690Z</td></tr>
+    </table>
+      </body>
+    </html>

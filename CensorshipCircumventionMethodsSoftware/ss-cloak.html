@@ -1,0 +1,74 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>ss-cloak</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Silwillower</td><td><p>Доброго времени суток всем.<br>
+Я новичок в сетях и был бы очень рад некоторым пояснениям и тыканием носом от более старших и опытных людей.<br>
+Не так давно познакомился с shadowsocks и его плагинами и возникло несколько вопросов по поводу связки shadowsocks + cloak и ее возможностей.<br>
+Меня интересует как можно оптимизировать данную связку в вопросах безопасности, скорости, приватности и анонимности.<br>
+Особенно интересует последнее, как эту связку видят специалисты если в конец добавить тор и впн\прокси для анонимизации коннекта и трудновычисляемости при поиске реального ip с которого идут данные.<br>
+Спрашиваю в связи с тем что работаю с сервисом который может в этом году стать нелегальным в моей стране и не хотелось бы присесть на бутылку из-за паршивой юрисдикции, но и терять эту работу нет возможности, а на переезд $$ пока нет.<br>
+Буду очень рад вашему профессиональному мнению и отклику.</p></td><td>2021-03-11T08:39:06.261Z</td></tr><tr><td>tango</td><td><p>I don’t know about Cloak, but for Shadowsocks the most important thing is use AEAD ciphers only (chacha20-ietf-poly1305, aes-256-gcm, aes-128-gcm). Many Shadowsocks implementations also support “stream ciphers” (<s>aes-128-ctr</s>, <s>aes-128-cfb</s>, <s>camellia-128-cfb</s>, <s>chacha20</s>, …) and you must <em>not</em> use these. AEAD ciphers are not perfect, but stream ciphers are vulnerable to a number of attacks, including decryption.</p>
+<ul>
+<li><a href="https://ntc.party/t/a-practical-guide-to-defend-against-the-gfws-latest-active-probing/847">A practical guide to defend against the GFW’s latest active probing</a></li>
+<li><a href="https://gfw.report/blog/ss_tutorial/en/" rel="noopener nofollow ugc">How to Deploy a Censorship Resistant Shadowsocks-libev Server</a></li>
+<li><a href="https://ntc.party/t/decryption-vulnerability-in-shadowsocks-stream-ciphers/377">Decryption vulnerability in Shadowsocks stream ciphers</a></li>
+</ul>
+<p>With Tor Browser, you can <a href="https://tb-manual.torproject.org/circumvention/" rel="noopener nofollow ugc">easily configure</a> an obfs4 bridge, which is similar to Shadowsocks in the way it obfuscates traffic. But obfs4 resists surveillance only if you use <a href="https://tb-manual.torproject.org/bridges/" rel="noopener nofollow ugc">a private bridge</a>, ideally one you set up yourself—don’t use the built-in bridges, because their IP addresses are well-known.</p></td><td>2021-03-11T15:06:53.308Z</td></tr><tr><td>ValdikSS</td><td><p>Shadowsocks (оригинальный) работает только по TCP, а UDP не инкапсулирует (TCP туннелируется по TCP, UDP туннелируется по UDP, но UDP не может туннелироваться в TCP).<br>
+Плагины в Shadowsocks работают только по TCP. Если вы настроите Shadowsocks+cloak, UDP-трафик будет либо блокироваться, либо идти в обход туннеля. При блокировке UDP-трафика у вас не будет работать часть сервисов (DNS через UDP, звонки в некоторых мессенджерах, некоторые онлайн-игры), а при обходе туннелирования они, собственно, не будут идти через Shadowsocks.</p></td><td>2021-03-12T13:10:23.054Z</td></tr><tr><td>Silwillower</td><td><p>Мне для работы UDP и не нужен. И да, я понимаю что лишаюсь определенных возможностей из-за отсутствия UDP.<br>
+Меня больше интересует вопрос нахождения меня через такой коннект, как могут найти, насколько это вероятно и что предпринять лучше для того чтобы не нашли, лучше работать неудобно, чем не работать вовсе.<br>
+DNS запросы думаю пускать через днскрипт, либо с впн/прокси сервака на конце и пока все тесты с оконечным днс говорят о том что это работает и по днс серваку сервисы не определяют даже косвенное местоположение.</p></td><td>2021-03-12T19:54:15.385Z</td></tr><tr><td>Silwillower</td><td><p>Thanks for ur reply.<br>
+Ur links deepened my understanding of this connection.<br>
+About bridges it’s for sure, but i dnt use it now, i exclude node from my country and neighboring.<br>
+What can you say about the discovery of this connection?<br>
+As far as I know in China, learned to detect pure SS, but its as far as I remember the article is quite a problematic process. I cant find it article now.</p></td><td>2021-03-12T20:03:19.857Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="Silwillower" data-post="5" data-topic="955">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/839c29/48.png" class="avatar"> Silwillower:</div>
+<blockquote>
+<p>What can you say about the discovery of this connection?<br>
+As far as I know in China, learned to detect pure SS, but its as far as I remember the article is quite a problematic process. I cant find it article now.</p>
+</blockquote>
+</aside>
+<p>As far as I know, there is no country where private obfs4 bridges are blocked.</p>
+<p>The article you are thinking of is possibly</p>
+<ul>
+<li><a href="https://gfw.report/publications/imc20/data/paper/shadowsocks.pdf">https://gfw.report/publications/imc20/data/paper/shadowsocks.pdf</a></li>
+<li><a href="https://gfw.report/talks/imc20/en/">https://gfw.report/talks/imc20/en/</a></li>
+</ul></td><td>2021-03-25T19:25:17.095Z</td></tr>
+    </table>
+      </body>
+    </html>

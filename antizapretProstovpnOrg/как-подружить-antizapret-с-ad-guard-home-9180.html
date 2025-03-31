@@ -1,0 +1,118 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>как-подружить-antizapret-с-ad-guard-home-9180</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>QuasyStellar(Quasy Stellar)</td><td><p>Использую на vds данный докер:</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/xtrime-ru/antizapret-vpn-docker">
+  <header class="source">
+
+      <a href="https://github.com/xtrime-ru/antizapret-vpn-docker" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="как-подружить-antizapret-с-ad-guard-home-9180/3f4178cf7cc0e54e77da75dbf645e8b493f49c39_2_690x344.png" class="thumbnail" data-dominant-color="EBEDED">
+
+  <h3><a href="https://github.com/xtrime-ru/antizapret-vpn-docker" target="_blank" rel="noopener nofollow ugc">GitHub - xtrime-ru/antizapret-vpn-docker: Docker container with antizapret-vpn for...</a></h3>
+
+    <p><span class="github-repo-description">Docker container with antizapret-vpn for selfhosting.</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Захотел также на vds сделать Ad Guard Home, чтобы в любом месте иметь доступ к сайтам и при этом без рекламы.<br>
+Запустил Agh, добавил в kresd политику как здесь:<br>
+<a href="https://ntc.party/t/%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-adguard-home-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80/6949/18" class="inline-onebox">Установка Adguard Home на роутер - #18 by dartraiden</a>, но в итоге проходят только запросы самого antizapret<br>
+<img src="как-подружить-antizapret-с-ad-guard-home-9180/127d5968406804bdd0534979f7f3ec69797911d6.png" alt="изображение" data-base62-sha1="2Dz9xWpLsAPfRckOwbiMo60BWMS" width="571" height="149"><br>
+Что можно сделать?</p></td><td>2024-08-11T17:21:15.555Z</td></tr><tr><td>xtrime</td><td><p>Сделал поддержку внешних DNS через ENV переменную + сделал пример docker-compose с общей сетью с adguard контейнером:</p>
+<aside class="onebox githubblob" data-onebox-src="https://github.com/xtrime-ru/antizapret-vpn-docker/blob/master/docker-compose.adguard.yml">
+  <header class="source">
+
+      <a href="https://github.com/xtrime-ru/antizapret-vpn-docker/blob/master/docker-compose.adguard.yml" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/xtrime-ru/antizapret-vpn-docker/blob/master/docker-compose.adguard.yml" target="_blank" rel="noopener nofollow ugc">xtrime-ru/antizapret-vpn-docker/blob/master/docker-compose.adguard.yml</a></h4>
+
+
+      <pre><code class="lang-yml">services:
+  antizapret-vpn:
+    extends:
+      file: docker-compose.base.yml
+      service: antizapret-vpn
+    networks:
+      static-network:
+        ipv4_address: 10.5.0.2
+    environment:
+      - DNS=10.5.0.3
+  adguardhome:
+    image: adguard/adguardhome
+    container_name: adguardhome
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+      - 784:784/udp
+      - 853:853/tcp
+      - 3000:3000/tcp
+      - 80:80/tcp
+</code></pre>
+
+
+
+  This file has been truncated. <a href="https://github.com/xtrime-ru/antizapret-vpn-docker/blob/master/docker-compose.adguard.yml" target="_blank" rel="noopener nofollow ugc">show original</a>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<pre><code class="lang-auto">git pull &amp;&amp; docker compose down &amp;&amp; docker compose -f docker-compose.adguard.yml  pull &amp;&amp; docker compose -f docker-compose.adguard.yml up -d
+</code></pre></td><td>2024-08-11T22:13:46.631Z</td></tr>
+    </table>
+      </body>
+    </html>

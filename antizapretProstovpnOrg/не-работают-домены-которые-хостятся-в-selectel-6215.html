@@ -1,0 +1,159 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>не-работают-домены-которые-хостятся-в-selectel-6215</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Ratio</td><td><p>Даже 2 из 4 их ns не резолвятся через впн, хотя без впн всё норм:</p>
+<pre><code class="lang-auto">$ nslookup ns1.selectel.ru 192.168.104.1
+Server:		192.168.104.1
+Address:	192.168.104.1#53
+
+** server can't find ns1.selectel.ru: SERVFAIL
+
+$ nslookup ns2.selectel.ru 192.168.104.1
+Server:		192.168.104.1
+Address:	192.168.104.1#53
+
+** server can't find ns2.selectel.ru: SERVFAIL
+</code></pre></td><td>2023-11-05T12:55:16.338Z</td></tr><tr><td>Ratio</td><td><pre><code class="lang-auto">$ nslookup ns3.selectel.ru 192.168.104.1
+Server:		192.168.104.1
+Address:	192.168.104.1#53
+
+Non-authoritative answer:
+Name:	ns3.selectel.ru
+Address: 188.68.203.5
+** server can't find ns3.selectel.ru: SERVFAIL
+
+$ nslookup ns4.selectel.ru 192.168.104.1
+Server:		192.168.104.1
+Address:	192.168.104.1#53
+
+Non-authoritative answer:
+Name:	ns4.selectel.ru
+Address: 77.223.114.10
+** server can't find ns4.selectel.ru: SERVFAIL
+</code></pre></td><td>2023-11-05T12:57:29.246Z</td></tr><tr><td>Ratio</td><td><pre><code class="lang-auto">$ dig @192.168.104.1 ns1.selectel.ru
+
+; &lt;&lt;&gt;&gt; DiG 9.16.44-Debian &lt;&lt;&gt;&gt; @192.168.104.1 ns1.selectel.ru
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: SERVFAIL, id: 25214
+;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;ns1.selectel.ru.		IN	A
+
+;; Query time: 2200 msec
+;; SERVER: 192.168.104.1#53(192.168.104.1)
+;; WHEN: Sun Nov 05 15:58:51 MSK 2023
+;; MSG SIZE  rcvd: 44
+
+$ dig @192.168.104.1 ns2.selectel.ru
+
+; &lt;&lt;&gt;&gt; DiG 9.16.44-Debian &lt;&lt;&gt;&gt; @192.168.104.1 ns2.selectel.ru
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: SERVFAIL, id: 34306
+;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;ns2.selectel.ru.		IN	A
+
+;; Query time: 68 msec
+;; SERVER: 192.168.104.1#53(192.168.104.1)
+;; WHEN: Sun Nov 05 15:58:54 MSK 2023
+;; MSG SIZE  rcvd: 44
+
+$ dig @192.168.104.1 ns3.selectel.ru
+
+; &lt;&lt;&gt;&gt; DiG 9.16.44-Debian &lt;&lt;&gt;&gt; @192.168.104.1 ns3.selectel.ru
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 22177
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;ns3.selectel.ru.		IN	A
+
+;; ANSWER SECTION:
+ns3.selectel.ru.	16759	IN	A	188.68.203.5
+
+;; Query time: 68 msec
+;; SERVER: 192.168.104.1#53(192.168.104.1)
+;; WHEN: Sun Nov 05 15:58:57 MSK 2023
+;; MSG SIZE  rcvd: 60
+
+$ dig @192.168.104.1 ns4.selectel.ru
+
+; &lt;&lt;&gt;&gt; DiG 9.16.44-Debian &lt;&lt;&gt;&gt; @192.168.104.1 ns4.selectel.ru
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 30223
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;ns4.selectel.ru.		IN	A
+
+;; ANSWER SECTION:
+ns4.selectel.ru.	9860	IN	A	77.223.114.10
+
+;; Query time: 68 msec
+;; SERVER: 192.168.104.1#53(192.168.104.1)
+;; WHEN: Sun Nov 05 15:59:02 MSK 2023
+;; MSG SIZE  rcvd: 60
+</code></pre></td><td>2023-11-05T13:00:04.414Z</td></tr><tr><td>ValdikSS</td><td><p>На текущий момент проблему не наблюдаю ни на одном VPN-сервере.</p></td><td>2023-11-06T12:30:26.572Z</td></tr><tr><td>Ratio</td><td><p>Да, сейчас всё работает. Но где-то была проблема. Какие upstream dns у антизапрета?</p></td><td>2023-11-06T12:47:23.028Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Ratio" data-post="5" data-topic="6215">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ratio/48/1938_2.png" class="avatar"> Ratio:</div>
+<blockquote>
+<p>Какие upstream dns у антизапрета?</p>
+</blockquote>
+</aside>
+<p>Никаких, это рекурсивный резолвер.</p></td><td>2023-11-06T13:13:01.884Z</td></tr>
+    </table>
+      </body>
+    </html>

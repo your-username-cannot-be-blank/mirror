@@ -1,0 +1,398 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>xray-с-wireguard-inbound-не-работает-fakedns</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>zeroed</td><td><p>Всем привет.</p>
+<p>Есть домашний сервер, решил на нём поднять xray, а уже к нему подключаться с роутера по wireguard.</p>
+<p>Пытаюсь настроить обход блокировок по следующей схеме:</p>
+<ol>
+<li>xray работает как dns сервер, и для нужных доменов возвращает ip адреса из подсети 10.30.0.0</li>
+<li>роутер подключен к xray по wireguard, и пересылает запросы к 10.30.0.0 в этот интерфейс wg</li>
+<li>xray резолвит fake ip адреса в реальные домены, и делает запросы по правилам роутинга</li>
+</ol>
+<p>Пункты 1-2 работают, а вот с пунктом 3 довести до ума не получается: xray не резолвит адреса обратно, и пытается делать запросы по ip адресам вида 10.30.100.60, из-за чего всё ломается.</p>
+<details>
+<summary>
+config.json</summary>
+<p>{<br>
+“log”: {<br>
+“loglevel”: “info”<br>
+},</p>
+<p>“dns”: {<br>
+“servers”: [<br>
+// Это мой домашний adguard home<br>
+{<br>
+“address”: “192.168.1.12”,<br>
+“port”: 6053<br>
+},<br>
+// Для примера несколько правил. DNS сервер работает отлично<br>
+{<br>
+“address”: “fakedns”,<br>
+“domains”: [<br>
+“domain:youtube.ru”,<br>
+“domain:2ip.ru”<br>
+]<br>
+}<br>
+]<br>
+},</p>
+<p>“fakedns”: [<br>
+{<br>
+“ipPool”: “10.30.0.0/16”,<br>
+“poolSize”: 65535<br>
+}<br>
+],</p>
+<p>“routing”: {<br>
+“domainStrategy”: “IPIfNonMatch”,<br>
+“rules”: [<br>
+{<br>
+“inboundTag”: [ “dns-input” ],<br>
+“outboundTag”: “dns-output”<br>
+},</p>
+<pre><code>  // Правила ниже не работают
+  {
+    "domain": ["domain:2ip.ru"],
+    "outboundTag": "xray-amsterdam"
+  },
+
+  {
+    "domain": ["domain:youtube.ru"],
+    "outboundTag": "wg-russia"
+  },
+
+  // Это добавлял для тестов. Что с ним, что без него - не работает
+  {
+    "ip": ["10.30.0.0/16"],
+    "outboundTag": "fakedns-resolver"
+  }
+]
+</code></pre>
+<p>},</p>
+<p>“inbounds”: [<br>
+{<br>
+“tag”: “dns-input”,<br>
+“port”: 5053,<br>
+“network”: “udp”,<br>
+“protocol”: “dokodemo-door”,<br>
+“settings”: {<br>
+“address”: “192.168.1.12”,<br>
+“port”: 6053,<br>
+“network”: “udp”<br>
+},<br>
+“sniffing”: {<br>
+“enabled”: true,<br>
+“destOverride”: [“http”, “tls”, “fakedns”, “fakedns+others”],<br>
+“metadataOnly”: false<br>
+}<br>
+},</p>
+<pre><code>{
+  "tag": "wg-in",
+  "port": 51820,
+  "protocol": "wireguard",
+  "settings": {
+    "secretKey": "&lt;ключ&gt;",
+    "peers": [
+      {
+        "publicKey": "&lt;ключ&gt;",
+        "allowedIPs": ["172.20.82.2/24"]
+      }
+    ]
+  },
+  "sniffing": {
+    "enabled": true,
+    "destOverride": [ "fakedns" ],
+    "metadataOnly": true
+  }
+}
+</code></pre>
+<p>],</p>
+<p>“outbounds”: [<br>
+{<br>
+“tag”: “direct”,<br>
+“protocol”: “freedom”<br>
+},</p>
+<pre><code>{
+  "protocol": "dns",
+  "tag": "dns-output",
+  "settings": {
+    "address": "192.168.1.12",
+    "network": "udp",
+    "port": 6053
+  }
+},
+
+{
+  "tag": "xray-amsterdam",
+  "protocol": "vmess",
+  "settings": {
+    "vnext": [
+      {
+        "address": "&lt;ip-адрес&gt;",
+        "port": 443,
+        "users": [
+          {
+            "id": "&lt;ключ&gt;",
+            "alterId": 0,
+            "security": "auto"
+          }
+        ]
+      }
+    ]
+  },
+  "streamSettings": {
+    "network": "ws",
+    "wsSettings": {
+      "path": "/xray"
+    }
+  }
+},
+
+{
+  "tag": "wg-russia",
+  "protocol": "wireguard",
+  "settings": {
+    "secretKey": "&lt;ключ&gt;",
+    "address": [ "&lt;адрес&gt;" ],
+    "dns": ["1.1.1.1"],
+    "peers": [
+      {
+        "publicKey": "&lt;ключ&gt;",
+        "presharedKey": "&lt;ключ&gt;",
+        "endpoint": "&lt;ip-адрес&gt;",
+        "allowedIPs": ["0.0.0.0/0", "::/0"],
+        "keepAlive": 20
+      }
+    ]
+  }
+},
+
+{
+  "tag": "fakedns-resolver",
+  "protocol": "freedom",
+  "settings": {
+    "domainStrategy": "UseIPv4"
+  }
+},
+
+{
+  "tag": "block",
+  "protocol": "blackhole"
+}
+</code></pre>
+<p>]<br>
+}</p>
+</details>
+<p>Возможно ли вообще через wg подключение резолвить fake ip адреса обратно в настоящие домены, чтобы через routing удобно перенаправлять трафик куда нужно?</p></td><td>2025-01-12T10:35:47.133Z</td></tr><tr><td>0ka(0ka)</td><td><p>попробуй тоже самое на sing-box</p></td><td>2025-01-12T10:53:14.790Z</td></tr><tr><td>zeroed</td><td><p>А sing-box ведь не умеет в wireguard inbound <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"> там, видимо, можно через “tun” пойти и настроить туннель от роутера к sing-box. Ни у кого нет примера конфига готового?</p></td><td>2025-01-12T12:12:20.833Z</td></tr><tr><td>sakontwist</td><td><p>Попробуйте для теста только fakedns+others в сниффере. Там есть какой-то косячок, сталкивался</p>
+<p>UPD: я использую вариант без metadata</p>
+<pre><code class="lang-auto">      "sniffing": {
+        "enabled": true,
+        "destOverride": ["fakedns+others"],
+        "routeOnly": true
+      }
+</code></pre></td><td>2025-01-12T12:28:15.447Z</td></tr><tr><td>0ka(0ka)</td><td><p>sing-box example</p>
+<pre><code class="lang-auto">{
+    "dns": {
+        "fakeip": {
+            "enabled": true,
+            "inet4_range": "198.18.0.0/15"
+        },
+        "independent_cache": true,
+        "rules": [
+            {
+                "query_type": [
+                    "SRV",
+                    "HTTPS",
+                    "NIMLOC"
+                ],
+                "server": "block"
+            },
+            {
+                "domain_keyword": [
+                    "tiktok",
+                    "spotify",
+                    "bing",
+                    "copilot",
+                    "discord"
+                ],
+                "domain_suffix": [
+                    "4pda.to",
+                    "ua",
+                    "speedtest.selectel.ru",
+                    "googlevideo.com",
+                    "youtube.com",
+                    "ytimg.com",
+                    "ggpht.com",
+                    "chatgpt.com",
+                    "oaistatic.com",
+                    "oaiusercontent.com",
+                    "intercomcdn.com",
+                    "openai.com",
+                    "gemini.google.com",
+                    "scdn.co",
+                    "ttwstatic.com",
+                    "2ip.me",
+                    "voidboost.cc",
+                    "notion.so",
+                    "notion.com",
+                    "splunkcloud.com"
+                ],
+                "query_type": [
+                    "A",
+                    "AAAA"
+                ],
+                "rule_set": "antizapret",
+                "server": "remote"
+            }
+        ],
+        "servers": [
+            {
+                "address": "76.76.2.2",
+                "strategy": "prefer_ipv6",
+                "tag": "local"
+            },
+            {
+                "address": "fakeip",
+                "strategy": "ipv4_only",
+                "tag": "remote"
+            },
+            {
+                "address": "rcode://success",
+                "tag": "block"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "address": "172.19.0.1/30",
+            "domain_strategy": "prefer_ipv6",
+            "interface_name": "singtun",
+            "mtu": 1500,
+            "sniff": true,
+            "tag": "tun",
+            "type": "tun"
+        },
+        {
+            "listen": "10.123.0.1",
+            "listen_port": 53,
+            "sniff": true,
+            "tag": "dns-in",
+            "type": "direct"
+        }
+    ],
+    "log": {
+        "disabled": true,
+        "level": "info"
+    },
+    "outbounds": [
+        {
+            "tag": "direct",
+            "type": "direct"
+        },
+        {
+            "tag": "dns-out",
+            "type": "dns"
+        },
+        {
+            "tag": "block",
+            "type": "block"
+        }
+    ],
+    "route": {
+        "rule_set": [
+            {
+                "format": "binary",
+                "tag": "antizapret",
+                "type": "remote",
+                "url": "https://github.com/savely-krasovsky/antizapret-sing-box/releases/latest/download/antizapret.srs"
+            }
+        ],
+        "rules": [
+            {
+                "ip_cidr": [
+                    "192.168.0.0/16",
+                    "10.0.0.0/8",
+                    "198.18.0.0/15",
+                    "172.19.0.0/24",
+                    "127.0.0.0/16"
+                ],
+                "outbound": "block"
+            },
+            {
+                "outbound": "dns-out",
+                "protocol": "dns"
+            }
+        ]
+    }
+}
+</code></pre>
+<p><code>cat /etc/systemd/network/2-singtun.network</code></p>
+<pre><code class="lang-auto">[Match]
+Name=singtun
+
+[Network]
+Address=172.19.0.1/30
+
+[Route]
+Destination=198.18.0.0/15
+</code></pre></td><td>2025-01-12T16:13:14.892Z</td></tr><tr><td>zeroed</td><td><p>Пробовал разные варианты, не помогло, к сожалению</p></td><td>2025-01-18T09:23:26.970Z</td></tr><tr><td>zeroed</td><td><p>Спасибо, попробую sing-box. Отпишусь по результатам</p></td><td>2025-01-18T09:24:02.230Z</td></tr><tr><td>outreach</td><td><p>Интересуюсь таким же сетапом.<br>
+В бета версии sing-box 1.11.0 добавили endpoint Wireguard. Он позволяет работать как на inbound, так и outbound.</p>
+<p>Вот мой пример:</p>
+<pre data-code-wrap="json"><code class="lang-json">"endpoints": [
+    {
+        "type": "wireguard",
+        "tag": "wg-ep",
+        "system": true,
+        "address": [
+            "10.10.10.1/24"
+        ],
+        "private_key": "",
+        "listen_port": 51820,
+        "peers": [
+            {
+                "public_key": ",
+                "allowed_ips": [
+                    "10.10.10.2/32"
+                ]
+            }
+        ]
+    }
+],
+
+</code></pre>
+<p>К сожалению, полностью настроить конфиг у меня не получилось.<br>
+Если получится у вас, то прошу поделиться <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2025-01-26T18:28:16.429Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,371 @@
+[
+    {
+        "id": 2200,
+        "name": null,
+        "username": "ValdikSS",
+        "avatar_template": "/user_avatar/ntc.party/valdikss/{size}/2_2.png",
+        "created_at": "2020-11-23T16:57:47.782Z",
+        "cooked": "<p><strong>TL;DR</strong>: Из-за блокировок Роскомнадзора большое количество ресурсов, находящихся на Amazon CloudFront и Akamai, периодически становятся кратковременно недоступны. Проблема вызвана частой сменой (ротацией) IP-адресов на доменах, использующих эти сервисы, а также балансировками на основе геопризнака и EDNS Client Subnet: периодически DNS-серверы ресурсов выдают клиентам адреса, внесённые в Реестр запрещенных сайтов. Неосведомлённому человеку сложно определить причину проблемы, так как через минуту всё, как правило, снова работает (но через какое-то время опять перестаёт).</p>\n<h3><a name=\"p-2200-h-1\" class=\"anchor\" href=\"#p-2200-h-1\"></a>Введение</h3>\n<p>Около двух лет в России в рамках борьбы с Telegram были заблокированы диапазоны IP-адресов Amazon Web Services, CloudFlare, Digital Ocean, Scaleway, Hetzner, Softlayer и других менее известных хостингов и CDN. Перечисленные сервисы очень популярны, их услугами пользуется значительное количество сайтов в интернете.<br>\nВо времена блокировки пользователи сообщали о недоступности <a href=\"https://www.igromania.ru/news/74766/Sony_prokommentirovala_problemy_s_dostupom_k_PlayStation_Network_v_Rossii.html\">Playstation Network</a>, <a href=\"https://vc.ru/flood/36457\">Viber</a>, <a href=\"https://www.the-village.ru/city/situation/309525-roskom-vs-telegram\">Spotify</a>, <a href=\"https://twitter.com/fsqgera/status/986162669370728448\">основного сайта Microsoft и некоторых его поддоменов</a>, а также множества других сервисов, сайтов и интернет-игр.<br>\n18.06.2020 <a href=\"https://rkn.gov.ru/news/rsoc/news73050.htm\">Роскомнадзор разблокировал</a> все ранее блокированные диапазоны, жалобы на недоступность сайтов резко сократились.</p>\n<p>Однако часть сайтов, использующих сервисы Amazon CloudFront и Akamai, до сих пор периодически не открывается либо не загружается полностью, а через минуту уже работают нормально. Вы могли списывать такое поведение на проблемы у интернет-провайдера или сайта, но на деле они вызваны интернет-блокировками в России и особенностями геобалансировки этих сервисов.</p>\n<p>Вот краткий список хостов, к которым был затруднен доступ за последние 2 недели:</p>\n<ul>\n<li><strong><a href=\"http://www.adobe.com\">www.adobe.com</a></strong></li>\n<li><strong><a href=\"http://leonardo.osnova.io\">leonardo.osnova.io</a></strong> (картинки сайтов <a href=\"http://dtf.ru\">dtf.ru</a>, <a href=\"http://tjournal.ru\">tjournal.ru</a>)</li>\n<li><strong><a href=\"http://cf-hls-media.sndcdn.com\">cf-hls-media.sndcdn.com</a></strong> (аудио SoundCloud)</li>\n<li><strong><a href=\"http://blog.playstation.com\">blog.playstation.com</a></strong> (блог Playstation)</li>\n<li><strong><a href=\"http://clips-media-assets2.twitch.tv\">clips-media-assets2.twitch.tv</a></strong> (видео с Twitch)</li>\n<li><strong><a href=\"http://ocsp.int-x3.letsencrypt.org\">ocsp.int-x3.letsencrypt.org</a></strong> (проверка сертификатов по протоколу OCSP)</li>\n<li><strong><a href=\"http://steamcommunity-a.akamaihd.net\">steamcommunity-a.akamaihd.net</a></strong> (форум Steam)</li>\n<li>*<strong>.zendesk.com</strong> (система поддержки Zendesk)</li>\n<li><strong><a href=\"http://a.slack-edge.com\">a.slack-edge.com</a></strong> (мессенджер Slack)</li>\n<li><strong><a href=\"http://v16-web.tiktok.com\">v16-web.tiktok.com</a>, <a href=\"http://s16.tiktokcdn.com\">s16.tiktokcdn.com</a></strong> (приложение TikTok)</li>\n<li><strong><a href=\"http://cdn-images.deezer.com\">cdn-images.deezer.com</a></strong> (картинки аудиосервиса Deezer)</li>\n</ul>\n<p>Давайте разберемся с причинами проблем и способами их устранения.</p>\n<h3><a name=\"p-2200-edns-client-subnet-2\" class=\"anchor\" href=\"#p-2200-edns-client-subnet-2\"></a>Геобалансировка и EDNS Client Subnet</h3>\n<p>Для того, чтобы распределить запросы пользователей к наиболее близким серверам географически, DNS-резолверы при обращении к DNS-серверам добавляют IP-адрес клиента с точностью до подсети /24, и сервер учитывает его при ответе на запрос.<br>\nAkamai, например, может отдавать совершенно разный набор IP-адресов на разные подсети, даже если они географически близко и принадлежат одному провайдеру, и отдаёт ответ со значением TTL равным одной минуте.</p>\n<p>Отрезолвим домен <strong><a href=\"http://steamcommunity-a.akamaihd.net\">steamcommunity-a.akamaihd.net</a></strong> (домен Steam для изображений и различных ресурсов) через DNS-резолвер Google 8.8.8.8, используя диапазоны 87.245.224.0/24, 87.245.225.0/24, 87.245.226.0/24, 87.245.227.0/24 провайдера retn для Client Subnet:</p>\n<pre><code class=\"lang-auto\">$ dig +short steamcommunity-a.akamaihd.net @8.8.8.8 +subnet=87.245.224.0/24\n92.123.77.32\n92.123.77.19\n\n$ dig +short steamcommunity-a.akamaihd.net @8.8.8.8 +subnet=87.245.225.0/24\n185.5.160.202\n185.5.160.187\n\n$ dig +short steamcommunity-a.akamaihd.net @8.8.8.8 +subnet=87.245.226.0/24\n185.5.160.202\n185.5.160.187\n\n$ dig +short steamcommunity-a.akamaihd.net @8.8.8.8 +subnet=87.245.227.0/24\n87.245.213.51\n87.245.213.9\n</code></pre>\n<p>Подождем пару минут, повторим опыт:</p>\n<pre><code class=\"lang-auto\">$ dig +short steamcommunity-a.akamaihd.net @8.8.8.8 +subnet=87.245.224.0/24\n2.20.188.65\n2.20.188.75\n\n$ dig +short steamcommunity-a.akamaihd.net @8.8.8.8 +subnet=87.245.225.0/24\n23.3.90.136\n23.60.69.14\n\n$ dig +short steamcommunity-a.akamaihd.net @8.8.8.8 +subnet=87.245.226.0/24\n95.101.143.18\n95.101.143.16\n\n$ dig +short steamcommunity-a.akamaihd.net @8.8.8.8 +subnet=87.245.227.0/24\n92.123.77.19\n92.123.77.32\n</code></pre>\n<p>Как легко заметить, для каждого диапазона отдаются разные наборы адресов, которые меняются со временем.</p>\n<p>Один из IP-адресов, <strong>92.123.77.19</strong>, <a href=\"https://reestr.rublacklist.net/record/2657011/\">находится в Реестре запрещенных сайтов</a> с 22.10.2020. При попытке браузера открыть сайт через этот IP-адрес, он либо сразу не откроет страницу, либо будет загружать её бесконечно долго (зависит от системы блокировок у провайдера).</p>\n<p><div class=\"lightbox-wrapper\"><a class=\"lightbox\" href=\"в-россии-сохраняются-проблемы-с-доступностью-сайтов-но-никто-их-не-замечает/352447101d3a467c5973fdd8dbcd38575afed040.png\" data-download-href=\"https://ntc.party/uploads/default/352447101d3a467c5973fdd8dbcd38575afed040\" title=\"Скриншот с сайта Роскомсвободы: IP-адрес внесён в реестр.\"><img src=\"в-россии-сохраняются-проблемы-с-доступностью-сайтов-но-никто-их-не-замечает/352447101d3a467c5973fdd8dbcd38575afed040.png\" alt=\"Скриншот с сайта Роскомсвободы: IP-адрес внесён в реестр.\" data-base62-sha1=\"7A71SvZoz0rqn3vPhJh4bitCxQ4\" width=\"413\" height=\"500\" data-dominant-color=\"F8F8F9\"><div class=\"meta\"><svg class=\"fa d-icon d-icon-far-image svg-icon\" aria-hidden=\"true\"><use href=\"#far-image\"></use></svg><span class=\"filename\">Скриншот с сайта Роскомсвободы: IP-адрес внесён в реестр.</span><span class=\"informations\">608×735 23.2 KB</span><svg class=\"fa d-icon d-icon-discourse-expand svg-icon\" aria-hidden=\"true\"><use href=\"#discourse-expand\"></use></svg></div></a></div></p>\n<p>Аналогичная ситуация наблюдается со многими другими доменами. Например, <strong><a href=\"http://leonadro.osnova.io\">leonadro.osnova.io</a></strong> (изображения новостных сайтов <a href=\"http://tjournal.ru\">tjournal.ru</a>, <a href=\"http://dtf.ru\">dtf.ru</a>) периодически резолвится в <strong>2.19.204.32</strong>, <strong>2.16.103.18</strong>, один из которых <a href=\"https://reestr.rublacklist.net/record/2657011/\">находится в Реестре</a>.</p>\n<p>Пример выполнения команды nslookup под Windows, используя DNS-резолверы провайдера ОнЛайм (Москва):</p>\n<pre><code class=\"lang-auto\">&gt;nslookup leonardo.osnova.io\n╤хЁтхЁ:  ns1.onlime.ru\nAddress:  77.37.251.33\n\nНе заслуживающий доверия ответ:\n╚ь :     a1844.dscd.akamai.net\nAddresses:  2a02:26f0:98::58dd:844b\n          2a02:26f0:98::58dd:8452\n          2.19.204.32\n          2.16.103.18\nAliases:  leonardo.osnova.io\n          leonardo.osnova.io.akamaized.net\n</code></pre>\n<h3><a name=\"p-2200-h-3\" class=\"anchor\" href=\"#p-2200-h-3\"></a>История выявления проблемы</h3>\n<p>Пользователи <a href=\"https://antizapret.prostovpn.org/\">АнтиЗапрета</a> и расширения <a href=\"https://chrome.google.com/webstore/detail/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D1%80%D1%83%D0%BD%D0%B5%D1%82%D0%B0/npgcnondjocldhldegnakemclmfkngch\">«Обход блокировок Рунета»</a> визуально уведомляются о факте проксирования домена или IP-адреса, а при ошибке проксирования им предоставляется возможность отправки сообщения об ошибке.</p>\n<p>При наличии домена проксирование всегда осуществляется по нему; на прокси-сервер не отправляется IP-адрес, полученный через DNS-резолвер пользователя.<br>\nОшибка возникала из-за того, что локально у пользователя домен резолвился в заблокированный <em>IP-адрес</em>, из-за чего запрос, содержащий только домен, отправлялся на прокси-сервер проекта. Прокси-сервер искал домен по списку заблокированных, не находя его там резолвил IP-адреса, получал <em>другой</em> набор IP-адресов (не тот, который был у клиента), и блокировал запрос из-за отсутствия IP-адресов в Реестре заблокированных.</p>\n<h3><a name=\"p-2200-h-4\" class=\"anchor\" href=\"#p-2200-h-4\"></a>Возможные решения проблемы</h3>\n<p>Чтобы хоть как-то уменьшить проблемы с интернетом в России, производители некоторых комплексов DPI создают свои специализированные DNS-резолверы, которые при наличии сразу заблокированных и не заблокированных адресов в одном DNS-ответе убирают заблокированный, не давая клиенту возможности обращаться к нему. Данная функция есть, например, в системе <a href=\"https://docs.carbonsoft.ru/pages/viewpage.action?pageId=113115218#%D0%9D%D0%BE%D0%B2%D0%BE%D0%B5%D0%B2CarbonReductorDPIX-%D0%9E%D0%BF%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F%D1%80%D0%B0%D0%B7%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0%D0%BF%D0%BE%D0%BF%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D1%85%D1%80%D0%B5%D1%81%D1%83%D1%80%D1%81%D0%BE%D0%B2\">Carbon Reductor DPI X</a>, но работает она только при использовании DNS-резолверов провайдера (а не сторонних, DNS over HTTPS, и т.п.):</p>\n<blockquote>\n<p>[…] Мы сделали сразу два решения проблемы с блокировкой популярных ресурсов.</p>\n<p>Первый способ — интеграция с DNS-серверами для избежания частичных блокировок.</p>\n<p>У некоторых больших ресурсов и сервисов, таких как Google, на одном домене используется большое количество IP-адресов. Некоторые из них могут случайно оказаться в списках на блокировку. В итоге абоненты испытывают проблемы, сайт у них открывается со второй или третьей попытки, пока браузер перебирает IP-адреса, возможно он так и не подключится. С помощью Carbon Reductor DPI X Вы можете настроить интеграцию с Вашим DNS-сервером и отдавать клиентам только незаблокированные IP-адреса.</p>\n<p>Если абонент использует публичные DNS-сервера этот способ не поможет. При обращении в поддержку можно рекомендовать ему использовать DNS-сервер провайдера или Вы можете настроить переадресацию DNS на маршрутизаторе.<br>\n[…]</p>\n</blockquote>\n<p>Готовое ПО с подобной функциональностью мне неизвестно, но это достаточно просто реализовать в Knot Resolver и PowerDNS Recursor.<br>\nВ простых случаях должно быть достаточно добавить незаблокированные адреса для домена в файл <strong>hosts</strong>, но на мобильных устройствах это невозможно сделать без root или специального ПО.</p>\n<p>Владельцы сайтов могут попробовать отключить геобалансировку и изменение IP-адресов, если такая настройка имеется, либо установить и использовать для домена собственный DNS-сервер, настроенный таким образом, чтобы отдавать только гарантированно не заблокированные адреса.</p>\n<h3><a name=\"p-2200-h-5\" class=\"anchor\" href=\"#p-2200-h-5\"></a>Вывод</h3>\n<p>Увы, по состоянию на конец ноября 2020 года интернет в России до сих пор нормально не работает: то тут, то там можно встретить кратковременную недоступность ресурсов, неполную загрузку сайтов и прочие атрибуты блокировок. Специалисты Роскомнадзора не знают об этой проблеме или игнорируют её, а из-за отсутствия визуального оповещения о блокировке такого типа, пользователи вынуждены винить владельцев сайтов или интернет-провайдера.</p>",
+        "post_number": 1,
+        "post_type": 1,
+        "posts_count": 3,
+        "updated_at": "2020-11-23T16:57:47.782Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 424,
+        "reads": 75,
+        "readers_count": 74,
+        "score": 2135.0,
+        "yours": false,
+        "topic_id": 770,
+        "topic_slug": "%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%81%D0%BE%D1%85%D1%80%D0%B0%D0%BD%D1%8F%D1%8E%D1%82%D1%81%D1%8F-%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D0%BE%D1%81%D1%82%D1%8C%D1%8E-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2-%D0%BD%D0%BE-%D0%BD%D0%B8%D0%BA%D1%82%D0%BE-%D0%B8%D1%85-%D0%BD%D0%B5-%D0%B7%D0%B0%D0%BC%D0%B5%D1%87%D0%B0%D0%B5%D1%82",
+        "display_username": null,
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "badges_granted": [],
+        "version": 1,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": false,
+        "can_wiki": false,
+        "link_counts": [
+            {
+                "url": "http://leonardo.osnova.io",
+                "internal": false,
+                "reflection": false,
+                "clicks": 36
+            },
+            {
+                "url": "http://www.adobe.com",
+                "internal": false,
+                "reflection": false,
+                "clicks": 16
+            },
+            {
+                "url": "https://antizapret.prostovpn.org/",
+                "internal": false,
+                "reflection": false,
+                "title": "АнтиЗапрет — скажи цензуре нет!",
+                "clicks": 12
+            },
+            {
+                "url": "http://dtf.ru",
+                "internal": false,
+                "reflection": false,
+                "clicks": 10
+            },
+            {
+                "url": "http://clips-media-assets2.twitch.tv",
+                "internal": false,
+                "reflection": false,
+                "clicks": 8
+            },
+            {
+                "url": "http://steamcommunity-a.akamaihd.net",
+                "internal": false,
+                "reflection": false,
+                "clicks": 7
+            },
+            {
+                "url": "https://chrome.google.com/webstore/detail/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D1%80%D1%83%D0%BD%D0%B5%D1%82%D0%B0/npgcnondjocldhldegnakemclmfkngch",
+                "internal": false,
+                "reflection": false,
+                "title": "Обход блокировок Рунета - Chrome Web Store",
+                "clicks": 7
+            },
+            {
+                "url": "http://cdn-images.deezer.com",
+                "internal": false,
+                "reflection": false,
+                "clicks": 6
+            },
+            {
+                "url": "http://tjournal.ru",
+                "internal": false,
+                "reflection": false,
+                "clicks": 6
+            },
+            {
+                "url": "https://www.the-village.ru/city/situation/309525-roskom-vs-telegram",
+                "internal": false,
+                "reflection": false,
+                "title": "Битва с Telegram: Как Роскомнадзор заблокировал интернет",
+                "clicks": 5
+            },
+            {
+                "url": "http://blog.playstation.com",
+                "internal": false,
+                "reflection": false,
+                "clicks": 5
+            },
+            {
+                "url": "http://leonadro.osnova.io",
+                "internal": false,
+                "reflection": false,
+                "clicks": 5
+            },
+            {
+                "url": "http://v16-web.tiktok.com",
+                "internal": false,
+                "reflection": false,
+                "clicks": 5
+            },
+            {
+                "url": "https://docs.carbonsoft.ru/pages/viewpage.action?pageId=113115218#%D0%9D%D0%BE%D0%B2%D0%BE%D0%B5%D0%B2CarbonReductorDPIX-%D0%9E%D0%BF%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F%D1%80%D0%B0%D0%B7%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0%D0%BF%D0%BE%D0%BF%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D1%85%D1%80%D0%B5%D1%81%D1%83%D1%80%D1%81%D0%BE%D0%B2",
+                "internal": false,
+                "reflection": false,
+                "title": "ÐÐ¾Ð²Ð¾Ðµ Ð² Carbon Reductor DPI X - 2. ÐÐ¾ÐºÑÐ¼ÐµÐ½ÑÐ°ÑÐ¸Ñ Carbon Reductor DPI X - ÐÐ¾ÐºÑÐ¼ÐµÐ½ÑÐ°ÑÐ¸Ñ Ð´Ð»Ñ Ð¿ÑÐ¾Ð²Ð°Ð¹Ð´ÐµÑÐ¾Ð² Ð¸ Ð¾Ð¿ÐµÑÐ°ÑÐ¾ÑÐ¾Ð² ÑÐ²ÑÐ·Ð¸",
+                "clicks": 5
+            },
+            {
+                "url": "http://ocsp.int-x3.letsencrypt.org",
+                "internal": false,
+                "reflection": false,
+                "clicks": 3
+            },
+            {
+                "url": "https://rkn.gov.ru/news/rsoc/news73050.htm",
+                "internal": false,
+                "reflection": false,
+                "title": "Роскомнадзор - О мессенджере Телеграмм",
+                "clicks": 3
+            },
+            {
+                "url": "http://s16.tiktokcdn.com",
+                "internal": false,
+                "reflection": false,
+                "clicks": 2
+            },
+            {
+                "url": "https://reestr.rublacklist.net/record/2657011/",
+                "internal": false,
+                "reflection": false,
+                "title": "Реестр запрещенных сайтов",
+                "clicks": 2
+            },
+            {
+                "url": "http://cf-hls-media.sndcdn.com",
+                "internal": false,
+                "reflection": false,
+                "clicks": 2
+            },
+            {
+                "url": "https://www.igromania.ru/news/74766/Sony_prokommentirovala_problemy_s_dostupom_k_PlayStation_Network_v_Rossii.html",
+                "internal": false,
+                "reflection": false,
+                "title": "Sony прокомментировала проблемы с доступом к PlayStation Network в России — Игромания",
+                "clicks": 1
+            },
+            {
+                "url": "https://vc.ru/flood/36457",
+                "internal": false,
+                "reflection": false,
+                "clicks": 1
+            },
+            {
+                "url": "http://a.slack-edge.com",
+                "internal": false,
+                "reflection": false,
+                "clicks": 1
+            },
+            {
+                "url": "https://twitter.com/fsqgera/status/986162669370728448",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://ntc.party/t/soundcloud-com/1009/6",
+                "internal": true,
+                "reflection": true,
+                "title": "Проблемы с сайтом soundcloud.com",
+                "clicks": 1
+            },
+            {
+                "url": "https://ntc.party/t/flickr-com/1012/3",
+                "internal": true,
+                "reflection": true,
+                "title": "Доступ к Flickr.com",
+                "clicks": 1
+            },
+            {
+                "url": "https://ntc.party/t/coubcom-%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0-%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%B0/794/2",
+                "internal": true,
+                "reflection": true,
+                "title": "Coub.com проблема доступа",
+                "clicks": 0
+            },
+            {
+                "url": "https://ntc.party/t/%D0%BD%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D0%B8-%D0%B0%D0%BD%D1%82%D0%B8%D0%B7%D0%B0%D0%BF%D1%80%D0%B5%D1%82%D0%B0/40/16",
+                "internal": true,
+                "reflection": true,
+                "title": "Новости АнтиЗапрета",
+                "clicks": 0
+            },
+            {
+                "url": "https://ntc.party/t/%C2%ABthe-proxy-server-is-refusing-connections%C2%BB-%D0%BF%D1%80%D0%B8-%D0%B7%D0%B0%D0%B3%D1%80%D1%83%D0%B7%D0%BA%D0%B5-%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9-%D1%81-leonardoosnovaio/789/2",
+                "internal": true,
+                "reflection": true,
+                "title": "«The proxy server is refusing connections» при загрузке изображений с leonardo.osnova.io",
+                "clicks": 0
+            },
+            {
+                "url": "https://ntc.party/t/themoviedborg/896/2",
+                "internal": true,
+                "reflection": true,
+                "title": "Themoviedb.org",
+                "clicks": 0
+            }
+        ],
+        "read": true,
+        "user_title": "AntiZapret staff",
+        "title_is_group": false,
+        "bookmarked": false,
+        "actions_summary": [],
+        "moderator": true,
+        "admin": true,
+        "staff": true,
+        "user_id": 1,
+        "hidden": false,
+        "trust_level": 2,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": false,
+        "wiki": false,
+        "post_url": "/t/%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%81%D0%BE%D1%85%D1%80%D0%B0%D0%BD%D1%8F%D1%8E%D1%82%D1%81%D1%8F-%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D0%BE%D1%81%D1%82%D1%8C%D1%8E-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2-%D0%BD%D0%BE-%D0%BD%D0%B8%D0%BA%D1%82%D0%BE-%D0%B8%D1%85-%D0%BD%D0%B5-%D0%B7%D0%B0%D0%BC%D0%B5%D1%87%D0%B0%D0%B5%D1%82/770/1",
+        "can_translate": false
+    },
+    {
+        "id": 2515,
+        "name": null,
+        "username": "ValdikSS",
+        "avatar_template": "/user_avatar/ntc.party/valdikss/{size}/2_2.png",
+        "created_at": "2021-02-09T22:23:42.174Z",
+        "cooked": "<p>В данную минуту (01:21 10.02.2021) у меня не загружаются аватарки пользователей на Github, т.к. 3 из 4 адресов на домене находятся в Реестре.</p>\n<pre><code class=\"lang-auto\">$ host avatars.githubusercontent.com\navatars.githubusercontent.com is an alias for github.map.fastly.net.\ngithub.map.fastly.net has address 151.101.0.133\ngithub.map.fastly.net has address 151.101.64.133\ngithub.map.fastly.net has address 151.101.128.133\ngithub.map.fastly.net has address 151.101.192.133  \n</code></pre>\n<p><a href=\"https://reestr.rublacklist.net/record/2747066/\">reestr.rublacklist.net/record/2747066</a></p>",
+        "post_number": 2,
+        "post_type": 1,
+        "posts_count": 3,
+        "updated_at": "2021-03-10T19:51:03.383Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 3,
+        "reads": 45,
+        "readers_count": 44,
+        "score": 24.0,
+        "yours": false,
+        "topic_id": 770,
+        "topic_slug": "%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%81%D0%BE%D1%85%D1%80%D0%B0%D0%BD%D1%8F%D1%8E%D1%82%D1%81%D1%8F-%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D0%BE%D1%81%D1%82%D1%8C%D1%8E-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2-%D0%BD%D0%BE-%D0%BD%D0%B8%D0%BA%D1%82%D0%BE-%D0%B8%D1%85-%D0%BD%D0%B5-%D0%B7%D0%B0%D0%BC%D0%B5%D1%87%D0%B0%D0%B5%D1%82",
+        "display_username": null,
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "badges_granted": [],
+        "version": 1,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": false,
+        "can_wiki": false,
+        "link_counts": [
+            {
+                "url": "https://reestr.rublacklist.net/record/2747066/",
+                "internal": false,
+                "reflection": false,
+                "title": "Реестр запрещенных сайтов",
+                "clicks": 9
+            }
+        ],
+        "read": true,
+        "user_title": "AntiZapret staff",
+        "title_is_group": false,
+        "bookmarked": false,
+        "actions_summary": [],
+        "moderator": true,
+        "admin": true,
+        "staff": true,
+        "user_id": 1,
+        "hidden": false,
+        "trust_level": 2,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": false,
+        "wiki": false,
+        "post_url": "/t/%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%81%D0%BE%D1%85%D1%80%D0%B0%D0%BD%D1%8F%D1%8E%D1%82%D1%81%D1%8F-%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D0%BE%D1%81%D1%82%D1%8C%D1%8E-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2-%D0%BD%D0%BE-%D0%BD%D0%B8%D0%BA%D1%82%D0%BE-%D0%B8%D1%85-%D0%BD%D0%B5-%D0%B7%D0%B0%D0%BC%D0%B5%D1%87%D0%B0%D0%B5%D1%82/770/2",
+        "can_translate": false
+    },
+    {
+        "id": 2965,
+        "name": null,
+        "username": "ValdikSS",
+        "avatar_template": "/user_avatar/ntc.party/valdikss/{size}/2_2.png",
+        "created_at": "2021-04-08T14:45:49.113Z",
+        "cooked": "<pre><code class=\"lang-auto\">$ host -t a www.teamviewer.com 1.1.1.1\nUsing domain server:\nName: 1.1.1.1\nAddress: 1.1.1.1#53\nAliases: \n\nwww.teamviewer.com is an alias for dp01e0e26epjj.cloudfront.net.\ndp01e0e26epjj.cloudfront.net has address 65.9.50.34\n</code></pre>\n<p><a href=\"https://reestr.rublacklist.net/search/?q=65.9.50.34\">https://reestr.rublacklist.net/search/?q=65.9.50.34</a></p>",
+        "post_number": 3,
+        "post_type": 1,
+        "posts_count": 3,
+        "updated_at": "2021-04-08T18:42:05.778Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 4,
+        "reads": 40,
+        "readers_count": 39,
+        "score": 28.0,
+        "yours": false,
+        "topic_id": 770,
+        "topic_slug": "%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%81%D0%BE%D1%85%D1%80%D0%B0%D0%BD%D1%8F%D1%8E%D1%82%D1%81%D1%8F-%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D0%BE%D1%81%D1%82%D1%8C%D1%8E-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2-%D0%BD%D0%BE-%D0%BD%D0%B8%D0%BA%D1%82%D0%BE-%D0%B8%D1%85-%D0%BD%D0%B5-%D0%B7%D0%B0%D0%BC%D0%B5%D1%87%D0%B0%D0%B5%D1%82",
+        "display_username": null,
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "badges_granted": [],
+        "version": 2,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": false,
+        "can_wiki": false,
+        "link_counts": [
+            {
+                "url": "https://reestr.rublacklist.net/search/?q=65.9.50.34",
+                "internal": false,
+                "reflection": false,
+                "title": "Реестр запрещенных сайтов",
+                "clicks": 12
+            }
+        ],
+        "read": true,
+        "user_title": "AntiZapret staff",
+        "title_is_group": false,
+        "bookmarked": false,
+        "actions_summary": [],
+        "moderator": true,
+        "admin": true,
+        "staff": true,
+        "user_id": 1,
+        "hidden": false,
+        "trust_level": 2,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": false,
+        "wiki": false,
+        "post_url": "/t/%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%81%D0%BE%D1%85%D1%80%D0%B0%D0%BD%D1%8F%D1%8E%D1%82%D1%81%D1%8F-%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D0%BE%D1%81%D1%82%D1%8C%D1%8E-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2-%D0%BD%D0%BE-%D0%BD%D0%B8%D0%BA%D1%82%D0%BE-%D0%B8%D1%85-%D0%BD%D0%B5-%D0%B7%D0%B0%D0%BC%D0%B5%D1%87%D0%B0%D0%B5%D1%82/770/3",
+        "can_translate": false
+    }
+]

@@ -1,0 +1,86 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>потеря-соединения-mullvad-vpn</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Lieben</td><td><p>В районе 5:05 по МСК резко пропал коннект к Mullvad VPN на всех устройствах. Не подключается ни через OpenVPN (в том числе с использованием bridge), ни через WireGuard (в том числе с использованием UDP over TCP). Провайдер Ростелеком.</p></td><td>2023-04-14T02:52:02.772Z</td></tr><tr><td>Wielkaneko</td><td><p>Схожая ситуация по словам нескольких людей у провайдера домру (эр телеком). С МТС к некоторым серверам в Швейцарии пока удается подключиться.</p>
+<p>UPD:  Официальный сайт - <a href="http://mullvad.net" rel="noopener nofollow ugc">mullvad.net</a> также под блокировкой.</p></td><td>2023-04-14T06:24:09.964Z</td></tr><tr><td>JJbet</td><td><p>Подтверждаю проблему на Beeline и Lovit, как мобила так и стационарник. Кажется, мы его потерли.</p></td><td>2023-04-14T07:13:03.720Z</td></tr><tr><td>CluelessPrivacyEnthusiast</td><td><p>Это также подставило под блокировку Mullvad DoH что в результате привело к неработоспособоности Mullvad Browser.<br>
+А отрубать или менять адрес DoH (или ставить расширения), что возможно может добавить уникальности браузеру звучит как-то не очень.</p></td><td>2023-04-18T18:13:18.894Z</td></tr><tr><td>unge-kins</td><td><p>Tele2, Спб. Постепенно «исчезают» сервера.</p></td><td>2023-04-21T12:58:44.539Z</td></tr><tr><td>Nao</td><td><p>Если есть IPv6 (в т.ч. и провайдерский 6to4) то можно в подменю “WireGuard Settings” врубить подключение по IPv6 (не путать с разрешением IPv6 внутри туннеля).<br>
+У меня после этого ко всем локациям коннект нормальный.<br>
+Единственное пинг большой и скорость не очень, но это вообще IPv6 у меня так работает в целом.</p></td><td>2023-04-26T09:08:16.616Z</td></tr><tr><td>Nao</td><td><p>Смог победить блокировку Mullvad на IPv4 с помощью установки вот этого на роутер с OpenWrt:</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/bol-van/zapret">
+  <header class="source">
+
+      <a href="https://github.com/bol-van/zapret" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="потеря-соединения-mullvad-vpn/b908f24ed97549441ae7fe84f8bd9d1d478c1fbc_2_690x344.png" class="thumbnail" data-dominant-color="F1F4F1">
+
+  <h3><a href="https://github.com/bol-van/zapret" target="_blank" rel="noopener nofollow ugc">GitHub - bol-van/zapret: DPI bypass multi platform</a></h3>
+
+    <p><span class="github-repo-description">DPI bypass multi platform</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Пока настроил обход только для протокола Wireguard в режиме udp и tcp.</p>
+<p>Важные настройки файла config</p>
+<pre><code class="lang-auto">MODE=custom
+NFQWS_OPT_DESYNC="--dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig --dpi-desync-any-protocol=1 --dpi-desync-cutoff=d2"
+</code></pre>
+<p>Настройка сильно зависит от того какие DPI у вас, так что возможно лучше позапускать blockcheck.sh и подобрать настройки под себя. Жаль только что скрипт умеет тестить только http/https, там что на wireguard сервера его не натравишь, но можно посмотреть другие популярные заблокированные хостнеймы.</p>
+<p>Файл init.d/openwrt/custom<br>
+<a class="attachment" href="потеря-соединения-mullvad-vpn/scOeIWqTFbIagUk8QO61dbhTYT7">custom</a> (979 байтов)</p>
+<p>В файл ipset/zapret-hosts-user.txt<br>
+Нужно добавить хостнеймы всех серверов Mullvad к которым надо подключаться и выполнить<br>
+ipset/get_user.sh</p>
+<p>В настройках Mullvad App нужно выбирать протокол Wireguard.<br>
+Если выбран UDP, то ставьте порт 51820.<br>
+Если выбран TCP, то ставьте UDP-over-TCP порт 80<br>
+Эти порты указаны в файле custom, можно их поменять или вообще убрать фильтрацию по портам в принципе если вам эта программа bol-van/zapret нужно только для обхода Mullvad.</p>
+<p>В будущем наверное добавлю получение серверов Mullvad через их API или вообще откажусь от фильтрации по IP и поменяю правило чтобы ловило весь WireGuard трафик, он вроде через iptables легко детектится.</p></td><td>2023-06-06T17:30:42.860Z</td></tr>
+    </table>
+      </body>
+    </html>

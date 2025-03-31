@@ -1,0 +1,621 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>создание-собственного-comss-dns</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tdencrash</td><td><p>Много где слышал про comss dns, пробовал его использовать. Он действительно помогает решать многие проблемы с доступом к ряду сайтов. Но я в какой-то степени параноик и есть у меня определенное недоверие к сторонним инструментам под чужим управлением. Очень интересна практическая реализация их настроек и как это можно повторить самостоятельно, пусть даже используя тот же control-d. Может кто знает, как они добиваются например этого:</p>
+<ul>
+<li>Обход блокировки доступа до сервисов с AI чатами (ChatGPT, Google Gimini etc), даже без использования VPN.</li>
+<li>Обход блокировки скачивания образов с сайта Microsoft.<br>
+В чем хитрость? В попытке разрешить имена с серверов на другом континенте, например из США?</li>
+</ul></td><td>2024-11-04T13:08:21.953Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><blockquote>
+<p>В концепции DNS есть механизм “проброса” адреса клиента в DNS пакет – EDNS Client Subnet (ECS – в дальнейшем)</p>
+</blockquote>
+<aside class="onebox wikipedia" data-onebox-src="https://en.wikipedia.org/wiki/EDNS_Client_Subnet">
+  <header class="source">
+
+      <a href="https://en.wikipedia.org/wiki/EDNS_Client_Subnet" target="_blank" rel="noopener nofollow ugc">en.wikipedia.org</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://en.wikipedia.org/wiki/EDNS_Client_Subnet" target="_blank" rel="noopener nofollow ugc">EDNS Client Subnet</a></h3>
+
+<p>EDNS Client Subnet (ECS) is an option in the Extension Mechanisms for DNS that allows a recursive DNS resolver to specify the subnetwork for the host or client on whose behalf it is making a DNS query. This is generally intended to help speed up the delivery of data from content delivery networks (CDNs), by allowing better use of DNS-based load balancing to select a service address near the client when the client computer is not necessarily near the recursive resolver. 
+ When an authoritative nam...</p>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://habr.com/ru/articles/538806/">
+  <header class="source">
+      <img src="создание-собственного-comss-dns/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://habr.com/ru/articles/538806/" target="_blank" rel="noopener nofollow ugc">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="создание-собственного-comss-dns/65306e6be5a9b4e6eecba9adc35681622e83dea9_2_690x389.png" class="thumbnail" data-dominant-color="DFDFE0" width="690" height="389"></div>
+
+<h3><a href="https://habr.com/ru/articles/538806/" target="_blank" rel="noopener nofollow ugc">Кабысдох – DoH-припарка от русского firewall</a></h3>
+
+  <p># wtf cf-hls-media.sndcdn.com cf-hls-media.sndcdn.com is an alias for d1ws1c3tu8ejje.cloudfront.net. d1ws1c3tu8ejje.cloudfront.net has address 13.33.240.123 ❌ 13.33.240.123 заблокирован С в очередной...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-11-04T14:31:08.870Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote quote-modified" data-post="4" data-topic="11011">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B7%D1%80%D0%B0%D1%87%D0%BD%D1%8B%D0%B9-%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8/11011/4">Прозрачный прокси</a> <a class="badge-category__wrapper " href="/c/censorship-circumvention-software/11"><span data-category-id="11" style="--category-badge-color: #92278F; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Discussions of censorship circumvention software of different kinds, for all operation systems and devices"><span class="badge-category__name">Censorship circumvention methods &amp; software</span></span></a>
+  </div>
+  <blockquote>
+    сама прокси через sing-box 
+{
+    "dns": {
+        "servers": [
+            {
+                "address": "1.1.1.1",
+                "detour": "direct",
+                "strategy": "prefer_ipv6",
+                "tag": "dns-remote"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "domain_strategy": "prefer_ipv6",
+            "listen": "0.0.0.0",
+            "listen_port": 443,
+            "sniff": true,
+            "sniff_override_destination": true,
+            "tag": "dire…
+  </blockquote>
+</aside>
+</td><td>2024-11-04T15:11:34.742Z</td></tr><tr><td>tdencrash</td><td><p>Да, но как это влияет на результат?<br>
+Например, я иду на сайт Quad9 DNS, сюда <a href="https://quad9.net/service/service-addresses-and-features" class="inline-onebox" rel="noopener nofollow ugc">Service Addresses &amp; Features | Quad9</a><br>
+Четко написано там, что первый блок адресов работает с выключенным ECS, а второй с включенным (Secured w/ECS: Malware blocking, DNSSEC Validation, ECS enabled). Но прописывание ни тех, ни других не дают того же результата, как у comss. Или я не правильно понимаю принцип этой технологии?</p></td><td>2024-11-04T15:12:35.051Z</td></tr><tr><td>mike7</td><td><p>Да, не правильно понимаете. Comss выдает адреса своих серверов и пропускает трафик через них.</p></td><td>2024-11-04T16:01:58.949Z</td></tr><tr><td>bokov333(Bokov333)</td><td><p>не comss, а control d. Comss всего лишь покупает у них услугу на сколько я понимаю</p></td><td>2024-11-04T17:52:52.009Z</td></tr><tr><td>mike7</td><td><p>Вопрос был про comss, и эти ребята можно сказать, что “натят” через свои серверы. Да, это сделано на платформе (технологии) Control D.<br>
+У Control D тоже есть такая услуга <a href="https://controld.com/free-dns?freeResolverType=uncensored&amp;helpPane=dns" rel="noopener nofollow ugc">https://controld.com/free-dns?freeResolverType=uncensored&amp;helpPane=dns</a>, но там сайтов много меньше</p></td><td>2024-11-04T18:03:57.020Z</td></tr><tr><td>tdencrash</td><td><p>Кажется я понял. Хитрость не столько в dns, сколько в том, какие они адреса отдают через этот свой dns. А адреса этот dns возвращает не реального сервиса, а собственных серверов, на которых они выполняют определенную фильтрацию трафика. Стало быть вся хитрость именно в фильтрующих серверах, а не в хитрой работе dns. Занимательно, однако. Такой расклад мне даже в голову не приходил. Спасибо за разъяснения!</p></td><td>2024-11-04T19:40:28.110Z</td></tr><tr><td>spellozz(Spellozz)</td><td><p>С точки зрения применения как я понял ставится днс сервер с поддержкой прокси и прокси отдает клиенту свой адрес, а сам работает с доменом.</p></td><td>2024-11-04T22:21:16.336Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Вариант для “бедных”, помогает понять общий смысл</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://t.me/winsiders/977062">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/6/60a0dd1195aa91677b6f00e7a4eb29555e45506b.svg" class="site-icon" data-dominant-color="" width="16" height="16">
+
+      <a href="https://t.me/winsiders/977062" target="_blank" rel="noopener">Telegram</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="320" height="320" src="создание-собственного-comss-dns/ad625dbc13b0b92e1a113ad90951683d43117efe.jpeg" class="thumbnail onebox-avatar" data-dominant-color="B9CBD6">
+
+<h3><a href="https://t.me/winsiders/977062" target="_blank" rel="noopener">Alexander O. in Инсайдеры Windows 18+</a></h3>
+
+  <p>Немного из праздного любопытства поковырялся с принципом работы всех этих Smart DNS. Сделал для себя костыль на базе своей VDS:
+
+nginx.conf
+worker_processes  auto;
+load_module /usr/lib/nginx/modules/ngx_stream_module.so;
+
+events {
+   ...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Полноценный вариант</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/alardus/portaller">
+  <header class="source">
+
+      <a href="https://github.com/alardus/portaller" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="создание-собственного-comss-dns/dcfa82847aa607210a4d1d9b8e92b922f4f1791a_2_690x344.png" class="thumbnail" data-dominant-color="EFF0F0">
+
+  <h3><a href="https://github.com/alardus/portaller" target="_blank" rel="noopener">GitHub - alardus/portaller: DNS proxy for geo-locked services</a></h3>
+
+    <p><span class="github-repo-description">DNS proxy for geo-locked services</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Учитывая, что многие провайдеры в РФ перехватывают весь DNS-трафик и резолвят принудительно сами, имеет смысл сразу прикручивать DoH/DoT. Иначе, вместо вашего DNS вам ответит DNS провайдера и магия не сработает.</p></td><td>2024-11-05T04:30:08.304Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="spellozz" data-post="9" data-topic="12695" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/spellozz/48/3875_2.png" class="avatar"> spellozz:</div>
+<blockquote>
+<p>С точки зрения применения как я понял ставится днс сервер с поддержкой прокси и прокси отдает клиенту свой адрес, а сам работает с доменом.</p>
+</blockquote>
+</aside>
+<p>Как я понимаю, большинство доменов DNS резолвит в их реальные адреса, а избранные домены резолвит в адрес прозрачного прокси, запущенного там же. В итоге, трафик до избранных доменов бегает через этот прокси, соответственно, эти домены считают, что перед ними не “грязный русский”, а европеец.</p>
+<p>Если я прав, то так можно сделать и аналог АнтиЗапрета. Правда, разблокируется лишь то, что заблокировано по доменным именам, но не то, что заблокировано по IP или подсети. Но зато это можно настроить практически на любом утюге, т.к. требуется лишь, чтобы этот утюг поддерживал DoH/DoT.</p></td><td>2024-11-05T04:49:06.084Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Пользуясь случаем: если у кого-то есть полный список доменов (не просто названия сервисов, а именно домены), которые “разблокирует” Comss, просьба поделиться.</p>
+<p>Известные домены я публиковал в конце <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-%D0%B0%D0%BD%D1%82%D0%B8%D0%B7%D0%B0%D0%BF%D1%80%D0%B5%D1%82-%D0%BD%D0%B0-%D0%BF%D1%80%D0%BE%D1%88%D0%B8%D0%B2%D0%BA%D0%B5-keenetic/7768">этого поста</a></p></td><td>2024-11-05T04:55:25.002Z</td></tr><tr><td>astolfobestgirl</td><td><aside class="quote no-group" data-username="dartraiden" data-post="11" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>разблокируется лишь то, что заблокировано по доменным именам, но не то, что заблокировано по IP или подсети</p>
+</blockquote>
+</aside>
+<p>Наоборот же.<br>
+Было бы неплохо, если бы кто-нибудь проверил как влияют фейковые пакеты badsum, wongseq на sniproxy. Фейки с ttl должны работать.</p></td><td>2024-11-05T04:55:49.492Z</td></tr><tr><td>spellozz(Spellozz)</td><td><p>Хочу попробовать провернуть это с dnscrypt-proxy, он умеет с прокси работать. А в адгард хоум для тестовых доменов указать этот днс.</p></td><td>2024-11-05T07:22:02.827Z</td></tr><tr><td>Ori</td><td><p>Написал мини-прогу. Делает запрос с контрлд/комсс, получает айпи, а потом делает whois и смотрит кому айпи принадлежит. Если принадлежит контролд - то там, скорее всего, работает региональная разблокировка. Можно это дело автоматизировать и прогнать по какому-нибудь списку, но какой именно список взять, и где?</p>
+<p><a class="attachment" href="создание-собственного-comss-dns/rqxVOfmXpiq3HY4NXeCO0amqVCw.zip">ComssAnalyzer.zip</a> (6,2 МБ)</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="создание-собственного-comss-dns/6a3c480b39326e167a9227a4f09f9c55528a14cf.png" data-download-href="https://ntc.party/uploads/default/6a3c480b39326e167a9227a4f09f9c55528a14cf" title="ca"><img src="создание-собственного-comss-dns/6a3c480b39326e167a9227a4f09f9c55528a14cf.png" alt="ca" data-base62-sha1="f9NLnEj6TybDDruhviBxWaCpuNx" width="451" height="500" data-dominant-color="1A1A1A"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">ca</span><span class="informations">470×520 10 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-11-05T07:30:09.736Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>Не забудьте ДНСы свои про апгрейдить заодно.<br>
+А то вдруг они подавятся количеством запросов</p></td><td>2024-11-05T07:46:51.068Z</td></tr><tr><td>astolfobestgirl</td><td><p>Я проверил и выяснил, что фейки md5sig, badseq, badsum и разбивка split2, disorder2 работают с прокси controld.<br>
+Не завёлся только autottl.<br>
+Для проверки использовал:</p>
+<pre><code class="lang-auto">curl -Sv --connect-to ::206.253.91.89 https://ntc.party/
+curl -Sv --connect-to ::51.38.99.209 https://ntc.party/
+</code></pre></td><td>2024-11-05T08:24:19.700Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="Ori" data-post="15" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Написал мини-прогу. Делает запрос с контрлд/комсс, получает айпи, а потом делает whois и смотрит кому айпи принадлежит. Если принадлежит контролд - то там, скорее всего, работает региональная разблокировка.</p>
+</blockquote>
+</aside>
+<p>Спасибо. Скомпилировал для линукса <a class="attachment" href="создание-собственного-comss-dns/jor1UZdgsEq266btn6kWMc43Ofn.zip">dns-check.zip</a> (3,2 МБ). Вписал в браузере dns<br>
+<a href="https://freedns.controld.com/uncensored" rel="noopener nofollow ugc">https://freedns.controld.com/uncensored</a><br>
+пробовал также <a href="https://freedns.controld.com/p0" rel="noopener nofollow ugc">https://freedns.controld.com/p0</a><br>
+по dnsleak IP резолвера 45.159.98.186 Польша.<br>
+Пинг в 1,75 выше, чем у 1.1.1.1.<br>
+Возвращаемые IP адреса сайтов принадлежат CONTROLD INC., согласно проге, но гео блок не обходится. Пробовал <code>intel.com</code>, <code>elevenlabs.io</code>.</p></td><td>2024-11-05T08:27:58.101Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>А почему бы не написать ребятам с comss такой вопрос? Раньше в комментариях они охотно отвечали на такие вопросы. Может дали бы такой список и объяснили, как их сервер работает для обхода блокировок. Я использовал их сервер для того, чтобы пользоваться ИИ.<br>
+<a href="https://www.comss.ru/disqus/page.php?id=12919" class="onebox" target="_blank" rel="noopener nofollow ugc">https://www.comss.ru/disqus/page.php?id=12919</a></p></td><td>2024-11-05T09:00:12.397Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>А ничего что после таких вот выкрутасов РосКом***** внесёт в баню Комсы ?</p>
+<p>Весёлые ребята. <img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"></p></td><td>2024-11-05T09:33:48.976Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Вы в комментарии хоть загляните, я же дал выше ссылку. Пользователи там им пишут - и они публично вносят домены для обхода. Можно написать им в личку, попросить почту для этого.</p></td><td>2024-11-05T09:39:13.583Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>Проблема в том…<br>
+Что почта в зоне РУ и так под контролем.<br>
+Вы только можете за себя отвечать, а не за идиотов. Появиться пост идиота о красоте обхода где-нить на открытых ресурсах и будет всем грустно сразу</p></td><td>2024-11-05T09:41:58.277Z</td></tr><tr><td>KDS</td><td><aside class="quote no-group" data-username="Zanoni" data-post="21" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/e99b99/48.png" class="avatar"> Zanoni:</div>
+<blockquote>
+<p>и они публично вносят</p>
+</blockquote>
+</aside>
+<p>А также, видимо, и убирают ) Инста больше не работает ни через один из их адресов. Ну или РТК все IP вообще перебанили.</p></td><td>2024-11-05T10:44:39.375Z</td></tr><tr><td>0ka(0ka)</td><td><p>о блокировке SNI роскомнадзором не забывайте</p></td><td>2024-11-05T12:57:43.772Z</td></tr><tr><td>KDS</td><td><p>Естественно с обходом проверял</p></td><td>2024-11-05T13:23:57.003Z</td></tr><tr><td>0ka(0ka)</td><td><p>ну так выше скидывали ip controld, через первый инста доступна</p></td><td>2024-11-05T13:30:38.497Z</td></tr><tr><td>beneficial92</td><td><p>Для начала <a href="https://tranco-list.eu/" rel="noopener nofollow ugc">https://tranco-list.eu/</a></p></td><td>2024-11-05T17:53:32.575Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group quote-modified" data-username="denium" data-post="18" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>Спасибо. Скомпилировал для линукса. Вписал в браузере dns<br>
+<a href="https://freedns.controld.com/uncensored">https://freedns.controld.com/uncensored </a><br>
+пробовал также <a href="https://freedns.controld.com/p0">https://freedns.controld.com/p0 </a><br>
+по dnsleak IP резолвера 45.159.98.186 Польша.<br>
+Возвращаемые IP адреса сайтов принадлежат CONTROLD INC., согласно проге, но гео блок не обходится. Пробовал <code>intel.com</code>, <code>elevenlabs.io</code>.</p>
+</blockquote>
+</aside>
+<p>Ну так, если вы если компилили, то код открывали, наверное? Не видела какой там ДНС вписан? Там не сам контролд, а комсс, который их услугами пользуется. С обычным контролд у меня тоже нифига не работает.</p>
+<aside class="quote no-group" data-username="Zanoni" data-post="19" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/e99b99/48.png" class="avatar"> Zanoni:</div>
+<blockquote>
+<p>А почему бы не написать ребятам с comss такой вопрос?</p>
+</blockquote>
+</aside>
+<p>Флаг в руки.</p>
+<aside class="quote no-group" data-username="beneficial92" data-post="27" data-topic="12695" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/9dc877/48.png" class="avatar"> beneficial92:</div>
+<blockquote>
+<p>Для начала <a href="https://tranco-list.eu/">https://tranco-list.eu/ </a></p>
+</blockquote>
+</aside>
+<p>Спс. Реально полезный лист. Воспользуюсь, если буду дорабатывать прогу.</p></td><td>2024-11-05T19:15:17.878Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Альтернатива: <a href="https://github.com/DNSCrypt/dnscrypt-proxy" class="inline-onebox" rel="noopener nofollow ugc">GitHub - DNSCrypt/dnscrypt-proxy: dnscrypt-proxy 2 - A flexible DNS proxy, with support for encrypted DNS protocols.</a></p>
+<p>В утилите можно прописать любой сервер DNS с DoH:</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://dnscrypt.info/public-servers/">
+  <header class="source">
+
+      <a href="https://dnscrypt.info/public-servers/" target="_blank" rel="noopener nofollow ugc">dnscrypt.info</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://dnscrypt.info/public-servers/" target="_blank" rel="noopener nofollow ugc">DNSCrypt - List of public DoH and DNSCrypt servers</a></h3>
+
+  <p>An extensive and constantly updated list of encrypted DNS servers (DoH and DNSCrypt) that are free and publicly accessible.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Там есть и бесплатные от ControlD</p></td><td>2024-11-05T19:21:07.549Z</td></tr><tr><td>denium</td><td><aside class="quote no-group quote-modified" data-username="Ori" data-post="28" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>если вы компилили, то код открывали, наверное?</p>
+</blockquote>
+</aside>
+<p>Не догадался глянуть.</p>
+<aside class="quote no-group" data-username="Ori" data-post="28" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>какой там ДНС вписан?</p>
+</blockquote>
+</aside>
+<p><a href="https://dns.controld.com/comss" rel="noopener nofollow ugc">https://dns.controld.com/comss</a></p></td><td>2024-11-05T19:21:17.405Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="Ori" data-post="15" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Можно это дело автоматизировать и прогнать по какому-нибудь списку</p>
+</blockquote>
+</aside>
+<p>Сделал. Прогнал по первой тысяче самых популярных доменов из <a href="https://ntc.party/t/%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-%D1%81%D0%BE%D0%B1%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D0%B3%D0%BE-comss-dns/12695/27">этого поста</a>.</p>
+<p>Результат:</p>
+<pre><code class="lang-auto">microsoft.com
+bing.com
+goo.gl
+sentry.io
+cisco.com
+googleblog.com
+stripe.com
+avast.com
+openai.com
+weather.com
+pixabay.com
+chatgpt.com
+dell.com
+avcdn.net
+sophos.com
+intel.com
+qualtrics.com
+newrelic.com
+microsoftapp.net
+intercom.io
+healthline.com
+bitdefender.com
+upwork.com
+unpkg.com
+supercell.com
+segment.io
+vmware.com
+pexels.com
+</code></pre>
+<p>Дальше проверять не буду, т.к. лень.<br>
+Вот прога + код. На линуксе и остальных ОС тоже должна завестить, но компильте уже сами.<br>
+<a class="attachment" href="создание-собственного-comss-dns/9o3An4mpoiJHNsbrBSQMRHSVDqx.zip">ComssAnalyzer2.zip</a> (6,2 МБ)<br>
+Использование: <code>ComssAnalyzer2 название_листа_со_списком_доменов</code></p></td><td>2024-11-06T02:42:11.108Z</td></tr><tr><td>denium</td><td><p>У меня предложение по usability для первого <a href="https://ntc.party/t/%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-%D1%81%D0%BE%D0%B1%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D0%B3%D0%BE-comss-dns/12695/15">ComssAnalyzer</a>. Если вводится в аргументе не доменное имя, а например<br>
+<code>ComssAnalyzer https://ottplayer.tv/</code><br>
+или<br>
+<code>ComssAnalyzer http://ottplayer.tv</code><br>
+то отсекать лишнее, чтобы не было ошибки Critical error: no IP found. Чтобы сама прога отсекала.<br>
+И ещё вопрос. Если IP несколько, берётся первый?</p></td><td>2024-11-06T23:01:48.662Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="Ori" data-post="31" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>На линуксе и остальных ОС тоже должна завестить, но компильте уже сами</p>
+</blockquote>
+</aside>
+<p>Можешь попробовать кросскомпилировать:</p>
+<pre><code class="lang-auto">set CGO_ENABLED=0
+set GOARCH=386
+set GOOS=linux
+go build -ldflags="-s -w"
+</code></pre>
+<p>GOARCH=386 значит будет работать и на 32 и на 64 битных линуксах (статический бинарник). CGO_ENABLED=0 можно не указывать.</p></td><td>2024-11-06T23:33:12.896Z</td></tr><tr><td>spellozz(Spellozz)</td><td><p>Я вот чего не понимаю. Есть к примеру игра Brawl stars, где блокировка стоит с российских ip. Умелец сделал днс и с его помощью обходит блокировку (<a href="http://dns.nullsproxy.com" rel="noopener nofollow ugc">dns.nullsproxy.com</a>). Сказал что поднял сервер и прокси буквально на коленке. Ч как и автор темы хочу сделать своё и не понимаю как оно работает. У меня есть впс и там стоит адгард, для доменов <a href="http://supercell.com" rel="noopener nofollow ugc">supercell.com</a> и <a href="http://brawlstarsgame.com" rel="noopener nofollow ugc">brawlstarsgame.com</a> указано правило ходить через этот днс сервер. Но как самостоятельно сделать такое , мозгов совершенно не хватает:( Есть идеи?</p></td><td>2024-11-07T04:21:17.019Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><blockquote>
+<p>А почему бы не написать ребятам с comss такой вопрос?</p>
+</blockquote>
+<p>Они уже 7 месяцев <a href="https://www.comss.ru/disqus/page.php?id=7315&amp;ht-comment-id=14292839">“думают”</a> над этим вопросом и всё никак не придумают.</p>
+<p>Я веду <a href="https://github.com/dartraiden/no-russia-hosts">свой список</a>, но у комсы пользовательская база больше и домены, не желающие видеть “грязных русских” они находят быстрее (плюс у них отдельный список для Крыма и подобных мест). Жаль дублировать усилия, было бы куда проще, если бы они сделали свои списки публичными.</p>
+<aside class="quote no-group" data-username="Hentay" data-post="20" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/hentay/48/12172_2.png" class="avatar"> Hentay:</div>
+<blockquote>
+<p>А ничего что после таких вот выкрутасов РосКом***** внесёт в баню Комсы ?</p>
+</blockquote>
+</aside>
+<p>Как раз поэтому они и не разблокируют доступ к ресурсам, заблокированным РКН (хотя технически могли бы).</p></td><td>2024-11-07T04:27:53.561Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="Ori" data-post="15" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Можно это дело автоматизировать и прогнать по какому-нибудь списку</p>
+</blockquote>
+</aside>
+<p>Насколько я понял из комментариев с их сайта, у них там куча разных списков с учётом того, где находится клиент. Условно: для Москвы это один список, а для Крыма другой, потому что ряд сервисов блокирует доступ именно со спорных территорий но не из России в целом.</p></td><td>2024-11-07T04:30:57.540Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote quote-modified" data-post="4" data-topic="11011">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B7%D1%80%D0%B0%D1%87%D0%BD%D1%8B%D0%B9-%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8/11011/4">Прозрачный прокси</a> <a class="badge-category__wrapper " href="/c/censorship-circumvention-software/11"><span data-category-id="11" style="--category-badge-color: #92278F; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Discussions of censorship circumvention software of different kinds, for all operation systems and devices"><span class="badge-category__name">Censorship circumvention methods &amp; software</span></span></a>
+  </div>
+  <blockquote>
+    сама прокси через sing-box 
+{
+    "dns": {
+        "servers": [
+            {
+                "address": "1.1.1.1",
+                "detour": "direct",
+                "strategy": "prefer_ipv6",
+                "tag": "dns-remote"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "domain_strategy": "prefer_ipv6",
+            "listen": "0.0.0.0",
+            "listen_port": 443,
+            "sniff": true,
+            "sniff_override_destination": true,
+            "tag": "dire…
+  </blockquote>
+</aside>
+</td><td>2024-11-07T10:23:30.438Z</td></tr><tr><td>denium</td><td><p>Иногда whois возвращает NetName, иногда netname. Прога это не учитывает. Если netname, то не возвращает результат. Нужен регистронезависимый grep.<br>
+Мне ChatGPT написал прогу на Си с обычным nslookup и whois, которая это учитывает. Но правда избавиться от префиксов https:// и http:// у него не получилось.</p></td><td>2024-11-07T22:11:41.927Z</td></tr><tr><td>Ori</td><td><p>Это сделать достаточно просто, но, мне кажется, это переизобретение велосипеда. Та прога, которая ComssAnalyzer, это просто был тест концепта, который я доработал в ComssAnalyzer2.</p>
+<p>Функционал, который вы хотите, уже есть во всем известных утилитах. Которыми вы и воспользовались.</p>
+<p>Хз крч. Попозже пофикшу и выложу. Наверн.</p></td><td>2024-11-08T00:40:30.098Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="Ori" data-post="39" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Хз крч. Попозже пофикшу и выложу. Наверн.</p>
+</blockquote>
+</aside>
+<p>Написал.<br>
+<a class="attachment" href="создание-собственного-comss-dns/nkqyTHpWp7zQokgww06Kr3IV6Zm.zip">ResolveAndWhois_1.2.zip</a> (6,2 МБ)</p>
+<p>Использование:</p>
+<pre><code class="lang-auto">USAGE: PROGRAMNAME +&lt;IPv&gt; +&lt;RESOLVER&gt; &lt;ADDRESS TO RESOLVE&gt;
+EXAMPLE 1: ResolveAndWhois.exe +4 +dns.google example.com
+EXAMPLE 2: ResolveAndWhois.exe +8.8.8.8:53 https://example.com/
+</code></pre>
+<p>Если не указывать айпи версию - предполагается 4.<br>
+Если не указывать адрес - предполагается <code>example.com</code>. Адрес автоматически чистится от префиксов и т.д.<br>
+Если не указывать резолвер - используется системный. Если не использовать точный адрес резолвера, предполагается https и /dns-query (doh). Поддерживается plain, в этом случае обязательно указывать в виде айпи:порт.<br>
+Справка по -? или --help</p>
+<p>Механику whois переделал. Выкинул модуль с гитхаба, который использовал до этого, т.к. он результаты выдает неустойчиво. Вместо этого прикрутил бутстрап-запрос к <a href="https://www.arin.net/resources/registry/whois/rdap/">ARIN</a>, который возвращает унифицированную запись Registration Data Access Protocol (RDAP) в виде json и потом просто её запарсил.</p>
+<p>UPD 1.1:</p>
+<ul>
+<li>теперь показывает источник whois записи</li>
+<li>показывает страну (если есть соответствующее поле)</li>
+<li>показывает дату регистрации, с поправкой на местное время</li>
+<li>показывает данные по всем enitites</li>
+<li>лучше форматирование</li>
+</ul>
+<p>UPD 1.2</p>
+<ul>
+<li>добавил вывод наличия ECH</li>
+</ul>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="создание-собственного-comss-dns/999ac129bb7c92cd955c3e8ede1d26b5ec918ea5.png" data-download-href="https://ntc.party/uploads/default/999ac129bb7c92cd955c3e8ede1d26b5ec918ea5" title="ddddd"><img src="создание-собственного-comss-dns/999ac129bb7c92cd955c3e8ede1d26b5ec918ea5.png" alt="ddddd" data-base62-sha1="lUQC0AThRQ183rCcA84osWwgtF3" width="469" height="500" data-dominant-color="121212"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">ddddd</span><span class="informations">717×764 15.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2024-11-08T05:10:44.515Z</td></tr><tr><td>meow2</td><td><p>Может ли данный способ оживить ech?</p>
+<p>Создать свой comss dns и проксировать <a href="http://cloudflare-ech.com" rel="noopener nofollow ugc">cloudflare-ech.com</a></p></td><td>2024-11-08T06:27:27.220Z</td></tr><tr><td>0ka(0ka)</td><td><p>нет, ech outer sni с днс не связан</p></td><td>2024-11-08T07:05:25.843Z</td></tr><tr><td>denium</td><td><p>Спасибо. Хорошо получилось. Вот только whois фейлится, если часто запросы отправлять. Зато результаты точнее, чем у системного whois. Системный whois почему-то для <code>filezilla-project.org</code> возвращает netname: STUB-49-12SLASH15.<br>
+Могу рассказать как скомпилировать для Linux, там немного хитро. Ну, или спросите у ChatGPT.<br>
+Закатываю глаза: а если ещё и проверку http3?</p></td><td>2024-11-08T18:38:27.724Z</td></tr><tr><td>Ori</td><td><p>Ну, с фейлами к ARIN я ничего сделать не смогу.</p>
+<p>Насчет http3 не уверен. На данный момент утилита обращается только к ДНС и к whois сервису. Насколько мне известно, в них нет информации по поводу поддержки http3 ресурсом. Значит придется делать запрос непосредственно к целевому сайту. А он может быть заблочен или типа того. В итоге, чтобы получить плюс-минус объективный результат, придется сначала делать обычный запрос - чтобы узнать доступен ли сайт в принципе. Короче, морока. Не знаю, нужно ли такое переусложнение?</p>
+<p>Насчет компиляции под линукс. У меня нет виртуалки или второй системы. Линукс есть на другом ноуте, но мне впадлу его включать. А выкладывать файл, который может даже не запустится ни у кого - ну такое. Надо всё-таки проверить работоспособность того, что накомпилировал. Поэтому и выкладываю только под винду.<br>
+Можно, конечно, загрузиться с флешки, но, опять-таки, мне впадлу.</p></td><td>2024-11-09T00:57:01.569Z</td></tr><tr><td>rewhat</td><td><aside class="quote no-group" data-username="Ori" data-post="44" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Насчет компиляции под линукс. У меня нет виртуалки или второй системы. Линукс есть на другом ноуте, но мне впадлу его включать.</p>
+</blockquote>
+</aside>
+<p>Из под WSL собирается, писать код можно там же через vscode. Я собрал, но у меня выдает ошибку, но на Винде при этом работает <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20">.</p>
+<pre><code class="lang-auto">DNS:    https://dns.controld.com/comss
+
+URL:    intel.com
+ERROR response received addr=https://dns.controld.com:443/comss proto=tcp status="requesting https://dns.controld.com:443/comss: Get \"https://dns.controld.com:443/comss?dns=AAABAAABAAAAAAAABWludGVsA2NvbQAAAQAB\": context deadline exceeded"
+Critical error: can't finish DNS lookup: can't resolve 'intel.com': requesting https://dns.controld.com:443/comss: Get "https://dns.controld.com:443/comss?dns=AAABAAABAAAAAAAABWludGVsA2NvbQAAAQAB": context deadline exceeded
+</code></pre>
+<p>upd: а, всё норм, надо было таймауты подкрутить (timeout и timeout whois на шестерку выставил, хз норм нет, не шарю)</p>
+<p><a class="attachment" href="создание-собственного-comss-dns/yVcElY4PY6gxYaDj9CLeW9C2WL.zip">resolvee.zip</a> (6,3 МБ)</p></td><td>2024-11-09T01:18:33.571Z</td></tr><tr><td>Ori</td><td><p>Да скомпилить то я могу. Проблема в том, что мне надо включать другой комп, чтобы проверить работоспособность. Потому что непроверенное я выкладывать не хочу.</p></td><td>2024-11-09T01:33:31.648Z</td></tr><tr><td>rewhat</td><td><p>ну дык wsl тупо установить, go накатить туда, шо там проверять-то</p></td><td>2024-11-09T01:34:03.136Z</td></tr><tr><td>Ori</td><td><p>Места нет на ноуте уже <img src="https://ntc.party/images/emoji/twitter/sob.png?v=12" title=":sob:" class="emoji" alt=":sob:" loading="lazy" width="20" height="20"></p></td><td>2024-11-09T01:34:49.677Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="Ori" data-post="44" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>На данный момент утилита обращается только к ДНС и к whois сервису. Насколько мне известно, в них нет информации по поводу поддержки http3 ресурсом.</p>
+</blockquote>
+</aside>
+<p>Ведь прога может обращаться и к TLS резолверам и в обычных резолверах есть информация о http3, если отправить HTTPS запись.<br>
+<code>dig -t https rutracker.org +short | grep h3</code><br>
+Если в ответе alpn=“h3,h2”, то h3 это оно.</p></td><td>2024-11-09T11:15:11.873Z</td></tr><tr><td>Ori</td><td><p>Ну вот, например, ответ от резолвера. <a href="https://dns.google/resolve?name=www.google.com&amp;rr_type=HTTPS&amp;ecs=">https://dns.google/resolve?name=www.google.com&amp;rr_type=HTTPS&amp;ecs=</a><br>
+На что тут смотреть? Я не вижу alpn=</p>
+<p>Или это нужно именно DoT? DoH не сработает?</p></td><td>2024-11-09T11:31:10.493Z</td></tr><tr><td>denium</td><td><p>DoT и DoH необязательны, но и через них можно посмотреть. И через обычный DNS (UDP), если сделать HTTPS запись.<br>
+Видимо, dns.google возвращает не все записи. Вот, что dig показывает:</p>
+<p>dig -t https <code>rutracker.org</code></p>
+<p>; &lt;&lt;&gt;&gt; DiG 9.18.1-1ubuntu1.1-Ubuntu &lt;&lt;&gt;&gt; -t https <code>rutracker.org</code><br>
+;; global options: +cmd<br>
+;; Got answer:<br>
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 54838<br>
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1</p>
+<p>;; OPT PSEUDOSECTION:<br>
+; EDNS: version: 0, flags:; udp: 1232<br>
+;; QUESTION SECTION:<br>
+;<code>rutracker.org</code>.			IN	HTTPS</p>
+<p>;; ANSWER SECTION:<br>
+<code>rutracker.org</code>.		263	IN	HTTPS	1 . alpn=“h3,h2” ipv4hint=104.21.32.39,172.67.182.196 ech=AEX+DQBBNgAgACD74YZqyZEVewMdSfVXmeZegG6qwHUf9n++UZnZabTBLwAEAAEAAQASY2xvdWRmbGFyZS1lY2guY29tAAA= ipv6hint=2606:4700:3031::6815:2027,2606:4700:3034::ac43:b6c4</p>
+<p>;; Query time: 215 msec<br>
+;; SERVER: 1.1.1.1#53(1.1.1.1) (UDP)<br>
+;; WHEN: Sat Nov 09 18:34:15 +07 2024<br>
+;; MSG SIZE  rcvd: 190</p>
+<p>Более того, браузеры могут использовать запись из DNS и сразу коннектиться по HTTP3.</p></td><td>2024-11-09T11:37:20.927Z</td></tr><tr><td>Ori</td><td><p>Нашел. Там действительно есть эта запись, даже от гугл.днс. А в браузере, через их сайт - нет. Странно.</p></td><td>2024-11-09T11:42:56.944Z</td></tr><tr><td>Ori</td><td><p>Короче, хз. Вроде сделал, но alpn запись настолько редко встречается… Я её только у гугла и у сайтов с ech наблюдаю. Не уверен, что оно того вообще стоило.</p>
+<p><a class="attachment" href="создание-собственного-comss-dns/vXrVMvaOpFFo4MVT3BnKKLt15CY.zip">ResolveAndWhois_1.3.zip</a> (6,2 МБ)</p></td><td>2024-11-09T13:58:52.921Z</td></tr><tr><td>denium</td><td><p>Спасибо. http3 уже много где используется, но видимо не все анонсируют alpn. По идее, надо также отправлять запрос специальной <a href="https://github.com/stunnel/static-curl/releases/latest" rel="noopener nofollow ugc">сборкой</a> curl:<br>
+<code>curl --http3-only</code><br>
+Но это, конечно, сложно. Например, домен <code>rr1---sn-aigl6nze.googlevideo.com</code> не имеет h3 записи, но по http3 соединяется.<br>
+Бывает даже, что главный сервер http3 не поддерживает, а его cdn соединяется. Например, <code>v19-webapp-prime.tiktok.com</code><br>
+Но всё равно полезно знать хотя бы о явной поддержке http3 в dns. Ещё раз спасибо за труды.</p>
+<p>Интересно, что <code>tiktok.com</code> хостится на Amazon, <code>www.tiktok.com</code> на Akamai, а  <code>v19-webapp-prime.tiktok.com</code> на Fastly.</p></td><td>2024-11-09T15:26:32.915Z</td></tr><tr><td>denium</td><td><p>А вообще-то информацию о h3 можно узнать из заголовков сервера при коннекте к нему.<br>
+Правда, эти два домена не возвращают их и там.<br>
+Так что есть 3 варианта:</p>
+<ol>
+<li>dns</li>
+<li>заголовки сервера</li>
+<li>curl --http3-only</li>
+</ol>
+<p>Я, кстати, собрал uGet с libcurl/http3. Первая многопоточная качалка с поддержкой QUIC.<br>
+Всего-то вставил строчку <code>curl_easy_setopt (curl, CURLOPT_HTTP_VERSION, 30);</code> в исходники и закомментил запрет проверки сертификатов.<br>
+Ждал помощи от ChatGPT, но у него лимиты истекли до следующих суток. В результате сам разобрался. Ну, конечно, ещё нужен <strong>shared</strong> curl с http3, у меня с quiche.</p></td><td>2024-11-09T18:19:47.377Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>Самое главное нет размышлений на тему технологии создания своего “собственного” comss dns <img src="https://ntc.party/images/emoji/twitter/sweat_smile.png?v=12" title=":sweat_smile:" class="emoji" alt=":sweat_smile:" loading="lazy" width="20" height="20"></p>
+<p>Условия: есть арендованный зарубежный VPS.<br>
+Задача: создать свой DNS на базе VPS для открытия нужных сайтов прописанных в AdGuard Home такового вида:<br>
+[/example.com/example2.com/example3.com/]x.x.x.x</p>
+<p>Вариант минимум - выдача адресов от DNS только для прописанных доменов на VPS для прокси. Для всех других сайтов DNS работать не будет.<br>
+Вариант максимум - выдача адресов от DNS как для прописанных доменов на VPS для прокси, так и для всех других сайтов только уже с реальными адресами без прокси.<br>
+То есть как сейчас работает сам comss.</p>
+<p>Буду очень рад обсудить возможные способы реализации <img src="https://ntc.party/images/emoji/twitter/handshake.png?v=12" title=":handshake:" class="emoji" alt=":handshake:" loading="lazy" width="20" height="20"></p></td><td>2024-11-10T16:17:49.047Z</td></tr><tr><td>gfqwdgecewgcdw</td><td><p>Nginx sni proxy<br>
+Adguard home</p></td><td>2024-11-10T16:55:48.143Z</td></tr><tr><td>0ka(0ka)</td><td><p>уже оставлял сообщение в начале темы</p></td><td>2024-11-10T16:59:46.582Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>Помогите пожалуйста разобраться.</p>
+<p>Есть VPS с Adguard Home + Sing-Box.</p>
+<p>В AGH прописано так:</p>
+<blockquote>
+<p>94.140.14.14<br>
+94.140.15.15<br>
+[/canva.com/browserleaks.com/2ip.ua/2ip.ru/]127.0.0.1:443</p>
+</blockquote>
+<p>В Sing-Box прописано так:</p>
+<pre><code class="lang-auto">{
+    "dns": {
+        "servers": [
+            {
+                "address": "94.140.14.14",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "domain_strategy": "prefer_ipv4",
+            "listen": "0.0.0.0",
+            "listen_port": 443,
+            "sniff": true,
+            "sniff_override_destination": true,
+            "tag": "direct-proxy",
+            "type": "direct"
+        }
+    ],
+    "log": {
+        "level": "debug"
+    },
+    "outbounds": [
+        {
+            "tag": "direct",
+            "type": "direct"
+        },
+        {
+            "tag": "block",
+            "type": "block"
+        },
+        {
+            "tag": "dns-out",
+            "type": "dns"
+        }
+    ],
+    "route": {
+        "final": "block",
+        "rules": [
+            {
+                "outbound": "dns-out",
+                "protocol": "dns"
+            },
+            {
+                "domain": [
+                    "2ip.ru",
+                    "2ip.ua",
+                    "canva.com",
+                    "browserleaks.com"
+                ],
+                "outbound": "direct"
+            }
+        ]
+    }
+}
+
+</code></pre>
+<p>В Adguard Home уже на своем роутере прописано так:</p>
+<blockquote>
+<p>[/2ip.ru/2ip.ua/browserleaks.com/canva.com/rutracker.org/]XX.XXX.XXX.XX (мой внешний IP VPS)</p>
+</blockquote>
+<p>nslookup на роутере дает так:</p>
+<pre><code class="lang-auto">traceroute to 2ip.ru (127.0.0.1), 30 hops max, 60 byte packets
+ 1  localhost.localdomain (127.0.0.1)  0.058 ms  0.027 ms  0.026 ms
+</code></pre>
+<p>Почему AGH на VPS не передает запрос на Sing-Box, а отвечает точным адресом 127.0.0.1?</p></td><td>2024-11-12T14:46:35.559Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="1unknown" data-post="59" data-topic="12695">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>Почему AGH на VPS не передает запрос на Sing-Box</p>
+</blockquote>
+</aside>
+<p>он не должен это делать, днс сервер никак не связан с sing-box, он должен только подменять ответы на нужные вам домены и возвращать vps_ip. Правило в днс сервере должно быть “address <a href="http://2ip.ru/">2ip.ru</a> / vps_ip”, а не “server <a href="http://2ip.ru/">2ip.ru</a> / 127.0.0.1:443”</p></td><td>2024-11-12T16:21:34.459Z</td></tr>
+    </table>
+      </body>
+    </html>

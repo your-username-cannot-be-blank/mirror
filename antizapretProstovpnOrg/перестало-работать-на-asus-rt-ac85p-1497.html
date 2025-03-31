@@ -1,0 +1,70 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>перестало-работать-на-asus-rt-ac85p-1497</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Angry_Engineer</td><td><p>Несколько месяцев назад перестало работать на Asus RT-AC85P. Скачал новый файл конфигурации, при подключении постоянное ожидание. Старый файл конфигурации подключается но эффекта ноль (при попытке проникнуть на заблокированный сайт пишет ERR_CONNECTION_CLOSED)</p></td><td>2021-12-07T17:17:23.922Z</td></tr><tr><td>ValdikSS</td><td><p>Смотрите журнал подключения, чтобы понять причину проблемы.</p></td><td>2021-12-08T22:26:41.268Z</td></tr><tr><td>Angry_Engineer</td><td><p>можно чуть подробнее? в роутере смотреть или где? новый файл конфигурации использовать не получается</p></td><td>2021-12-11T17:43:02.873Z</td></tr><tr><td>ValdikSS</td><td><p>Да, нужно смотреть журнал (лог) подключения OpenVPN в роутере. Для подробностей см. документацию к вашему роутеру или обратитесь в поддержку Asus.</p></td><td>2021-12-11T18:13:44.198Z</td></tr><tr><td>Angry_Engineer</td><td><p>Как то так (перед подключением почистил):</p>
+<p>Dec 11 23:39:31 vpnclient5[11750]: OpenVPN 2.4.7 mipsel-unknown-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [MH/PKTINFO] [AEAD] built on Mar 4 2021<br>
+Dec 11 23:39:31 vpnclient5[11750]: library versions: OpenSSL 1.0.2u 20 Dec 2019, LZO 2.03<br>
+Dec 11 23:39:31 vpnclient5[11752]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts<br>
+Dec 11 23:39:31 vpnclient5[11752]: OpenSSL: error:140E6118:lib(20):func(230):reason(280)<br>
+Dec 11 23:39:31 vpnclient5[11752]: Failed to set restricted TLS cipher list: DEFAULT:@SECLEVEL=0<br>
+Dec 11 23:39:31 vpnclient5[11752]: Exiting due to fatal error</p></td><td>2021-12-11T18:43:50.234Z</td></tr><tr><td>ValdikSS</td><td><p>Попробуйте в конфигурационном файле заменить строку:<br>
+<code>setenv opt tls-cipher "DEFAULT:@SECLEVEL=0"</code><br>
+на<br>
+<code>setenv opt tls-cipher "DEFAULT@SECLEVEL=0"</code><br>
+т.е. убрать двоеточие.<br>
+Если это не сработает, то уберите строку целиком. Но сперва проверьте без двоеточия и напишите, работает ли так, пожалуйста.</p></td><td>2021-12-11T18:54:06.282Z</td></tr><tr><td>Angry_Engineer</td><td><p>без двоеточия так:</p>
+<p>Dec 12 00:07:31 rc_service: httpd 320:notify_rc restart_vpncall<br>
+Dec 12 00:07:31 vpnclient5[1273]: OpenVPN 2.4.7 mipsel-unknown-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [MH/PKTINFO] [AEAD] built on Mar  4 2021<br>
+Dec 12 00:07:31 vpnclient5[1273]: library versions: OpenSSL 1.0.2u  20 Dec 2019, LZO 2.03<br>
+Dec 12 00:07:31 vpnclient5[1275]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts<br>
+Dec 12 00:07:31 vpnclient5[1275]: OpenSSL: error:140E6118:lib(20):func(230):reason(280)<br>
+Dec 12 00:07:31 vpnclient5[1275]: Failed to set restricted TLS cipher list: DEFAULT@SECLEVEL=0<br>
+Dec 12 00:07:31 vpnclient5[1275]: Exiting due to fatal error</p>
+<p>то же самое собственно</p></td><td>2021-12-11T19:08:16.242Z</td></tr><tr><td>Angry_Engineer</td><td><p>без строки подключилось но по закрытым ресурсам ходить отказывается</p></td><td>2021-12-11T19:10:53.421Z</td></tr><tr><td>ValdikSS</td><td><p>Нужно правильно настроить DNS, чтобы использовался только DNS-сервер из VPN.</p></td><td>2021-12-11T19:14:36.490Z</td></tr><tr><td>Angry_Engineer</td><td><p>задать гуглоднс в настройках роутера?</p></td><td>2021-12-11T19:15:12.880Z</td></tr><tr><td>ValdikSS</td><td><p>Сначала попробуйте разобраться, как это сделать правильно: если в настройках маршрутизатора есть возможность задать использование DNS только из VPN, то используйте эту опцию.<br>
+Если такой функции нет, то установите DNS в какой-то публичный (например, <code>8.8.8.8</code>), и пропишите маршрут в конфигурационном файле (<code>route 8.8.8.8 255.255.255.255</code>).</p></td><td>2021-12-11T19:22:04.718Z</td></tr><tr><td>Angry_Engineer</td><td><p>это прописывать до ключей?</p></td><td>2021-12-11T19:23:46.335Z</td></tr><tr><td>ValdikSS</td><td><p>Не принципиально, в любое место конфигурационного файла.</p></td><td>2021-12-11T19:23:46.928Z</td></tr><tr><td>Angry_Engineer</td><td><p>не помогло. на заблокированные сайты так и не пускает</p></td><td>2021-12-11T19:36:30.190Z</td></tr><tr><td>ValdikSS</td><td><p>Вам придётся выявлять причину проблемы самостоятельно, либо обращаться к производителю.</p></td><td>2021-12-11T19:45:37.463Z</td></tr><tr><td>Angry_Engineer</td><td><p>какого производителя роутер посоветуете взять чтоб не плясать с бубном?</p></td><td>2021-12-12T20:19:42.323Z</td></tr><tr><td>ValdikSS</td><td><p>На Keenetic VPN настраивается более-менее сносно. Не без особенностей, но работает стабильно.</p>
+<p>Вы написали в первом сообщении, что у вас перестал работать VPN, т.е. раньше он работал? Верните ту настройку, что у вас стояла до этого — раньше у вас в VPN маршрутизировался не весь трафик.</p></td><td>2021-12-18T03:13:44.404Z</td></tr><tr><td>User69</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="13" data-topic="1497">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Сначала попробуйте разобраться, как это сделать правильно: если в настройках маршрутизатора есть возможность задать использование DNS только из VPN, то используйте эту опцию.</p>
+</blockquote>
+</aside>
+<p>В настройках VPN клиента поставьте Accept DNS Configuration в Exclusive</p></td><td>2021-12-18T12:29:28.956Z</td></tr><tr><td>koctik-2017(Константин)</td><td><p>у меня тоже была эта проблема и я нашел ее решение, что нужно сделать? все очень просто откройте файл конфигурации .ovpn с помощью notepad++ или с помощью другого текстового редактора, найдите и удалите строку: setenv opt tls-cipher “DEFAULT:@SECLEVEL=0” (в notepad++ она идет под номером 42), после этого сохраните файл и заново загрузите его на роутер и все будет работать.</p></td><td>2021-12-26T13:51:10.051Z</td></tr><tr><td>Angry_Engineer</td><td><p>увы подключается но не работает</p></td><td>2021-12-26T15:35:48.930Z</td></tr><tr><td>Angry_Engineer</td><td><p>к сожалению предыдущий файл настроек утерян</p></td><td>2021-12-26T15:41:13.638Z</td></tr><tr><td>ValdikSS</td><td><p>В файле настроек не было каких-либо изменений, кроме <code>setenv opt tls-cipher “DEFAULT:@SECLEVEL=0”</code>. Абслютно ничего не менялось за последнее время и на стороне серверов также.</p></td><td>2021-12-26T18:24:21.002Z</td></tr><tr><td>Angry_Engineer</td><td><p>ну тогда видимо до замены роутера не судьба</p></td><td>2021-12-26T18:30:50.233Z</td></tr><tr><td>koctik-2017(Константин)</td><td><p>а что вообще значит эта строка?</p></td><td>2021-12-27T09:06:16.912Z</td></tr><tr><td>SlimShaggy</td><td><p>Проблема может быть связана с обновлением прошивки роутера. На RT-N66U с прошивкой 3.0.0.4.382.52272 точно такая же проблема (не подключается VPN, а после комментирования строки подключается, но не работает). После отката на предыдущую 3.0.0.4.382.51641 работает даже без удаления строки.</p></td><td>2022-05-07T21:59:16.086Z</td></tr>
+    </table>
+      </body>
+    </html>

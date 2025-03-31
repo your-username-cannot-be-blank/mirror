@@ -1,0 +1,181 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>exposing-and-circumventing-chinas-censorship-of-esni</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>gfw.report(gfw.report)</td><td><p><strong>Authors:</strong> Kevin Bock, iyouport, Anonymous, Louis-Henri Merino, David Fifield, Amir Houmansadr, Dave Levin</p>
+<p>Date: Friday, August 7, 2020</p>
+<p><a href="https://gfw.report/blog/gfw_esni_blocking/zh/" rel="nofollow noopener">中文版: 揭示和规避中国对加密SNI（ESNI）的封锁</a></p>
+<p>This report first appeared on <a href="https://geneva.cs.umd.edu/posts/china-censors-esni/esni/" rel="nofollow noopener">censorship.ai</a>. We also maintain an up-to-date copy of the report on iyouport, gfw.report, net4people and ntc.party.</p>
+<hr>
+<p>On 2020-07-30, <a href="https://www.iyouport.org/" rel="nofollow noopener">iyouport</a> <a href="https://mailarchive.ietf.org/arch/msg/tls/YzT5LjLJ_6WWhdnU2wVsKNKR6_I/" rel="nofollow noopener">reported</a> (<a href="https://web.archive.org/web/20200801221253/https://mailarchive.ietf.org/arch/msg/tls/YzT5LjLJ_6WWhdnU2wVsKNKR6_I/" rel="nofollow noopener">archive</a>) the apparent blocking of TLS connections with the encrypted SNI (ESNI) extension in China. iyouport says that the first occurrence of blocking was one day earlier, on 2020-07-29.</p>
+<p>We confirm that the Great Firewall (GFW) of China has recently begun blocking ESNI—one of the foundational features of TLS 1.3 and HTTPS.  We empirically demonstrate what triggers this censorship and how long residual censorship lasts.  We also present several evasion strategies discovered by <a href="https://geneva.cs.umd.edu" rel="nofollow noopener">Geneva</a> that can be run either client-side or server-side to evade blocking.</p>
+<h2>What is Encrypted Server Name Indication (ESNI)?</h2>
+<p>TLS is the foundation of secure communication on the web (HTTPS). It provides authenticated encryption so that users can know with whom they are communicating, and that their information cannot be read or tampered with by an intermediary.  Although TLS hides the <em>content</em> of a user’s communication, it does not always hide <em>with whom</em> the user is communicating; the TLS handshake optionally contains a Server Name Indication (SNI) field that allows the user’s client to inform the server which website it wishes to communicate with. Nation-state censors have used the SNI field to block users from being able to communicate with certain destinations.  China, for one, has long been censoring HTTPS in this manner.</p>
+<p>TLS 1.3 introduced Encrypted SNI (ESNI) that, put simply, encrypts the SNI so that intermediaries cannot view it.  (To learn more about ESNI and its benefits, see <a href="https://blog.cloudflare.com/encrypted-sni/" rel="nofollow noopener">Cloudflare’s article</a>).  ESNI has <a href="https://www.usenix.org/system/files/foci19-paper_chai_update.pdf" rel="nofollow noopener">the potential to complicate nation-states’ abilities to censor HTTPS content</a>; rather than be able to block only connections to specific websites, ESNI would require censors to block all TLS connections to specific servers.  We do confirm that this is now happening in China!</p>
+<h2>Our Main Findings</h2>
+<ul>
+<li>The GFW blocks ESNI connections by dropping packets from client to server.</li>
+<li>The blocking can be triggered bidirectionally.</li>
+<li>The <code>0xffce</code> extension is necessary to trigger the blocking.</li>
+<li>The blocking can happen on all ports from 1 to 65535.</li>
+<li>Once the GFW blocks a connection, it will continue blocking all traffic associated with the 3-tuples of (srcIP, dstIP, dstPort) for 120 or 180 seconds.</li>
+<li>We have discovered 6 client-side and 4 server-side evasion strategies.</li>
+</ul>
+<h2>How Do We Know These?</h2>
+<p>We have made a simple Python program that performs the following:</p>
+<ol>
+<li>completes a TCP handshake with a specified server;</li>
+<li>and then sends a TLS ClientHello message with an ESNI extension; the fingerprint of the ClientHello is as normal as what Firefox 79.0 would send.</li>
+</ol>
+<p>The program sends ClientHellos with ESNI both inside-out and outside-in, while capturing traffic on both sides for analysis. The servers to which we send ClientHellos complete the TCP handshake, but they do not send any data packets back to the client, nor do  they are first to close the connection.  All experiments were conducted between July 30th and August 6st.</p>
+<h2>Details About the Blocking</h2>
+<h3>Blocking by dropping packets, not injecting RSTs</h3>
+<p>Comparing the traffic captured on both endpoints, we find the GFW blocks ESNI connections by dropping packets from clients to servers.</p>
+<p>This has two differences from how the GFW censors other commonly-used protocols.  First, the GFW censors (non-encrypted) SNI and HTTP by injecting forged TCP RSTs to both server and client; conversely, we have observed no injected packets from the GFW to censor ESNI traffic.  Second, the GFW drops traffic from server to client to block Tor and <a href="https://gfw.report/blog/gfw_shadowsocks" rel="nofollow noopener">Shadowsocks</a> servers; however, it drops only client-to-server packets when censoring ESNI.</p>
+<p>We further note the GFW does not distinguish the flags of TCP packets when dropping them.  (This is different from some censorship systems in Iran which do not drop packets with RST or FIN flags.)</p>
+<h3>The blocking can be triggered bidirectionally</h3>
+<p>We find the blocking can be triggered bidirectionally.  In other words, sending an ESNI handshake from outside the firewall to inside can get blocked in the same way as sending it inside-out.</p>
+<p>Thanks to this bidirectional feature, one can test this ESNI-based censorship remotely from the outside of the GFW without having control of any Chinese server.  The GFW’s censorship on DNS, HTTP, SNI, FTP, SMTP, and Shadowsocks can also be measured outside-in.</p>
+<h4>The GFW censors ESNI, but not omit-SNI</h4>
+<p>We confirm a TLS ClientHello without ESNI/SNI extensions cannot trigger the blocking.  In other words, the <code>0xffce</code> payload of the <code>encrypted_server_name</code> extension is necessary to trigger the blocking.</p>
+<p>We tested this by replacing the <code>0xffce</code> in a triggering ClientHello with <code>0x7777</code>. After the replacement, sending such a ClientHello could not trigger the blocking anymore.</p>
+<p>This confirmation is important because some censors have been observed blocking <a href="https://github.com/net4people/bbs/issues/10#issuecomment-532035677" rel="nofollow noopener">any ClientHello message without the SNI extension</a>, which would result in the blocking of both ESNI and <a href="https://tlsfingerprint.io/static/frolov2019.pdf" rel="nofollow noopener">omitting-SNI</a>.</p>
+<h4>New extension values are not blocked</h4>
+<p>As informed by an anonymous reviewer on the <a href="https://pad.riseup.net/p/xCRfphD5CoxmbFcpc1s2" rel="nofollow noopener">riseup pad</a>, the currently deployed ESNI uses extension value <code>0xffce</code> (see <a href="https://datatracker.ietf.org/doc/html/draft-ietf-tls-esni-01" rel="nofollow noopener">Section 8.1</a>). However, the newer ECH uses extension value <code>0xff02</code>, <code>0xff03</code> and <code>0xff04</code>(<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tls-esni-07" rel="nofollow noopener">Section 11.1</a>). We confirm no censorship has been observed on these extension values yet.</p>
+<p>Specifically, we replace the <code>0xffce</code> in a triggering ClientHello with the values of <code>0xff02</code>, <code>0xff03</code>, and <code>0xff04</code> respectively. And no blocking is observed after sending such modified ClientHellos.</p>
+<h4>A complete TCP handshake is required before triggering the blocking</h4>
+<p>We find a complete TCP handshake is necessary in order to trigger the ESNI blocking.</p>
+<p>We conducted two experiments from the outside to a server in China. In the first experiment, without sending any <code>SYN</code> packet, our client sent one naked ClientHello message with ESNI extension every 2 seconds. In the second experiment, our client sent a <code>SYN</code> packet and a ClientHello message with ESNI extension; but the server would not respond with any packet (not even to complete the TCP three-way handshake).</p>
+<p>In total, we sent 10 ClientHello messages in each experiment. The result shows no blocking or residual censorship was ever triggered; all ClientHello messages reached the server. This means a TCP handshake is necessary before triggering ESNI-based censorship. It also indicates, similar to the SNI-based censorship by the GFW, the censorship machine for ESNI is stateful.</p>
+<h4>The blocking can happen on all ports</h4>
+<p>We find the ESNI blocking can happen not only on port 443, but on <em>all</em> ports from 1 to 65535.</p>
+<p>Specifically, we sent two ESNI handshakes in a row to the port 1-65535 of a Chinese server from the outside.  For each port, we first sent an ESNI handshake; then after the connection timeout (after 20 seconds), we tried to complete a TCP handshake with the server again. If we do not receive any <code>SYN+ACK</code> from the server the second time, we consider the censorship occurred on that port.  As a result, the ESNI blocking was observed on all ports from 1 to<br>
+65535.</p>
+<p>This feature allows us to test ESNI censorship efficiently, as we can conduct testings on multiple ports of the same IP address simultaneously.</p>
+<h3>Residual Censorship</h3>
+<p>We find that the GFW employs “residual censorship” of ESNI connections. This means that, for some amount of time after triggering censorship for a given connection, it will continue blocking <em>any</em> connections with the same 3-tuple of source IP, destination IP, and destination port.</p>
+<p>The precise duration of residual censorship appears to vary by vantage point. We observed residual censorship for 120 seconds at two of our vantage points, and 180 seconds at another vantage point.</p>
+<p>Sending additional ESNI handshakes during residual censorship time does <em>not</em> reset the timer of the censoring machine. This is similar to the previously observed residual censorship on SNI-based blocking of the GFW. (Conversely, each additional packet set while residual censorship in effect in <a href="https://geneva.cs.umd.edu/posts/iran-whitelister/" rel="nofollow noopener">Iran resets the timer</a>.)</p>
+<p>These findings are partially based on the following experiment. From the outside, we sent one ClientHello message per second to port 443 of a Chinese server.  The 1st, 2nd, and 121st TCP handshakes were accepted. All other handshake attempts were unsuccessful because the <code>SYN</code>s did not reach the server.</p>
+<p>This result shows, similar to previously discovered SNI-based residual censorship, the GFW also employs residual censorship for ESNI. In addition, the fact that second handshake could complete means that it takes at least 1 second for the GFW to react and enable the blocking rules.</p>
+<h2>How Can We Circumvent the Blocking?</h2>
+
+<p><strong>Geneva (<em>Gen</em>etic <em>Eva</em>sion)</strong> is a genetic algorithm developed by those of us at the University of Maryland that automatically discovers new censorship evasion strategies.  Geneva manipulates packet streams—injecting, altering, fragmenting, and dropping packets—in a manner that bypasses censorship without impacting the original underlying connection.  Unlike most other anti-censorship systems, Geneva does not require deployment at both sides of the connection: it runs exclusively at one side (client or server).</p>
+<p>Geneva trains its genetic algorithm against live censors, and to date has found dozens of censorship evasion strategies in various countries.  Geneva’s strategies are expressed in a domain-specific language.  Details of the language, along with the entire Geneva codebase, are available at the <a href="https://github.com/kkevsterrr/geneva" rel="nofollow noopener">Geneva GitHub repository</a>.</p>
+<p>To learn more about how Geneva (or the Geneva strategy engine) works under the hood, see our <a href="https://geneva.cs.umd.edu/papers" rel="nofollow noopener">papers</a> or <a href="https://geneva.cs.umd.edu/about" rel="nofollow noopener">about</a> page.</p>
+ 
+<p>To allow Geneva to train directly against the GFW’s ESNI censorship, we wrote a custom plugin that performs the following steps:</p>
+<ol>
+<li>Geneva starts a TCP server on a random open port on a vantage point located outside of China. By randomizing our ports, we do not need to worry about residual censorship.</li>
+<li>Geneva drives a TCP client located inside of China to connect to the server.</li>
+<li>The client sends a TLS 1.3 ClientHello with the Encrypted SNI extension.</li>
+<li>The client sleeps for 2 seconds to allow the GFW censorship to kick in.</li>
+<li>The client sends a short test message <code>"test"</code> to test if it has been censored.</li>
+<li>Steps 4 &amp; 5 are repeated.</li>
+<li>The server confirms that it receives both the full TLS ClientHello from the client and the test messages. If it does, the strategy is rewarded with a positive fitness; if not (or if the client timed out while sending its test messages), the strategy is punished.</li>
+</ol>
+<p>With this, Geneva discovered multiple evasion strategies <em>in just a few hours</em>. We describe them in detail below.</p>
+<p>The Geneva strategy engine is open source on <a href="http://github.com/kkevsterrr/geneva" rel="nofollow noopener">our Github</a>.</p>
+<p>All of these strategies can be run with our open-source Geneva strategy engine (<a href="http://github.com/kkevsterrr/geneva" rel="nofollow noopener">repository</a>).  Since they operate at the TCP layer, they can be applied to any application that needs to use ESNI: with Geneva running, even an unmodified web browser can become a simple censorship evasion tool.</p>
+<p>Note that Geneva is <em>not</em> designed as a general purpose evasion tool, and does not provide any additional encryption, privacy, or protection. It is a research prototype and it is not optimized for speed. Use these strategies at your own risk.</p>
+<h3>Evasion strategies</h3>
+<p>We trained Geneva over the span of 48 hours, both client- and server-side. In total, we discovered 6 strategies to defeat the ESNI censorship: 4 that work from the server, and 6 that work from the client.</p>
+<p>The following are TCP-layer strategies that can defeat the ESNI censorship when applied exclusively at the client-side.</p>
+<p><strong>Strategy 1: Triple <code>SYN</code></strong></p>
+<p>The first client strategy works by initiating the TCP 3-way handshake with<br>
+<em>three</em> <code>SYN</code> packets, such that the sequence number of the third <code>SYN</code> is corrupted.</p>
+<p>In Geneva’s syntax, this strategy looks like this: <code>[TCP:flags:S]-duplicate(duplicate,tamper{TCP:seq:corrupt})-| \/</code></p>
+<p>This strategy performs a desynchronization attack against the Great Firewall. The GFW synchronizes on the corrupt sequence number, so it misses the ESNI request.</p>
+<p>This strategy can also be applied from the server-side:</p>
+<p><code>[TCP:flags:SA]-tamper{TCP:flags:replace:S}(duplicate(duplicate,tamper{TCP:seq:corrupt}),)-| \/</code></p>
+<p>Although this strategy makes it so the server never sends a <code>SYN+ACK</code> packet, this does not break the three-way handshake. During the three-way handshake, instead of the server sending a <code>SYN+ACK</code> packet as usual, the server instead sends three <code>SYN</code> packets (the third with a corrupt sequence number).</p>
+<p>The first <code>SYN</code> packet serves to initiate a TCP Simultaneous Open, an archaic feature of TCP supported by all major operating systems to handle the case in which two TCP stacks send a <code>SYN</code> packet at the same time. When the client receives a <code>SYN</code> from the server, the <em>client</em> sends a <code>SYN+ACK</code> packet, and server responds with an <code>ACK</code> to complete the handshake. This effectively changes the traditional three-way handshake to a four-way handshake. The <code>SYN</code> with the corrupt sequence number causes the GFW to desynchronize (but is ignored by the client), successfully defeating censorship without harming the connection.</p>
+<p><strong>Strategy 2: Four Byte Segmentation</strong></p>
+<p>The next strategy we discover can also be used from client or server. In this strategy, the client sends the ESNI request across two TCP segments, such that the first TCP segment is less than or equal to 4 bytes long.</p>
+<p>From the client-side, in Geneva’s syntax this strategy looks like this: <code>[TCP:flags:PA]-fragment{tcp:4:True}-| \/</code></p>
+<p>This is not the first time Geneva has discovered segmentation strategies, but it is surprising that this strategy works in China. The Great Firewall has been famous for its ability to reassemble TCP segments for almost a decade now (see <a href="https://github.com/NullHypothesis/brdgrd" rel="nofollow noopener">brdgrd</a>). The TLS header is 5 bytes long, so by segmenting specifically the TLS header across multiple packets, we hypothesize this breaks the GFW’s ability to protocol fingerprint ESNI packet as TLS. This has interesting implications for how the GFW fingerprints connections: it suggests the component of the GFW that performs connection fingerprinting cannot reassemble TCP segments for all protocols. This theory is supported by other segmentation-based strategies identified by Geneva in the past (see <a href="https://geneva.cs.umd.edu/papers/come-as-you-are.pdf" rel="nofollow noopener">this paper</a>).</p>
+<p>This strategy can also be triggered from the server-side. By reducing the TCP window size during the 3-way handshake, a server can force the client to segment their request. In Geneva’s syntax, this can be accomplished with: <code>[TCP:flags:SA]-tamper{TCP:window:replace:4}-| \/</code>.</p>
+<p><strong>Strategy 3: TCB Teardown</strong></p>
+<p>The next strategy is a classic TCB (TCP Control Block) Teardown: the client injects a <code>RST</code> packet with a broken checksum into the connection. This tricks the GFW into thinking the connection has been torn down.</p>
+<p>In Geneva’s syntax, this strategy looks like: <code>[TCP:flags:A]-duplicate(,tamper{TCP:flags:replace:RA}(tamper{TCP:chksum:corrupt},))-| \/</code></p>
+<p>TCB Teardowns are not new: they were demonstrated almost a decade ago by <a href="https://www.usenix.org/conference/foci13/workshop-program/presentation/khattak" rel="nofollow noopener">Khattak et al.</a>, and Geneva has discovered <a href="https://geneva.cs.umd.edu/papers/geneva_ccs19.pdf" rel="nofollow noopener">Teardown attacks</a> repeatedly in the past against the GFW.</p>
+<p>Surprisingly, this strategy also can be induced from the server-side. During the three-way handshake, the server can send a <code>SYN+ACK</code> packet with a corrupt acknowledgement number, thereby inducing the client to send a <code>RST</code>. This causes the <code>RST</code> to have an incorrect sequence number (and an acknowledgement number of 0, but it still is sufficient to cause a TCB Teardown.</p>
+<p><strong>Strategy 4: <code>FIN+SYN</code></strong></p>
+<p>The next strategy appears to be another desychronization attack, but via a different attack vector. In this strategy, the client (or the server) sends a packet with the <code>FIN</code> and <code>SYN</code> flags both set during the three-way handshake. For the client, in Geneva’s syntax: <code>[TCP:flags:A]-duplicate(tamper{TCP:flags:replace:FS},)-| \/</code> For the server, in Geneva’s syntax: <code>[TCP:flags:SA]-duplicate(tamper{TCP:flags:replace:FS},)-| \/</code></p>
+<p>In the past, we’ve found the GFW against other protocols has special handling for <code>FIN</code> packets when it comes to resynchronization. In this case, it looks like the presence of the <code>FIN</code> causes the GFW to immediately resynchronize, but the presence of the <code>SYN</code> causes it to think the actual seqno is <code>+1</code> from the actual value, making the GFW off by 1 from the real connection.</p>
+<p>We tested this hypothesis by incrementing the sequence number of the actual request by 1 while this strategy was running, and saw that the client got censored.</p>
+<p>From the server-side, the <code>FIN</code> flag is not required for this strategy to work.</p>
+<p><strong>Strategy 5: TCB Turnaround</strong></p>
+<p>The TCB Turnaround strategy is simple: before the client initiates the three-way handshake, it first sends a <code>SYN+ACK</code> packet to the server. The <code>SYN+ACK</code> causes the GFW to confuse the roles of the client and server, thereby allowing the client to communicate unimpeded. TCB Turnaround attacks still work in Kazakhstan, but turnaround attacks do not work against the GFW for any other protocols.</p>
+<p>In Geneva’s syntax: <code>[TCP:flags:S]-duplicate(tamper{TCP:flags:replace:SA},)-| \/</code></p>
+<p>This strategy is client-only, since by the time the <code>SYN</code> packet arrives at the server, the censor already knows which side is the client.</p>
+<p><strong>Strategy 6: TCB Desynchronization</strong></p>
+<p>Finally, Geneva identified simple payload-based TCB desynchronization. From the client, injecting a packet with a payload and a broken checksum is sufficient to desynchronize the GFW from the connection. Geneva has identified these in the past against the GFW’s censorship of other protocols as well.</p>
+<p>In Geneva’s syntax: <code>[TCP:flags:A]-duplicate(tamper{TCP:load:replace:AAAAAAAAAA}(tamper{TCP:chksum:corrupt},),)-|</code></p>
+<p>This strategy cannot be used from the server-side.</p>
+<h3>Summary on Circumvention Strategies</h3>
+<p>In total, we have discovered 6 strategies that work from the client-side, and 4 that work from the server-side. Each of these works with near 100% reliability, and can be used to evade the ESNI censorship. Unfortunately, these specific strategies may not be a long-term solution: as the cat and mouse game progresses, the Great Firewall will likely to continue to improve its censorship capabilities.</p>
+<h2>Unresolved Questions</h2>
+<p>It is not yet clear why we observe different durations of residual censorship from different vantage points.  As with all such research, it is also possible that there are some regions of China that are affected in different ways than our vantage points.  If you observe different behavior or that some of our evasion strategies do not work, please feel free to contact us!</p>
+<h2>Thanks</h2>
+<p>We want to thank all anonymous reviewers who offered us valuable and immediate questions, feedback and suggestions on the <a href="https://pad.riseup.net/p/xCRfphD5CoxmbFcpc1s2" rel="nofollow noopener">riseup pad</a>. These comments guided us to prioritize the questions that interest the community the most; and thus greatly accelerated our research.</p>
+<p>We are also thankful to the OONI and OTF community for all of their support.</p>
+<h2>Contacts</h2>
+<p><a href="https://geneva.cs.umd.edu/people/" rel="nofollow noopener">Geneva team</a>:</p>
+<ul>
+<li>Kevin Bock (<a href="https://geneva.cs.umd.edu/keys/kevin_pgp.asc" rel="nofollow noopener">PGP key</a>)</li>
+<li>
+<a href="https://www.cs.umd.edu/~dml" rel="nofollow noopener">Dave Levin</a> (<a href="https://geneva.cs.umd.edu/keys/dave_pgp.asc" rel="nofollow noopener">PGP key</a>)</li>
+</ul>
+<p><a href="https://gfw.report" rel="nofollow noopener">GFW Report</a>:</p>
+<ul>
+<li>Anonymous (<a href="https://gfw.report/gfw_report.asc" rel="nofollow noopener">PGP key</a>)</li>
+<li>
+<a href="https://people.cs.umass.edu/~amir" rel="nofollow noopener">Amir Houmansadr</a> (<a href="https://people.cs.umass.edu/~amir/Amir%20Houmansadr%20(3C599DC4)%20%E2%80%93%20Public.asc" rel="nofollow noopener">PGP key</a>)</li>
+</ul>
+<p>We maintain an up-to-date copy of the report on <a href="https://geneva.cs.umd.edu/posts/china-censors-esni/esni/" rel="nofollow noopener">censorship.ai</a>, <a href="http://iyouport.org" rel="nofollow noopener">iyouport.org</a>, <a href="https://gfw.report/blog/gfw_esni_blocking/en/" rel="nofollow noopener">gfw.report</a>, net4people and ntc.party.</p></td><td>2020-08-07T19:27:42.987Z</td></tr><tr><td>fortuna</td><td><p>Great report. I particularly like the 4-byte split, since it can be implemented in application space.</p>
+<p>Question: does the 4-byte split also bypass SNI-based blocking? What about HTTP blocking?</p></td><td>2020-08-07T21:25:03.414Z</td></tr><tr><td>fortuna</td><td><p>It would be great to add the China tag to this post, so we can easily find all China-related content in one place.</p></td><td>2020-08-07T21:25:38.167Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="gfw.report" data-post="1" data-topic="611">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/g/53a042/48.png" class="avatar"> gfw.report:</div>
+<blockquote>
+<h2>How Can We Circumvent the Blocking?</h2>
+</blockquote>
+</aside>
+<p>Incidentally, I tried <a class="mention" href="/u/valdikss">@ValdikSS</a>’s idea of <a href="https://ntc.party/t/http-headers-tls-padding-as-a-censorship-circumvention-method/168/2">using the TLS padding extension</a> to hide the ESNI extension. It didn’t work in this case, not even with 65472 bytes of padding.</p></td><td>2020-08-08T00:30:46.008Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,55 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>ищу-лёгкий-маршрутизатор-трафика-для-openwrt</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>BBS</td><td><p>Всем здравствуйте!<br>
+Разыскиваю лёгкий маршрутизатор трафика на основной роутер под openwrt. Задачи: работать как отдельный socks5 и/или прозрачный проксик, в зависимости от домена или ip адреса назначения отправлять трафик напрямую в шлюз, или в один из настроенных socks5 серверов, в том числе на других IP адресах. Очень желательна фильтрация доменов по регулярным выражениям, а также проксирование UDP соединений.</p>
+<p>Рассматривал xray и ruantiblock:<br>
+xray хорош всем, кроме размеров. У меня осталось 5 МБ свободной памяти, я его даже не скачаю. Даже если скачаю в tmp, не факт что ему хватит оперативки. Если есть какая-то облегчённая версия xray чисто для маршрутизации, напишите.<br>
+ruantiblock умеет только tor, tun или прозрачный прокси. Указать IP адрес socks5 ему вроде как нельзя. И регулярных выражений я там не обнаружил, видимо плохо искал.<br>
+Заранее спасибо!</p></td><td>2025-01-04T20:48:10.761Z</td></tr><tr><td>Overhead</td><td><p>Как давний юзер рунтиблока и pbr в openwrt могу сказать, что регулярных выражений для доменов там точно нет. Потому что dnsamsq не поддерживает никаких регулярок доменов в своём конфиге. В принципе, они и не нужны. Для домена работает правило “поглащения” поддоменов, т.е. запись <code>site.com</code> означает <code>*.site.com</code> или <code>sub.site.com</code> - это <code>*.sub.site.com</code>. В zapret вроде такой же подход для списков доменов. Этого достачно для любого нормального применения, регвыражения в доменах уже овердрочь для экзотических случаев.</p>
+<aside class="quote no-group" data-username="BBS" data-post="1" data-topic="14331">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/e47774/48.png" class="avatar"> BBS:</div>
+<blockquote>
+<p>Указать IP адрес socks5 ему вроде как нельзя.</p>
+</blockquote>
+</aside>
+<p>Конечно нельзя. Socks - это уровень приложений (как и http-прокси к примеру), в него нельзя отправить любой сырой трафик как в локальный прозрачный прокси в линкусе. Для работы с socks приложение должно поддерживать протокол socks и соединяться по этому протоколу с прокси сервером. Полиси-роутинг (pbr, ruantiblock и подобные решения) работает на более низком уровне и заворачивает L3 трафик на сетевой интерфейс, либо L4 трафик (tcp, udp) на порт прозрачного прокси в linux.</p></td><td>2025-01-05T15:33:48.987Z</td></tr><tr><td>BBS</td><td><p>За pbr спасибо, интересная надстройка. Но для моих целей не подходит (</p></td><td>2025-01-05T22:22:59.928Z</td></tr>
+    </table>
+      </body>
+    </html>

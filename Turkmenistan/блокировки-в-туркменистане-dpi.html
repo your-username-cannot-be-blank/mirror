@@ -1,0 +1,134 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировки-в-туркменистане-dpi</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>debian_tm(Kevin)</td><td><p>Нужна консультация по методов обхода блокировок. Со своей стороны окажу любую доступную поддержку. Блокировки стали чаще и жестче (IP адреса блокируются сотнями). Помогите советом.</p></td><td>2021-12-12T14:36:02.052Z</td></tr><tr><td>ValdikSS</td><td><p>Задавайте вопросы.</p></td><td>2021-12-16T00:04:43.526Z</td></tr><tr><td>tango</td><td><p>It would be helpful if you could help us diagnose blocking of Snowflake in Turkmenistan.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/censorship-analysis/-/issues/40024">
+  <header class="source">
+      <img src="блокировки-в-туркменистане-dpi/0326920897798ced2c754cd1e380444c7a3ec533.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/censorship-analysis/-/issues/40024" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="блокировки-в-туркменистане-dpi/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/censorship-analysis/-/issues/40024" target="_blank" rel="noopener">Blocking of Snowflake in Turkmenistan, 2021-10-24 (#40024) · Issues · The Tor...</a></h3>
+
+  <p>On 2021-10-24, the number of Snowflake users in Turkmenistan dropped from 20–30 to almost zero:</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>We know from <a href="https://github.com/net4people/bbs/issues/80">past observations</a> that DNS, HTTP, and HTTPS blocking in Turkmenistan is bidirectional: it can be tested easily from outside the country. In this way, we can see that Snowflake is blocked because the domain-fronting channel to the Snowflake broker is blocked:</p>
+<pre><code class="lang-plaintext">$ dig @95.85.120.6 +noedns +short +timeout=5 cdn.sstatic.net
+127.0.0.1
+↑ DNS injection
+$ curl --connect-to ::95.85.120.6: --connect-timeout 5 https://cdn.sstatic.net/ -D -
+curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to cdn.sstatic.net:443
+↑ connection reset
+</code></pre>
+<p>Is the domain <a href="http://www.google.com">www.google.com</a> blocked for you? In my tests it is currently not blocked. If <a href="http://www.google.com">www.google.com</a> (or another Google domain) is not blocked, then we may be able to make Snowflake work again, by using an alternative channel for communication with the broker, <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/50">AMP cache</a>.</p>
+<p><a class="mention" href="/u/debian_tm">@debian_tm</a>, are you willing to help test AMP cache, to see if it can make Snowflake work in Turkmenistan again? To do it, you will need the latest Tor Browser 11.5a1 (alpha release):</p>
+<ul>
+<li><a href="https://blog.torproject.org/new-release-tor-browser-115a1/" class="inline-onebox">New Alpha Release: Tor Browser 11.5a1 (Windows, macOS, Linux) | The Tor Project</a></li>
+<li><a href="https://www.torproject.org/download/alpha/" class="inline-onebox">Tor Project | Download Tor Browser Alpha</a></li>
+</ul>
+<p>Go into the Tor Browser folder and edit the torrc-defaults file:</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>platform</th>
+<th>location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>linux</td>
+<td>Browser/TorBrowser/Data/Tor/torrc-defaults</td>
+</tr>
+<tr>
+<td>windows</td>
+<td>Browser\TorBrowser\Data\Tor\torrc-defaults</td>
+</tr>
+<tr>
+<td>osx</td>
+<td>Contents/Resources/TorBrowser/Tor/torrc-defaults</td>
+</tr>
+</tbody>
+</table>
+</div><p>Find the part that says:</p>
+<pre><code class="lang-plaintext">## snowflake configuration
+ClientTransportPlugin snowflake exec ...
+</code></pre>
+<p>Delete the following options from the line:</p>
+<pre><code class="lang-plaintext">-url https://snowflake-broker.torproject.net.global.prod.fastly.net/ -front cdn.sstatic.net
+</code></pre>
+<p>And replace them with these options:</p>
+<pre><code class="lang-plaintext">-url https://snowflake-broker.torproject.net/ -ampcache https://cdn.ampproject.org/ -front www.google.com
+</code></pre>
+<p>Then start Tor Browser, and <a href="https://tb-manual.torproject.org/ru/circumvention/#ispolzovanie-podkliuchaemykh-transportov">configure it to use Snowflake as a bridge</a> at <code>about:preferences#tor</code>.</p>
+<p>For extra debugging information, you can add <code>-log snowflake.log -log-to-state-dir</code> to the <code>ClientTransportPlugin snowflake</code> line in torrc-default.</p>
+<p>The problem with editing torrc-defaults is that the changes will be deleted, the next time the browser updates itself. But if this test works for you, we can look for ways to make the change more permanent and usable.</p></td><td>2021-12-16T19:15:38.919Z</td></tr><tr><td>international</td><td><aside class="quote no-group" data-username="debian_tm" data-post="1" data-topic="1518" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/b77776/48.png" class="avatar"> debian_tm:</div>
+<blockquote>
+<p>Нужна консультация по методов обхода блокировок. Со своей стороны окажу любую доступную поддержку. Блокировки стали чаще и жестче (IP адреса блокируются сотнями). Помогите советом.</p>
+</blockquote>
+</aside>
+<p>Does Shadowsocks work in Turkmenistan?</p></td><td>2021-12-16T22:38:06.705Z</td></tr><tr><td>zinoid</td><td><p>Еще надо проверить не заблокированы ли stun сервера. При необходимости вписать свой. Потому что, например, даже в России блокируются первые два из списка. Не знаю, правда, насколько stun обязателен.</p></td><td>2021-12-21T18:19:14.945Z</td></tr><tr><td>zinoid</td><td><p>Кстати, говорят некоторые (очень немногие) публичные адреса VPNGate от SoftEther работают в Туркменистане. Попробуйте также I2P (но начальный старт должен быть в чистой сети).</p></td><td>2021-12-21T18:23:21.318Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="zinoid" data-post="5" data-topic="1518">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/8e8cbc/48.png" class="avatar"> zinoid:</div>
+<blockquote>
+<p>Не знаю, правда, насколько stun обязателен.</p>
+</blockquote>
+</aside>
+<p>It only needs one of the STUN servers to be unblocked.</p></td><td>2021-12-22T06:12:06.847Z</td></tr><tr><td>LiquidICP(Liquid ICP)</td><td><p>Any success with working VPN in TM?</p></td><td>2022-06-09T15:25:51.673Z</td></tr><tr><td>0ka(0ka)</td><td><p>del</p></td><td>2022-06-09T22:50:43.139Z</td></tr><tr><td>split</td><td><p>Any suggestion for a tool/service that works?</p></td><td>2022-06-13T16:11:10.934Z</td></tr><tr><td>0ka(0ka)</td><td><p>del</p></td><td>2022-06-14T23:47:55.739Z</td></tr><tr><td>anonymous62(anonymous62)</td><td><p>Блокируют <code>HTTP CONNECT</code> метод с любым адресом.</p></td><td>2022-08-24T17:24:44.659Z</td></tr><tr><td>anonymous123(anonymous123)</td><td><p>DNS.QUERY.NAME == *.in-addr.arpa заблокирован, для любого типа<br>
+DNS запросы проверяют на всех(?) портах</p></td><td>2023-09-10T10:02:44.985Z</td></tr>
+    </table>
+      </body>
+    </html>

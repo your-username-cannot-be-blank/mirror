@@ -1,0 +1,451 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>call-the-testers-amneziawg-protocol</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>AmneziaVPN</td><td><p>Всем привет!</p>
+<p>Во время недавних блокировок OpenVPN и WireGuard команда Amnezia VPN задумалась над созданием собственного протокола, который сможет помочь пользователям обходить блокировки при этом сильно не снижая скорость (так как OpenVPN over Cloak, который мы рекомендовали к установке - скоростью не радовал по понятным причинам).</p>
+<p>Представляем вам нашу реализацию протокола WireGuard - <a href="https://github.com/amnezia-vpn/amnezia-wg" rel="noopener nofollow ugc"><strong>AmneziaWG</strong></a>.</p>
+<p>AmneziaWG (AmneziaWireGuard) - это форк обычного WireGuard-Go с добавлением функций для обхода блокировок и снижения вероятности обнаружения протокола. Одной из ключевых особенностей AmneziaWG является обратная совместимость с WireGuard. Это означает, что при использовании AmneziaWG, если в конфигурации не указаны специфические параметры для обфускации протокола, он будет работать как стандартный WireGuard.</p>
+<p>В чем особенность?</p>
+<ul>
+<li>Перед началом сессии клиент отправляет несколько пакетов со случайными данными (количество таких пакетов Jc и их минимальный и максимальный размер в байтах Jmin, Jmax задается в конфиге)</li>
+<li>Изменен заголовок пакета рукопожатия (Initiator to Responder), и ответного пакета (Responder to Initiator), эти значения также выставляются в конфиге (H1 и H2)</li>
+<li>Инит-пакеты рукопожатия дополнительно имеют мусор в начале данных,</li>
+<li>размеры определяются значениями S1 и S2. (по умолчанию инициирующий пакет рукопожатия имеет фиксированный размер (148 байт), после добавления мусора его размер будет равен 148 + длина случайных байтов).</li>
+<li>Изменен заголовок пакетов с данными и специальных пакетов “Under Load” - H4 и H3 соответственно.</li>
+</ul>
+<p>Ещё раз подробно о новых настраиваемых полях:</p>
+<ol>
+<li><strong>Jc</strong> (<strong>Junk packet count</strong>) - количество пакетов со случайными данными, которые отправляются перед началом сессии</li>
+<li><strong>Jmin</strong> (<strong>Junk packet minimum size</strong>) - минимальный размер пакета для Junk packet. То есть все рандомно генерируемые пакеты будут иметь размер не меньше чем Jmin</li>
+<li><strong>Jmax</strong> (<strong>Junk packet maximum size</strong>) - максимальный размер для Junk пакетов</li>
+<li><strong>S1</strong> (<strong>Init packet junk size</strong>) - размер случайных данных, которые будут добавлены к init пакету, размер которого изначально фиксированный</li>
+<li><strong>S2</strong> (<strong>Response packet junk size</strong>) - размер случайных данных, которые будут добавлены к ответу, размер которого изначально фиксированный</li>
+<li><strong>H1</strong> (<strong>Init packet magic header</strong>) - заголовок первого байта рукопожатия</li>
+<li><strong>H2</strong> (<strong>Response packet magic header</strong>) - заголовок первого байта ответа на рукопожатие</li>
+<li><strong>H4</strong> (<strong>Transport packet magic header</strong>) - заголовок пакета передаваемых данных</li>
+<li><strong>H3</strong> (<strong>Underload packet magic header</strong>) - заголовок пакета UnderLoad</li>
+</ol>
+<p>Как вы можете догадаться, заголовки H1, H2, H3, H4 должны быть разными. Если выставить Jc, S1 и S2 в нули, то и мусора не будет.</p>
+<p>Протестировать данный протокол можно 2-мя способами:</p>
+<ol>
+<li>Установите Amnezia VPN на своем сервере, <a href="https://amnezia.org/en/downloads" rel="noopener nofollow ugc">скачав клиент с официального сайта</a>.</li>
+<li><a href="mailto:support@amnezia.org">Написать нам на почту</a> с просьбой выдать конфиг для тестирования данного протокола (в заголовке письма требуется указать <strong>“Тестирвоание AmneziaWG - NTC.PARTY”</strong>).</li>
+</ol>
+<p>Просим всех, кому интересно, протестировать данный протокол!</p>
+<p>Любые отзывы по работающему/не работающему протоколу и производительности приветствуются! Вопросы тоже.</p>
+<details>
+<summary>
+English</summary>
+<p>Hello everyone!</p>
+<p>During the recent blocking of OpenVPN and WireGuard the Amnezia VPN team thought about creating their own protocol, which could help users to bypass the blocking without slowing down the speed (since OpenVPN over Cloak, which we recommended to install, was not very fast for obvious reasons).</p>
+<p>Here is our implementation of the WireGuard protocol - <a href="https://github.com/amnezia-vpn/amnezia-wg" rel="noopener nofollow ugc"><strong>AmneziaWG</strong></a>.</p>
+<p>AmneziaWG (AmneziaWireGuard) is a fork of the WireGuard-Go with added features to bypass blocking and reduce the probability of protocol detection. One of the key features of AmneziaWG is backward compatibility with WireGuard. This means that when using AmneziaWG, unless specific parameters for protocol obfuscation are specified in the configuration, it will work like standard WireGuard.</p>
+<p>What is the feature?</p>
+<ul>
+<li>Before starting a session the client sends several packets with random data (the number of such packets Jc and their minimum and maximum size in bytes Jmin, Jmax is set in the config).</li>
+<li>The header of handshake packet (Initiator to Responder) and response packet (Responder to Initiator) has been changed, these values are also set in config (H1 and H2).</li>
+<li>Handshake init packets additionally have garbage at the beginning of the data, the sizes are determined by S1 and S2 values. (by default, the handshake init packet has a fixed size (148 bytes), after adding garbage its size will be 148 + size of random bytes).</li>
+<li>The header of data packets and special “Under Load” packets has been changed - H4 and H3 respectively.</li>
+</ul>
+<p>More details about new customizable fields:</p>
+<ol>
+<li><strong>Jc</strong> (<strong>Junk packet count</strong>) - number of packets with random data that are sent before the start of the session</li>
+<li><strong>Jmin</strong> (<strong>Junk packet minimum size</strong>) - minimum packet size for Junk packet. That is, all randomly generated packets will have a size no smaller than Jmin.</li>
+<li>Jmax (<strong>Junk packet maximum size</strong>) - maximum size for Junk packets</li>
+<li><strong>S1</strong> (Init packet junk size) - the size of random data that will be added to the init packet, the size of which is initially fixed.</li>
+<li><strong>S2</strong> (<strong>Response packet junk size</strong>) - the size of random data that will be added to the response packet, the size of which is initially fixed.</li>
+<li><strong>H1</strong> (<strong>Init packet magic header</strong>) - the header of the first byte of the handshake</li>
+<li><strong>H2</strong> (<strong>Response packet magic header</strong>) - header of the first byte of the handshake response</li>
+<li><strong>H4</strong> (<strong>Transport packet magic header</strong>) - header of the packet of the data packet</li>
+<li><strong>H3</strong> (<strong>Underload packet magic header</strong>) - UnderLoad packet header.</li>
+</ol>
+<p>As you can guess, the H1, H2, H3, H4 headers must be different. If you set Jc, S1 and S2 to zero, there will be no garbage.</p>
+<p>There are 2 ways to test this protocol:</p>
+<ol>
+<li>Install Amnezia VPN on your server by <a href="https://amnezia.org/en/downloads" rel="noopener nofollow ugc">downloading the client from the official website</a>.</li>
+<li><a href="mailto:support@amnezia.org">Write to us by e-mail</a> with a request to issue a config for testing this protocol (in the header of the e-mail you should specify <strong>“Testing AmneziaWG - NTC.PARTY”</strong>).</li>
+</ol>
+<p>We ask everyone who is interested to test this protocol!</p>
+<p>Any feedback on working/not working protocol and performance is welcome! Questions too.</p>
+</details></td><td>2023-10-24T14:40:34.381Z</td></tr><tr><td>bolvan</td><td><p>Linux kernel module ожидается ? Кощунство гонять tun на роутерах с openwrt и VPS</p></td><td>2023-10-24T16:00:21.309Z</td></tr><tr><td>AmneziaVPN</td><td><p>Планируем.<br>
+На данный момент находимся на стадии поиска исполнителя.</p></td><td>2023-10-24T17:03:11.829Z</td></tr><tr><td>spirt(andy)</td><td><p>Будет поддержка других дистрибутивов, кроме ubuntu и debian ? На арч не устанавливается, internal error.<br>
+В логах сервера установка не идёт дальше COMMAND=/usr/bin/docker ps --format ‘{{.Names}} {{.Ports}}’</p></td><td>2023-10-24T23:26:16.149Z</td></tr><tr><td>Geracl(blacktemple support)</td><td><p>Что значит обратная совместимость WG, получается для вашей серверной части нужен свой клиент? или клиент WG дефолтный подойдет</p></td><td>2023-10-25T05:05:15.827Z</td></tr><tr><td>bolvan</td><td><p>Полагаю, что обратная совместимость достигается только в случае полного отключения всех дурилок DPI, что превращает софт в оригинальный WG. В таком виде его использование лишено смысла.<br>
+А в другом стандартные клиенты не подхватят. У WG очень все строго. Если что-то неправильно, такие пакеты молча отбрасываются</p></td><td>2023-10-25T06:13:17.752Z</td></tr><tr><td>AmneziaVPN</td><td><p>Спасибо огромное за репорт.<br>
+Расширить поддержку дистрибутивов для установки планируем, да.</p></td><td>2023-10-25T11:45:41.856Z</td></tr><tr><td>AmneziaVPN</td><td><p>С обычным WG сервером может работать конфигурация AmneziaWG в которой установлены Jc, Jmin, Jmax, а остальные поля нулевые. Таким образом клиент AWG будет просто посылать мусорные пакеты перед init пакетами, что абсолютно не влияет на работу протокола WG, но может сбить с толку DPI.</p></td><td>2023-10-25T11:47:00.180Z</td></tr><tr><td>soloway(Solo Way)</td><td><p>Какие молодцы. Очень правильное направление. Часто обсуждаемые сейчас обертки туннелей на основе TLS (Cloak и тп) в настоящий момент сильно избыточны и неизбежно ведут к драматичному снижению скорости, огромным задержкам из-за чего пользоваться ими невыносимо.</p>
+<p>Огромная благодарность за мобильные клиенты.</p></td><td>2023-10-25T12:20:31.588Z</td></tr><tr><td>soloway(Solo Way)</td><td><p>Это слегка модифицированный wireguard-go. Легко скомпилировать самостоятельно и закинуть один файл в  /usr/bin</p>
+<p>В первом посте пропущен важный момент. Для того чтобы использовать в конфигах дополнительные параметры так же потребуется собрать модифицированную утилиту wg.</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/amnezia-vpn/amneziawg-tools">
+  <header class="source">
+
+      <a href="https://github.com/amnezia-vpn/amneziawg-tools" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="call-the-testers-amneziawg-protocol/f2bc878a906974facf3a5cd5c3959f3b87869479_2_690x344.png" class="thumbnail" data-dominant-color="EDEEED">
+
+  <h3><a href="https://github.com/amnezia-vpn/amneziawg-tools" target="_blank" rel="noopener nofollow ugc">GitHub - amnezia-vpn/amneziawg-tools: Tools for configuring Amnezia-WG </a></h3>
+
+    <p><span class="github-repo-description">Tools for configuring Amnezia-WG </span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2023-10-25T12:30:14.945Z</td></tr><tr><td>tlgrmku(tlgrmku)</td><td><p>Эт конечно всё хорошо. Но как быть с мобильными клиентами?</p></td><td>2023-10-25T16:19:11.479Z</td></tr><tr><td>AmneziaVPN</td><td><p>Новая версия Amnezia VPN (4.0.8), которая как раз и поддерживает новый протокол, доступна для всех платформ - Windows, MacOS, iOS, Android и Linux (в PlayMarket его еще нет, так как он проходит review от Google, поэтому вы можете <a href="https://github.com/amnezia-vpn/amnezia-client/releases/tag/4.0.8" rel="noopener nofollow ugc">установить apk с GitHub</a>).</p></td><td>2023-10-25T16:41:46.936Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group quote-modified" data-username="AmneziaVPN" data-post="12" data-topic="6081">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/amneziavpn/48/3789_2.png" class="avatar"> AmneziaVPN:</div>
+<blockquote>
+<p>доступна для Linux</p>
+</blockquote>
+</aside>
+<p>Попробовал, установщик ставится в /usr/local/bin, /opt/AmneziaVPN, /usr/share/applications, служба systemd AmneziaVPN, без деинсталлятора. deb пакет был бы предпочтительней.</p></td><td>2023-10-25T17:27:58.001Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>А можно какими-то плюс-минус рекомендованными параметрами всех этих Jc, S и H поделиться?</p>
+<p>Сейчас собрал на двух машинках с Ubuntu <em>(сюрприз, для сборки требует Go 1.20+, в Ubuntu 22.04 - 1.18, пришлось ещё Go ставить с офсайта свежайший)</em>, в конфиги накидал значений от балды, запустил, погонял iperf - падение скорости в пределах погрешности измерения. Но это просто тестовый сервер, который первый под руку попался, и мой ноут, между ними и так всего 30-35 Мбит/с (latency ~80 ms). Буду пробовать на более толстом канале.</p>
+<p>Вообще, если это будет стабильно работать и при не блокироваться - это спасение, конечно. У меня по WG сейчас не только пользователи инсту смотрят, но сервера между собой данные перекидывают, иногда терабайтами за раз, так что скорость канала критична.</p>
+<p>P.S. Ну что могу сказать, впечатлён! На скоростях поприличнее (550-600 Мбит/с без VPN, latency между серверами 40 ms) падение скорости в пределах 5% (ну т.е. опять погрешности измерения), использование CPU по время запуска iperf в пределах единиц процентов (и это на древнем Xeon E5645).</p></td><td>2023-10-25T20:57:00.652Z</td></tr><tr><td>spirt(andy)</td><td><p>Собрал , установил amnezia-wg, amnezia-wg-tools. Добавил к конфиг интерфейса Jc = 10, интерфейс не поднимается, ругается на неверный параметр. Может как-то поподробнее расскажете , как установить корректно из гитхаба ?</p></td><td>2023-10-26T02:12:02.585Z</td></tr><tr><td>Geracl(blacktemple support)</td><td><p>будет ли клиент чистый без установщика? даже в новой бета версии он очень тяжелый для обычного юзера. Какая нибудь lite версия как outline ждущая конфига или ключа</p></td><td>2023-10-26T03:08:47.027Z</td></tr><tr><td>soloway(Solo Way)</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://www.wireguard.com/xplatform/">
+  <header class="source">
+      <img src="call-the-testers-amneziawg-protocol/0f615f29d054c95dee3dd0ed82f1ae0871ff63ee.png" class="site-icon" data-dominant-color="B56F70" width="16" height="16">
+
+      <a href="https://www.wireguard.com/xplatform/" target="_blank" rel="noopener nofollow ugc">wireguard.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="call-the-testers-amneziawg-protocol/a07c854866146238c66bb919d956432a33abff15_2_690x362.png" class="thumbnail" data-dominant-color="821719" width="690" height="362"></div>
+
+<h3><a href="https://www.wireguard.com/xplatform/" target="_blank" rel="noopener nofollow ugc">Cross-platform Interface - WireGuard</a></h3>
+
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2023-10-26T05:36:42.196Z</td></tr><tr><td>spirt(andy)</td><td><p>спасибо, добрый человек !</p></td><td>2023-10-26T06:24:28.324Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>К ссылке, которую выше скинули, добавлю, что адрес собственно интерфейса, который обычный WG берёт из конфига (Interface → Address), тут надо добавлять через ip address add X.X.X.X/XX dev wgX, и у меня после всего этого потребовалось ещё пнуть ip link set dev wgX up, чтобы запустился.</p>
+<p>Ну а я пошёл собирать под Alpine на arm32, чтобы запихнуть на Микротик <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> Собрать-то собрал, но что-то пока не особо работает, буду разбираться.</p></td><td>2023-10-26T09:48:09.094Z</td></tr><tr><td>AmneziaVPN</td><td><p>Предполагаем что при текущих условиях Jc лучше брать в интервале [3,10], Jmin = 100, Jmax = 1000, S1,S2 в [50,500], и рандомные H1-H4 &lt; uint_max</p></td><td>2023-10-26T12:06:41.950Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="borouhin" data-post="19" data-topic="6081">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/borouhin/48/3734_2.png" class="avatar"> borouhin:</div>
+<blockquote>
+<p>тут надо добавлять через ip address add X.X.X.X/XX dev wgX, и у меня после всего этого потребовалось ещё пнуть ip link set dev wgX up, чтобы запустился.</p>
+</blockquote>
+</aside>
+<p>в официальном WG все именно так, и на офф сайте в гайде по настройке это есть</p></td><td>2023-10-26T19:00:42.475Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>С официальным в большинстве случаев используется и в большинстве гайдов описан wg-quick, который берёт адрес (и ещё несколько параметров, перечисленных в его мане, неизвестных wg) из конфига. Для тех, кто не пользовался чистым wg - тот момент, что wg setconf ругается на тот самый конфиг, который wg-quick принимал на ура, может быть неочевиден, как и показал пост <a class="mention" href="/u/spirt">@spirt</a> выше. Поэтому и пояснил.<br>
+Но в целом, пожалуй, и тут лучше и wg-quick дособрать, да, а то у меня какой-то промежуточный вариант получился - уже с wg, но ещё без wg-quick <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2023-10-26T19:11:34.758Z</td></tr><tr><td>spirt(andy)</td><td><p>Завелся на арче , скорость на первый взгляд как на родном вайргуарде. Только почему-то виндовс клиент(амнезия) не работает. Wireshark вообще не показывает пакетов в строну сервера во время подключения. Проверял на вин10 и вин11.  На андроиде всё ок.</p></td><td>2023-10-26T23:38:42.898Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>Завёлся на Mikrotik RB3011 (arm32, в контейнере на базе Alpine). Где-то я только накосячил с кросс-компиляцией wg, не запускается, но обошёлся без него, берём nc и пишем настройки в сокет, от wg не сильно много облегчения в этом вопросе. Можно сделать контейнер, которые все настройки будет брать из переменных окружения, настроенных в Микротике (и сделаю).</p>
+<p>Производительность разочаровала. 2 ядра по 1,4 ГГц, при трафике всего 30 Мбит/с загрузка CPU 75-85%. С родым Wireguard микротика держится в пределах 30%. Сейчас с того роутера, на котором поднял для теста amnezia-wg, больше скорость и без VPN не получается, следующий раз попробую на более шустром канале, но что-то мне подсказывает, что в потолок по CPU упрусь очень скоро <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p>
+<p><em>P.S. Кто ещё будет заморачиваться с применением wireguard-go в чистом виде без wg - чтобы получить из ключа, который генерит wg и который в обычном конфиге для wg-quick указывается, ключ, который можно напрямую скормить в сокет с командой set, надо исполнить следующее: “echo your_key_from_wg_conf | base64 -d | xxd -p -c 256” Может, это я один такой недогадливый, но я на этот момент час потратил, пока исходники wg не почитал. А ведь должен мне был знак “=” в конце ключа сразу намекнуть, что это base64, и прежде чем его кодировать в hex, надо его раскодировать…</em></p></td><td>2023-10-27T01:50:26.764Z</td></tr><tr><td>spirt(andy)</td><td><p>вы не разбирались с wg-quick? у меня собранный из гитхаба amnezia-wg-tools почему-то всё равно ругается на неверный параметр. без него очень грустно )</p></td><td>2023-10-27T04:39:14.480Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>Нет, я решил обойтись одним wireguard-go. По ходу, я даже wg под какую-то не ту разновидность arm32 собрал, а с учётом моего сценария использования (все параметры надо брать из переменных окружения, а не из файла) никакого смысла в wg особого нет, чем десять раз вызывать wg set, проще echo -e “set=1\n\private_key=…\n…\n\n” | nc local:/var/run/wireguard/wgXX.sock" вызвать один раз и ip два раза.</p>
+<p>Ну а если wg есть - то wg-quick заменяется ровно на три команды - wg setconf, ip address add и ip link set. Ну ещё если у Вас там в PostUp что-то было - то вызвать его вручную. Особых проблем не вижу.</p></td><td>2023-10-27T09:11:52.535Z</td></tr><tr><td>invu(invu)</td><td><p><a class="mention" href="/u/spirt">@spirt</a>, берешь свой conf, комментируешь строку с Address, ниже добавляешь нужные параметры:<br>
+<code>Jc=uint16 Jmin=uint16 Jmax=uint16 S1=uint16 S2=uint16 H1=uint32 H2=uint32 H3=uint32 H4=uint32</code></p>
+<p>после:<br>
+<code>wg setconf &lt;interface&gt; conf-file</code><br>
+<code>ip (-6) address add &lt;какой там был закомментированный адрес&gt; dev &lt;interface&gt;</code><br>
+<code>ip link set mtu 1404 up dev &lt;interface&gt;</code><br>
+<code>#по поводу mtu не уверен</code><br>
+<code>ip (-6) route add &lt;адрес пира&gt; dev &lt;interface&gt;</code><br>
+<code>и проверяешь пингом</code></p>
+<p>PS: У меня wireguard-wg (amnezia-wg) собранная статически занимает меньше места:<br>
+в Makefile заменить<br>
+<code>go build -v -o "$@"</code><br>
+на<br>
+<code>CGO_ENABLED=0 go build -v -trimpath -ldflags "-s -w" -o "$@"</code></p></td><td>2023-10-27T09:41:29.542Z</td></tr><tr><td>spirt(andy)</td><td><p>Спасибо всем за развернутые ответы. С сервером разобрались более менее ) теперь возникает проблема на линукс-клиенте c дефолтным маршрутом. клиент-сервер друг друга пингуют, но стоит добавить на клиенте  ip r add 0.0.0.0/0 metric 1 dev wg0 , всё глохнет. что не так опять ?)</p>
+<p>разобрался<br>
+нужен был отдельный маршрут с более высокой метрикой на адрес сервера через локальный шлюз .<br>
+мож пригодится кому</p>
+<p>ждём модуль ядра ) и amnezia-wg-quick ) я конечно понимаю unix-way , все дела, но удобно же )</p></td><td>2023-10-27T22:45:20.380Z</td></tr><tr><td>spirt(andy)</td><td><p>win клиент амнезия не работает. трафика нет с него вообще. проверили на много всяких разных виндовс.<br>
+на этих же компах прекрасно работают openvpn wintun, tun, dco, wireguard  оригинал , sing-box system, gvisor, mixed.</p></td><td>2023-10-28T04:23:52.228Z</td></tr><tr><td>soloway(Solo Way)</td><td><p>Пару слов о том, как сделать конфиг для мобильного приложения AmneziaVPN:</p>
+<ol>
+<li>Заполнить шаблон параметрами своего сервера:<br>
+<a class="attachment" href="call-the-testers-amneziawg-protocol/i0qxuMhNETaZ9BJdU1pBBNfxL6m.json">a-conf.example.json</a> (1.7 KB)<br>
+Очень внимательно. По непонятным причинам многие параметры указываются трижды.</li>
+<li>Запустить прикрепленный скрипт и вставить текст полученного конфига:<br>
+<a class="attachment" href="call-the-testers-amneziawg-protocol/oVkdr3MTcHANgcIg6EMuTBmOxIr.py">a-conf.py</a> (1.0 KB)<br>
+После нажатия Enter параметры будут упакованы в строку вида <strong>vpn://…</strong> которую можно импортировать в мобильном приложении.</li>
+</ol>
+<p>Для работы скрипта требуется PyQt6. Если необходимо установить:<br>
+<code># pip install PyQt6</code></p></td><td>2023-10-28T20:58:10.890Z</td></tr><tr><td>stupidityIsntCrime</td><td><p>чтобы пынять работает или нет нужно дождаться очередной волны тестирования блокировки протоколов, там видно буит</p></td><td>2023-10-29T06:18:32.175Z</td></tr><tr><td>AmneziaVPN</td><td><p>Что вы имеете в виду? У вас не подключается приложение или в чем заключается ошибка?</p></td><td>2023-10-30T12:20:29.409Z</td></tr><tr><td>Praising7137</td><td><p>Понимаю что проблема не самая важная, но стало интересно. Попробовал выложенным выше скриптом сгенерировать конфиг для своего обычного WG сервера (по вашей рекомендации выставлены Jc, Jmin, Jmax, остальные поля нулевые). Мобильное приложение его приняло и позволило подключаться, никаких проблем. Десктопная версия конфиг тоже приняла, но подключаться отказывается- кнопка просто не реагирует на нажатия. Видимо, в десктопе как-то подругому проверяется конфиг?<br>
+<a class="attachment" href="call-the-testers-amneziawg-protocol/h8IayVzOGzmhvBEmJtthLBrh0Tg.json">a-conf.json</a> (1,3 КБ)</p></td><td>2023-10-30T15:50:00.401Z</td></tr><tr><td>spirt(andy)</td><td><p>да, не подключается. Просто бесконечно крутит - “подключение” . wireshark не показывает пакетов в сторону сервера</p></td><td>2023-10-30T21:38:34.853Z</td></tr><tr><td>mexxtron(mexxtron)</td><td><p>Интересно, для Entware (Keenetic) реализация этого протокола планируется? Обычный WG на новых arm-кинетиках просто спасение по скорости и удобству…</p></td><td>2023-10-31T06:01:53.014Z</td></tr><tr><td>bolvan</td><td><p>Это tun-based софт. Если есть шелл, entware и tun, будет работать.<br>
+Но</p>
+<ol>
+<li>GO программы очень жирные. без флэшки, наверно, не обойтись</li>
+<li>Что там по RAM ? 64 может быть мало</li>
+</ol>
+<p>В интерфейс вряд ли проведут. Все-таки что-такое кинетик производитель и что такое этот проект</p></td><td>2023-10-31T06:44:48.314Z</td></tr><tr><td>soloway(Solo Way)</td><td><p>Обновил шаблон. Похоже параметр PresharedKey обязателен для десктопной версии.<br>
+<a class="attachment" href="call-the-testers-amneziawg-protocol/i0qxuMhNETaZ9BJdU1pBBNfxL6m.json">a-conf.example.json</a> (1.7 KB)</p></td><td>2023-10-31T06:50:29.973Z</td></tr><tr><td>mexxtron(mexxtron)</td><td><p>Да в веб-интерфейсе и не надо, если есть OPKG <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> В новых ARM-кинетиках (Peak, Ultra) по 256 Мб хранилище, я без проблем туда ставлю все нужные пакеты OPKG, флэшку не использую. А оперативки там 512. Очень удачные аппараты получились, лучше них только RB5009.</p></td><td>2023-10-31T07:02:54.944Z</td></tr><tr><td>AmneziaVPN</td><td><p>Отписали вам в ЛС.</p></td><td>2023-10-31T09:26:31.609Z</td></tr><tr><td>RangerRU</td><td><p>Здравствуйте<br>
+Установка на свой сервер только через приложение?<br>
+Планируется ли docker вариант для самостоятельной установки и настройки как в своё время wirehole/ DWG и т.д.?<br>
+Заранее спасибо за ответ <img src="https://ntc.party/images/emoji/twitter/wink.png?v=12" title=":wink:" class="emoji" alt=":wink:" loading="lazy" width="20" height="20"></p></td><td>2023-10-31T12:41:05.643Z</td></tr><tr><td>soloway(Solo Way)</td><td><p>Вполне можно обойтись и без сверхмощного роутера дополнив тот, что есть.</p>
+<p>Если у провайдера нет ipv6 нет или он не нужен, а на полке пылится не нашедший применения Raspberry PI или даже старенький PC с сетевым портом, то сравнительно легко можно настроить вторую подсеть работающую на тех же проводах с доступом и интернет через VPN.</p>
+<p>Например роутер смотрит в сторону домашней сети с 192.168.1.1/24. Тогда сетевому порту  PI назначим сразу два постоянных адреса: 192.168.1.2/24 и 192.168.2.1/24. Настроим маскарадинг и VPN и с теперь любого устройства можно будет ходить как обычно по локальной сети, так и в интернет через VPN вручную поменяв настройки IP с авто на любой незанятый адрес в подсети 192.168.2.0/24 и шлюзом 192.168.2.1.</p>
+<p>Звучит как что-то сложное, но это довольно легко организовать в моем любимом systemd-networkd</p>
+<pre><code class="lang-auto"># cat /etc/systemd/network/en0.network                                                         
+[Match]
+# Name of my lan interface
+Name=en0
+
+[Network]
+DHCP=no
+Address=192.168.1.2/24
+Address=192.168.2.1/24
+DNS=1.1.1.1
+DNS=1.0.0.1
+IPForward=yes
+IPMasquerade=ipv4
+LinkLocalAddressing=ipv6
+LLMNR=no
+IPv6AcceptRA=no
+
+# Route to my VPS
+[Route]
+Destination=11.22.33.44/32
+Gateway=192.168.1.1
+GatewayOnlink=no
+</code></pre>
+<p>Можно пойти дальше и отключить DHCP-сервер на роутере после чего поднять такой сервер на PI (это еще несколько строк в том же файле настроек). Получится наоборот - подключенные устройства будут автоматически получать интернет через VPN.</p></td><td>2023-10-31T14:31:22.750Z</td></tr><tr><td>yury-sannikov(Yuriy Sannikov)</td><td><p>Всем привет!<br>
+Комментарий <a href="https://ntc.party/u/borouhin">borouhin</a> к статье на Хабре сподвиг меня на эксперименты по запуску amnezia-wg в контейнере Микротика. Если кому интересно, ссылка на репозиторий <a href="https://github.com/yury-sannikov/amnezia-wg-docker" class="inline-onebox" rel="noopener nofollow ugc">GitHub - yury-sannikov/amnezia-wg-docker: An amnezia-wg Docker builds</a><br>
+Конечная цель: настроить туннель между микротом и походным роутером на OpenWRT с помощью amnezia-wg.</p></td><td>2023-11-05T20:33:10.835Z</td></tr><tr><td>Dhohbr</td><td><p>Заменил 3 версию на 4, предварительно удалив все настройки и пакеты.<br>
+Установил Openvpn over Cloak, который работал на 3 версии, и AmneziaWG.<br>
+Протокол AmneziaWG работает, а вот Openvpn over Cloak не подключается. В логах приложения висит на Promoting for VPN permissions. На сервере в tcpdump вижу что пакеты прилетают. Телнет проходит.</p>
+<p>По интерфейсу есть замечания:<br>
+Хотелось бы светлую тему.<br>
+Не видно верхней панели.<br>
+Заблокированы уведомления приложения. Погуглил в интернетах, пишут что это гугл внёс какие-то изменения для пакетов установленных через APK в Android 13, и разработчики должны внедрить эту поддержку в свое ПО.<br>
+Кнопка “Назад” не работает в разделах Settings, Share и на основном экране не выходит из приложения.</p></td><td>2023-11-06T03:04:30.530Z</td></tr><tr><td>User_96c9e3c964bf</td><td><p>На данный момент у меня блокируется wg на домашнем и мобильном интернете. Попробовал ваш wireguard, все без проблем завелось и подключается. Еще бы это внедрить в официальный клиент от wireguard вообще цены бы небыло. Но я так понимаю что это врядли когда произойдет.</p>
+<p>Спасибо большое команде Amnezia за ваши труды!</p></td><td>2024-01-18T16:00:56.794Z</td></tr><tr><td>Aructeb</td><td><p>Подскажите куда копать. Хочу настроить руками.</p>
+<p>Создал интерфейс<br>
+<code># amneziawg-go  wg1</code></p>
+<p>Установил amneziawg-tools. Пытаюсь настроить, но выдает ошибку:</p>
+<pre><code class="lang-auto"># wg setconf wg1 /etc/wireguard/wg1.conf
+Unable to modify interface: Operation not supported
+</code></pre></td><td>2024-01-26T10:28:48.838Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>Не сам сталкивался, но буквально вчера мне писал человек с такой же проблемой. Замена wg на более раннюю версию помогла, это какой-то баг в amneziawg-tools v1.0.20240120 (может быть и нескольких более ранних, в моём случае помог откат на октябрьскую версию, которая у меня была в собранном виде, промежуточные не пробовали).<br>
+Ну или выбросить этот wg вообще, раз с ним ещё и проблемы, и писать конфиг напрямую в unix domain socket по <a href="https://www.wireguard.com/xplatform/" rel="noopener nofollow ugc">мануалу</a>.</p></td><td>2024-01-26T10:52:28.296Z</td></tr><tr><td>invu(invu)</td><td><p>У вас точно wg от amnezia? Сейчас собрал с github, всё прошло нормально( только сеть не тестил, времени нет). Вот моя версия <a class="attachment" href="call-the-testers-amneziawg-protocol/zEdjdLV8o9VjJReajOlkVu78EVT">wg</a> (130,4 КБ)</p></td><td>2024-01-26T14:47:14.961Z</td></tr><tr><td>Aructeb</td><td><p>У меня немного другой размер файла, все собралось без ошибок отсюда <a href="https://github.com/amnezia-vpn/amneziawg-tools" class="inline-onebox" rel="noopener nofollow ugc">GitHub - amnezia-vpn/amneziawg-tools: Tools for configuring Amnezia-WG</a>.</p></td><td>2024-01-26T15:52:35.144Z</td></tr><tr><td>Aructeb</td><td><p>Писать напрямую в сокет пробовал, ошибку -22 выдает, не понял что это значит.</p>
+<p>Я тут сейчас посмотрел в релизе v1.0.20240120 код из другого бранча, собрал, попробовал, другую ошибку выдает. В общем если у кого то получилось завести, то буду благодарен, если поделитесь, что конкретно и в какой последовательности делали.</p></td><td>2024-01-26T16:36:04.697Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><aside class="quote no-group" data-username="Aructeb" data-post="50" data-topic="6081">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/58f4c7/48.png" class="avatar"> Aructeb:</div>
+<blockquote>
+<p>Писать напрямую в сокет пробовал, ошибку -22 выдает, не понял что это значит.</p>
+</blockquote>
+</aside>
+<p>Это ошибка синтаксиса. Два неочевидных момента при записи в сокет:</p>
+<ul>
+<li>значения ключиков private_key / public_key надо в сокет писать не в base64, как в конфиг, а в виде hex dump, т.е. “echo ключ_из_конфига | base64 -d | xxd -c 64 -ps”</li>
+<li>endpoint может быть только IP, но не hostname.</li>
+</ul>
+<p>У меня вместо wg setconf примерно такой скрипт (его формирует ansible, т.к. туннелей и пиров много, но для примера):</p>
+<blockquote>
+<p>#!/bin/bash<br>
+cat | socat - UNIX-CONNECT:/var/run/amneziawg/wg13.sock &lt;&lt;- END<br>
+set=1<br>
+private_key=XXX<br>
+listen_port=1313<br>
+jc=12<br>
+jmin=400<br>
+jmax=1200<br>
+s1=500<br>
+s2=300<br>
+h1=33<br>
+h2=67<br>
+h3=99<br>
+h4=12<br>
+replace_peers=true<br>
+public_key=XXX<br>
+endpoint=11.22.33.44:1414<br>
+replace_allowed_ips=true<br>
+allowed_ip=0.0.0.0/0<br>
+persistent_keepalive_interval=10</p>
+<p>END<br>
+ip address add 10.13.13.1/30 dev wg13<br>
+ip link set wg13 up</p>
+</blockquote>
+<p>Ну и systemd unit, который этот скрипт (в данном примере /usr/local/bin/wg_conf13) вызывает (засунуть всё в файл юнита не получается, т.к. там нет поддержки ни heredoc, ни даже pipe):</p>
+<blockquote>
+<p>[Unit]<br>
+Description=Amnezia WireGuard tunnel wg13<br>
+After=network-online.target nss-lookup.target<br>
+Wants=network-online.target nss-lookup.target</p>
+<p>[Service]<br>
+Type=oneshot<br>
+RemainAfterExit=true<br>
+ExecStart=/usr/local/bin/wireguard wg13<br>
+ExecStartPost=/usr/local/bin/wg_conf13<br>
+ExecStop=ip link delete dev wg13<br>
+Restart=Always</p>
+<p>[Install]<br>
+WantedBy=multi-user.target</p>
+</blockquote>
+<p>P.S. В последних билдах amnezia-wg путь к сокету изменился - теперь не /var/run/wireguard/wgXX.sock, а /var/run/amneziawg/wgXX.sock. Поправил скрипт выше.</p></td><td>2024-01-26T17:34:22.766Z</td></tr><tr><td>synclpz(Victor)</td><td><p>Добрые люди (<a href="https://t.me/romikb" class="inline-onebox" rel="noopener nofollow ugc">Telegram: Contact @romikb</a>) в чате в телеге сделали билд wireguard для винды с поддержкой amneziawg, <a href="https://github.com/RomikB/amneziawg-client-windows" class="inline-onebox" rel="noopener nofollow ugc">GitHub - RomikB/amneziawg-client-windows: Download WireGuard for Windows at https://www.wireguard.com/install . This repo is a mirror only. Official repository is at https://git.zx2c4.com/wireguard-windows</a></p>
+<p>У меня собралось за 5 минут и запахало</p></td><td>2024-04-21T21:39:38.623Z</td></tr><tr><td>0ka(0ka)</td><td><p>не понимаю почему после всей работы заливку релиза пропускают, и разрабы амнезии, и добрые люди выше.</p>
+<p>Мне лично было сложно с этим протоколом: пакет для установки модуля и утилит на сервер зарыт на гитхабе без упоминаний в теме, хз каким чудом я его нашел, после установки вижу что man без изменений от оригинала, а команда awg-quick выдаёт мне неверный путь</p>
+<pre><code class="lang-auto">configuration found at /etc/amnezia/INTERFACE.conf.
+</code></pre>
+<p>конфиги на самом деле в /etc/amnezia/amneziawg/INTERFACE.conf</p>
+<p>инфы про параметры S1,S1,Jc,… почему-то нет нигде кроме этой темы</p>
+<p>официальный GUI клиент не позволяет вручную добавить конфиг (спасибо <a href="https://ntc.party/t/call-the-testers-amneziawg-protocol/6081/37">soloway</a> выше что смог расшифровать строку vpn://, но добавление конфига таким способом это боль)</p>
+<p>идея супер, работает тоже супер, но реализация просто нет слов, без генератора конфигов от soloway я бы даже не стал пробовать</p></td><td>2024-04-21T22:08:07.168Z</td></tr><tr><td>0ka(0ka)</td><td><p>на андроид и apple платформы вышло нормальное приложение wireguard, клон оригинала с функциями amneziawg, найдёте в гугл плей и аппстор</p></td><td>2024-05-26T06:26:13.522Z</td></tr><tr><td>0ka(0ka)</td><td><p>на винде на официальном клиенте и на <a href="https://github.com/RomikB/amneziawg-client-windows">amneziawg-client-windows</a> вижу потерю исходящих пакетов если передавать быстрее чем 22мбит\сек, на андроид клиенте при этом всё норм</p>
+<p>iperf3 -c 10.11.1.1 -u -b 22000000</p>
+<pre><code class="lang-auto">[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-10.25  sec  20.9 MBytes  17.1 Mbits/sec  0.050 ms  3/15907 (0.019%)  receiver
+</code></pre>
+<p>iperf3 -c 10.11.1.1 -u -b 50000000</p>
+<pre><code class="lang-auto">[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-10.07  sec  45.2 MBytes  37.6 Mbits/sec  0.045 ms  10852/45195 (24%)  receiver
+</code></pre>
+<p>проверял на win 10 22h2 на реальном железе и ltsc 21h2 в virtualbox, работает одинаково</p></td><td>2024-05-26T07:04:59.435Z</td></tr><tr><td>Waffenrock</td><td><p>Это вы про приложение от AmneziaWG v.1.1.1? Так его давно уж зарелизили вроде, нет?<br>
+А вот для OpenWRT нормального клиента AmneziaWG с luci-мордой и куртизанками для aarch64 видимо ещё лет 10 ждать будем. Похоже amnezia team считает openwrt проклятым местом.</p></td><td>2024-08-04T19:56:57.536Z</td></tr><tr><td>rem</td><td><aside class="quote no-group" data-username="Waffenrock" data-post="56" data-topic="6081">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/waffenrock/48/4632_2.png" class="avatar"> Waffenrock:</div>
+<blockquote>
+<p>А вот для OpenWRT нормального клиента AmneziaWG с luci-мордой и куртизанками для aarch64 видимо ещё лет 10 ждать будем.</p>
+</blockquote>
+</aside>
+<p>Да как бы уже давно есть готовенькое:</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/lolo6oT/awg-openwrt">
+  <header class="source">
+
+      <a href="https://github.com/lolo6oT/awg-openwrt" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="call-the-testers-amneziawg-protocol/11e5df8c2f3b1d31647bd65c830eab44d8a07507_2_690x344.png" class="thumbnail" data-dominant-color="F5F3F0">
+
+  <h3><a href="https://github.com/lolo6oT/awg-openwrt" target="_blank" rel="noopener nofollow ugc">GitHub - lolo6oT/awg-openwrt: AmneziaWG for OpenWrt</a></h3>
+
+    <p><span class="github-repo-description">AmneziaWG for OpenWrt</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Сегодня перешёл с OpenVPN на AWG</p></td><td>2024-08-10T14:25:15.100Z</td></tr><tr><td>bropines(Sergey Pinus)</td><td><p>Я новичек в теме. У меня вопрос к разрабам амнезии. А возможно сделать плагины для nekobox? Типо мне удобнее пользоваться прокси сервером локально в телефоне, из-за включённого адгарда на впн. Или можно добавить поддержку запуска как прокси сервера? Было бы очень удобно.</p></td><td>2024-08-22T23:44:38.280Z</td></tr><tr><td>ani917(ani)</td><td><p>спасибо за хорошую программу, но для warp она не помогает</p>
+<p>add.<br>
+через 3 минуты попыток она у меня разаботала, после перебора jc</p></td><td>2024-08-23T20:07:56.251Z</td></tr><tr><td>as9sefrv9jm2(as9sefrv9jm2)</td><td><p>Добрался посмотреть AmneziaVPN клиент. Подключился из него к антизапретовскому впн, и выяснилось, что клиент принудительно всё пихает в тоннель, полностью игнорируя настройки антизапрета.<br>
+Подключился к их AmneziaFree, и вот с ним, клиент показал “раздельное туннелирование на сервере”.<br>
+<img src="call-the-testers-amneziawg-protocol/b6a561f5ef6e6145cc816c8564b13440b9141379.png" alt="" data-base62-sha1="q3Lehp7gNqZM7YSWlLtp1NZGa0N" role="presentation" width="367" height="116"><br>
+После этого попробовал из их клиента настроить разные протоколы на своем сервере, но нигде не нашел возможности включить раздельное туннелирование именно на стороне сервера.<br>
+Может кто направить где у них расписано как такое сделать? В доках на сайте попадается только про клиентскую сторону.</p></td><td>2024-08-24T14:23:22.040Z</td></tr><tr><td>gfqwdgecewgcdw</td><td><p>Какие настройки?</p></td><td>2024-08-25T06:07:16.957Z</td></tr><tr><td>ani917(ani)</td><td><p>они одноразовые и соединение отваливается, я сейчас пользуюсь другой программой<br>
+один раз запустилось с такими</p>
+<blockquote>
+<p>Jc = 12<br>
+Jmin = 9<br>
+Jmax = 10<br>
+H1 = 3<br>
+H2 = 2<br>
+H3 = 2<br>
+H4 = 3</p>
+</blockquote></td><td>2024-08-25T07:13:34.581Z</td></tr><tr><td>0ka(0ka)</td><td><p>Вы же прочитали 1 пост? H параметры изменяют заголовки пакетов, т.е. совместимость с wireguard теряется</p></td><td>2024-08-25T07:20:28.554Z</td></tr><tr><td>ani917(ani)</td><td><p>читал<br>
+мне надо было не совместимость с вг а подключиться к варп</p></td><td>2024-08-25T07:23:24.873Z</td></tr><tr><td>0ka(0ka)</td><td><p>warp это wireguard, соотвественно вам нужна совместимость с wireguard…</p></td><td>2024-08-25T07:29:52.529Z</td></tr><tr><td>zzr</td><td><p>вот чесн я думал что ета вся амнезия ет прост очередные “бомбилы”, которые прост решили понтзаработать на хомячках которые не в теме, но оказалось реальная тема ето всё - у меня на мелком провайдере который понтключается к ттк (они лютые ваще в плане блокировок) задушили класический виригуард, а ваш софт реально работает СПАСИБО вам за ваш труд!!1</p></td><td>2024-08-26T08:46:17.020Z</td></tr><tr><td>zzr</td><td><p>кстати говоря уже не нужно ничего собирать из исходников и страдать, они выкатили репонизиторий где можн из бинарников всё воткнуть инепарица <a href="https://github.com/amnezia-vpn/amneziawg-linux-kernel-module?tab=readme-ov-file#amneziawg-kernel-module" class="inline-onebox" rel="noopener nofollow ugc">GitHub - amnezia-vpn/amneziawg-linux-kernel-module: AmneziaWG Linux kernel module</a></p></td><td>2024-08-26T08:50:31.352Z</td></tr><tr><td>klim123123(Klim123123)</td><td><aside class="quote no-group" data-username="rem" data-post="57" data-topic="6081">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/5fc32e/48.png" class="avatar"> rem:</div>
+<blockquote>
+<p>Сегодня перешёл с OpenVPN на AWG</p>
+</blockquote>
+</aside>
+<p>подскажи пожалуйста как эти пользоваться в OpenWRT?</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/lolo6oT/awg-openwrt">
+  <header class="source">
+
+      <a href="https://github.com/lolo6oT/awg-openwrt" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="call-the-testers-amneziawg-protocol/11e5df8c2f3b1d31647bd65c830eab44d8a07507_2_690x344.png" class="thumbnail" data-dominant-color="F5F3F0">
+
+  <h3><a href="https://github.com/lolo6oT/awg-openwrt" target="_blank" rel="noopener nofollow ugc">GitHub - lolo6oT/awg-openwrt: AmneziaWG for OpenWrt</a></h3>
+
+    <p><span class="github-repo-description">AmneziaWG for OpenWrt</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+на странице /cgi-bin/luci/admin/system/opkg пытался добавить этот урл не работает.<br>
+файлов opkg тоже не нашел чтобы скормить в openwrt.</p></td><td>2024-08-28T20:17:09.929Z</td></tr><tr><td>norookie(Norookie)</td><td><p>А как-то можно это завести с конфигом от впн провайдера? или не заведется?</p></td><td>2024-08-28T21:06:22.394Z</td></tr><tr><td>klim123123(Klim123123)</td><td><p>нашел амнезию под openwrt для всех возможных систем<br>
+ничего точно самому не нужно компилировать или собирать.</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://github.com/Slava-Shchipunov/awg-openwrt/releases/tag/v23.05.4">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/b/bad3e5f9ad67c1ddf145107ce7032ac1d7b22563.svg" class="site-icon" data-dominant-color="" width="32" height="32">
+
+      <a href="https://github.com/Slava-Shchipunov/awg-openwrt/releases/tag/v23.05.4" target="_blank" rel="noopener nofollow ugc">GitHub</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/344;"><img src="call-the-testers-amneziawg-protocol/6e2d0815fedaa74082e4e003e2866366ad274e18_2_690x345.png" class="thumbnail" data-dominant-color="F5F6F1" width="690" height="345"></div>
+
+<h3><a href="https://github.com/Slava-Shchipunov/awg-openwrt/releases/tag/v23.05.4" target="_blank" rel="noopener nofollow ugc">Release Build amnezia wg for all devices with openwrt v23.05.4 ·...</a></h3>
+
+  <p>AmneziaWG for OpenWrt. Contribute to Slava-Shchipunov/awg-openwrt development by creating an account on GitHub.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-08-28T21:16:11.909Z</td></tr>
+    </table>
+      </body>
+    </html>

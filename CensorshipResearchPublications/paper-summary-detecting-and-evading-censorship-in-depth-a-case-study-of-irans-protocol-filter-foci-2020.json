@@ -1,0 +1,100 @@
+[
+    {
+        "id": 1810,
+        "name": "",
+        "username": "tango",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/t/e36b37/{size}.png",
+        "created_at": "2020-08-26T15:33:51.428Z",
+        "cooked": "<p>Detecting and Evading Censorship-in-Depth: A Case Study of Iran’s Protocol Filter<br>\nKevin Bock, Yair Fax, Kyle Reese, Jasraj Singh, Dave Levin<br>\n<a href=\"https://censorbib.nymity.ch/#Bock2020a\" class=\"onebox\" target=\"_blank\" rel=\"nofollow noopener\">https://censorbib.nymity.ch/#Bock2020a</a><br>\n<a href=\"https://www.usenix.org/conference/foci20/presentation/bock\" rel=\"nofollow noopener\">https://www.usenix.org/conference/foci20/presentation/bock</a> (video and slides)<br>\n<a href=\"https://geneva.cs.umd.edu/posts/iran-whitelister/\" rel=\"nofollow noopener\">https://geneva.cs.umd.edu/posts/iran-whitelister/</a> (blog post)</p>\n<p>The paper is about a new component of the Internet censorship system in Iran: a <em>protocol filter</em> that permits only certain protocols on certain TCP ports. The protocol filter, newly activated in February 2020, is separate from, but operates in concert with, the previously existing “standard” DPI-based censorship in Iran. A connection is blocked if it trips <em>either</em> of the two censorship systems.</p>\n<p>The protocol filter operates on TCP ports 53, 80, and 443 only. On these ports, connections are only allowed if they match the protocol fingerprint of DNS, HTTP, or TLS. The protocol fingerprint is not paired with a specific port as you might expect: any of the three protocols may be used on any of the three ports. The filter looks at the first two data-carrying packets after the TCP handshake. If the two packets together do not match one of the permitted protocol fingerprints, then every packet after the first will be dropped for 60 seconds. If another non-protocol-conforming flow is sent to the same destination before the 60 seconds are up, the timer is reset. The protocol filter does not do TCP reassembly, nor verify packet checksums. It is unidirectional, only operating on flows that originate in Iran. Curiously, not all destination IP addresses are affected equally. Of an Alexa top 20K list of destinations, only about 18% were consistently affected by the protocol filter.</p>\n<p>Section 4.3 gives precise descriptions of the protocol fingerprints the filter looks for. For example, to qualify as HTTP, the combined payload of the first two packets must be at least 8 bytes long, and begin with <code>GET </code>, <code>POST </code>, <code>HEAD </code>, <code>CONNECT </code>, <code>OPTIONS </code>, <code>DELETE </code>, or <code>PUT </code>. The DNS protocol fingerprint has a bug, which is that it matches the format of DNS over UDP, and doesn’t account for the <a href=\"https://tools.ietf.org/html/rfc1035#section-4.2.2\" rel=\"nofollow noopener\">length prefixes</a> that are a feature of DNS over TCP. DNS over TCP still works in Iran, despite the bug in the protocol filter, because an entire DNS query fits in one TCP packet, and the filter never blocks the first packet in a flow.</p>\n<p>The authors use <a href=\"https://censorbib.nymity.ch/#Bock2019a\" rel=\"nofollow noopener\">Geneva</a> (see <a href=\"https://github.com/net4people/bbs/issues/23\" rel=\"nofollow noopener\">previous summary</a>) to automatically discover ways to evade the protocol filter. They find four evasion strategies, three client-side and one server-side:</p>\n<ol>\n<li>(client-side) At the beginning of the flow, send a packet with a protocol-conforming payload but a bad checksum. The filter, which does not verify checksums, marks the entire flow as protocol-conforming, while the packet with the bad checksum is ignored by the destination.</li>\n<li>(client-side) Send two or more FIN packets before the TCP handshake.</li>\n<li>(client-side) Send nine ACK, RST, or SYN packets at the end of the handshake.</li>\n<li>(server-side) Send nine SYN/ACK packets with incorrect acknowledgement numbers. This causes the client to send nine RSTs, effectively inducing the client to perform Strategy 3.</li>\n</ol>",
+        "post_number": 1,
+        "post_type": 1,
+        "posts_count": 1,
+        "updated_at": "2020-08-26T15:33:51.428Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 34,
+        "reads": 6,
+        "readers_count": 5,
+        "score": 171.2,
+        "yours": false,
+        "topic_id": 655,
+        "topic_slug": "paper-summary-detecting-and-evading-censorship-in-depth-a-case-study-of-irans-protocol-filter-foci-2020",
+        "display_username": "",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "badges_granted": [],
+        "version": 1,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": false,
+        "can_wiki": false,
+        "link_counts": [
+            {
+                "url": "https://www.usenix.org/conference/foci20/presentation/bock",
+                "internal": false,
+                "reflection": false,
+                "title": "Detecting and Evading Censorship-in-Depth: A Case Study of Iran’s Protocol Whitelister | USENIX",
+                "clicks": 1
+            },
+            {
+                "url": "https://censorbib.nymity.ch/#Bock2020a",
+                "internal": false,
+                "reflection": false,
+                "title": "The Internet censorship bibliography",
+                "clicks": 1
+            },
+            {
+                "url": "https://geneva.cs.umd.edu/posts/iran-whitelister/",
+                "internal": false,
+                "reflection": false,
+                "title": "censorship.ai | Iran: A New Model for Censorship",
+                "clicks": 1
+            },
+            {
+                "url": "https://censorbib.nymity.ch/#Bock2019a",
+                "internal": false,
+                "reflection": false,
+                "title": "The Internet censorship bibliography",
+                "clicks": 0
+            },
+            {
+                "url": "https://github.com/net4people/bbs/issues/23",
+                "internal": false,
+                "reflection": false,
+                "title": "Geneva: Evolving Censorship Evasion Strategies (CCS 19) · Issue #23 · net4people/bbs · GitHub",
+                "clicks": 0
+            },
+            {
+                "url": "https://tools.ietf.org/html/rfc1035#section-4.2.2",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 1035 - Domain names - implementation and specification",
+                "clicks": 0
+            }
+        ],
+        "read": true,
+        "user_title": "dnstt developer",
+        "title_is_group": false,
+        "bookmarked": false,
+        "actions_summary": [],
+        "moderator": false,
+        "admin": false,
+        "staff": false,
+        "user_id": 26,
+        "hidden": false,
+        "trust_level": 3,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": false,
+        "wiki": false,
+        "post_url": "/t/paper-summary-detecting-and-evading-censorship-in-depth-a-case-study-of-irans-protocol-filter-foci-2020/655/1",
+        "can_translate": false
+    }
+]

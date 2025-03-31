@@ -1,0 +1,103 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>firefox-encrypted-client-hello-dns-over-https</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Anonimno(Anonimno)</td><td><p>Заметил что некоторые заблокированные сайты начали открываться после включение в Firefox “Encrypted Client Hello” и “DNS over HTTPS” без каких-либо инструментов обхода. Видимо включение ECH помогает заходить на заблокированные по имени домена сайты. Интересно как долго по времени будет работать данная технология до блокировки роскомпозором</p></td><td>2023-10-05T14:33:00.487Z</td></tr><tr><td>anon94384997</td><td><p>В этих браузерах во flags включил ECH, а также DoH (Cloudflare) в настройках.<br>
+Opera (Chromium 109), Win7, Ростелеком<br>
+Brave (Chromium 107, окт 2022), Xubuntu 22.04, Yota<br>
+Заблокированные сайты (например, Rutracker, он за Cloudflare) не открываются.<br>
+Браузеры слишком старые?</p></td><td>2023-10-08T17:10:23.127Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p><a href="https://www.opennet.ru/opennews/art.shtml?num=59869" class="inline-onebox">В Firefox и Cloudflare включена поддержка ECH для скрытия домена в HTTPS-трафике</a> :</p>
+<blockquote>
+<p>В Chrome поддержку ECH начали постепенно включать, начиная с выпуска <a href="https://www.opennet.ru/opennews/art.shtml?num=59470">Chrome 115</a>.</p>
+</blockquote></td><td>2023-10-08T17:20:58.293Z</td></tr><tr><td>anon94384997</td><td><p>Я так понял поддержку в браузерах реализовали давно, просто стали включать по умолчанию недавно. Я включил во флагах, но не работает. Может быть стандарт немного поменялся.</p></td><td>2023-10-08T17:42:08.199Z</td></tr><tr><td>anon94384997</td><td><p>Вот эти сайты говорят, что ECH включен<br>
+<a href="https://crypto.cloudflare.com/cdn-cgi/trace" rel="noopener nofollow ugc">https://crypto.cloudflare.com/cdn-cgi/trace</a> (sni=encrypted)<br>
+<a href="https://defo.ie/ech-check.php" rel="noopener nofollow ugc">https://defo.ie/ech-check.php</a><br>
+А здесь <a href="https://defo.ie" rel="noopener nofollow ugc">https://defo.ie</a> говорится, что поддерживается в Chromium 105+ (если включить во флагах + DoH).<br>
+Однако, при попытке открыть рутрекер:<br>
+Этот сайт не может обеспечить безопасное соединение<br>
+Сайт <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> отправил недействительный ответ.<br>
+ERR_SSL_PROTOCOL_ERROR<br>
+В Brave (Chromium 107).</p>
+<p>UPD: Работает в Firefox 118 с такими настройками:<br>
+network.dns.echconfig.enabled - True<br>
+network.dns.http3_echconfig.enable - True<br>
+network.dns.force_waiting_https_rr - True<br>
+security.tls.ech.grease_probability - 100<br>
+security.tls.ech.grease_http3 - True</p>
+<p>Рутрекер открывается (на Yota). Но важное условие - не нужно отключать HTTP3 (QUIC). Т.е. сайты должны быть не только под Cloudflare, но и поддерживать HTTP3 (он работает по UDP протоколу). Отключаешь HTTP3 и перестает открываться рутрекер. Раньше некоторые его отключали чтобы не тупили сайты из-за блока QUIC у провайдеров и потому что есть риск утечки мимо прокси (кто использует прокси).</p>
+<p>Пишут, что ECH появился в Chrome 105. Но включили по умолчанию позднее и, возможно, в старых версиях хрома поддерживается более ранний стандарт. Я включил QUIC и ECH в Chromium 107 и 109, но рутрекер не открывается. 109 последняя версия для Win7.<br>
+Хорошо бы составить список какие сайты это разблокирует. Пока что пользы мало.</p></td><td>2023-10-08T19:00:19.796Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Просьба писать источник данных<br>
+<a href="https://wiki.mozilla.org/Security/Encrypted_Client_Hello" class="onebox" target="_blank" rel="noopener nofollow ugc">https://wiki.mozilla.org/Security/Encrypted_Client_Hello</a><br>
+Вот тут более подробно технически и с небольшими пояснениями как и что в Firefox</p>
+<aside class="quote no-group" data-username="anon94384997" data-post="6" data-topic="5885">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/49beb7/48.png" class="avatar"> anon94384997:</div>
+<blockquote>
+<p>Хорошо бы составить список какие сайты это разблокирует. Пока что пользы мало.</p>
+</blockquote>
+</aside>
+<p>Сайты могут включать/выключать, надо пробовать. Пока что списки будут устаревать быстрее чем обновлятся.</p></td><td>2023-10-09T19:41:56.581Z</td></tr><tr><td>usnevst</td><td><p>У рутрекера нет ключа в <a href="https://dns.google/query?name=rutracker.org&amp;rr_type=HTTPS&amp;ecs=" rel="noopener nofollow ugc">днс записи</a><br>
+У <a href="https://dns.google/query?name=crypto.cloudflare.com&amp;rr_type=HTTPS&amp;ecs=" rel="noopener nofollow ugc">crypto.cloudflare.com</a> и <a href="https://dns.google/query?name=defo.ie&amp;rr_type=HTTPS&amp;ecs=" rel="noopener nofollow ugc">defo.ie</a> есть. Без ключа не будет ECH.</p>
+<p>QUIC работает по другой причине, без ключа там тоже нет ECH.</p></td><td>2023-10-09T20:54:39.954Z</td></tr><tr><td>usnevst</td><td><p>Парсер сложного QUIC у ТСПУ простой, был и возможно еще есть. Изначально все ошибки парсера, и как результат неизвестный SNI, приводили к блокировке. Парсер улучшали, он стал понимать фреймы Chrome. Отменили блокировки для недоступного SNI. Но Firefox все еще делал “неправильные” пакеты, и парсер не мог достать SNI. Цензор разрешал такой трафик, потому что узнать о наличии и использовать h3 можно только подключившись через TLS с читаемым SNI, или сделав дополнительный (лишний) DNS запрос. С включением ECH запрос делать нужно, поэтому информацию о протоколах Firefox может получить до подключения к сайту.</p></td><td>2023-10-10T12:09:31.613Z</td></tr><tr><td>Dhohbr</td><td><p>На сколько я понял из описания, это будет работать только для сайтов, расположенных в cdn.<br>
+В открытом виде все-равно передается общий домен, и РКН заблокирует его на раз-два, как и QUIC.<br>
+Ну и от блокировки по IP это тоже не спасет.</p></td><td>2023-10-11T12:48:02.935Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Теоритически и технически - нет. Вот тут:</p>
+<aside class="quote no-group" data-username="ilyaigpetrov" data-post="4" data-topic="5885">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/i/5fc32e/48.png" class="avatar"> ilyaigpetrov:</div>
+<blockquote>
+<p><a href="https://www.opennet.ru/opennews/art.shtml?num=59869" rel="noopener nofollow ugc">В Firefox и Cloudflare включена поддержка ECH для скрытия домена в HTTPS-трафике </a> :</p>
+</blockquote>
+</aside>
+<p>написано “а также общее имя домена, <strong>которое не пересекается с фактическим именем</strong> запрошенного домена”. Но цензор может наложить бан на все пакеты идущие на определённый IP. Даже если на этом IP крутится несколько сайтов.<br>
+Почему надежда на “CDN” с поддержкой ECH? Потому что там за 1им IP скрывается слишком много сайтов и есть риск забанить себе полинтернета.</p></td><td>2023-10-11T15:20:27.452Z</td></tr><tr><td>usnevst</td><td><p>Вот только у РКН уже есть опыт блокировки половины интернета. Что их остановит от повторения?</p>
+<p>CF с февраля’22 увеличил число ДЦ в РФ, думаете будут рисковать из-за ECH?</p></td><td>2023-10-11T16:01:30.210Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>да как я понимаю они уже пихают общий хост <a href="http://cloudflare-ech.com" rel="noopener nofollow ugc">cloudflare-ech.com</a>. По нему весь этот трафик и порежут. То есть cloudflare как бы сдал всех сразу.</p></td><td>2023-10-11T17:05:21.836Z</td></tr><tr><td>usnevst</td><td><p>Можно использовать другой домен, который проксируется CF. Пока запретов на домены для ECH у CF не обнаружено. Впрочем, пользовательский софт так делать не будет.</p>
+<p>Потестировать можно <a href="https://raw.githubusercontent.com/sftcd/curl/ECH-experimental/docs/ECH.md" rel="noopener nofollow ugc">собрав</a> неофициальные openssl и curl с поддержкой ECH.</p>
+<p>У меня curl заработал только в статичной сборке (<code>--disable-shared</code>).<br>
+Сборка (для упрощения, без поддержки днс запросов) такая:</p>
+<pre><code class="lang-auto">LDFLAGS="-L$HOME/code/openssl" ./configure --with-ssl=$HOME/code/openssl --enable-ech --disable-shared
+</code></pre>
+<p>Через ECH конфиг с днс иногда (всегда) не получается сразу получить http ответ, но сервер в таком случае может вернуть нужный через retry_configs в TLS. Если curl не повторил запрос с новым конфигом, нужно будет копипастить.</p>
+<pre><code class="lang-auto">src/curl -vvv --ech ecl:&lt;base64_config&gt; --ech pn:&lt;SNI&gt; https://site
+</code></pre>
+<p>Если не лезть в Wireshark, можно начать тесты с <a href="https://defo.ie/ech-check.php" rel="noopener nofollow ugc">defo.io</a>, где показывают используемый <code>SSL_ECH_OUTER_SNI</code></p></td><td>2023-10-12T18:59:09.006Z</td></tr><tr><td>fdsadf4345</td><td><p>usnevst<br>
+Подскажите как сделать поддержку Secure SNI в openwrt, что для этого надо, какие пакеты и как настроить если вы в курсе ?<br>
+Включил в мозиле и да, реально стали открываться сайты, хотелось бы это сделать на уровне роутера</p></td><td>2023-10-18T12:05:37.912Z</td></tr><tr><td>User69</td><td><p>Cloudflare <a href="https://community.cloudflare.com/t/early-hints-and-encrypted-client-hello-ech-are-currently-disabled-globally/567730" rel="noopener nofollow ugc">отключил</a> ECH у себя везде до следующего года</p></td><td>2023-10-18T13:25:51.180Z</td></tr><tr><td>usnevst</td><td><p>Нет, не знаю. <code>ClientHelloOuter</code> (где передают публичный SNI) и <code>ClientHelloInner</code> (где спрятан оригинальный SNI) связаны, как минимум у них есть новое TLS расширение. Невозможно взять <code>ClientHello</code> от браузера (приложения) и завернуть в <code>ClientHelloOuter</code>, превратив в <code>ClientHelloInner</code> без модификации самого <code>ClientHello</code>, если приложение не использует ECH. Это сломает TLS протокол.</p></td><td>2023-10-18T13:31:35.878Z</td></tr><tr><td>fdsadf4345</td><td><p>User69<br>
+Не знаю что они там отключили, но пока что всё работает на данный момент</p></td><td>2023-10-18T13:53:10.969Z</td></tr>
+    </table>
+      </body>
+    </html>

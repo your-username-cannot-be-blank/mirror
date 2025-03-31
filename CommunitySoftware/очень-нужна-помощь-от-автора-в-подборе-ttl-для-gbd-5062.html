@@ -1,0 +1,108 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>очень-нужна-помощь-от-автора-в-подборе-ttl-для-gbd-5062</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Quqas(Quqas)</td><td><p>чем больше читаю <a href="https://github.com/ValdikSS/GoodbyeDPI/issues/258" class="inline-onebox" rel="noopener nofollow ugc">auto-ttl не хочет быть auto? · Issue #258 · ValdikSS/GoodbyeDPI · GitHub</a> тем всё меньше понимаю…</p>
+<p>думал что --set-ttl реально меняет ttl на значение. а оказывается както на хопы завязано.</p>
+<p>моя ситуация: --auto-ttl уже давно перестал работать.  к нему можно добавить свои цифры но что не пробую вообще не даёт эффекта.</p>
+<p>даёт (давал) эффект --set-ttl</p>
+<p>при --set-ttl 6 (без других ключей) сайты не ломаются и пробиваются некоторые заблоченные</p>
+<p>при --set-ttl 8 (без других ключей) пробивается намного больше заблоченных (добавление других ключей к --set-ttl 6 не помогает) но и ломается ещё больше в том числе и сами заблоченные (с последними вообще странно, потому что указание в листе ведёт не так как без листа)</p>
+<p>наконец остаются заблоченые которые требуют “помощи” -e 4 и --reverse-frag  к --set-ttl 8 и так открываются все кроме закрытых по ip и поломанных ttl8</p>
+<p>наконец решил решил добавить --min-ttl 8   к --set-ttl 8  и это дало хороший эффект. теперь не вижу поломанных сайтов, но стала лезть заглушка на адреса [<em>не на все</em>] которые при <strong>“просто”  --set-ttl 8 и даже --set-ttl 6</strong> прекрасно открываются.(то что заглушка особо неясно - как правило если через gbd хоть чтото пробивается то её нет, а на остальных лоченых connect reset или sslerr до подбора правильных ключей)</p>
+<p>другие комбинации ttl min и set  не улучшают, а только хуже делают</p>
+<p>поясните пожалуйста, как прописать чтоб логика была ttl 6 по дефолту и только если “что-то не так” ttl8</p></td><td>2023-08-03T09:48:19.773Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>т.е. как понимаю основной dpi прова на 6м хопе</p>
+<p>а дальше на 7-8 магистральные (или их нет) в зависимости от направления маршрута\адреса сайта</p>
+<p>взрывает мозг:<br>
+1- как сайты ломаются при --set-tll 8 если крайне сомнительно что “конечные” сайты ближе 8го хопа?<br>
+2- как перестаёт пробиваться при -min-ttl 8? то что может лезть заглушка ещё понятно, потому что она на 6м хопе а значит ближе 8</p></td><td>2023-08-03T18:26:51.367Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>ну на самом деле можно обычным icmp.</p>
+<p>в консоле хрома на ломаном сайте (фонтанка.ру нет картинок) вижу ssl error для сайтов с картинками например <a href="http://static.ngs.ru" rel="noopener nofollow ugc">static.ngs.ru</a></p>
+<p>а в pingPlotter он в сам деле на седьмом хопе  <img src="https://ntc.party/images/emoji/twitter/scream.png?v=12" title=":scream:" class="emoji" alt=":scream:" loading="lazy" width="20" height="20"></p>
+<p>разобрался  что --set-ttl 8 --min-ttl 7 тоже чинит картинки как и min8 но “пробивку”  не улучшает а min6 что странно опять ломает картинки и не помогает пробивке</p>
+<p>нужен автор чтоб разобраться…</p></td><td>2023-08-03T22:07:00.247Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>складывается впечатление что надо искать особые ключи\параметры “в помощь” к --set-ttl 6. но у меня не получается</p></td><td>2023-08-03T22:32:51.222Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>частично помогло в хроме включить “Всегда использовать безопасные соединения”</p>
+<p>т.е. он вместо меня дописывает https://</p>
+<p>но получается что http перестало работать если -min-ttl 8 добавить. WTF?</p>
+<p>без -min-ttl 8 и по http блоченый сайт открывается. и другие сами на https переходят. т.е. в адресной строке достаточно вводить <a href="http://domain.com" rel="noopener nofollow ugc">domain.com</a></p>
+<p>а главное что основная часть и при -min-ttl 8 работает. перестала работать пробивка лишь для некоторых. и в чём разница х.з.</p>
+<hr>
+<p>а чтобы не лезла заглушка назад вернул -f 2. но опять же во первых это не помогает самим сайтам открыться. как и -k 2 и -n<br>
+а во вторых без -min-ttl 8 и в -f 2 нет необходимости</p></td><td>2023-08-04T12:43:37.351Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Quqas" data-post="1" data-topic="5062">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>думал что --set-ttl реально меняет ttl на значение. а оказывается както на хопы завязано.</p>
+</blockquote>
+</aside>
+<p>Использование только <code>--set-ttl</code> отправляет фиктивный пакет с указанным TTL. При использовании <code>--set-ttl</code> с <code>--min-ttl</code>, фиктивный пакет с TTL, указанным в <code>--set-ttl</code>, отправляется только если расстояние 64 - ПОЛУЧЕННЫЙ_ПАКЕТ или 128 - ПОЛУЧЕННЫЙ_ПАКЕТ больше <code>--min-ttl</code>.</p>
+<p>Используйте <code>--wrong-chksum</code> или <code>--wrong-seq</code>, без <code>--set-ttl</code> или <code>--auto-ttl</code>, если TTL работает ненадёжно.</p></td><td>2023-08-10T11:38:24.547Z</td></tr><tr><td>Quqas(Quqas)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="7" data-topic="5062">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>ользование только <code>--set-ttl</code> отправляет фиктивный пакет с указанным TTL. При использовании <code>--set-ttl</code> с <code>--min-ttl</code>, фиктивный пакет с TTL, указанным в <code>--set-ttl</code>, отправляется только если расстояние 64 - ПОЛУЧЕННЫЙ_ПАКЕТ или 128 - ПОЛУЧЕННЫЙ_ПАКЕТ больше <code>--min-ttl</code>.</p>
+<p>Используйте <code>--wrong-chksum</code> или <code>--wrong-seq</code>, без <code>--set-ttl</code> или <code>--auto-ttl</code>, если TTL работае</p>
+</blockquote>
+</aside>
+<p>Спасибо за ответ.<br>
+wrong-seq сам по себе не пробивает . по крайней мере у меня.</p>
+<p>wrong-chksum ломает ещё больше сайтов (ssl err) и на него min-ttl не влияет (по моим тестам)</p>
+<p>долго пытался разобраться с auto-ttl но так и не смог даже по описанию с гитхаба</p>
+<p>максимум 1-1-8 заработало = эффект как просто set-ttl 8</p>
+<p>1-6-8 просто не пробивает ничего, запускается и 6-1-8 но видимо обрабатывается как и 1-1-8 и эффект тотже</p>
+<p>auto-ttl он динамический? или разово подбирает set-ttl?</p>
+<p>можно ли его прописать так чтоб выбирал 6 или 8 в зависимости от … непонятно чего… например отсутствия быстрого ответа от сайта</p></td><td>2023-08-10T19:18:49.145Z</td></tr><tr><td>ValdikSS</td><td><p>Попробуйте <code>-f 2 -e 2 --reverse-frag --wrong-chksum</code>. Других опций не добавляйте.</p>
+<aside class="quote no-group" data-username="Quqas" data-post="8" data-topic="5062">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>ломает ещё больше сайтов</p>
+</blockquote>
+</aside>
+<p>Используйте <code>--blacklist</code>.</p>
+<aside class="quote no-group" data-username="Quqas" data-post="8" data-topic="5062">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>auto-ttl он динамический? или разово подбирает set-ttl?</p>
+</blockquote>
+</aside>
+<p>Объяснение работы есть по ссылке, которую вы привели.</p></td><td>2023-08-11T03:58:47.455Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,288 @@
+[
+    {
+        "id": 4171,
+        "name": "gfw.report",
+        "username": "gfw.report",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/g/53a042/{size}.png",
+        "created_at": "2021-09-25T00:57:42.186Z",
+        "cooked": "<p>Date: Friday, September 24, 2021</p>\n<p><a href=\"https://gfw.report/blog/private_relay_censorship/zh/\" rel=\"noopener nofollow ugc\">中文版：<em>评估苹果的iCloud Private Relay的抗封锁能力</em></a></p>\n<p>This report first appeared on <a href=\"https://github.com/net4people/bbs/issues/87\" rel=\"noopener nofollow ugc\">Net4People</a>. We also maintain an up-to-date copy of the report on <a href=\"https://gfw.report/blog/private_relay_censorship/en/\" rel=\"noopener nofollow ugc\">GFW Report</a> and ntc.party.</p>\n<hr>\n<p>On September 20, 2021, Apple released <a href=\"https://support.apple.com/en-us/HT212614\" rel=\"noopener nofollow ugc\">iCloud Private Relay</a> (<a href=\"https://web.archive.org/web/20210921182126/https://support.apple.com/en-us/HT212614\" rel=\"noopener nofollow ugc\">archive</a>) as a new service on iOS 15, iPadOS 15, and macOS Monterey.</p>\n<p>Although Apple does not introduce Private Relay as a censorship circumvention tool, in this post, we attempt to understand the potential value of iCloud Private Relay for censorship circumvention. We first introduce how private relay works based on Apple’s documents and our measurement. We then present our empirical observation on its censorship resilience, supported by our measurements in China. As of September 23, 2021, we haven’t found any evidence of censorship against it in China. We also discuss its blocking resistance against common censorship methods, including DNS hijacking, SNI filtering, IP blocking, active probing, as well as self-censorship. Finally, we present some important but unanswered questions about the Private Relay.</p>\n<p>We do not intend to make this a comprehensive report. Instead, we hope to start off  discussions in the community by presenting our thoughts, observations and measurement methods.</p>\n<h2><a name=\"main-findings-1\" class=\"anchor\" href=\"#main-findings-1\"></a>Main Findings</h2>\n<ul>\n<li>As of September 23, 2021, we haven’t found any evidence of censorship against Private Relay in China.</li>\n<li>The Private Relay can be easily block by common censorship methods, including DNS hijacking, (QUIC) SNI filtering, IP blocking. It may be possible to block by active probing as well.</li>\n<li>The service has been self-censored in many countries, though it is reportedly still usable with a foreign iCloud account.</li>\n</ul>\n<h2><a name=\"introduction-2\" class=\"anchor\" href=\"#introduction-2\"></a>Introduction</h2>\n<p>Below is an introduction based on our measurement and our understanding of <a href=\"https://support.apple.com/en-us/HT212614\" rel=\"noopener nofollow ugc\">Apple’s</a> <a href=\"https://developer.apple.com/support/prepare-your-network-for-icloud-private-relay\" rel=\"noopener nofollow ugc\">documents</a>. In summary, the Private Relay has a two-hop structure, consisting of an ingress relay and an egress relay:</p>\n<pre data-code-wrap=\"txt\"><code class=\"lang-txt\">\n  ------------\n |DNS resolver|\n  ------------\n       ^\n       |\n    A mask.icloud.com?\nHTTPS mask.icloud.com?\n       |\n       0\n       |\n    ------           -------------           ------------           -------\n   |client| &lt;==1==&gt; |ingress relay| &lt;==2==&gt; |egress relay| &lt;==3==&gt; |website|\n    ------           -------------           ------------           -------\n</code></pre>\n<ul>\n<li>Step 0: The client sends two plaintext queries of type <code>A</code> and <code>HTTPS</code> for <code>mask.icloud.com</code> or <code>mask-api.icloud.com</code> to a DNS resolver, asking for the IP addresses of ingress relays.</li>\n<li>Step 1: The client then selects one IP address from the answers and initiates an encrypted QUIC connection to its port 443.</li>\n<li>Step 2: According to the <a href=\"https://support.apple.com/en-us/HT212614\" rel=\"noopener nofollow ugc\">document</a>, “[t]he second relay, which is operated by a third-party content provider, generates a temporary IP address, decrypts the name of the website you requested and connects you to the site”.</li>\n<li>Step 3: The traffic between the egress relays and websites is exactly the same as traffic between clients and websites when no Private Relay is used.</li>\n</ul>\n<h2><a name=\"capture-traffic-between-an-iphone-and-relays-3\" class=\"anchor\" href=\"#capture-traffic-between-an-iphone-and-relays-3\"></a>Capture traffic between an iPhone and relays</h2>\n<p>To capture and analyze the traffic from a mobile device, one intuitive way is to set up a VPN that works at the network layer, tunneling all the traffic at the transport layer and above to a (local) server, where <code>tcpdump</code> or <code>wireshark</code> can be run. However, the iCloud Private Relay feature appears to be disabled when a VPN is used.</p>\n<p>As an alternative, we set up a WiFi hotspot from the desktop and let the iPhone connect to it. We then captured and analyzed the traffic from the laptop. Below is the script we used to setup the hotspot, which was borrowed from <a href=\"https://computingforgeeks.com/create-wi-fi-hotspot-on-ubuntu-debian-fedora-centos-arch/\" rel=\"noopener nofollow ugc\">this tutorial</a>.</p>\n<pre data-code-wrap=\"sh\"><code class=\"lang-sh\">#!/bin/bash\n\nset -x\nset -e\n\n## Source: https://computingforgeeks.com/create-wi-fi-hotspot-on-ubuntu-debian-fedora-centos-arch/\n\n## Change the IFNAME to your Wi-Fi network interface: `ip link show`\nIFNAME=\"wlp4s0\"\nCON_NAME=\"MyHotSpot\"\nPASSWORD=\"77fdda98a6feaf6cc9\"\n\nnmcli con add type wifi ifname \"$IFNAME\" con-name \"$CON_NAME\" autoconnect yes ssid \"$CON_NAME\"\n\nnmcli con modify \"$CON_NAME\" 802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared\n\nnmcli con modify \"$CON_NAME\" wifi-sec.key-mgmt wpa-psk\nnmcli con modify myhotspot wifi-sec.psk \"$PASSWORD\"\n\nnmcli connection show \"$CON_NAME\"\n\nnmcli con up \"$CON_NAME\"\n\nnmcli connection show \"$CON_NAME\"\n</code></pre>\n<p>When observing the DNS and initial QUIC traffic, we find the following Wireshark filter helpful:</p>\n<pre data-code-wrap=\"txt\"><code class=\"lang-txt\">quic.long.packet_type == 0 or udp.port == 53\n</code></pre>\n<h2><a name=\"measure-current-censorship-and-evaluate-potential-censorship-cost-4\" class=\"anchor\" href=\"#measure-current-censorship-and-evaluate-potential-censorship-cost-4\"></a>Measure current censorship and evaluate potential censorship cost</h2>\n<p>In this section, we measure current censorship in China, and discuss the cost for a censor to detect and block Private Relay using commonly used censorship methods.</p>\n<h3><a name=\"dns-hijacking-5\" class=\"anchor\" href=\"#dns-hijacking-5\"></a>DNS hijacking</h3>\n<p>As introduced above, the client needs to get an IP address of the ingress relay before initiating QUIC connections to it. Since these DNS queries are (possibly intentionally) sent in plaintext, it is vulnerable to the DNS poisoning attack. Actually, Apple <a href=\"https://developer.apple.com/support/prepare-your-network-for-icloud-private-relay\" rel=\"noopener nofollow ugc\">suggests</a> DNS hijacking as “[t]he fastest and most reliable way” to block Private Relay:</p>\n<blockquote>\n<p>The fastest and most reliable way to alert users is to return a negative answer from your network’s DNS resolver, preventing DNS resolution for the following hostnames used by Private Relay traffic. Avoid causing DNS resolution timeouts or silently dropping IP packets sent to the Private Relay server, as this can lead to delays on client devices.</p>\n<p><a href=\"http://mask.icloud.com\" rel=\"noopener nofollow ugc\">mask.icloud.com</a></p>\n<p><a href=\"http://mask-h2.icloud.com\" rel=\"noopener nofollow ugc\">mask-h2.icloud.com</a></p>\n</blockquote>\n<p>In practice, we observed two ways for the client to get an IP address of the resolvers. The first way is:</p>\n<ol>\n<li>The client first sends two DNS queries of type <code>A</code> and <code>HTTPS</code> for <code>mask.icloud.com</code>. The responses include a type <code>CNAME</code> answer <code>mask.apple-dns.net</code>, along with many type <code>A</code> answers.</li>\n<li>The client appears to select the first answer in the reponses, which is the <code>CNAME</code> one. The client thus has to send another two DNS queries of type <code>A</code> and <code>HTTPS</code> for <code>mask.apple-dns.net</code>.</li>\n<li>The client will then select the first answer in the responses.</li>\n</ol>\n<p>The second way is:</p>\n<ol>\n<li>The client first sent two DNS queries of type <code>A</code> and <code>HTTPS</code> for <code>mask-api.icloud.com</code>. The responses include a type <code>CNAME</code> answer <code>mask-api.fe.apple-dns.net</code>, along with many type <code>A</code> answers.</li>\n<li>The client appears to select the first answer in the reponses, which is the <code>CNAME</code> one. The client thus has to send another two DNS queries of type <code>A</code> and <code>HTTPS</code> for <code>mask-api.fe.apple-dns.net</code>.</li>\n<li>The client will then select the first answer in the responses.</li>\n</ol>\n<p>Note that we did not observe any query of the <a href=\"https://developer.apple.com/support/prepare-your-network-for-icloud-private-relay\" rel=\"noopener nofollow ugc\">documented</a> <code>mask-h2.icloud.com</code>. This observation aligns with the finding in <a href=\"https://isc.sans.edu/forums/diary/A+First+Look+at+Apples+iOS+15+Private+Relay+feature/27858/\" rel=\"noopener nofollow ugc\">this post</a>.</p>\n<h4><a name=\"measuring-current-dns-censorship-in-china-6\" class=\"anchor\" href=\"#measuring-current-dns-censorship-in-china-6\"></a>Measuring current DNS censorship in China</h4>\n<p>Although it is trivial for the GFW to poison the domains mentioned above, we have not been able to observe any DNS poisoning against these domains yet. Specifically, we tested by sending DNS queries from China to the outside, and also from outside to China. You can also test it yourself from the outside of China, exploiting the bi-directional characterisitc of the GFW. It is worth noting that <code>dig</code> does not support <a href=\"https://www.ietf.org/archive/id/draft-ietf-dnsop-svcb-https-07.html#name-the-svcb-record-type\" rel=\"noopener nofollow ugc\">type <code>HTTPS</code></a> queries yet; be careful that <strong><code>dig</code> will fall back to type <code>A</code> queries without a blocking warning</strong> for a query like this: <code>dig @1.1.1.1 mask.icloud.com -t HTTPS +timeout=2</code>.</p>\n<p>We thus used the follwing script with Scapy. Since <code>104.193.82.0</code> is a Chinese IP address without a DNS service running, we would have received responses injected by the GFW if any of the queries were censored.</p>\n<pre data-code-wrap=\"python3\"><code class=\"lang-python3\">#!/usr/bin/env python3\n\n# This script is only reponsible for sending DNS queries, but not for receiving responses.\n# To observe DNS responses, use tcpdump or wireshark. eg. :\n# sudo tcpdump host 104.193.82.0\n\nfrom scapy.all import *\n\n# https://www.ietf.org/archive/id/draft-ietf-dnsop-svcb-https-07.html#name-the-svcb-record-type\nTYPE_HTTPS=65\n\nCHINESE_IP=\"104.193.82.0\"\n\nfor qname in [\"mask.icloud.com\",\n              \"mask-api.icloud.com\",\n              \"mask.apple-dns.net\",\n              \"mask-api.fe.apple-dns.net\",\n              \"mask-h2.icloud.com\"]:\n    for qtype in [TYPE_HTTPS, \"A\", \"AAAA\"]:\n        send(IP(dst=CHINESE_IP)/UDP(dport=53)/DNS(rd=1, qd=DNSQR(qname=qname, qtype=qtype)))\n</code></pre>\n<h3><a name=\"sni-filtering-7\" class=\"anchor\" href=\"#sni-filtering-7\"></a>SNI filtering</h3>\n<p>As explained in this <a href=\"https://stackoverflow.com/a/65400340\" rel=\"noopener nofollow ugc\">answer</a>, although clienthello messages are encryped in QUIC, <a href=\"https://datatracker.ietf.org/doc/html/draft-ietf-quic-tls-33#section-5.2\" rel=\"noopener nofollow ugc\">the secrets are derived from a fixed salt and the Destination Connection ID field</a>. The Initial packets can thus be easily decrypted. Actually, a newer version of the Wireshark can automate the decryption process for you.</p>\n<p>It is therefore possible for censor to decrypt the Inital packets and check the SNI field against <code>mask.icloud.com</code>.</p>\n<h4><a name=\"measuring-current-quic-sni-censorship-in-china-8\" class=\"anchor\" href=\"#measuring-current-quic-sni-censorship-in-china-8\"></a>Measuring current (QUIC-)SNI censorship in China</h4>\n<p>We tested by capturing the initial packets from client and replaying them on a Chinese server. The server responded with QUIC handshake messages and we observed no disruption.</p>\n<p>For example, we first saved the following hex stream as <code>quic.hex</code>:</p>\n<pre data-code-wrap=\"txt\"><code class=\"lang-txt\">c80000000108bec8eac6d55fe88a08e87fe5dfa21d247700452c6a2a855275bb191ffe213c2ad1e07467f9ed24956172c4bee69e8446049a94fbae38973cf11ce80cc1379237e4a0f610ae2408ac096635b3978dcf21b4c81d96a2e53d9a9b04dc234341869f7ea85dc99e2ea028827257c4b6993a29ae07e9368c22426d1780abcf8c4b5ab8b2e3ba4de878306ecf4a4e5851c2168b8412f9a55fa5971520914f13c4a86106161e19bfa1eff9c08a9b566e1656ebceeb7184d60a0328203e5e66fc16ad8452343dee5e2ad22ba0ef80b978ba62c64ac75826b79d119c5a7bf9859655d79116e3f4069e87269bab7f9d0373d8e98e4c4891eaf621ce073c61f59eeddd828c96d785ff3155083f5ac93263e5496a6a38a2a2e0bbf64041e76a500bf4748143f2b8705c3732dc12b218f428eeadd02c50e71c5ffaa1ca14c483ac44c75d10e98d38ddaa38f38c0ba7af20108967541586c51bccd2765781b123b4a91fed0f32f0b11bfc4ff5beaccb023f7d977787a0d09942f5159da772b9ca5a7c512a8644bb399858cc6ee2a5d5c099be6780a619cbadc6407db320d34179bf1ff94401ef0e134d0d8ae705a468b5dcd7b9c078e72ddba146e947dca7d4968b3fc892e425ef60bec05df120b20f26f340ed134b064b4fddd194fee666ff49c943b82f812c6f57daaa70ef5aa7b511e8d9501a447783a4e7eee709499161c4055941d516f16bc4ed114d90f6d49c1a297484749fa99f84eb309c2743018eeebb71c6050061e4899b94ecc746fb98174ce383a9d250f61d3aca4db9249122763ca03c41a67b616e722f5171e34a610aeb9cfb6c74f8bdd549d1b0fbd4a766dd66dc355de7f55d55e029d495687c149d9bac0eba89276a0c8048a97545c08597ea836917ceaebe2e334d9376f3c3dc29ee6df84508558d2c77a1139907aba7735945846e3a8c4675845e01c7e2cb1370b31221f95e1bd0c8e5ecc9e86bf5658859379e3c752e34d6bf9e0e9481cf9ed5df79b9c756cb904603eaab2478b6aaa5740b28213f2716b2b4769e21d9c7e2d62e9708de9644a3de048745f079717e0a565475d0684be9cb13c261f55832953c37078cde29894b2176eab5157e4262dbba7919ef2c66d0cf86d7de93059e9f013e2e82544dc803dea878e184d248065454c65c26d8c67b7778e229390de7560815e6cdc53cce1fb11d62d9b0ecea890b4310ffcf7cd544ca8d6a1b9eed7b92a93fd6c00d0a2338f66ad77c9220c69437b3651b18899c68a8e59f12dc2f014d70a6ca5b4aa419516fde01079a1f76c3198db4f6229641e5e89b1b6aa9797c27b55f439e98858f9d3eef1ffff6f5e52e9e94468d21e8ab965abb864836be07016fdbb63a24e954b863a98d590033bd163df6a7740d256a0bbaa910e45a8f40877b6b84fd2d8f57604d236e4351bd228dc707fe3538440b2796dbab58183f306912c6104d13ea96c649fd338994b4a2d5ecbfdd66b69b5245763371cc38c92774723f546a27519db4660f5dc6312f5f56edad2dcb77bd3034c8a4a084ee7e57016fea8a5fcb114ee5ae97d55b177dd8b1ccd0508fb6baee6244ccedf2705ba35a760b944acb4b3e0394b5add44e851d18e0400d99b4910cd4cb63311727f4a98289ce4ee960c506b72243fde14cf5d3185cc4b598f080faf9ebc75847dc7126bb90c47368c5408898e7bdaf9cde4f04299043600dcdf850c306c737d4be37c316eed63718804e9972f6c95d79771ada173293b06037f1282f4e79f8116e3d4c5fed2ec6db335faf2b0481b3aa3a0192f9ff3fea35ae1bafe71bbcd07a301fe11638a180b6b202c29dea331ac6a2527587a82175cd7b96033b165b88580e83df7759ebe6586d68d4efe6028403d5d0d700e967ca4908bbd8e4\n</code></pre>\n<p>We then send it to the ingress relay and received a response:</p>\n<pre data-code-wrap=\"sh\"><code class=\"lang-sh\">xxd -r -p quic.hex | nc -u mask.icloud.com 443 -v\n</code></pre>\n<p>Note that the payload in the example will not get a reponse from an ingress relay anymore, approximately two days after it was first generated. One can probably still trigger reponses from the ingress relays with freshly generated Initial packets.</p>\n<h3><a name=\"quic-tls-fingerprint-filtering-9\" class=\"anchor\" href=\"#quic-tls-fingerprint-filtering-9\"></a>(Quic-)TLS fingerprint filtering</h3>\n<p>As explained above, the clienthello messages in the Initial packets can be easily decrypted. It is thus possible fro censor to conduct censorship based on the <a href=\"https://github.com/net4people/bbs/issues/54\" rel=\"noopener nofollow ugc\">TLS fingerprint</a>.</p>\n<p>Our observation of the TLS fingerprint of the Private Relay aligns with the findings in <a href=\"https://isc.sans.edu/forums/diary/A+First+Look+at+Apples+iOS+15+Private+Relay+feature/27858/\" rel=\"noopener nofollow ugc\">this report</a>:</p>\n<blockquote>\n<p>The connection to the relay uses QUIC to port 443/UDP and TLS 1.3. The clienthello includes the server name extension and the server name “<a href=\"http://mask.icloud.com\" rel=\"noopener nofollow ugc\">mask.icloud.com</a>.” Only 3 cipher suites are offered (TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256). The server ends up selecting the AES128 suite. Application Layer Protocol Negotiation (ALPN) is also used, with unsurprisingly HTTP/3 being the only option.</p>\n</blockquote>\n<p>Note that, apart from the 3 cipher suites, we saw a forth Grease ciphersuit (<code>0x2a2a</code>).</p>\n<p>As a side note, we also observed two GREASE extensions<br>\n<a href=\"https://www.rfc-editor.org/rfc/rfc8701.html#section-2-3.1\" rel=\"noopener nofollow ugc\">0xAAAA</a> and <a href=\"https://www.rfc-editor.org/rfc/rfc8701.html#section-2-3.4\" rel=\"noopener nofollow ugc\">0X3A3A</a>. They probably do not have anything to do with authentication (if they do, it’s something very non-standard Apple is doing). The GREASE extensions turned out to be not uncommon; web browsers send them as well. As expalined in <a href=\"https://tools.ietf.org/id/draft-ietf-tls-grease-04.html\" rel=\"noopener nofollow ugc\">this doc</a>, they were used to “reserve a set of TLS protocol values that may be advertised to ensure peers correctly handle unknown values”. In other words, GREASE is meant to provide automated diversity to protocol fields, to prevent the protocol from “rusting shut” by assuming only certain values may appear.</p>\n<p>We are also curious, by any chance, <a href=\"https://tlsfingerprint.io/\" rel=\"noopener nofollow ugc\">tlsfingerprint.io</a> can tell us how unique these (or any) (QUIC) ClientHello fingerprints are? (<a href=\"https://github.com/sergeyfrolov\" rel=\"noopener nofollow ugc\">@sergeyfrolov</a>, <a href=\"https://github.com/ewust\" rel=\"noopener nofollow ugc\">@ewust</a>)</p>\n<h3><a name=\"active-probing-to-ingress-relay-10\" class=\"anchor\" href=\"#active-probing-to-ingress-relay-10\"></a>Active probing to ingress relay</h3>\n<p>We find that the ingress relay will respond to a replay of the Initial packets within approximately two days since the packets were generated. We also tried to use <a href=\"https://github.com/lucas-clemente/quic-go\" rel=\"noopener nofollow ugc\">quic-go</a> and <a href=\"https://github.com/lucas-clemente/quic-go\" rel=\"noopener nofollow ugc\"><code>curl --http3</code></a> to send a typical Quic with <a href=\"http://SNI=mask.apple.com\" rel=\"noopener nofollow ugc\">SNI=mask.apple.com</a> to the ingress relay; however, the ingress relay did not respond anything in this case. We suspected that has something to do with the <a href=\"https://datatracker.ietf.org/doc/html/rfc7301\" rel=\"noopener nofollow ugc\">ALPN extension</a> included in the clienthello sent by the legitimate clients. It may also be possible that the client traffic contains some other authenticators.</p>\n<h3><a name=\"ip-blocking-to-ingress-relays-11\" class=\"anchor\" href=\"#ip-blocking-to-ingress-relays-11\"></a>IP blocking to ingress relays</h3>\n<p>As introduced above, we could still receive responses from ingress relays by sending Initial packets from China. This indicates that, at least for the IP addresses we tested, China has not blocked it yet.</p>\n<p>However, it could be fairly easy to block the ingress relay IP in serveral ways:</p>\n<ol>\n<li>block all IP addresses to which <code>mask.icloud.com</code>, <code>mask-api.icloud.com</code> and <code>mask-h2.icloud.com</code> resolve.</li>\n<li>observe QUIC connections with <a href=\"http://SNI=mask.apple.com\" rel=\"noopener nofollow ugc\">SNI=mask.apple.com</a> and confirm it is indeed an ingress relay using the active probing approach mentioned above. Then block the corresponding IP addresses.</li>\n</ol>\n<h3><a name=\"ip-based-discrimination-against-egress-relays-12\" class=\"anchor\" href=\"#ip-based-discrimination-against-egress-relays-12\"></a>IP-based discrimination against egress relays</h3>\n<p>Similar to Tor exit relays, which are available publicly, Apple provides an up-to-date <a href=\"https://mask-api.icloud.com/egress-ip-ranges.csv\" rel=\"noopener nofollow ugc\">lists of egress IP ranges</a> (<a href=\"https://web.archive.org/web/20210921182354/https://mask-api.icloud.com/egress-ip-ranges.csv\" rel=\"noopener nofollow ugc\">archive</a>). This list could be easily used by websites to discriminate against Private Relay users, like <a href=\"https://www.icir.org/vern/papers/tor-differential.NDSS16.pdf\" rel=\"noopener nofollow ugc\">what Tor users have been suffering from</a>.</p>\n<h2><a name=\"questions-not-answered-yet-13\" class=\"anchor\" href=\"#questions-not-answered-yet-13\"></a>Questions not answered yet</h2>\n<h3><a name=\"how-apple-implements-the-self-censorship-14\" class=\"anchor\" href=\"#how-apple-implements-the-self-censorship-14\"></a>How Apple implements the self censorship</h3>\n<p>Apart from all the possible external censorship methods discussed above, Apple has been conducting self-censorship to prevent users in heavily censored areas from using the Private Relays. It is thus important to understand how Apple implements the self censorship in order to circumvent it.</p>\n<p>Specifically, Apple <a href=\"https://support.apple.com/en-us/HT212614\" rel=\"noopener nofollow ugc\">admitted</a> that:</p>\n<blockquote>\n<p>Private Relay isn’t available in all countries and regions. If you travel somewhere Private Relay isn’t available, it will automatically turn off and will turn on again when you re-enter a country or region that supports it. Private Relay will notify you when it’s unavailable and when it’s active again.</p>\n</blockquote>\n<p>According to <a href=\"https://www.macrumors.com/2021/09/17/icloud-private-relay-disabled-russia/\" rel=\"noopener nofollow ugc\">many</a> <a href=\"https://www.reuters.com/world/china/apples-new-private-relay-feature-will-not-be-available-china-2021-06-07/\" rel=\"noopener nofollow ugc\">news sources</a>, these countries include China, Belarus, Colombia, Egypt, Kazakhstan, Saudi Arabia, South Africa, Turkmenistan, Uganda, the Philippines, and Russia.</p>\n<p>It remains an unanswered questions on how and what self-censorship has been implemented by Apple. From our testing, it seems that the ingress server does <strong>not</strong> refuse service based on the geolocation of client IP addresses. However, it is still unclear to us how Apples determines the location of the user and thus refuse to be activated.</p>\n<p>One report <a href=\"https://qust.me/post/PrivateRelay/\" rel=\"noopener nofollow ugc\">claimed</a> (<a href=\"https://web.archive.org/web/20210707024209/https://qust.me/post/PrivateRelay/\" rel=\"noopener nofollow ugc\">archive</a>) that Apple learned users’ geo-location from users’ IP addresses connected to its certain servers; proxying traffic to these certain servers will activate the Private Relay service.</p>\n<p>Another user report <a href=\"https://v2ex.com/t/803142\" rel=\"noopener nofollow ugc\">claimed</a> (<a href=\"https://web.archive.org/web/20210924192532/https://v2ex.com/t/803142\" rel=\"noopener nofollow ugc\">archive</a>) that it is sufficient to activate Private Relay by changing the iCloud region to ones where Private Relay is not self-censored. However, another user in the post failed to activate the service with the same settings.</p>\n<p>We note that it is not uncommon for a Chinese iOS circumventor to have a non-Chinese iCloud account. This is because, due to the heavy censorship against circumvention tools in Chinese app stores, it is almost essential to have a non-Chinese iCloud account to install other circumvention tools.</p>\n<h3><a name=\"how-does-the-user-authentication-work-15\" class=\"anchor\" href=\"#how-does-the-user-authentication-work-15\"></a>How does the user authentication work?</h3>\n<p>Apple <a href=\"https://developer.apple.com/support/prepare-your-network-for-icloud-private-relay\" rel=\"noopener nofollow ugc\">claims</a> that:</p>\n<blockquote>\n<p>Private Relay validates that the client connecting is an iPhone, iPad, or Mac, so you can be assured that connections are coming from an Apple device.</p>\n</blockquote>\n<blockquote>\n<p>All connections that use Private Relay validate that the client is an iPhone, iPad, or Mac and that the customer has a valid iCloud+ subscription. Private Relay enforces several anti-abuse and anti-fraud techniques, such as single-use authentication tokens and rate-limiting.</p>\n</blockquote>\n<p>We are curious how (or if) Apple authenticates Priavet Relay users on the ingress and egress relays.</p>\n<h3><a name=\"how-does-the-underlying-decryption-work-16\" class=\"anchor\" href=\"#how-does-the-underlying-decryption-work-16\"></a>How does the underlying decryption work?</h3>\n<p>In the introduction section, we mentioned that the Private Relay “has a two-hop structure”. However, we do not have know anything more about the underlying structure. For example, is an <a href=\"https://en.wikipedia.org/wiki/Onion_routing\" rel=\"noopener nofollow ugc\">onion-routing</a> structure used? Amir Houmansadr <a href=\"https://gfw.report/blog/private_relay_privacy/en/#our-immediate-questions-about-private-relays\" rel=\"noopener nofollow ugc\">expressed concerns on the intransparency of the underlying protocol</a>. Further investigation is required to better understand the underlying encryption/decryption mechanism.</p>\n<h2><a name=\"acknowledgement-17\" class=\"anchor\" href=\"#acknowledgement-17\"></a>Acknowledgement</h2>\n<p>We thank a person who prefers to stay anonymous for lending us an iPhone for testing.</p>\n<h2><a name=\"contacts-18\" class=\"anchor\" href=\"#contacts-18\"></a>Contacts</h2>\n<p>We encourage you to share your comments publicly or privately. Our private contact information can be found at the footer of <a href=\"https://gfw.report/\" rel=\"noopener nofollow ugc\">GFW Report</a>.</p>",
+        "post_number": 1,
+        "post_type": 1,
+        "posts_count": 1,
+        "updated_at": "2021-09-25T00:57:42.186Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 218,
+        "reads": 19,
+        "readers_count": 18,
+        "score": 1093.8,
+        "yours": false,
+        "topic_id": 1346,
+        "topic_slug": "evaluating-the-censorship-resistance-of-apples-icloud-private-relay",
+        "display_username": "gfw.report",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "badges_granted": [],
+        "version": 1,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": false,
+        "can_wiki": false,
+        "link_counts": [
+            {
+                "url": "https://gfw.report/blog/private_relay_censorship/zh/",
+                "internal": false,
+                "reflection": false,
+                "clicks": 12
+            },
+            {
+                "url": "https://github.com/net4people/bbs/issues/87",
+                "internal": false,
+                "reflection": false,
+                "clicks": 2
+            },
+            {
+                "url": "https://gfw.report/blog/private_relay_censorship/en/",
+                "internal": false,
+                "reflection": false,
+                "clicks": 2
+            },
+            {
+                "url": "https://gfw.report/",
+                "internal": false,
+                "reflection": false,
+                "title": "Welcome to GFW.Report",
+                "clicks": 2
+            },
+            {
+                "url": "https://support.apple.com/en-us/HT212614",
+                "internal": false,
+                "reflection": false,
+                "title": "About iCloud Private Relay - Apple Support",
+                "clicks": 1
+            },
+            {
+                "url": "https://developer.apple.com/support/prepare-your-network-for-icloud-private-relay",
+                "internal": false,
+                "reflection": false,
+                "title": "Prepare Your Network or Web Server for iCloud Private Relay - Support - Apple Developer",
+                "clicks": 1
+            },
+            {
+                "url": "https://tlsfingerprint.io/",
+                "internal": false,
+                "reflection": false,
+                "title": "TLSfingerprint.io",
+                "clicks": 1
+            },
+            {
+                "url": "http://SNI=mask.apple.com",
+                "internal": false,
+                "reflection": false,
+                "clicks": 1
+            },
+            {
+                "url": "https://web.archive.org/web/20210921182354/https://mask-api.icloud.com/egress-ip-ranges.csv",
+                "internal": false,
+                "reflection": false,
+                "clicks": 1
+            },
+            {
+                "url": "https://stackoverflow.com/a/65400340",
+                "internal": false,
+                "reflection": false,
+                "title": "security - Does the QUIC protocol sends ClientHello in clear text? - Stack Overflow",
+                "clicks": 0
+            },
+            {
+                "url": "https://github.com/net4people/bbs/issues/54",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://www.rfc-editor.org/rfc/rfc8701.html#section-2-3.1",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 8701: Applying Generate Random Extensions And Sustain Extensibility (GREASE) to TLS Extensibility",
+                "clicks": 0
+            },
+            {
+                "url": "https://datatracker.ietf.org/doc/html/draft-ietf-quic-tls-33#section-5.2",
+                "internal": false,
+                "reflection": false,
+                "title": "draft-ietf-quic-tls-33",
+                "clicks": 0
+            },
+            {
+                "url": "https://tools.ietf.org/id/draft-ietf-tls-grease-04.html",
+                "internal": false,
+                "reflection": false,
+                "title": "Applying GREASE to TLS Extensibility",
+                "clicks": 0
+            },
+            {
+                "url": "https://github.com/sergeyfrolov",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://github.com/ewust",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://datatracker.ietf.org/doc/html/rfc7301",
+                "internal": false,
+                "reflection": false,
+                "title": "rfc7301",
+                "clicks": 0
+            },
+            {
+                "url": "https://www.macrumors.com/2021/09/17/icloud-private-relay-disabled-russia/",
+                "internal": false,
+                "reflection": false,
+                "title": "Apple Seemingly Adds Russia to List of Countries Where iCloud Private Relay Won't Be Available - MacRumors",
+                "clicks": 0
+            },
+            {
+                "url": "https://qust.me/post/PrivateRelay/",
+                "internal": false,
+                "reflection": false,
+                "title": "如何在中国开启 iCloud Private Relay｜苹果家的 VPN 使用体验 ✈️ | 酱紫表",
+                "clicks": 0
+            },
+            {
+                "url": "https://www.icir.org/vern/papers/tor-differential.NDSS16.pdf",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://www.reuters.com/world/china/apples-new-private-relay-feature-will-not-be-available-china-2021-06-07/",
+                "internal": false,
+                "reflection": false,
+                "title": "Apple's new 'private relay' feature will not be available in China | Reuters",
+                "clicks": 0
+            },
+            {
+                "url": "https://en.wikipedia.org/wiki/Onion_routing",
+                "internal": false,
+                "reflection": false,
+                "title": "Onion routing - Wikipedia",
+                "clicks": 0
+            },
+            {
+                "url": "https://web.archive.org/web/20210707024209/https://qust.me/post/PrivateRelay/",
+                "internal": false,
+                "reflection": false,
+                "title": "如何在中国开启 iCloud Private Relay｜苹果家的 VPN 使用体验 ✈️ | 酱紫表",
+                "clicks": 0
+            },
+            {
+                "url": "https://v2ex.com/t/803142",
+                "internal": false,
+                "reflection": false,
+                "title": "为啥打开 private relay 就用不了公司 wifi 了？ - V2EX",
+                "clicks": 0
+            },
+            {
+                "url": "https://gfw.report/blog/private_relay_privacy/en/#our-immediate-questions-about-private-relays",
+                "internal": false,
+                "reflection": false,
+                "title": "Reflections on Apple's iCloud Private Relay: Does it Really Improve Privacy?",
+                "clicks": 0
+            },
+            {
+                "url": "https://web.archive.org/web/20210924192532/https://v2ex.com/t/803142",
+                "internal": false,
+                "reflection": false,
+                "title": "为啥打开 private relay 就用不了公司 wifi 了？ - V2EX",
+                "clicks": 0
+            },
+            {
+                "url": "https://web.archive.org/web/20210921182126/https://support.apple.com/en-us/HT212614",
+                "internal": false,
+                "reflection": false,
+                "title": "About iCloud Private Relay - Apple Support",
+                "clicks": 0
+            },
+            {
+                "url": "https://github.com/lucas-clemente/quic-go",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://mask-api.icloud.com/egress-ip-ranges.csv",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://www.ietf.org/archive/id/draft-ietf-dnsop-svcb-https-07.html#name-the-svcb-record-type",
+                "internal": false,
+                "reflection": false,
+                "title": "Service binding and parameter specification via the DNS (DNS SVCB and HTTPS RRs)",
+                "clicks": 0
+            },
+            {
+                "url": "https://www.rfc-editor.org/rfc/rfc8701.html#section-2-3.4",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 8701: Applying Generate Random Extensions And Sustain Extensibility (GREASE) to TLS Extensibility",
+                "clicks": 0
+            },
+            {
+                "url": "https://isc.sans.edu/forums/diary/A+First+Look+at+Apples+iOS+15+Private+Relay+feature/27858/",
+                "internal": false,
+                "reflection": false,
+                "title": "A First Look at Apple's iOS 15 \"Private Relay\" feature.",
+                "clicks": 0
+            },
+            {
+                "url": "https://computingforgeeks.com/create-wi-fi-hotspot-on-ubuntu-debian-fedora-centos-arch/",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "http://mask-h2.icloud.com",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "http://mask.icloud.com",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            }
+        ],
+        "read": true,
+        "user_title": null,
+        "bookmarked": false,
+        "actions_summary": [],
+        "moderator": false,
+        "admin": false,
+        "staff": false,
+        "user_id": 115,
+        "hidden": false,
+        "trust_level": 2,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": false,
+        "wiki": false,
+        "post_url": "/t/evaluating-the-censorship-resistance-of-apples-icloud-private-relay/1346/1",
+        "can_translate": false
+    }
+]

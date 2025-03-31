@@ -1,0 +1,195 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>suspicious-activity-of-kazakhtelecom-isp-on-rutrackerorg-domain</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>mushroom(Гриб)</td><td><p><strong>English version in comments</strong></p>
+<p>Здравствуйте, и снова репорт о подозрительных действий Казахтелекома. Предположительно это MITM атака с заменой сертификата, происходящаяя на домене <a href="https://rutracker.org" rel="noopener nofollow ugc">RuTracker.org</a></p>
+<p>С TTL ниже 9 не работает</p>
+<pre><code class="lang-auto">
+$ nmap -vv --ttl 9 -p 443 --script ssl-cert rutracker.org  
+Starting Nmap 7.92 ( https://nmap.org ) at 2022-07-06 13:19 +06
+You have specified some options that require raw socket access.
+These options will not be honored without the necessary privileges.
+NSE: Loaded 1 scripts for scanning.
+NSE: Script Pre-scanning.
+NSE: Starting runlevel 1 (of 1) scan.
+Initiating NSE at 13:19
+Completed NSE at 13:19, 0.00s elapsed
+Warning: Hostname rutracker.org resolves to 4 IPs. Using 172.67.137.176.
+Initiating Ping Scan at 13:19
+Scanning rutracker.org (172.67.137.176) [2 ports]
+Completed Ping Scan at 13:19, 0.10s elapsed (1 total hosts)
+Initiating Parallel DNS resolution of 1 host. at 13:19
+Completed Parallel DNS resolution of 1 host. at 13:19, 0.10s elapsed
+Initiating Connect Scan at 13:19
+Scanning rutracker.org (172.67.137.176) [1 port]
+Discovered open port 443/tcp on 172.67.137.176
+Completed Connect Scan at 13:19, 0.10s elapsed (1 total ports)
+NSE: Script scanning 172.67.137.176.
+NSE: Starting runlevel 1 (of 1) scan.
+Initiating NSE at 13:19
+Completed NSE at 13:19, 0.23s elapsed
+Nmap scan report for rutracker.org (172.67.137.176)
+Host is up, received syn-ack (0.099s latency).
+Other addresses for rutracker.org (not scanned): 104.21.56.234 2606:4700:3036::6815:38ea 2606:4700:3037::ac43:89b0
+Scanned at 2022-07-06 13:19:16 +06 for 0s
+
+PORT    STATE SERVICE REASON
+443/tcp open  https   syn-ack
+| ssl-cert: Subject: commonName=sni.cloudflaressl.com/organizationName=Cloudflare, Inc./stateOrProvinceName=California/countryName=US/localityName=San Francisco
+| Subject Alternative Name: DNS:rutracker.org, DNS:sni.cloudflaressl.com, DNS:*.rutracker.org
+| Issuer: commonName=INTER ISCA/organizationName=ISCA/countryName=KZ
+| Public Key type: rsa
+| Public Key bits: 2048
+| Signature Algorithm: sha256WithRSAEncryption
+| Not valid before: 2022-07-02T00:00:00
+| Not valid after:  2023-07-02T23:59:59
+| MD5:   4d73 95f4 4012 cb00 3564 25d7 4b69 b33e
+| SHA-1: 2cf8 6fe6 a025 87c1 8449 25fa 939f 226d 721e 110a
+| -----BEGIN CERTIFICATE-----
+| MIIEPjCCAyagAwIBAgIQWEqiV4agTVWC6iFNj146BDANBgkqhkiG9w0BAQsFADAx
+| MQswCQYDVQQGEwJLWjENMAsGA1UEChMESVNDQTETMBEGA1UEAxMKSU5URVIgSVND
+| QTAeFw0yMjA3MDIwMDAwMDBaFw0yMzA3MDIyMzU5NTlaMHUxCzAJBgNVBAYTAlVT
+| MRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1TYW4gRnJhbmNpc2NvMRkw
+| FwYDVQQKExBDbG91ZGZsYXJlLCBJbmMuMR4wHAYDVQQDExVzbmkuY2xvdWRmbGFy
+| ZXNzbC5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQD0oJjf+izr
+| bggQpqQBipxnV8QspDzLdd8RCuGK5qI8BRRym5bZmx+8Bmw7SABksfIvFQHoXwhe
+| laP9CbAm6zTf0wH5h7wwYE7bxZjxKC06S+stv6OJitoL8vPe9eiZygtVFOPXBh5X
+| ze4H8tFwwwMJSgxnWv7wR8mN/9H38zp96DVgOv99WAtGcmaZLa2qOWjbfLpi4PzH
+| BdzqApjRVNZWhd3upWxYEjuq0CRRliGsVyM7YAEUmrF7RAI7m5b99iAIyiaO+cH5
+| 6iuR+/fAYHejoAJNC/I/UnsR0pGs4cB/4IW5/hr86T4c+1A82/NXrKMMKn2N2K93
+| zNEAfrmSFeh/AgMBAAGjggEMMIIBCDAdBgNVHQ4EFgQUC5yUdjs4qbZsg6fZDu+m
+| UBcNYYgwawYDVR0jBGQwYoAUgsJUnDLUjlbr9m7Ji/jEZ1C33tahNKQyMDAxEjAQ
+| BgNVBAMTCUlTQ0EgUk9PVDENMAsGA1UEChMESVNDQTELMAkGA1UEBhMCS1qCFALC
+| VJwy1I5W6/ZuyYv4xGdQt97WMAwGA1UdEwEB/wQCMAAwCwYDVR0PBAQDAgWgMB0G
+| A1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjBABgNVHREEOTA3gg1ydXRyYWNr
+| ZXIub3JnghVzbmkuY2xvdWRmbGFyZXNzbC5jb22CDyoucnV0cmFja2VyLm9yZzAN
+| BgkqhkiG9w0BAQsFAAOCAQEAfwnX+LAVb5ajuihmNVMIPkUaax2uhWdDkUmWz89w
+| TQs97La4q1gN5EE7U8aJKlcPSL1svfYNgK4Af5vJDDaUdhmV/5G++2XFlqMxjTuI
+| Po4WsG7MzOnRCAf4UMyfL4fxcgXaWn73M+oY+qtY2t5Ghk3FhaIIW4mubqKqijOf
+| EhW9FGN43s2IQ+4v4LtPv3Q0v+e+K9pkPTc9p/aQJpL57cqymGoH5WKiW5SgjNsB
+| m2ovuEG8GCehMFpS5xq1xlXd4uOBwHK2N4I7K6q0QTdZTYo9+f4MDaGJpkBXHOO6
+| d9s3c+27aXnqGiOlt232HP9nqBkvhOhsPLKATLsRCoQHOA==
+|_-----END CERTIFICATE-----
+
+NSE: Script Post-scanning.
+NSE: Starting runlevel 1 (of 1) scan.
+Initiating NSE at 13:19
+Completed NSE at 13:19, 0.00s elapsed
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 0.90 seconds
+</code></pre>
+<p>Проверил, DNS, ответы совпадают с dns.google</p></td><td>2022-07-06T07:27:02.269Z</td></tr><tr><td>mushroom(Гриб)</td><td><p>Here we go again, report on suspicious activity of KazakhTelecom ISP. Probably this MITM attack with TLS certificate spoofing, this is going on <a href="https://rutracker.org" rel="noopener nofollow ugc">RuTracker.org</a></p>
+<p>With TTL below 9, there is no answer from server.</p>
+<pre><code class="lang-auto">
+$ nmap -vv --ttl 9 -p 443 --script ssl-cert rutracker.org  
+Starting Nmap 7.92 ( https://nmap.org ) at 2022-07-06 13:19 +06
+You have specified some options that require raw socket access.
+These options will not be honored without the necessary privileges.
+NSE: Loaded 1 scripts for scanning.
+NSE: Script Pre-scanning.
+NSE: Starting runlevel 1 (of 1) scan.
+Initiating NSE at 13:19
+Completed NSE at 13:19, 0.00s elapsed
+Warning: Hostname rutracker.org resolves to 4 IPs. Using 172.67.137.176.
+Initiating Ping Scan at 13:19
+Scanning rutracker.org (172.67.137.176) [2 ports]
+Completed Ping Scan at 13:19, 0.10s elapsed (1 total hosts)
+Initiating Parallel DNS resolution of 1 host. at 13:19
+Completed Parallel DNS resolution of 1 host. at 13:19, 0.10s elapsed
+Initiating Connect Scan at 13:19
+Scanning rutracker.org (172.67.137.176) [1 port]
+Discovered open port 443/tcp on 172.67.137.176
+Completed Connect Scan at 13:19, 0.10s elapsed (1 total ports)
+NSE: Script scanning 172.67.137.176.
+NSE: Starting runlevel 1 (of 1) scan.
+Initiating NSE at 13:19
+Completed NSE at 13:19, 0.23s elapsed
+Nmap scan report for rutracker.org (172.67.137.176)
+Host is up, received syn-ack (0.099s latency).
+Other addresses for rutracker.org (not scanned): 104.21.56.234 2606:4700:3036::6815:38ea 2606:4700:3037::ac43:89b0
+Scanned at 2022-07-06 13:19:16 +06 for 0s
+
+PORT    STATE SERVICE REASON
+443/tcp open  https   syn-ack
+| ssl-cert: Subject: commonName=sni.cloudflaressl.com/organizationName=Cloudflare, Inc./stateOrProvinceName=California/countryName=US/localityName=San Francisco
+| Subject Alternative Name: DNS:rutracker.org, DNS:sni.cloudflaressl.com, DNS:*.rutracker.org
+| Issuer: commonName=INTER ISCA/organizationName=ISCA/countryName=KZ
+| Public Key type: rsa
+| Public Key bits: 2048
+| Signature Algorithm: sha256WithRSAEncryption
+| Not valid before: 2022-07-02T00:00:00
+| Not valid after:  2023-07-02T23:59:59
+| MD5:   4d73 95f4 4012 cb00 3564 25d7 4b69 b33e
+| SHA-1: 2cf8 6fe6 a025 87c1 8449 25fa 939f 226d 721e 110a
+| -----BEGIN CERTIFICATE-----
+| MIIEPjCCAyagAwIBAgIQWEqiV4agTVWC6iFNj146BDANBgkqhkiG9w0BAQsFADAx
+| MQswCQYDVQQGEwJLWjENMAsGA1UEChMESVNDQTETMBEGA1UEAxMKSU5URVIgSVND
+| QTAeFw0yMjA3MDIwMDAwMDBaFw0yMzA3MDIyMzU5NTlaMHUxCzAJBgNVBAYTAlVT
+| MRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1TYW4gRnJhbmNpc2NvMRkw
+| FwYDVQQKExBDbG91ZGZsYXJlLCBJbmMuMR4wHAYDVQQDExVzbmkuY2xvdWRmbGFy
+| ZXNzbC5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQD0oJjf+izr
+| bggQpqQBipxnV8QspDzLdd8RCuGK5qI8BRRym5bZmx+8Bmw7SABksfIvFQHoXwhe
+| laP9CbAm6zTf0wH5h7wwYE7bxZjxKC06S+stv6OJitoL8vPe9eiZygtVFOPXBh5X
+| ze4H8tFwwwMJSgxnWv7wR8mN/9H38zp96DVgOv99WAtGcmaZLa2qOWjbfLpi4PzH
+| BdzqApjRVNZWhd3upWxYEjuq0CRRliGsVyM7YAEUmrF7RAI7m5b99iAIyiaO+cH5
+| 6iuR+/fAYHejoAJNC/I/UnsR0pGs4cB/4IW5/hr86T4c+1A82/NXrKMMKn2N2K93
+| zNEAfrmSFeh/AgMBAAGjggEMMIIBCDAdBgNVHQ4EFgQUC5yUdjs4qbZsg6fZDu+m
+| UBcNYYgwawYDVR0jBGQwYoAUgsJUnDLUjlbr9m7Ji/jEZ1C33tahNKQyMDAxEjAQ
+| BgNVBAMTCUlTQ0EgUk9PVDENMAsGA1UEChMESVNDQTELMAkGA1UEBhMCS1qCFALC
+| VJwy1I5W6/ZuyYv4xGdQt97WMAwGA1UdEwEB/wQCMAAwCwYDVR0PBAQDAgWgMB0G
+| A1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjBABgNVHREEOTA3gg1ydXRyYWNr
+| ZXIub3JnghVzbmkuY2xvdWRmbGFyZXNzbC5jb22CDyoucnV0cmFja2VyLm9yZzAN
+| BgkqhkiG9w0BAQsFAAOCAQEAfwnX+LAVb5ajuihmNVMIPkUaax2uhWdDkUmWz89w
+| TQs97La4q1gN5EE7U8aJKlcPSL1svfYNgK4Af5vJDDaUdhmV/5G++2XFlqMxjTuI
+| Po4WsG7MzOnRCAf4UMyfL4fxcgXaWn73M+oY+qtY2t5Ghk3FhaIIW4mubqKqijOf
+| EhW9FGN43s2IQ+4v4LtPv3Q0v+e+K9pkPTc9p/aQJpL57cqymGoH5WKiW5SgjNsB
+| m2ovuEG8GCehMFpS5xq1xlXd4uOBwHK2N4I7K6q0QTdZTYo9+f4MDaGJpkBXHOO6
+| d9s3c+27aXnqGiOlt232HP9nqBkvhOhsPLKATLsRCoQHOA==
+|_-----END CERTIFICATE-----
+
+NSE: Script Post-scanning.
+NSE: Starting runlevel 1 (of 1) scan.
+Initiating NSE at 13:19
+Completed NSE at 13:19, 0.00s elapsed
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 0.90 seconds
+</code></pre>
+<p>I have checked DNS, it’s ok</p></td><td>2022-07-06T07:35:33.782Z</td></tr><tr><td>ValdikSS</td><td><p>Сайт при этом открывается, видна главная страница?</p></td><td>2022-07-06T07:48:45.177Z</td></tr><tr><td>mushroom(Гриб)</td><td><p>К сожалению нет. Точнее как-то рандомно работает. Сначала firefox прост игнорил сертификат и отсылал в http. Потом жаловался на некорректный сертификат, иногда заходил. Не могу понять в чём причина такого поведения.</p></td><td>2022-07-06T07:57:24.248Z</td></tr><tr><td>mushroom(Гриб)</td><td><p>Сертификат действительного <a href="http://RuTracker.org" rel="noopener nofollow ugc">RuTracker.org</a> имеет шифрование на Elliptic Curves. Тем временем подмененый сертификат использует RSA-2048, естественно все Fingerprints отличаются</p></td><td>2022-07-06T08:00:25.349Z</td></tr><tr><td>mushroom(Гриб)</td><td><p>Хм, решил немного поресёрчить насчёт INTER ISCA, гугл говорит это какой-то научный комплекс <img src="https://ntc.party/images/emoji/twitter/smiley.png?v=12" title=":smiley:" class="emoji" alt=":smiley:" loading="lazy" width="20" height="20"><br>
+<a href="https://isca.kz/ru/homepage-ru" class="onebox" target="_blank" rel="noopener nofollow ugc">https://isca.kz/ru/homepage-ru</a></p></td><td>2022-07-06T08:06:02.084Z</td></tr>
+    </table>
+      </body>
+    </html>

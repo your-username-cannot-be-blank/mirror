@@ -1,0 +1,135 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>openvpn-proxy</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Rofliex(Rofliex)</td><td><p>Привет, ищу способ конвертации openvpn соединения в proxy.<br>
+Цель: анонимизация конкретных приложений а не всей системы.<br>
+Пробовал вот эти решения:</p>
+<ul>
+<li><a href="https://hub.docker.com/r/kizzx2/openvpn-client-socks/" rel="noopener nofollow ugc">https://hub.docker.com/r/kizzx2/openvpn-client-socks/</a></li>
+<li><a href="https://github.com/haugene/docker-transmission-openvpn" class="inline-onebox" rel="noopener nofollow ugc">GitHub - haugene/docker-transmission-openvpn: Docker container running Transmission torrent client with WebUI over an OpenVPN tunnel</a> , но к сожалению не разобрался в чем проблема ( либо я где-то ошибся, либо ошибка в чем-то другом) Скрин docker-compose: <a href="https://i.imgur.com/ODP2fn4.png" class="inline-onebox" rel="noopener nofollow ugc">Imgur: The magic of the Internet</a></li>
+</ul>
+<p>Доп инфа:<br>
+VPN провайдер - SurfShark. Была проблема с конфигами(клиент отказывался их принимать и коннектиться по конфигам), но решил откатом OpenVPN Connect до 3.3.7<br>
+Тип прокси подойдёт любой, как socks так и https</p></td><td>2023-11-13T19:05:45.087Z</td></tr><tr><td>Xunlei</td><td><p>Приветствую. Для Windows я делаю так:<br>
+<strong>1</strong> — Создаю необходимое количество виртуальных интерфейсов TAP, Wintun или DCO (не поддерживает сжатие).<br>
+<strong>2</strong> — Присваиваю им необходимые названия в сетевых подключениях.<br>
+<strong>3</strong> — Настраиваю конфигурацию OpenVPN на определённый интерфейс, например:</p>
+<pre><code class="lang-auto">windows-driver wintun
+dev tun
+dev-type tun
+dev-node "OpenVPN Wintun"
+</code></pre>
+<p>Эту конфигурацию можно вписать в отдельный файл и включить в клиентский файл:</p>
+<pre><code class="lang-auto">config ..\\device.txt
+</code></pre>
+<p><strong>4</strong> — Настраиваю метрики интерфейсам.<br>
+Просмотр списка индексов интерфейсов в <em>PowerShell</em>:</p>
+<pre><code class="lang-auto">Get-NetIPInterface | Format-Table -AutoSize
+</code></pre>
+<p>Назначение метрики:</p>
+<pre><code class="lang-auto">Set-NetIPInterface -InterfaceIndex "&lt;индекс&gt;" -InterfaceMetric "&lt;значение&gt;" -PolicyStore "PersistentStore"
+Set-NetIPInterface -InterfaceIndex "&lt;индекс&gt;" -InterfaceMetric "&lt;значение&gt;"
+</code></pre>
+<p>Первая строка сохраняет метрику, вторая тут же применяет. Значение метрик следует выбирать кратной 1000, например, для <code>Loopback Pseudo-Interface 1</code> <em>1000</em>, для <code>LAN</code> <em>2000</em>, для <code>OpenVPN Wintun</code> <em>3000</em>. Итоговая метрика назначения будет суммой значения метрики маршрута и значения метрики интерфейса. (В этом примере broadcast пакет будет идти на интерфейс с наименьшей метрикой, если они нужны для каких-то приложений в локальной сети, которые не поддерживают рассылку на все интерфейсы в системе, то следует назначить интерфейсу локальной сети метрику меньше, либо настроить статический маршрут для назначения <em>255.255.255.255</em>.)</p>
+<p>Аналоги этих команд в <em>cmd</em>:</p>
+<pre><code class="lang-auto">netsh interface ipv4 show subinterfaces
+set subinterface “&lt;имя&gt;” mtu=&lt;значение&gt; store=persistent
+</code></pre>
+<p>После этого все подключения в системе без биндинга будут идти через интерфейс <code>LAN</code>.<br>
+<strong>5</strong> — Настраиваю менеджер тунелей <a href="https://gost.run/" rel="noopener nofollow ugc">GOST</a>. Пример конфигурации:</p>
+<pre><code class="lang-auto">services:
+# Direct SOCKS5
+- name: service-socks-LAN
+  addr: "[::1]:1000"
+  interface: "LAN"
+  resolver: resolver-local
+  handler:
+    type: socks5
+    metadata:
+      udp: true
+  listener:
+    type: tcp
+# SOCKS5 over OpenVPN Wintun
+- name: service-socks-OpenVPN-Wintun
+  addr: "[::1]:1001"
+  interface: "OpenVPN Wintun"
+  resolver: resolver-local
+  handler:
+    type: socks5
+    metadata:
+      udp: true
+  listener:
+    type: tcp
+
+# DNS resolver
+resolvers:
+- name: resolver-local
+  nameservers:
+  - addr: "udp://[::1]:53"
+    ttl: -1
+
+# Logging
+log:
+  level: warn
+  format: text
+  output: stdout
+</code></pre>
+<p>Так, в примере, на <em>1000</em> порту будет прокси напрямую, на <em>1001</em> будет прокси через виртуальный интерфейс. (К сожалению, в GOST сломано проксирование UDP через SOCKS5 и требует самостоятельного патчинга в случае необходимости.)<br>
+<strong>6</strong> — Для настройки policy based routing для приложений использую <a href="https://www.proxifier.com/" rel="noopener nofollow ugc">Proxifier</a> (UDP не поддерживает). Есть аналог без GUI <a href="https://github.com/wiresock/proxifyre" rel="noopener nofollow ugc">socksify / proxifyre</a> (UDP поддерживает).<br>
+<strong>7</strong> — ???<br>
+<strong>8</strong> — PROFIT</p></td><td>2023-11-13T22:03:04.841Z</td></tr><tr><td>Rofliex(Rofliex)</td><td><p>Спасибо, может быть попробую как-нибудь. А пока нашёл более простой выход:</p>
+<ul>
+<li>Купить конфиг для wireguard за копейки</li>
+<li>Заюзать <a href="https://github.com/pufferffish/wireproxy" class="inline-onebox" rel="noopener nofollow ugc">GitHub - pufferffish/wireproxy: Wireguard client that exposes itself as a socks5 proxy</a> → proxyfier</li>
+</ul></td><td>2023-11-14T16:24:13.380Z</td></tr><tr><td>Xunlei</td><td><p>Для wireguard да, есть ещё вариант <a href="https://github.com/wiresock/WireSockUI" rel="noopener nofollow ugc">WireSockUI</a>.</p></td><td>2023-11-14T21:08:51.459Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote quote-modified" data-post="1" data-topic="106">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/106">Convert TUN/TAP to Socks5/HTTP proxy (OpenVPN as proxy)</a> <a class="badge-category__wrapper " href="/c/censorship-circumvention-software/tools-for-researchers-and-developers/26"><span data-category-id="26" style="--category-badge-color: #12A89D; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #92278F;" data-parent-category-id="11" data-drop-close="true" class="badge-category --has-parent" title="Utilities, libraries and other software making development easier"><span class="badge-category__name">Tools for researchers and developers</span></span></a>
+  </div>
+  <blockquote>
+    These are very useful utilities — they convert TUN/TAP to Socks or HTTP Proxy, allowing to use VPN as a proxy (OpenVPN as Socks5), does not require root privileges. 
+
+
+tunsocks is a user-level SOCKS, HTTP, and port forwarding proxy for use with VPNs that typically interact with tun devices. Rather than passing bytes to and from the tun device, they can pass the data to and from this user-level program. tunsocks is implemented using lwIP. 
+Additionally, tunsocks provides connection sharing via NA…
+  </blockquote>
+</aside>
+</td><td>2023-11-19T02:55:45.700Z</td></tr>
+    </table>
+      </body>
+    </html>

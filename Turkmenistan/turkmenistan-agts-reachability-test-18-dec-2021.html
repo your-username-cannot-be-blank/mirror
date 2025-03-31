@@ -1,0 +1,114 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>turkmenistan-agts-reachability-test-18-dec-2021</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>AGTS Turkmenistan, ADSL. <a href="https://agts.tv/">https://agts.tv/</a> censorship filtering test.<br>
+IP range whois has <strong>Azerbaijan</strong> geolocation.</p>
+<ol>
+<li>Many, many datacenters/hosting providers are blocked by IP ranges.</li>
+<li>Many websites are blocked with IP filter, by DPI or with DNS injection, or both/all of them. See magestic_top1000_127.0.0.1_dnsfilteredhosts.txt for the top 1000 Majestic domains resolving to 127.0.0.1 results.<br>
+If you use proper IP address for the domain, in some cases the website becomes reachable, but this is rare — most of the time the IP ranges are blocked as well.</li>
+<li>HTTP requests with “vpn” string in host value are blocked. The connection instantly dropped with TCP RST. This does not occur with HTTPS requests.</li>
+<li>Not all TCP destination ports are reachable. From 65535, only about 1150 (!) are not filtered, other are blocked either with TCP RST or without the reply (depending on the ISP). Check reachabletcpports.txt file.</li>
+<li>DNS queries are filtered (resolved IP address is rewritten to 127.0.0.1) on both ISP and third-party DNS resolvers, including non-53 port.</li>
+<li>All known public DNS resolvers (<a href="https://en.wikipedia.org/wiki/Public_recursive_name_server" class="inline-onebox">Public recursive name server - Wikipedia</a> UDP 53) are blacklisted by IP except Yandex DNS on secondary IP addresses (non-77.88.8.8).</li>
+<li>All known DNS-over-HTTPS are filtered by IP.</li>
+<li>Some Tor relays operating on ports 80 and 443 are reachable. Tor Browser 11.0.2 may be slow to connect but usually does that pretty steady, without using bridges or snowflake.</li>
+</ol>
+<p>What have not been tested:</p>
+<ol>
+<li>Protocol filtering. There is an OpenVPN fingerprinting and filtering: it’s either tore down on first OpenVPN RESET packets or later in the session. I’ve made such tests before but this time didn’t test it.</li>
+</ol>
+<p><a class="attachment" href="turkmenistan-agts-reachability-test-18-dec-2021/b4jgNDJnV2wBysLxKBZjnu8GsRc.7z">turkmenistan_agts_18_Dec_2021.7z</a> (38.4 KB)</p>
+<p>Notable domain black list:</p>
+<pre><code class="lang-auto">youtube.com (127.0.0.1)
+twitter.com (127.0.0.1)
+instagram.com (127.0.0.1)
+youtu.be (127.0.0.1)
+blogspot.com (127.0.0.1)
+telegram.me (127.0.0.1)
+groups.google.com (127.0.0.1)
+whatsapp.com / api.whatsapp.com (127.0.0.1)
+vk.com (127.0.0.1)
+m.facebook.com / web.facebook.com (127.0.0.1)
+tiktok.com (127.0.0.1)
+s3.amazonaws.com (127.0.0.1)
+livejournal.com (127.0.0.1)
+docs.microsoft.com (127.0.0.1)
+discord.gg (127.0.0.1)
+snapchat.com (127.0.0.1)
+</code></pre></td><td>2021-12-18T16:42:36.566Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="1" data-topic="1537">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>HTTP requests with “vpn” string in host value are blocked.</p>
+</blockquote>
+</aside>
+<p>Good find. It appears that the match is case-sensitive. Lowercase “vpn” in the Host gets blocked, uppercase “VPN” does not.</p>
+<pre><code class="lang-plaintext">$ curl --connect-to ::95.85.125.162: --connect-timeout 5 http://$HOST/ -D -
+</code></pre>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>Host</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>example.com</code></td>
+<td>301 Moved Permanently</td>
+</tr>
+<tr>
+<td><code>examvpnle.com</code></td>
+<td>Connection reset by peer</td>
+</tr>
+<tr>
+<td><code>EXAMVPNLE.COM</code></td>
+<td>301 Moved Permanently</td>
+</tr>
+<tr>
+<td><code>EXAMvpnLE.COM</code></td>
+<td>Connection reset by peer</td>
+</tr>
+</tbody>
+</table>
+</div><p>I get the same results whether I test with 95.85.125.162 (<a href="http://agts.tv">agts.tv</a>) or 95.85.120.6 (telecom.tm).</p></td><td>2021-12-22T06:21:43.375Z</td></tr>
+    </table>
+      </body>
+    </html>

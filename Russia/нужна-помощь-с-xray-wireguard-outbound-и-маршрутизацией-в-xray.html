@@ -1,0 +1,219 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>нужна-помощь-с-xray-wireguard-outbound-и-маршрутизацией-в-xray</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>the-d-kid(Andrey)</td><td><p>Всем привет. Есть зарубежная машина с установленным xray. Цель - завернуть все запросы которые щас от её лица возвращаюстя обратно в Россию в WireGuard (для большей беспалевности сервера). Попытался сам по одному китайскому примеру настроить такую схему, честно говоря не в точности повторял пример так как там ещё зачем то заворачиваются в Wireguard ещё и всё в домене .cn, переделывать на .ru эту часть я не стал так как не вижу смысла, основная опасность как по мне именно в возврат в Россию. Короче когда схема с WARP не заработала, решил перенастроить на свой русский wg сервер что бы посмотреть идут ли хоть хендшейки вообще. Короче хендшейки идут, но всё равно запросы на русские айпишники идут от зарубежного сревера, а не от wireguard сервера (что моего что WARP)<br>
+Если кто знает поскажите где облажался в конфиге)</p>
+<pre data-code-wrap="json"><code class="lang-json">{
+    "metrics": {
+        "tag": "metrics_out"
+    },
+    "stats": {},
+    "policy": {
+        "levels": {
+            "0": {
+                "statsUserUplink": true,
+                "statsUserDownlink": true
+            }
+        },
+        "system": {
+            "statsInboundUplink": true,
+            "statsInboundDownlink": true,
+            "statsOutboundUplink": true,
+            "statsOutboundDownlink": true
+        }
+    },
+    "api": {
+        "tag": "api",
+        "services": [
+            "StatsService"
+        ]
+    },
+    "log": {
+        "loglevel": "info"
+    },
+    "routing": {
+        "rules": [
+            {
+                "type": "field",
+                "inboundTag": [
+                    "metrics_in"
+                ],
+                "outboundTag": "metrics_out"
+            },
+            {
+                "type": "field",
+                "inboundTag": [
+                    "api"
+                ],
+                "outboundTag": "api"
+            },
+			{
+				"inboundTag": [
+                    "vless_tls"
+                ],
+                "ip": [
+                    "geoip:ru"
+                ],
+                "outboundTag": "warp"
+            }
+        ],
+        "domainStrategy": "AsIs"
+    },
+    "inbounds": [
+        {
+            "port": 11111,
+            "protocol": "dokodemo-door",
+            "tag": "metrics_in",
+            "listen": "127.0.0.1",
+            "settings": {
+                "address": "127.0.0.1"
+            }
+        },
+        {
+            "listen": "127.0.0.1",
+            "port": 8080,
+            "protocol": "dokodemo-door",
+            "settings": {
+                "address": "127.0.0.1"
+            },
+            "tag": "api"
+        },
+        {
+            "port": 443,
+            "protocol": "vless",
+            "tag": "vless_tls",
+            "settings": {
+                "clients": [
+                    {
+                        "id": "xxxx",
+                        "email": "xxxx@xxxx",
+                        "flow": "xtls-rprx-vision"
+                    }
+                ],
+                "decryption": "none",
+                "fallbacks": [
+                    {
+                        "dest": "7777"
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "tls",
+                "tlsSettings": {
+                    "alpn": [
+                        "http/1.1",
+                        "h2"
+                    ],
+                    "certificates": [
+                        {
+                            "certificateFile": "/etc/letsencrypt/live/xxxx/fullchain.pem",
+                            "keyFile": "/etc/letsencrypt/live/xxxx/privkey.pem"
+                        }
+                    ]
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls"
+                ]
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "freedom",
+            "tag": "direct"
+        },
+        {
+            "protocol": "blackhole",
+            "tag": "block"
+        },
+		{
+            "protocol": "wireguard",
+            "settings": {
+                "secretKey": "xxxx",
+                "address": [
+                    "192.168.0.11/32"
+                ],
+                "peers": [
+                    {
+                        "publicKey": "xxxx",
+                        "allowedIPs": [
+                            "0.0.0.0/0"
+                        ],
+                        "endpoint": "xx.xx.xx.xx:xxxxx"
+                    }
+                ],
+                "mtu": 1280
+            },
+            "tag": "warp"
+        }
+    ]
+}
+</code></pre></td><td>2024-11-26T15:29:26.935Z</td></tr><tr><td>0ka(0ka)</td><td><p>log debug</p></td><td>2024-11-26T17:07:20.733Z</td></tr><tr><td>the-d-kid(Andrey)</td><td><p>поставил дебаг, не понимаю куда смотреть, включил отображение логов с грепом айпишника яндекса, зашёл на <a href="http://yandex.ru/internet" class="inline-onebox" rel="noopener nofollow ugc">Яндекс.Интернетометр — проверка скорости интернета</a>, увидел</p>
+<pre><code class="lang-auto">/var/log# journalctl -u xray.service -f -n 100 | grep 5.255.255.77
+Nov 27 06:14:25 myvps.superhosting.su xray[56793]: 2024/11/27 06:14:25 [Info] [2011566585] proxy/vless/inbound: received request for tcp:5.255.255.77:443
+Nov 27 06:14:25 myvps.superhosting.su xray[56793]: 2024/11/27 06:14:25 from [my home ip]:[port] accepted tcp:5.255.255.77:443 [vless_tls &gt;&gt; direct] email: xxxx@xxxx
+Nov 27 06:14:25 myvps.superhosting.su xray[56793]: 2024/11/27 06:14:25 [Info] [2011566585] proxy/freedom: connection opened to tcp:yandex.ru:443, local endpoint [my vps ip]:[port], remote endpoint 5.255.255.77:443
+</code></pre>
+<p>собсна xray считает, что надо направить всё это через direct почему то не смотря на то что указанно в конфиге:</p>
+<pre data-code-wrap="json"><code class="lang-json">{
+				"inboundTag": [
+                    "vless_tls"
+                ],
+                "ip": [
+                    "geoip:ru"
+                ],
+                "outboundTag": "warp"
+            }
+</code></pre></td><td>2024-11-26T23:40:48.439Z</td></tr><tr><td>0ka(0ka)</td><td><p>если убрать geoip то начинает работать? geoip файлы на месте?</p></td><td>2024-11-27T00:08:32.533Z</td></tr><tr><td>the-d-kid(Andrey)</td><td><p>файлы geoip рядом с исполняемым файлом xray<br>
+А по поводу начинает работать - ну не работает то только маршрутизация ru айпишников в wg outband, всё что direct работает (ну и в direct сваливается всё, что я хочу что бы сваливалось в wg outband)<br>
+или предлагается ради теста попробовать всё засунуть в wg outband?</p></td><td>2024-11-27T02:08:25.539Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="the-d-kid" data-post="5" data-topic="13382">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/the-d-kid/48/13094_2.png" class="avatar"> the-d-kid:</div>
+<blockquote>
+<p>или предлагается ради теста попробовать всё засунуть в wg outband?</p>
+</blockquote>
+</aside>
+<p>да, а точнее отредактировать текущее правило и убрать geoip. Еще возможно проблема в  “domainStrategy”: “AsIs”, возможно надо “IPIfNonMatch” (пробуй это сначала)</p></td><td>2024-11-27T02:24:50.994Z</td></tr>
+    </table>
+      </body>
+    </html>

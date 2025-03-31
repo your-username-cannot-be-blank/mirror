@@ -1,0 +1,128 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>dns-антизапрета-перестает-резолвить-4089</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>atc891</td><td><p>развернут ovpn-клиент на mikrotik, routeros 7.8, при попытке загрузки фото/видео в instagram днс прекращает резолвить любые запросы, это на стороне антизапрета ограничение или так не должно быть?</p></td><td>2023-03-21T16:00:38.826Z</td></tr><tr><td>nzkhammatov(Ainur Khammatov)</td><td><blockquote>
+<p><a href="https://ntc.party/t/mikrotik/666/175" class="inline-onebox">Обход блокировки на mikrotik - #175 by khammatov</a></p>
+</blockquote></td><td>2023-03-21T21:07:25.306Z</td></tr><tr><td>atc891</td><td><p>все так и сделано, кроме того, что на ovpn-интерфейсе use peer dns указан exclusively, отпишусь как поставлю yes и проверю работоспособность</p></td><td>2023-03-22T01:39:30.329Z</td></tr><tr><td>nzkhammatov(Ainur Khammatov)</td><td><p>С 5 пунктом ознакомьтесь</p></td><td>2023-03-22T01:57:08.770Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="atc891" data-post="1" data-topic="4089">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/49beb7/48.png" class="avatar"> atc891:</div>
+<blockquote>
+<p>при попытке загрузки фото/видео в instagram днс прекращает резолвить любые запросы</p>
+</blockquote>
+</aside>
+<p>Возможно, у вас настолько большой буфер пакетов, что возникает bufferbloat и загрузка изображений забивает весь буфер, не оставляя возможности для DNS-запроса (или ответа) в разумный временной период?</p></td><td>2023-03-22T10:21:50.244Z</td></tr><tr><td>atc891</td><td><p>читал, не актуально, проблем с каналом нет, связь с антизапретом тоже нормальная, проблема только с описанным в теме сценарием</p></td><td>2023-03-22T10:47:39.244Z</td></tr><tr><td>atc891</td><td><p>посмотрю в этом направлении, спасибо</p></td><td>2023-03-22T11:06:41.836Z</td></tr><tr><td>nzkhammatov(Ainur Khammatov)</td><td><blockquote>
+<p><a href="https://ntc.party/t/666/175">Сборник ссылок</a></p>
+</blockquote>
+<p><strong>В моем случае со своим АнтиЗапрет контейнером помогло добавление вот этих настроек</strong></p>
+<pre data-code-wrap="bash"><code class="lang-bash">push "sndbuf 524288"
+push "rcvbuf 524288"
+</code></pre>
+<p><strong>В два конфигурационных файла внутри контейнера</strong></p>
+<pre data-code-wrap="bash"><code class="lang-bash">/etc/openvpn/server/antizapret.conf
+/etc/openvpn/server/antizapret-tcp.conf
+</code></pre>
+<p><strong>Мой АнтиЗапрет работает на маршрутизаторе, и при подключении сразу нескольких клиентов, которые используют одновременно разные приложения (instagram, youtube), пропадала возможность ресолва адресов</strong></p>
+<p><strong>Если на телевизоре работал youtube, и кто-то в то же самое время начинал листать instagram или другой похожий ресурс происходило тоже самое что и у вас</strong></p></td><td>2023-04-01T09:27:18.817Z</td></tr><tr><td>kirill</td><td><p>полезный твик, спасибо,<br>
+сохранил</p>
+<p>p.s.: а вот тут</p><aside class="quote quote-modified" data-post="315" data-topic="129">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/4/ee59a6/48.png" class="avatar">
+    <a href="https://ntc.party/t/vpn/129/315">Контейнер VPN АнтиЗапрета для установки на собственный сервер</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/az-self-hosted/38"><span data-category-id="38" style="--category-badge-color: #0088CC; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #8C6238;" data-parent-category-id="5" data-drop-close="true" class="badge-category --has-parent" title="Вопросы и особенности работы контейнера VPN АнтиЗапрета на своих серверах"><span class="badge-category__name">АнтиЗапрет на собственном сервере (self-hosted)</span></span></a>
+  </div>
+  <blockquote>
+    <a class="mention" href="/u/valdikss">@ValdikSS</a> и знатоки. 
+Хочу обсудить такую идею. 
+Вот, у нас получается есть два возможных вида подключения - tcp &amp; udp. 
+tcp мы не трогаем, оставляем его “под мобилки с 3G”. 
+Что если, мы udp будем использовать под проводной интернет? 
+Выдвигаю на обсуждение следующие твики antizapret.conf 
+
+Убираем comp-lzo
+
+
+txqueuelen поднимаем с 250 до 2000
+Добавляем 
+fast-io 
+sndbuf 512000 
+rcvbuf 512000 
+push “sndbuf 512000” 
+push “rcvbuf 512000” 
+ncp-disable
+
+
+на клиенте так же убираем comp-lzo. 
+Как в ци…
+  </blockquote>
+</aside>
+<p>
+предлагали ускорить правкой<br>
+/etc/openvpn/server/antizapret.conf</p>
+<p>что думаете на этот счёт?</p>
+<p>p.p.s: с его правками у меня вообще перестало всё подключаться</p>
+<p>в итоге “миксанул” с <a href="https://ntc.party/t/vpn/129/73" class="inline-onebox">Контейнер VPN АнтиЗапрета для установки на собственный сервер - #73 by kirill</a> и дело пошло<br>
+правильно, или нет, – не знаю, но ошибок не даёт</p>
+<p>lxc exec antizapret-vpn – nano /etc/openvpn/server/antizapret.conf</p>
+<p>• remove<br>
+comp-lzo</p>
+<p>• change<br>
+txqueuelen 2000<br>
+ncp-ciphers AES-128-GCM</p>
+<p>• add<br>
+sndbuf 524288<br>
+rcvbuf 524288<br>
+push “sndbuf 524288”<br>
+push “rcvbuf 524288”</p>
+<p>cipher AES-128-GCM</p>
+<p>fast-io<br>
+ncp-disable</p>
+<p>в .ovpn:</p>
+<p>• remove<br>
+comp-lzo</p>
+<p>• add<br>
+auth-nocache<br>
+cipher AES-128-GCM</p></td><td>2023-04-01T09:48:19.176Z</td></tr><tr><td>atc891</td><td><p>наконец-то дошли руки проверить, пофиксил bufferbloat, тест на waveform проходит успешно, но проблема осталась. На локации выход в интернет через опсоса, йота. Кстати, когда выключаю интерфейс опенвпн, гуи роутера, winbox, зависает, перезахожу и вижу, что опенвпн-клиент не вырубился и интерфейс все так же зависший, но консоль работает. Чтобы гуи заработало, приходится ребутать роутер по питанию. В файрволле правила с дефолтного конфига.</p></td><td>2023-04-21T16:57:12.807Z</td></tr><tr><td>atc891</td><td><p>ну, для меня не актуально, т.к. использую публичный сервер антизапрета, своего нет</p></td><td>2023-04-21T17:08:26.725Z</td></tr><tr><td>GCRaistlin</td><td><p>Перестает разрешать имена через секунды/минуты после подключения. В логе ничего. Win2k3 Server, OpenVPN 2.3.18.<br>
+Вернее, не разрешать перестает, а вообще отвечать: полученный адрес из подсети 10.224.x.x не пингуется.</p></td><td>2023-04-22T18:39:41.277Z</td></tr><tr><td>ValdikSS</td><td><p>Значит, вероятно, проблема не связана с DNS-резолвером.</p></td><td>2023-04-27T11:23:11.983Z</td></tr><tr><td>Gromily4(Gromily4)</td><td><p>При работающем антизапрете на роутере под DD-WRT перестал работать Planet VPN.<br>
+Если убрать и оставить провайдерские DNS, то все работает и подключается. Надо проверить почему не может работать.</p></td><td>2023-05-06T09:27:52.057Z</td></tr><tr><td>yatolkosprosit</td><td><p>У меня Firefox 112.0.2./Linux. Последнее время каждый раз сразу после старта Firefox не работает вообще ничего. Отключаю Антизапрет - начинают работать незаблокированные сайты. Через некоторое время включаю Антизапрет - незаблокированные сайты открываются, заблокироанные нет. Еще через некоторое время начинают открываться все сайты.</p></td><td>2023-05-07T14:26:00.338Z</td></tr><tr><td>ValdikSS</td><td><p>Речь про VPN? Если нет, проверьте, что PAC-файл скачивается, и что вы используете актуальную ссылку (с портом). Если не поможет, создайте новую тему с указанием всех данных.</p></td><td>2023-05-07T18:24:20.230Z</td></tr><tr><td>yatolkosprosit</td><td><p>У меня не VPN, а ссылка на PAC-файл. Но ссылка была без указания порта. Сейчас поменял, посмотрим на поведение.</p></td><td>2023-05-07T19:07:30.000Z</td></tr><tr><td>Gromily4(Gromily4)</td><td><p>А можно что-то сделать, чтобы Planet VPN работал при работающем антизапрете.<br>
+Раньше все нормально работало, но два дня назад перестало, пишет “ошибка подключения”.<br>
+Причем, если отключить антизапрет на роутере и оставить только провайдера, то проблем нет.</p>
+<p>zoogvpn работает даже с включенным антизапретом, browsec аналогично.<br>
+Но Planet VPN не проходит вообще никак.</p></td><td>2023-05-08T06:18:57.399Z</td></tr>
+    </table>
+      </body>
+    </html>

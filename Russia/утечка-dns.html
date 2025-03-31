@@ -1,0 +1,56 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>утечка-dns</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Chert228</td><td><p>Добрый вечерок. Купил VPS у вроде как нормального хостинга, находящийся в Финляндии, на базе Ubuntu 22.04, подключился на Windows 11 к серверу через Vless + Reality (клиент Nekoray, Singbox. Включен режим Tun, поставлен белый список для программ и сайтов), при проверке на <a href="http://dnsleaktest.com" rel="noopener nofollow ugc">dnsleaktest.com</a> один dns-сервер оказывается российским (физически нахожусь я в России), все остальные - финские (ну или реже - шведские, изредка вообще немецкие). Иногда все нормально - все сервера финские/шведские, иногда один российский среди них оказывается - такая картина что и при проксировании <a href="http://dnsleaktest.com" rel="noopener nofollow ugc">dnsleaktest.com</a>, что и без его проксирования. Какие есть возможные решения?</p></td><td>2024-10-31T18:40:53.124Z</td></tr><tr><td>0ka(0ka)</td><td><p>в сет.адаптерах в винде укажи днс 1.1.1.1 и в nekobox включить strict route в tun</p></td><td>2024-10-31T19:24:30.431Z</td></tr><tr><td>Chert228</td><td><p>Спасибо, помогло, ISP поменялся с гугловского на Cloudflare и ру адреса за 15 тестов я не увидел. На телефоне 1.1.1.1 стоял по умолчанию и тоже все отлично<br>
+p.s. ну ладно, один разок московский проскочил за множество проходов, но я на Урале и ладно</p></td><td>2024-11-01T07:05:30.833Z</td></tr><tr><td>Chert228</td><td><p>Если кому-нить поможет, то вот <img src="https://ntc.party/images/emoji/twitter/writing_hand.png?v=12" title=":writing_hand:" class="emoji" alt=":writing_hand:" loading="lazy" width="20" height="20">:</p>
+<ol>
+<li>“Параметры” - “Сеть и интернет” - “Internet” - “Назначение DNS-сервера” - включить “Ipv4” и в поле “Предпочтительный DNS-сервер” сменить с 8.8.8.8 на 1.1.1.1, после сохраниться и перезапустить пк.</li>
+<li>в Nekobox зайти в “Настройки” - “Настройки маршрутов” - “DNS” - поменять “Удаленный (remote) DNS” на 1.1.1.1, потом зайти в “Общие” - “Кастомные маршруты (global)” и включить Strict route:<br>
+{<br>
+“rules”: [<br>
+],<br>
+“strict_route”: true<br>
+}<br>
+<img src="https://ntc.party/images/emoji/twitter/writing_hand.png?v=12" title=":writing_hand:" class="emoji only-emoji" alt=":writing_hand:" loading="lazy" width="20" height="20"><br>
+После сохраниться и перезапустить клиент.</li>
+</ol></td><td>2024-11-01T07:18:05.541Z</td></tr><tr><td>0ka(0ka)</td><td><p>не важно какой адрес днс, главное что бы это был днс не от роутера. в настройках некобокса можно днс можно не менять</p></td><td>2024-11-01T15:07:17.962Z</td></tr><tr><td>dDmioko(Алексей Николаевич Анисимов)</td><td><p>Проверить итоговый конфиг можно через нажатие по подключению в nekobox: ПКМ =&gt; Share =&gt; Export sing-box config (Ctrl-E) =&gt; Copy core config<br>
+Произвёл указанную настройку - никак не повлияло на итоговый конфиг. И не удивительно: ведь настройка <code>strict_route</code> - это настройка inbounds tun соединения, судя из доков (<a href="https://sing-box.sagernet.org/configuration/inbound/tun/#strict_route" class="inline-onebox" rel="noopener nofollow ugc">Tun - sing-box</a>)</p>
+<p>Чтобы включить <code>strict_route</code> нужно зайти в Tun Settings и нажать на чекбокс Strict Route (слева направо он второй, на версии 4.0 beta4)</p>
+<p>Ну и в общем говоря в Custom route можно настроить только <code>rules</code>. Другие настройки там никак не действуют (в частности пробовал <code>rule_set</code> подключить). Для таких настроек уже надо нажать двойным кликом ЛКМ по соединению и открыть Custom Config Settings (находится над OK и Cancel). И там уже настраивать свои настройки <code>experimental</code>, <code>route</code>, <code>inbounds</code> и т.д.</p></td><td>2024-11-04T01:06:34.118Z</td></tr><tr><td>abc555</td><td><p>днс 1.1.1.1 я использовал лет 15 тому назад, ну не помню, с момента как он появился только, если честно, такая шляпа, я спрыгнул с него давным давно, а вы его только осваиваете или гугл днс который всё логирует, ну во всяком случаи открыто об говорит, а зная эту мутную контору что она из себя представляет, я так и не решился включать такой днс, пробовал ради интереса, но только ради интереса, ну а покупать где то там в финляндии у меня такое даже в голову ни разу не пришло, если есть лишняя капуста, лучше помогите вон пацанам на развитие тем по обходу, вот это было бы намного лучше, хотя это дело каждого и добровольное</p></td><td>2024-11-05T13:21:05.124Z</td></tr>
+    </table>
+      </body>
+    </html>

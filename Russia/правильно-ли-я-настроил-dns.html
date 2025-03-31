@@ -1,0 +1,311 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>правильно-ли-я-настроил-dns</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>erLCoder(Maksim)</td><td><p>Я поднял vless на панели 3x-ui, вот как выглядит мой конфиг</p>
+<pre><code class="lang-auto">{
+  "log": {
+    "access": "./access.log",
+    "dnsLog": true,
+    "error": "",
+    "loglevel": "info",
+    "maskAddress": ""
+  },
+  "api": {
+    "tag": "api",
+    "services": [
+      "HandlerService",
+      "LoggerService",
+      "StatsService"
+    ]
+  },
+  "inbounds": [
+    {
+      "tag": "api",
+      "listen": "127.0.0.1",
+      "port": 62789,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIP"
+      }
+    },
+    {
+      "tag": "blocked",
+      "protocol": "blackhole",
+      "settings": {}
+    },
+    {
+      "tag": "warp",
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1280,
+        "secretKey": "xxxxxxxxxxxx",
+        "address": [
+          "172.16.0.2/32",
+          "2606:4700:110:8dd1:5e3a:336d:8a38:cabc/128"
+        ],
+        "workers": 2,
+        "domainStrategy": "ForceIPv4",
+        "reserved": [
+          0,
+          123,
+          96
+        ],
+        "peers": [
+          {
+            "publicKey": "xxxxxx=",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "endpoint": "engage.cloudflareclient.com:2408",
+            "keepAlive": 0
+          }
+        ],
+        "noKernelTun": true
+      }
+    },
+    {
+      "tag": "dns-out",
+      "protocol": "dns",
+      "settings": {
+        "network": "udp",
+        "address": "127.0.0.1",
+        "port": 53,
+        "nonIPQuery": "drop",
+        "blockTypes": []
+      }
+    }
+  ],
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserDownlink": true,
+        "statsUserUplink": true
+      }
+    },
+    "system": {
+      "statsInboundDownlink": true,
+      "statsInboundUplink": true,
+      "statsOutboundDownlink": true,
+      "statsOutboundUplink": true
+    }
+  },
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": [
+          "api"
+        ],
+        "outboundTag": "api"
+      },
+      {
+        "type": "field",
+        "outboundTag": "blocked",
+        "protocol": [
+          "bittorrent"
+        ]
+      },
+      {
+        "type": "field",
+        "outboundTag": "blocked",
+        "domain": [
+          "geosite:category-ads-all"
+        ]
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:category-ru",
+          "geosite:google",
+          "vk.com"
+        ],
+        "outboundTag": "warp"
+      },
+      {
+        "type": "field",
+        "inboundTag": [
+          "dns-in"
+        ],
+        "outboundTag": "dns-out"
+      },
+      {
+        "type": "field",
+        "outboundTag": "direct",
+        "domain": [
+          "youtube.com",
+          "youtu.be"
+        ]
+      }
+    ]
+  },
+  "stats": {},
+  "dns": {
+    "servers": [
+      "localhost"
+    ],
+    "queryStrategy": "UseIP",
+    "tag": "dns-in"
+  },
+  "fakedns": null
+}
+</code></pre>
+<p>Я не могу понять почему в “Исходящие” на dns-out использовано 0/0 bytes. Как-то это странно. Если, что я использую nekoray</p></td><td>2025-01-16T18:31:47.536Z</td></tr><tr><td>0ka(0ka)</td><td><p>в nekoray по умолчанию DoH, protocol: dns это только udp dns</p></td><td>2025-01-16T19:39:59.801Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Короче как я понял махинации, которые я проделал на сервере в целом бесполезны.<br>
+Поставил вот <a href="https://1.1.1.1/dns-query" rel="noopener nofollow ugc">https://1.1.1.1/dns-query</a> в некорее. Вот такая картина примерно, а там еще есть галочка “Использовать DNS-объект” правильно ли я понял, что я могу туда впихнуть ипшник сервака с поднятым dns и юзать свой? Просто какие то проблемы с 8.8.8.8 и 1.1.1.1</p>
+<pre><code class="lang-auto">2025/01/16 19:47:05 DNS accepted https://1.1.1.1/dns-query [dns -&gt; proxy]
+2025/01/16 19:47:05 DNS accepted https://1.1.1.1/dns-query [dns -&gt; proxy]
+2025/01/16 19:47:05 DNS accepted https://1.1.1.1/dns-query [dns -&gt; proxy]
+2025/01/16 19:47:05 DNS accepted https://1.1.1.1/dns-query [dns -&gt; proxy]
+2025/01/16 19:47:05 DNS accepted https://1.1.1.1/dns-query [dns -&gt; proxy]
+2025/01/16 19:47:05 [Error] app/dns: failed to retrieve response for gateway-us-east1-b.discord.gg. &gt; Post "https://1.1.1.1/dns-query": context canceled
+2025/01/16 19:47:05 [Error] app/dns: failed to retrieve response for gateway-us-east1-b.discord.gg. &gt; Post "https://1.1.1.1/dns-query": context canceled
+2025/01/16 19:47:05 [Error] app/dns: failed to retrieve response for gateway-us-east1-b.discord.gg. &gt; Post "https://1.1.1.1/dns-query": context canceled
+2025/01/16 19:47:05 [Error] app/dns: failed to retrieve response for gateway-us-east1-b.discord.gg. &gt; Post "https://1.1.1.1/dns-query": context canceled
+2025/01/16 19:47:05 [Error] app/dns: failed to retrieve response for gateway-us-east1-b.discord.gg. &gt; Post "https://1.1.1.1/dns-query": context canceled
+2025/01/16 19:47:05 [Error] app/dns: failed to retrieve response for gateway-us-east1-b.discord.gg. &gt; Post "https://1.1.1.1/dns-query": context canceled
+</code></pre></td><td>2025-01-16T19:49:30.214Z</td></tr><tr><td>0ka(0ka)</td><td><p>ничего не понял. в чем проблема изначально и что вы пытались сделать?</p></td><td>2025-01-16T19:56:42.228Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>в логах некорея начались ошибки связанные с dns(как я полагаю не резольвит домены). Изначально стоял DoH в nekoray такой: <a href="https://8.8.8.8/dns-query" rel="noopener nofollow ugc">https://8.8.8.8/dns-query</a>. Начались ошибки, я выставил <a href="https://1.1.1.1/dns-query" rel="noopener nofollow ugc">https://1.1.1.1/dns-query</a> и все также продолжались подобные ошибки как из сообщения выше. Но в некорее есть галочка “Использовать DNS-объект” куда я вписал айпи сервера в таком виде и ошибки перестали сыпаться. Правильно ли я понимаю, что поднятый мной днс на сервере теперь используется некореем или не совсем так?</p>
+<pre><code class="lang-auto">{
+  "servers": [xxx.xxx.xxx.xxx]
+}
+</code></pre></td><td>2025-01-16T19:59:29.355Z</td></tr><tr><td>0ka(0ka)</td><td><p>Если у вас перестал работать DoH то значит вы что-то серьезно сломали.</p>
+<aside class="quote no-group" data-username="erLCoder" data-post="5" data-topic="14680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/erlcoder/48/13517_2.png" class="avatar"> erLCoder:</div>
+<blockquote>
+<p>Правильно ли я понимаю, что поднятый мной днс на сервере теперь используется некореем или не совсем так?</p>
+</blockquote>
+</aside>
+<p>я не вижу никакого днс сервера, я вижу сниффер днс в конфиге сервера который все запросы будет заворачивать на себя (а на сервере прописан localhost адрес, т.е. системный днс).</p>
+<p>советую вернуть некобокс в дефолт, переустановить панель, не трогать json конфиг и настроить всё через интерфейс, я не вижу ничего особенного для чего нужно было бы лезть в json</p></td><td>2025-01-16T20:04:04.933Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>я не лез в json, нужно было просто завернуть dns на сам сервак, ибо были утечки</p>
+<p>через bind9 я поставил днс и теперь айпи моего сервера можно использовать как днс, который в свою очередь отправляет все на 8.8.8.8 и 8.8.4.4</p></td><td>2025-01-16T20:08:05.973Z</td></tr><tr><td>0ka(0ka)</td><td><p>чтобы небыло утечки на клиенте то в некобоксе включите strict route в tun settings, еще скорее всего в винде нужно прописать dns 1.1.1.1 или любой другой (кроме днс с роутера), для ipv6 убрать днс вообще.</p>
+<p>чтобы увидеть куда утечка то смотреть надо через wireshark</p></td><td>2025-01-16T20:11:42.922Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="erLCoder" data-post="7" data-topic="14680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/erlcoder/48/13517_2.png" class="avatar"> erLCoder:</div>
+<blockquote>
+<p>через bind9 я поставил днс и теперь айпи моего сервера можно использовать как днс</p>
+</blockquote>
+</aside>
+<p>ничего непонятно</p></td><td>2025-01-16T20:13:12.255Z</td></tr><tr><td>roman_sv</td><td><aside class="quote no-group" data-username="erLCoder" data-post="5" data-topic="14680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/erlcoder/48/13517_2.png" class="avatar"> erLCoder:</div>
+<blockquote>
+<p>ошибки связанные с dns</p>
+</blockquote>
+</aside>
+<p>Если там ошибки с узлами googlevideo, то это норма. И вообще это не ошибки. Можно не верить логу в плане днс эрроров. Они есть и в чистом сингбоксе, и в клэш на роутере. И на стабильных версиях, и на бетах, и на альфах и уже целый год на любых версиях. И под виндой, и под лоинуксом. Хз из-за чего он серет в логи днс ошибками, но можно игнорить их.</p>
+<p>Скорее всего он пишет днс эррор из-за того, что узел послал нафиг (а чаще всего в обычных ситуациях это происходит с упомянутым гугл видео - открой браузер в режиме разраба и помониторь - часто шуруют ошибки 400, вот именно они и считаются как днс эррор, наверное). Но это не значит, что есть какие-то проблемы с резолвингом. Если в браузере всегда все сайты открываются и ни разу не было такого, что “адрес не найден”, то всё ок.</p>
+<p>А прописывать надо именно CF по DOH-(3). С ним лучше работает.<br>
+Дох3 в плане конспирации, наверное, плохой вариант, ибо там udp используется. А udp внутри влеса это палево для очень продвинутого DPI. У нас это пока не проблема и ближайшие годы проблемой не будет. Обычный DOH (не 3) юзает TCP.</p></td><td>2025-01-17T03:01:25.486Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Вот у меня как раз бывает, что не резольвит, прям браузер иногда выдает ошибку и приходится перезагружать страницу. Ещё было дело заходил на игровой сервер и просто было бесконечное подключение, только выключил некорей и сразу все подконнектило. Вчера удалил из конфига DNS, который настроил перезагрузил сервер и было все норм с ошибками, сейчас запустил на компе некорей, насерело ошибками так как никогда еще</p></td><td>2025-01-17T03:24:57.618Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Кроме того заметил перебои на мобильной сети оператора Билайн с ютубом в Москве и области, помню в конце декабря ставил xtls-rprx-vision в flow и стало лучше тогда. Сейчас же нереально смотреть Ютуб, несмотря на то что стоит xtls, как будто без него сижу</p></td><td>2025-01-17T05:02:03.843Z</td></tr><tr><td>souvenir</td><td><aside class="quote no-group" data-username="erLCoder" data-post="7" data-topic="14680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/erlcoder/48/13517_2.png" class="avatar"> erLCoder:</div>
+<blockquote>
+<p>через bind9 я поставил днс и теперь айпи моего сервера можно использовать как днс, который в свою очередь отправляет все на 8.8.8.8 и 8.8.4.4</p>
+</blockquote>
+</aside>
+<p>Ничего толком не понятно, а в самой системе у вас как doh настроен? CF или Гугл?</p></td><td>2025-01-17T06:07:23.540Z</td></tr><tr><td>skyrunner(name)</td><td><p>я сделал тоже самое, только отправляю все на 127.0.0.1</p></td><td>2025-01-17T06:13:37.801Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>ну грубо говоря можно в настройках адаптера в windows выставить этот днс, doh не настраивал, но я убрал из конфигурации сервера всю муть что сделал и ошибки уже реже сыпет. Но на мобильном интернете беда с ютубом полная в Москве, мне кажется, что тут в целом весь траффик затормаживают</p></td><td>2025-01-17T06:25:01.985Z</td></tr><tr><td>0ka(0ka)</td><td><p>Никакого затормаживания нет. Проблема в настройке сервера и/или клиента</p></td><td>2025-01-17T09:10:19.737Z</td></tr><tr><td>0ka(0ka)</td><td><p>Выводы абсолютно неверные. Http коды и ошибки днс совершенно разные вещи. Прописывать можно любой днс, они все работают нормально если у вас нигде нет косяков.</p></td><td>2025-01-17T09:14:16.216Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Я просто так предположил, потому что дома с мобильного интернета и проводного все хорошо, только выхожу из дома и еду в Москву, как начинается свистопляска и телеграм, тик ток, ютуб(причем соединение есть, просто видео начинает тормозить из-за нехватки буфера) сразу начинают дико тупить</p></td><td>2025-01-17T13:18:23.203Z</td></tr><tr><td>0ka(0ka)</td><td><p>на варпе тоже самое?</p></td><td>2025-01-17T13:48:37.294Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Я и с варпом пробовал и без него, не работает. Вот поэтому я и выдвинул свои смелые предположения, уже не знаю, что делать</p>
+<p>P.S в некорее я плюс минус понял и пофиксил большинство ошибок. У меня “final dns out” стоял “proxy”, выставив “bypass” все стало лучше, также я поставил днс для “прямых” запросов не localhost, а <a href="https://223.5.5.5/dns-query" rel="noopener nofollow ugc">https://223.5.5.5/dns-query</a></p></td><td>2025-01-17T13:52:07.210Z</td></tr><tr><td>0ka(0ka)</td><td><p>я про варп через amneziaWG, прямой варп без некорея и личной впс</p></td><td>2025-01-17T14:00:15.881Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="erLCoder" data-post="20" data-topic="14680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/erlcoder/48/13517_2.png" class="avatar"> erLCoder:</div>
+<blockquote>
+<p>У меня “final dns out” стоял “proxy”, выставив “bypass” все стало лучше</p>
+</blockquote>
+</aside>
+<p>и днс запросы пошли напрямую</p></td><td>2025-01-17T14:01:44.425Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="erLCoder" data-post="7" data-topic="14680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/erlcoder/48/13517_2.png" class="avatar"> erLCoder:</div>
+<blockquote>
+<p>через bind9 я поставил днс</p>
+</blockquote>
+</aside>
+<p>Рекомендую добавить опции в <em>named.conf</em>:</p>
+<pre><code class="lang-auto">	forward only;
+	stale-answer-enable yes;
+	stale-cache-enable yes;
+	stale-answer-ttl 3600; # 1 hour
+	max-stale-ttl 86400; # 24 hours
+	stale-refresh-time 86400; # 24 hours
+	stale-answer-client-timeout 500;
+</code></pre></td><td>2025-01-17T14:10:25.206Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>прошу прощения за тупняк, сейчас я уже не в Москве и не смогу к сожалению проверить работу через варп</p></td><td>2025-01-17T14:11:02.795Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Только что опробовал и через варп тоже еле дышит ютуб</p></td><td>2025-01-20T04:46:14.593Z</td></tr><tr><td>0ka(0ka)</td><td><p>а <a href="https://speedtest.selectel.ru/">спидтест</a>  сколько выдаёт?</p></td><td>2025-01-20T07:41:44.951Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Через VLESS: 9.75 мбит<br>
+через WARP: 2.26 мбит<br>
+напрямую: 1.13 мбит</p>
+<p>замеры провел в течение 5 минут и влесс два раза прогнал результат такой же</p>
+<p>P.S скорость на vless упала при повторном замере до 1.24 мбит</p></td><td>2025-01-20T08:03:23.841Z</td></tr><tr><td>0ka(0ka)</td><td><p>ну это пипец… хотя 480p должен работать и на 2х мбит</p></td><td>2025-01-20T08:11:18.682Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Ну все же ютуб уже не будет прежним в каком нибудь метро или электричке получается. Ибо глазу 480 смотреть не очень приятно, короче не знаю что делать</p></td><td>2025-01-20T08:12:44.338Z</td></tr><tr><td>0ka(0ka)</td><td><p>так ты пытался смотреть 1080p на 2х мегабитах?..</p>
+<aside class="quote no-group" data-username="erLCoder" data-post="29" data-topic="14680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/erlcoder/48/13517_2.png" class="avatar"> erLCoder:</div>
+<blockquote>
+<p>короче не знаю что делать</p>
+</blockquote>
+</aside>
+<p>проверь на другой симке, можно того же мегафона, у тебя может быть низкий приоритет если качаешь много и платишь мало</p></td><td>2025-01-20T08:20:50.640Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>ну влесс то выдал почти 10 хоть и недостаточно этого, оказывается она просидает вообще до 1 мбит я просто не попадал в этот момент на замерах, в этот раз повезло. А так у меня безлимитный пакет старый, вроде анлим назывался, может быть из-за безлимита, который сейчас проблематично получить насколько я помню из за пакета яровой</p></td><td>2025-01-20T08:29:42.752Z</td></tr><tr><td>0ka(0ka)</td><td><p>на 3g то пробовал переключать? или его нету там где нужен инет?</p></td><td>2025-01-20T08:34:02.679Z</td></tr><tr><td>uikono(uikono)</td><td><aside class="quote no-group" data-username="erLCoder" data-post="31" data-topic="14680">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/erlcoder/48/13517_2.png" class="avatar"> erLCoder:</div>
+<blockquote>
+<p>из за пакета яровой</p>
+</blockquote>
+</aside>
+<p>безлимиты поотменяли потому что дорого, и оборудование не резиновое xD<br>
+а в целом да, уже давненько ходят разговоры о том что на безлим тарифах режут скорость</p></td><td>2025-01-20T09:40:55.532Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>понимаешь в чем странность я живу в области в 40 км от Москвы и дома все отлично на мобилке, еду в Москву и когда здесь пребываю просто мандец полный, раньше не было такого что самое главное</p></td><td>2025-01-20T12:29:27.479Z</td></tr><tr><td>0ka(0ka)</td><td><p>просто там где ты живешь нет нагрузки на моб сеть</p></td><td>2025-01-20T13:59:34.410Z</td></tr><tr><td>rockyjourney</td><td><p>Такая же ошибка в nekobox:</p>
+<pre><code class="lang-auto">dns: exchange failed for example.org. IN AAAA: Post "https://1.1.1.1/dns-query": dial tcp [VPS IP ADDRESS]:443: i/o timeout
+dns: exchange failed for example.org in AAAA: Post "https://1.1.1.1/dns-query": context canceled
+</code></pre>
+<p>При этом это случается только с домашнего WIFI. Если я через USB с телефона раздам мобильный интернет, ошибка пропадает, все грузится ОК.</p>
+<p>При этом на мобильном на тот же ВПС еще подключен OpenVPN. Он тоже работает с мобильной связи, не может подключиться с WIFI.</p>
+<p>Это происходит переодически, не каждый день.</p>
+<p>В чем прикол, кто-нибудь понимает, сталкивался?</p>
+<p>Может ли быть такое, что провайдер перехватывает и подменяет DNS?</p></td><td>2025-03-19T21:29:37.040Z</td></tr><tr><td>0ka(0ka)</td><td><p>Https dns который еще и через vless никто никогда не перехватит. В зацензуреной строке точно ip а не домен типа duckdns? Если домен, то советую отказаться и пользоваться ip адресом</p></td><td>2025-03-20T01:35:23.640Z</td></tr><tr><td>chupasaurus</td><td><p>Я примерно во время вашего поста обнаружил отвал DoH у 1.1.1.1, причём не в РФ, так что просто совпадение.</p></td><td>2025-03-20T08:11:21.658Z</td></tr><tr><td>rockyjourney</td><td><p>Да, там IP</p></td><td>2025-03-20T12:06:02.247Z</td></tr><tr><td>rockyjourney</td><td><p>1.1.1.1 это был фикс. Сначала стоял 8.8.8.8. Перестал работать вчера, попробовал изменить на 1.1.1.1 - та же самая ошибка (указанная выше). Так что хз. Отвал продлился 2-3 часа, потом все работало ОК. Такое случается не первый раз.</p></td><td>2025-03-20T12:07:14.095Z</td></tr>
+    </table>
+      </body>
+    </html>

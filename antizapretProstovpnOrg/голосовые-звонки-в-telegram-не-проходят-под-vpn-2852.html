@@ -1,0 +1,95 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>голосовые-звонки-в-telegram-не-проходят-под-vpn-2852</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>unxed(Unxed)</td><td><ul>
+<li>Тип настройки: VPN</li>
+<li>Тип проблемы: не проходят голосовые звонки в мобильном Telegram при установленном VPN соединении</li>
+<li>Что с сайтом: уведомление о звонке проходит, а само голосовое соединение не устанавливается</li>
+<li>Используемый браузер: стандартный мобильный Телеграм из Play Market’а</li>
+</ul></td><td>2022-07-20T15:28:18.825Z</td></tr><tr><td>ValdikSS</td><td><p>Попробуйте подключиться к VPN вот с этим конфигурационным файлом:<br>
+<a class="attachment" href="голосовые-звонки-в-telegram-не-проходят-под-vpn-2852/pywKzx3XqeL6JUNa5PpKYWgRwfi.ovpn">antizapret-tcp_nothing.ovpn</a> (6.3 KB)</p>
+<p>Это файл-пустышка: он только подключается к серверу, но не устанавливает ни маршрутов, ни DNS.<br>
+Если при подключении к нему проблемы останутся, то это ошибка в приложении Telegram. Скорее всего, связанная с определением IP-адреса для пробива NAT — возможно, разработчики предположили, что VPN-соединение не может не пропускать весь трафик.</p></td><td>2022-07-20T15:56:06.063Z</td></tr><tr><td>unxed(Unxed)</td><td><p>С antizapret-tcp_nothing.ovpn проблема осталась. Спасибо за подсказку! Баг в ТГ:<br>
+<a href="https://bugs.telegram.org/c/19158" class="onebox" target="_blank" rel="noopener nofollow ugc">https://bugs.telegram.org/c/19158</a></p></td><td>2022-07-20T17:43:55.517Z</td></tr><tr><td>ValdikSS</td><td><p>У вас, кстати, какой OpenVPN-клиент: OpenVPN Connect или OpenVPN for Android?</p>
+<p>Давайте я помогу вам с написанием правильного сообщения об ошибке.</p>
+<h4>
+<a name="voice-calls-are-not-working-when-local-only-split-tunneling-vpn-is-connected-1" class="anchor" href="#voice-calls-are-not-working-when-local-only-split-tunneling-vpn-is-connected-1"></a>Voice calls are not working when local-only (split-tunneling) VPN is connected</h4>
+<p>Voice calls are not working with “antizapret” VPN when using private IPs (like 192.168.X.X). Antizapret is a free VPN service used by people in Russia to bypass censorship, but unlike regular VPN, it works like a split-tunneling VPN: it does not set default route, it does not redirect all users’ traffic.<br>
+Its OpenVPN configuration file: <a href="https://antizapret.prostovpn.org/antizapret-tcp.ovpn">https://antizapret.prostovpn.org/antizapret-tcp.ovpn</a></p>
+<p>The bug is reproducible with a minimum OpenVPN configuration which provides only internal network access, and does not install any additional routes or change DNS.</p>
+<p>Antizapret support suggests that the bug is most likely related to determining source IP address the call/NAT punching — perhaps Telegram developers believed that when a VPN connection is established, it always redirect all the traffic, which is not true in the case of this service. If this assumption is correct, then there’s a bug in Telegram: it should use source IP of (or bind to) the internet interface, not the VPN interface.<br>
+<code>https://ntc.party/t/telegram-vpn/2852</code></p>
+<p>Steps to reproduce</p>
+<ul>
+<li>Connect to the Internet using “gray” IP (like 192.168.X.X)</li>
+<li>Install OpenVPN client app</li>
+<li>Add VPN configuration from this file: <a href="https://antizapret.prostovpn.org/antizapret-tcp.ovpn">https://antizapret.prostovpn.org/antizapret-tcp.ovpn</a>
+</li>
+<li>Connect to VPN</li>
+<li>Try to make a voice call via Telegram</li>
+</ul></td><td>2022-07-20T17:58:21.019Z</td></tr><tr><td>unxed(Unxed)</td><td><p>OpenVPN Connect</p></td><td>2022-07-20T23:18:50.634Z</td></tr><tr><td>ValdikSS</td><td><p>Попробуйте OpenVPN for Android, чтобы убедиться в наличии той же проблемы.<br>
+В качестве временного решения можно исключить OpenVPN из списка использования VPN, в OpenVPN for Android есть такая функция.</p></td><td>2022-07-21T00:08:17.492Z</td></tr><tr><td>unxed(Unxed)</td><td><blockquote>
+<p>is most likely related to determining source IP address the call/NAT punching</p>
+</blockquote>
+<p>Вот это звучит немного странно, здесь точно нет ошибки?</p>
+<blockquote>
+<p>Попробуйте OpenVPN for Android</p>
+</blockquote>
+<p>Попробую, спасибо!</p></td><td>2022-07-21T06:38:41.395Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="unxed" data-post="7" data-topic="2852">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/unxed/48/1627_2.png" class="avatar"> unxed:</div>
+<blockquote>
+<p>Вот это звучит немного странно, здесь точно нет ошибки?</p>
+</blockquote>
+</aside>
+<p>Не могу сказать, как это реализовано в Telegram, но в браузерах WebRTC байндится на разные локальные IP/интерфейсы в процессе ICE, т.к. пиры могут быть внутри одной локальной сети/одного NAT/CGNAT, а интерфейсов может быть несколько.</p></td><td>2022-07-21T08:24:05.195Z</td></tr><tr><td>unxed(Unxed)</td><td><blockquote>
+<p>Попробуйте OpenVPN for Android</p>
+</blockquote>
+<p>Симптомы те же</p>
+<blockquote>
+<p>Не могу сказать, как это реализовано в Telegram</p>
+</blockquote>
+<p>Я там в тикете оставил ссылку сюда в любом случае</p>
+<blockquote>
+<p>В качестве временного решения можно исключить OpenVPN из списка использования VPN, в OpenVPN for Android есть такая функция.</p>
+</blockquote>
+<p>Это где там в настройках такое? Не могу сообразить.</p>
+<p>UPD: А, в смысле, Telegram включить в список приложений, разботающих без VPN? Ну такое, а если его заблокируют завтра?</p></td><td>2022-07-22T10:54:26.900Z</td></tr>
+    </table>
+      </body>
+    </html>

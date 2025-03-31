@@ -1,0 +1,174 @@
+[
+    {
+        "id": 1076,
+        "name": "",
+        "username": "tango",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/t/e36b37/{size}.png",
+        "created_at": "2020-03-31T17:44:42.739Z",
+        "cooked": "<p>An End-to-End, Large-Scale Measurement of DNS-over-Encryption: How Far Have We Come?<br>\nChaoyi Lu, Baojun Liu, Zhou Li, Shuang Hao, Haixin Duan, Mingming Zhang, Chunying Leng, Ying Liu, Zaifeng Zhang, Jianping Wu<br>\n<a href=\"https://dnsencryption.info/imc19-doe.html\" class=\"onebox\" target=\"_blank\" rel=\"nofollow noopener\">https://dnsencryption.info/imc19-doe.html</a></p>\n<p>This paper is an early view of the state of various forms of encrypted DNS, collectively referred to as DNS-over-Encryption, as of early 2019. Its main focus is <a href=\"https://tools.ietf.org/html/rfc7858\" rel=\"nofollow noopener\">DNS over TLS</a> (DoT) and <a href=\"https://tools.ietf.org/html/rfc8484\" rel=\"nofollow noopener\">DNS over HTTPS</a> (DoH). The authors scan for and count public DoT and DoH resolvers, test their worldwide reachability and performance, and attempt to quantify how much the protocols are used by end users. DoT and DoH provide satisfactory quality of service, and are less likely to be disrupted than traditional plaintext DNS. Use of DNS-over-Encryption is small compared to plaintext DNS, but growing.</p>\n<p>The paper begins with background on several forms of encrypted DNS. Besides DoT and DoH, the authors describe <a href=\"https://tools.ietf.org/html/rfc8094\" rel=\"nofollow noopener\">DNS-over-DTLS</a>, <a href=\"https://tools.ietf.org/html/draft-huitema-dprive-dnsoquic-00\" rel=\"nofollow noopener\">DNS-over-QUIC</a>, and <a href=\"https://dnscrypt.info/\" rel=\"nofollow noopener\">DNSCrypt</a>. Of these, only DoT and DoH are standardized by the IETF and have large public resolvers.</p>\n<p>The first step in the research was to find public DoT and DoH resolvers. The authors found DoT resolvers using ZMap scans for TCP port 853, followed by test queries to verify DNS protocol support. They scanned every 10 days for two months, finding about 1,500 public DoT servers in each scan. DoH is harder to scan for because it shares port 443 with ordinary HTTPS. So instead of live scans, they queried an industrial URL database for HTTPS URLs containing <code>/dns-query</code> or <code>/resolve</code>, which are conventional of DoH, similarly with followup verification queries. They found 17 public DoH servers, of which all but two were already documented in the <a href=\"https://dnsprivacy.org/wiki/display/DP/DNS+Privacy+Public+Resolvers\" rel=\"nofollow noopener\">DNS Privacy Project</a> and <a href=\"https://github.com/curl/curl/wiki/DNS-over-HTTPS##publicly-available-servers\" rel=\"nofollow noopener\">curl wiki</a> lists. Large providers accounted for 75% of the discovered DoT resolvers, but there was a long tail of operators running only one or a few resolvers.</p>\n<p>The next step was to test the discovered resolvers’ reachability and performance. For vantage points the authors used two commercial SOCKS proxy services: <a href=\"https://www.proxyrack.com/\" rel=\"nofollow noopener\">ProxyRack</a>, which provides access to 166 countries; and <a href=\"http://h.zhimaruanjian.com/\" rel=\"nofollow noopener\">Zhima</a>, which is only in China (chosen because DNS tampering is known to be pervasive in China). From these vantages they sent DoT, DoH, and plaintext TCP DNS queries to four resolvers: <a href=\"https://cloudflare-dns.com/\" rel=\"nofollow noopener\">Cloudflare</a> at 1.1.1.1, <a href=\"https://developers.google.com/speed/public-dns\" rel=\"nofollow noopener\">Google Public DNS</a> at 8.8.8.8, <a href=\"https://www.quad9.net/\" rel=\"nofollow noopener\">Quad9</a> at 9.9.9.9, and a private resolver they set up themselves. The use of SOCKS proxies unfortunately precluded testing plaintext UDP DNS, but the authors argue that the performance of TCP DNS is similar, once a persistent TCP connection is established. The results of these tests appear in <a href=\"https://dnsencryption.info/imc19-doe.pdf#page=9\" rel=\"nofollow noopener\">Table 4</a>, which is worth studying for a bit. DNS-over-Encryption is overall more than 99% reachable, which is better than plaintext DNS. A surprising 16% of clients cannot access plaintext DNS at 1.1.1.1 (mostly in Indonesia, Vietnam, and India), but the failure rate drops to 1% with DoT. This is possibly because of DNS interception devices that can handle plaintext DNS but not DoT. In China, nearly all clients can access Google’s plaintext resolver at 8.8.8.8, but none can reach its DoH resolver. (Tests of DoT in China were not available.) While 8.8.8.8 is not blocked in China, the DoH server name (<a href=\"https://developers.google.com/speed/public-dns/docs/doh/migration\" rel=\"nofollow noopener\">formerly</a> dns.google.<a></a>com, now dns.<a></a>google) resolves to some other IP address that is blocked under the China-wide ban of Google addresses. Cloudflare’s 1.1.1.1 is generally somewhat less reachable than other resolvers because of network equipment that wrongly treats 1.1.1.1 as a private or internal address. The Quad9 DoH resolver failed 13% of queries because of a too-short timeout.</p>\n<p>Regarding performance, DoT and DoH add only a few milliseconds of latency over plaintext TCP DNS in the case where connections are reused. If connections are not reused, the added latency may be hundreds of milliseconds. Connection reuse is critical for performance, but also widely implemented and common.</p>\n<p>The last part of the paper is an attempt to quantify how much DoT and DoH are used. For DoT, the authors looked at 1.5 years of netflow data from a Chinese ISP on port 853, retaining flows that matched the IP address of one of the known DoT resolvers. Use of DoT was only about 0.1%–1.0% that of plaintext DNS, but increasing. DoH usage is not easy to infer from netflow data because it does not use a separate port number. Instead the authors approximated the usage of public DoH servers by taking advantage of DNS itself: they searched the <a href=\"https://www.farsightsecurity.com/solutions/dnsdb/\" rel=\"nofollow noopener\">DNSDB</a> and <a href=\"https://passivedns.cn/help/\" rel=\"nofollow noopener\">360 PassiveDNS</a> passive DNS databases for queries for the hostnames of known DoH servers. Only four domains had more than 10,000 queries: dns.google.<a></a>com, mozilla.cloudflare-dns.<a></a>com, doh.cleanbrowsing.<a></a>org, and doh.crypto.<a></a>sx. Google’s hostname was the most queried and the Firefox-specific Cloudflare name was second; all were growing.</p>\n<p>Thanks to Chaoyi Lu for commenting on a draft of this summary.</p>",
+        "post_number": 1,
+        "post_type": 1,
+        "posts_count": 1,
+        "updated_at": "2020-03-31T17:46:56.511Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 19,
+        "reads": 8,
+        "readers_count": 7,
+        "score": 96.6,
+        "yours": false,
+        "topic_id": 417,
+        "topic_slug": "paper-summary-an-end-to-end-large-scale-measurement-of-dns-over-encryption-how-far-have-we-come-imc-19",
+        "display_username": "",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "badges_granted": [],
+        "version": 1,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": false,
+        "can_wiki": false,
+        "link_counts": [
+            {
+                "url": "https://dnsencryption.info/imc19-doe.html",
+                "internal": false,
+                "reflection": false,
+                "title": "DNS-over-Encryption (IMC '19)",
+                "clicks": 2
+            },
+            {
+                "url": "https://tools.ietf.org/html/rfc8484",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 8484 - DNS Queries over HTTPS (DoH)",
+                "clicks": 0
+            },
+            {
+                "url": "https://tools.ietf.org/html/rfc8094",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 8094 - DNS over Datagram Transport Layer Security (DTLS)",
+                "clicks": 0
+            },
+            {
+                "url": "https://tools.ietf.org/html/draft-huitema-dprive-dnsoquic-00",
+                "internal": false,
+                "reflection": false,
+                "title": "draft-huitema-dprive-dnsoquic-00 - Specification of DNS over Dedicated QUIC Connections",
+                "clicks": 0
+            },
+            {
+                "url": "https://github.com/curl/curl/wiki/DNS-over-HTTPS##publicly-available-servers",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://dnscrypt.info/",
+                "internal": false,
+                "reflection": false,
+                "title": "Home page of the DNSCrypt project [DNS security]",
+                "clicks": 0
+            },
+            {
+                "url": "https://www.proxyrack.com/",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://dnsprivacy.org/wiki/display/DP/DNS+Privacy+Public+Resolvers",
+                "internal": false,
+                "reflection": false,
+                "title": "DNS Privacy Public Resolvers - DNS Privacy Project - Global Site",
+                "clicks": 0
+            },
+            {
+                "url": "https://tools.ietf.org/html/rfc7858",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 7858 - Specification for DNS over Transport Layer Security (TLS)",
+                "clicks": 0
+            },
+            {
+                "url": "https://developers.google.com/speed/public-dns",
+                "internal": false,
+                "reflection": false,
+                "title": "Public DNS  |  Google Developers",
+                "clicks": 0
+            },
+            {
+                "url": "https://www.quad9.net/",
+                "internal": false,
+                "reflection": false,
+                "title": "Quad9 DNS: Internet Security and Privacy in a Few Easy Steps",
+                "clicks": 0
+            },
+            {
+                "url": "https://developers.google.com/speed/public-dns/docs/doh/migration",
+                "internal": false,
+                "reflection": false,
+                "title": "Migration to anycast and RFC 8484 DoH  |  Public DNS  |  Google Developers",
+                "clicks": 0
+            },
+            {
+                "url": "https://www.farsightsecurity.com/solutions/dnsdb/",
+                "internal": false,
+                "reflection": false,
+                "title": "Passive DNS historical internet database: Farsight DNSDB",
+                "clicks": 0
+            },
+            {
+                "url": "http://h.zhimaruanjian.com/",
+                "internal": false,
+                "reflection": false,
+                "title": "芝麻HTTP官网：高匿HTTP代理IP,SOCKS5代理IP,360天IP去重服务",
+                "clicks": 0
+            },
+            {
+                "url": "https://dnsencryption.info/imc19-doe.pdf#page=9",
+                "internal": false,
+                "reflection": false,
+                "clicks": 0
+            },
+            {
+                "url": "https://passivedns.cn/help/",
+                "internal": false,
+                "reflection": false,
+                "title": "About-passiveDNS",
+                "clicks": 0
+            },
+            {
+                "url": "https://cloudflare-dns.com/",
+                "internal": false,
+                "reflection": false,
+                "title": "1.1.1.1 — The free app that makes your Internet faster.",
+                "clicks": 0
+            }
+        ],
+        "read": true,
+        "user_title": "dnstt developer",
+        "title_is_group": false,
+        "bookmarked": false,
+        "actions_summary": [],
+        "moderator": false,
+        "admin": false,
+        "staff": false,
+        "user_id": 26,
+        "hidden": false,
+        "trust_level": 3,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": false,
+        "wiki": false,
+        "post_url": "/t/paper-summary-an-end-to-end-large-scale-measurement-of-dns-over-encryption-how-far-have-we-come-imc-19/417/1",
+        "can_translate": false
+    }
+]

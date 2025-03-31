@@ -1,0 +1,531 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>in-case-snowflake-rendezvous-gets-blocked</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p><a href="https://ntc.party/t/in-case-snowflake-rendezvous-gets-blocked/1857/2">Русская версия</a></p>
+<p>Snowflake is known for using WebRTC, but there is a phase called <a href="https://www.bamsoftware.com/papers/thesis/#sec:snowflake-design"><em>rendezvous</em></a> before the WebRTC phase. The rendezvous phase and the WebRTC may be attacked separately. In case the default rendezvous (based on domain fronting) is blocked, there is a backup. But there is no easy way to enable the backup: you have to edit a configuration file.</p>
+<p>Open the Tor Browser folder and find the torrc-defaults file:</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>platform</th>
+<th>location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>linux</td>
+<td>Browser/TorBrowser/Data/Tor/torrc-defaults</td>
+</tr>
+<tr>
+<td>windows</td>
+<td>Browser\TorBrowser\Data\Tor\torrc-defaults</td>
+</tr>
+<tr>
+<td>osx</td>
+<td>Contents/Resources/TorBrowser/Tor/torrc-defaults</td>
+</tr>
+</tbody>
+</table>
+</div><p>Find the part that says:</p>
+<pre><code class="lang-plaintext">## snowflake configuration
+ClientTransportPlugin snowflake exec ...
+</code></pre>
+<p>Remove the following options from the line:</p>
+<pre><code class="lang-plaintext">-url https://snowflake-broker.torproject.net.global.prod.fastly.net/ -front cdn.sstatic.net
+</code></pre>
+<p>And replace them with these options:</p>
+<pre><code class="lang-plaintext">-url https://snowflake-broker.torproject.net/ -ampcache https://cdn.ampproject.org/ -front www.google.com
+</code></pre>
+<p>Leave all the other options the same. Then start Tor Browser, and <a href="https://tb-manual.torproject.org/circumvention/#using-pluggable-transports">configure it to use Snowflake as a bridge</a> at <code>about:preferences#tor</code>.</p>
+<p>In place of <code>-front www.google.com</code>, you can try other Google domains.</p>
+<p>For extra debugging information, you can add the options <code>-log snowflake.log -log-to-state-dir</code>. Search for a file called snowflake.log.</p>
+<p>The torrc-defaults file will be overwritten when Tor Browser self-upgrades, and you will have to apply the change again.</p>
+<p>Information on how the backup rendezvous works: <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/50#overview">AMP cache rendezvous#Overview</a>.</p></td><td>2022-03-07T02:01:40.614Z</td></tr><tr><td>tango</td><td><p>Snowflake, как известно, использует технологию WebRTC. Но перед фазой WebRTC есть фаза, которя называется <a href="https://www.bamsoftware.com/papers/thesis/#sec:snowflake-design"><em>rendezvous</em></a>. Фазы <em>rendezvous</em> и WebRTC могут быть атакованы по отдельности. В случае, если <em>rendezvous</em> используемый по умолчанию (основанный на доменном прикрытии) будет заблокирован, есть запасной вариант. Но не существует простого способа включить резервный процесс: необходимо отредактировать файл конфигурации.</p>
+<p>Для этого откройте папку Tor Browser и найдите используемый по умолчанию файл torrc:</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>platform</th>
+<th>location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>linux</td>
+<td>Browser/TorBrowser/Data/Tor/torrc-defaults</td>
+</tr>
+<tr>
+<td>windows</td>
+<td>Browser\TorBrowser\Data\Tor\torrc-defaults</td>
+</tr>
+<tr>
+<td>osx</td>
+<td>Contents/Resources/TorBrowser/Tor/torrc-defaults</td>
+</tr>
+</tbody>
+</table>
+</div><p>Найдите строчки кода, которые начинаются с:</p>
+<pre><code class="lang-nohighlight">## snowflake configuration
+ClientTransportPlugin snowflake exec ...
+</code></pre>
+<p>Удалите следующую часть кода:</p>
+<pre><code class="lang-nohighlight">-url https://snowflake-broker.torproject.net.global.prod.fastly.net/ -front cdn.sstatic.net
+</code></pre>
+<p>И замените его на этот код:</p>
+<pre><code class="lang-nohighlight">-url https://snowflake-broker.torproject.net/ -ampcache https://cdn.ampproject.org/ -front www.google.com
+</code></pre>
+<p>Оставьте все остальные опции без изменений. Затем запустите Tor Browser и настройте его на <a href="https://tb-manual.torproject.org/ru/circumvention/#ispolzovanie-podkliuchaemykh-transportov">использование Snowflake в качестве моста</a>. Это можно сделать здесь: <code>about:preferences#tor</code>.</p>
+<p>Вместо <code>-front www.google.com</code> вы можете использовать другие доменты Google.</p>
+<p>Для получения дополнительной отладочной информации вы можете добавить в файл torrc следующий код <code>-log snowflake.log -log-to-state-dir</code>. Так логи будут сохраняться в файле с названием snowflake.log.</p>
+<p>При автоматическом обновлении браузера Tor файл torrc будет перезаписан на вариант, который используется браузером по умолчанию, поэтому все описанные выше изменения нужно будет вносить снова.</p>
+<p>Информация о том, как работает резервный процесс <em>rendezvous</em>: <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/50#overview">AMP cache rendezvous#Overview</a>.</p>
+<p>Перевод сделан <a class="mention" href="/u/nina">@Nina</a>.</p></td><td>2022-03-07T16:59:35.350Z</td></tr><tr><td>anon94384997</td><td><p>Мне кажется, snowflake заблокировали или проблемы только у меня? Проверьте, если не трудно.</p></td><td>2022-07-18T18:23:46.259Z</td></tr><tr><td>anon94384997</td><td><p>А чего все молчат? По моим наблюдениям, заблокировали все-таки snowflake. На уровне dtls (webrtc) протокола. Версия свежая, под VPN соединяется, напрямую нет. Метод выше тоже пробовал. Siberia, Yota.</p>
+<p>Wireshark:<br>
+STUN Binding Request<br>
+DTLSv1.2 Client Hello<br>
+DTLSv1.2 Hello Verify Request<br>
+…</p>
+<p>Tor:<br>
+10:10:28 Bootstrapped 1% (conn_pt): Connecting to pluggable transport<br>
+10:10:28 Bootstrapped 2% (conn_done_pt): Connected to pluggable transport<br>
+10:10:28 Bootstrapped 10% (conn_done): Connected to a relay<br>
+10:10:36 snowflake-client: offer created<br>
+10:10:38 snowflake-client: broker rendezvous peer received<br>
+10:10:48 snowflake-client: connection failed timeout waiting for DataChannel.OnOpen<br>
+10:10:53 snowflake-client: offer created<br>
+10:10:54 snowflake-client: broker rendezvous peer received<br>
+10:11:04 snowflake-client: connection failed timeout waiting for DataChannel.OnOpen<br>
+10:11:09 snowflake-client: offer created<br>
+10:11:11 snowflake-client: broker rendezvous peer received<br>
+10:11:21 snowflake-client: connection failed timeout waiting for DataChannel.OnOpen<br>
+…<br>
+10:12:15 snowflake-client: offer created<br>
+10:12:16 snowflake-client: broker rendezvous peer received<br>
+10:12:26 snowflake-client: connection failed timeout waiting for DataChannel.OnOpen<br>
+10:12:28 Delaying directory fetches: No running bridges<br>
+…<br>
+10:15:28 Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 1; recommendation warn; host 2B280B23E1107BB62ABFC40DDCC8824814F80A72 at 192.0.2.3:1)<br>
+10:15:28 1 connections have failed:<br>
+10:15:28 1 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE<br>
+10:15:28 Pluggable Transport process terminated with status code 0</p>
+<p>Может быть это связано с этим:<br>
+<a href="https://ntc.party/t/a-new-snowflake-blocking-rule-offset-of-supported-groups-in-dtls-client-hello/2420">A new Snowflake blocking rule (offset of supported_groups in DTLS Client Hello</a><br>
+<a href="https://ntc.party/t/webrtc/2174/">Проблемы в работе ПО использующего WebRTC</a></p>
+<p>Оффтоп: Похоже, meek тоже заблокирован. Работает только самосборная standalone версия с нестандартными параметрами, конечно, очень медленно.<br>
+И Psiphon стал медленней работать (соединяется по HTTPS 443).<br>
+По tor metrics уменьшения числа пользователей snowflake в России не замечено. Наверное, это только на провайдерах с ТСПУ.</p></td><td>2022-07-19T11:46:36.703Z</td></tr><tr><td>tango</td><td><p>The current belief is that the DTLS blocking rules from <a href="https://ntc.party/t/a-new-snowflake-blocking-rule-offset-of-supported-groups-in-dtls-client-hello/2420" class="inline-onebox">A new Snowflake blocking rule (offset of supported_groups in DTLS Client Hello)</a> affect some, but not all, Snowflake connections. It may depend on what kind of NAT the client has, or other factors.</p>
+<p><a class="mention" href="/u/shelikhoo">@Shelikhoo</a> has made <a href="https://ntc.party/t/testing-invitation-for-tor-browser-with-supported-groups-patch-countermeasure-in-snowflake-to-evade-censorship-observed-in-russia/2837">test packages that have a different DTLS fingerprint</a>. This is to determine whether the DTLS blocking rules really are affecting many users in Russia. Please give them a try, if you can:</p>
+<p><a href="https://people.torproject.org/~shelikhoo/dqo8apcai4/tor-browser/">https://people.torproject.org/~shelikhoo/dqo8apcai4/tor-browser/</a></p>
+<p>Here is some more background:</p>
+<ul>
+<li><a href="https://gitlab.torproject.org/tpo/anti-censorship/censorship-analysis/-/issues/40030#note_2813861" class="inline-onebox">IRC Tip about Signature used to block Snowflake in Russia, 2022-May-16 (#40030) · Issues · The Tor Project / Anti-censorship / censorship-analysis · GitLab</a>
+<blockquote>
+<ul>
+<li>UDP packets matching the pattern <code>^\x16\xfe[\xfd\xff].{X}\x00\x1d\x00\x17\x00\x18</code> are getting blocked, where <em>X</em> is a small number of enumerated byte offsets, and \x00\x1d\x00\x17\x00\x18 is the supported_groups extension. One of the offsets happens to match where pion/dtls places the extension in its Client Hello.</li>
+<li>Concise description of the current situation: snowflake connections are blocked when either peer in the connection is Pion-based (e.g. snowflake-client or proxy-go) and takes the role of the DTLS client.
+<ul>
+<li>Put another way, the connection is ok if: the proxy is a browser proxy (not proxy-go) and snowflake-client operates as a DTLS server, not client</li>
+</ul>
+</li>
+<li>Pull request <a href="https://github.com/pion/dtls/pull/474" class="inline-onebox">Shuffle Elliptic Curves in ClientHello to circumvent Russian censorship by ValdikSS · Pull Request #474 · pion/dtls · GitHub</a> has the risk of creating a new, even more distinctive fingerprint
+<ul>
+<li>So does altering the offset of supported_groups without changing other aspects of the fingerprint</li>
+</ul>
+</li>
+<li>One idea is to make a patch or fork of pion/dtls with either pull request <a href="https://github.com/pion/dtls/pull/474" class="inline-onebox">Shuffle Elliptic Curves in ClientHello to circumvent Russian censorship by ValdikSS · Pull Request #474 · pion/dtls · GitHub</a> or some other change that alters the offset, then ask people to test it</li>
+<li>Shell will create a ticket for releasing a version of Snowflake/TorBrowser with patch applied.</li>
+</ul>
+</blockquote>
+</li>
+<li><a href="https://gitlab.torproject.org/tpo/anti-censorship/team/-/issues/83" class="inline-onebox">Creating a version of Tor Browser with patched Snowflake client that includes supported_groups censorship countermeasure (#83) · Issues · The Tor Project / Anti-censorship / Team · GitLab</a></li>
+</ul></td><td>2022-07-19T15:24:45.379Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="anon94384997" data-post="4" data-topic="1857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/49beb7/48.png" class="avatar"> anon94384997:</div>
+<blockquote>
+<p>А чего все молчат? По моим наблюдениям, заблокировали все-таки snowflake. На уровне dtls (webrtc) протокола. Версия свежая, под VPN соединяется, напрямую нет. Метод выше тоже пробовал. Siberia, Yota.</p>
+</blockquote>
+</aside>
+<p>Ростелеком+ТСПУ, прямо сейчас (<span data-date="2022-07-20" data-time="00:12:00" class="discourse-local-date" data-timezone="Europe/Moscow" data-email-preview="2022-07-19T21:12:00Z UTC">2022-07-19T21:12:00Z</span>) первый раз подключился медленно (около минуты), второй и третий разы уже быстро.</p></td><td>2022-07-19T21:14:22.366Z</td></tr><tr><td>anonymous50(anonymous50)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="6" data-topic="1857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Ростелеком+ТСПУ, прямо сейчас (<span data-date="2022-07-20" data-time="00:12:00" class="discourse-local-date" data-timezone="Europe/Moscow" data-email-preview="2022-07-19T21:12:00Z UTC">2022-07-19T21:12:00Z</span>)</p>
+</blockquote>
+</aside>
+<p>С тестовой сборкой snowflake-client?</p></td><td>2022-07-20T07:31:29.466Z</td></tr><tr><td>ValdikSS</td><td><p>Нет, с обычным Tor Browser 11.5.</p></td><td>2022-07-20T08:48:06.257Z</td></tr><tr><td>anonymous51(anonymous51)</td><td><p>Блокировку <code>Сlient Hello</code> убрали, теперь блокируют <code>Hello Verify Request</code></p>
+<p>Snowflake будет работать <strong>только</strong> если вашим пиром будет браузерная версия прокси и snowflake клиент будет DTLS Client’ом.</p>
+<ol>
+<li>Брокер выдает пир с рестриктивным NAT’ом пиру с не рестриктивным.</li>
+<li>Браузерную версию прокси чаще запускают за NAT’ом, а standalone на белом адресе.</li>
+</ol>
+<p>Если ваш snowflake клиент за рестриктивным NAT’ом (им может оказаться даже ваш домашний маршрутизатор), вашим пиром с большей вероятностью будет standalone прокси.</p></td><td>2022-07-20T11:34:41.555Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="anonymous51" data-post="9" data-topic="1857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b5a626/48.png" class="avatar"> anonymous51:</div>
+<blockquote>
+<p>Блокировку <code>Сlient Hello</code> убрали, теперь блокируют <code>Hello Verify Request</code></p>
+</blockquote>
+</aside>
+<p>Do you happen to know the specific fingerprint inside Hello Verify Request? Or just the fact that it is sent at all?</p>
+<p><a href="https://arxiv.org/pdf/2008.03254.pdf#page=2">MacMillan et al.</a> had reported the Hello Verify Request vulnerability:</p>
+<blockquote>
+<p>Do not send the optional <em>Client Hello</em> and <em>Hello Verify Request</em> from the DTLS handshake</p>
+</blockquote></td><td>2022-07-21T18:09:11.208Z</td></tr><tr><td>anonymous53(anonymous53)</td><td><p>Directions: Both<br>
+Datagram size: 30h<br>
+<code>16 FE [FD or FF]</code> offset: 00h<br>
+<code>03</code> offset: 0Dh</p></td><td>2022-07-21T18:23:30.375Z</td></tr><tr><td>ValdikSS</td><td><p>Can confirm, this pattern is filtered, thanks.</p></td><td>2022-07-21T19:42:36.414Z</td></tr><tr><td>oct21</td><td><p>snowflake странно работает. Подключение есть в дестктопной версии тор бразуера под windows. Но нет подключения в linux, если запустить тор службу через cli и настроить мост в torrc. Мой конфиг в torrc:<br>
+UseBridges 1<br>
+ClientTransportPlugin snowflake exec /opt/snowflake/client/client<br>
+Bridge snowflake 192.0.2.3:1 url=<a href="https://snowflake-broker.torproject.net.global.prod.fastly.net/" rel="noopener nofollow ugc">https://snowflake-broker.torproject.net.global.prod.fastly.net/</a> <a href="http://front=cdn.sstatic.net" rel="noopener nofollow ugc">front=cdn.sstatic.net</a> ice=stun:stun.voip.blackberry.com:3478,stun:stun.altar.com.pl:3478,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.com:3478,stun:stun.sonetel.net:3478,stun:stun.stunprotocol.org:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl</p>
+<p>две строчки, которыми спами тор:<br>
+[notice] Managed proxy “/opt/snowflake/client/client”: broker failure dial tcp [scrubbed]: connect: no route to host<br>
+[notice] Managed proxy “/opt/snowflake/client/client”: offer created</p>
+<p>служба застревает на 10%.</p></td><td>2022-07-24T19:39:14.320Z</td></tr><tr><td>anonymous55(anonymous55)</td><td><p>Зачем передавать аргументы динамически?<br>
+Лучше так:</p>
+<aside class="quote no-group">
+<blockquote>
+<p>UseBridges 1<br>
+Bridge snowflake 192.0.2.3:1 2B280B23E1107BB62ABFC40DDCC8824814F80A72<br>
+ClientTransportPlugin snowflake exec /opt/snowflake/client/client -url <a href="https://snowflake-broker.torproject.net.global.prod.fastly.net/" rel="noopener nofollow ugc">https://snowflake-broker.torproject.net.global.prod.fastly.net/</a> -front <a href="http://cdn.sstatic.net" rel="noopener nofollow ugc">cdn.sstatic.net</a> -ice stun:stun.l.google.com:19302,stun:stun.voip.blackberry.com:3478,stun:stun.altar.com.pl:3478,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.com:3478,stun:stun.sonetel.net:3478,stun:stun.stunprotocol.org:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478</p>
+</blockquote>
+</aside>
+<blockquote>
+<p>no route to host</p>
+</blockquote>
+<p>Нужно смотреть куда резольвит <code>front</code> и где маршрут обрывается.</p></td><td>2022-07-24T20:06:30.593Z</td></tr><tr><td>anon94384997</td><td><p>Я не уверен, что дело в этом, но не мешает ли вам apparmor? В случае использования debian, ubuntu или opensuse.<br>
+Я слышал, что в файл <code>/etc/apparmor.d/abstractions/tor</code> нужно добавить строчку <code>/usr/bin/snowflake-client ix,</code> и перезагрузиться.<br>
+Лично у меня нет ошибки <code>no route to host</code> на линуксе. Хотя, в последнее время запускаю tor не как службу, а от юзера. Просто бинарники из тор браузера достал и скопировал в ~/tor. Чтобы не следить за свежестью пакета.<br>
+Но когда tor и snowflake запускались системно, подобных ошибок тоже не было.</p>
+<p>Кстати, blackberry и altar.com.pl недоступны в России. antisip и sonetel вроде тоже.</p></td><td>2022-07-24T20:54:19.120Z</td></tr><tr><td>anonymous56(anonymous56)</td><td><aside class="quote no-group" data-username="anonymous51" data-post="9" data-topic="1857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b5a626/48.png" class="avatar"> anonymous51:</div>
+<blockquote>
+<p>рестриктивным NAT’ом</p>
+</blockquote>
+</aside>
+<p>Терминология запутывает. Snowflake называет рестриктивными (в терминах snowflake) симмертичные (в терминах NAT), там где внешний адрес или порт будут разными для разных адресов назначения. Такое упрощение, например, делает невозможной связь симметричного и рестриктивного (в терминах NAT) пиров.</p>
+<p>Мне не удалось воспроизвести успешного подключения даже при условии получение ответа от браузерной прокси (общее соотношение доступных сейчас webext и standalone прокси 1:12), браузер выбирает роль DTLS клиента. Что логично, иначе правила блокировки были бы другими.</p></td><td>2022-07-25T09:54:23.949Z</td></tr><tr><td>anon94384997</td><td><p>Как вообще надежней всего определить тип NAT? Разные проги показывают разные данные, в разных формулировках.<br>
+Вот snowflake-proxy (server на go) мне выдал, что у меня NAT type: restricted. А stun client (два вида пробовал): Endpoint Independent Mapping (Address and Port Dependent Filtering).<br>
+RetroShare: Full Cone NAT.<br>
+Но они везде так пишут. А входящие в торрентах есть, аська звонится (напрямую, собеседник тоже за NAT). Только у протона вроде подубовее.</p></td><td>2022-07-25T18:55:52.448Z</td></tr><tr><td>oct21</td><td><p>да, у меня дебиан, и в apparmor я заранее добавлял уже путь до снежинки, так что моя ошибка уже с добавленной строчкой. что такое front и как посмотреть путь пакетов? хотя я уже сомневаюсь что такие вопросы здесь релевантны, в конце концов это форум о блокировках, а не о посикс-системах для чайников(</p></td><td>2022-07-25T20:32:05.598Z</td></tr><tr><td>anonymous56(anonymous56)</td><td><p>Типы NAT можно отсортировать в крупные кучки, но на практике будут упрощения или уточнение тонкостей. Получится, что для разных сетевых случаев разные типы имеют похожее название. В том числе из-за ошибок.</p>
+<p><a href="https://github.com/RetroShare/libretroshare/blob/master/src/pqi/pqinetstatebox.cc#L291" rel="noopener nofollow ugc">RetroShare</a> использует <a href="https://github.com/RetroShare/libretroshare/issues/16#issuecomment-1081721316" rel="noopener nofollow ugc">self maintained NAT traversal technique based on DHT</a><br>
+В RetroShare выделяют основные типы:</p>
+<aside class="quote no-group">
+<blockquote>
+<p>Symmetric NAT<br>
+Deterministic Symmetric NAT<br>
+Restricted Cone NAT<br>
+Full Cone NAT</p>
+</blockquote>
+</aside>
+<p>Snowflake proxy определяет <code>restricted</code> <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/wikis/NAT-matching#proxy-assignment" rel="noopener nofollow ugc">иначе</a> чем даже Snowflake client:</p>
+<aside class="quote no-group">
+<blockquote>
+<ul>
+<li>
+<p>unrestricted: proxies in this bucket will work with all clients, even those with the most restrictive symmetric NATs and filtering behaviour. This includes proxies with no NATs, full cone NATs, and restricted cone NATs.</p>
+</li>
+<li>
+<p>restricted: all other proxies are restricted. This includes port restricted cone NATs and symmetric NATs. Most of the proxies in this bucket will work for clients without symmetric NATs.</p>
+</li>
+</ul>
+</blockquote>
+</aside>
+<p>Всего два варианта, хотя для определения совместимости в WebRTC <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/wikis/NAT-matching#nat-compatibility" rel="noopener nofollow ugc">выделяют типы</a>:</p>
+<aside class="quote no-group">
+<blockquote>
+<p>Symmetric NAT<br>
+Restricted Cone NAT<br>
+Port Restricted Cone NAT<br>
+Full Cone NAT</p>
+</blockquote>
+</aside>
+<p><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40077" rel="noopener nofollow ugc">Планируют изменения</a></p>
+<aside class="quote no-group" data-username="oct21" data-post="18" data-topic="1857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/o/e9bcb4/48.png" class="avatar"> oct21:</div>
+<blockquote>
+<p>что такое front и как посмотреть путь пакетов?</p>
+</blockquote>
+</aside>
+<blockquote>
+<p>traceroute <a href="http://cdn.sstatic.net" rel="noopener nofollow ugc">cdn.sstatic.net</a></p>
+</blockquote>
+<aside class="quote no-group" data-username="anonymous56" data-post="16" data-topic="1857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/f1d935/48.png" class="avatar"> anonymous56:</div>
+<blockquote>
+<p>Мне не удалось воспроизвести успешного подключения</p>
+</blockquote>
+</aside>
+<p>Есть, как минимум, два сорта ПАК ТСПУ в установленном виде – одно работает, а второе для галочки. Синтетические тесты оно проходит, адреса и SNI блочит, а вот в реальных задачах окружающую среду только нагревает.</p></td><td>2022-07-26T08:39:42.784Z</td></tr><tr><td>anonymous58(anonymous58)</td><td><p>Усложнили правило блокировки для snowflake и других. Одиночным пакетом из приложения выявить паттерн теперь невозможно. Проверка многоуровневая – отдельная очередь для условного webrtc и уже в ней проверка. Похоже на оптимизацию под слабое железо, потратив такты на очередь выиграли окно под правило. Если это так, блокировка snowflake заденет теперь “всех”.</p>
+<p>Новое правило: ClientHello запускает проверку на HelloVerifyRequest. Направление любое.</p></td><td>2022-08-06T08:43:41.359Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="anon94384997" data-post="15" data-topic="1857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/49beb7/48.png" class="avatar"> anon94384997:</div>
+<blockquote>
+<p>Кстати, blackberry и altar.com.pl недоступны в России. antisip и sonetel вроде тоже.</p>
+</blockquote>
+</aside>
+<p>This observation agrees with OONI measurements I looked at in May 2022. Besides blackberry and altar, also <a href="http://stun.stunprotocol.org">stun.stunprotocol.org</a> was not reachable.</p>
+<p><a href="https://lists.torproject.org/pipermail/anti-censorship-team/2022-May/000237.html" class="onebox" target="_blank" rel="noopener">https://lists.torproject.org/pipermail/anti-censorship-team/2022-May/000237.html</a></p>
+<blockquote>
+<p>In summary, 3 of the pool of 12 STUN servers are inaccessible in Russia. One of them is blocked by censorship in Russia, and the other two look like geoblocking of Russian clients by the STUN service.</p>
+<p><a href="http://stun.voip.blackberry.com">stun.voip.blackberry.com</a> and the IP address 178.239.90.248 are on the unified register of blocked sites, the entry dated 2017-04-28</p>
+<p><a href="http://stun.stunprotocol.org">stun.stunprotocol.org</a> is not on the unified register as far as I can tell, nor are its IP addresses 18.191.223.12 and 2600:1f16:8c5:101::108. … the domain resolves incorrectly only in Russia and Ukraine:</p>
+<p>stun.altar.com.pl is not on the unified register, nor is its IP address<br>
+176.119.42.11. Its failures only start on 2022-03-09. Its domain usually resolves correctly, but in Russia the actual STUN phase usually results in a timeout.</p>
+</blockquote></td><td>2022-09-01T23:42:31.549Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="tango" data-post="1" data-topic="1857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"> tango:</div>
+<blockquote>
+<p>But there is no easy way to enable the backup: you have to edit a configuration file.</p>
+</blockquote>
+</aside>
+<p>By the way, in recent versions of Tor Browser this is easier to do. You can can do it just by <a href="https://tb-manual.torproject.org/bridges/">entering a custom bridge address</a> in the normal about:preferences#connection interface:</p>
+<pre><code class="lang-auto">snowflake 192.0.2.3:80 2B280B23E1107BB62ABFC40DDCC8824814F80A72 fingerprint=2B280B23E1107BB62ABFC40DDCC8824814F80A72 url=https://snowflake-broker.torproject.net/ ampcache=https://cdn.ampproject.org/ front=cdn.ampproject.org ice=stun:stun.voip.blackberry.com:3478,stun:stun.altar.com.pl:3478,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.com:3478,stun:stun.sonetel.net:3478,stun:stun.stunprotocol.org:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478
+</code></pre>
+<p>This currently only works in desktop Tor Browser. Orbot for mobile <a href="https://github.com/net4people/bbs/issues/131#issuecomment-1271953939">does not support custom snowflake bridge lines</a>, as of version 16.6.1-RC-3 at least.</p></td><td>2022-10-09T22:02:24.435Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="anonymous51" data-post="9" data-topic="1857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b5a626/48.png" class="avatar"> anonymous51:</div>
+<blockquote>
+<p>Блокировку <code>Сlient Hello</code> убрали, теперь блокируют <code>Hello Verify Request</code></p>
+</blockquote>
+</aside>
+<p>Today, <a class="mention" href="/u/shelikhoo">@Shelikhoo</a> merged a change to stop sending Hello Verify Request. This may overcome Snowflake blocking by DTLS fingerprint in some ISPs in Russia.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/131">
+  <header class="source">
+      <img src="in-case-snowflake-rendezvous-gets-blocked/2b53bcc676e85c87449f11645231ad78ec75c322.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/131" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="in-case-snowflake-rendezvous-gets-blocked/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/131" target="_blank" rel="noopener">Apply Skip Hello Verify Migration (!131) · Merge requests · The Tor Project /...</a></h3>
+
+  <p>This merge request includes the patch to remove hello verify message in the DTLS handshake process. This have been proven to be effective as a countermeasure...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>It is not present in any release yet, but you can test it manually. You need commit <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/commit/10fd00068528fd6309bbb49f9dd0fea38f1ac5ef">10fd00068528fd6309bbb49f9dd0fea38f1ac5ef</a> or later. The expected output is <code>Bootstrapped 100% (done)</code>.</p>
+<pre><code class="lang-plaintext">$ git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake.git
+$ cd snowflake/client
+$ go build
+$ tor -f torrc
+</code></pre>
+<aside class="quote no-group" data-username="anonymous51" data-post="9" data-topic="1857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/b5a626/48.png" class="avatar"> anonymous51:</div>
+<blockquote>
+<p>Snowflake будет работать <strong>только</strong> если вашим пиром будет браузерная версия прокси и snowflake клиент будет DTLS Client’ом.</p>
+</blockquote>
+</aside>
+<p>There may still be a problem with the standalone (non-browser) proxies, as the Hello Verify Request mitigation hasn’t been applied to them yet.</p></td><td>2023-01-17T18:36:58.924Z</td></tr><tr><td>Shelikhoo(Shelikhoo (V2Fly, Way To Fly))</td><td><p>RE: It is not present in any release yet<br>
+I intend to release a new version and get the patch into Tor Browser in the immediate future.</p>
+<p>RE: There may still be a problem with the standalone (non-browser) proxies<br>
+It would take some time to get all the standalone proxies to update(as evident in the case of distributed snowflake server support). But since the majority of the proxy are browser based, and snowflake client would retry automatically, it should connect eventually.</p></td><td>2023-01-17T22:26:47.092Z</td></tr><tr><td>tango</td><td><p>The Hello Verify Request change is released in Tor Browser 12.0.3. It may make Snowflake work in Russia, if it was not working before for you.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://blog.torproject.org/new-release-tor-browser-1203/">
+  <header class="source">
+      <img src="in-case-snowflake-rendezvous-gets-blocked/8be9ac8563c1d02179d93f825c53f2527126a7dc.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://blog.torproject.org/new-release-tor-browser-1203/" target="_blank" rel="noopener">blog.torproject.org</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/388;"><img src="in-case-snowflake-rendezvous-gets-blocked/d64c172667dbbae682f85b72895f4e3d6284b4b7.png" class="thumbnail" data-dominant-color="340378" width="690" height="388"></div>
+
+<h3><a href="https://blog.torproject.org/new-release-tor-browser-1203/" target="_blank" rel="noopener">New Release: Tor Browser 12.0.3 | Tor Project</a></h3>
+
+  <p>Tor Browser 12.0.3 is now available from the Tor Browser download page and also from our distribution directory.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2023-02-16T15:30:09.312Z</td></tr><tr><td>sprite</td><td><p>А это просто в мануалах сами мейнтейнеры предлагали</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/tree/main/client?ref_type=heads#running-the-snowflake-client-with-tor">
+  <header class="source">
+      <img src="in-case-snowflake-rendezvous-gets-blocked/22a5e584341d9b7f1f039dd03de49c414a043536.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/tree/main/client?ref_type=heads#running-the-snowflake-client-with-tor" target="_blank" rel="noopener nofollow ugc">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="in-case-snowflake-rendezvous-gets-blocked/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/tree/main/client?ref_type=heads#running-the-snowflake-client-with-tor" target="_blank" rel="noopener nofollow ugc">client · main · The Tor Project / Anti-censorship / Pluggable Transports /...</a></h3>
+
+  <p>Pluggable Transport using WebRTC, inspired by Flashproxy.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Спасибо кстати за наводку на статические конфиги бриджа.<br>
+Погулив, нашел такой конфиг</p><aside class="onebox githubblob" data-onebox-src="https://github.com/mcgr0g/talpa-altaica/blob/master/setup/tor/torrc#L13">
+  <header class="source">
+
+      <a href="https://github.com/mcgr0g/talpa-altaica/blob/master/setup/tor/torrc#L13" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/mcgr0g/talpa-altaica/blob/master/setup/tor/torrc#L13" target="_blank" rel="noopener nofollow ugc">mcgr0g/talpa-altaica/blob/master/setup/tor/torrc#L13</a></h4>
+
+
+
+    <pre class="onebox"><code class="lang-">
+      <ol class="start lines" start="3" style="counter-reset: li-counter 2 ;">
+          <li>SocksPort 0.0.0.0:9050</li>
+          <li>ControlPort 0.0.0.0:9051</li>
+          <li>#</li>
+          <li># Write credentials to a file.</li>
+          <li>CookieAuthentication 1</li>
+          <li>ExitRelay 0</li>
+          <li></li>
+          <li># Change 'syslog' to 'stdout' to see more logging in the terminal.</li>
+          <li>Log notice stdout</li>
+          <li></li>
+          <li class="selected">UseBridges 1</li>
+          <li></li>
+          <li># see https://forum.torproject.org/t/fix-problems-with-snowflake-since-2024-03-01-broker-failure-unexpected-error-no-answer/11755</li>
+          <li>ClientTransportPlugin snowflake exec ./snowflake</li>
+          <li>Bridge snowflake 192.0.2.3:80 2B280B23E1107BB62ABFC40DDCC8824814F80A72 fingerprint=2B280B23E1107BB62ABFC40DDCC8824814F80A72 url=https://snowflake-broker.azureedge.net/ fronts=ajax.aspnetcdn.com ice=stun:stun.l.google.com:19302,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.com:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478 utls-imitate=hellorandomizedalpn</li>
+          <li>Bridge snowflake 192.0.2.4:80 8838024498816A039FCBBAB14E6F40A0843051FA fingerprint=8838024498816A039FCBBAB14E6F40A0843051FA url=https://snowflake-broker.azureedge.net/ fronts=ajax.aspnetcdn.com ice=stun:stun.l.google.com:19302,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.net:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478 utls-imitate=hellorandomizedalpn</li>
+          <li></li>
+          <li>ClientTransportPlugin webtunnel exec ./webtunnel</li>
+          <li>Bridge webtunnel 192.0.2.3:1 url=https://akbwadp9lc5fyyz0cj4d76z643pxgbfh6oyc-167-71-71-157.sslip.io/5m9yq0j4ghkz0fz7qmuw58cvbjon0ebnrsp0</li>
+          <li></li>
+          <li># Are the exit nodes restricted to specific location?</li>
+      </ol>
+    </code></pre>
+
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+И 1 из двух бриджей завелся.</p></td><td>2023-09-30T14:36:47.088Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="sprite" data-post="28" data-topic="1857">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/sprite/48/3732_2.png" class="avatar"> sprite:</div>
+<blockquote>
+<p>А это просто в мануалах сами мейнтейнеры предлагали</p>
+</blockquote>
+</aside>
+<p>Sorry about that. The snowflake-client README is outdated in that regard. It’s still documenting an older, deprecated way to set configuration options. The <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/blob/d434549df88292ff6e61830dc06a49b0ac1b21c6/client/torrc">example torrc file</a> is a better representative. I opened an issue to update the README:</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40294">
+  <header class="source">
+      <img src="in-case-snowflake-rendezvous-gets-blocked/c29e86f0f48ebfbf4d11a8192feef805c92d5b42.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40294" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="in-case-snowflake-rendezvous-gets-blocked/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40294" target="_blank" rel="noopener">Client README recommends command-line options rather than bridge line...</a></h3>
+
+  <p>snowflake-client, for backward compatibility reasons, accepts some configuration options as command line options (e.g. -front, -ice) as an alternative to the (preferred) format of setting those...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2023-10-07T16:56:27.725Z</td></tr><tr><td>sprite</td><td><p>Спасибо, что сделали муналы и пример torrc болеее человеколюбивыми!</p>
+<p>Немного оффтопик: верно ли понял, что к каждому бриджу до сих пор нужно прописывать параметры подключения вида</p>
+<pre><code class="lang-auto">url=https://snowflake-broker.torproject.net.global.prod.fastly.net/ front=foursquare.com ice=stun:stun.l.google.com:19302,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.com:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478 utls-imitate=hellorandomizedalpn
+</code></pre>
+<p>Или это уже можно вынести в (какую-либо?)  общую часть конфига?</p></td><td>2023-11-30T23:39:40.868Z</td></tr><tr><td>tango</td><td><p>There are two ways to specify most settings: as a command-line argument in the <code>ClientTransportPlugin</code> line and as as a <code>key=value</code> parameter in the <code>Bridge</code> line. The <code>key=value</code> SOCKS parameters are the preferred form, but the command-line options still work. The command-line options will be global (not specific to a single <code>Bridge</code> line). If the same option is given on the command line and in a <code>Bridge</code> line, the <code>Bridge</code> line setting wins.</p>
+<p>So yes, you can move one or more settings out of the <code>Bridge</code> line and into the <code>ClientTransportPlugin</code> line. For example, you can change</p>
+<pre><code class="lang-plaintext">ClientTransportPlugin snowflake exec ./client
+Bridge snowflake 192.0.2.3:80 2B280B23E1107BB62ABFC40DDCC8824814F80A72 fingerprint=2B280B23E1107BB62ABFC40DDCC8824814F80A72 url=https://snowflake-broker.torproject.net.global.prod.fastly.net/ front=foursquare.com fronts=foursquare.com,github.githubassets.com ice=stun:stun.l.google.com:19302 utls-imitate=hellorandomizedalpn
+Bridge snowflake 192.0.2.4:80 8838024498816A039FCBBAB14E6F40A0843051FA fingerprint=8838024498816A039FCBBAB14E6F40A0843051FA url=https://snowflake-broker.torproject.net.global.prod.fastly.net/ front=foursquare.com fronts=foursquare.com,github.githubassets.com ice=stun:stun.l.google.com:19302 utls-imitate=hellorandomizedalpn
+</code></pre>
+<p>to</p>
+<pre><code class="lang-plaintext">ClientTransportPlugin snowflake exec ./client -ice=stun:stun.l.google.com:19302
+Bridge snowflake 192.0.2.3:80 2B280B23E1107BB62ABFC40DDCC8824814F80A72 fingerprint=2B280B23E1107BB62ABFC40DDCC8824814F80A72 url=https://snowflake-broker.torproject.net.global.prod.fastly.net/ front=foursquare.com fronts=foursquare.com,github.githubassets.com utls-imitate=hellorandomizedalpn
+Bridge snowflake 192.0.2.4:80 8838024498816A039FCBBAB14E6F40A0843051FA fingerprint=8838024498816A039FCBBAB14E6F40A0843051FA url=https://snowflake-broker.torproject.net.global.prod.fastly.net/ front=foursquare.com fronts=foursquare.com,github.githubassets.com utls-imitate=hellorandomizedalpn
+</code></pre></td><td>2023-12-11T04:49:47.522Z</td></tr>
+    </table>
+      </body>
+    </html>

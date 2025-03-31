@@ -1,0 +1,90 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>utls—fork-of-the-go-standard-tls-library-providing-low-level-access-to-the-clienthello-for-mimicry-purposes</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><aside class="onebox githubrepo" data-onebox-src="https://github.com/refraction-networking/utls">
+  <header class="source">
+
+      <a href="https://github.com/refraction-networking/utls" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="utls—fork-of-the-go-standard-tls-library-providing-low-level-access-to-the-clienthello-for-mimicry-purposes/99664eef74234d98b9e34611fede915542de0d64_2_690x344.png" class="thumbnail" data-dominant-color="EDF2F4">
+
+  <h3><a href="https://github.com/refraction-networking/utls" target="_blank" rel="noopener">GitHub - refraction-networking/utls:  Fork of the Go standard TLS library, providing...</a></h3>
+
+    <p><span class="github-repo-description"> Fork of the Go standard TLS library, providing low-level access to the ClientHello for mimicry purposes.</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>uTLS is a fork of “crypto/tls”, which provides ClientHello fingerprinting resistance, low-level access to handshake, fake session tickets and some other features. Handshake is still performed by “crypto/tls”, this library merely changes ClientHello part of it and provides low-level access.</p>
+<h1><a name="p-184-features-1" class="anchor" href="#p-184-features-1"></a>Features</h1>
+<h2><a name="p-184-low-level-access-to-handshake-2" class="anchor" href="#p-184-low-level-access-to-handshake-2"></a>Low-level access to handshake</h2>
+<ul>
+<li>Read/write access to all bits of client hello message.</li>
+<li>Read access to fields of ClientHandshakeState, which, among other things, includes ServerHello and MasterSecret.</li>
+<li>Read keystream. Can be used, for example, to “write” something in ciphertext.</li>
+</ul>
+<h2><a name="p-184-clienthello-fingerprinting-resistance-3" class="anchor" href="#p-184-clienthello-fingerprinting-resistance-3"></a>ClientHello fingerprinting resistance</h2>
+<p>Golang’s ClientHello has a very unique fingerprint, which especially sticks out on mobile clients, where Golang is not too popular yet. Some members of anti-censorship community are concerned that their tools could be trivially blocked based on ClientHello with relatively small collateral damage. There are multiple solutions to this issue.</p>
+<h3><a name="p-184-randomized-fingerprint-4" class="anchor" href="#p-184-randomized-fingerprint-4"></a>Randomized Fingerprint</h3>
+<p>Randomized Fingerprints are supposedly good at defeating blacklists, since those fingerprints have random ciphersuites and extensions in random order. Note that all used ciphersuites and extensions are fully supported by uTLS, which provides a solid moving target without any compatibility or parrot-is-dead attack risks.</p>
+<h2><a name="p-184-fake-session-tickets-5" class="anchor" href="#p-184-fake-session-tickets-5"></a>Fake Session Tickets</h2>
+<p>Fake session tickets is a very nifty trick that allows power users to hide parts of handshake, which may have some very fingerprintable features of handshake, and saves 1 RTT.</p></td><td>2019-09-22T20:48:10.893Z</td></tr><tr><td>ValdikSS</td><td><p>The author, <a class="mention" href="/u/_sf">@_sf</a>, told me that uTLS allows very low-level ClientHello access, so it could be used for censorship circumvention is some cases.</p>
+<blockquote>
+<p>So, uTLS has a bunch of built-in mimicry ClientHelloSpec’s, for example, <a href="https://github.com/refraction-networking/utls/blob/dbda71b12fd3048f28ffd97b54d48dc6bebbcd40/u_parrots.go#L19">HelloChrome_62</a>, which includes all the information that uTLS needs to marshal a Chrome-like ClientHello, such as ciphers and extensions. Let’s say you want to send a huge ClientHello by including an extension with ID someID and a 16KB body. You can copy-paste the generation function for that spec or any other ClientHelloSpec (uTLS also supports generation of randomized ClientHellos), then add your utls.GenericExtension{Id: someID, Data: make(<span class="chcklst-box fa fa-square-o fa-fw"></span>byte, 1024*16)}  to a desired place in the ordered list of ClientHelloSpec.Extensions, and apply the resulting spec with uconn.ApplyPreset() function.</p>
+<p>The “fake SNI in the beginning and real SNI before/after padding” may require a roundabout implementation: I try to prevent users from shooting themselves in the foot, and including 2 SNI extensions with different values is precisely one of the things I wouldn’t want to happen accidentally. However, I believe you still should be able to do that: just include second SNI extension as utls.GenericExtension{}, so uTLS doesn’t recognize the the type of the second SNI extension, and simply marshals it as-is.</p>
+</blockquote></td><td>2019-09-23T19:13:30.114Z</td></tr><tr><td>willsionggg(Alex Wilson)</td><td><p>Hi I’m new here.<br>
+So my ISP is throttling my internet speed except for one site i   use that site as a fake sni i did v2ray it works fine full speed but using v2ray need a server and i don’t want to use different ip so i just want to know if this tool will work for me i don’t know how to use it if you can help me appreciate it Thank you</p></td><td>2022-11-22T18:16:13.138Z</td></tr><tr><td>tango</td><td><p>I don’t think uTLS helps in your situation. It’s only useful if your ISP is interfering with connections based on the TLS fingerprint. If the ISP is only looking at SNI, it’s possible to change the SNI without using uTLS.</p>
+<p>uTLS is not a tool or proxy to use directly. It’s more like a library that other tools can import and use.</p>
+<p>On the BBS forum there are some recent threads about how TLS fingerprinting is used in Iran and China, and how uTLS can help:</p>
+<ul>
+<li><a href="https://github.com/net4people/bbs/issues/129">Large scale blocking of TLS-based censorship circumvention tools in China</a></li>
+<li><a href="https://github.com/net4people/bbs/issues/131">Unexplained drop in Snowflake client polls and bandwidth, testers wanted</a></li>
+</ul></td><td>2022-12-03T22:10:53.664Z</td></tr>
+    </table>
+      </body>
+    </html>

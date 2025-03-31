@@ -1,0 +1,112 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>social-networks-being-slowed-down</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>stek29(Viktor Oreshkin)</td><td><p>Social networks are being slowed down after explosion in Istanbul.</p>
+<p>Currently Facebook, Instagram, Twitter, TikTok, YouTube seem to be slowed down.<br>
+Reddit, VK and Telegram seem to work fine.</p>
+<p>It’s a different blocking mechanism than one used for completely blocked sites (i.e. for Porn sites).</p></td><td>2022-11-13T15:56:23.198Z</td></tr><tr><td>stek29(Viktor Oreshkin)</td><td><p>I’ve made some experiments on mobile Turkcell, here’s what I found:</p>
+<ol>
+<li>Connections are being slowed down, not blocked completely</li>
+<li>Slow down happens by SNI — so using “allowed” SNI and connecting to Facebook balancers works fine</li>
+<li>When connecting without SNI, connection is only slowed down if there were connections to that IP with slowed down SNIs, for example:</li>
+</ol>
+<pre><code class="lang-auto"># 1.1.1.1 is not associated with Facebook, so it’s not slowed down yet
+# time curl -qs https://1.1.1.1 &gt;/dev/null
+real    0m 0.91s
+# now connect to 1.1.1.1 with a slowed down SNI
+# time curl -qs https://facebook.com --resolve facebook.com:443:1.1.1.1 &gt;/dev/null
+Command exited with non-zero status 60
+real    0m 7.75s
+# try connecting to 1.1.1.1 without SNI again, and now it’s slowed down
+# time curl -qs https://1.1.1.1 &gt;/dev/null
+Command exited with non-zero status 92
+real    0m 17.77s
+</code></pre>
+<p>After reconnecting to network, this association is reset (so 1.1.1.1 is not slowed down after toggling airplane mode on and off).<br>
+I don’t know if it’s because I go to a different instance of filters, or they’re simply always start from clean state.</p>
+<p>EDIT: most likely it always starts with a clean state, since same happens for <a href="http://facebook.com" rel="noopener nofollow ugc">facebook.com</a>’s IP:</p>
+<pre><code class="lang-auto"># time curl -k https://157.240.238.35
+real    0m 0.87s
+# time curl https://facebook.com 
+real    0m 11.05s
+# time curl -k https://157.240.238.35
+curl: (92) HTTP/2 stream 1 was not closed cleanly before end of the underlying stream
+Command exited with non-zero status 92
+real    1m 1.32s
+</code></pre>
+<ol start="4">
+<li>it’s a different mechanism from one used for blocked websites — when doing the same as in step 3 with <a href="http://pornhub.com" rel="noopener nofollow ugc">pornhub.com</a>, 1.1.1.1 doesn’t become blocked or slowed down</li>
+<li>HTTP seems to work fine, and only HTTPS seems to be slowed down — but I’m not sure since I don’t know how to test this one properly</li>
+</ol></td><td>2022-11-13T16:05:18.413Z</td></tr><tr><td>stek29(Viktor Oreshkin)</td><td><p>There have been reports on BTK providing official comment, something like this:</p>
+<blockquote>
+<p>At the request of the relevant units, the band narrowing was implemented by the BTK for the social media platforms across the country for the unethical images and terrorist content that emerged after the explosion in Taksim.</p>
+</blockquote>
+<p>I wasn’t able to find a proper source for it, so I won’t be posting any.</p></td><td>2022-11-13T17:20:19.437Z</td></tr><tr><td>stek29(Viktor Oreshkin)</td><td><p>Netblocks Report: <a href="https://netblocks.org/reports/social-media-restricted-in-turkey-after-blast-in-taksim-istanbul-7yNnr0yq" class="inline-onebox" rel="noopener nofollow ugc">Social media restricted in Turkey after blast in Taksim, Istanbul - NetBlocks</a></p></td><td>2022-11-13T17:22:41.377Z</td></tr><tr><td>tango</td><td><p>I see a report now that the throttling of social media has ended. I don’t know exactly when.</p>
+<p><a href="https://twitter.com/arzugeybulla/status/1592035768356450304" class="onebox" target="_blank" rel="noopener">https://twitter.com/arzugeybulla/status/1592035768356450304</a></p>
+<p>OONI has some measurements.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://mastodon.social/@ooni/109338098033721450">
+  <header class="source">
+      <img src="social-networks-being-slowed-down/237ad025e2232740260bcd28b682dc88a375c403.png" class="site-icon" data-dominant-color="8076EC" width="16" height="16">
+
+      <a href="https://mastodon.social/@ooni/109338098033721450" target="_blank" rel="noopener" title="07:16PM - 13 November 2022">Mastodon – 13 Nov 22</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/421;"><img src="social-networks-being-slowed-down/927b5e4a3ba179abcfc043da9c4187cc5e9c1f26_2_690x422.png" class="thumbnail" data-dominant-color="BFF3D6" width="690" height="422"></div>
+
+<h3><a href="https://mastodon.social/@ooni/109338098033721450" target="_blank" rel="noopener">OONI (@ooni@mastodon.social)</a></h3>
+
+  <p>Attached: 1 image
+
+🔴 Today, following the explosion in #Istanbul, some ISPs in #Turkey started blocking Twitter, Instagram, Facebook, and YouTube
+
+OONI data:...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2022-11-14T19:03:03.388Z</td></tr><tr><td>stek29(Viktor Oreshkin)</td><td><p>They’ve ended sometime after midnight local time, I believe.</p></td><td>2022-11-15T10:22:05.776Z</td></tr><tr><td>Nina(Nina)</td><td><p>Social media and messenger apps like X, YouTube, Telegram, Instagram are inaccessible in Turkey today, the censorship event can be related to the arrest of the mayor of Istanbul (one of the oppositional leaders in the country): <a href="https://ifade.org.tr/engelliweb/bant-genisligi-daraltilan-platformlar/" class="inline-onebox">Bant genişliği daraltılan platformlar – İfade Özgürlüğü Derneği</a></p></td><td>2025-03-19T13:17:47.664Z</td></tr>
+    </table>
+      </body>
+    </html>

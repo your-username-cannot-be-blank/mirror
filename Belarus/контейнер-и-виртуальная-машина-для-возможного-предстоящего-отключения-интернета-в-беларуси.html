@@ -1,0 +1,416 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>Сделал серверный контейнер и клиентскую виртуальную машину для продвинутых пользователей, для применения в случае серьезной цензуры интернета.</p>
+<p>Образ маскирует интернет-трафик под скачивание почты с Gmail (протокол IMAP с шифрованием, TLS-запросы на <code>imap.gmail.com</code>, порт 993) по умолчанию, также есть режим маскировки под DNS-запросы на фиктивный домен <code>int.loc</code>, с прямым подключением к серверу по порту DNS 53. Почта и DNS — наиболее «живучие» протоколы, которые будут блокироваться в последнюю очередь.</p>
+<p><strong>Интернет из виртуальной машины можно раздать на все устройства внутри домашней сети (компьютеры, смартфоны, приставки).</strong> Для этого необходимо указать IP-адрес виртуальной машины в качестве шлюза и DNS-сервера. Устанавливать дополнительное ПО на конечных устройствах не требуется.</p>
+<p>Файлы здесь:<br>
+<a>ftp://serv.valdikss.org.ru/Downloads/Temp/cenvm-belarus/</a></p>
+<p><strong>Внимание!</strong> Клиентская виртуальная машина предназначена для временного использования в случае цензурирования интернета, в сети с домашним маршрутизатором. Она маршрутизирует весь трафик, в ней нет фильтров по интерфейсам или IP-диапазонам.</p>
+<p><strong>Для технически неподкованных пользователей</strong>, без опыта работы с Linux, рекомендуется использовать <a href="https://getoutline.org/">Outline</a>, установив его на собственный сервер. Он гораздо проще в установке и использовании, но, с большой вероятностью, не сможет обеспечить доступ в интернет в случае введения действительно жесткой интернет-цензуры.</p>
+<hr>
+<p><code>rootfs.tar.xz</code> — системный <strong>серверный</strong> контейнер, может быть запущен в systemd-nspawn или LXD. Содержит Cloak, dnstt в качестве фронт-энда, v2ray в качестве бек-енда.<br>
+Экспортирует порты 53 (5300 в контейнере, нужно делать маппинг 53 → 5300, см. пример ниже) и 993.</p>
+<p>Пример для systemd. Предварительно загрузить rootfs.tar.xz на сервер, далее выполнить:</p>
+<pre><code class="lang-auto">apt -y install systemd-container
+machinectl import-tar rootfs.tar.xz cen
+mkdir -p /etc/systemd/nspawn/
+echo -e "[Network]\nVirtualEthernet=yes\nPort=tcp:993\nPort=udp:53:5300\nPort=tcp:53:5300" &gt; /etc/systemd/nspawn/cen.nspawn
+systemctl enable --now systemd-networkd.service
+machinectl enable cen
+machinectl start cen
+
+sleep 10
+systemctl -M cen disable --now ferm
+machinectl copy-from cen /root/cloak_adminuid.txt cloak_adminuid.txt
+machinectl copy-from cen /root/cloak_pubkey.txt cloak_pubkey.txt
+machinectl copy-from cen /root/dnstt-server.pub dnstt-server.pub
+machinectl copy-from cen /root/v2ray_uuid.txt v2ray_uuid.txt
+</code></pre>
+<p>Дополнительная настройка не требуется.</p>
+<hr>
+<p><code>CenVM.ova</code> — <strong>клиентский</strong> образ виртуальной машины для VirtualBox и других систем виртуализации. Представляет собой программный маршрутизатор, который нужно запустить в виртуальной машине, настроить, и далее использовать IP-адрес виртуальной машины в качестве шлюза и DNS-сервера для всех необходимых устройств в домашней сети.</p>
+<ol>
+<li>Установите VirtualBox, скачайте и импортируйте образ CenVM.ova.</li>
+<li>Убедитесь, что в настройках виртуальной машины, во вкладке Network у Adapter 1 указан сетевой интерфейс, через который вы получаете интернет на компьютер, а у Adapter 2 указан внутренний сетевой интерфейс VirtualBox (host-only adapter).</li>
+<li>Запустите виртуальную машину.</li>
+<li>Войдите под именем <code>root</code>, пароль <code>1</code>.</li>
+<li>Скачайте файлы <code>cloak_adminuid.txt</code>, <code>cloak_pubkey.txt</code>, <code>dnstt-server.pub</code>, <code>v2ray_uuid.txt</code> с удалённого сервера в директорию <code>/root</code>, например, с помощью sftp:</li>
+</ol>
+<pre><code class="lang-auto">sftp root@1.2.3.4
+get cloak_adminuid.txt
+get cloak_pubkey.txt
+get dnstt-server.pub
+get v2ray_uuid.txt
+</code></pre>
+<ol start="6">
+<li>Пропишите IP-адрес сервера в файле <code>/usr/local/etc/config.sh</code>, например, с помощью nano.</li>
+<li>Перезагрузите виртуальную машину.</li>
+<li>Настройте компьютер на использование IP-адреса виртуальной машины в качестве шлюза и DNS-сервера. Посмотреть IP-адрес виртуальной машины можно командой <code>ip -br a</code>, вам нужен адрес вида <code>192.168.56.xxx</code>.</li>
+</ol>
+<hr>
+<p>По умолчанию виртуальная машина настроена на маскировку под <code>imap.gmail.com</code>, порт 993. Чтобы использовать маскировку под DNS, замените порт <code>6001</code> на <code>6002</code> в файле <code>/usr/local/etc/v2ray.json.template</code> и перезагрузите машину.</p>
+<pre><code class="lang-auto">  "outbounds": [{
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [{
+        "address": "127.0.0.1",
+        "port": 6001,  // ←←← ВОТ ЭТОТ
+        "users": [{ "id": "==UUID==", "alterId": 64 }],
+        "domainStrategy": "UseIP"
+      }]
+    }
+  }],
+</code></pre></td><td>2020-07-26T13:23:03.099Z</td></tr><tr><td>drughacker</td><td><p>Запустил виртуалку - чёрный экран.<br>
+И ещё не совсем понятно, что нужно использовать: виртуалку И серверный контейнер либо виртуалку ИЛИ серверный контейнер</p></td><td>2020-08-07T16:07:12.728Z</td></tr><tr><td>ValdikSS</td><td><p>Нужно использовать и виртуалку (на компьютере, в качестве маршрутизатора-шлюза), и контейнер на сервере (в качестве выходного туннеля для виртуалки).</p>
+<p>Настраивать виртуалку следует согласно инструкции в посте.</p></td><td>2020-08-07T19:36:30.000Z</td></tr><tr><td>Ignatella</td><td><p>Помогите пожалуйста с 8 пунктом. Вроде был все предыдущие шаги выполнил, но ничего загрузить не могу. Ниже прилагаю скриншоты. Спасибо<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/6b318c4e64bd72def78330008754c2baf2a2ca6f.png" data-download-href="https://ntc.party/uploads/default/6b318c4e64bd72def78330008754c2baf2a2ca6f" title="1"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/6b318c4e64bd72def78330008754c2baf2a2ca6f_2_690x305.png" alt="1" data-base62-sha1="fihfe3cVC64iQFukGRbiGiuPkiX" width="690" height="305" srcset="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/6b318c4e64bd72def78330008754c2baf2a2ca6f_2_690x305.png, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/6b318c4e64bd72def78330008754c2baf2a2ca6f_2_1035x457.png 1.5x, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/6b318c4e64bd72def78330008754c2baf2a2ca6f_2_1380x610.png 2x" data-dominant-color="B7B7B8"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">1</span><span class="informations">1920×851 155 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2020-08-08T08:46:04.626Z</td></tr><tr><td>Ignatella</td><td><p>Вот output с удаленного сервера<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/34777e47c2d796b6a2bc859e4d959c4732c63ee7.png" data-download-href="https://ntc.party/uploads/default/34777e47c2d796b6a2bc859e4d959c4732c63ee7" title="img-2020-08-08-11-57-06"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/34777e47c2d796b6a2bc859e4d959c4732c63ee7_2_690x314.png" alt="img-2020-08-08-11-57-06" data-base62-sha1="7u8QbgsKG47EfA8Yg3CPESs6E3Z" width="690" height="314" srcset="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/34777e47c2d796b6a2bc859e4d959c4732c63ee7_2_690x314.png, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/34777e47c2d796b6a2bc859e4d959c4732c63ee7_2_1035x471.png 1.5x, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/34777e47c2d796b6a2bc859e4d959c4732c63ee7_2_1380x628.png 2x" data-dominant-color="121212"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">img-2020-08-08-11-57-06</span><span class="informations">1920×874 536 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2020-08-08T08:57:34.341Z</td></tr><tr><td>ValdikSS</td><td><p>Убедитесь, что в настройках виртуальной машины установлен bridge (мост) на сетевой интерфейс в интернет (Wi-Fi-интерфейс в вашем случае).</p>
+<p>В настройках Windows шлюз и DNS у Wi-Fi-интерфейса («беспроводная сеть») необходимо убрать (чтобы он вообще не использовался), а у Host-интерфейса (Virtualbox Host-Only network) установить и шлюз, и DNS, в IP-адрес виртуальной машины.</p></td><td>2020-08-08T09:12:49.585Z</td></tr><tr><td>Ignatella</td><td><p>Думаю, что я ошибаюсь где-то в простом месте. Извините за беспокойство<br>
+Вот скриншот, а интернет отсутствует. Спасибо</p>
+<p>UPD: Ошибка: DNS-сервер не отвечает.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/9f46e385fafb110c61bd181c887fecc12a242430.png" data-download-href="https://ntc.party/uploads/default/9f46e385fafb110c61bd181c887fecc12a242430" title="image"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/9f46e385fafb110c61bd181c887fecc12a242430_2_690x369.png" alt="image" data-base62-sha1="mJ1NmSQVM7DorHiY4n8rJc5vp96" width="690" height="369" srcset="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/9f46e385fafb110c61bd181c887fecc12a242430_2_690x369.png, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/9f46e385fafb110c61bd181c887fecc12a242430_2_1035x553.png 1.5x, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/9f46e385fafb110c61bd181c887fecc12a242430_2_1380x738.png 2x" data-dominant-color="ABABAB"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1920×1029 293 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2020-08-08T13:18:28.167Z</td></tr><tr><td>ValdikSS</td><td><p>Вы сделали сетевую петлю: указали TAP Adapter VPN’а в качестве интернет-канала для виртуальной машины, а на компьютере настроили интернет через виртуальную машину.</p>
+<p>Сетевой пакет с компьютера идёт в виртуальную машину, она его маршрутизирует в TAP-адаптер, который пытается его отправить в VPN через виртуальную машину (т.к. весь интернет теперь через ВМ) и так до бесконечности.</p>
+<p>Либо укажите Wi-Fi-адаптер, либо настраивайте маршрутизацию до VPN через правильный интерфейс, и т.п.</p></td><td>2020-08-08T13:38:34.000Z</td></tr><tr><td>ValdikSS</td><td><p>Новости сообщают о проблемах с интернетом в Беларуси.<br>
+Пользователи контейнера+виртуалки, пожалуйста, напишите, работает ли эта связка, и насколько хорошо.</p></td><td>2020-08-09T16:35:32.778Z</td></tr><tr><td>ValdikSS</td><td><p>Блокировка трафика осуществляется по протоколам TCP и UDP, трафик фильтруется на хопе:</p>
+<pre><code class="lang-auto"># traceroute google.com --tcp
+traceroute to google.com (172.217.20.206), 30 hops max, 60 byte packets
+ 1  192.168.100.1 (192.168.100.1)  0.451 ms  0.630 ms  0.811 ms
+ 2  100.125.128.1 (100.125.128.1)  3.703 ms  3.679 ms  3.857 ms
+ 3  mm-57-80-84-93.dynamic.pppoe.mgts.by (93.84.80.57)  3.453 ms  3.795 ms  4.458 ms
+ 4  172.23.2.29 (172.23.2.29)  6.021 ms  6.157 ms  6.151 ms
+ 5  core1.net.belpak.by (93.85.80.45)  4.802 ms  5.337 ms  5.331 ms
+ 6  ie2.net.belpak.by (93.85.80.42)  5.325 ms  7.748 ms  10.464 ms
+ 7  asbr7.net.belpak.by (93.85.80.122)  3.261 ms  2.948 ms  3.391 ms
+ 8  * * *
+ 9  * * *
+10  * * *
+</code></pre>
+<pre><code class="lang-auto"># traceroute google.com --icmp
+traceroute to google.com (172.217.20.206), 30 hops max, 60 byte packets
+ 1  192.168.100.1 (192.168.100.1)  0.794 ms  0.972 ms  1.152 ms
+ 2  100.125.128.1 (100.125.128.1)  7.945 ms  8.293 ms  8.810 ms
+ 3  mm-57-80-84-93.dynamic.pppoe.mgts.by (93.84.80.57)  3.617 ms  3.774 ms  3.766 ms
+ 4  172.23.2.29 (172.23.2.29)  6.132 ms  6.270 ms  6.271 ms
+ 5  core1.net.belpak.by (93.85.80.45)  4.095 ms  4.276 ms  12.026 ms
+ 6  ie2.net.belpak.by (93.85.80.42)  11.151 ms  6.839 ms  6.821 ms
+ 7  asbr7.net.belpak.by (93.85.80.122)  3.648 ms  3.989 ms  4.165 ms
+ 8  209.85.148.70 (209.85.148.70)  30.560 ms  30.946 ms  31.114 ms
+ 9  108.170.251.145 (108.170.251.145)  25.022 ms  25.018 ms  25.494 ms
+10  108.170.228.9 (108.170.228.9)  31.204 ms  30.775 ms  31.151 ms
+11  216.239.56.81 (216.239.56.81)  25.905 ms  26.088 ms  26.277 ms
+12  108.170.250.209 (108.170.250.209)  29.602 ms  29.777 ms  29.773 ms
+13  216.239.41.171 (216.239.41.171)  26.084 ms  25.534 ms  25.545 ms
+14  waw02s08-in-f14.1e100.net (172.217.20.206)  25.394 ms  25.496 ms  25.437 ms
+</code></pre>
+<p>Соединение на IP-адрес <code>google.com (172.217.20.206)</code> не устанавливается: ответ на SYN-пакет не приходит.<br>
+Соединение до <code>imap.gmail.com:993</code> успешно устанавливается.</p>
+<p>Анализ пакетов осуществляется с помощью DPI. Часть соединений отбрасывается на этапе TLS-хендшейка, в частности, на нестандартных портах (3143).</p>
+<p><strong>Контейнер+виртуальная машина работают на mgts.by в полной мере.</strong></p></td><td>2020-08-09T18:43:55.781Z</td></tr><tr><td>CenBel</td><td><p>Приветствую.<br>
+Решил поднять виртуалку. Споткнулся на п. 5. После отправи sftp <a href="mailto:root@1.2.3.4">root@1.2.3.4</a> выводится:<br>
+ssh: connect to host 1.2.3.4 port 22: Connection timed out<br>
+Соответственно, не могу выкачать файлы *.txt. Че делать?</p></td><td>2020-08-10T09:06:44.029Z</td></tr><tr><td>ValdikSS</td><td><p>Вместо 1.2.3.4 необходимо вписать IP-адрес сервера, на котором установлен контейнер.</p></td><td>2020-08-10T11:04:22.000Z</td></tr><tr><td>mcen</td><td><p>Установил контейнер на сервер. Настроил клиентскую vm, но что-то пакеты идут только к серверу, ответов назад не вижу. Фаервол на сервере выключен. В контенере пишутся логи? и если да как их искать. Спасибо<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/0d36d85ae780417828a81504a0d30e09f66439b4.png" data-download-href="https://ntc.party/uploads/default/0d36d85ae780417828a81504a0d30e09f66439b4" title="tempsnip"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/0d36d85ae780417828a81504a0d30e09f66439b4.png" alt="tempsnip" data-base62-sha1="1STIa0irdG50FPfprOPUytxiBYU" width="690" height="160" data-dominant-color="CDDEED"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">tempsnip</span><span class="informations">1903×442 47.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2020-08-10T11:34:52.372Z</td></tr><tr><td>ValdikSS</td><td><p>Логи не настроены. Попробуйте воспользоваться tcpdump на порт 53 на стороне сервера, чтобы хотя бы проверить, что сервер действительно не отвечает.</p>
+<p>Также не забудьте перезагрузить ВМ после скачивания файлов.</p>
+<p>Режим с маскировкой под почту (тот, который по умолчанию) будет работать заметно быстрее.</p></td><td>2020-08-10T11:53:38.000Z</td></tr><tr><td>mcen</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/e354245c3edc57ed6467f5b054d6bb9462c635c2.png" data-download-href="https://ntc.party/uploads/default/e354245c3edc57ed6467f5b054d6bb9462c635c2" title="image"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/e354245c3edc57ed6467f5b054d6bb9462c635c2.png" alt="image" data-base62-sha1="wr2ESdnbcxUjMZHNwP08ZsALlbY" width="689" height="283" data-dominant-color="303131"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1371×563 79.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+вот tcpdump, странно что идут dns запросы хоть в конфиге v2ray стоит 6001 порт, клиенскую vm перезагружал</p></td><td>2020-08-10T12:23:01.848Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="mcen" data-post="15" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/bcef8e/48.png" class="avatar"> mcen:</div>
+<blockquote>
+<p>странно что идут dns запросы хоть в конфиге v2ray стоит 6001 порт,</p>
+</blockquote>
+</aside>
+<p>Это нормально, это поддержание сессии.<br>
+Захватите трафик на порту 993, посмотрите ответы.</p></td><td>2020-08-10T12:57:38.306Z</td></tr><tr><td>mcen</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/bf89bc86bfe424e6eea948fa31648af228643ed5.png" data-download-href="https://ntc.party/uploads/default/bf89bc86bfe424e6eea948fa31648af228643ed5" title="image"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/bf89bc86bfe424e6eea948fa31648af228643ed5.png" alt="image" data-base62-sha1="rkqil33jwIvc2DPjSZEjsNmCwbr" width="690" height="305" data-dominant-color="2B2B2B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1499×664 72.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+tcpdump</p></td><td>2020-08-10T13:12:56.090Z</td></tr><tr><td>mcen</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/a4958fb39ed24de3cc365a19ef0e1589ff81cbc8.png" data-download-href="https://ntc.party/uploads/default/a4958fb39ed24de3cc365a19ef0e1589ff81cbc8" title="image"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/a4958fb39ed24de3cc365a19ef0e1589ff81cbc8.png" alt="image" data-base62-sha1="ntYJO55gH9Cq6m0EoXrQRUveOy4" width="690" height="180" data-dominant-color="6A7074"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1815×475 56.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+wireshark</p></td><td>2020-08-10T13:13:33.543Z</td></tr><tr><td>medfgh(medfgh)</td><td><p>такой вопрос<br>
+у меня файла  /usr/local/etc/v2ray.json.template по дефолту нет это окей или должен его создать?</p></td><td>2020-08-10T13:18:58.552Z</td></tr><tr><td>mcen</td><td><p><a href="https://ntc.party/u/medfgh">medfgh</a> на клиентской vm он должен быть</p></td><td>2020-08-10T13:22:33.201Z</td></tr><tr><td>medfgh(medfgh)</td><td><p>Бля, да, спасибо, глаз замылился уже<br>
+у тебя завелась тачка?<br>
+как ты балансировал что бы было 2 гейтвея на винде и один точно не работал с основной машины ?</p></td><td>2020-08-10T13:25:11.918Z</td></tr><tr><td>ValdikSS</td><td><p>Зайдите в сам контейнер командой <code>machinectl shell cen</code>, установите там tcpdump: <code>apt update &amp;&amp; apt install tcpdump</code>, убедитесь, что процессы v2ray и ck-server-linux-amd64 запущены.</p></td><td>2020-08-10T13:32:48.326Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="medfgh" data-post="21" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/ebca7d/48.png" class="avatar"> medfgh:</div>
+<blockquote>
+<p>как ты балансировал что бы было 2 гейтвея на винде и один точно не работал с основной машины ?</p>
+</blockquote>
+</aside>
+<p>Это не требуется: просто уберите gateway у интернет-интерфейса. Виртуальная машина использует мост для подключения к интернет-интерфейсу, маршрутизатор ей выдаст отдельный адрес.</p></td><td>2020-08-10T13:33:53.586Z</td></tr><tr><td>medfgh(medfgh)</td><td><p>Мой пк мейн порт 192.168.100.3<br>
+Роутер 192.168.100.1</p>
+<p>ВМ клиент 192.168.56.107<br>
+мой пк Virtualbox Host-only Network 192.168.56.1<br>
+Если убираю адрес роутера из дефолт гейтвея после загрузки, то ВМ не знает куда пинговать,и никуда не уходит пинг, если убираю до загрузки ВМ , то нет ip адреса у порта(DHCP не отработал)<br>
+и не выходит никак починить, вроде метрики нашёл, но всё равно он балансирует запросы между гейтвеями, а нужно чтобы один работал, а второй пассивный<br>
+мб есть идеи?)</p></td><td>2020-08-10T13:57:08.128Z</td></tr><tr><td>mcen</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="22" data-topic="599" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Зайдите в сам контейнер командой <code>machinectl shell cen</code> , установите там tcpdump: <code>apt update &amp;&amp; apt install tcpdump</code> , убедитесь, что процессы v2ray и ck-server-linux-amd64 запущены.</p>
+</blockquote>
+</aside>
+<p>проверил, запущены ck-server-linux dnstt-server v2ray, в tcpdump в контейнере все тоже самое, что и на самой хост машине контейнера</p></td><td>2020-08-10T14:00:16.994Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="medfgh" data-post="24" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/ebca7d/48.png" class="avatar"> medfgh:</div>
+<blockquote>
+<p>Если убираю адрес роутера из дефолт гейтвея после загрузки, то ВМ не знает куда пинговать,и никуда не уходит пинг, если убираю до загрузки ВМ , то нет ip адреса у порта(DHCP не отработал)</p>
+</blockquote>
+</aside>
+<p>У виртуальной машины должно быть два интерфейса: bridge (мост) к интернет-адаптеру и host-only interface. Bridge не зависит от настроек IP-адреса на хост-системе.</p></td><td>2020-08-10T14:03:50.994Z</td></tr><tr><td>ValdikSS</td><td><p>Не знаю, что вам еще подсказать. Убедитесь, что вообще интернет работает внутри контейнера, и что правильно настроена маршрутизация, если вы что-то настраивали доплонительно. Может, у вас iptables запрещает маршрутизацию между интерфейсами? У вас даже на SYN ответа нет. Попробуйте перезагрузить контейнер.</p></td><td>2020-08-10T14:04:43.339Z</td></tr><tr><td>ValdikSS</td><td><p>В контейнере обнаружился баг, из-за чего он может не работать корректно.<br>
+После установки выполните:<br>
+<code>systemctl -M cen disable --now ferm</code><br>
+Инструкция обновлена.</p></td><td>2020-08-10T21:20:39.165Z</td></tr><tr><td>gloros</td><td><p>Подскажите где можно беларусам скачать контейнер?</p></td><td>2020-08-11T07:12:34.626Z</td></tr><tr><td>mcen</td><td><p>попробуйте вот эту ссылку: <a href="http://135.181.47.40/Valdik_VM/" rel="nofollow noopener">http://135.181.47.40/Valdik_VM/</a></p></td><td>2020-08-11T07:54:14.930Z</td></tr><tr><td>gloros</td><td><p>Спасибо огромное!!! Скачал. Буду пробовать.</p></td><td>2020-08-11T08:29:44.444Z</td></tr><tr><td>gmfdbxuz</td><td><p>Как проще всего поднять socks сервер в клиентской вм? Может он там уже есть?</p></td><td>2020-08-11T08:35:02.461Z</td></tr><tr><td>gmfdbxuz</td><td><p>Это нужно для полноценного доступа к сайтам, сейчас большая часть .by сайтов недоступна из-за границы. Мне кажется проще всего настроить броузер на использование сокса для всего кроме .by, а не заворачивать весь трафик через удаленный сервер.</p></td><td>2020-08-11T09:00:29.105Z</td></tr><tr><td>ValdikSS</td><td><p>В ВМ, в файл /usr/local/etc/v2ray.json.template, в раздел inbounds добавьте:</p>
+<pre><code class="lang-auto">  {
+        "port": 6999,
+        "listen": "0.0.0.0",
+        "protocol": "socks"
+  },
+</code></pre>
+<p>Должно получиться примерно так:</p>
+<pre><code class="lang-auto">{
+  //"log": {"loglevel": "debug"},
+  "dns": {"servers": ["127.0.0.1"]},
+  "inbounds": [{
+        "port": 6100, // Port of the server. Must be the same as above.
+        "listen": "0.0.0.0",
+        "protocol": "dokodemo-door",
+        "settings": {
+            "network": "tcp,udp",
+            "timeout": 300,
+            "followRedirect": true
+        },
+        "streamSettings": {
+        "network": "tcp",
+        "security": "none",
+        "sockopt": {"tproxy": "redirect"}
+        }
+  },
+  {
+        "port": 6999,
+        "listen": "0.0.0.0",
+        "protocol": "socks"
+  },
+…
+</code></pre>
+<p>Обратите внимание на добавленную запятую после закрывающей “}”.<br>
+После модификации файла перезагрузите ВМ.</p></td><td>2020-08-11T09:04:08.476Z</td></tr><tr><td>gmfdbxuz</td><td><p>Работает, спасибо. <img src="https://ntc.party/images/emoji/twitter/shushing_face.png?v=9" title=":shushing_face:" class="emoji" alt=":shushing_face:"></p></td><td>2020-08-11T09:13:20.604Z</td></tr><tr><td>gloros</td><td><p>А кто подскажет для беларусов где скачать конфиги openvpn ?</p></td><td>2020-08-11T09:19:52.187Z</td></tr><tr><td>mon4ez</td><td><p>Не знаком с таким видом контейнеров, подскажите, в чем может быть причина того что в контейнере нет интернета?</p></td><td>2020-08-11T11:10:53.057Z</td></tr><tr><td>gloros</td><td><p>А контейнер вы настроили?<br>
+У меня беда в том что при скачивании скриптов из virtualbox пишет refused так как инета в урезанном виде стоит на моём компе. Psiphon пытается как-то загрузится, но почти сразу падает, так как на моем IP сразу несколько чел сидит. С мобилы ещё инет через psiphon пашет. Нужно на компе его поднять.</p></td><td>2020-08-11T11:44:16.406Z</td></tr><tr><td>mon4ez</td><td><p>Контенер по инструкции запускал. с VirtualEthernet=no интернет внутри есть, что и не удивительно. Но в таком режиме толку от контейнера не много.</p></td><td>2020-08-11T11:52:58.607Z</td></tr><tr><td>gmfdbxuz</td><td><p>возможно в iptables какие-то правила уже стоят и мешают</p></td><td>2020-08-11T12:01:20.932Z</td></tr><tr><td>mon4ez</td><td><p>Ну там докер стоит, но он эти порты не трогает, а больше ничего не рулится. Свежий сервер.</p></td><td>2020-08-11T12:02:00.469Z</td></tr><tr><td>gmfdbxuz</td><td><p>с докером не подскажу, я воткнул в amazon ec2 на убунту образе, поднялось все как описано</p></td><td>2020-08-11T12:03:16.646Z</td></tr><tr><td>somedude</td><td><p>Это ваш сервер там форсят в телеге? Можете добавить хотябы ридми для тех кто не сильно подкован? А то люди видят ссылку, а что там внутри - не понимают.</p></td><td>2020-08-11T12:11:28.645Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="gloros" data-post="38" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/g/f07891/48.png" class="avatar"> gloros:</div>
+<blockquote>
+<p>У меня беда в том что при скачивании скриптов из virtualbox пишет refused так как инета в урезанном виде стоит на моём компе.</p>
+</blockquote>
+</aside>
+<p>Если вы можете подключиться к удалённому серверу по SSH хоть как-то, то можете вручную создать все файлы в виртуальной машине — у них у всех текстовое содержимое.</p></td><td>2020-08-11T12:20:49.408Z</td></tr><tr><td>ValdikSS</td><td><p>Проверьте правила iptables, посмотрите через tcpdump, маршрутизируются ли пакеты в интерфейс контейнера (он должен называться ve-cen).<br>
+Зайдите внутрь контейнера (<code>machinectl shell cen</code>), проверьте наличие IP-адреса на интерфейсе host0 (<code>ip addr</code>).</p></td><td>2020-08-11T12:27:44.718Z</td></tr><tr><td>ValdikSS</td><td><p>На всякий случай, если не все понимают, <strong>вы можете получать интернет из виртуальной машины на всех устройствах внутри вашей домашней сети (компьютерах, смартфонах, приставках)</strong>. Для этого необходимо указать IP-адрес виртуальной машины в качестве шлюза и DNS-сервера. Устанавливать дополнительное ПО на конечных устройствах не требуется.</p>
+<p>Узнать IP-адрес виртуальной машины можно либо в самой виртуальной машине (команда <code>ip -br a</code>), либо в на странице информации на вашем домашнем маршрутизаторе.</p></td><td>2020-08-11T12:51:13.239Z</td></tr><tr><td>cineg19105</td><td><p>Спасибо за твои старания Valdik!</p>
+<ol>
+<li>сделай пожалуста видео настройки)</li>
+<li>можно ли сделать это за недорого или в рамках prostovpn?</li>
+<li>пока не натроено через виртуалку  в внп psiphon на windows сделать чтобы Hosts файл работал и блокировал рекламу?<br>
+3.1 тоже самое но с adguard + psiphon</li>
+<li>можно ли поставить любую впн программу на эмулятор андроида (nox player и др.) у которой нет win-версии и с эмулятора раздать в саму winodows где запущен эмулятор?</li>
+</ol>
+<p>спасибо!</p></td><td>2020-08-11T13:15:47.963Z</td></tr><tr><td>mon4ez</td><td><p>У нас тут спор был между трех админов будет или нет доступна виртуалка, оказалась доступнна.<br>
+Проблема в том что с хоста доступны все сайты. С подключенной машины из сети, доступен телеграмм и гугл. БОльше ничего не открывается. Днс сервер работает.</p></td><td>2020-08-11T13:52:21.207Z</td></tr><tr><td>ValdikSS</td><td><p>Правильно ли я понимаю: если вы используете ВМ шлюзом на компьютере, где ВМ и запущена, то всё работает, а если вы прописываете IP-адрес в качестве шлюза на других устройствах, то работает только telegram и google?<br>
+Не знаю, в чём может быть проблема, протестирую позже. Посмотрите, ходят ли пакеты, через tcpdump.</p></td><td>2020-08-11T15:04:00.552Z</td></tr><tr><td>mon4ez</td><td><p>Всё верно. Пакеты видно и на виртуалке и на сервере.</p></td><td>2020-08-11T15:12:09.221Z</td></tr><tr><td>ValdikSS</td><td><p>Ответы на запросы на сайты, которые не открываются, видны в tcpdump? Или видно только сами запросы?</p></td><td>2020-08-11T15:13:30.184Z</td></tr><tr><td>mon4ez</td><td><p>Ответы есть от тех сайтов которые грузятся, ну и грузятся частично, в основном текстовая часть. Очень похоже на проблему с mtu.</p></td><td>2020-08-11T15:16:26.140Z</td></tr><tr><td>ValdikSS</td><td><p>Запустите tcpdump в виртуальной машине, wireshark на отдельном компьютере, и посмотрите, видны ли ответы на запросы в tcpdump, и видны ли они в wireshark.</p>
+<p>Попробуйте уменьшить MTU на интерфейсе внутри ВМ:<br>
+<code>ip link set mtu 1300 dev enp8s0</code>, где <code>enp8s0</code> — интерфейс в сети вашего домашнего маршрутизатора (используйте <code>ip -br a</code>).</p></td><td>2020-08-11T15:20:53.160Z</td></tr><tr><td>mon4ez</td><td><p>Уточните, пожалуйста, на каком именно интерфейсе виртуалки. Том что в мосте, или том что идет в сеть хоста?<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/925f2a41aae9b94292a457b34812397685d6a191.png" data-download-href="https://ntc.party/uploads/default/925f2a41aae9b94292a457b34812397685d6a191" title="Screenshot_20200811_182644"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/925f2a41aae9b94292a457b34812397685d6a191_2_690x77.png" alt="Screenshot_20200811_182644" data-base62-sha1="kSRBfQkiTtYjB0qr5XFK3ciXATD" width="690" height="77" srcset="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/925f2a41aae9b94292a457b34812397685d6a191_2_690x77.png, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/925f2a41aae9b94292a457b34812397685d6a191_2_1035x115.png 1.5x, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/925f2a41aae9b94292a457b34812397685d6a191.png 2x" data-dominant-color="121212"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20200811_182644</span><span class="informations">1260×141 17.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2020-08-11T15:27:36.703Z</td></tr><tr><td>ValdikSS</td><td><p>enp0s3, в вашем случае.</p></td><td>2020-08-11T15:28:09.546Z</td></tr><tr><td>mon4ez</td><td><p>Судя по дампам, сайты отвечают и сервер ответы получает. На виртуалке ответы с сервера видно вроде,  хотя тяжело сопоставить. На компьютерах в сети ответов нет.<br>
+Уменьшение mtu не помогло.</p></td><td>2020-08-11T15:56:11.065Z</td></tr><tr><td>mbllllb(mbllllb)</td><td><p>добрый вечер, после выполнения всех инструкций на локальной машине (host: windows 10 со всеми обновлениями на сегодня) результат выполнения <strong>ip -br a</strong> <img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/848e393639d5cfc10a0b54ca13a42479854f0cf7.png" alt="Annotation 2020-08-11 234710" data-base62-sha1="iUDJMP4g4KlW3G9jilxYDDsrN5R" width="623" height="96"><br>
+т.е. адрес контейнера enp0s8 - отсутствует.<br>
+В чем может быть проблема?</p></td><td>2020-08-11T20:57:17.369Z</td></tr><tr><td>mbllllb(mbllllb)</td><td><p><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/8f6b27cd609985069c22266525e4ca5643115b72.png" alt="Annotation 2020-08-11 235901" data-base62-sha1="ksJRbtYkHkUub6i99JlmycTKjtw" width="630" height="256"><br>
+вот настройки адаптера контейнера. Все остальное по-умолчанию.<br>
+Пожалуйста, намекните, что может быть не так?</p></td><td>2020-08-11T21:14:11.836Z</td></tr><tr><td>mon4ez</td><td><p>В менеджере сетей виртуалбокса DHCP сервер включен?</p></td><td>2020-08-12T07:43:31.689Z</td></tr><tr><td>mbllllb(mbllllb)</td><td><p>на картинке при выключенном dhcp. Если включить, то ip появляется, но не ххх.ххх.56.ххх - вместо 56 разные числа выше 100. Поэтому нельзя прописать этот адрес к шлюз, т.к. подсеть - ххх.ххх.100.хх. Пробовал в настройках адаптера Virtualbox Host-only при существующем IP поставить маску 255.255.0.0 - и потерял драйвер WIFI - Только его удаление исправило ситуацию))</p></td><td>2020-08-12T08:20:14.648Z</td></tr><tr><td>ValdikSS</td><td><p>По умолчанию Virtualbox настраивает host-only-сеть на 192.168.56.xxx.<br>
+Конфигурируется в file → host network manager (CTRL+H).</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/64892adea246d8425ae863adde00468172e4fd0e.png" data-download-href="https://ntc.party/uploads/default/64892adea246d8425ae863adde00468172e4fd0e" title="Screenshot_20200812_112656"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/64892adea246d8425ae863adde00468172e4fd0e_2_644x500.png" alt="Screenshot_20200812_112656" data-base62-sha1="elnCS4VOPNKC2LWByKsVrmsRtJs" width="644" height="500" srcset="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/64892adea246d8425ae863adde00468172e4fd0e_2_644x500.png, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/64892adea246d8425ae863adde00468172e4fd0e.png 1.5x, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/64892adea246d8425ae863adde00468172e4fd0e.png 2x" data-dominant-color="E1E9EC"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20200812_112656</span><span class="informations">677×525 50.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/dc4bc43da10a84d2f64addc2be0cc4b51c6d216f.png" data-download-href="https://ntc.party/uploads/default/dc4bc43da10a84d2f64addc2be0cc4b51c6d216f" title="Screenshot_20200812_112706"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/dc4bc43da10a84d2f64addc2be0cc4b51c6d216f_2_644x500.png" alt="Screenshot_20200812_112706" data-base62-sha1="vqPn6kWetCbjCE32y1zPhPDxdyT" width="644" height="500" srcset="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/dc4bc43da10a84d2f64addc2be0cc4b51c6d216f_2_644x500.png, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/dc4bc43da10a84d2f64addc2be0cc4b51c6d216f.png 1.5x, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/dc4bc43da10a84d2f64addc2be0cc4b51c6d216f.png 2x" data-dominant-color="E2E9ED"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20200812_112706</span><span class="informations">677×525 47.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2020-08-12T08:27:17.774Z</td></tr><tr><td>ValdikSS</td><td><p>Насколько я понимаю, интернет-связность внутри страны более-менее работает и не подвергается фильтрации.</p>
+<p>Если у вас «белый» (маршрутизируемый) IP-адрес, можно «раздать» интернет из виртуальной машины внутри страны, подняв Shadowsocks или V2ray-прокси сервер внутри ВМ, и установив Shadowsocks/V2ray-клиенты на смартфоны Android/iOS.</p>
+<p>Раздаваемый трафик можно замаскировать под заход на сайт в зоне .by по протоколу HTTP. Напишу подробнее, если необходимо.</p></td><td>2020-08-12T08:43:42.528Z</td></tr><tr><td>mbllllb(mbllllb)</td><td><p>спасибо, это все прояснило)<br>
+Сегодня с утра интернет снова работает, визуально все вернулось в состояние “как было до”. Но данная тема уже не потеряет своей актуальности, больше спасибо вам.</p></td><td>2020-08-12T09:02:37.191Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="cineg19105" data-post="47" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/c/73ab20/48.png" class="avatar"> cineg19105:</div>
+<blockquote>
+<p>можно ли сделать это за недорого или в рамках prostovpn?</p>
+</blockquote>
+</aside>
+<p>Не в рамках простовпн, но недорого: можете купить VPS у Scaleway, OVH, ITLDC, UltraVPS. Всё в пределах $5 в месяц.</p>
+<aside class="quote no-group" data-username="cineg19105" data-post="47" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/c/73ab20/48.png" class="avatar"> cineg19105:</div>
+<blockquote>
+<p>можно ли поставить любую впн программу на эмулятор андроида (nox player и др.) у которой нет win-версии и с эмулятора раздать в саму winodows где запущен эмулятор?</p>
+</blockquote>
+</aside>
+<p>Думаю, можно, если в эмуляторе есть root. С этим должен справится <a href="https://github.com/Mygod/VPNHotspot">VPN Hotspot</a>. Однако, неужели действительно есть программы, для которых нет аналога под Windows? Обфускаций средствами simple-obfs, V2ray или dnstt должно хватить, они работают под Windows.</p>
+<aside class="quote no-group" data-username="cineg19105" data-post="47" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/c/73ab20/48.png" class="avatar"> cineg19105:</div>
+<blockquote>
+<p>пока не натроено через виртуалку в внп psiphon на windows сделать чтобы Hosts файл работал и блокировал рекламу?</p>
+</blockquote>
+</aside>
+<p>Да, это можно сделать установкой дополнительного DNS-резолвера на компьютер.</p></td><td>2020-08-12T09:24:16.011Z</td></tr><tr><td>mcen</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="62" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Раздаваемый трафик можно замаскировать под заход на сайт в зоне .by по протоколу HTTP. Напишу подробнее, если необходимо.</p>
+</blockquote>
+</aside>
+<p>можете пожалуйста написать подробней, Спасибо!</p></td><td>2020-08-12T13:43:56.043Z</td></tr><tr><td>Illusion_of_control</td><td><p>Не могу подключится вообще к порту IMAP. Виртуалка на Ubuntu.Визуально разница между локальной виртуалкой и облаком, отсутствие второго адреса у контейнера (192.168.X.X)</p></td><td>2020-08-12T16:35:51.616Z</td></tr><tr><td>ValdikSS</td><td><p>Не можете подключиться к IP-адресу контейнера и порту 993? Вы отключили ferm?</p></td><td>2020-08-12T17:29:05.000Z</td></tr><tr><td>Illusion_of_control</td><td><p>Так, всё верно, я отключил ferm. telnet 1.2.3.4 933 просто висит на подключении.</p></td><td>2020-08-12T18:23:25.345Z</td></tr><tr><td>ValdikSS</td><td><p>Попробуйте в <code>/usr/local/etc/ckserver.json</code> в контейнере заменить IP-адрес <code>172.217.23.195</code> на адрес, полученный выполнением команды <code>host imap.gmail.com</code>, после чего перезагрузите сервер.</p></td><td>2020-08-12T18:29:32.815Z</td></tr><tr><td>nzkhammatov(Ainur Khammatov)</td><td><p><a href="https://poiskvps.ru/index.php?search_ram_min=1024&amp;search_price_max=150&amp;search_virtualization%5B%5D=3&amp;search_os%5B%5D=3" rel="noopener nofollow ugc">poiskvps.ru</a></p>
+<p><a href="https://vps.today/index.php?disk=5&amp;ram=1&amp;price=150&amp;v%5B%5D=1&amp;os%5B%5D=4" rel="noopener nofollow ugc">vps.today</a></p></td><td>2020-09-28T06:42:33.301Z</td></tr><tr><td>nzkhammatov(Ainur Khammatov)</td><td><p>Приобретайте тот, который по карману. Разворачивайте продукт и тестируйте.</p>
+<aside class="quote" data-post="72" data-topic="599">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/nzkhammatov/48/4650_2.png" class="avatar">
+    <a href="https://ntc.party/t/topic/599/72">Контейнер и виртуальная машина для возможного предстоящего отключения интернета в Беларуси</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/belarus/32"><span data-category-id="32" style="--category-badge-color: #A461EF; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent"><span class="badge-category__name">Belarus</span></span></a>
+  </div>
+  <blockquote>
+    <a href="https://poiskvps.ru/index.php?search_ram_min=1024&amp;search_price_max=150&amp;search_virtualization%5B%5D=3&amp;search_os%5B%5D=3" rel="noopener nofollow ugc">poiskvps.ru</a> 
+<a href="https://vps.today/index.php?disk=5&amp;ram=1&amp;price=150&amp;v%5B%5D=1&amp;os%5B%5D=4" rel="noopener nofollow ugc">vps.today</a>
+  </blockquote>
+</aside>
+</td><td>2020-09-28T07:40:56.278Z</td></tr><tr><td>keva(keva)</td><td><p>Хотел уточнить, актуальна ли данная инструкция. Всё сделал по тексту, как бы без ошибок. Но не работает. host <a href="http://imap.gmail.com" rel="noopener nofollow ugc">imap.gmail.com</a> выдаёт not found…</p></td><td>2020-11-01T14:18:36.675Z</td></tr><tr><td>ValdikSS</td><td><p>Что вы пытаетесь сделать, и что именно не работает?</p></td><td>2020-11-01T14:26:32.955Z</td></tr><tr><td>keva(keva)</td><td><p>Я типа в Беларуси. СОВСЕМ не спец в этом. Просто сделал по инструкции. Ошибок, какбы не вылазило. Но и не работает ничего, если в настройках v4 адаптера меняю на  IP-адреса виртуальной машины в качестве шлюза и DNS-сервера</p></td><td>2020-11-01T14:44:10.274Z</td></tr><tr><td>keva(keva)</td><td><p>По командам machinectl copy-from cen /root/cloak_adminuid.txt cloak_adminuid.txt у меня скопировалось в папку пользователя, а не root. Так и должно быть? Тупо пробовал и в root положить - ничего после перезагрузок не изменилось. Файлы как бы исплняемыми эти не делал и права на них в папке root не менял… Тупил вот так, короче. И, ка проверить на сервере и на виртуалке. Если возможно - пожалуйста подробно, для “ОСОБО одарённых”…</p></td><td>2020-11-01T14:48:55.684Z</td></tr><tr><td>keva(keva)</td><td><p>Да, сервер - инстанс на Oracl-е - если это важно. Порты в его Гуе открыл. На роутере - пробросил. OpenVPN на этом инстансе работает…</p></td><td>2020-11-01T14:52:20.683Z</td></tr><tr><td>ValdikSS</td><td><p>В Беларуси продолжаются интернет-блокировки? Напишу чуть позже шаги для проверки и отладки.</p></td><td>2020-11-01T14:50:35.000Z</td></tr><tr><td>keva(keva)</td><td><p>Ну каждые выходные у нас хрень творится. Не так, бывает, жестоко, как 9-11 августа. Но, тем не менее в Телегаме видео не загрузить. Мобильный интернет у всех провов не работает… ТАКАЯ любовь…))</p></td><td>2020-11-01T14:55:02.742Z</td></tr><tr><td>ValdikSS</td><td><p>Прежде всего убедитесь, что серверная часть у вас работает. Установите curl, выполните:</p>
+<p><code>curl -v https://IP-АДРЕС:993</code></p>
+<p>Должно быть что-то вроде: <code>curl: (60) SSL certificate problem: self signed certificate</code>. Если вы получаете такой ответ, то всё в порядке.<br>
+Если не получаете такой ответ, а <strong>соединение долгое время не устанавливается</strong> — скорее всего, проблема та же, что описана в посте <a href="https://ntc.party/t/topic/599/69">69</a>. В этом случае подключитесь к серверу по SSH, зайдите в контейнер командой <code>machinectl cen shell</code>, выполните <code>host imap.gmail.com</code> замените <code>172.217.23.195</code> в файле <code>usr/local/etc/ckserver.json</code> на IP-адрес из команды host.</p>
+<p>В клиентской виртуальной машине должны быть файлы <code>cloak_adminuid.txt, cloak_pubkey.txt, dnstt-server.pub, v2ray_uuid.txt</code> в папке <code>/root</code>. Убедитесь, что они есть и наполнены содержимым.</p></td><td>2020-11-02T10:08:54.204Z</td></tr><tr><td>keva(keva)</td><td><p>Сорри, но что-то сразу не нагуглю, как полечить unknown operation cen при выполнении machinectl cen shell</p></td><td>2020-11-02T10:42:29.635Z</td></tr><tr><td>keva(keva)</td><td><p>На сервере по пути usr/local/etc/ нет файла ckserver.json. Это потому, что я в контейнер не могу попасть?</p></td><td>2020-11-02T10:49:05.291Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="keva" data-post="83" data-topic="599" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a6a055/48.png" class="avatar"> keva:</div>
+<blockquote>
+<p>Сорри, но что-то сразу не нагуглю, как полечить unknown operation cen при выполнении machinectl cen shell</p>
+</blockquote>
+</aside>
+<p><code>machinectl shell cen</code>.</p>
+<aside class="quote no-group" data-username="keva" data-post="84" data-topic="599" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a6a055/48.png" class="avatar"> keva:</div>
+<blockquote>
+<p>На сервере по пути usr/local/etc/ нет файла ckserver.json. Это потому, что я в контейнер не могу попасть?</p>
+</blockquote>
+</aside>
+<p>Искать этот файл нужно внутри контейнера, а не на файловой системе сервера.</p></td><td>2020-11-02T11:01:42.239Z</td></tr><tr><td>keva(keva)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/9c2275124ed8a811a9d16b9452023163c6a0d49b.jpeg" data-download-href="https://ntc.party/uploads/default/9c2275124ed8a811a9d16b9452023163c6a0d49b" title="2"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/9c2275124ed8a811a9d16b9452023163c6a0d49b_2_690x217.jpeg" alt="2" data-base62-sha1="mhejd0XOwiD3VJnxjvaxhWaduqv" width="690" height="217" srcset="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/9c2275124ed8a811a9d16b9452023163c6a0d49b_2_690x217.jpeg, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/9c2275124ed8a811a9d16b9452023163c6a0d49b_2_1035x325.jpeg 1.5x, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/9c2275124ed8a811a9d16b9452023163c6a0d49b_2_1380x434.jpeg 2x" data-dominant-color="9E9FA0"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">2</span><span class="informations">1490×470 177 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div> <div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/708be529f6d839bac48d2127e3ceea864e26ffc6.jpeg" data-download-href="https://ntc.party/uploads/default/708be529f6d839bac48d2127e3ceea864e26ffc6" title="3"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/708be529f6d839bac48d2127e3ceea864e26ffc6_2_690x395.jpeg" alt="3" data-base62-sha1="g3DcrxxSftVqSsJShKiXiv7kIWq" width="690" height="395" srcset="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/708be529f6d839bac48d2127e3ceea864e26ffc6_2_690x395.jpeg, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/708be529f6d839bac48d2127e3ceea864e26ffc6.jpeg 1.5x, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/708be529f6d839bac48d2127e3ceea864e26ffc6.jpeg 2x" data-dominant-color="292B2D"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">3</span><span class="informations">709×406 115 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2020-11-02T11:30:09.006Z</td></tr><tr><td>keva(keva)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/bd4cec31eb89d6237d36723ceee0bc773a659bcb.jpeg" data-download-href="https://ntc.party/uploads/default/bd4cec31eb89d6237d36723ceee0bc773a659bcb" title="4"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/bd4cec31eb89d6237d36723ceee0bc773a659bcb_2_503x500.jpeg" alt="4" data-base62-sha1="r0D2Y8R6dAQAVGMlfcyWgW69bnR" width="503" height="500" srcset="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/bd4cec31eb89d6237d36723ceee0bc773a659bcb_2_503x500.jpeg, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/bd4cec31eb89d6237d36723ceee0bc773a659bcb.jpeg 1.5x, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/bd4cec31eb89d6237d36723ceee0bc773a659bcb.jpeg 2x" data-dominant-color="1B1B1D"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">4</span><span class="informations">697×692 101 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Ответ по SSL норм, но не взлетает. И по host <a href="http://imap.gmail.com" rel="noopener nofollow ugc">imap.gmail.com</a> 2 IP. Но оба варианта не заводятся. Что ещё проверить?</p></td><td>2020-11-02T12:21:43.501Z</td></tr><tr><td>keva(keva)</td><td><p>Ещё заметил, что при “заходе” в контейнер host сначала выдаёт одни IP. Если снова подать эту команду - они меняются на другие… Может и это влияет…<div class="lightbox-wrapper"><a class="lightbox" href="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/f7b2a6b84ec85755bfcb02ef42ba97c49f7c7e0d.jpeg" data-download-href="https://ntc.party/uploads/default/f7b2a6b84ec85755bfcb02ef42ba97c49f7c7e0d" title="5"><img src="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/f7b2a6b84ec85755bfcb02ef42ba97c49f7c7e0d_2_407x499.jpeg" alt="5" data-base62-sha1="zleH0JhlXtICOjwHkWmqUsF2KdL" width="407" height="499" srcset="контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/f7b2a6b84ec85755bfcb02ef42ba97c49f7c7e0d_2_407x499.jpeg, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/f7b2a6b84ec85755bfcb02ef42ba97c49f7c7e0d_2_610x748.jpeg 1.5x, контейнер-и-виртуальная-машина-для-возможного-предстоящего-отключения-интернета-в-беларуси/f7b2a6b84ec85755bfcb02ef42ba97c49f7c7e0d.jpeg 2x" data-dominant-color="191C20"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">5</span><span class="informations">679×833 119 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2020-11-02T13:32:00.733Z</td></tr><tr><td>ValdikSS</td><td><p>С серверной стороной у вас все, кажется, в порядке. Смотрите клиентскую, в частности, проверьте наличие файлов и их содержимое.</p></td><td>2020-11-02T13:45:13.460Z</td></tr><tr><td>keva(keva)</td><td><p>А IP так и должны себя вести в контейнере - сначала 1 пара - потом другая? Первая пара  не рабочая? И, какой из них - 108 или 109 надо на самом деле надо прописывать?<br>
+На клиент на виртуалке эти файлы 4 шт. cloak_adminuid.txt, cloak_pubkey.txt, dnstt-server.pub, v2ray_uuid.txt я скопировал в root через WinSCP. Права на них сейчас - 0644. Или надо было в home создать папку root и туда их кинуть? Содержимое - ключи в виде набора символов есть. НЕ знаю, что ещё мне посмотреть??? Или, может надо эти ключи перегенерить как-то? Посмотрел, что в контеёнере они соответствуют тому, что лежат в VM. Шлюз и DNS я правильно прописал? Есть, какие мысли?</p></td><td>2020-11-02T14:18:42.582Z</td></tr><tr><td>keva(keva)</td><td><p>Сейчас перезагрузил сервер - curl -v <a href="https://xn--IP--l8cug0fj:993" rel="noopener nofollow ugc">https://IP-АДРЕС:993</a> выдаёт curl: (60) SSL certificate problem: self signed certificate. НО!!! IP по host imap и в файле <code>usr/local/etc/ckserver.json</code> ПРИ ЭТОМ совсем РАЗНЫЕ. Как всё же должно это работать? Или это не важно и, главное - ответ curl: (60) SSL certificate problem: self signed certificate? Очень много вариантов…</p></td><td>2020-11-02T18:03:02.414Z</td></tr><tr><td>keva(keva)</td><td><p>Видно, слишком много вопросов назадавал …</p></td><td>2020-11-03T16:34:03.752Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="keva" data-post="90" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a6a055/48.png" class="avatar"> keva:</div>
+<blockquote>
+<p>А IP так и должны себя вести в контейнере - сначала 1 пара - потом другая? Первая пара не рабочая? И, какой из них - 108 или 109 надо на самом деле надо прописывать?</p>
+</blockquote>
+</aside>
+<p>Это всё не принципиально. Если бы у вас curl вместо того, чтобы выдавать сообщение о самоподписном сертификате, зависал, то это бы имело значение. Серверная сторона у вас работает корректно.</p>
+<p>Я не знаю, почему у вас не работает. Никаких отладочных средств в виртуальной машине не предусмотрено. Вам следует воспользоваться чем-нибудь попроще, например — Outline.</p></td><td>2020-11-04T15:42:18.315Z</td></tr><tr><td>keva(keva)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="93" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Вам следует воспользоваться чем-нибудь попроще, например — Outline.</p>
+</blockquote>
+</aside>
+<p>Это, типа потому, что я тупой. НЕ буду даже спорить. В 1 сообщении так и написал, что “не спец” от слова СОВСЕМ. И  к Вам -никаких претензий - Боже упаси. Однако Outline НЕ помогает, в нашей ситуации.</p>
+<aside class="quote no-group" data-username="ValdikSS" data-post="93" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Это всё не принципиально.</p>
+</blockquote>
+</aside>
+<p>В этом месте не понял. Вы же сами ссылались на 69 сообщение, где как раз и меняли эти IP-шники…<br>
+На клиент на виртуалке эти файлы 4 шт. cloak_adminuid.txt, cloak_pubkey.txt, dnstt-server.pub, v2ray_uuid.txt в какую папку надо было копировать? И права на них надо как-то менять?</p></td><td>2020-11-05T11:24:30.570Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="keva" data-post="94" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a6a055/48.png" class="avatar"> keva:</div>
+<blockquote>
+<p>Однако Outline НЕ помогает, в нашей ситуации.</p>
+</blockquote>
+</aside>
+<p>Если у вас отключают интернет так, что не работает получение почты через Gmail IMAP, а также не работают DNS-запросы — контейнер вам не поможет получить доступ в интернет.</p>
+<aside class="quote no-group" data-username="keva" data-post="94" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a6a055/48.png" class="avatar"> keva:</div>
+<blockquote>
+<p>В этом месте не понял. Вы же сами ссылались на 69 сообщение, где как раз и меняли эти IP-шники…</p>
+</blockquote>
+</aside>
+<p>Пожалуйста, читайте внимательнее: если бы у вас вызов curl приводил к долгому ожиданию ответа, то нужно было бы менять адрес. А у вас, судя по вашим сообщениям, и серверная, и клиентская часть настроена корректно. Я не знаю, в чем может быть проблема, и не особо хочу разбираться: этот контейнер делался для показа принципиальной концепции, на скорую руку, я не ожидал, что он кому-то потребуется после конца августа.</p></td><td>2020-11-05T11:47:28.686Z</td></tr><tr><td>keva(keva)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="95" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Если у вас отключают интернет так, что не работает получение почты через Gmail IMAP, а также не работают DNS-запросы — контейнер вам не поможет получить доступ в интернет.</p>
+</blockquote>
+</aside>
+<p>Оставим в покое Outline.<br>
+Я выше писал неоднократно, что и при РАБОТАЮЩЕМ интернете НЕТ “интернета” при шлюзе и DNS из виртуалки.<br>
+Про “cloak_adminuid.txt, cloak_pubkey.txt, dnstt-server.pub, v2ray_uuid.txt в какую папку надо было копировать?” так и НЕ услышал. Что поделать,тупой…</p>
+<aside class="quote no-group" data-username="ValdikSS" data-post="95" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>потребуется после конца августа.</p>
+</blockquote>
+</aside>
+<p>А у нас “август” никак не заканчивается. А у вас начаться может в любой момент. Вдруг…</p>
+<aside class="quote no-group" data-username="ValdikSS" data-post="95" data-topic="599">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>и не особо хочу разбираться</p>
+</blockquote>
+</aside>
+<p>“Мы в ответе за тех, кого приручили…” Это цитата… такая…</p></td><td>2020-11-05T12:38:28.862Z</td></tr><tr><td>RVS(RVS)</td><td><p>Настраивал еще в августе по инструкции выше - до сих пор работает, по крайней мере в мирное время сейчас. Все крутится на Linux, сервер брал на виртуалке OVH. Что касается просмотра видео, то у меня через такой прокси скорость падает до 1 мегабита, но и не для этих целей поднималось все.</p>
+<p>Пользуясь случаем, скажу <strong>ValdikSS</strong> спасибо! В свете новых событий, метод может пригодиться тем, кто его нашел в ближайшее время снова.</p></td><td>2020-11-14T18:34:01.218Z</td></tr><tr><td>keva(keva)</td><td><p>Del</p></td><td>2020-11-14T18:46:20.023Z</td></tr><tr><td>keva(keva)</td><td><p>На клиент на виртуалке эти файлы 4 шт. cloak_adminuid.txt, cloak_pubkey.txt, dnstt-server.pub, v2ray_uuid.txt я скопировал в root через WinSCP. Права на них сейчас - 0644. Или надо было в home создать папку root и туда их кинуть?</p></td><td>2020-11-14T18:47:04.368Z</td></tr><tr><td>RVS(RVS)</td><td><p>Файлы согласно инструкции лежат в директории <code>/root</code>.<br>
+/root/cloak_adminuid.txt<br>
+/root/cloak_pubkey.txt<br>
+И т.д.</p></td><td>2020-11-14T18:59:01.022Z</td></tr><tr><td>RVS(RVS)</td><td><p>Дополню, что использую образ Virtualbox как socks прокси на порту 6999. Для этого следовал дополнительной инструкции <a href="https://ntc.party/t/topic/599/34" class="inline-onebox">Контейнер и виртуальная машина для возможного предстоящего отключения интернета в Беларуси</a></p></td><td>2020-11-14T19:06:42.898Z</td></tr><tr><td>keva(keva)</td><td><p>И у меня там лежат. А, какие у Вас права на эти файлы? Меняли их вообще - или просто скопировали?</p></td><td>2020-11-14T19:08:49.946Z</td></tr><tr><td>keva(keva)</td><td><p>Т.е по инструкции не заработало и пришлось с  socks прокси на порту 6999 дополнительно шаманить?</p></td><td>2020-11-14T19:10:53.050Z</td></tr><tr><td>RVS(RVS)</td><td><p>Права не трогал - -rw-r–r-- 0644. Все завелось сразу. Удобнее было использовать socks, через dns не проверял.</p></td><td>2020-11-14T19:16:30.804Z</td></tr><tr><td>keva(keva)</td><td><p>Т. е. и без socks-а у Вас работало нормально?<br>
+А Вы сами реально из Беларуси? Схема из этой темы работала 9 -11 августа, когда у нас всё рубанули? Я сам из Гомеля… И ещё. Эта схема помогает как-то , когда по выходным эти уроды мутят со связью регулярно? Например в Телеграмме даже картинки не прогружаются, не говоря про видео?</p></td><td>2020-11-14T19:23:16.808Z</td></tr><tr><td>RVS(RVS)</td><td><p>Из Беларуси. Настраивал в конце августа и пока не пригодилось т.к. таким образом, как 9-11 числа не блокировали больше. Написал все как есть, сам такой же “не специалист” в этом - у меня работает через socks, dns не пробовал. Больше ничем помочь не смогу, удачи.</p></td><td>2020-11-14T19:43:52.107Z</td></tr>
+    </table>
+      </body>
+    </html>

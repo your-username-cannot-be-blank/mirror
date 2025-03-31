@@ -1,0 +1,160 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>vless-reality-повышенный-пинг-и-маленькая-отдача</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>erLCoder(Maksim)</td><td><p>Поднял свой сервер на rdp-onedash от serverius holding. Поставил себе в flow xtls-rprx-vision и sni поставил пока что <a href="http://yahoo.com" rel="noopener nofollow ugc">yahoo.com</a>, посмотрев через RealiTLScanner, увидел что есть такой же косящий под <a href="http://yahoo.com" rel="noopener nofollow ugc">yahoo.com</a>. И в дискорде резко начинает подскакивать пинг у некоторых пользователей. В ufw фаерволе настроил все по черному списку закинул туда ненужные порты по типу 80 и остальных, которые открыты, но не используются и убрал возможность пинга сервера извне, отключив icmp в фаерволе, от самого сервака пинг идет.</p>
+<p>P.S также у меня сильно упала скорость отдачи<br>
+Что делать, подскажите</p></td><td>2024-12-22T13:56:15.799Z</td></tr><tr><td>Xunlei</td><td><p>Пробовать другие протоколы, тунели. Для начала те, где нет congestion control.</p></td><td>2024-12-22T14:03:02.424Z</td></tr><tr><td>nami</td><td><p><a href="http://yahoo.com" rel="noopener nofollow ugc">yahoo.com</a> не лучший выбор, проверь тупо пингом другие домены, найди тот к которому будет минимальная задержка, его и ставь, еще можешь попробовать в настройках панели включить bbr</p></td><td>2024-12-22T14:40:50.428Z</td></tr><tr><td>naykaminka(Sergey)</td><td><p>Зачем пинг отключать, разве цензор будет подобным заниматься ?<br>
+И как это вообще влияет на безопасность.</p></td><td>2024-12-22T14:45:44.897Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>а где он в 3x-ui?</p></td><td>2024-12-22T15:02:54.031Z</td></tr><tr><td>nami</td><td><p>на сервере открываешь настройки командой x-ui и там 23 пункт</p></td><td>2024-12-22T15:12:54.128Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>он включен у меня, возможно еще это может быть как то связано что я флоу поставил только вчера и сделал на 443 порт</p></td><td>2024-12-22T15:14:29.297Z</td></tr><tr><td>nami</td><td><p>смена sni значит не помогает?</p></td><td>2024-12-22T15:15:34.293Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>все равно огромные пинги ловятся периодически и бывает 40 мбит отдача бывает 1 мбит и даже меньше<br>
+поставил вообще не популярный сайт в моем asn</p></td><td>2024-12-22T15:20:35.126Z</td></tr><tr><td>0ka(0ka)</td><td><p>На самом сервере сделай спидтест<br>
+Download<br>
+<code>iperf3 -4 -c speedtest.novoserve.com -p 5203 -R</code><br>
+Upload<br>
+<code>iperf3 -4 -c speedtest.novoserve.com -p 5203</code></p>
+<p>Запусти мониторинг хотя бы на 10 минут<br>
+<code>mtr -s 1472 -i 0.5 1.1.1.1</code> (потерь на последнем хопе быть не должно)</p></td><td>2024-12-22T15:28:03.258Z</td></tr><tr><td>nami</td><td><p>Утечки днс нет? <a href="https://dnsleaktest.com/" rel="noopener nofollow ugc">https://dnsleaktest.com/</a></p></td><td>2024-12-22T15:32:27.705Z</td></tr><tr><td>0ka(0ka)</td><td><p>Вопрос вообще не по теме… Непонятно как вы связали лаги инета с утечкой днс.</p></td><td>2024-12-22T15:39:38.379Z</td></tr><tr><td>nami</td><td><p>Я точно не знаю, где то попадалась инфа что при перехвате днс скорость может падать в ноль</p></td><td>2024-12-22T15:42:34.770Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Download:</p>
+<pre><code class="lang-auto">root@mail:~# iperf3 -4 -c speedtest.novoserve.com -p 5203 -R
+Connecting to host speedtest.novoserve.com, port 5203
+Reverse mode, remote host speedtest.novoserve.com is sending
+[  5] local xxxxxx port 48586 connected to 185.80.233.178 port 5203
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-1.00   sec   111 MBytes   930 Mbits/sec                  
+[  5]   1.00-2.00   sec   111 MBytes   934 Mbits/sec                  
+[  5]   2.00-3.00   sec   109 MBytes   918 Mbits/sec                  
+[  5]   3.00-4.00   sec   110 MBytes   925 Mbits/sec                  
+[  5]   4.00-5.00   sec   110 MBytes   923 Mbits/sec                  
+[  5]   5.00-6.00   sec   113 MBytes   948 Mbits/sec                  
+[  5]   6.00-7.00   sec   109 MBytes   911 Mbits/sec                  
+[  5]   7.00-8.00   sec   111 MBytes   930 Mbits/sec
+</code></pre>
+<p>Upload:</p>
+<pre><code class="lang-auto">root@mail:~# iperf3 -4 -c speedtest.novoserve.com -p 5203
+Connecting to host speedtest.novoserve.com, port 5203
+[  5] local xxxxxxx port 35508 connected to 185.80.233.178 port 5203
+[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
+[  5]   0.00-1.00   sec   110 MBytes   922 Mbits/sec   14   1.35 MBytes       
+[  5]   1.00-2.00   sec   108 MBytes   902 Mbits/sec   60    947 KBytes       
+[  5]   2.00-3.00   sec   106 MBytes   891 Mbits/sec   84    916 KBytes       
+[  5]   3.00-4.00   sec   109 MBytes   912 Mbits/sec   50    840 KBytes       
+[  5]   4.00-5.00   sec   108 MBytes   902 Mbits/sec   42    928 KBytes       
+[  5]   5.00-6.00   sec   108 MBytes   902 Mbits/sec   90    987 KBytes       
+[  5]   6.00-7.00   sec   110 MBytes   923 Mbits/sec  152   1.10 MBytes       
+[  5]   7.00-8.00   sec   110 MBytes   923 Mbits/sec   53    831 KBytes       
+[  5]   8.00-9.00   sec   108 MBytes   902 Mbits/sec  120   1.41 MBytes
+</code></pre>
+<p>MTR:</p>
+<pre><code class="lang-auto">Keys:  Help   Display mode   Restart statistics   Order of fields   quit
+                                                                                                           Packets               Pings
+ Host                                                                                                    Loss%   Snt   Last   Avg  Best  Wrst StDev
+ 1. gw.sim-networks.net                                                                                   0.0%   907    0.6   0.6   0.5   5.7   0.4
+ 2. 185.8.179.36                                                                                          0.0%   907    1.5   1.6   1.1  13.0   0.9
+ 3. speed-ix.cloudflare.com                                                                               0.0%   907    3.6   8.4   3.3  45.7   7.3
+ 4. 141.101.65.115                                                                                        0.0%   906    4.0   6.3   3.1  85.0   7.5
+ 5. one.one.one.one                                                                                       0.0%   906    3.3   3.1   3.0   4.0   0.1
+</code></pre></td><td>2024-12-22T16:31:33.414Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>только айпи германии, хотя сервер в нидерландах</p></td><td>2024-12-22T16:32:00.466Z</td></tr><tr><td>0ka(0ka)</td><td><p>возможно проблемы с сетью у клиентов, тогда как уже писали пробуй другой протокол, amneziaWG или openvpn например, голос в дискорде должен работать лучше в таком случае</p></td><td>2024-12-22T16:44:46.295Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Пинг все также повышенный в дискорде, демонстрации зависают и сильно отстают<br>
+Заметил, что в nekoray, которым я пользуюсь, а также у товарища в V2RayN имеются подобные ошибки, которых раньше не было в таких количествах без flow xtls-rprx-vision</p>
+<pre><code class="lang-auto">2024/12/25 16:42:03 [Error] app/dns: failed to retrieve response for dc1.ksn.kaspersky-labs.com. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:42:04 [Error] app/dns: failed to retrieve response for tdesktop.telega.one. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:42:09 udp:127.0.0.1:61693 accepted udp:66.22.197.54:50010 [socks-in -&gt; proxy]
+2024/12/25 16:42:10 [Error] app/dns: failed to retrieve response for dc1-st.ksn.kaspersky-labs.com. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:42:10 [Error] app/dns: failed to retrieve response for dc1-st.ksn.kaspersky-labs.com. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:42:10 [Error] app/dns: failed to retrieve response for dc1-st.ksn.kaspersky-labs.com. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:42:15 [Error] app/dns: failed to retrieve response for t.sports.ru. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:42:15 tcp:127.0.0.1:63405 accepted tcp:148.251.117.22:443 [socks-in -&gt; proxy]
+2024/12/25 16:42:17 tcp:127.0.0.1:63408 accepted tcp:148.251.117.22:443 [socks-in -&gt; proxy]
+2024/12/25 16:42:20 tcp:127.0.0.1:63415 accepted tcp:148.251.117.22:443 [socks-in -&gt; proxy]
+2024/12/25 16:42:22 tcp:127.0.0.1:63418 accepted tcp:148.251.117.22:443 [socks-in -&gt; proxy]
+2024/12/25 16:42:32 udp:127.0.0.1:60819 accepted udp:35.214.226.222:50002 [socks-in -&gt; proxy]
+2024/12/25 16:42:36 udp:127.0.0.1:62247 accepted udp:127.0.0.1:2080 [socks-in -&gt; dns-out]
+2024/12/25 16:42:36 [Error] app/dns: failed to retrieve response for s06.upd.kaspersky.com. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:42:36 [Error] app/dns: failed to retrieve response for s06.upd.kaspersky.com. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:43:09 udp:127.0.0.1:52268 accepted udp:66.22.197.54:50010 [socks-in -&gt; proxy]
+2024/12/25 16:43:32 udp:127.0.0.1:64189 accepted udp:35.214.226.222:50002 [socks-in -&gt; proxy]
+2024/12/25 16:43:38 tcp:127.0.0.1:63461 accepted tcp:162.159.128.233:443 [socks-in -&gt; proxy]
+2024/12/25 16:43:45 udp:127.0.0.1:62247 accepted udp:127.0.0.1:2080 [socks-in -&gt; dns-out]
+2024/12/25 16:43:45 [Error] app/dns: failed to retrieve response for fp-afd.azureedge.net. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:43:45 [Error] app/dns: failed to retrieve response for t-ring.msedge.net. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:43:46 [Error] app/dns: failed to retrieve response for fp-vs-nocache.azureedge.net. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:44:09 udp:127.0.0.1:53920 accepted udp:66.22.197.54:50010 [socks-in -&gt; proxy]
+2024/12/25 16:44:22 udp:127.0.0.1:62247 accepted udp:127.0.0.1:2080 [socks-in -&gt; dns-out]
+2024/12/25 16:44:22 [Error] app/dns: failed to retrieve response for presence-public-service-prod.ol.epicgames.com. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:44:32 udp:127.0.0.1:59151 accepted udp:35.214.226.222:50002 [socks-in -&gt; proxy]
+2024/12/25 16:44:36 udp:127.0.0.1:62247 accepted udp:127.0.0.1:2080 [socks-in -&gt; dns-out]
+2024/12/25 16:44:36 [Error] app/dns: failed to retrieve response for s08.upd.kaspersky.com. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:44:44 [Error] app/dns: failed to retrieve response for xsts.auth.xboxlive.com. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:44:47 tcp:127.0.0.1:63514 accepted tcp:148.251.117.22:443 [socks-in -&gt; proxy]
+2024/12/25 16:44:48 udp:127.0.0.1:51826 accepted udp:8.8.8.8:53 [socks-in -&gt; dns-out]
+2024/12/25 16:44:48 tcp:127.0.0.1:63520 accepted tcp:148.251.117.22:443 [socks-in -&gt; proxy]
+2024/12/25 16:44:52 [Error] app/dns: failed to retrieve response for fp-afd.azurefd.us. &gt; Post "https://8.8.8.8/dns-query": context canceled
+2024/12/25 16:45:04 [Error] app/dns: failed to retrieve response for activity.windows.com. &gt; Post "https://8.8.8.8/dns-query": context canceled
+</code></pre>
+<p>Логов с дискордом нет, но в целом там такая же картина.</p>
+<p>P.S Использую ядро x-ray. К слову проблемы появились после выдачи ключе с flow xtls-rprx-vision, без него все работает без больших пингов и падения скорости выгрузки</p></td><td>2024-12-25T16:48:04.521Z</td></tr><tr><td>sakontwist</td><td><p>У вас настроен DoH прямо в xray? Проверьте как идут эти запросы к dns - прямо или через default outbound</p></td><td>2024-12-25T17:07:36.904Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Вот только что выставил в настройках 3x-ui xray</p>
+<pre><code class="lang-auto">"dns": {
+    "servers": [
+      "1.1.1.1",
+      "1.0.0.1"
+    ],
+    "queryStrategy": "UseIP"
+  },
+  "fakedns": null
+</code></pre>
+<p>Вы это имели ввиду?</p></td><td>2024-12-25T17:16:26.963Z</td></tr><tr><td>sakontwist</td><td><p>Значит клиенты пытаются идти на  8.8.8.8 и обламываются.</p></td><td>2024-12-25T17:20:10.411Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Вот собственно и встает вопрос, что мне с этим делать, каждому клиенту не очень удобно выставлять эти днс сервера самостоятельно. Поставить в панели 8.8.8.8 и 8.8.4.4? Но тогда как оно работало все до этого я не понимаю</p></td><td>2024-12-25T17:22:23.405Z</td></tr><tr><td>sakontwist</td><td><p>Надо в клиенте задать localdns и не использовать remotedns. Либо для remote использовать обычный udp 53 и на сервере xray его перехватывает и запрос обрабатывать через сервера в конфигурации. Смотрите в сторону dns outbound.</p></td><td>2024-12-25T17:26:07.011Z</td></tr><tr><td>sakontwist</td><td><p>У меня вообще в качестве remote dns стоит 127.0.0.1. Но так как этот запрос прилетает на сервер, то там на порту 127.0 0.1:53 висит unbound, который и отвечает. Заодно его и сам сервер использует.</p></td><td>2024-12-25T17:27:22.123Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Ладно с этим я понял, а скорость отдачи тоже из-за проблем с днс могут подтягиваться или это может быть что-то с ядром на сервере? Я вот только что обновил панель до 2.4.10, ничего не поменялось как была маленькая отдача так и осталась</p></td><td>2024-12-25T17:30:51.270Z</td></tr><tr><td>sakontwist</td><td><p>Со скоростью факторов очень много, начиная от ядра и bbr например, и заканчивая тупо ддосом в каких-нибудь Нидерландов. Там лютуют уже много дней (можно посмотреть сводки в телеге timeweb). Обычно в таких случаях я тестирую канал с сервера консольным speedtest. Ну либо iperf3 между клиентом и сервером. От этого уже можно плясать. Можно iperf завернуть потом в vless или что там у вас и померить уже скорость через neko</p></td><td>2024-12-25T17:35:16.850Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Только что прогнал iperf3 с моего домашнего сервера до нидерландов и с этой командой у меня получилось</p>
+<pre><code class="lang-auto">orangepi@orangepi3-lts:~$ iperf3 -c ipaddr -p 5201 -R
+Connecting to host ipaddr, port 5201
+Reverse mode, remote host ipaddr is sending
+[  5] local 192.168.0.20 port 58218 connected to ipaddr port 5201
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-1.00   sec   904 KBytes  7.40 Mbits/sec                  
+[  5]   1.00-2.00   sec   711 KBytes  5.83 Mbits/sec                  
+[  5]   2.00-3.00   sec   266 KBytes  2.18 Mbits/sec                  
+[  5]   3.00-4.00   sec  85.1 KBytes   697 Kbits/sec                  
+[  5]   4.00-5.00   sec   230 KBytes  1.89 Mbits/sec                  
+[  5]   5.00-6.00   sec   409 KBytes  3.35 Mbits/sec                  
+[  5]   6.00-7.00   sec   315 KBytes  2.58 Mbits/sec                  
+[  5]   7.00-8.00   sec   138 KBytes  1.13 Mbits/sec                  
+[  5]   8.00-9.00   sec   216 KBytes  1.77 Mbits/sec                  
+[  5]   9.00-10.00  sec   297 KBytes  2.43 Mbits/sec                  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-10.05  sec  3.72 MBytes  3.10 Mbits/sec   34             sender
+[  5]   0.00-10.00  sec  3.49 MBytes  2.93 Mbits/sec                  receiver
+</code></pre>
+<p>как вы могли заметить на самом сервере все замечательно, когда я проводил тесты выше, а уже сам коннект между домашним сервером и нидерландами на выгрузку происходит какая то беда полная</p></td><td>2024-12-25T18:18:54.334Z</td></tr><tr><td>sakontwist</td><td><p>Значит проблема на магистрали до сервера, с Нидерландами такая беда уже неделю, другие направления работают нормально.</p>
+<p>UPD: все может наладиться часов после 23 из моих наблюдений, но это если хостинг vps не под ddos</p></td><td>2024-12-25T18:21:44.375Z</td></tr><tr><td>erLCoder(Maksim)</td><td><p>Понял, спасибо за помощь</p></td><td>2024-12-25T18:33:04.485Z</td></tr>
+    </table>
+      </body>
+    </html>

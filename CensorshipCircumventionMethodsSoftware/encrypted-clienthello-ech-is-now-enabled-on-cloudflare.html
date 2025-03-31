@@ -1,0 +1,290 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>encrypted-clienthello-ech-is-now-enabled-on-cloudflare</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>Just discovered that Rutracker opens without any circumvention methods on Edge and Firefox, and that turns out to be thanks to ECH, it’s hosted behind Cloudflare.</p>
+<blockquote>
+<p><em>Note: most browsers require DNS-over-HTTPS to be configured to receive DNS <code>HTTPS type</code> record which contain ECH configuration, however in Firefox 130, it works even with the regular unprotected DNS.</em></p>
+</blockquote>
+<p>As far as I could find, it haven’t been announced anywhere, except in their <a href="https://developers.cloudflare.com/ssl/edge-certificates/ech/">documentation</a>:</p>
+<blockquote>
+<p>Caution</p>
+<p>ECH is disabled globally, and cannot currently be enabled in the Cloudflare Dashboard.</p>
+<p>Starting in August, 2024, ECH will be gradually released on free zones. It will not be possible to disable it. A toggle will be added to the Cloudflare Dashboard at a later point before ECH is made available for other zone plans.</p>
+</blockquote>
+<p>Cloudflare uses a single ECH key &amp; configuration for all the domains</p>
+<pre><code class="lang-auto">$ dig +short rutracker.org HTTPS
+1 . alpn="h3,h2" ipv4hint=104.21.32.39,172.67.182.196 ech=AEX+DQBBYQAgACB/ZNpruUIOMT7U9iv5DLgTo+oHQ7RI7GeHwd0tbccrCAAEAAEAAQASY2xvdWRmbGFyZS1lY2guY29tAAA= ipv6hint=2606:4700:3031::6815:2027,2606:4700:3034::a
+c43:b6c4
+
+$ dig +short crypto.cloudflare.com HTTPS
+1 . alpn="http/1.1,h2" ipv4hint=162.159.137.85,162.159.138.85 ech=AEX+DQBBYQAgACB/ZNpruUIOMT7U9iv5DLgTo+oHQ7RI7GeHwd0tbccrCAAEAAEAAQASY2xvdWRmbGFyZS1lY2guY29tAAA= ipv6hint=2606:4700:7::a29f:8955,2606:4700:7:
+:a29f:8a55
+</code></pre>
+<pre><code class="lang-auto">SvcParam: ech
+    SvcParamKey: ech (5)
+    SvcParamValue length: 71
+    ECHConfigList length: 69
+    ECHConfig: id=97 cloudflare-ech.com
+        Version: 0xfe0d
+        Length: 65
+        HKPE Key Config
+            Config Id: 97
+            KEM Id: DHKEM(X25519, HKDF-SHA256) (32)
+            Public Key length: 32
+            Public Key: 7f64da6bb9420e313ed4f62bf90cb813a3ea0743b448ec6787c1dd2d6dc72b08
+            Cipher Suites length: 4
+            Cipher Suites (1 suite)
+        Maximum Name Length: 0
+        Public Name length: 18
+        Public Name: cloudflare-ech.com
+        Extensions length: 0
+</code></pre>
+<p><code>cloudflare-ech.com</code> is used as a canary domain (SNI) for TLS requests</p>
+<pre><code class="lang-auto">Transport Layer Security
+    TLSv1.3 Record Layer: Handshake Protocol: Client Hello
+        Content Type: Handshake (22)
+        Version: TLS 1.0 (0x0301)
+        Length: 587
+        Handshake Protocol: Client Hello
+            Handshake Type: Client Hello (1)
+            Length: 583
+            Version: TLS 1.2 (0x0303)
+            Random: cb6244609a92947f8ccf9c7e731dc013cf00f739468bad266be3e9d4b40dfea4
+            Session ID Length: 32
+            Session ID: 2587cb2bc557eb6af6c561df526f2f42111108418712bfe550331cf0a4b1af53
+            Cipher Suites Length: 34
+            Cipher Suites (17 suites)
+            Compression Methods Length: 1
+            Compression Methods (1 method)
+            Extensions Length: 476
+            Extension: server_name (len=23) name=cloudflare-ech.com
+            Extension: extended_master_secret (len=0)
+            Extension: renegotiation_info (len=1)
+            Extension: supported_groups (len=14)
+            Extension: ec_point_formats (len=2)
+            Extension: application_layer_protocol_negotiation (len=14)
+            Extension: status_request (len=5)
+            Extension: delegated_credentials (len=10)
+            Extension: key_share (len=107) x25519, secp256r1
+            Extension: supported_versions (len=5) TLS 1.3, TLS 1.2
+            Extension: signature_algorithms (len=24)
+            Extension: record_size_limit (len=2)
+            Extension: encrypted_client_hello (len=217)
+                Type: encrypted_client_hello (65037)
+                Length: 217
+                Client Hello type: Outer Client Hello (0)
+                Cipher Suite: HKDF-SHA256/AES-128-GCM
+                    KDF Id: HKDF-SHA256 (1)
+                    AEAD Id: AES-128-GCM (1)
+                Config Id: 97
+                Enc length: 32
+                Enc: 08181d7e3ce624682fe03c8c31698f5a6c198aff850bccfedf6780e8dea6267e
+                Payload length: 175
+                Payload [truncated]: 20d54aebde0806f5ea62f287b713d9dba7e93636885160b2588633befe1e986046991c997bf9bd3e96927d99a3a3c0075870644ed6b9d0cd25e8da2ca197ee00907eef3955a5507b83bddecff3a720ad62ff577ac2b685ede87ae196c75e5f4c5ed02566350834bbc945b5f380
+            [JA4: t13d1713h2_5b57614c22b0_748f4c70de1c]
+            [JA4_r: t13d1713h2_002f,0035,009c,009d,1301,1302,1303,c009,c00a,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0005,000a,000b,000d,0017,001c,0022,002b,0033,fe0d,ff01_0403,0503,0603,0804,0805,0806,0401,0501,0601,0203,0201]
+            [JA3 Fullstring: 771,4865-4867-4866-49195-49199-52393-52392-49196-49200-49162-49161-49171-49172-156-157-47-53,0-23-65281-10-11-16-5-34-51-43-13-28-65037,29-23-24-25-256-257,0]
+            [JA3: ed3d2cb3d86125377f5a4d48e431af48]
+</code></pre></td><td>2024-09-12T22:45:22.118Z</td></tr><tr><td>artenox</td><td><p>Да, у меня под йотой rutracker открывается в Brave 1.59.117/Chromium 118.0.5993.70 (sni <code>cloudflare-ech.com</code>) с включенным <span class="hashtag-raw">#encrypted-client-hello</span> (я слышал, что в новых версиях флаг исчез, значит что этот параметр стал по умолчанию и не отключить?)<br>
+Напомню, что у меня есть <a href="https://github.com/artenax/curl/releases">сборка curl</a> для линукса с поддержкой ECH (а также QUIC Quiche). Она тоже работает:<br>
+<code>curl --http3-only --ech hard --tlsv1.3 --doh-url https://cloudflare-dns.com/dns-query -v https://rutracker.org/</code><br>
+Что интересно, под warp vpn не хочет: weird server reply.</p></td><td>2024-09-13T00:35:30.349Z</td></tr><tr><td>anon9001(anon)</td><td><p>So cloudflare finally did something good for once? Instead of giving constant 403s to users or thinking you’re bot in neverending verification loop</p></td><td>2024-09-13T05:56:05.907Z</td></tr><tr><td>MasterYoba</td><td><p>Видимо <a href="http://cloudflare-ech.com" rel="noopener nofollow ugc">cloudflare-ech.com</a> в скором времени окажется в блоке у ркн. Что плохо, потому что тогда может накрыться vless-over-cdn, вырубить-то эту штуку в панели CF пока нельзя.</p></td><td>2024-09-13T05:59:22.064Z</td></tr><tr><td>0ka(0ka)</td><td><p>С ним то что будет? ECH в xray поддержки нет, в sing-box вручную включать надо</p></td><td>2024-09-13T06:24:40.098Z</td></tr><tr><td>meeeeeh</td><td><p>С одной стороны, давно этого ждал, особенно в контексте рутрекера.</p>
+<p>С другой - риск блокировки Cloudflare или их ECH канарейки очень вырос. Что хуже, на бесплатных тарифах ECH сейчас нельзя отключить - так что если вдруг РКН начнёт фильтровать этот конкретный вариант SNI, заблокироваными окажутся все кто не находится на платном тире, неважно, есть ли они в банлисте\на ТСПУ или нет.</p></td><td>2024-09-13T07:06:38.260Z</td></tr><tr><td>anon9001(anon)</td><td><p>У ркн давно был план по этого поводу. НСДИ и серты минцифры вшитые в новое железо которые нельзя удалить</p></td><td>2024-09-13T07:09:36.322Z</td></tr><tr><td>meeeeeh</td><td><p>Я про яблоко, вы мне про макароны.</p>
+<p>НСДИ и сертификаты Минцифры тут вообще никаким боком, это отдельная история - та, в которой интернета в РФ не осталось, а остался только интранет с тонким ручейком наружу а-ля ДНРК.</p></td><td>2024-09-13T07:12:19.701Z</td></tr><tr><td>roman_sv</td><td><p>Плохая новость…<br>
+Значит в ближайщее время начнут гасить DOH. А у меня провайдер подменят ответы от DNS по udp. Например ссылки <code>youtu.be</code> не открываются. Всё на уровне OS резолвит через dnscrypt-proxy по DOH. Ибо так, и безопаснее, и нет подмены, и даже быстрее ,чем у провайдера по днс бенчмарку. Сейчас они мне сломаются всё. И что тогда делать-то, в прокси резолв всей системы пускать? Это в свою очередь сломает доступ к некоторым сервисам, которые для разных регионов отдают разные IP. Т.е. я буду получать IP для нидерландов через проксю, а соединяться буду из РФ. И сервер будет не отвечать.</p>
+<p>Ну а про блокировку ресурсов на CF уже выше написали.</p></td><td>2024-09-13T07:14:10.624Z</td></tr><tr><td>anon9001(anon)</td><td><p>Для ech нужен doh, а если позированые сертификаты будут вшиваться на роутерах у абонентов, то ркн не нужно будет пытаться плясать вокруг collateral damage с блокировками клаудфлер. В этом и была вся суть национального mitm</p></td><td>2024-09-13T07:15:03.433Z</td></tr><tr><td>anon9001(anon)</td><td><aside class="quote no-group" data-username="roman_sv" data-post="9" data-topic="10075">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/ecb155/48.png" class="avatar"> roman_sv:</div>
+<blockquote>
+<p>в прокси резолв всей системы пускать?</p>
+</blockquote>
+</aside>
+<p>В хостс записывать. Сейчас неплохо посмотреть как китай это будет делать и как ситуация будет развиваться. Тут могут вполне реально начаться блоки по ип, в том чисте и в китае</p></td><td>2024-09-13T07:20:23.425Z</td></tr><tr><td>meeeeeh</td><td><p>Для ECH DoH в случае с Firefox необязателен - см. первый пост в нитке. Персонально я так и пользуюсь им, кстати - у меня есть полностью доверенный DNS в моём интранете, ходящий в DoH\DoT апстримы не принадлежащие Google, Cloudflare и другим бигтехам.</p>
+<p>У хромого всё немного хуже, но судя по багтрекеру того же Cromite (форк умершего пару лет Bromite, который был Android-only; Cromite доступен на почти всех платформах) там тоже думают о том чтоб доверять резолвам локального plaintext DNS, если он сообщает в ответ корректные HTTPS-записи.</p>
+<p>Завалить DoH не завалив HTTPS в целом тоже будет крайне проблемно. Да, можно будет прибить резолверы Google, Cloudflare, Quad9 и кого-то ещё - однако существует ещё туева хуча других, менее попсово-ширпотребных сервисов, который держат мелкие конторы, шифропанк-коллективы и просто отдельно взятые люди.</p></td><td>2024-09-13T07:20:35.951Z</td></tr><tr><td>ani917(ani)</td><td><p>вы уверены что ртрекер заблокирован? тот которая 1 ссылка в поисковике открывается, edge<br>
+я проверял на их сайте, <a href="https://www.cloudflare.com/ssl/encrypted-sni/#sni" class="inline-onebox" rel="noopener nofollow ugc">Cloudflare Browser Check</a><br>
+Secure SNI показывает не включен</p></td><td>2024-09-15T04:15:17.912Z</td></tr><tr><td>Ori</td><td><p>Да, заблокирован<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="encrypted-clienthello-ech-is-now-enabled-on-cloudflare/78c21ed9c2bfd2b33187f7ae6e30fe45919bd19f.png" data-download-href="https://ntc.party/uploads/default/78c21ed9c2bfd2b33187f7ae6e30fe45919bd19f" title="rt"><img src="encrypted-clienthello-ech-is-now-enabled-on-cloudflare/78c21ed9c2bfd2b33187f7ae6e30fe45919bd19f.png" alt="rt" data-base62-sha1="hehcg4ml1QNdH6y0yl4XmIID1vh" width="690" height="176" data-dominant-color="151515"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">rt</span><span class="informations">964×247 8.97 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-15T05:10:10.622Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="1" data-topic="10075">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>however in Firefox 130, it works even with the regular unprotected DNS.</p>
+</blockquote>
+</aside>
+<p>На linux - да, на винде - нет.<br>
+chrome (srware iron) последние с каких-то версий и на винде, и на linux<br>
+На виндовом фоксе четкая зависимость от about:config trr.  0 - нет, 3 - да</p>
+<p>Проверял по <a href="https://tls-ech.dev/">https://tls-ech.dev/</a></p>
+<p>Клоудфларе запускаются и без обхода блокировок</p></td><td>2024-09-22T07:55:19.985Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="Dhowti" data-post="32" data-topic="10075" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dhowti/48/1737_2.png" class="avatar"> Dhowti:</div>
+<blockquote>
+<p>Что ли всем включили? Пункт пропал из настроек, больше неотключаемо?</p>
+</blockquote>
+</aside>
+<p>Да, включили всем на free tier. Обещали вернуть тоггл после того, как выкатят всё в прод для платных пользователей.</p>
+<aside class="quote no-group" data-username="bolvan" data-post="33" data-topic="10075">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>На linux - да, на винде - нет.</p>
+</blockquote>
+</aside>
+<p>Там есть два флага, <code>network.dns.native_https_query</code> и <code>network.dns.native_https_query_win10</code>. Начиная со 130-го фокса оба должны быть по умолчанию включены - тогда работает без DoH с любым DNS, который умеет в HTTPS-записи.</p></td><td>2024-09-22T08:40:49.849Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="bolvan" data-post="33" data-topic="10075">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>На linux - да, на винде - нет.</p>
+</blockquote>
+</aside>
+<p>Все тесты я делал на Windows.</p></td><td>2024-09-22T11:34:12.145Z</td></tr><tr><td>Datura_metel(Datura metel)</td><td><blockquote>
+<p>Starting in August, 2024, ECH will be gradually released on free zones.</p>
+</blockquote>
+<p>It seems that paid zones can use <code>ECHConfig</code> of free zones.</p>
+<pre><code class="lang-auto">printf 'GET / HTTP/1.1\r\nHost: readthedocs.org\r\n\r\n' | openssl s_client -tls1_3 -ech_config_list xxxx -alpn 'http/1.1' -connect readthedocs.org:443 -quiet
+
+</code></pre></td><td>2024-09-30T18:36:41.178Z</td></tr><tr><td>bolvan</td><td><p>выяснено, что на виндовс fox использует DNS API, чтобы понять прописан ли в системе DoH<br>
+и работает это из коробки только на win11<br>
+на win10 - нет</p>
+<p>если fox не детектит или не хочет детектить DoH в системе, он требует локальный DoH от себя.<br>
+если DoH нет нигде - он отказывается от ECH</p>
+<p>пишут, что на win10 детект отключен из-за какого-то бага в винде</p>
+<p>на linux нет возможности обнаружить прослойку DoH универсальным образом, потому ECH включают всегда</p></td><td>2024-10-10T07:16:05.760Z</td></tr><tr><td>Fixator10</td><td><p>На 10ой майки на релизную сборку так и не завезли DoH попросту</p></td><td>2024-10-10T08:37:41.693Z</td></tr><tr><td>bolvan</td><td><p>вроде завезли, но неполностью</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://winitpro.ru/index.php/2020/07/10/nastroyka-dns-over-https-doh-v-windows/">
+  <header class="source">
+      <img src="encrypted-clienthello-ech-is-now-enabled-on-cloudflare/c7b1aac8d95d838afa7e6e396aabe74619d14b90.png" class="site-icon" data-dominant-color="008DD2" width="16" height="16">
+
+      <a href="https://winitpro.ru/index.php/2020/07/10/nastroyka-dns-over-https-doh-v-windows/" target="_blank" rel="noopener">winitpro.ru</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://winitpro.ru/index.php/2020/07/10/nastroyka-dns-over-https-doh-v-windows/" target="_blank" rel="noopener">Настраиваем DNS over HTTPS (DoH) в Windows 10 | Windows для системных...</a></h3>
+
+  <p>Поддержка протокола DNS over HTTPS (DoH) появилась в последнем билде Windows 10 2004 (May 2020 Update). Начиная с этой версии, Windows 10 может выполнять</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>на windows server 2022 настройки уже есть в settings, но он на более новом билде, чем последняя 10</p></td><td>2024-10-10T15:49:18.928Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>и не будет, и никто не обещал, это уже мертвая ось</p></td><td>2024-10-10T23:56:50.136Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>эта статья ошибочная, нет и не будет в 10, там за пример взято было построение переходное до анонса 11</p></td><td>2024-10-10T23:59:09.412Z</td></tr><tr><td>Dhowti(Eugene)</td><td><p>Возможно, немного оффтопик, но совсем немного. Может кто пояснить, вот если сайт открывается через ECH, и  я хочу внести его в исключения своего VPN, ну просто чтобы быстрее работало, какой домен надо внести в исключения, самого сайта или <a href="http://cloudflare-ech.com" rel="noopener nofollow ugc">cloudflare-ech.com</a>? Читал-читал про ECH, но так и не понял. Ведь если SNI зашифровано ещё в браузере, мой VPN же не сможет его распознать и пустить напрямую? Простите, если глупый вопрос.</p>
+<p>Написал и догадался как проверить, поэкспериментировал на <a href="https://encryptedsni.com/cdn-cgi/trace" rel="noopener nofollow ugc">https://encryptedsni.com/cdn-cgi/trace</a>, результат - исключение целевого домена не влияет, а какой там фронт-домен я не понял…</p></td><td>2024-10-11T00:08:34.518Z</td></tr><tr><td>ValdikSS</td><td><p>The flag in the control panel just controls the DNS record. Since the ECH key is the same for all the domains, you can still connect to any (?) domain even if it has ECH disabled.</p>
+<pre><code class="lang-auto">$ dig +short HTTPS gdeposylka.ru
+1 . alpn="h3,h2" ipv4hint=104.25.106.6,104.25.107.6,172.67.80.113 ipv6hint=2606:4700:20::6819:6a06,2606:4700:20::6819:6b06,2606:4700:20::ac43:5071
+
+$ (echo -e "GET / HTTP/1.0\r\nHost: gdeposylka.ru\r\n\r\n"; sleep 10) | ./openssl s_client -CApath /etc/ssl/certs/ -no_ssl3 -no_tls1 -no_tls1_1 -no_tls1_2 -connect gdeposylka.ru:443 -servername gdeposylka.ru -ech_config_list 'AEX+DQBBVgAgACC91NEyBX4eLKQ/XSZk9DabQ/MbtpGNoDC3hOhS7QPtNQAEAAEAAQASY2xvdWRmbGFyZS1lY2guY29tAAA=' -ech_alpn_outer outer,public,h2 -alpn inner,secret,http/1.1
+
+Setting new_session_cb
+Connecting to 2606:4700:20::6819:6a06
+CONNECTED(00000003)
+ECH client callback printing: 
+SSL_ech_print
+s=0x560765ac9410
+ech_attempted=1
+ech_attempted_type=0xfe0d
+ech_atttempted_cid=0x56
+ech_done=1
+ech_grease=0
+HRR=0
+ech_returned=0x0
+ech_returned_len=0
+ech_backend=0
+ech_success=1
+1 ECHConfig value loaded
+cfg(0): [fe0d,56,cloudflare-ech.com,0020,[0001,0001],bdd4d132057e1e2ca43f5d2664f4369b43f31bb6918da030b784e852ed03ed35,00,00]
+
+depth=2 C=US, O=Google Trust Services LLC, CN=GTS Root R4
+verify return:1
+depth=1 C=US, O=Google Trust Services, CN=WE1
+verify return:1
+depth=0 CN=gdeposylka.ru
+verify return:1
+…
+</code></pre></td><td>2024-10-11T16:46:14.629Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="artenox" data-post="2" data-topic="10075">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>Что интересно, под warp vpn не хочет: weird server reply.</p>
+</blockquote>
+</aside>
+<p>Just linking a related bug report I happened to find today. It says that Cloudflare servers detect the use of Warp, and for some reason refuse to serve ECH to Warp clients.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://bugzilla.mozilla.org/show_bug.cgi?id=1862650">
+  <header class="source">
+      <img src="encrypted-clienthello-ech-is-now-enabled-on-cloudflare/0e5104b4f1a2415a6952c558c18a244436bf7946.png" class="site-icon" data-dominant-color="538847" width="128" height="128">
+
+      <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1862650" target="_blank" rel="noopener">bugzilla.mozilla.org</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1862650" target="_blank" rel="noopener">1862650 - Cloudflare rejects ECH if WARP is in use.</a></h3>
+
+  <p>ASSIGNED (djackson) in Web Compatibility - Site Reports. Last updated 2024-05-22.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<blockquote>
+<p>I downloaded and tested with WARP running in regular (non-socks) mode. Cloudflare’s output indicates no use of ECH but they detect use of WARP. Testing with a different ECH site (<a href="https://defo.ie/ech-check.php">https://defo.ie/ech-check.php</a>) indicates ECH succeeds. Testing with Chrome confirms the same behaviour as Firefox with Cloudflare disabling ECH when WARP is used but ECH with other sites working through WARP.</p>
+<p>This looks like a deliberate policy decision by Cloudflare, everything is working correctly in Firefox and Chrome.</p>
+</blockquote></td><td>2024-11-07T20:09:17.107Z</td></tr>
+    </table>
+      </body>
+    </html>

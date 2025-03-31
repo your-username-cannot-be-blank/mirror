@@ -1,0 +1,250 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>настройка-цепочки-wireguardxray</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>vurk</td><td><p>Всех приветствую.</p>
+<p>Пытаюсь настроить соединение по такой схеме - <a href="http://0x0.st/H_6K.jpg" rel="noopener nofollow ugc">http://0x0.st/H_6K.jpg</a><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="настройка-цепочки-wireguardxray/52fdab100d3df53a2c1e449ed1b8938a1f1bc8cb.jpeg" data-download-href="https://ntc.party/uploads/default/52fdab100d3df53a2c1e449ed1b8938a1f1bc8cb" title="network"><img src="настройка-цепочки-wireguardxray/52fdab100d3df53a2c1e449ed1b8938a1f1bc8cb_2_353x500.jpeg" alt="network" data-base62-sha1="bQaDjVW3oTEIJxp6ENGyoLrpQkr" width="353" height="500" srcset="настройка-цепочки-wireguardxray/52fdab100d3df53a2c1e449ed1b8938a1f1bc8cb_2_353x500.jpeg, настройка-цепочки-wireguardxray/52fdab100d3df53a2c1e449ed1b8938a1f1bc8cb_2_529x750.jpeg 1.5x, настройка-цепочки-wireguardxray/52fdab100d3df53a2c1e449ed1b8938a1f1bc8cb_2_706x1000.jpeg 2x" data-dominant-color="FCFCFD"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">network</span><span class="informations">827×1169 51.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Смысл такой организации: 1) российская ВПСка хостит “сервер” ваергарда, чтобы обеспечить доступ клиентом (пиров) между собой, в т.ч. подключенных к ней роутеров для доступа к устройствам за роутерами. 2) Настройка маршрутизации основного трафика для всех клиентов сразу делается в одном месте и удобно - на российской ВПСке. 3) Все, что должно идти не на <em>.ru/</em>.рф, идет на зарубежную (NL) ВПСку.</p>
+<p>Дано: поднято две ВПС (ру и нл). На ру организован шлюз с ваергард, к нему подключены все нужные клиенты. Для клиентов данный шлюз - основной (0.0.0.0/0 и ::/0). На зарубежной ВПС поднят xray-server, настроенный на работу reality (конфигурация рабочая, пробовал подключаться напрямую с клиентов с помощью nekoray/foxray).<br>
+Нужно: правильно организовать редирект основного трафика на зарубежную ВПС через xray через терминал (потому что ГУИ на ВПС не будет).</p>
+<p>Что я сделал: скачал xray-core, использовал такой конфиг - <a href="http://0x0.st/H_6P.json" rel="noopener nofollow ugc">http://0x0.st/H_6P.json</a>, поднял клиент на российской ВПСке с этим конфигом. xray не ругался на ошибки. Через ss вижу</p>
+<pre><code class="lang-auto">ss -tunlp | grep xray
+tcp   LISTEN 0      4096       127.0.0.1:10808      0.0.0.0:*    users:(("xray",pid=2522,fd=3))
+tcp   LISTEN 0      4096       127.0.0.1:10809      0.0.0.0:*    users:(("xray",pid=2522,fd=7))
+</code></pre>
+<p>Вроде работает. Дальше мне надо как-то перевести весь трафик, который идет от “клиентов” (то есть пиров) ваергард “сервера” (пира-шлюза-российской ВПС) на зарубежную ВПС. Тут две проблемы: 1) как это сделать (пробовал iptables через цепочку прероутинга редиректить весь tcp/udp трафик с ваергард порта на порт 10808/9 - не вышло), 2) как при глобальном редиректе всего трафика фильтровать, куда пускать трафик к <em>.ru/</em>.рф, а куда остальной?</p>
+<p>Прошу знатоков подсказать, куда копать.</p>
+<p>ПыСы. В nekoray, например, есть некий tun mode, который создает интерфейс и делает его основным. Как это сделать через xray-core с его конфигом я не понял. Судя по всему, это как раз то, что мне нужно.</p></td><td>2023-08-12T00:10:25.412Z</td></tr><tr><td>Sofi</td><td><p>Во первых, не PREROUTING нужна, а FORWARD на первом сервере во второй.<br>
+Во вторых, нужен ipset со списком AS тех адресов, который пойдет в Нидерланды.</p></td><td>2023-08-12T02:38:49.464Z</td></tr><tr><td>vurk</td><td><p><a class="mention" href="/u/sofi">@Sofi</a>,</p>
+<p>Поясни подробнее, пожалуйста. Не понял, при чем тут форвардинг, если речь идет об перенаправлении трафика с порта wireguard (например, 51820) на порт local proxy xray (10808/10809). ЕЯПП это больше похоже на transparent proxy, для которой должно работать что-то вроде</p>
+<pre><code class="lang-auto">iptables -t nat -A PREROUTING -p udp --dport 51820 -j REDIRECT --to-port 10808
+</code></pre>
+<p>Но это, очевидно, не работает.</p>
+<p>По поводу AS серверов, разве эту задачу не выполняет сам xray? В доках описано, что можно избирательно пускать трафик в обход прокси, если есть совпадения по домену/regexp и т.д. У меня вопрос здесь в том, достаточно ли будет просто завернуть весь входящий трафик российской ВПС, который идет на порт 51820, в прокси, чтобы xray все сам разруливал, или нужны будут доп. действия (какие)?</p>
+<p>UPD. Пока разбирался с проблемой перевода трафика на другой порт, оказалось что хотя xray запущен на российской ВПС и не ругается на ошибки, по traceroute весь трафик все равно идет напрямую, а не через прокси на зарубежной ВПС. Видимо, еще в конфиге клиента ошибка.</p></td><td>2023-08-12T06:58:09.954Z</td></tr><tr><td>Sofi</td><td><p>Насколько я поняла из вашего вопроса, вам нужно форвардить с РФ до Нидерландов тот трафик, который не должен проходить через сервера РФ, разве нет?<br>
+То есть при подключении к серверу РФ, трафик, который не попадает под некие правила, должен идти в Нидерланды.<br>
+Поправьте, если не права.<br>
+Насчёт прозрачного прокси - это не так, в вашем случае, правило другое:<br>
+iptables -t nat -A OUTPUT -p $tcp/udp --dport $port -j REDIRECT --to-ports $port<br>
+Чтобы работало в PREROUTING как прозрачный прокси, правило должно быть другим:<br>
+iptables -t mangle -A PREROUTING -j TPROXY --tproxy-mark $mark</p>
+<p>Конкретнее задачу опишите, пожалуйста.</p></td><td>2023-08-12T09:18:58.583Z</td></tr><tr><td>vurk</td><td><p>Я плохо объяснил. Исправляюсь.</p>
+<p>Есть российская ВПС. У нее две задачи: 1) с помощью wireguard объединить в одну сеть множество устройств, чтобы можно было общаться между устройствами, 2) быть шлюзом для выхода в интернет с помощью <strong>xray</strong> (это важно, что это не просто шлюз, а именно шлюз через xray).</p>
+<p>Шлюз через xray работает следующим образом. На российской ВПС стоит клиент (xray-core) с конфигом, который я публиковал в первом посте (который, судя по всему не работает). На зарубежной ВПС развернут xray-server с xtls-reality в качестве основного способа работы.</p>
+<p>Сейчас у меня два вопроса: 1) как весь трафик от пиров wireguard, для который российская ВПС - шлюз для выхода в интерент, завернуть в xray (в локальный прокси, который открывается на порту 10808 или 10809, 2) как без GUI, то есть средствами только xray-core из терминала по ssh подключить российскую ВПС к зарубежной ВПС так, чтобы трафик, который идет от пиров wireguard и от самой российской ВПС шел по правилам, заданным в конфиге xray-core клиента, т.е. все, что идет на домены *.рф и *.ru  - идет в обход прокси (НЕ через зарубежную ВПС), а весь остальной трафик только через зарубежную ВПС (то есть через xray xtls-reality сервер).</p>
+<p>Сама маршрутизация по доменам осуществляется xray. Для меня не понятно, как это происходит через режим прокси.</p></td><td>2023-08-12T10:49:32.203Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="vurk" data-post="5" data-topic="5284">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/v/a88e57/48.png" class="avatar"> vurk:</div>
+<blockquote>
+<ol>
+<li>как весь трафик от пиров wireguard, для который российская ВПС - шлюз для выхода в интерент, завернуть в xray (в локальный прокси, который открывается на порту 10808 или 10809</li>
+</ol>
+</blockquote>
+</aside>
+<p><a href="https://github.com/bol-van/zapret/blob/master/docs/redsocks.txt">redsocks</a><br>
+Заворот ip трафика на прокси работает лишь для tcp.<br>
+Я бы очень хорошо подумал, прежде чем связываться с прокси. Не лучше ли пробросить нормально через тоннель ip ?<br>
+Вариантов множество. Хоть тот же wireguard+ipobfs с уродованием IP фреймов, благо у ВПСок внешний ип есть.   Нестандартный IP протокол и транспортный хедер, не похожий ни на что.<br>
+Это невозможно через NAT, требует рута, сложно, так что у цензоров руки еще не скоро доберутся (надеюсь)</p>
+<p>Что касается доменов, то как вы собираетесь их распознавать и по ним принимать решение ? Это возможно для http, теоретически можно выдернуть SNI из ClientHello, то есть сделать для https, но что со всем остальным делать ?<br>
+К тому же домен никак не связан с местоположением сервера. Может все же geoip ?</p></td><td>2023-08-12T11:48:32.061Z</td></tr><tr><td>Sofi</td><td><p>Поднимается redsocks или подобный прокси.<br>
+В конфиге указывается порт и адреса с которого и на который будет идти редирект, затем правилом выше перекидываете трафик пиров на этот порт:<br>
+iptables -t nat -A PREROUTING -p udp --dport $wg_port -j REDIRECT --to-ports $proxy_port</p>
+<p>По второму вопросу:<br>
+Без понятия что из себя вообще представляет x-ray.<br>
+В случае соединения двух vps, достаточно прокинуть туннель через тот же wg, а для пиров исключить вторую vps из правил маршрутизации для РФ.<br>
+P. S. Пропишите адрес шлюза на первой vps как адрес порта редиректа для прокси на который перенаправляете пиров.</p></td><td>2023-08-12T13:53:27.105Z</td></tr><tr><td>0ka(0ka)</td><td><p>пользуйся sing-box вместо xray, он поддерживает tun, в который весь wg трафик пойдёт без проблем, конфиг дам если надо. Протокол лучше используй ss, а не vless/vless/trojan т.к. он поддерживает udp, а не делает конвертацию в TCP (это медленно). Если к этому еще приделать rule по доменам, то сервак понадобится не слабый т.к. маршрутизировать будет sing-box (медленно)</p></td><td>2023-08-13T15:34:57.636Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="vurk" data-post="5" data-topic="5284">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/v/a88e57/48.png" class="avatar"> vurk:</div>
+<blockquote>
+<ol>
+<li>как весь трафик от пиров wireguard, для который российская ВПС - шлюз для выхода в интерент, завернуть в xray</li>
+</ol>
+</blockquote>
+</aside>
+<p>Нужно использовать <a href="https://www.v2fly.org/config/protocols/dokodemo.html">inbound dokodemo-door</a> с соответствующими iptables/nftables-правилами.</p>
+<aside class="quote no-group" data-username="vurk" data-post="5" data-topic="5284">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/v/a88e57/48.png" class="avatar"> vurk:</div>
+<blockquote>
+<ol start="2">
+<li>как без GUI, то есть средствами только xray-core из терминала по ssh подключить российскую ВПС к зарубежной ВПС</li>
+</ol>
+</blockquote>
+</aside>
+<p>Настройка не отличается от просто настройки v2fly/xray в качестве прокси-сервера/клиента. Только учтите, что это всё ещё прокси: вы сможете туннелировать только TCP/UDP-трафик, не сможете принимать входящие подключения, могут быть проблемы с VoIP/WebRTC.</p>
+<p>В вашем конфигурационном файле нет правил на маршрутизации (routing → rules) через удалённый сервер.</p>
+<aside class="quote no-group" data-username="vurk" data-post="5" data-topic="5284">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/v/a88e57/48.png" class="avatar"> vurk:</div>
+<blockquote>
+<p>Сама маршрутизация по доменам осуществляется xray. Для меня не понятно, как это происходит через режим прокси.</p>
+</blockquote>
+</aside>
+<p><code>geosite</code> — специальный список IP-диапазонов или доменов. Вряд ли в вашей базе существует список <code>ru</code>. Если вы хотите маршрутизировать все диапазоны IP-адресов, закреплённые за Россией, нужно использовать routing → rules → <code>"ip": ["geoip:ru"]</code>, если домены: <code>"domains": ["domain:ru"]</code> (все домены, заканчивающиеся на <code>.ru</code>).<br>
+Чтобы маршрутизация по доменам работала, в inbound нужно включить <a href="https://www.v2fly.org/config/inbounds.html#sniffingobject">sniffing</a>.<br>
+Обратите внимание, что директива (по крайней мере, в v2fly) называется domain<strong>s</strong>, а не domain. Возможно, у вас ошибка.</p></td><td>2023-08-14T07:58:38.859Z</td></tr><tr><td>aphexman(Вячеслав)</td><td><p>Привет! Я вижу ты крутой спец, помоги пожалуйста с настройкой wireguard разобраться, заранее спасибо!</p></td><td>2023-08-16T10:52:49.250Z</td></tr><tr><td>0ka(0ka)</td><td><p>в плане? что нужно?</p></td><td>2023-08-16T18:36:18.853Z</td></tr><tr><td>Gamber</td><td><p><a href="https://ntc.party/t/%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D1%86%D0%B5%D0%BF%D0%BE%D1%87%D0%BA%D0%B8-wireguardxray/5284/8">0ka</a> буду признателен, если поделитесь примером конфига.<br>
+Задача один в один, как описывает топикстартер.<br>
+Сразу пошел по варианту tun интерфейса.<br>
+Подключение до заморской локации установлено успешно, по статическим маршрутам доступ к отдельным ресурсам есть.<br>
+Но как грамотно прокинуть клиентов WG RU до Xray NL сервера, через tun интерфейс, понять не могу.<br>
+Через дефолтный шлюз, WG клиенты в Интернет выходят без проблем.<br>
+Sing-box</p>
+<pre><code class="lang-auto">{
+    "log": {
+        "level": "debug"
+    },
+    "inbounds": [
+        {
+            "type": "tun",
+            "interface_name": "tun0",
+            "domain_strategy": "ipv4_only",
+            "inet4_address": "172.16.0.1/30",
+            "stack": "gvisor",
+            "endpoint_independent_nat": true,
+            "auto_route": false,
+            "strict_route": false,
+            "sniff": true
+        }
+    ],
+    "outbounds": [
+        {
+            "type": "vless",
+            "server": "***",
+            "server_port": 443,
+            "uuid": "***",
+            "flow": "xtls-rprx-vision",
+            "network": "tcp",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "server_name": "www.nvidia.com",
+                "insecure": false,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": ""
+                },
+                "reality": {
+                    "enabled": true,
+                    "public_key": "***",
+                    "short_id": "***"
+                }
+            }
+        }
+    ],
+    "route": {
+              "auto_detect_interface": true
+            }
+}
+</code></pre>
+<p>iptabels (выход через дефолтный шлюз)</p>
+<pre><code class="lang-auto">*filter
+-I FORWARD -i wg+ -j ACCEPT
+COMMIT
+*nat
+-A POSTROUTING -o eth0 -j MASQUERADE
+COMMIT
+</code></pre>
+<p>ip</p>
+<pre><code class="lang-auto">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:16:5b:c1:b4:fd brd ff:ff:ff:ff:ff:ff
+    altname enp0s3
+    altname ens3
+    inet 1.2.3.4/32 brd 1.2.3.253 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::216:5bff:fec1:b4fd/64 scope link
+       valid_lft forever preferred_lft forever
+4: wg0: &lt;POINTOPOINT,NOARP,UP,LOWER_UP&gt; mtu 1420 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/none
+    inet 172.17.0.1/24 scope global wg0
+       valid_lft forever preferred_lft forever
+49: tun0: &lt;POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP&gt; mtu 9000 qdisc fq_codel state UNKNOWN group default qlen 500
+    link/none
+    inet 172.16.0.1/30 brd 172.16.0.3 scope global tun0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::d3cd:ff75:7334:8ddb/64 scope link stable-privacy
+       valid_lft forever preferred_lft forever
+</code></pre>
+<p>route (прописан маршрут до <a href="http://2ip.ru" rel="noopener nofollow ugc">2ip.ru</a>, все работает, вижу IP NL сервера)</p>
+<pre><code class="lang-auto">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         5.6.7.8      0.0.0.0         UG    0      0        0 eth0
+5.6.7.8      0.0.0.0         255.255.255.255 UH    0      0        0 eth0
+172.16.0.0      0.0.0.0         255.255.255.252 U     0      0        0 tun0
+172.17.0.0      0.0.0.0         255.255.255.0   U     0      0        0 wg0
+static.35.201.2 172.16.0.1      255.255.255.255 UGH   0      0        0 tun0
+</code></pre></td><td>2023-10-31T06:34:52.181Z</td></tr><tr><td>Dhohbr</td><td><p><a class="mention" href="/u/gamber">@Gamber</a> если я равильно понял вас, то должно работать так:<br>
+Добавьте правило<br>
+-A POSTROUTING -s 172.17.0.0/24 -o tun0 -j MASQUERADE</p>
+<p>Тогда клиенты должны видеть на сайте 2ip адрес NL сервера.<br>
+А это -I FORWARD -i wg+ -j ACCEPT можно убрать, если у вас глобально ACCEPT стоит.</p></td><td>2023-10-31T07:32:33.666Z</td></tr><tr><td>0ka(0ka)</td><td><p>попробуйте так</p>
+<pre><code class="lang-auto">echo "5 sing-rt" &gt;&gt; /etc/iproute2/rt_tables #создаем новую таблицу маршрутов
+
+ip route add default dev tun0 table sing-rt #добавляем шлюз sing-box в новую таблицу
+
+ip rule add from 172.17.0.0/24 table sing-rt #добавляем правило: для source addr 172.17.0.0/24 (wg subnet) использовать новую таблицу маршрутов
+
+iptables -t nat -A POSTROUTING -o tun0 -j MASQUERADE #
+</code></pre>
+<p>и проверка на сервере через</p>
+<pre><code class="lang-auto">curl -v --interface wg0 2ip.ru
+</code></pre>
+<p>это всё без гарантий т.к. проверить не могу, если последняя команда фейлит то проверяйте на клиенте</p></td><td>2023-10-31T09:23:58.062Z</td></tr><tr><td>nzkhammatov(Ainur Khammatov)</td><td><p><code>https://serverfault.com/a/1073566</code></p></td><td>2023-10-31T09:52:48.750Z</td></tr><tr><td>Gamber</td><td><p><a href="https://ntc.party/u/0ka">0ka</a> <a href="https://ntc.party/u/khammatov">khammatov</a> Благодарю, все получилось.<br>
+<a href="https://ntc.party/u/0ka">0ka</a> Во второй строчке небольшая опечатка, нужно tun0.<br>
+А так все ok, взлетело.<br>
+<a href="https://ntc.party/u/Dhohbr">Dhohbr</a> именно так и пробовал первоначально.<br>
+Как оказалась, вся изюминка именно в отдельной таблице маршрутов )</p></td><td>2023-10-31T13:17:13.175Z</td></tr><tr><td>Gamber</td><td><p>Наверное, не буду поднимать новую тему, так как это, по сути, продолжение истории.</p>
+<p>После успешного тестирования вышеописанной связки на стороннем RU VPS, решил поднять его непосредственно у себя.</p>
+<p>Дано:</p>
+<p>Две локации в RU. На обеих Микротики в качестве маршрутизаторов.</p>
+<p>Локация 1. За NAT провайдера.</p>
+<p>Локация 2. Публичная статика.</p>
+<p>Между локациями поднят WG туннель, прописаны маршруты в LAN обеих локаций.</p>
+<p>В LAN Локации 2 поднят сервер на Debian, на котором развернут Sing-Box клиент, смотрящий в зарубежный NL сервер.</p>
+<p>По конфигу клиента все в целом так же, только в Inbound включен auto_route.</p>
+<p>В iptables, NAT на LAN интерфейсе сервера.</p>
+<p>Клиент успешно поднимается, curl <a href="http://2ip.ru" rel="noopener nofollow ugc">2ip.ru</a> отдает зарубежный IP. Дополнительных таблиц маршрутизации не создаю.</p>
+<p>На роутере в Локации 1 поднят GRE туннель в Локацию 2 на Debain сервер. GRE добавлен в NAT, по BGP получаю список заблокированных подсетей в роуты, в качестве шлюза задаю IP GRE интерфейса на стороне Debian. Тут вопросов нет, все работает как нужно.</p>
+<p>Проблемы начинаются в Локации 2. Первое, что я попытался сделать, повторить схему, реализованную в первой локации. Создал на Debian еще один GRE интерфейс, поднял туннель с роутером, добавил туннель на роутере в NAT, прописал маршруты до GRE Debian сервера. Вот с NAT и начинаются проблемы, первые пару минут все работает (хосты в LAN успешно ходят куда нужно через NL), но потом я вижу, как NAT правило для GRE начинает генерировать огромное количество трафика, процесс клиента Sing-Box уходит в 100% загрузку и падает. Есть стойкое подозрение, что получилась у меня петля или нечто подобное.</p>
+<p>Попробовал выйти из ситуации так. Убрал GRE и NAT, в маршруты BGP прописал IP LAN интерфейса Debian сервера. Работает, но есть ощущение, что криво. При подключении с рабочего ПК к заблокированному ресурсу, есть явная и ощутимая задержка около 5-7 секунд. Если заменить в настройках сетевого адаптера шлюз с LAN IP роутера на LAN IP Debian сервера, все начинает работать адекватно.</p>
+<p>Дайте пожалуйста совет, как наиболее грамотно выйти из этой ситуации?</p></td><td>2024-06-06T17:11:11.951Z</td></tr>
+    </table>
+      </body>
+    </html>

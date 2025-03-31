@@ -1,0 +1,441 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>новый-dpi-в-перми-для-блокировки-telegram</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>zhovner(Pavel Zhovner)</td><td><p>Везде пишут про новый DPI который тестируют в Перми.<br>
+Якобы он успешно блокирует Telegram и mtrpoxy трафик.</p>
+<p>Сейчас в качестве решения предлагают fake tls прокси. Официальная реализация прокси уже поддерживает TLS <a href="https://github.com/TelegramMessenger/MTProxy" rel="nofollow noopener">https://github.com/TelegramMessenger/MTProxy</a></p>
+<p>Интересно можно ли положить этот прокси за обычным веб-сервером?</p></td><td>2019-09-16T10:14:56.121Z</td></tr><tr><td>ValdikSS</td><td><p>Немного потестировал Fake TLS на трех прокси.</p>
+<ul>
+<li>В ClientHello всегда используется SNI <code>google.com</code>.</li>
+<li>Сервер предоставляет настоящий, действующий сертификат для <code>google.com</code>.</li>
+<li>Один из серверов корректно отвечает на HTTPS, т.е. проксирует запросы к настоящему <a href="http://google.com">google.com</a>. Другой — сбрасывает соединение.</li>
+<li>Набор ciphersuites в ClientHello мимикрирует под Chrome, похоже.</li>
+<li>Клиент и сервер генерируют эфемерные (временные) ключи и передают их в Key Share extension.</li>
+<li>Сервер сохраняет Session ID и блокирует повторные подключения с этим же ID, для исключения атаки на повторную отправку данных.</li>
+</ul>
+<aside class="quote no-group" data-username="zhovner" data-post="1" data-topic="62">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/zhovner/48/3_2.png" class="avatar"> zhovner:</div>
+<blockquote>
+<p>Интересно можно ли положить этот прокси за обычным веб-сервером?</p>
+</blockquote>
+</aside>
+<p>Бегло посмотрел код сервера <a href="https://github.com/alexbers/mtprotoproxy">alexbers/mtprotoproxy</a>, в нём есть такая возможность, причем он даже поддерживает протокол PROXY (который из haproxy).</p>
+<p>Но, насколько понимаю, клиент не даёт возможности указать SNI, и используется только <a href="http://google.com">google.com</a>, поэтому запуск своего сайта, к которому также обращаются как к <a href="http://google.com">google.com</a>, создает возможность для фингерпринтинга (хотя, наверное, и так ясно, что обращение к IP-адресу, не принадлежащему к Google, со SNI <a href="http://google.com">google.com</a> — это что-то необычное).</p></td><td>2019-09-16T14:39:20.080Z</td></tr><tr><td>koteeq(Anna Prosvetova)</td><td><p>Нет, передаётся <a href="http://google.com" rel="noopener nofollow ugc">google.com</a> клиентом в SNI не всегда. Хостер fake tls прокси может выбрать любой удобный домен, например, какой-нибудь <a href="http://amazonaws.com" rel="noopener nofollow ugc">amazonaws.com</a>. Особенно красиво будет, если захостить прокси на Amazon <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"><br>
+Клиент легко понимает, какой использовать домен, потому что строка secret для подключения состоит из: ee + 16-byte secret (hex) + SNI domain (hex)</p></td><td>2019-09-16T16:27:24.805Z</td></tr><tr><td>ValdikSS</td><td><p>Где можно почитать подробней, есть ли техническое описание реализации Fake TLS в Telegram?<br>
+Нашел: <a href="https://habr.com/ru/post/461171/" rel="nofollow noopener">https://habr.com/ru/post/461171/</a></p></td><td>2019-09-16T16:49:35.693Z</td></tr><tr><td>seriyps</td><td><p>Не видел особо точных технических описаний, могу попытаться объяснить:<br>
+rfc tls1.3 <a href="https://tools.ietf.org/html/rfc8446" rel="nofollow noopener">https://tools.ietf.org/html/rfc8446</a></p>
+<ol>
+<li>Telegram клиент отправляет технически валидный TLS1.3 ClientHello. Все поля (кроме random) в нём не имеют смысла и в протоколе mtproto proxy ни на что не влияют. просто выглядят как валидный TLS. В поле random записан специальный хеш от ClientHello + proxy secret. В расширение sni кладётся domain который закодирован в секрете (как <a class="mention" href="/u/koteeq">@koteeq</a> заметил). Т.е. клиент решает что положить в SNI.</li>
+<li>Прокси получает этот client hello, считает хеш от него и секрета на своей стороне и сверяет с тем что пришло. Не совпало - закрываем или пробрасываем на хост из SNI. Совпало - генерируем ServerHello (тоже все поля фейковые кроме random в котором так же хеш от ClientHello + ServerHello). Так же отправляет фейковые ChangeCipherSuite и фейковый зашифрованный (tls1.3) сертификат сервера (просто рандомные данные, официальный и python прокси подбирают размер фейкового сертификата обращаясь к домену из SNI; erlang прокси просто использует рандомный размер).</li>
+<li>Клиент сверяет хеши из ServerHello и если всё ок, то отправляет TLS Frame пакет с теми самыми 64 байтами из которых вычисляются ключи шифрования и первым ашифрованным mtproto data пакетом.</li>
+<li>После этого обмен данными идёт по тому же рандомизированному dd протоколу, но к пакетам добавляется TLS Frame заголовок</li>
+</ol></td><td>2019-09-24T09:06:56.117Z</td></tr><tr><td>seriyps</td><td><p>Тут вот ещё можно генерировать ссылки и секреты для различных версий протокола:<br>
+<a href="http://seriyps.ru/mtpgen.html" class="onebox" target="_blank" rel="nofollow noopener">http://seriyps.ru/mtpgen.html</a><br>
+Можно в код страницы заглянуть чтоб понять как секреты формируются</p></td><td>2019-09-24T09:15:06.199Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><blockquote>
+<p>обращение к IP-адресу, не принадлежащему к Google, со SNI <a href="http://google.com">google.com</a> — это что-то необычное</p>
+</blockquote>
+<p>Не всегда. Есть GGC, например. Иногда www.google.tld терминировался и на него.</p></td><td>2019-09-24T21:25:35.629Z</td></tr><tr><td>ValdikSS</td><td><p>В статье написано:</p>
+<blockquote>
+<p>Почти все поля не имеют для клиентов Telegram смысла и нужны лишь для того чтобы прикидываться TLS. Самая важную функцию несёт поле <em>Random</em> , куда помещается результат <a href="https://ru.wikipedia.org/wiki/HMAC">HMAC</a> от общего секрета и данных в пакете, что позволяет доказать клиенту что он знает секрет. Также, клиент ксорит последние 4 байта поля Random со своим временем в формате unixtime, что позволяет прокси-серверу определять когда был сгенерирован пакет. Это полезно для защиты от replay-атак. Если пакет сгенерирован давно или в будущем, то прокси-сервер может его сразу отбросить.</p>
+</blockquote>
+<p>Не совсем понятно про время. Время XOR’ится с последними байтами Random после HMAC, но как тогда сервер получает корректный HMAC? Там секундная точность?</p></td><td>2019-09-25T06:24:03.771Z</td></tr><tr><td>seriyps</td><td><blockquote>
+<p>Там секундная точность?</p>
+</blockquote>
+<p>Нет. Просто то, с чем XOR-ится timestamp может быть вычеслено как на клиенте, так и на сервере (если оба знают секрет). Так что просто делается обратный XOR.<br>
+Если не лень, можно тут посмотреть. Есть реализация как сервера:</p><aside class="onebox githubblob" data-onebox-src="https://github.com/seriyps/mtproto_proxy/blob/c18cd95f5109635e712660beb4fa726f3f5ba468/src/mtp_fake_tls.erl#L110-L114">
+  <header class="source">
+
+      <a href="https://github.com/seriyps/mtproto_proxy/blob/c18cd95f5109635e712660beb4fa726f3f5ba468/src/mtp_fake_tls.erl#L110-L114" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/seriyps/mtproto_proxy/blob/c18cd95f5109635e712660beb4fa726f3f5ba468/src/mtp_fake_tls.erl#L110-L114" target="_blank" rel="noopener nofollow ugc">seriyps/mtproto_proxy/blob/c18cd95f5109635e712660beb4fa726f3f5ba468/src/mtp_fake_tls.erl#L110-L114</a></h4>
+
+
+
+    <pre class="onebox"><code class="lang-erl">
+      <ol class="start lines" start="110" style="counter-reset: li-counter 109 ;">
+          <li>ServerDigest = make_server_digest(Data, Secret),</li>
+          <li>&lt;&lt;Zeroes:(?DIGEST_LEN - 4)/binary, Timestamp:32/unsigned-little&gt;&gt; = XoredDigest =</li>
+          <li>    crypto:exor(ClientDigest, ServerDigest),</li>
+          <li>lists:all(fun(B) -&gt; B == 0 end, binary_to_list(Zeroes)) orelse</li>
+          <li>    error({protocol_error, tls_invalid_digest, XoredDigest}),</li>
+      </ol>
+    </code></pre>
+
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Так и клиента (клиента делал для тестов):</p><aside class="onebox githubblob" data-onebox-src="https://github.com/seriyps/mtproto_proxy/blob/c18cd95f5109635e712660beb4fa726f3f5ba468/src/mtp_fake_tls.erl#L268-L282">
+  <header class="source">
+
+      <a href="https://github.com/seriyps/mtproto_proxy/blob/c18cd95f5109635e712660beb4fa726f3f5ba468/src/mtp_fake_tls.erl#L268-L282" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/seriyps/mtproto_proxy/blob/c18cd95f5109635e712660beb4fa726f3f5ba468/src/mtp_fake_tls.erl#L268-L282" target="_blank" rel="noopener nofollow ugc">seriyps/mtproto_proxy/blob/c18cd95f5109635e712660beb4fa726f3f5ba468/src/mtp_fake_tls.erl#L268-L282</a></h4>
+
+
+
+    <pre class="onebox"><code class="lang-erl">
+      <ol class="start lines" start="268" style="counter-reset: li-counter 267 ;">
+          <li>Pack = fun(FakeRandom) -&gt;</li>
+          <li>               &lt;&lt;?TLS_REC_HANDSHAKE, ?TLS_10_VERSION, 512:?u16,</li>
+          <li>                 ?TLS_TAG_CLI_HELLO, 508:?u24, ?TLS_12_VERSION,</li>
+          <li>                 FakeRandom:?DIGEST_LEN/binary,</li>
+          <li>                 SessIdLen, SessionId:SessIdLen/binary,</li>
+          <li>                 CSLen:?u16, CipherSuites:CSLen/binary,</li>
+          <li>                 1, 0,                                        %Compression methods</li>
+          <li>                 ExtLen:?u16, Extensions:ExtLen/binary&gt;&gt;</li>
+          <li>       end,</li>
+          <li>FakeRandom0 = binary:copy(&lt;&lt;0&gt;&gt;, ?DIGEST_LEN),</li>
+          <li>Hello0 = Pack(FakeRandom0),</li>
+          <li>Digest = crypto:hmac(sha256, Secret, Hello0),</li>
+          <li>EncTimestamp = &lt;&lt;(binary:copy(&lt;&lt;0&gt;&gt;, ?DIGEST_LEN - 4))/binary, Timestamp:32/unsigned-little&gt;&gt;,</li>
+          <li>FakeRandom = crypto:exor(Digest, EncTimestamp),</li>
+          <li>Pack(FakeRandom).</li>
+      </ol>
+    </code></pre>
+
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2019-09-25T08:51:39.215Z</td></tr><tr><td>ValdikSS</td><td><p>Первые последствия: <a href="https://nnmclub.to/forum/viewtopic.php?p=10303546#10303546" class="inline-onebox">⚡ Автономный способ обхода DPI и эффективный способ обхода блокировок сайтов по IP-адресу. GoodbyeDPI и ReQrypt + Blockcheck (ОБНОВЛЕНО 26 Декабря 2021) стр.61 :: NNM-Club</a></p>
+<blockquote>
+<p>GoodByeDPI работал. теперь перестал. ростелеком<br>
+Откуда: ХМАО</p>
+</blockquote>
+<p>Заметка для себя: так выглядит EcoDPI от <a href="http://rdp.ru">rdp.ru</a></p>
+<pre><code class="lang-auto">BlockCheck v0.0.9.8
+Для получения корректных результатов используйте DNS-сервер провайдера и отключите средства обхода блокировок.
+
+Проверка работоспособности IPv6: IPv6 недоступен.
+IP: 37.79.89.xxx, провайдер: OJSC Uralsvyazinform/ Ростелеком МРФ "Урал"
+
+[O] Тестируем IPv4 DNS
+	Через системный DNS:	 ['104.18.182.1', '104.18.183.1', '104.20.134.45', '104.20.135.45', '104.24.10.70', '104.24.11.70', '195.8.215.136', '195.82.146.214', '208.100.28.56', '67.202.114.141']
+	Через Google DNS:	 ['104.18.182.1', '104.18.183.1', '104.20.134.45', '104.20.135.45', '104.24.10.70', '104.24.11.70', '195.8.215.136', '195.82.146.214', '208.100.28.56', '67.202.114.141']
+	Через Google API:	 ['104.18.182.1', '104.18.183.1', '104.20.134.45', '104.20.135.45', '104.24.10.70', '104.24.11.70', '195.8.215.136', '195.82.146.214', '208.100.28.56', '67.202.114.141']
+	Несуществующий DNS не вернул адресов (это не ошибка)
+[✓] DNS-записи не подменяются
+[✓] DNS не перенаправляется
+
+[O] Тестируем HTTP
+	Открываем  http://a.putinhuylo.com/
+[✓] Сайт открывается
+	Открываем  http://furry.booru.org/
+[✓] Сайт открывается
+	Открываем  http://furry.booru.org/index.php?page=post&amp;s=view&amp;id=111173
+[☠] Получен неожиданный ответ, скорее всего, страница-заглушка провайдера. Пробуем через прокси.
+[✓] Сайт открывается через прокси
+	Открываем  http://pbooru.com/
+[✓] Сайт открывается
+	Открываем  http://pbooru.com/index.php?page=post&amp;s=view&amp;id=303026
+[✓] Сайт открывается
+	Открываем  http://rutracker.org/forum/index.php
+[☠] Получен неожиданный ответ, скорее всего, страница-заглушка провайдера. Пробуем через прокси.
+[✓] Сайт открывается через прокси
+
+[O] Тестируем HTTPS
+	Открываем  https://e621.net/
+[☠] Сайт не открывается
+	Открываем  https://lolibooru.moe/
+[☠] Сайт не открывается
+	Открываем  https://rutracker.org/forum/index.php
+[☠] Сайт не открывается
+	Открываем  https://www.dailymotion.com/
+[☠] Сайт не открывается
+
+[O] Тестируем обход DPI
+	Пробуем способ «дополнительный пробел после GET» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «заголовок hOSt вместо Host» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «заголовок hoSt вместо Host» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «значение Host БОЛЬШИМИ БУКВАМИ» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «необычный порядок заголовков» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «отсутствие пробела между двоеточием и значением заголовка Host» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «перенос строки в заголовках в UNIX-стиле» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «перенос строки перед GET» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «табуляция в конце домена» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «точка в конце домена» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «фрагментирование заголовка» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «фрагментирование заголовка, hoSt и отсутствие пробела одновременно» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «дополнительный пробел после GET» на rutracker.org
+[☠] Сайт не открывается
+	Пробуем способ «заголовок hOSt вместо Host» на rutracker.org
+[☠] Сайт не открывается
+	Пробуем способ «заголовок hoSt вместо Host» на rutracker.org
+[☠] Сайт не открывается
+	Пробуем способ «значение Host БОЛЬШИМИ БУКВАМИ» на rutracker.org
+[☠] Сайт не открывается
+	Пробуем способ «необычный порядок заголовков» на rutracker.org
+[☠] Сайт не открывается
+	Пробуем способ «отсутствие пробела между двоеточием и значением заголовка Host» на rutracker.org
+[☠] Сайт не открывается
+	Пробуем способ «перенос строки в заголовках в UNIX-стиле» на rutracker.org
+[☠] Сайт не открывается
+	Пробуем способ «перенос строки перед GET» на rutracker.org
+[✓] Сайт открывается
+	Пробуем способ «табуляция в конце домена» на rutracker.org
+[☠] Сайт не открывается
+	Пробуем способ «точка в конце домена» на rutracker.org
+[☠] Сайт не открывается
+	Пробуем способ «фрагментирование заголовка» на rutracker.org
+[☠] Сайт не открывается
+	Пробуем способ «фрагментирование заголовка, hoSt и отсутствие пробела одновременно» на rutracker.org
+[☠] Сайт не открывается
+
+[!] Результат:
+[⚠] Ваш провайдер полностью блокирует доступ к HTTPS-сайтам из реестра.
+[⚠] У вашего провайдера "обычный" DPI. Вам поможет HTTPS/Socks прокси, VPN или Tor.
+</code></pre>
+<p>Стоит два DPI: новый in-path, и старый Ростелекомовский за ним, on-path.</p>
+<p>Перенаправление происходит теперь на <code>http://warning.rt.ru</code>, без get-параметров, а раньше параметрами передавался заблокированный домен, на который пользователь попытался зайти. Часто перенаправления (для HTTP) и TCP RST (для HTTPS) присылаются с большой задержкой, видимо, искусственной: от 2 до 16 секунд. Раньше такого не было.<br>
+Это, к слову, <strong>третий</strong> DPI у Ростелекома, и все они подключены одновременно. Второй — вот такой: <a href="https://ntc.party/t/dpi/85" class="inline-onebox">Интереснная особенность DPI Ростелекома</a></p></td><td>2019-10-01T19:37:23.774Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="11" data-topic="62">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>так выглядит EcoDPI от <a href="http://rdp.ru">rdp.ru</a></p>
+</blockquote>
+</aside>
+<p>А про EcoDPI это установленный другим методом факт или всё же предположение на основании публикаций в СМИ о роли <a href="http://rdp.ru">rdp.ru</a> в процессе? Я слышал мнения, что RDP хотели подвинуть от “кормушки” и, я допускаю, что-то даже и произошло.</p></td><td>2019-10-01T19:51:09.658Z</td></tr><tr><td>ValdikSS</td><td><p>Это только моё предположение. Но, подозреваю, что это действительно EcoDPI.</p></td><td>2019-10-01T19:53:24.414Z</td></tr><tr><td>ValdikSS</td><td><p>Результат <code>blockcheck tls_experiment_v1</code></p>
+<pre><code class="lang-auto">BlockCheck v0.0.9.8-tls_experiment_v1
+Для получения корректных результатов используйте DNS-сервер провайдера и отключите средства обхода блокировок.
+
+Проверка работоспособности IPv6: IPv6 недоступен.
+IP: 188.17.169.xxx, провайдер: OJSC Uralsvyazinform/ Ростелеком МРФ "Урал"
+
+[O] Тестируем IPv4 DNS
+	Через системный DNS:	 ['104.18.182.1', '104.18.183.1', '104.20.134.45', '104.20.135.45', '104.24.10.70', '104.24.11.70', '195.8.215.136', '195.82.146.214', '208.100.28.56', '67.202.114.141']
+	Через Google DNS:	 ['104.18.182.1', '104.18.183.1', '104.20.134.45', '104.20.135.45', '104.24.10.70', '104.24.11.70', '195.8.215.136', '195.82.146.214', '208.100.28.56', '67.202.114.141']
+	Через Google API:	 ['104.18.182.1', '104.18.183.1', '104.20.134.45', '104.20.135.45', '104.24.10.70', '104.24.11.70', '195.8.215.136', '195.82.146.214', '208.100.28.56', '67.202.114.141']
+	Несуществующий DNS не вернул адресов (это не ошибка)
+[✓] DNS-записи не подменяются
+[✓] DNS не перенаправляется
+
+[O] Тестируем HTTP
+	Открываем  http://a.putinhuylo.com/
+[✓] Сайт открывается
+	Открываем  http://furry.booru.org/
+[✓] Сайт открывается
+	Открываем  http://furry.booru.org/index.php?page=post&amp;s=view&amp;id=111173
+[☠] Сайт не открывается, пробуем через прокси
+[✓] Сайт открывается через прокси
+	Открываем  http://pbooru.com/
+[✓] Сайт открывается
+	Открываем  http://pbooru.com/index.php?page=post&amp;s=view&amp;id=303026
+[✓] Сайт открывается
+	Открываем  http://rutracker.org/forum/index.php
+[☠] Сайт не открывается, пробуем через прокси
+[✓] Сайт открывается через прокси
+
+[O] Тестируем HTTPS
+	Открываем  https://e621.net/
+[✓] Сайт открывается
+	Открываем  https://lolibooru.moe/
+[✓] Сайт открывается
+	Открываем  https://rutracker.org/forum/index.php
+[☠] Сайт не открывается
+	Открываем  https://www.dailymotion.com/
+[☠] Сайт не открывается
+
+[O] Тестируем обход DPI
+	Пробуем способ «дополнительный пробел после GET» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «заголовок hOSt вместо Host» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «заголовок hoSt вместо Host» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «значение Host БОЛЬШИМИ БУКВАМИ» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «необычный порядок заголовков» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «отсутствие пробела между двоеточием и значением заголовка Host» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «перенос строки в заголовках в UNIX-стиле» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «перенос строки перед GET» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «табуляция в конце домена» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «точка в конце домена» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «фрагментирование заголовка» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «фрагментирование заголовка, hoSt и отсутствие пробела одновременно» на pbooru.com
+[☠] Сайт не открывается
+	Пробуем способ «дополнительный пробел после GET» на rutracker.org
+[☠] Ошибка: timeout('timed out')
+	Пробуем способ «заголовок hOSt вместо Host» на rutracker.org
+[☠] Ошибка: timeout('timed out')
+	Пробуем способ «заголовок hoSt вместо Host» на rutracker.org
+[☠] Ошибка: timeout('timed out')
+	Пробуем способ «значение Host БОЛЬШИМИ БУКВАМИ» на rutracker.org
+[☠] Ошибка: timeout('timed out')
+	Пробуем способ «необычный порядок заголовков» на rutracker.org
+[☠] Ошибка: timeout('timed out')
+	Пробуем способ «отсутствие пробела между двоеточием и значением заголовка Host» на rutracker.org
+[☠] Ошибка: timeout('timed out')
+	Пробуем способ «перенос строки в заголовках в UNIX-стиле» на rutracker.org
+[☠] Ошибка: timeout('timed out')
+	Пробуем способ «перенос строки перед GET» на rutracker.org
+[✓] Сайт открывается
+	Пробуем способ «табуляция в конце домена» на rutracker.org
+[☠] Ошибка: timeout('timed out')
+	Пробуем способ «точка в конце домена» на rutracker.org
+[☠] Ошибка: timeout('timed out')
+	Пробуем способ «фрагментирование заголовка» на rutracker.org
+[☠] Ошибка: timeout('timed out')
+	Пробуем способ «фрагментирование заголовка, hoSt и отсутствие пробела одновременно» на rutracker.org
+[☠] Ошибка: timeout('timed out')
+
+[O] Тестируем обход DPI (HTTPS)
+	 Пробуем Обычный запрос на dailymotion.com
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello без SNI на dailymotion.com
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello с большим padding на dailymotion.com
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello с большим padding и SNI только в конце padding на dailymotion.com
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным до padding на dailymotion.com
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным после padding на dailymotion.com
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем Обычный запрос на danbooru.donmai.us
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello без SNI на danbooru.donmai.us
+[✓] Сайт открывается
+	 Пробуем ClientHello с большим padding на danbooru.donmai.us
+[✓] Сайт открывается
+	 Пробуем ClientHello с большим padding и SNI только в конце padding на danbooru.donmai.us
+[✓] Сайт открывается
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным до padding на danbooru.donmai.us
+[☠] Ошибка (TLS): SSLError(1, '[SSL: TLSV1_ALERT_DECODE_ERROR] tlsv1 alert decode error (_ssl.c:1076)')
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным после padding на danbooru.donmai.us
+[☠] Ошибка (TLS): SSLError(1, '[SSL: TLSV1_ALERT_DECODE_ERROR] tlsv1 alert decode error (_ssl.c:1076)')
+	 Пробуем Обычный запрос на e621.net
+[✓] Сайт открывается
+	 Пробуем ClientHello без SNI на e621.net
+[✓] Сайт открывается
+	 Пробуем ClientHello с большим padding на e621.net
+[✓] Сайт открывается
+	 Пробуем ClientHello с большим padding и SNI только в конце padding на e621.net
+[✓] Сайт открывается
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным до padding на e621.net
+[☠] Ошибка (TLS): SSLError(1, '[SSL: TLSV1_ALERT_DECODE_ERROR] tlsv1 alert decode error (_ssl.c:1076)')
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным после padding на e621.net
+[☠] Ошибка (TLS): SSLError(1, '[SSL: TLSV1_ALERT_DECODE_ERROR] tlsv1 alert decode error (_ssl.c:1076)')
+	 Пробуем Обычный запрос на gelbooru.com
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello без SNI на gelbooru.com
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello с большим padding на gelbooru.com
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello с большим padding и SNI только в конце padding на gelbooru.com
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным до padding на gelbooru.com
+[☠] Ошибка (TLS): SSLError(1, '[SSL: TLSV1_ALERT_DECODE_ERROR] tlsv1 alert decode error (_ssl.c:1076)')
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным после padding на gelbooru.com
+[☠] Ошибка (TLS): SSLError(1, '[SSL: TLSV1_ALERT_DECODE_ERROR] tlsv1 alert decode error (_ssl.c:1076)')
+	 Пробуем Обычный запрос на rutracker.org
+[☠] Ошибка (TLS): ConnectionResetError(10054, 'Удаленный хост принудительно разорвал существующее подключение', None, 10054, None)
+	 Пробуем ClientHello без SNI на rutracker.org
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello с большим padding на rutracker.org
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello с большим padding и SNI только в конце padding на rutracker.org
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным до padding на rutracker.org
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным после padding на rutracker.org
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем Обычный запрос на zello.com
+[☠] Ошибка (TLS): timeout('_ssl.c:1059: The handshake operation timed out')
+	 Пробуем ClientHello без SNI на zello.com
+[✓] Сайт открывается
+	 Пробуем ClientHello с большим padding на zello.com
+[✓] Сайт открывается
+	 Пробуем ClientHello с большим padding и SNI только в конце padding на zello.com
+[✓] Сайт открывается
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным до padding на zello.com
+[☠] Ошибка (TLS): SSLError(1, '[SSL: TLSV1_ALERT_DECODE_ERROR] tlsv1 alert decode error (_ssl.c:1076)')
+	 Пробуем ClientHello с большим padding, поддельным SNI в начале и правильным после padding на zello.com
+[☠] Ошибка (TLS): SSLError(1, '[SSL: TLSV1_ALERT_DECODE_ERROR] tlsv1 alert decode error (_ssl.c:1076)')
+
+[!] Результат:
+[⚠] Ваш провайдер полностью блокирует доступ к HTTPS-сайтам из реестра.
+[⚠] У вашего провайдера "обычный" DPI. Вам поможет HTTPS/Socks прокси, VPN или Tor.
+</code></pre></td><td>2019-10-03T04:45:26.678Z</td></tr><tr><td>ValdikSS</td><td><p>Новый DPI установили вне Свердловской области — в Мурманской области.<br>
+<a href="https://rutracker.org/forum/viewtopic.php?p=78125766#78125766" class="onebox" target="_blank" rel="noopener">https://rutracker.org/forum/viewtopic.php?p=78125766#78125766</a></p>
+<blockquote>
+<p>Мурманская область, провайдер Олтелеком, Win 7x64. Goodbyedpi не помогает. Еще месяц назад сидел на Ростелекоме и все работало. <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p>
+</blockquote></td><td>2019-10-16T20:30:47.931Z</td></tr>
+    </table>
+      </body>
+    </html>

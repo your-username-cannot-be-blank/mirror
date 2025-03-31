@@ -1,0 +1,48 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-weaponizing-middleboxes-for-tcp-reflected-amplification-usenix-security-2021</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Weaponizing Middleboxes for TCP Reflected Amplification<br>
+Kevin Bock, Abdulrahman Alaraj, Yair Fax, Kyle Hurley, Eric Wustrow, Dave Levin<br>
+<a href="https://censorbib.nymity.ch/#Bock2021b">https://censorbib.nymity.ch/#Bock2021b</a><br>
+<a href="https://geneva.cs.umd.edu/weaponizing">https://geneva.cs.umd.edu/weaponizing</a><br>
+<a href="https://www.usenix.org/conference/usenixsecurity21/presentation/bock">Slides and video</a></p>
+<p>This paper shows how to do a certain kind of denial-of-service attack, a reflected amplification attack, using TCP and network middleboxes, like censorship middleboxes that inject block pages. Reflected amplification attacks traditionally rely on non-connection-oriented protocols like UDP: find a service that replies with more data than you send it, then send it some data, spoofing the source address of a victim host that will receive that reflected reply. In comparison, reflected amplification using TCP is usually thought to be infeasible, because an off-path attacker needs to guess the TCP server’s initial sequence number in order to complete the TCP handshake, as well as prevent the victim from tearing down the nascent connection with a RST. But this paper makes a crucial observation: middleboxes often use TCP state machines that are intentionally simplistic. They may be designed to track flows even in the face of packet loss or asymmetric routing, for example, and for that reason omit certain required checks like strict sequence number matching. The laxness of these middleboxes can be exploited to cause them to send large volumes of TCP traffic, in situations where end hosts with full TCP implementation would not even consider a connection to exist. Apart from the novelty of using TCP, the attacks developed in this paper are noteworthy for the large amplification factors achieved. In some cases the amplification factor is infinite: because of some kind of self-sustaining feedback loop, the middlebox never stops sending traffic.</p>
+<p>The authors use <a href="https://github.com/net4people/bbs/issues/2">Quack</a> measurements to identify network paths that are likely to contain injection middleboxes. They use <a href="https://ntc.party/t/paper-summary-geneva-evolving-censorship-evasion-strategies-ccs-19/298/3">Geneva</a> to discover packet sequences that cause middleboxes on those paths to respond, starting from an initial seed of a PSH+ACK packet containing an HTTP GET request payload. Geneva finds five distinct packet sequences that can cause injection (<a href="https://www.usenix.org/system/files/sec21-bock.pdf#page=5">Section 3.3.1</a>), as well as packet-level tweaks to optimize the amplification factor, like increasing the IP TTL and the TCP window scaling factor. They do an IPv4-wide scan using <a href="https://zmap.io/">ZMap</a> to discover more middleboxes that are susceptible to the discovered packet sequences. These scans find over 5 million responders that have an amplification factor greater than 1, and over 50,000 that have a factor greater than 100. A substantial fraction of amplifying middleboxes can be attributed to national censorship firewalls. <a href="https://www.usenix.org/system/files/sec21-bock.pdf#page=11">Section 5.5</a> is a targeted investigation into injection fingerprints from Bangladesh, Iran, China, Saudi Arabia, and Russia. The harms of censorship are known; this research shows that censorship infrastructure can cause harm even beyond its intended purpose: “Nation-state censors effectively turn every routable IP addresses within their country into a potential amplifier.”</p>
+<p>Thanks to the authors for reviewing a draft of this summary.</p></td><td>2022-08-15T20:05:14.131Z</td></tr>
+    </table>
+      </body>
+    </html>

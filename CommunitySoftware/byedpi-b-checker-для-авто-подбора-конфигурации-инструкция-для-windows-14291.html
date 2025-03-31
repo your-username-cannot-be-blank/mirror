@@ -1,0 +1,177 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>byedpi-b-checker-для-авто-подбора-конфигурации-инструкция-для-windows-14291</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>TesterTi(TesterIt)</td><td><details>
+<summary>
+О программе ByeDpi (огромное спасибо ее автору hufrea):</summary>
+<blockquote>
+<p>Локальный socks-прокси (это не впн/не внешний прокси, он никуда не перенаправляет сетевые запросы, лишь обрабатывает их). Кроме браузера этот прокси можно прописать в любой др. программе и на уровне системы.<br>
+Офиц. страничка: <a href="https://github.com/hufrea/byedpi" class="inline-onebox" rel="noopener nofollow ugc">GitHub - hufrea/byedpi: Bypass DPI</a><br>
+Обсуждение: <a href="https://ntc.party/t/byedpi-%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5/">https://ntc.party/t/byedpi-обсуждение/</a><br>
+Есть версии для Linux и для Android <a href="https://github.com/romanvht/ByeDPIAndroid" class="inline-onebox" rel="noopener nofollow ugc">GitHub - romanvht/ByeDPIAndroid: Приложение локально запускает ByeDPI и перенаправляет весь TCP трафик через него</a> (с подбором параметров)</p>
+</blockquote>
+</details>
+<details>
+<summary>
+Описание файлов ByeDpi:</summary>
+<blockquote>
+<p>ciadpi.exe - приложение ByeDpi<br>
+byedpi.bat - батник, запускающий ByeDpi с параметрами по умолчанию (адрес 0.0.0.0, порт 1080)<br>
+service_install.bat - батник, устанавливающий ByeDpi как службу с параметрами по умолчанию<br>
+service_restart.bat - батник, перезапускающий службу ByeDpi<br>
+service_delete.bat - батник, удаляющий службу ByeDpi</p>
+</blockquote>
+</details>
+<details>
+<summary>
+О скрипте B-Checker.cmd (авто-подбор и сохранение готовой конфигурации byedpi):</summary>
+<ul>
+<li>Многие идеи позаимствованы из GoodCheck от Ori и blockcheck от bolvan (спасибо ребятам)</li>
+<li>Скрипт на русском</li>
+<li>Может найти рабочие ip для сайтов (но не обойти гео-блок)</li>
+<li>Ищет общую конфигурацию для сайтов из чеклиста. Если хотя бы один сайт недоступен, конфигурация не будет найдена. Чеклисты лучше составлять по принципу: “1 сайт + необходимые поддомены” либо “несколько однотипных сайтов”</li>
+<li>Для ютуба ищет 2 отдельных конфигурации: 1. для веб-сайта; 2. для видео</li>
+<li>Находит рабочую конфигурацию и предлагает оценить ее</li>
+<li>Сохраняет в файл cmd одобренную конфигурацию и прекращает перебор конфигураций</li>
+<li>Для отправки запросов использует форк curl <a href="https://github.com/lexiforest/curl-impersonate" class="inline-onebox" rel="noopener nofollow ugc">GitHub - lexiforest/curl-impersonate: An active fork of curl-impersonate with more versions and build targets.</a>, собранный с библиотеками из chrоmium. curl-impersonate имитирует браузер chrome, для сокращения нестыковок (когда в curl сайт доступен, а в браузере нет, и наоборот)</li>
+<li>Настройки скрипта хранятся в файле B-Checker.ini. Важные настройки: $browser, $maxRetry, $maxParallel. С $browser=chrome107 Kyber отключен, с $browser=chrome124 Kyber включен. Настройка в реальном браузере должна соответствовать. С chrome107 могут находиться одни конфигурации, с chrome124 - др. По умолчанию ищет медленные ($maxParallel=2), но стабильные ($maxRetry=0) конфигурации. Чтобы найти быстрые конфигурации, нужно выставить $maxParallel=300,  нестабильные - $maxRetry=1. Если curl зависает, нужно выставить $curlFreezes=yes</li>
+</ul>
+</details>
+<details>
+<summary>
+Описание файлов B-Checker:</summary>
+<blockquote>
+<p>HELP.txt - справка<br>
+B-Checker.cmd - основной скрипт<br>
+B-Checker.ini - файл с настройками B-Checker.cmd<br>
+B-Checker.log - лог скрипта<br>
+ServiceRemover.bat - завершает все копии ciadpi.exe и удаляет все службы byedpi<br>
+\BlackLists\ - папка с блэклистами (файлы *.txt со списком доменов, к которым byedpi применяет параметры), AllBlackLists.bat создает общий блэклист<br>
+\CheckLists\ - папка с чеклистами (файлы *.txt со списком сайтов для B-Checker), AllCheckLists.bat создает общий чеклист<br>
+\Files\curl\ - папка утилиты curl-impersonate (версия сборки 0.8.0.x86_64, версия curl 8.7)<br>
+\Files\fakes\ - папка с файлами .bin для фейковых данных (взяты из сборки zapret)<br>
+\Files\ConfigGenerator.bat - генератор конфигов byedpi, можно настроить под себя<br>
+\Files\Configs.txt - файл с конфигурациями (1821 шт., полный перебор занимает больше 1 часа)<br>
+\Files\DnsChecker.bat - проверяет ответы dns-серверов из файла DNS.txt<br>
+\Files\DohChecker.bat - проверяет ответы doh-серверов из файла DoH.txt<br>
+\Files\IPs.ini - файл с рабочими ip (создается, если какие-то сайты недоступны по ip)<br>
+\Files\DNS.txt - файл со списком dns-серверов<br>
+\Files\DoH.txt - файл со списком doh-серверов<br>
+\Files\Short-LongFormConverter.bat - конвертирует параметры конфигурации в короткую/длинную форму (<code>--oob</code> в <code>-o</code> и наоборот). В короткой форме после каждого параметра д.б. пробел (<code>-o 1+s -A t</code>)<br>
+\Files\SmartProxyByeDPI.json - файл с готовыми настройками расширения SmartProxy<br>
+\Files\ZeroOmegaByeDPI.bak - файл с готовыми настройками расширения ZeroOmega</p>
+</blockquote>
+</details>
+<p><strong>Инструкция для Windows:</strong><br>
+<strong>1)</strong> Скачать и распаковать архив последнего релиза ByeDpi <a href="https://github.com/hufrea/byedpi/releases" class="inline-onebox" rel="noopener nofollow ugc">Releases · hufrea/byedpi · GitHub</a> (на момент написания это <a href="https://github.com/hufrea/byedpi/releases/download/v0.15/byedpi-15-x86_64-w64.zip" rel="noopener nofollow ugc">https://github.com/hufrea/byedpi/releases/download/v0.15/byedpi-15-x86_64-w64.zip</a>)<br>
+<strong>2)</strong> Скачать и распаковать архив со скриптом <a class="attachment" href="byedpi-b-checker-для-авто-подбора-конфигурации-инструкция-для-windows-14291/1WYfSx2GuhzQMkmS6z1WYzla5YI.zip">B-Checker.zip</a> (6,4 МБ)  в папку с byedpi (не в отдельную папку, а туда же, где все файлы; после распаковки <code>B-Checker.cmd</code> должен лежать рядом с <code>ciadpi.exe</code>)<br>
+<strong>3)</strong> Установить в браузере расширение для прокси<br>
+В <code>Firefox</code> лучше <code>SmartProxy</code> <a href="https://addons.mozilla.org/ru/firefox/addon/smartproxy/" rel="noopener nofollow ugc">https://addons.mozilla.org/ru/firefox/addon/smartproxy/</a><br>
+В браузерах на <code>Chromium</code> (Chrome,Edge,Opera,Yandex) лучше <code>ZeroOmega</code> <a href="https://chromewebstore.google.com/detail/proxy-switchyomega-3-zero/pfnededegaaopdmhkdmcofjmoldfiped" rel="noopener nofollow ugc">https://chromewebstore.google.com/detail/proxy-switchyomega-3-zero/pfnededegaaopdmhkdmcofjmoldfiped</a><br>
+Если в браузере стоят др. расширения прокси/впн, зайдите в Настройки → Расширения и отключите их.<br>
+<strong>4)</strong> Импортировать готовые настройки для SmartProxy/ZeroOmega. В них уже задан и сам прокси (тип SOCKS, адрес 127.0.0.1, порт 18083) и мн. популярные сайты.<br>
+<code>SmartProxy в Firefox:</code><br>
+Перейти в Настройки → Резервирование/восстановление → Восстановить из резервной копии  → загрузить файл <code>SmartProxyByeDPI.json</code> из папки <code>Files</code><br>
+В расширении есть 3 основных режима: 1.Напрямую (все сайты без прокси); 2.Умный прокси (прокси для сайтов из списка “Умный прокси” в настройках); 3.Всегда включен (все сайты через выбранный прокси)<br>
+<code>ZeroOmega в Chrome:</code><br>
+Перейти в Options → Import/Export → Restore from file → загрузить файл <code>ZeroOmegaByeDPI.bak</code> из папки <code>Files</code><br>
+В расширении есть 3 основных режима: 1.Direct (все сайты без прокси); 2.auto switch (прокси только для сайтов из списка “auto switch” в настройках); 3.ByeDPI (все сайты через ByeDPI)</p>
+<details>
+<summary>
+Если стоит антивирус/фаерволл/брандмауэр:</summary>
+<blockquote>
+<p>Для работы утилит curl-impersonate.exe и ciadpi.exe нужно добавить их в исключения либо дать хотя бы минимальные разрешения:</p>
+<ol>
+<li>для curl-impersonate.exe: разрешить все исходящие запросы TCP</li>
+<li>для curl-impersonate.exe: разрешить все исходящие запросы UDP</li>
+<li>для браузера: разрешить исходящие запросы TCP на 127.0.0.1 и порт 18083</li>
+<li>для браузера: разрешить исходящие запросы UDP на 127.0.0.1 и порт 18083</li>
+<li>для ciadpi.exe: разрешить все исходящие запросы TCP</li>
+<li>для ciadpi.exe: разрешить все исходящие запросы UDP</li>
+<li>для ciadpi.exe: разрешить все входящие запросы TCP</li>
+<li>для ciadpi.exe: разрешить все входящие запросы UDP</li>
+</ol>
+</blockquote>
+</details>
+<details>
+<summary>
+Если у вас windows 7:</summary>
+<blockquote>
+<p>1.Скачать и установить спец. утилиту <a href="https://github.com/i486/VxKex/releases/download/Version1.1.1.1375/KexSetup_Release_1_1_1_1375.exe" rel="noopener nofollow ugc">https://github.com/i486/VxKex/releases/download/Version1.1.1.1375/KexSetup_Release_1_1_1_1375.exe</a><br>
+VxKex позволяет запускать мн. неподдерживаемые на win7 программы<br>
+2.Зайти в папку \Files\curl\  → открыть свойства файла curl-impersonate.exe → перейти на вкладку “VxKex” → поставить галку “Enable VxKex for this program” → нажать Ok<br>
+При изменении пути к curl-impersonate.exe повторить п.2</p>
+</blockquote>
+</details>
+<p><strong>5)</strong> Запустить B-Checker.cmd от имени Администратора<br>
+<strong>6)</strong> Выбрать чеклист (список сайтов)<br>
+<strong>7)</strong> Если скрипт нашел конфигурацию - проверить сайт в браузере (ни в коем случае не закрывать консольное окно с byedpi!).<br>
+<strong>8)</strong> Конфигурация не устроила - нажать цифру 2 и Enter. Скрипт продолжит поиск.<br>
+<strong>9)</strong> Все открылось - просто нажать Enter. Скрипт сохранит конфигурацию в cmd и завершит работу. Затем запустить созданный cmd (для консоли или службы - как удобнее).<br>
+<em><code>Примечание:</code></em> если создано несколько cmd для разных чеклистов, то при запуске одного консольные окна других закрываются. Службы можно удалить, запустив <code>ServiceRemover.bat</code></p>
+<details>
+<summary>
+Как скачать видео через ByeDpi:</summary>
+<blockquote>
+<ol>
+<li>Установить бесплатный менеджер закачек <a href="https://downloadmaster.com/ru/download/" rel="noopener nofollow ugc">https://downloadmaster.com/ru/download/</a></li>
+<li>Открыть “Настройки” (кнопка на панели инструментов) → Настройки прокси → Добавить → Тип SOCKS5 Сервер 127.0.0.1 Порт 18083 → Нажать ОК</li>
+<li>Поставить 2 галки “Использовать HTTP прокси” и “Использовать HTTPS прокси”. В обоих пунктах выбрать прокси 127.0.0.1:18083 (SOCKS5) → Нажать ОК</li>
+<li>Скопировать адрес видео</li>
+<li>В Download Master нажать кнопку “Добавить” на панели инструментов (если адрес не подхватился автоматом)</li>
+<li>В окне “Добавить закачку” наверху переключиться на вкладку Видео (там их 2: Ссылка/Видео)</li>
+<li>Ниже под ссылкой на ваше видео (справа от Категории) можно выбрать качество видео</li>
+<li>Нажать кнопку “Начать закачку” в том же окне<br>
+p.s. по моему опыту для загрузки видео лучше конфигурации со split и disorder</li>
+</ol>
+</blockquote>
+</details>
+<details>
+<summary>
+Инструкции по настройке браузера:</summary>
+<blockquote>
+<p>Включить Kyber <a href="https://wotcheats.ru/index.php?topic=530.0" rel="noopener nofollow ugc">https://wotcheats.ru/index.php?topic=530.0</a><br>
+Отключить Kyber <a href="https://ntc.party/t/%D0%BA%D0%B0%D0%BA-%D0%BE%D1%82%D0%BA%D0%BB%D1%8E%D1%87%D0%B8%D1%82%D1%8C-kyber-%D0%B2-%D0%B1%D1%80%D0%B0%D1%83%D0%B7%D0%B5%D1%80%D0%B0%D1%85-%D0%B8%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F/10863">https://ntc.party/t/как-отключить-kyber-в-браузерах-инструкция/10863</a><br>
+Включить DoH <a href="https://www.anti-malware.ru/analytics/Technology_Analysis/How-to-set-up-DNS-over-HTTPS" rel="noopener nofollow ugc">https://www.anti-malware.ru/analytics/Technology_Analysis/How-to-set-up-DNS-over-HTTPS</a><br>
+Очистить кеш Dns <a href="https://ru.dz-techs.com/chrome-edge-firefox-safari-opera-browser-clear-dns-cache" rel="noopener nofollow ugc">https://ru.dz-techs.com/chrome-edge-firefox-safari-opera-browser-clear-dns-cache</a><br>
+Отключить ECH <a href="https://www.opennet.ru/tips/3258_tls_ech_block_cloudflare_firefox_chrome.shtml" rel="noopener nofollow ugc">https://www.opennet.ru/tips/3258_tls_ech_block_cloudflare_firefox_chrome.shtml</a></p>
+</blockquote>
+</details>
+<p><strong>P.S.</strong> Всех с Новым Годом!</p></td><td>2025-01-01T22:52:09.970Z</td></tr>
+    </table>
+      </body>
+    </html>

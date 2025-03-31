@@ -1,0 +1,112 @@
+{
+    "log": {
+      "disabled": false,
+      "level": "debug",
+      "output": "/tmp/sing-box.log",
+      "timestamp": true
+    },
+	"dns": {
+      "strategy": "ipv4_only",
+      "servers": [
+        {
+           "tag": "google",
+           "address": "https://8.8.8.8/dns-query"
+        },
+        {
+           "tag": "local",
+           "address": "local",
+           "detour": "direct"
+        },
+        {
+           "tag": "block",
+           "address": "rcode://success"
+        }
+        ]
+        },
+    "inbounds": [
+      {
+            "domain_strategy": "ipv4_only",
+            "type": "tun",
+            "tag": "tun-in",
+            "interface_name": "tun0",
+            "inet4_address": "172.19.16.1/30",
+            "stack": "gvisor",
+            "mtu": 9000,
+            "auto_route": true,
+            "strict_route": false,
+            "endpoint_independent_nat": false,
+            "sniff": true,
+            "sniff_override_destination": true,
+            "gso": true
+
+     }
+    ],
+    "outbounds": [
+      {
+          "type": "vless",
+          "tag": "vless",
+          "server": "IP_SERVER",
+          "server_port": PORT_SERVER,
+          "uuid": "UUID",
+          "flow": "",
+          "tls": {
+            "enabled": true,
+            "insecure": false,
+            "server_name": "google.com",
+            "utls": {
+              "enabled": true,
+              "fingerprint": "chrome"
+            },
+            "reality": {
+              "enabled": true,
+              "public_key": "PUBLICKEY",
+             "short_id": "SHORT_ID"
+            }
+          }
+        },
+
+        {
+           "type": "direct",
+           "tag": "direct"
+        },
+        {
+           "type": "dns",
+           "tag": "dns-out"
+        },
+        {
+           "type": "block",
+           "tag": "block"
+        }
+      ],
+ "route": {
+    "rules": [
+	{
+	   "protocol": "dns",
+	   "outbound": "dns-out"
+	},
+    {
+       "ip_is_private": true,
+       "outbound": "direct"
+    },
+    {
+       "domain_suffix": [
+	      ".ru",
+	      ".su"
+			],
+       "outbound": "direct"
+    },
+
+    {
+       "domain_suffix": "instagram.com",
+       "outbound": "vless"
+    }
+      
+	],
+
+	"final": "vless",
+	"auto_detect_interface": true
+    }
+  }
+  
+
+

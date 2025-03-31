@@ -1,0 +1,119 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>vpn-port-forwarding</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>meow</td><td><p>Цель 127.0.0.1:80 port forwarding to vps-ip:80 (для примера)<br>
+Интернет на 127.0.0.1 при этом остается обычным от провайдера, с vps не берется<br>
+Подскажите, может кто встречал скрипт/софт для настройки подобного, в идеале еще и учетом реалий блокировки по протоколам?</p>
+<p>Платные/триал решения не интересуют.</p></td><td>2024-01-31T12:55:56.976Z</td></tr><tr><td>0ka(0ka)</td><td><p>xray через dokodemo-door, sing-box через direct, stunnel, <a href="https://hysteria.network/docs/advanced/Full-Client-Config/#tcp-forwarding">hysteria2</a> через udpForwarding и tcpForwarding должны уметь что вы хотите</p>
+<p>пример xray</p>
+<pre><code class="lang-auto">"inbounds": [
+        {
+            "listen": "0.0.0.0",
+            "port": 1,
+            "protocol": "dokodemo-door",
+            "settings": {
+                "address": "127.0.0.1",
+                "network": "tcp,udp",
+                "port": 50090
+            }
+        }
+    ],
+</code></pre>
+<p>sing-box direct</p>
+<pre><code class="lang-auto">"inbounds": [
+		{
+            "listen": "0.0.0.0",
+            "listen_port": 1,
+            "network": "tcp",
+            "override_address": "127.0.0.1",
+            "override_port": 50090,
+            "tag": "direct-in2",
+            "type": "direct"
+        },
+        {
+            "listen": "0.0.0.0",
+            "listen_port": 1,
+            "network": "udp",
+            "override_address": "127.0.0.1",
+            "override_port": 50090,
+            "tag": "direct-in2",
+            "type": "direct"
+        }
+    ],
+</code></pre>
+<p>локальный порт 1 = удаленный порт 50090<br>
+это часть конфига, вы сами должны поднять сервер и добавить outbounds в конфиг.</p>
+<p>или, если у вас уже поднят VPN, то можно использовать freedom/direct outbound (стандартный инет, без заворачивания в туннель) и параметр <a href="https://xtls.github.io/en/config/outbound.html#outboundobject">sendThrough</a> в xray (или <a href="https://sing-box.sagernet.org/configuration/shared/dial/">bind_interface</a> в sing-box), в который можно прописать локальный ip адрес интерфейса/название интерфейса, если у вас уже поднят VPN, и трафик пойдёт через него</p></td><td>2024-01-31T13:08:01.272Z</td></tr><tr><td>Xunlei</td><td><p>Не очень понял постановку задачи, причём тут VPN.<br>
+Возможно вам поможет данный пример конфигурации менеджера туннелей <a href="https://gost.run/" rel="noopener nofollow ugc">GOST</a> для windows:</p>
+<pre><code class="lang-auto">services:
+# Port forwarding
+- name: service-Wintun-Forwarder
+  addr: "127.0.0.1:80"
+  interface: "OpenVPN Wintun"
+  handler:
+    type: udp
+  listener:
+    type: udp
+    metadata:
+      keepAlive: true
+      ttl: 5s
+  forwarder:
+    nodes:
+    - name: target-vps
+      addr: 198.51.100.1:80
+</code></pre>
+<p>Тут в <em>interface</em> необходимо вписать название виртуального интерфейса VPN, если вы хотите через него форвардить.</p></td><td>2024-01-31T13:12:31.771Z</td></tr><tr><td>meow</td><td><aside class="quote no-group" data-username="Xunlei" data-post="3" data-topic="7036">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>Не очень понял постановку задачи, причём тут VPN.</p>
+</blockquote>
+</aside>
+<p><a href="https://portmap.io/" rel="noopener nofollow ugc">https://portmap.io/</a> и похожие платные сервисы работают через vpn туннель</p></td><td>2024-01-31T15:09:42.235Z</td></tr><tr><td>Xunlei</td><td><p>Если нужен reverse forwarding, то есть:<br>
+<a href="https://ssh-j.com/" rel="noopener nofollow ugc">Public SSH Jump &amp; Port Forwarding Server</a> (<a href="http://sshjmpnoutfqotbj6r3acexiwoalgkth55y5kys7js3px2qqqrwuhqqd.onion/" rel="noopener nofollow ugc">onion</a>)<br>
+Есть ещё <a href="https://www.thc.org/segfault/" rel="noopener nofollow ugc">Segfault</a>, только меня там забанили через месяц за использования публичного порта в торрент клиенте.</p></td><td>2024-01-31T16:14:46.119Z</td></tr><tr><td>Xunlei</td><td><p>Если нужно объединить пользователей за NAT в виртуальную сеть, то есть <a href="https://zerotier.com/" rel="noopener nofollow ugc">ZeroTier</a> (бесплатно до 25 устройств) и <a href="https://tailscale.com/" rel="noopener nofollow ugc">Tailscale</a> (бесплатно до 100 устройств), работает через UDP hole punching.</p></td><td>2024-01-31T16:24:15.259Z</td></tr><tr><td>meow</td><td><p><a href="https://portmap.io/" rel="noopener nofollow ugc">https://portmap.io/</a> подходит мне, но пинг и скорость не радуют, хотелось на своем сервере так же в пару кликов делать подобное.</p></td><td>2024-01-31T23:05:23.306Z</td></tr><tr><td>0ka(0ka)</td><td><p>так вам с локалхоста на впс, или с впс на локалхост? в 1 посте первое, а щас про второе…</p></td><td>2024-01-31T23:43:38.245Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>Я так понимаю, Вы не очень глубоко разбираетесь в теме <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> Поэтому попробую структурировать Вашу задачу, чтобы было понятно, что в каком порядке гуглить.</p>
+<p>Во-первых, уточните - Вам нужен именно публичный доступ к Вашему компу или же доступ только для себя. Всё, что я напишу дальше, относится к первому случаю. Во втором случае Вам надо не порты пробрасывать, а сделать VPN, в котором будет Ваш комп, VPS и к которому Вы тоже будете подключаться откуда Вам надо через VPS и обращаться к Вашему компу по его IP в VPN-сети.</p>
+<p>Во-вторых, для начала забудьте про проброс портов и просто сделайте VPN между компом и VPS. Рекомендую настроить Wireguard, пока он ещё чаще работает, чем нет. Он простой как три рубля, в сети вагон мануалов. Потом, когда всё заработает, сделаете его стойким к блокировкам, об этом ниже.<br>
+Единственный нюанс в настройке WG у Вас будет в том, что со стороны компа Allowed IPs VPS’а должны быть 0.0.0.0/0, т.к. запросы будут прилетать с любых адресов, а вот маршрут по умолчанию строить Вам через VPS не надо. Для этого добавьте в конфиг строчку “Table=off”. Остальное в гугле на каждом углу разжёвано.</p>
+<p>В-третьих, после того, как VPN заработает, комп и VPS будут успешно пинговать друг друга по адресам в VPN-сети, сделайте на VPS проброс нужных Вам портов с WAN-интерфейса на адрес компа в VPN-сети, ну и forwarding включите. Настроек там три строчки, больше специфики для каждого дистрибутива, куда эти настройки записать, чтобы после перезагрузки сохранились. Опять же, гугл по словам “port forwarding ваш_дистрибутив” в помощь.</p>
+<p>И вот уже в четвёртых, когда всё заработает, тогда или поменяйте обычный Wireguard на Amnezia-WG (проще, быстрее, но в случае совсем уж ковровых блокировок может не спасти) или заверните его в Cloak (должен лучше продержаться даже в самые тёмные времена, но чуть сложнее настройка и ощутимо медленнее). Опять же, руководств полно, темы и здесь на форуме есть, когда дойдёте до этого этапа и будете готовы задать конкретные вопросы, Вам обязательно помогут <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p>
+<p>Удачи!</p></td><td>2024-02-01T01:16:44.059Z</td></tr><tr><td>meow</td><td><p>Доступ нужен публичный, про наличие огромного количество гайдов тоже знаю, хоть и могу потратить пару часов на настройку, но ищу именно скрипт/софт где это делается в один клик, чтобы не тратить время на настройку когда очередной vps провайдер сообщит что со следующего месяца цена станет в 2-3 раза выше или сменит айпи просто так и сломает конфиг. К сожалению сталкиваюсь с таким постоянно в сегменте 1-2$ vps, но ежики кололись, но продолжали есть кактус.</p></td><td>2024-02-01T11:48:11.913Z</td></tr><tr><td>Xunlei</td><td><p>В один клик знаю способ, если не нужна анонимность: купить у вашего ISP белый IP.<br>
+В GOST можно настроить <a href="https://gost.run/en/tutorials/reverse-proxy/#remote-port-forwarding" rel="noopener nofollow ugc">Remote Port Forwarding</a>.</p></td><td>2024-02-01T11:53:25.803Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>Если не хотите разбираться сами - платите деньги тому, кто сделает за Вас… Всё, что я написал выше, за ту самую пару часов один раз оформляется в плейбук Ansible, который потом можно хоть по три раза в день на новую VPS’ку раскатывать.</p></td><td>2024-02-01T12:37:57.464Z</td></tr>
+    </table>
+      </body>
+    </html>

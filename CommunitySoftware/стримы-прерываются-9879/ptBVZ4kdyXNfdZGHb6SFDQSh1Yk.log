@@ -1,0 +1,2568 @@
+* checking system
+CYGWIN detected
+firewall type is windivert
+* checking prerequisites
+* checking DNS
+system DNS is working
+comparing system resolver to public DNS : 8.8.8.8
+pornhub.com : OK
+ntc.party : OK
+rutracker.org : OK
+www.torproject.org : OK
+bbc.com : OK
+checking resolved IP uniqueness for : pornhub.com ntc.party rutracker.org www.torproject.org bbc.com
+censor's DNS can return equal result for multiple blocked domains.
+all resolved IPs are unique
+-- DNS looks good
+-- NOTE this check is Russia targeted. In your country other domains may be blocked.
+* checking virtualization
+cannot detect
+
+NOTE ! this test should be run with zapret or any other bypass software disabled, without VPN
+
+specify domain(s) to test. multiple domains are space separated.
+domain(s) (default: rutracker.org) : ip protocol version(s) - 4, 6 or 46 for both (default: 4) : 
+check http (default : Y) (Y/N) ? 
+check https tls 1.2 (default : Y) (Y/N) ? 
+TLS 1.3 uses encrypted ServerHello. DPI cannot check domain name in server response.
+This can allow more bypass strategies to work.
+What works for TLS 1.2 will also work for TLS 1.3 but not vice versa.
+Most sites nowadays support TLS 1.3 but not all. If you can't find a strategy for TLS 1.2 use this test.
+TLS 1.3 only strategy is better than nothing.
+check https tls 1.3 (default : N) (Y/N) ? 
+make sure target domain(s) support QUIC or result will be negative in any case
+check http3 QUIC (default : Y) (Y/N) ? 
+on limited systems like openwrt CA certificates might not be installed to preserve space
+in such a case curl cannot verify server certificate and you should either install ca-bundle or disable verification
+however disabling verification will break https check if ISP does MitM attack and substitutes server certificate
+do not verify server certificate (default : N) (Y/N) ? 
+sometimes ISPs use multiple DPIs or load balancing. bypass strategies may work unstable.
+how many times to repeat each test (default: 1) : 
+quick - scan as fast as possible to reveal any working strategy
+standard - do investigation what works on your DPI
+force - scan maximum despite of result
+1 : quick
+2 : standard
+3 : force
+your choice (default : standard) : selected : standard
+
+
+* port block tests ipv4 rr2---sn-pivhx-n8vd.googlevideo.com:80
+nc -z -w 2 85.112.117.141 80
+Connection to 85.112.117.141 80 port [tcp/http] succeeded!
+85.112.117.141 connects
+
+* curl_test_http ipv4 rr2---sn-pivhx-n8vd.googlevideo.com
+- checking without DPI bypass
+!!!!! AVAILABLE !!!!!
+
+* port block tests ipv4 rr2---sn-pivhx-n8vd.googlevideo.com:443
+nc -z -w 2 85.112.117.141 443
+Connection to 85.112.117.141 443 port [tcp/https] succeeded!
+85.112.117.141 connects
+
+* curl_test_https_tls12 ipv4 rr2---sn-pivhx-n8vd.googlevideo.com
+- checking without DPI bypass
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+
+- IP block tests (requires manual interpretation)
+> testing iana.org on it's original ip
+!!!!! AVAILABLE !!!!!
+> testing rr2---sn-pivhx-n8vd.googlevideo.com on 192.0.43.8 (iana.org)
+curl: (28) Connection timed out after 2003 milliseconds
+> testing iana.org on 85.112.117.141 (rr2---sn-pivhx-n8vd.googlevideo.com)
+curl: (28) Connection timed out after 2012 milliseconds
+
+preparing winws redirection
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-tls=sni
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-tls=sniext
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=3
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=4
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=5
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=10
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-pos=50
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=3
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=4
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=4 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=5
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=5 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=7
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=7 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=8
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=8 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=9
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=9 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=10
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=10 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=11
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=11 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=12
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=12 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badseq
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badseq --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=md5sig
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=3
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=4
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=5
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=5 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=7
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=7 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=8
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=8 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=9
+curl: (28) Operation timed out after 2013 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=9 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=10
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=10 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=11
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=11 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=12
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=12 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badsum --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badseq
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=datanoack
+curl: (28) Operation timed out after 2003 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=md5sig
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=3
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=3 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=4
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=4 --dpi-desync-fake-tls=0x00000000
+curl: (28) Operation timed out after 2003 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=4 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badseq
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badseq --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badseq --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=md5sig
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=3
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=4
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=5
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=5 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=6
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=7
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=7 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=8
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=8 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=9
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=9 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=10
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=10 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=11
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=11 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=12
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=12 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badsum --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badseq
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badseq --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=md5sig
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=4
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=4 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=4 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=5
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=5 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=5 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=5 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=6
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=7
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=7 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=7 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=7 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=8
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=8 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=8 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=8 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=9
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=9 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=9 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=9 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=10
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=10 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=10 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=10 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=11
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=11 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=11 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=11 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=12
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=12 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=12 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=12 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=3
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=3 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=4
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=4 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=4 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=5
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=5 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=5 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=5 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=7
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=7 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=7 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=7 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=8
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=8 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=8 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=8 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=9
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=9 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=9 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=9 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=10
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=10 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=10 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=10 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=11
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=11 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=11 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=11 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=12
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=12 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=12 --dpi-desync-fake-tls=0x00000000
+curl: (35) OpenSSL/3.3.1: error:0A00042E:SSL routines::tlsv1 alert protocol version
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=12 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq
+curl: (28) Connection timed out after 2017 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=md5sig
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=336 --dpi-desync-split-seqovl-pattern=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2017 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (28) Operation timed out after 2000 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Operation timed out after 2010 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000
+curl: (28) Operation timed out after 2014 milliseconds with 0 bytes received
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2017 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata --dpi-desync-fake-syndata=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --wssize 1:6
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --wssize 1:6
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2 --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=3 --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=4 --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=5 --wssize 1:6
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=6 --wssize 1:6
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=6 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=7 --wssize 1:6
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=7 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=8 --wssize 1:6
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=8 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badsum --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badseq --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=datanoack --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=md5sig --wssize 1:6
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=2 --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=3 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=4 --wssize 1:6
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badsum --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badseq --wssize 1:6
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=datanoack --wssize 1:6
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=md5sig --wssize 1:6
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=3 --wssize 1:6
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=4 --wssize 1:6
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=5 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=6 --wssize 1:6
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=6 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=6 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --wssize 1:6
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq --wssize 1:6
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --wssize 1:6
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --wssize 1:6
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --wssize 1:6
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --wssize 1:6
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2017 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --wssize 1:6
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badseq --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --wssize 1:6
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=md5sig --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+!!!!! AVAILABLE !!!!!
+WARNING ! although md5sig fooling worked it will not work on all sites. it typically works only on linux servers.
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=2 --wssize 1:6
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=3 --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=4 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=5 --wssize 1:6
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=6 --wssize 1:6
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=6 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=7 --wssize 1:6
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=7 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=8 --wssize 1:6
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=8 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=9 --wssize 1:6
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=9 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=10 --wssize 1:6
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=10 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=11 --wssize 1:6
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=11 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2017 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=12 --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=12 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badsum --wssize 1:6
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badseq --wssize 1:6
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=datanoack --wssize 1:6
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=md5sig --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --wssize 1:6
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2 --wssize 1:6
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3 --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=4 --wssize 1:6
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=5 --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=6 --wssize 1:6
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=6 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=6 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=6 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=7 --wssize 1:6
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=7 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=7 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=7 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=8 --wssize 1:6
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=8 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=8 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=8 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=9 --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=9 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=9 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=9 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=10 --wssize 1:6
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=10 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=10 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=10 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=11 --wssize 1:6
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=11 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=11 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=11 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=12 --wssize 1:6
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=12 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=12 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=12 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --wssize 1:6
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq --wssize 1:6
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2050 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2 --wssize 1:6
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=3 --wssize 1:6
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=4 --wssize 1:6
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=5 --wssize 1:6
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=6 --wssize 1:6
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=6 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=6 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=6 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=7 --wssize 1:6
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=7 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=7 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=7 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=8 --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=8 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=8 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=8 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=9 --wssize 1:6
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=9 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=9 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=9 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=10 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=10 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=10 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=10 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=11 --wssize 1:6
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=11 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=11 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=11 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=12 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=12 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=12 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (35) Recv failure: Connection reset by peer
+UNAVAILABLE code=35
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=12 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badsum --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=badseq --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=datanoack --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=md5sig --wssize 1:6
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-fooling=md5sig --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --wssize 1:6
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2 --wssize 1:6
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3 --wssize 1:6
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50 --wssize 1:6
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=336 --dpi-desync-split-seqovl-pattern=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2 --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4 --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=4 --dpi-desync-split-pos=5 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=9 --dpi-desync-split-pos=10 --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50 --wssize 1:6
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+WARNING ! although autottl worked it requires testing on multiple domains to find out reliable delta
+WARNING ! if a reliable delta cannot be found it's a good idea not to use autottl
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,split --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2013 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6
+curl: (28) Connection timed out after 2011 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=1 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2014 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=2 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6
+curl: (28) Connection timed out after 2012 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=3 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=4 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000
+curl: (28) Connection timed out after 2006 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder --dpi-desync-ttl=1 --dpi-desync-autottl=5 --wssize 1:6 --dpi-desync-fake-tls=0x00000000 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2010 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata --wssize 1:6
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata --dpi-desync-fake-syndata=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --wssize 1:6
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2 --wssize 1:6
+!!!!! AVAILABLE !!!!!
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --wssize 1:6
+curl: (28) Connection timed out after 2001 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,split2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --wssize 1:6
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --wssize 1:6
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --dpi-desync-fake-syndata=/cygdrive/c/zapret-win-bundle-master/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --wssize 1:6 --dpi-desync-split-pos=1
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+
+!!!!! curl_test_https_tls12: working strategy found for ipv4 rr2---sn-pivhx-n8vd.googlevideo.com : winws --dpi-desync=split --dpi-desync-fooling=badseq !!!!!
+
+clearing winws redirection
+
+* curl_test_http3 ipv4 rr2---sn-pivhx-n8vd.googlevideo.com
+- checking without DPI bypass
+curl: (28) Connection timed out after 2015 milliseconds
+UNAVAILABLE code=28
+
+preparing winws redirection
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=fake
+curl: (28) Connection timed out after 2009 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=fake --dpi-desync-repeats=2
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=fake --dpi-desync-repeats=5
+curl: (28) Connection timed out after 2003 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=fake --dpi-desync-repeats=10
+curl: (28) Connection timed out after 2007 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=fake --dpi-desync-repeats=20
+curl: (28) Connection timed out after 2005 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=8
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=16
+curl: (28) Connection timed out after 2002 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=24
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=32
+curl: (28) Connection timed out after 2004 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=40
+curl: (28) Connection timed out after 2008 milliseconds
+UNAVAILABLE code=28
+- checking winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=64
+curl: (28) Connection timed out after 2016 milliseconds
+UNAVAILABLE code=28
+
+curl_test_http3: winws strategy for ipv4 rr2---sn-pivhx-n8vd.googlevideo.com not found
+
+clearing winws redirection
+
+* SUMMARY
+ipv4 rr2---sn-pivhx-n8vd.googlevideo.com curl_test_http : working without bypass
+ipv4 rr2---sn-pivhx-n8vd.googlevideo.com curl_test_https_tls12 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split --dpi-desync-fooling=badseq
+ipv4 rr2---sn-pivhx-n8vd.googlevideo.com curl_test_http3 : winws not working
+
+Please note this SUMMARY does not guarantee a magic pill for you to copy/paste and be happy.
+Understanding how strategies work is very desirable.
+This knowledge allows to understand better which strategies to prefer and which to avoid if possible, how to combine strategies.
+Blockcheck does it's best to prioritize good strategies but it's not bullet-proof.
+It was designed not as magic pill maker but as a DPI bypass test tool.
+
+press enter to continue

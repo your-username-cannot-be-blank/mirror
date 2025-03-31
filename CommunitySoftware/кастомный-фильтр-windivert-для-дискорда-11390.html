@@ -1,0 +1,277 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>кастомный-фильтр-windivert-для-дискорда-11390</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>gepron1x(Георгий)</td><td><p>Привет. Разбираюсь с блокировкой дискорда. Почитал форум, решение есть, но как я понял есть проблема - дурение на всех высоких портах udp может сломать другие протоколы типа торрента.</p>
+<p>По словам <span class="mention">@bol-van</span> войс блочат именно по STUN.</p>
+<p>Решаюсь написать кастомный фильтр для WinDivert:</p><aside class="onebox githubblob" data-onebox-src="https://github.com/bol-van/zapret/blob/2cd6db3ba5ac2fa1494bed1c1903bc3531c76bc5/docs/windows.txt#L57">
+  <header class="source">
+
+      <a href="https://github.com/bol-van/zapret/blob/2cd6db3ba5ac2fa1494bed1c1903bc3531c76bc5/docs/windows.txt#L57" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/bol-van/zapret/blob/2cd6db3ba5ac2fa1494bed1c1903bc3531c76bc5/docs/windows.txt#L57" target="_blank" rel="noopener nofollow ugc">bol-van/zapret/blob/2cd6db3ba5ac2fa1494bed1c1903bc3531c76bc5/docs/windows.txt#L57</a></h4>
+
+
+
+    <pre class="onebox"><code class="lang-txt">
+      <ol class="start lines" start="47" style="counter-reset: li-counter 46 ;">
+          <li></li>
+          <li>Задача iptables в winws решается внутренними средствами через фильтры windivert.</li>
+          <li>У windivert существует собственный язык фильтров, похожий на язык фильтров wireshark.</li>
+          <li>Документация по фильтрам windivert : https://reqrypt.org/windivert-doc.html#filter_language</li>
+          <li>Чтобы не писать сложные фильтры вручную, предусмотрены различные упрощенные варианты автоматического построения фильтров.</li>
+          <li></li>
+          <li> --wf-iface=&lt;int&gt;[.&lt;int&gt;]		; числовые индексы интерфейса и суб-интерфейса</li>
+          <li> --wf-l3=ipv4|ipv6			; фильтр L3 протоколов. по умолчанию включены ipv4 и ipv6.</li>
+          <li> --wf-tcp=[~]port1[-port2]		; фильтр портов для tcp. ~ означает отрицание</li>
+          <li> --wf-udp=[~]port1[-port2]		; фильтр портов для udp. ~ означает отрицание</li>
+          <li class="selected"> --wf-raw=&lt;filter&gt;|@&lt;filename&gt;		; задать напрямую фильтр windivert из параметра или из файла. имени файла предшествует символ @.</li>
+          <li> --wf-save=&lt;filename&gt;			; сохранить сконструированный фильтр windivert в файл для последующей правки вручную</li>
+          <li> --ssid-filter=ssid1[,ssid2,ssid3,...]  ; включать winws только когда подключена любая из указанных wifi сетей</li>
+          <li> --nlm-filter=net1[,net2,net3,...]	; включать winws только когда подключена любая из указанных сетей NLM</li>
+          <li> --nlm-list[=all]			; вывести список сетей NLM. по умолчанию только подключенных, all - всех.</li>
+          <li>Параметры --wf-l3, --wf-tcp, --wf-udp могут брать несколько значений через запятую.</li>
+          <li></li>
+          <li>Номера интерфейсов можно узнать так : netsh int ip show int.</li>
+          <li>Некоторых типы соединений там не увидеть. В этом случае запускайте winws с параметром --debug и смотрите IfIdx там.</li>
+          <li>SubInterface используется windivert, но практически всегда 0, его можно не указывать. Вероятно он нужен в редких случаях.</li>
+          <li></li>
+      </ol>
+    </code></pre>
+
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Первая попытка успешная!  Я сделал простейший фильтр на длину udp Payload, которую подсмотрел в Wireshark. Войсчат в дискорде работает.</p>
+<details>
+<summary>
+Моя конфигурация</summary>
+<p>start “zapret: http,https,quic” /min “%~dp0winws.exe” ^<br>
+–wf-raw=“(tcp and remotePort == 443) or (udp and (udp.PayloadLength == 74 or udp.PayloadLength == 20))” ^<br>
+–filter-tcp=443 --hostlist=“%~dp0list-discord.txt” --dpi-desync=disorder2 --new ^<br>
+–filter-udp=50000-65535 --dpi-desync=fake --dpi-desync-cutoff=d4 --dpi-desync-repeats=6 --dpi-desync-any-protocol</p>
+</details>
+<p>Прошу вашего экспертного мнения. Думаю, нужен фильтр по заголовку, ибо на длину полагаться некрасиво.</p></td><td>2024-10-09T23:39:33.409Z</td></tr><tr><td>Decavoid(Decavoid)</td><td><p><code>--dpi-desync-cutoff=d4 --dpi-desync-repeats=6</code><br>
+Эти ключи необходимы? Что если их убрать?</p></td><td>2024-10-10T00:11:51.479Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="Decavoid" data-post="2" data-topic="11390">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/decavoid/48/8949_2.png" class="avatar"> Decavoid:</div>
+<blockquote>
+<p>Эти ключи необходимы? Что если их убрать?</p>
+</blockquote>
+</aside>
+<p>repeats не знаю, а без cutoff будет беда, усиленная кратно через  repeats</p></td><td>2024-10-10T05:27:59.567Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="gepron1x" data-post="1" data-topic="11390">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/gepron1x/48/5578_2.png" class="avatar"> gepron1x:</div>
+<blockquote>
+<p>wf-raw=“(tcp and remotePort == 443) or (udp and (udp.PayloadLength == 74 or udp.PayloadLength == 20))” ^</p>
+</blockquote>
+</aside>
+<p>я бы рекомендовал сохранить стандартный фильтр через  --wf-save<br>
+там есть ряд важных ограничителей<br>
+и над ним уже издеваться</p>
+<p>а дальше стоит вписать  ограничитель на подсети дисккорда. они проскакивали в обсуждениях дискорда удп на гитхабе<br>
+подсети стоит обьединить, чтобы не писать кучу /24</p>
+<p>я не исследовал блокировку дискорда<br>
+вывод о стуне был сделан на базе постов в обсуждениях. может еще что-то есть</p>
+<p>в течение 2 недель собираюсь выкатить юзер моде реализацию ипсетов<br>
+но когда подсетей мало лучше использовать wf-raw</p></td><td>2024-10-10T05:34:06.976Z</td></tr><tr><td>SsSAtonioSsS(Antonio)</td><td><p>Можно ли определить конкретный пакет по его началу?<br>
+Конкретно пакеты auth в discord:</p>
+<pre><code class="lang-auto">0000   xx xx xx xx xx xx 2c f0 5d a3 58 ee 08 00 45 00
+0010   00 66 d1 4d 00 00 80 11 5a 70 c0 a8 32 32 22 00
+0020   f9 ee e5 0c c3 58 00 52 6d fc 00 01 00 46 00 00
+0030   e4 df 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+0040   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+0050   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+0060   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+0070   00 00 f4 f7
+
+0000   xx xx xx xx xx xx 2c f0 5d a3 58 ee 08 00 45 00
+0010   00 66 d1 4e 00 00 80 11 5a 6f c0 a8 32 32 22 00
+0020   f9 ee e5 0d c3 58 00 52 bf d4 00 01 00 46 00 00
+0030   e4 df 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+0040   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+0050   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+0060   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+0070   00 00 a3 1e
+
+</code></pre>
+<p>У пакетов общие 5 байт в начале payload и 2 байта в конце.</p>
+<p>Можно ли указать это для нахождения нужного пакета?<br>
+Первые 4-5 байт данных не изменяются.<br>
+–wf-raw=“udp.Payload[0:3]==0x00010046”<br>
+При указании ничего не работает…</p></td><td>2024-10-10T14:18:09.533Z</td></tr><tr><td>partyhard</td><td><aside class="quote no-group" data-username="SsSAtonioSsS" data-post="5" data-topic="11390">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/sssatoniosss/48/12293_2.png" class="avatar"> SsSAtonioSsS:</div>
+<blockquote>
+<p>–wf-raw=“udp.Payload[0:3]==0x00010046”</p>
+</blockquote>
+</aside>
+<p>Во-первых, udp.Payload[i] работает с байтами. Для работы с 32-разрядными словами (4 байта) используйте udp.Payload32[i].<br>
+Во-вторых, я не уверен, что i можно указывать как диапазон. Цитата из доков:</p>
+<blockquote>
+<p>The <code>packet*[i]</code>, <code>tcp.Payload*[i]</code> and <code>udp.Payload*[i]</code> fields take an <em>index</em> parameter (<code>i</code>). The following indexing schemes are supported:</p>
+<ul>
+<li><em>Undecorated integer</em> (e.g., <code>packet32[10]</code>): evaluates to the <code>i</code> th word from the start of the packet/payload. This is essentially C-style array indexing;</li>
+<li><em>Negative decorated integer</em> (e.g., <code>packet32[-10]</code>): evaluates to the <code>i</code> th word from the <strong>end</strong> of the packet/payload. Here the index (<code>-1</code>) is the first full word that fits; and</li>
+<li><em>Byte decorated (negative) integer</em> (e.g., <code>packet32[10b]</code> or <code>packet32[-10b]</code>): evaluated to the word offset by <code>i</code> bytes from the start (or end) of the packet/payload.</li>
+</ul>
+</blockquote></td><td>2024-10-10T14:45:06.341Z</td></tr><tr><td>bolvan</td><td><p>Рабочий пример из winws для детекта входящего HTTP redirect</p>
+<pre><code class="lang-auto">// HTTP/1.? 30(2|7)
+
+tcp.PayloadLength&gt;=12 and tcp.Payload32[0]==0x48545450 and tcp.Payload16[2]==0x2F31 and tcp.Payload[6]==0x2E and tcp.Payload16[4]==0x2033 and tcp.Payload[10]==0x30 and (tcp.Payload[11]==0x32 or tcp.Payload[11]==0x37)
+</code></pre>
+<p>байты идут в network byte order. То есть big endian.</p></td><td>2024-10-10T16:03:31.104Z</td></tr><tr><td>gepron1x(Георгий)</td><td><p>Написал фильтр на основе wf-save, со всеми <a href="https://ntc.party/t/zapret-whats-new/61/157">подсетями дискорда</a>.<br>
+Да простит бог меня за это…</p>
+<details>
+<summary>
+rules.txt</summary>
+<p>!impostor and !loopback and<br>
+((outbound and (((tcp.DstPort == 80) or (tcp.DstPort == 443)) or ((udp.DstPort == 443) or<br>
+(udp.DstPort &gt;= 50000 and udp.DstPort &lt;= 65535 and (<br>
+(ip.DstAddr &gt;= 66.22.196.0 and ip.DstAddr &lt;= 66.22.199.255) or<br>
+(ip.DstAddr &gt;= 66.22.200.0 and ip.DstAddr &lt;= 66.22.207.255) or<br>
+(ip.DstAddr &gt;= 66.22.208.0 and ip.DstAddr &lt;= 66.22.223.255) or<br>
+(ip.DstAddr &gt;= 66.22.224.0 and ip.DstAddr &lt;= 66.22.227.255) or<br>
+(ip.DstAddr &gt;= 66.22.230.0 and ip.DstAddr &lt;= 66.22.231.255) or<br>
+(ip.DstAddr &gt;= 66.22.232.0 and ip.DstAddr &lt;= 66.22.239.255) or<br>
+(ip.DstAddr &gt;= 66.22.240.0 and ip.DstAddr &lt;= 66.22.247.255) or<br>
+(ip.DstAddr &gt;= 66.22.248.0 and ip.DstAddr &lt;= 66.22.248.255))<br>
+))) and<br>
+(((ip.DstAddr &lt; 127.0.0.1 or ip.DstAddr &gt; 127.255.255.255) and (ip.DstAddr &lt; 10.0.0.0 or ip.DstAddr &gt; 10.255.255.255) and (ip.DstAddr &lt; 192.168.0.0 or ip.DstAddr &gt; 192.168.255.255) and (ip.DstAddr &lt; 172.16.0.0 or ip.DstAddr &gt; 172.31.255.255) and (ip.DstAddr &lt; 169.254.0.0 or ip.DstAddr &gt; 169.254.255.255)) or ((ipv6.DstAddr &gt; ::1) and (ipv6.DstAddr &lt; 2001::0 or ipv6.DstAddr &gt;= 2001:1::0) and (ipv6.DstAddr &lt; fc00::0 or ipv6.DstAddr &gt;= fe00::0) and (ipv6.DstAddr &lt; fe80::0 or ipv6.DstAddr &gt;= fec0::0) and (ipv6.DstAddr &lt; ff00::0 or ipv6.DstAddr &gt;= ffff::0))))<br>
+or<br>
+(inbound and tcp and (tcp.Ack and tcp.Syn or tcp.Rst or tcp.Fin) and ((tcp.SrcPort == 80) or (tcp.SrcPort == 443)) and (((ip.SrcAddr &lt; 127.0.0.1 or ip.SrcAddr &gt; 127.255.255.255) and (ip.SrcAddr &lt; 10.0.0.0 or ip.SrcAddr &gt; 10.255.255.255) and (ip.SrcAddr &lt; 192.168.0.0 or ip.SrcAddr &gt; 192.168.255.255) and (ip.SrcAddr &lt; 172.16.0.0 or ip.SrcAddr &gt; 172.31.255.255) and (ip.SrcAddr &lt; 169.254.0.0 or ip.SrcAddr &gt; 169.254.255.255)) or ((ipv6.SrcAddr &gt; ::1) and (ipv6.SrcAddr &lt; 2001::0 or ipv6.SrcAddr &gt;= 2001:1::0) and (ipv6.SrcAddr &lt; fc00::0 or ipv6.SrcAddr &gt;= fe00::0) and (ipv6.SrcAddr &lt; fe80::0 or ipv6.SrcAddr &gt;= fec0::0) and (ipv6.SrcAddr &lt; ff00::0 or ipv6.SrcAddr &gt;= ffff::0)))))</p>
+</details></td><td>2024-10-10T20:14:09.038Z</td></tr><tr><td>Jabronskiy</td><td><p>Проверил по-быстрому с этим конфигом</p>
+<details>
+<summary>
+cmd</summary>
+<p>start “zapret: discord” /min “%~dp0winws.exe” ^<br>
+–wf-raw=@testwf.txt ^<br>
+–filter-tcp=443 --hostlist=“%~dp0list-youtube.txt” --hostlist=“%~dp0list-blacklist.txt” --hostlist=“%~dp0list-discord.txt” --dpi-desync=split --dpi-desync-split-pos=1 --dpi-desync-fooling=badseq --dpi-desync-repeats=7 --new ^<br>
+–filter-udp=50000-65535 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d4 --dpi-desync-repeats=6</p>
+</details>
+<p>Коннектит ко всем серверам, кроме Бразилии, Гонконга, Индии, иногда Японии и юга США, Сингапура и Австралии. Но! Один раз даже к Роттердаму не подключился, но перезаход помог. Возможно зависит от настроек, но нужны ли эти сервера?</p></td><td>2024-10-10T21:06:12.119Z</td></tr><tr><td>gepron1x(Георгий)</td><td><p>Полагаю, что тот список подсетей включал только российские сервера. Сделал фильтр по заголовку пакета, попробуй его:</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>!impostor and !loopback and<br>
+((outbound and (((tcp.DstPort == 80) or (tcp.DstPort == 443)) or ((udp.DstPort == 443) or<br>
+(udp.DstPort &gt;= 50000 and udp.DstPort &lt;= 65535 and udp.PayloadLength == 74 and udp.Payload32[0] == 0x00010046<br>
+))) and<br>
+(((ip.DstAddr &lt; 127.0.0.1 or ip.DstAddr &gt; 127.255.255.255) and (ip.DstAddr &lt; 10.0.0.0 or ip.DstAddr &gt; 10.255.255.255) and (ip.DstAddr &lt; 192.168.0.0 or ip.DstAddr &gt; 192.168.255.255) and (ip.DstAddr &lt; 172.16.0.0 or ip.DstAddr &gt; 172.31.255.255) and (ip.DstAddr &lt; 169.254.0.0 or ip.DstAddr &gt; 169.254.255.255)) or ((ipv6.DstAddr &gt; ::1) and (ipv6.DstAddr &lt; 2001::0 or ipv6.DstAddr &gt;= 2001:1::0) and (ipv6.DstAddr &lt; fc00::0 or ipv6.DstAddr &gt;= fe00::0) and (ipv6.DstAddr &lt; fe80::0 or ipv6.DstAddr &gt;= fec0::0) and (ipv6.DstAddr &lt; ff00::0 or ipv6.DstAddr &gt;= ffff::0))))<br>
+or<br>
+(inbound and tcp and (tcp.Ack and tcp.Syn or tcp.Rst or tcp.Fin) and ((tcp.SrcPort == 80) or (tcp.SrcPort == 443)) and (((ip.SrcAddr &lt; 127.0.0.1 or ip.SrcAddr &gt; 127.255.255.255) and (ip.SrcAddr &lt; 10.0.0.0 or ip.SrcAddr &gt; 10.255.255.255) and (ip.SrcAddr &lt; 192.168.0.0 or ip.SrcAddr &gt; 192.168.255.255) and (ip.SrcAddr &lt; 172.16.0.0 or ip.SrcAddr &gt; 172.31.255.255) and (ip.SrcAddr &lt; 169.254.0.0 or ip.SrcAddr &gt; 169.254.255.255)) or ((ipv6.SrcAddr &gt; ::1) and (ipv6.SrcAddr &lt; 2001::0 or ipv6.SrcAddr &gt;= 2001:1::0) and (ipv6.SrcAddr &lt; fc00::0 or ipv6.SrcAddr &gt;= fe00::0) and (ipv6.SrcAddr &lt; fe80::0 or ipv6.SrcAddr &gt;= fec0::0) and (ipv6.SrcAddr &lt; ff00::0 or ipv6.SrcAddr &gt;= ffff::0)))))</p>
+</details></td><td>2024-10-10T21:21:30.224Z</td></tr><tr><td>gepron1x(Георгий)</td><td><p>Он, конечно потенциально может сработать на пакеты с пейлодом 74 байта, заголовок которых начинается на 0x00010046, но я думаю что это маловероятно.<br>
+<a href="https://fossies.org/linux/misc/nDPI-4.10.tar.gz/nDPI-4.10/src/lib/protocols/discord.c?M=26" class="onebox" target="_blank" rel="noopener nofollow ugc">https://fossies.org/linux/misc/nDPI-4.10.tar.gz/nDPI-4.10/src/lib/protocols/discord.c?M=26</a><br>
+Нашел такой же метод в этом коде.</p>
+<p>UPD Закинул все мои пресеты на форк github <a href="https://github.com/gepron1x/zapret-win-bundle" class="inline-onebox" rel="noopener nofollow ugc">GitHub - gepron1x/zapret-win-bundle: zapret and blockcheck binary bundle for windows (discord presets)</a><br>
+preset_discord и preset_full соответственно <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-10-10T21:24:32.466Z</td></tr><tr><td>Jabronskiy</td><td><aside class="quote no-group" data-username="gepron1x" data-post="10" data-topic="11390">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/gepron1x/48/5578_2.png" class="avatar"> gepron1x:</div>
+<blockquote>
+<p>Полагаю, что тот список подсетей включал только российские сервера. Сделал фильтр по заголовку пакета, попробуй его</p>
+</blockquote>
+</aside>
+<p>Как я понял это список подсетей серверов от провайдера <a href="http://i3D.net" rel="noopener nofollow ugc">i3D.net</a> B.V, но есть еще от Гугла(были еще от Psychz Networks, но, кажись, от них отказались). Собственно поэтому на ту же Японию, юг США и Роттердам коннектит с переменным успехом, так как они поделены между провайдерами и тут как повезёт куда тебя кинет. Финский сервак, к которому походу только при автоматической подборке сервера кидает, например, вообще весь от Гугла.</p>
+<p>Я может попозже попробую дополнить фильтр остальными айпишниками, но пока второй вариант работает.</p></td><td>2024-10-11T10:52:45.238Z</td></tr><tr><td>Jabronskiy</td><td><p>Ну вот что-то такое вышло. В этих диапазонах явно не только дискорд, но работают все сервера из списка за исключением Африки и, возможно, юга США, которые с переменным успехом работают. Финский тоже работает, на треть работает Франкфуртовский, но к нему вряд ли коннектить будет, так как к финскому пинг меньше(причем даже до Московского больше).<br>
+Но честно сказать не знаю кому нужны какие-то сервера кроме Московского, Роттердамского и финского/Стокгольмского. Наверное можно объединить с фильтром по заголовку и так меньше всего флуда будет?</p>
+<details>
+<summary>
+filter.txt</summary>
+<p>!impostor and !loopback and<br>
+((outbound and (((tcp.DstPort == 80) or (tcp.DstPort == 443)) or ((udp.DstPort == 443) or<br>
+(udp.DstPort &gt;= 50000 and udp.DstPort &lt;= 65535 and (<br>
+(ip.DstAddr &gt;= 66.22.196.0 and ip.DstAddr &lt;= 66.22.199.255) or<br>
+(ip.DstAddr &gt;= 66.22.200.0 and ip.DstAddr &lt;= 66.22.207.255) or<br>
+(ip.DstAddr &gt;= 66.22.208.0 and ip.DstAddr &lt;= 66.22.223.255) or<br>
+(ip.DstAddr &gt;= 66.22.224.0 and ip.DstAddr &lt;= 66.22.227.255) or<br>
+(ip.DstAddr &gt;= 66.22.230.0 and ip.DstAddr &lt;= 66.22.231.255) or<br>
+(ip.DstAddr &gt;= 66.22.232.0 and ip.DstAddr &lt;= 66.22.239.255) or<br>
+(ip.DstAddr &gt;= 66.22.240.0 and ip.DstAddr &lt;= 66.22.247.255) or<br>
+(ip.DstAddr &gt;= 66.22.248.0 and ip.DstAddr &lt;= 66.22.248.255) or<br>
+(ip.DstAddr &gt;= 35.215.192.0 and ip.DstAddr &lt;= 35.215.255.255) or<br>
+(ip.DstAddr &gt;= 35.215.128.0 and ip.DstAddr &lt;= 35.215.191.255) or<br>
+(ip.DstAddr &gt;= 35.207.192.0 and ip.DstAddr &lt;= 35.207.255.255) or<br>
+(ip.DstAddr &gt;= 35.213.0.0 and ip.DstAddr &lt;= 35.213.127.255) or<br>
+(ip.DstAddr &gt;= 35.214.128.0 and ip.DstAddr &lt;= 35.214.255.255) or<br>
+(ip.DstAddr &gt;= 34.0.240.0 and ip.DstAddr &lt;= 34.0.255.255) or<br>
+(ip.DstAddr &gt;= 35.213.128.0 and ip.DstAddr &lt;= 35.213.191.255) or<br>
+(ip.DstAddr &gt;= 35.213.192.0 and ip.DstAddr &lt;= 35.213.255.255) or<br>
+(ip.DstAddr &gt;= 35.217.0.0 and ip.DstAddr &lt;= 35.217.63.255))	<br>
+))) and<br>
+(((ip.DstAddr &lt; 127.0.0.1 or ip.DstAddr &gt; 127.255.255.255) and (ip.DstAddr &lt; 10.0.0.0 or ip.DstAddr &gt; 10.255.255.255) and (ip.DstAddr &lt; 192.168.0.0 or ip.DstAddr &gt; 192.168.255.255) and (ip.DstAddr &lt; 172.16.0.0 or ip.DstAddr &gt; 172.31.255.255) and (ip.DstAddr &lt; 169.254.0.0 or ip.DstAddr &gt; 169.254.255.255)) or ((ipv6.DstAddr &gt; ::1) and (ipv6.DstAddr &lt; 2001::0 or ipv6.DstAddr &gt;= 2001:1::0) and (ipv6.DstAddr &lt; fc00::0 or ipv6.DstAddr &gt;= fe00::0) and (ipv6.DstAddr &lt; fe80::0 or ipv6.DstAddr &gt;= fec0::0) and (ipv6.DstAddr &lt; ff00::0 or ipv6.DstAddr &gt;= ffff::0))))<br>
+or<br>
+(inbound and tcp and (tcp.Ack and tcp.Syn or tcp.Rst or tcp.Fin) and ((tcp.SrcPort == 80) or (tcp.SrcPort == 443)) and (((ip.SrcAddr &lt; 127.0.0.1 or ip.SrcAddr &gt; 127.255.255.255) and (ip.SrcAddr &lt; 10.0.0.0 or ip.SrcAddr &gt; 10.255.255.255) and (ip.SrcAddr &lt; 192.168.0.0 or ip.SrcAddr &gt; 192.168.255.255) and (ip.SrcAddr &lt; 172.16.0.0 or ip.SrcAddr &gt; 172.31.255.255) and (ip.SrcAddr &lt; 169.254.0.0 or ip.SrcAddr &gt; 169.254.255.255)) or ((ipv6.SrcAddr &gt; ::1) and (ipv6.SrcAddr &lt; 2001::0 or ipv6.SrcAddr &gt;= 2001:1::0) and (ipv6.SrcAddr &lt; fc00::0 or ipv6.SrcAddr &gt;= fe00::0) and (ipv6.SrcAddr &lt; fe80::0 or ipv6.SrcAddr &gt;= fec0::0) and (ipv6.SrcAddr &lt; ff00::0 or ipv6.SrcAddr &gt;= ffff::0)))))</p>
+</details>
+<p>Инфу брал <a href="https://gist.github.com/VIPO777/92ef25eb1ef02cf5c48fbebd11b1f27b" rel="noopener nofollow ugc">отсюда</a>, <a href="https://github.com/iamkuper/amnezia-discord-config/tree/main/configs" rel="noopener nofollow ugc">отсюда</a> и <a href="https://gist.githubusercontent.com/AndyIsHereBoi/bf57d7fa1661c82b4a7f5987e56420bf/raw/7ef7bc308d36bcd1ad5aff42de6c43c838873563/as%2520of%25209-2-2024" rel="noopener nofollow ugc">тут</a> еще сверялся.</p></td><td>2024-10-12T10:52:42.305Z</td></tr><tr><td>bolvan</td><td><p>Прекрасно, очень хорошо сделано. Для этого и задумывались --wf-save и --wf-raw.<br>
+Жаль, что нет ipset-ов в windivert.</p>
+<p>Но еще стоит помнить, что базовый фильтр немного изменяется при включении autohostlist режима.<br>
+Если вдруг понадобится автолист, там нужен перехват RST и http redirect.</p></td><td>2024-10-12T11:00:55.195Z</td></tr><tr><td>gepron1x(Георгий)</td><td><p>Решение рабочее, но, боюсь, флуд в сети все равно будет во время разговоров и трансляций в дс. Обойти блокировку достаточно в момент подключения, блочат именно тот первый пакет с длиной 74, дальше войс нормально работает</p></td><td>2024-10-12T15:28:29.259Z</td></tr><tr><td>Hint</td><td><p>Что нужно сделать с этим первым пакетом, чтобы его пропустило? Написал клиентскую dll для Discord для перенаправления tcp трафика на socks5/https (просто кидаю dll в папку с программой и всё работает за исключением звонков), а с проксированием udp стало лень возиться (половину кода написал, но потом плюнул и решил для звонков использовать VPN). Если можно как-то отредактировать какой-то пакет, чтобы дальше всё работало, то сделать это легко на уровне процесса.</p></td><td>2024-10-12T18:15:12.124Z</td></tr><tr><td>Hint</td><td><p>Сделал отправку просто одного нулевого байта перед первым после bind пакетом и всё заработало, можно разговаривать голосом.</p></td><td>2024-10-12T19:12:03.422Z</td></tr><tr><td>Jabronskiy</td><td><blockquote>
+<p>Но еще стоит помнить, что базовый фильтр немного изменяется при включении autohostlist режима. Если вдруг понадобится автолист, там нужен перехват RST и http redirect.</p>
+</blockquote>
+<p>Что-то подобное в inbound? И это получается отдельный фильтр, который надо использовать только если <code>hostlist-auto</code> включен, а в ином случае лучше без него?</p>
+<details>
+<summary>
+inbound</summary>
+<p><code>(inbound and tcp and ((tcp.Ack and tcp.Syn or tcp.Rst or tcp.Fin) or (tcp.PayloadLength&gt;=12 and tcp.Payload32[0]==0x48545450 and tcp.Payload16[2]==0x2F31 and tcp.Payload[6]==0x2E and tcp.Payload16[4]==0x2033 and tcp.Payload[10]==0x30 and (tcp.Payload[11]==0x32 or tcp.Payload[11]==0x37))) and ((tcp.SrcPort == 443)) and (((ip.SrcAddr &lt; 127.0.0.1 or ip.SrcAddr &gt; 127.255.255.255) and (ip.SrcAddr &lt; 10.0.0.0 or ip.SrcAddr &gt; 10.255.255.255) and (ip.SrcAddr &lt; 192.168.0.0 or ip.SrcAddr &gt; 192.168.255.255) and (ip.SrcAddr &lt; 172.16.0.0 or ip.SrcAddr &gt; 172.31.255.255) and (ip.SrcAddr &lt; 169.254.0.0 or ip.SrcAddr &gt; 169.254.255.255)) or ((ipv6.SrcAddr &gt; ::1) and (ipv6.SrcAddr &lt; 2001::0 or ipv6.SrcAddr &gt;= 2001:1::0) and (ipv6.SrcAddr &lt; fc00::0 or ipv6.SrcAddr &gt;= fe00::0) and (ipv6.SrcAddr &lt; fe80::0 or ipv6.SrcAddr &gt;= fec0::0) and (ipv6.SrcAddr &lt; ff00::0 or ipv6.SrcAddr &gt;= ffff::0)))))</code></p>
+</details></td><td>2024-10-13T15:47:54.821Z</td></tr><tr><td>bolvan</td><td><p>Он не мешает особо, только раздувает код и вносит какой-то оверхед на процессинг фильтра в windivert.sys. Насколько он значителен судить не берусь, но в коде windivert есть начальный парсинг. На каждый пакет он текст не мучает. Уже все переведено в токенный псевдо-код.</p></td><td>2024-10-13T16:11:26.794Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="gepron1x" data-post="15" data-topic="11390">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/gepron1x/48/5578_2.png" class="avatar"> gepron1x:</div>
+<blockquote>
+<p>Решение рабочее, но, боюсь, флуд в сети все равно будет во время разговоров и трансляций в дс.</p>
+</blockquote>
+</aside>
+<p>Не будет, если cutoff сделать. у windivert нет conntrack. Там нельзя задать номер пакета в “соединении”.<br>
+Потому придется в user-mode в winws. У pktws есть свой коннтрак.<br>
+windivert фильтр отсеивает левые IP прямо в ядре. Это замена iptables фильтрам.</p></td><td>2024-10-13T16:14:33.926Z</td></tr>
+    </table>
+      </body>
+    </html>

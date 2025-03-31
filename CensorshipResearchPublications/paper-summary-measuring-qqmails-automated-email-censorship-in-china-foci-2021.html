@@ -1,0 +1,48 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-measuring-qqmails-automated-email-censorship-in-china-foci-2021</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Measuring QQMail’s automated email censorship in China<br>
+Jeffrey Knockel, Lotus Ruan<br>
+<a href="https://dl.acm.org/doi/10.1145/3473604.3474560">https://dl.acm.org/doi/10.1145/3473604.3474560</a><br>
+<a href="https://github.com/citizenlab/chat-censorship/tree/master/qqmail">https://github.com/citizenlab/chat-censorship/tree/master/qqmail</a></p>
+<p>The paper investigates automated keyword censorship done by <a href="https://mail.qq.com/">QQMail</a>, the most popular email provider in China. In common with, for example, chat platforms and online games, censorship of email messages in China is done not by the Great Firewall, but by the email provider. It happens that QQMail’s <a href="https://en.wikipedia.org/wiki/MX_record">MX servers</a> reveal whether an incoming email is censored in their <a href="https://datatracker.ietf.org/doc/html/rfc5321#section-4.2">SMTP reply</a>: a censored message results in “550 Mail content denied”, while an uncensored message results in “250 OK” (if the recipient QQMail account exists) or “500 Mailbox unavailable or access denied” (if not). To test whether an email would be censored, send it to a nonexistent QQMail address and examine the reply code. This test can be done externally and does not even require a QQMail account or control over a host in China.</p>
+<p>QQMail’s censorship system evidently works by looking for combinations of certain keywords, all of which must be present for a message to be censored. For example, the keyword 习近平 (“Xi Jinping”) alone is not censored, nor is 复辟 (“restore monarchy”), but the combination 习近平 AND 复辟 results in a blocked message. However, it is more complicated than that. For some censored keyword combinations, there are “extenuating” keyword combinations which, if also present in the message, will <em>disable</em> the censorship that would otherwise occur. For example, a message containing 习近平 and 复辟 will not be censored if it additionally contains the keyword 群发机 (“group messaging machine”). The authors looked for minimal combinations of censored keywords using the <a href="https://censorbib.nymity.ch/#Knockel2019a">component-aware binary splitting (CABS)</a> algorithm, using text sourced from Chinese-language Twitter and from keyword lists that have been discovered in past research. The existence of extenuating keywords complicates CABS: it is necessary to iterate the algorithm until it converges. Having discovered a minimal censored combination (the ANDs), the authors looked for extenuating keywords (the AND NOTs) by again running CABS, this time with inverted logic: they appended other keywords to a known-censored combination and looked for cases of <em>no</em> censorship. It is necessary to iterate the inverted algorithm (which the authors call CABSE) as well, because of possible interference by other censored keywords.</p>
+<p>The tests uncovered <a href="https://github.com/citizenlab/chat-censorship/blob/83e35064ee3fb6b3da799b927dbb6ed12b534636/qqmail/censored.txt">173 censored keyword combinations</a> and <a href="https://github.com/citizenlab/chat-censorship/blob/83e35064ee3fb6b3da799b927dbb6ed12b534636/qqmail/extenuating.csv">43 unique extenuating combinations</a>. The set of extenuating keywords is different for each censored combination—the number of extenuations per censored combination ranges from 0 to 38. In topic, the censored combinations mostly have to do with the Xinjiang region, the Chinese Communist Party, or Xi Jinping. (And notably do not cover other topics known to be censored in China, such as gambling, pornography, and malware.) The puzzling thing, though, is that the extenuating keywords—which exempt a message from censorship—are themselves things that you might expect to be censored, including phrases like 法輪功 (“<a href="https://en.wikipedia.org/wiki/Falun_Gong">Falun Gong</a>”) and 刘士辉 (“<a href="https://www.frontlinedefenders.org/en/profile/liu-shihui">Liu Shihui</a>”). The authors speculate about this counterintuitive behavior in Section 6, but find no fully satisfactory explanation. A further bit of weirdness is that QQMail does not censor incoming mail to a recipient that has previously sent mail to the sender, which is behavior more characteristic of a spam filter than a content filter.</p>
+<p>Thanks to the authors for reviewing a draft of this summary.</p></td><td>2021-11-10T16:41:24.207Z</td></tr>
+    </table>
+      </body>
+    </html>

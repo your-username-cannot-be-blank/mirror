@@ -1,0 +1,157 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>release-v1202108030-1176</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>I released v1.20210803.0 of dnstt. I changed the major version number to 1 to signify that I do not plan to break compatibility in the future.</p>
+<ul>
+<li><a href="https://www.bamsoftware.com/software/dnstt/#download">https://www.bamsoftware.com/software/dnstt/#download</a></li>
+<li><a href="https://www.bamsoftware.com/software/dnstt/dnstt-20210803.zip">dnstt-20210803.zip</a> (<a href="https://www.bamsoftware.com/software/dnstt/dnstt-20210803.zip.asc">sig</a>, <a href="https://www.bamsoftware.com/david/david.asc">key</a>)</li>
+<li><a href="https://repo.or.cz/dnstt.git/shortlog/refs/tags/v1.20210803.0">https://repo.or.cz/dnstt.git/shortlog/refs/tags/v1.20210803.0</a></li>
+<li><a href="https://repo.or.cz/dnstt.git/blob/a7a9372246e5816c9b60509e0c45800ca4455b46:/CHANGELOG">CHANGELOG</a></li>
+</ul>
+<p>The main feature of this release is some parameter tuning for a small improvement in performance in some configurations. <a href="https://www.bamsoftware.com/software/dnstt/performance.html#download-20210802">See the full post on performance.</a> I’d be grateful for any reports of performance regressions in this new version.</p>
+<p>I’m working on <a href="https://repo.or.cz/champa.git">Champa</a>, a circumvention tunnel based on AMP cache. Like dnstt, Champa uses a <a href="https://www.bamsoftware.com/papers/turbotunnel/">Turbo Tunnel</a> model, with <a href="https://github.com/net4people/bbs/issues/14">KCP and smux</a> as an inner session layer. While working on Champa, I discovered that adjusting some buffer and window sizes could greatly improve download performance. <a href="https://lists.torproject.org/pipermail/anti-censorship-team/2021-July/000178.html">I suggested that the same idea might help Snowflake</a>, and I spent some time experimenting to see if it could help dnstt as well.</p>
+<p>In summary, I was able to improve download speeds, but only in some configurations, and only a little bit. I was encouraged in initial tests with plaintext UDP and without a recursive resolver, which I was able to make go quite fast, even <a href="https://repo.or.cz/dnstt.git/patch/de15c5a51291cae19dfad26149f00b2b836edfb3">over 1 MB/s</a>. But this is a configuration we don’t care about, because it’s not covert. In a recommended configuration with a recursive resolver and an encrypted transport, I was really only able to speed up Cloudflare/DoT, by about 25%. Quad9/DoT was also sped up, but it was very slow to begin with.</p>
+<p>I started by re-running the experiment with <a href="https://repo.or.cz/dnstt.git/shortlog/refs/tags/v0.20200430.0">v0.20200430.0</a>, the version used in <a href="https://www.bamsoftware.com/software/dnstt/performance.html#download-20200430">the previous round of performance tests</a>, in order to have a fresh basis of comparison. Since then, the Comcast/DoT server ceased operation, and Cloudflare/UDP went from one of the fastest configurations to the slowest. I repeated the tests with the new <a href="https://repo.or.cz/dnstt.git/shortlog/refs/tags/v1.20210803.0">v1.20210803.0</a>, which has the performance tweaks.</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>resolver</th>
+<th>transport</th>
+<th style="text-align:right">v0.20200430.0</th>
+<th style="text-align:right">v1.20210803.0</th>
+<th style="text-align:right">change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>none</td>
+<td>UDP</td>
+<td style="text-align:right">186.0 KB/s</td>
+<td style="text-align:right">332.5 KB/s</td>
+<td style="text-align:right">+78.7%</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>DoH</td>
+<td style="text-align:right">132.7 KB/s</td>
+<td style="text-align:right">134.6 KB/s</td>
+<td style="text-align:right">+1.4%</td>
+</tr>
+<tr>
+<td>Cloudflare</td>
+<td>DoT</td>
+<td style="text-align:right">88.9 KB/s</td>
+<td style="text-align:right">112.8 KB/s</td>
+<td style="text-align:right">+26.9%</td>
+</tr>
+<tr>
+<td>Cloudflare</td>
+<td>DoH</td>
+<td style="text-align:right">98.2 KB/s</td>
+<td style="text-align:right">97.4 KB/s</td>
+<td style="text-align:right">−0.7%</td>
+</tr>
+<tr>
+<td>Comcast</td>
+<td>DoH</td>
+<td style="text-align:right">75.2 KB/s</td>
+<td style="text-align:right">72.7 KB/s</td>
+<td style="text-align:right">−3.3%</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>UDP</td>
+<td style="text-align:right">57.7 KB/s</td>
+<td style="text-align:right">70.4 KB/s</td>
+<td style="text-align:right">+22.0%</td>
+</tr>
+<tr>
+<td>PowerDNS</td>
+<td>DoH</td>
+<td style="text-align:right">35.6 KB/s</td>
+<td style="text-align:right">34.9 KB/s</td>
+<td style="text-align:right">−2.2%</td>
+</tr>
+<tr>
+<td>Quad9</td>
+<td>DoH</td>
+<td style="text-align:right">20.7 KB/s</td>
+<td style="text-align:right">31.0 KB/s</td>
+<td style="text-align:right">+49.4%</td>
+</tr>
+<tr>
+<td>Quad9</td>
+<td>UDP</td>
+<td style="text-align:right">47.5 KB/s</td>
+<td style="text-align:right">22.2 KB/s</td>
+<td style="text-align:right">−53.3%</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>DoT</td>
+<td style="text-align:right">44.2 KB/s</td>
+<td style="text-align:right">14.4 KB/s</td>
+<td style="text-align:right">−67.5%</td>
+</tr>
+<tr>
+<td>Quad9</td>
+<td>DoT</td>
+<td style="text-align:right">0.9 KB/s</td>
+<td style="text-align:right">1.6 KB/s</td>
+<td style="text-align:right">+86.2%</td>
+</tr>
+<tr>
+<td>Cloudflare</td>
+<td>UDP</td>
+<td style="text-align:right">0.9 KB/s</td>
+<td style="text-align:right">0.8 KB/s</td>
+<td style="text-align:right">−4.6%</td>
+</tr>
+</tbody>
+</table>
+</div><p>The Google/DoT, Quad9/DoH, Quad9/UDP rows need some comment. In looking at the second-by-second download rates, we see that in 2 out of 3 trials, Google/DoT was initially going somewhat faster in the new version than in the old version, but then stalled and made no further progress. This was caused by a TCP disconnection (which itself is not unusual when using the Google DoT resolver) followed by a failure to reestablish the connection due to a name lookup error. This could be made more robust, but it does not really bear on bandwidth measurements. In the old Quad9/DoH and the new Quad9/UDP graphs, in 2 of the 3 trials there is a pattern of the download making progress, then stalling, then making progress, then stalling, and so on. I don’t know what may be causing this phenomenon, except to guess that it may be rate limiting on a subset of backend server. In both cases, the 1 trial without the stop-and-start pattern has similar performance as in the other version.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="release-v1202108030-1176/1f40cf4f07d8a01b72f54bb66326a0802f0baefc.png" data-download-href="https://ntc.party/uploads/default/1f40cf4f07d8a01b72f54bb66326a0802f0baefc" title="dnstt-tests-20210802"><img src="release-v1202108030-1176/1f40cf4f07d8a01b72f54bb66326a0802f0baefc_2_666x500.png" alt="dnstt-tests-20210802" data-base62-sha1="4stEFqHB0qNEBgkXSuiPR7YOye0" width="666" height="500" srcset="release-v1202108030-1176/1f40cf4f07d8a01b72f54bb66326a0802f0baefc_2_666x500.png, release-v1202108030-1176/1f40cf4f07d8a01b72f54bb66326a0802f0baefc_2_999x750.png 1.5x, release-v1202108030-1176/1f40cf4f07d8a01b72f54bb66326a0802f0baefc_2_1332x1000.png 2x" data-dominant-color="F8F5F5"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">dnstt-tests-20210802</span><span class="informations">1536×1152 238 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>I’ve made the test code and raw data available, so you should be able to reproduce the table and graph, or run your own experiments. You will need <a href="https://git-annex.branchable.com/">git-annex</a> to download a subset of the data files.</p>
+<pre><code class="lang-plaintext">git clone https://www.bamsoftware.com/git/dnstt-tests.git
+cd dnstt-tests/2021-08-02
+git annex get data/*/*.csv
+Rscript graphs.R
+</code></pre></td><td>2021-08-04T02:02:11.215Z</td></tr>
+    </table>
+      </body>
+    </html>

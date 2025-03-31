@@ -1,0 +1,122 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>прозрачный-прокси</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>p.diddy</td><td><p>Для обхода geo block на зарубежных сайтах как chatgpt используют dns серверы<br>
+на этих серверах https проксируется, без каких либо прозрачных прокси,<br>
+на сервере слушается 443 порт и не указан баннер сервиса<br>
+вот например иранский dns server<br>
+178.22.122.100<br>
+nslookup - chatgpt com ведет на их сервер 50.7.85.220<br>
+если у себя в файле hosts прописать chatgpt com 50.7.85.220<br>
+то сайт будет работать без каких либо настроек прокси<br>
+как так сделать что бы можно бы было на клиентской машине указать domain и ip в файле hosts<br>
+и трафик на сервере проксировался через 443 порт без программ по типу squid proxy 3proxy и т.д…<br>
+есть примеры как так настроить проксирование можно?<br>
+возможно там как то через iptables PREROUTING, dNAT на сервер внутри у которого поднят socks proxy http proxy<br>
+и плюс там еще acl листы есть, он проксирует через себя только определенные домены, остальные рвет соединение</p></td><td>2024-10-03T21:33:40.010Z</td></tr><tr><td>0ka(0ka)</td><td><p>сама прокси через sing-box</p>
+<pre><code class="lang-auto">{
+    "dns": {
+        "servers": [
+            {
+                "address": "1.1.1.1",
+                "detour": "direct",
+                "strategy": "prefer_ipv6",
+                "tag": "dns-remote"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "domain_strategy": "prefer_ipv6",
+            "listen": "0.0.0.0",
+            "listen_port": 443,
+            "sniff": true,
+            "sniff_override_destination": true,
+            "tag": "direct-proxy",
+            "type": "direct"
+        }
+    ],
+    "log": {
+        "level": "debug"
+    },
+    "outbounds": [
+        {
+            "tag": "direct",
+            "type": "direct"
+        },
+        {
+            "tag": "block",
+            "type": "block"
+        },
+        {
+            "tag": "dns-out",
+            "type": "dns"
+        }
+    ],
+    "route": {
+        "final": "block",
+        "rules": [
+            {
+                "outbound": "dns-out",
+                "protocol": "dns"
+            },
+            {
+                "domain": [
+                    "2ip.me"
+                ],
+                "outbound": "direct"
+            }
+        ]
+    }
+}
+</code></pre>
+<p>разрешен только <a href="http://2ip.me">2ip.me</a>, проверка через <code>curl -v --connect-to ::127.0.0.1 https://2ip.me</code><br>
+днс сервер можно сделать на dnsmasq</p>
+<pre><code class="lang-auto">no-resolv
+no-hosts
+server=1.1.1.1
+cache-size=10000
+interface=eth0
+
+address=/2ip.me/vps_ip
+</code></pre>
+<p>eth0 и vps_ip заменяете на свои<br>
+<a href="http://2ip.me">2ip.me</a> будет заменен на ip адрес vps</p>
+<p>это НЕ будет работать на сайтах которые заблокированы ркном</p></td><td>2024-10-05T20:16:09.628Z</td></tr>
+    </table>
+      </body>
+    </html>

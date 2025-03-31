@@ -1,0 +1,118 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>не-приходит-server-hello-через-wireguard-на-определенных-сайтах</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Elevator</td><td><p>Столкнулся с непонятной проблемой. Есть VPS и wireguard тунель до роутера. Некоторые сайты не открываются через тунель, не приходит server hello, соединения отваливается по таймауту. Если попытаться зайти с vps то все работает.</p>
+<p>curl <a href="http://protonmail.com" rel="noopener nofollow ugc">protonmail.com</a> через туннель</p>
+<pre><code class="lang-auto"> ./curl -4Iv --http2 https://protonmail.com
+*   Trying 185.70.42.12:443...
+* Connected to protonmail.com (185.70.42.12) port 443 (#0)
+* ALPN: offers http/1.1
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* TLSv1.2 (OUT), TLS handshake, Client hello (1):
+</code></pre>
+<p>curl <a href="http://protonmail.com" rel="noopener nofollow ugc">protonmail.com</a> с vps</p>
+<pre><code class="lang-auto">curl -4Iv --http2 https://protonmail.com
+*   Trying 185.70.42.12:443...
+* TCP_NODELAY set
+* Connected to protonmail.com (185.70.42.12) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*   CAfile: /etc/ssl/certs/ca-certificates.crt
+  CApath: /etc/ssl/certs
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+</code></pre>
+<p>curl <a href="http://tjournal.ru" rel="noopener nofollow ugc">tjournal.ru</a> через туннель</p>
+<pre><code class="lang-auto">curl -4Iv --http2 https://tjournal.ru
+*   Trying 51.15.103.162:443...
+* Connected to tjournal.ru (51.15.103.162) port 443 (#0)
+* ALPN: offers http/1.1
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+* TLSv1.2 (OUT), TLS handshake, Client hello (1):
+* TLSv1.2 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+</code></pre>
+<p>Проблема проявляется только на определенных сайтах! Выше лог с <a href="http://tjournal.ru" rel="noopener nofollow ugc">tjournal.ru</a> который почему-то через тунель работает нормально. Уже 2-ой день ломаю голову, не могу понять в чем причина</p></td><td>2022-04-17T07:42:37.320Z</td></tr><tr><td>Elevator</td><td><p>Нашел причину. По дефолту wireguard ставит mtu 1420 из-за чего начинают фрагментироваться пакеты. Выставил 1500 и все заработало</p></td><td>2022-04-17T10:26:18.933Z</td></tr><tr><td>ValdikSS</td><td><p>Вероятно, вы заблокировали ICMP, из-за чего у вас сломался <a href="https://en.wikipedia.org/wiki/Path_MTU_Discovery" class="inline-onebox">Path MTU Discovery - Wikipedia</a><br>
+Правильное решение — выставлять корректный TCP MSS, соответствующий MTU туннельного интерфейса.</p></td><td>2022-04-17T12:28:08.267Z</td></tr><tr><td>Elevator</td><td><p>Я правильно понимаю что если разрешить ICMP то проблема будет решена?</p></td><td>2022-04-17T13:14:54.590Z</td></tr><tr><td>ValdikSS</td><td><p>Да, в большей степени. Проблема будет наблюдаться только с сайтами, которые также блокируют ICMP на стороне их сервера. Чтобы решить и эту проблему, нужно модифицировать TCP MSS в соответствии с MTU линка.<br>
+<a href="https://tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.cookbook.mtu-mss.html" class="onebox" target="_blank" rel="noopener">https://tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.cookbook.mtu-mss.html</a></p></td><td>2022-04-17T13:37:47.525Z</td></tr><tr><td>Elevator</td><td><p>Тогда зачем фрагментировать пакеты на роутере под туннель если можно просто выставить mtu у туннеля?</p>
+<p>Вслучае с удаленным сервером или ограничением провайдера понятно, нет выбора.</p></td><td>2022-04-17T14:01:30.715Z</td></tr><tr><td>ValdikSS</td><td><p>Насколько вижу, протокол Wireguard не поддерживает и не осуществляет внутреннюю фрагментацию, поэтому увеличивая MTU туннельного интерфейса, вы вынуждаете операционную систему осуществлять фрагментацию UDP-пакетов WireGuard на уровне IP, а фрагментированные IP-пакеты во многих сетях блокируются: вы просто не сможете пользоваться вашим VPN через некоторых провайдеров.</p>
+<p>Фрагментировать пакеты на IP-уровне в современном интернете официально не рекомендуется:</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://www.rfc-editor.org/rfc/rfc8900.html">
+  <header class="source">
+
+      <a href="https://www.rfc-editor.org/rfc/rfc8900.html" target="_blank" rel="noopener">rfc-editor.org</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://www.rfc-editor.org/rfc/rfc8900.html" target="_blank" rel="noopener">RFC 8900: IP Fragmentation Considered Fragile</a></h3>
+
+  <p>
+       This document describes IP fragmentation and explains how it
+      introduces fragility to Internet communication. 
+       This document also proposes alternatives to IP fragmentation and
+      provides recommendations for developers and...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2022-04-17T14:06:43.144Z</td></tr><tr><td>Elevator</td><td><p>Век живи - век учись</p>
+<p>Спасибо за разъяснения</p></td><td>2022-04-17T14:13:01.778Z</td></tr>
+    </table>
+      </body>
+    </html>

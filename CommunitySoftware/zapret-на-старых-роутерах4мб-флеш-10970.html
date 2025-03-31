@@ -1,0 +1,57 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>zapret-на-старых-роутерах4мб-флеш-10970</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>NewUse(New Use)</td><td><p>Коллеги, слепил простенький пакет tpws, с автозагрузкой и автодобавлением правил для fw для Openwrt 19.07 и более ранних, в условиях малого объёма он не тянет в себе блокчек ipset и прочие объёмные вещи, но при этом добавляет автозапуск и простой, но удобный uci-конфиг, настройки по умолчанию соответствуют рекомендациям для ускорения YouTube за исключением блокировки QUIC, для которой есть своя опция.</p>
+<p>Оформил в виде PR(<a href="https://github.com/bol-van/zapret/pull/413" class="inline-onebox" rel="noopener nofollow ugc">Add minimal config and init script to tpws by NewUse · Pull Request #413 · bol-van/zapret · GitHub</a>), если уважаемый автор добавит версионности, можно будет попробовать запихнуть в офф. фиды.</p>
+<p>Также написал для него минималистичный web-интерфейс, подготовил черновой PR(<a href="https://github.com/bol-van/zapret/pull/429" class="inline-onebox" rel="noopener nofollow ugc">Add simple luci configuration for tpws by NewUse · Pull Request #429 · bol-van/zapret · GitHub</a>), но его можно будет мерджить только после предыдущего PR и т.к. он сделан для старых версий OpenWRT в офф. фиды его не возьмут(на lua вместо js), но можно собрать и выложить как “бинарный” пакет, ибо он платформонезааисимый.</p></td><td>2024-10-02T13:54:56.835Z</td></tr><tr><td>MIHAHIM</td><td><p>Привет, установил запрет с офф  гитхаба, немного урезал, и он поместился и установился. Никак не могу правильный конфиг прописать… На винде у меня есть готовый вариант который работает стабильно и долго, но под Openwrt конфиг не понимаю как его прописать, не поможешь?</p>
+<p>Вот рабочий конфиг для винды:<br>
+<span class="mention">@echo</span> off<br>
+start “zapret: http,https,quic,discord” /min “%~dp0winws.exe” ^<br>
+–wf-tcp=80,443 --wf-udp=443,50000-65535 ^<br>
+–filter-udp=443 --hostlist=“%~dp0russia-youtubeQ.txt” --dpi-desync=fake --dpi-desync-repeats=4 --dpi-desync-fake-quic=“%~dp0quic_initial_www_google_com.bin” --new ^<br>
+–filter-tcp=443 --hostlist=“%~dp0russia-youtubeGV.txt” --dpi-desync=split --dpi-desync-split-pos=1 --dpi-desync-fooling=badseq --dpi-desync-repeats=10 --dpi-desync-ttl=4 --new ^<br>
+–filter-tcp=443 --hostlist=“%~dp0russia-youtube.txt” --dpi-desync=fake,split2 --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=3 --dpi-desync-fake-tls=“%~dp0tls_clienthello_www_google_com.bin” --dpi-desync-ttl=3 --new ^<br>
+–filter-tcp=80 --hostlist=“%~dp0russia-blacklist.txt” --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig --new ^<br>
+–filter-tcp=443 --hostlist=“%~dp0russia-blacklist.txt” --dpi-desync=fake,split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --dpi-desync-fake-tls=“%~dp0tls_clienthello_www_google_com.bin” --dpi-desync-ttl=5 --new ^<br>
+–filter-udp=443 --hostlist=“%~dp0russia-discord.txt” --dpi-desync=fake --dpi-desync-udplen-increment=10 --dpi-desync-repeats=7 --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic=“%~dp0quic_initial_www_google_com.bin” --new ^<br>
+–filter-udp=50000-65535 --dpi-desync=fake,tamper --dpi-desync-any-protocol --dpi-desync-fake-quic=“%~dp0quic_initial_www_google_com.bin” --new ^<br>
+–filter-tcp=443 --hostlist=“%~dp0russia-discord.txt” --dpi-desync=fake,split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --dpi-desync-fake-tls=“%~dp0tls_clienthello_www_google_com.bin” --dpi-desync-ttl=4</p></td><td>2024-10-12T04:59:54.412Z</td></tr><tr><td>NewUse(New Use)</td><td><p>смотря что ты урезал, если поставил то, что я делал, то ютюб должен работать из коробки, только опцию блокировки quic надо включить и про списки обхода забыть, ибо они не помещаются</p>
+<p>какой роутер, сколько памяти?</p></td><td>2024-10-12T06:27:37.007Z</td></tr><tr><td>MIHAHIM</td><td><p>Роутер C60 Archer v2. Памяти 8. Если ставить прошивку 23 то места для запрета не остается, пробовал ставить 19.07, там хватало место, я по сути ничего не урезал, просто пакекты под другие ОС удалил из папки запрета и доки (инструкции)</p></td><td>2024-10-12T09:36:34.558Z</td></tr><tr><td>MIHAHIM</td><td><p>Как мне установить данную урезанную версию? Откатывать на 19.07 опять? или на 23 тоже пойдет? А то опять обновился…</p></td><td>2024-10-12T09:41:31.085Z</td></tr><tr><td>NewUse(New Use)</td><td><p>кажется, имеет смысл уйти на 19-ую версию, и не резать запрет, а поставить полную версию, на 23-ую моя то влезет, но там tpws и тоже урезана до нельзя, только весь трафик, без точечных обходов</p>
+<p>полный запрет 600кб занимает, странно что на 8Мб не влез, но может можно что-то убрать лишнее, например, собрать 23.05 сразу с нудными пакетами, включить настройки оптимизации и т.д.</p></td><td>2024-10-12T22:47:40.102Z</td></tr>
+    </table>
+      </body>
+    </html>

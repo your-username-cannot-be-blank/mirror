@@ -1,0 +1,187 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>Некоторые маршрутизаторы при настройке OpenVPN плохо работают с DNS внутри VPN: либо не позволяют назначить приоритет DNS (и запросы идут то через основной DNS, то через DNS VPN’а), либо не умеют автоматически получать настройки DNS от VPN-сервера, либо вовсе не поддерживают DNS в VPN.</p>
+<p>У меня появилась идея: обнаруживать и перехватывать DNS-запросы на VPN-сервере на любой IP-адрес, и перенаправлять их на собственный DNS-сервер.</p>
+<p>Это позволит на проблемных маршрутизаторах, например, установить любой публичный DNS-сервер в качестве основного (8.8.8.8 от Google, 77.88.8.8 от Яндекс, 1.1.1.1 от Cloudflare, или даже стандартный DNS-сервер провайдера), добавить на него маршрут в конфигурационный файл OpenVPN, и при падении VPN-туннеля или проблемах подключения будет использоваться публичный DNS, а при работающем VPN-подключении — DNS VPN’а.</p>
+<p>Нужна ли такая функция?</p></td><td>2019-09-20T14:54:15.181Z</td></tr><tr><td>ValdikSS</td><td><p>Реализовано. Любой UDP DNS-запрос на любой IPv4-адрес теперь перенаправляется на DNS-сервер внутри VPN.</p>
+<p>Чтобы использовать эту функцию, настройте маршрутизатор на использование DNS, например, <code>8.8.8.8</code>, и в конфигурационный файл OpenVPN добавьте:<br>
+<code>route 8.8.8.8</code></p>
+<p>Пока VPN антизапрета не подключен, будет использоваться Google DNS <code>8.8.8.8</code>. Как только вы подключитесь к туннелю, запросы к <code>8.8.8.8</code> будут маршрутизироваться в VPN и обрабатываться DNS-сервером в VPN.</p></td><td>2019-10-08T15:06:52.187Z</td></tr><tr><td>Enklomx</td><td><p>Насколько я помню, резолверы ProstoVPN умеют работать с доменами OpenNIC, Namecoin и Emercoin. Справедливо ли это и в данном случае?</p></td><td>2019-10-09T12:38:47.003Z</td></tr><tr><td>ValdikSS</td><td><p>Да, через VPN антизапрета эти зоны тоже резолвятся.</p></td><td>2019-10-09T12:55:17.284Z</td></tr><tr><td>zald(alex)</td><td><p>А на padavan куда добавлять route 8.8.8.8 ?<br>
+Antizapret идеально подходит для падавана</p>
+<p>UPD:<br>
+Нашел в Расширенная конфигурация OpenVPN</p></td><td>2019-10-09T20:51:07.576Z</td></tr><tr><td>zald(alex)</td><td><p>Если какой нибудь дом.ру перехватывает днс, то это сработает?</p></td><td>2019-10-10T09:29:41.033Z</td></tr><tr><td>ValdikSS</td><td><p>Да, сработает.</p></td><td>2019-10-10T12:32:13.203Z</td></tr><tr><td>zald(alex)</td><td><p>Пробывали не помогло. ASUS RT11P на падаване.</p>
+<p>С пк антизапрет работает, а с роутера просто выбрасывает. Не дает в интернет идти.</p></td><td>2019-10-10T12:35:54.536Z</td></tr><tr><td>ValdikSS</td><td><p>Зачем вы вообще настраиваете эту возможность на Padavan, в этой прошивке же корректная работа с DNS внутри VPN?</p></td><td>2019-10-10T12:38:34.771Z</td></tr><tr><td>zald(alex)</td><td><p>Начну по порядку AC51U падаваном на борту отлично запустил антизапрет и на билайне забыл о блокировках. Корректная вроде как он запускается на ура.</p>
+<p>С дом ру на RT11P тоже падаван там запускаться на отрез отказался и ломаю голову дело в роутере или провайдере. Подключается, но потом само WAN соединение сбрасывается, иногда подключается, но заглушка всё равно вылазит. Вот так.<br>
+BlockCheck показал, что перехватывается DNS и полный DPI.<br>
+Вот из-за этого перехвата DNS как раз и проблема. Если запустить на компьютере антизапрет всё работает, но в роутере его не развернуть.</p></td><td>2019-10-10T12:44:07.449Z</td></tr><tr><td>ValdikSS</td><td><p>Не имеет значения, перехватывает ли провайдер DNS, или нет. В настройках VPN установите<br>
+<code>Получать адреса DNS от VPN-сервера: заменить весь список DNS</code>.</p></td><td>2019-10-10T12:47:26.040Z</td></tr><tr><td>zald(alex)</td><td><p>Cтоит. Не помогло.</p>
+<p>Могу лог BlockCheck скинуть</p></td><td>2019-10-10T12:48:13.261Z</td></tr><tr><td>ValdikSS</td><td><p>Проблема на вашей стороне, в настройке. VPN антизапрета так или иначе способен обойти блокировку во всех случаях, на всех провайдерах.<br>
+Проверяйте маршрутизацию на роутере, смотрите, на какие DNS-серверы идут запросы. Убедитесь, что в браузере отключён кеш.</p></td><td>2019-10-10T13:28:11.668Z</td></tr><tr><td>plat75</td><td><p>Подскажите где взять настройки для падавана? на основном сайте данных этих нет<br>
+Вроде с горем пополам ввел настройки, пишет подключено, но сайты как были заблокированы так и остались.<br>
+дайте ссылку на точные настройки</p></td><td>2019-10-24T16:59:46.425Z</td></tr><tr><td>ValdikSS</td><td><p>Антизапрету не требуются особых настроек, настраивайте его как любое другое OpenVPN-подключение. Единственное — убедитесь, что DNS-сервер используется из VPN, а не из интернет-подключения.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://github.com/zhovner/zaborona_help/wiki/Padavan">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/b/bad3e5f9ad67c1ddf145107ce7032ac1d7b22563.svg" class="site-icon" data-dominant-color="" width="32" height="32">
+
+      <a href="https://github.com/zhovner/zaborona_help/wiki/Padavan" target="_blank" rel="noopener">GitHub</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/344;"><img src="перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/64ebe0c93438d3c54abbf10a6f244ad95f08e725_2_690x345.png" class="thumbnail" data-dominant-color="ECEBE8" width="690" height="345"></div>
+
+<h3><a href="https://github.com/zhovner/zaborona_help/wiki/Padavan" target="_blank" rel="noopener">Padavan</a></h3>
+
+  <p>Бесплатный сервис для обхода блокировок сайтов в Украине — https://zaborona.help - zhovner/zaborona_help</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2019-10-24T17:41:57.509Z</td></tr><tr><td>plat75</td><td><p>Так вот я первый раз пытаюсь настроить, но что то не то делаю, подключение есть а сайты не грузит.<br>
+Кому не сложно пришлите может скриншоты настроек</p></td><td>2019-10-24T18:08:30.674Z</td></tr><tr><td>ValdikSS</td><td><p>Выше по ссылке есть все настройки, со скриншотами.</p></td><td>2019-10-24T18:57:17.894Z</td></tr><tr><td>plat75</td><td><p>Спасибо, за помощь, сразу не додумался перейти по ссылке из за названия, так как мне нужно для России</p></td><td>2019-10-25T07:38:11.501Z</td></tr><tr><td>zald(alex)</td><td><p>На всякий случай могу выложить скриншоты с настроенным антизапретом на падаване.</p></td><td>2019-10-27T18:04:55.384Z</td></tr><tr><td>plat75</td><td><p>Было бы не плохо, даже если продублировать. То хоть в теме ещё кому пригодится</p></td><td>2019-10-27T19:03:18.955Z</td></tr><tr><td>Protey</td><td><p>Здравствуйте, не могли бы вы поделиться настройками или сделать скриншоты настроек?<br>
+Как я понял у меня как и у Вас - ASUS RT11P на падоване<br>
+За ранее благодарен</p></td><td>2019-11-01T20:24:35.836Z</td></tr><tr><td>zald(alex)</td><td><p>У меня AC51U.<br>
+RT11P у меня сбрасывал OpenVPN соединение. Я всё равно покажу настройку, но с AC51U.<br>
+За работу на RT11P не ручаюсь. Слишком мало оперативки. Может работать, а может нет. В связке с RT11P и дом.ру не заработало. Соединение вроде идет, но сбрасывается.</p>
+<p>На AC51U всё отлично. Вот настройки.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/0539eebba981caf73e8cd5e067e44a7a48d8d9a7.jpeg" data-download-href="https://ntc.party/uploads/default/0539eebba981caf73e8cd5e067e44a7a48d8d9a7" title="image"><img src="перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/0539eebba981caf73e8cd5e067e44a7a48d8d9a7_2_401x499.jpeg" alt="image" data-base62-sha1="KevrWII4mIBSxNhH7KrVFaZ15l" width="401" height="499" srcset="перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/0539eebba981caf73e8cd5e067e44a7a48d8d9a7_2_401x499.jpeg, перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/0539eebba981caf73e8cd5e067e44a7a48d8d9a7_2_601x748.jpeg 1.5x, перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/0539eebba981caf73e8cd5e067e44a7a48d8d9a7.jpeg 2x" data-dominant-color="17364B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">696×866 307 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>В расширенной конфигурации написать<br>
+verb 3<br>
+mute 10</p>
+<p>auth-nocache</p>
+<p>А ключи\сертификаты идут сами по порядку. Достаточно открыть .ovpn в текстовом редакторе. Желательно Notepad++</p>
+<p>Отдельно спасибо ValdikSS. Без него такой полезной штуки не было.</p>
+<p>После настройки не забываем чистить кэш браузера. Можете проверить работу со своего телефона например.</p></td><td>2019-11-04T11:35:34.308Z</td></tr><tr><td>zald(alex)</td><td><p>Осталось заставить переброс DNS сделать. В конфиге прописываю, но уже одни сайты открываются, а одни нет. Например animespirit не хочет, если прописать гугл днс, но какой нибудь трекер открывается.<br>
+Это как раз после обновы от ValdikSS.</p>
+<p>К слову если на RT11-P не завелось, то возможно проще пересобрать прошивку самому через Prometheus и выбрать только один модуль OpenVPN, а остальные нет. Оставить только важные.</p>
+<p>Можно к слову отдельную ветку для настройки на роутерах.</p></td><td>2019-11-04T11:43:51.151Z</td></tr><tr><td>Protey</td><td><aside class="quote no-group" data-username="zald" data-post="22" data-topic="87">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/zald/48/272_2.png" class="avatar"> zald:</div>
+<blockquote>
+<p>AC51U</p>
+</blockquote>
+</aside>
+<p>Спасибо что откликнулись, но к сожалению так же не работает, и к стати провайдер Дом Ру<br>
+Что на счет переброс DNS, если правильно Вас понял, то это надо в <strong>Расширенная конфигурация OpenVPN</strong> прописать <strong>route 8.8.8.8</strong>, и в<br>
+<strong>Настройка сервера DNS и WINS - DNS-сервер 1:</strong> прописать 8.8.8.8?<br>
+Если да, то не работает, а пересобирать прошивку, ну, такое, до этого долго руки не дойдут)</p></td><td>2019-11-05T13:57:50.961Z</td></tr><tr><td>Protey</td><td><p>может сможете помочь, решить проблему с роутером ASUS RT11P, может что-то не так делаю</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/3da9a60a0df7a8629258df898f4a518ee65d5ee5.jpeg" data-download-href="https://ntc.party/uploads/default/3da9a60a0df7a8629258df898f4a518ee65d5ee5" title="DNS%20-%20RT-N11P%20Wireless%20Router%20-%20DHCP-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80"><img src="перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/3da9a60a0df7a8629258df898f4a518ee65d5ee5_2_569x500.jpeg" alt="DNS%20-%20RT-N11P%20Wireless%20Router%20-%20DHCP-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80" data-base62-sha1="8NuAXvMNhDgNFiVrSA4OY1G98eF" width="569" height="500" srcset="перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/3da9a60a0df7a8629258df898f4a518ee65d5ee5_2_569x500.jpeg, перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/3da9a60a0df7a8629258df898f4a518ee65d5ee5_2_853x750.jpeg 1.5x, перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/3da9a60a0df7a8629258df898f4a518ee65d5ee5.jpeg 2x" data-dominant-color="C3C5C8"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">DNS%20-%20RT-N11P%20Wireless%20Router%20-%20DHCP-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80</span><span class="informations">1009×886 334 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div> <div class="lightbox-wrapper"><a class="lightbox" href="перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/16b1c4e56ad47bb4abf5b5d2229b9ab57289a0bf.jpeg" data-download-href="https://ntc.party/uploads/default/16b1c4e56ad47bb4abf5b5d2229b9ab57289a0bf" title="VPN%20-%20RT-N11P%20Wireless%20Router%20-%20VPN%20%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82"><img src="перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/16b1c4e56ad47bb4abf5b5d2229b9ab57289a0bf_2_658x500.jpeg" alt="VPN%20-%20RT-N11P%20Wireless%20Router%20-%20VPN%20%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82" data-base62-sha1="3eLn7BeylnLvXpRmsjg6uCOfdO7" width="658" height="500" srcset="перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/16b1c4e56ad47bb4abf5b5d2229b9ab57289a0bf_2_658x500.jpeg, перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/16b1c4e56ad47bb4abf5b5d2229b9ab57289a0bf_2_987x750.jpeg 1.5x, перехват-dns-через-vpn-чтобы-лучше-работало-на-маршрутизаторах-87/16b1c4e56ad47bb4abf5b5d2229b9ab57289a0bf.jpeg 2x" data-dominant-color="B2B2B2"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">VPN%20-%20RT-N11P%20Wireless%20Router%20-%20VPN%20%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82</span><span class="informations">1178×894 402 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2019-11-05T14:12:23.734Z</td></tr><tr><td>zald(alex)</td><td><p>Это больше в роутере проблема. Только прошивку пересобирать через скрипт прометей, но и то не факт.<br>
+Провайдер небось еще и сам настройки выдает?) Уходите тогда с него или роутер меняйте.</p>
+<p>Например в другом регионе поставили AC51U и там дом.ру, но там сразу PPPoE, никаких автоматических настроек. Заработало без проблем.</p>
+<p>ValdikSS особо не поможет. У него нет этого роутера.</p></td><td>2019-11-05T16:44:58.955Z</td></tr><tr><td>Protey</td><td><blockquote>
+<p>Провайдер небось еще и сам настройки выдает?)</p>
+</blockquote>
+<p>не понял вопроса, в смысле сам настройки выдает?)</p>
+<blockquote>
+<p>и там дом.ру, но там сразу PPPoE, никаких автоматических настроек. Заработало без проблем</p>
+</blockquote>
+<p>если имеется ввиду в <strong>Тип WAN-подключения:</strong> выбрано PPPoE, так у меня у самого так же.</p></td><td>2019-11-05T17:17:08.537Z</td></tr><tr><td>ValdikSS</td><td><p>Если хотите обсуждать особенности настроек на конкретном роутере или линейке роутеров, разумнее создать тему под них.</p></td><td>2019-11-06T02:37:42.909Z</td></tr><tr><td>festo(Sergey)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="2" data-topic="87">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Чтобы использовать эту функцию, настройте маршрутизатор на использование DNS, например, <code>8.8.8.8</code> , и в конфигурационный файл OpenVPN добавьте:<br>
+<code>route 8.8.8.8</code></p>
+</blockquote>
+</aside>
+<p>прошу прощения, вопрос от нуба, куда именно прописать эту строчку? понятно, что в конфиг, но куда конкретно? в начале, в середине, в конце?</p>
+<p>p.s. вообще, я по другому вопросу пришёл сюда, меня интересует возможность использования и VPN antizapret, и DNS провайдера, но для конкретных доменов, например, для гугла, внутри одного подключения, как это можно реализовать? не знаю как работает ваш форум, но видел, что вы есть на этом форуме, можем там продолжить обсуждение <a href="https://forum.keenetic.net/topic/4621-%D0%BA%D0%B0%D0%BA-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C-antizapretprostovpnorg-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80%D0%B5/page/4/" rel="noopener nofollow ugc">https://forum.keenetic.net/topic/4621-как-использовать-antizapretprostovpnorg-на-роутере/page/4/</a></p></td><td>2019-11-23T08:41:10.249Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="festo" data-post="29" data-topic="87">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/e68b1a/48.png" class="avatar"> festo:</div>
+<blockquote>
+<p>понятно, что в конфиг, но куда конкретно? в начале, в середине, в конце?</p>
+</blockquote>
+</aside>
+<p>Не имеет значения, в любое место.</p>
+<aside class="quote no-group" data-username="festo" data-post="29" data-topic="87">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/f/e68b1a/48.png" class="avatar"> festo:</div>
+<blockquote>
+<p>меня интересует возможность использования и VPN antizapret, и DNS провайдера, но для конкретных доменов, например, для гугла, внутри одного подключения, как это можно реализовать?</p>
+</blockquote>
+</aside>
+<p>Необходимо настроить DNS-резолвер так, чтобы он использовал для конкретной зоны или зон заданный DNS-сервер провайдера, а для всего остального — DNS-сервер антизапрета. Это сравнительно просто настраивается в dnsmasq, который часто применяется в маршрутизаторах. Что используется в Keenetic, я не знаю, скорее всего, что-то самописное создателями маршрутизатора.</p></td><td>2019-11-23T11:21:30.676Z</td></tr><tr><td>festo(Sergey)</td><td><p>спасибо за ответ. ещё уточню, я правильно понял, что прописав “route 8.8.8.8”, ресурсы продолжат работать, если пропадёт подключение к вашему VPN?</p></td><td>2019-11-23T11:36:01.290Z</td></tr><tr><td>ValdikSS</td><td><p>Да, именно так, для этого и было сделано перенаправление.</p></td><td>2019-11-23T11:36:47.445Z</td></tr><tr><td>Vokoto</td><td><p>А каким образом данная опция настраивается на MikroTik?</p></td><td>2019-11-28T08:24:47.952Z</td></tr><tr><td>ValdikSS</td><td><p>Странный вопрос… любым доступным способом.<br>
+Или вы спрашиваете о том, как реализовать перехват DNS так, как он реализован в сервисе, на MIkrotik, для своего OpenVPN? Наверное, никак: в Mikrotik нет модуля u32 или иных средств по проверке данных внутри пакета.</p></td><td>2019-11-30T01:13:48.062Z</td></tr><tr><td>Brumbumbes</td><td><p>Т.е. в настоящее время при использовании этого функционала ВСЕ DNS-запросы уходят на DNS Антизапрета, так?</p>
+<p>А можно ли допилить сей функционал таким образом, чтоб DNS Антизапрета резолвил только заблокированные адреса?<br>
+Скажем, на роутере я указал DNS провайдера (поскольку есть местные ресурсы, открывающиеся ТОЛЬКО через DNS провайдера). Создал маршрут, отправляющий на Антизапрет трафик, идущий на эти провайдерские DNS.<br>
+Но блин, в итоге-то при таком раскладе я не могу открыть провайдерские ресурсы, т.к. резолвятся они через DNS Антизапрета.<br>
+Можно ли внедрить условие?</p>
+<ul>
+<li>если адрес в блоке, то резолвить через DNS Антизапрета;</li>
+<li>если адреса нет в блоке - то резолвить через указанный на роутере провайдерский (или любой другой) DNS (т.е. пропускать запрос без подмены destination)</li>
+</ul></td><td>2019-12-03T23:48:23.258Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Brumbumbes" data-post="35" data-topic="87">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/a9adbd/48.png" class="avatar"> Brumbumbes:</div>
+<blockquote>
+<p>Т.е. в настоящее время при использовании этого функционала ВСЕ DNS-запросы уходят на DNS Антизапрета, так?</p>
+</blockquote>
+</aside>
+<p>Да, но только если вы вручную добавите маршрут через VPN антизапрета на какой-то IP-адрес, на который потом будете отправлять DNS-запросы. По умолчанию, если использовать конфигурационный файл и не модифицировать его, DNS-запросы на сторонние DNS-серверы работают привычным образом, не через VPN.</p>
+<aside class="quote no-group" data-username="Brumbumbes" data-post="35" data-topic="87">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/a9adbd/48.png" class="avatar"> Brumbumbes:</div>
+<blockquote>
+<p>Скажем, на роутере я указал DNS провайдера (поскольку есть местные ресурсы, открывающиеся ТОЛЬКО через DNS провайдера). Создал маршрут, отправляющий на Антизапрет трафик, идущий на эти провайдерские DNS.</p>
+</blockquote>
+</aside>
+<p>Зачем вы это сделали? Это равнозначно установке DNS-сервера из VPN.<br>
+Эта функциональность сделана для ущербных маршршутизаторов, которые не умеют нормально работать с DNS-конфигурацией, которую передаёт VPN-сервер через настройки OpenVPN.</p>
+<aside class="quote no-group" data-username="Brumbumbes" data-post="35" data-topic="87">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/a9adbd/48.png" class="avatar"> Brumbumbes:</div>
+<blockquote>
+<p>Можно ли внедрить условие?</p>
+</blockquote>
+</aside>
+<p>Уверен, DNS-сервер вашего провайдера недоступен из интернета, антизапрет не может резолвить адреса через него. Антизапрет вообще не использует DNS-резолверы, а рекурсивно отправлет DNS-запросы через knot-resolver.</p>
+<p>Настройте и сконфигурируйте собственный резолвер так, как вам требуется. Если у вас маршрутизатор на OpenWRT, в нем используется DNS и DHCP-сервер dnsmasq, в котором подобную конфигурацию можно настроить несколькими строками конфигурационного файла.</p></td><td>2019-12-03T23:55:23.309Z</td></tr><tr><td>ValdikSS</td><td><p>A post was merged into an existing topic: <a href="/t/tp-link-ax-73/1449/2">Tp link ax 73 кто знает как запусть антизапрет</a></p></td><td>2021-11-13T09:36:47.814Z</td></tr>
+    </table>
+      </body>
+    </html>

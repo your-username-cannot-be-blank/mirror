@@ -1,0 +1,189 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>dpi-blockcheck-скрипт-для-подбора-конфигураций-zapret-11856</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>chronotorius(Victor Shilin)</td><td><p>На днях писал скрипт для проверки работы сайтов на python и подбора конфига для zapret.</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/ChronoMonochrome/DPI_Blockcheck">
+  <header class="source">
+
+      <a href="https://github.com/ChronoMonochrome/DPI_Blockcheck" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="dpi-blockcheck-скрипт-для-подбора-конфигураций-zapret-11856/65aa0fd48d07eca9d96020adf688cd1fc90063e5_2_690x344.png" class="thumbnail" data-dominant-color="E9ECF0">
+
+  <h3><a href="https://github.com/ChronoMonochrome/DPI_Blockcheck" target="_blank" rel="noopener nofollow ugc">GitHub - ChronoMonochrome/DPI_Blockcheck: A python script to test sites availability using...</a></h3>
+
+    <p><span class="github-repo-description">A python script to test sites availability using GoodbyeDPI / zapret tool on Windows</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Поддерживается zapret и GoodbyeDPI.<br>
+При первоначальной установке запускать <code>python download_files.py</code>, все бинарники для Windows скачаются из официальных репозиториев, затем запускать <code>python blockcheck.py --tool=zapret</code> или <code>python blockcheck.py --tool=goodbyedpi</code> (для теста нужно вручную отключать системную службу и VPN).<br>
+Список протестированных стратегий пишется в лог (по умолчанию используется simple пресет, в котором я выбрал заработавшие у меня стратегии).<br>
+Если стратегии заработали плохо, возможно, необходимо прогнать полный тест (<code>python blockcheck.py --tool=zapret --strategies_set_name=full</code>)<br>
+Для подбора конфига нужно парсить лог:<br>
+<code>python parse_log.py -i log.txt -o dist</code><br>
+В папке dist появится конфиг вроде такого ниже (для zapret / win64)</p>
+<details>
+<summary>
+Summary</summary>
+<p>set BIN=%~dp0bin<br>
+set STRAT=%~dp0strategies\</p>
+<p>start “Zapret: multi” /min “%BIN%winws.exe” ^<br>
+–wf-tcp=80,443 --wf-udp=443,50000-50099 ^<br>
+–filter-tcp=443 --hostlist=“%STRAT%_dpidesync_disorder_dpidesyncfooling_badsum.txt”  --dpi-desync=disorder --dpi-desync-fooling=badsum --new ^<br>
+–filter-tcp=443 --hostlist=“%STRAT%_dpidesync_disorder2_dpidesyncsplitseqovl_1_dpidesyncsplittls_sni.txt”  --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --new ^<br>
+–filter-tcp=443 --hostlist=“%STRAT%_dpidesync_fake,disorder_dpidesyncttl_1.txt”  --dpi-desync=fake,disorder --dpi-desync-ttl=1 --new ^<br>
+–filter-tcp=443 --hostlist=“%STRAT%_dpidesync_fake,disorder_dpidesyncttl_12_dpidesyncfaketls_0x00000000.txt”  --dpi-desync=fake,disorder --dpi-desync-ttl=12 --dpi-desync-fake-tls=0x00000000 --new ^<br>
+–filter-tcp=443 --hostlist=“%STRAT%_dpidesync_fake,disorder2_dpidesyncttl_4_dpidesyncfaketls_0x00000000.txt”  --dpi-desync=fake,disorder2 --dpi-desync-ttl=4 --dpi-desync-fake-tls=0x00000000 --new ^<br>
+–filter-tcp=443 --hostlist=“%STRAT%_dpidesync_fake,split_dpidesyncfooling_badseq_dpidesyncfaketls_0x00000000.txt”  --dpi-desync=fake,split --dpi-desync-fooling=badseq --dpi-desync-fake-tls=0x00000000 --new ^<br>
+–filter-tcp=443 --hostlist=“%STRAT%_dpidesync_split2_dpidesyncsplitseqovl_1_dpidesyncsplittls_sni.txt”  --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --new ^<br>
+–filter-udp=443 --hostlist=“%~dp0list-discord.txt” --dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-udplen-increment=10 --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic=“%BIN%quic_initial_www_google_com.bin” --new ^<br>
+–filter-udp=50000-50099 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d3 --dpi-desync-repeats=6 --dpi-desync-fake-quic=“%BIN%quic_initial_www_google_com.bin” --new ^<br>
+–filter-tcp=443 --hostlist=“%~dp0list-discord.txt” --dpi-desync=fake,split --dpi-desync-autottl=2 --dpi-desync-repeats=6 --dpi-desync-fooling=badseq --dpi-desync-fake-tls=“%BIN%tls_clienthello_www_google_com.bin” --new ^<br>
+–filter-udp=443 --hostlist=“%~dp0list-general.txt” --dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-udplen-increment=10 --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic=“%BIN%quic_initial_www_google_com.bin” --new ^<br>
+–filter-tcp=80 --hostlist=“%~dp0list-general.txt” --dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --new ^<br>
+–filter-tcp=443 --hostlist-auto=“%STRAT%hostlist-auto.txt” --hostlist=“%~dp0list-general.txt” --dpi-desync=fake,split --dpi-desync-autottl=2 --dpi-desync-repeats=6 --dpi-desync-fooling=badseq --dpi-desync-fake-tls=“%BIN%tls_clienthello_www_google_com.bin”</p>
+</details>
+<p>Скрипт выбирает несколько стратегий, чтобы заработало как можно большее число сайтов (используются первые заработавшие, по хорошему, нужно делать приоритет одних над другими). Список стратегий брал из топика <a href="https://ntc.party/t/goodcheck-%D0%B1%D0%BB%D0%BE%D0%BA%D1%87%D0%B5%D0%BA-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82-%D0%B4%D0%BB%D1%8F-goodbyedpi-zapret-byedpi/10880">GoodCheck - блокчек-скрипт для GoodbyeDPI, Zapret, ByeDPI</a>. Отдельная благодарность <a href="https://github.com/Flowseal/zapret-discord-youtube" class="inline-onebox" rel="noopener nofollow ugc">GitHub - Flowseal/zapret-discord-youtube</a> (фикс youtube и discord взят оттуда).</p></td><td>2024-10-15T08:01:43.372Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А есть ли какие-то отличия от гудчека? Доступность сайта проверяется curl-ом?</p></td><td>2024-10-15T16:32:50.958Z</td></tr><tr><td>chronotorius(Victor Shilin)</td><td><aside class="quote no-group" data-username="TesterTi" data-post="2" data-topic="11856" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>Доступность сайта проверяется curl-ом?</p>
+</blockquote>
+</aside>
+<p>Нет, через модуль requests, в детали не вникал, использует ли python http3 в таком случае или нет, но заработало и так.</p>
+<aside class="quote no-group" data-username="TesterTi" data-post="2" data-topic="11856" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>А есть ли какие-то отличия от гудчека?</p>
+</blockquote>
+</aside>
+<p>Только разве что генерация конфигов на основе лога, ибо мне надоело вручную подбирать их (а тут еще выяснилось, что некоторые сайты перестают работать на одних стратегиях но работают на других).<br>
+Пока тестирую насколько вообще долго проработают сгенеренные таким образом конфиги (на моей выборке заработало 43/57 доменов, остальные работают только с wssize 1:6, который, как я понял, не поддерживает фильтрацию по доменам).</p></td><td>2024-10-15T18:38:06.071Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><aside class="quote no-group" data-username="chronotorius" data-post="3" data-topic="11856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/chronotorius/48/10920_2.png" class="avatar"> chronotorius:</div>
+<blockquote>
+<p>requests</p>
+</blockquote>
+</aside>
+<p>Интересно. А есть гайд, как запустить ваш скрипт на windows?</p></td><td>2024-10-15T19:18:44.582Z</td></tr><tr><td>chronotorius(Victor Shilin)</td><td><aside class="quote no-group" data-username="TesterTi" data-post="4" data-topic="11856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>Интересно. А есть гайд, как запустить ваш скрипт на windows?</p>
+</blockquote>
+</aside>
+<p>Пардоньте, этот модуль нужно ставить вручную, я почему-то всегда думал, что он входил в стандартную поставку python и даже в readme ничего не написал:<br>
+Ставить его так:<br>
+<code>python -m pip install requests</code></p>
+<p>Но сейчас это уже не нужно - оказалось, что requests не подходит для задач, где нужно тестировать много сайтов по много раз, я перешел на aiohttp, он должен быть в стандартной поставке python 3.x.</p>
+<p>В остальном - скрипт просто запускать с коммандной строки в режиме админа (<code>python blockcheck.py --tool=zapret</code>), python должен быть в переменной окружения path.</p></td><td>2024-10-15T19:50:32.329Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Спасибо, попробую</p></td><td>2024-10-15T19:54:09.948Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Прикольная штука. На выходе получился рабочий cmd.<br>
+Но вот ютуб он мне не разблокировал. Хотя справедливости ради, то та же история и с preset_russia.cmd и с конфигом от KDS из YTDisBystro. Хотя без проблем работает spoofdpi.<br>
+И gdpi на очень простых настройках, даже без фейков) Думаю, это проблема списка статегий. В них не все случаи учтены. Из пожеланий - если возможно , то вызывать parse_log.py из основного скрипта и в конце писать путь к готовому cmd.</p></td><td>2024-10-15T20:51:56.951Z</td></tr><tr><td>bolvan</td><td><p>Это плохой подход давить на работающие строки без понимания<br>
+Ведет в никуда.<br>
+Предполагается, что глова станет обьединять стратегии в общий знаменатель</p></td><td>2024-10-16T06:13:10.402Z</td></tr><tr><td>chronotorius(Victor Shilin)</td><td><aside class="quote no-group" data-username="TesterTi" data-post="7" data-topic="11856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>И gdpi на очень простых настройках, даже без фейков) Думаю, это проблема списка статегий. В них не все случаи учтены.</p>
+</blockquote>
+</aside>
+<p>Наверно стоило в simple пресет выбрать другие настройки. Но я не знаю, какие сейчас работают, например, с youtube, сам перешел на zapret, когда не смог завести youtube c goodbyedpi.</p>
+<aside class="quote no-group" data-username="TesterTi" data-post="7" data-topic="11856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>Из пожеланий - если возможно , то вызывать parse_log.py из основного скрипта и в конце писать путь к готовому cmd.</p>
+</blockquote>
+</aside>
+<p>Есть в планах сделать отдельным флагом сразу подбор готовой конфигурации (без полного перебора), но для начала вышло проще сделать парсинг лога.</p>
+<aside class="quote no-group" data-username="bolvan" data-post="8" data-topic="11856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Это плохой подход давить на работающие строки без понимания<br>
+Ведет в никуда.</p>
+</blockquote>
+</aside>
+<p>Я пытаюсь разобраться, но это не так просто. Вот к примеру, дома и на работе один и тот же провайдер, но одни и те же конфиги работают хуже дома, видимо настройки на тех коробках другие. Если я правильно понял, подвох может быть в --dpi-desync-ttl и --dpi-desync-autottl?</p></td><td>2024-10-16T06:38:38.501Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="chronotorius" data-post="9" data-topic="11856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/chronotorius/48/10920_2.png" class="avatar"> chronotorius:</div>
+<blockquote>
+<p>Я пытаюсь разобраться, но это не так просто. Вот к примеру, дома и на работе один и тот же провайдер, но одни и те же конфиги работают хуже дома, видимо настройки на тех коробках другие. Если я правильно понял, подвох может быть в --dpi-desync-ttl и --dpi-desync-autottl?</p>
+</blockquote>
+</aside>
+<p>На разных провайдерах разные настройки это нормально.<br>
+Но вот если для разных сайтов на одном провайдере разные настройки, то их как правило можно обьединить, поняв суть различий и найдя общий рабочий вариант.<br>
+Сколько ни настраивал где-либо, всегда можно было найти общую стратегию. И поэтому не надо было до  недавних порт никаких --new<br>
+Они были сделаны только после того, как некоторые ресурсы стали блочить действительно особым образом.<br>
+Что вообще может отличаться для этих сотен тысяч блоченных доменов ? Думаете их будут каждый под микроскопом разглядывать и блочить ? Сомнительно.<br>
+Различаться могут трейсы. То есть пути, по которым идут пакеты. На них может стоять разный DPI.<br>
+Вариативность путей сильно зависит от провайдера. Как ASки подключены.<br>
+Бывает балансировка. Случайный выбор путей. Но так или иначе, вариантов путей не может быть много. Обычно они хорошо светятся по блокчеку. От балансировки помогает несколько попыток. И это именно та причина, почему я оставляю это средство как исследовалку, а не генератор китайских заклинаний, волшебно что-то открывающих.<br>
+Увидел общую картину, понял что работает, понял как это пробивать, написал общий вариант.</p>
+<p>Если же бездумно копировать что-то одно и делать хостлист на каждый домен, можно в этом утонуть. И для каждого нового опять будете мучаться полчаса, прогоняя чекер</p></td><td>2024-10-16T07:44:32.429Z</td></tr><tr><td>chronotorius(Victor Shilin)</td><td><aside class="quote no-group" data-username="bolvan" data-post="10" data-topic="11856">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Увидел общую картину, понял что работает, понял как это пробивать, написал общий вариант.</p>
+</blockquote>
+</aside>
+<p>Спасибо за разъяснение, видимо придется глубже копнуть, чтобы самому научиться делать общий вариант для списка сайтов.</p></td><td>2024-10-16T07:56:58.589Z</td></tr>
+    </table>
+      </body>
+    </html>

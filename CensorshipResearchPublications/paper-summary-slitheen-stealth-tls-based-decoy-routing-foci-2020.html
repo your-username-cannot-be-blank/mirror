@@ -1,0 +1,63 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-slitheen-stealth-tls-based-decoy-routing-foci-2020</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Slitheen++: Stealth TLS-based Decoy Routing<br>
+Benedikt Birtel, Christian Rossow<br>
+<a href="https://censorbib.nymity.ch/#Birtel2020a" class="onebox" target="_blank" rel="nofollow noopener">https://censorbib.nymity.ch/#Birtel2020a</a><br>
+<a href="https://www.usenix.org/conference/foci20/presentation/birtel" rel="nofollow noopener">https://www.usenix.org/conference/foci20/presentation/birtel</a> (video and slides)<br>
+<a href="https://cispa.saarland/group/rossow/papers/tr-slitheen++.pdf" rel="nofollow noopener">https://cispa.saarland/group/rossow/papers/tr-slitheen++.pdf</a> (extended technical report)<br>
+<a href="https://cispa.saarland/group/rossow/files/Slitheen++.tar.gz" rel="nofollow noopener">https://cispa.saarland/group/rossow/files/Slitheen++.tar.gz</a> (source code)</p>
+<p>Slitheen++ is a collection of refinements to <a href="https://censorbib.nymity.ch/#Bocovich2016a" rel="nofollow noopener">Slitheen</a>, a decoy routing design that prioritizes indistinguishability of traffic patterns. Slitheen++ responds to certain issues that were left open in the original Slitheen design, and fixes bugs in its prototype implementation. For the most part, the changes are intended to decrease distinguishability, but Slitheen++ also make compromises in the downstream direction, increasing distinguishability for the sake of more consistent throughput.</p>
+<p>Recall that Slitheen works by <em>traffic replacement</em> in HTTPS connections. In the upstream direction, the client sends data in an “X-Slitheen” HTTP header, deleting or compressing other headers to make room without changing the packet size. In the downstream direction, the relay station replaces the contents of “leaf” resources, such as images and videos, again without changing their size. An <em>overt user simulator</em> provides a carrier for the covert session by imitating a human web user, fetching HTTPS pages so that Slitheen can replace their content. Slitheen++ makes a number of changes:</p>
+<ul>
+<li>The Slitheen paper left the details of the overt user simulator open, and its prototype implementation was simplistic. In Slitheen++, the overt user simulator is more realistic, following links within a domain, and inserting delays between fetches to simulate the thinking time of a human user.</li>
+<li>The upstream channel uses code book–style compression of HTTP headers to make room for the X-Slitheen header. Something of this nature was proposed in the Slitheen paper but not implemented in the prototype.</li>
+<li>Alternative stream schedulers provide better fairness between the many streams that are multiplexed into a covert session.</li>
+<li>Various code-quality bugs, like uninitialized variables, are fixed.</li>
+<li>Slitheen++ removes superencryption of covert data, which was introduced in the followup to the Slitheen paper, <a href="https://censorbib.nymity.ch/#Bocovich2018a" rel="nofollow noopener">“Secure asymmetry and deployability for decoy routing systems”</a> (Appendix B). The Slitheen++ authors argue that much of what you would want to send through the covert tunnel is already separately encrypted and authenticated—by TLS, for example—making the superencryption unnecessary.</li>
+<li>Neither Slitheen nor Slitheen++ can replace traffic when TCP segments arrive out of order, or when a TLS record does not fit in a single TCP segment. In Slitheen++, covert TLS flows are run through a normalizing proxy (<a href="https://trafficserver.apache.org/" rel="nofollow noopener">Apache Traffic Server</a>) to reorder packets and reduce the size of TLS records. This provides more usable downstream capacity, at the cost of altering traffic patterns and network fingerprints.</li>
+</ul>
+<p>Some other acknowledged issues from Slitheen are left open:</p>
+<ul>
+<li>Slitheen++ requires symmetric routes and downstream flow blocking.</li>
+<li>Slitheen++ does not work with HTTP/2.</li>
+</ul>
+<p>Slitheen++ is evaluated in a VM environment, with the client, normalizing TLS proxy, and relay station running on the same host. The experiments test downloading a web page from ten different domains, using wikipedia.<a></a>org as the overt domain. The link-following feature of the overt user simulator in Slitheen++ slightly diminishes performance, because different links have different leaf resources and therefore downstream capacity. Simulated thinking time in the overt user simulator increases covert page download times by several seconds.</p>
+<p>Thanks to the authors for commenting on a draft of this summary.</p></td><td>2020-09-02T17:27:17.214Z</td></tr>
+    </table>
+      </body>
+    </html>

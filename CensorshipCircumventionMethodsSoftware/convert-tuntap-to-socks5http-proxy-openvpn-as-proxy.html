@@ -1,0 +1,346 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>convert-tuntap-to-socks5http-proxy-openvpn-as-proxy</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>These are very useful utilities — they convert TUN/TAP to Socks or HTTP Proxy, allowing to use VPN as a proxy (OpenVPN as Socks5), does not require root privileges.</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/russdill/tunsocks">
+  <header class="source">
+
+      <a href="https://github.com/russdill/tunsocks" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/92f81af63c225b3d2e34127c875d56dd328e88d3_2_690x344.png" class="thumbnail" data-dominant-color="ECECED">
+
+  <h3><a href="https://github.com/russdill/tunsocks" target="_blank" rel="noopener">GitHub - russdill/tunsocks: User-level IP forwarding, SOCKS proxy, and HTTP...</a></h3>
+
+    <p><span class="github-repo-description">User-level IP forwarding, SOCKS proxy, and HTTP proxy for VPNs that provide tun-like interface</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>tunsocks is a user-level SOCKS, HTTP, and port forwarding proxy for use with VPNs that typically interact with tun devices. Rather than passing bytes to and from the tun device, they can pass the data to and from this user-level program. tunsocks is implemented using lwIP.</p>
+<p>Additionally, tunsocks provides connection sharing via NAT.</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/cernekee/ocproxy">
+  <header class="source">
+
+      <a href="https://github.com/cernekee/ocproxy" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/06e22e37692d1f2cfe4fcb1de2712d936daf11fd_2_690x344.png" class="thumbnail" data-dominant-color="ECECEE">
+
+  <h3><a href="https://github.com/cernekee/ocproxy" target="_blank" rel="noopener">GitHub - cernekee/ocproxy: OpenConnect proxy</a></h3>
+
+    <p><span class="github-repo-description">OpenConnect proxy</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>ocproxy is a user-level SOCKS and port forwarding proxy for <a href="http://www.infradead.org/openconnect/">OpenConnect</a> based on lwIP. When using ocproxy, OpenConnect only handles network activity that the user specifically asks to proxy, so the VPN interface no longer “hijacks” all network traffic on the host.</p></td><td>2019-09-22T22:52:17.713Z</td></tr><tr><td>amwashere(amwashere)</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a> Thanks for suggestions. But due to a lack of documentation for tunsocks isn’t obvious how setup forwarding traffic from created socks5 to specific tun interface. Could you provide some examples of using tunsocks?</p>
+<p>What I want to achieve is like this:</p>
+<p>User (socks5 client) – [vps with socks5 server + several tun interfaces (openvpn clients connected to different vpn servers)] – several outputs to the internet via different vpn servers</p>
+<p>E.g.<br>
+port 8081 socks5 - forward all client’s requests to tun1<br>
+port 8082 socks5 - forward all client’s requests to tun2<br>
+etc.</p></td><td>2022-04-13T22:49:53.167Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="amwashere" data-post="2" data-topic="106">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/4da419/48.png" class="avatar"> amwashere:</div>
+<blockquote>
+<p>Could you provide some examples of using tunsocks?</p>
+</blockquote>
+</aside>
+<p>Sorry, I haven’t tried it personally.</p></td><td>2022-04-22T18:24:37.812Z</td></tr><tr><td>ValdikSS</td><td><p>For OpenVPN, there’s a <a href="https://sourceforge.net/p/openvpn/mailman/openvpn-devel/thread/1397366216-657-1-git-send-email-cernekee%40gmail.com/">patch</a> for ocproxy support, but it’s outdated (for 2.3.x branch). I’ve ported it to the <a href="https://github.com/ValdikSS/openvpn-tunpipe">recent 2.5</a>, but this is PoC (Windows not supported, yet).<br>
+You can use it with <a href="https://github.com/cernekee/ocproxy">ocproxy</a> or <a href="https://github.com/russdill/tunsocks">tunsocks</a>, which expose VPN as a SOCKS/HTTP proxy.</p>
+<p>FYI, there’s similar projects for WireGuard: <a href="https://github.com/zhsj/wghttp/">wghttp</a>, <a href="https://github.com/shimberger/wg-http-proxy">wg-http-proxy</a>, <a href="https://github.com/octeep/wireproxy">wireproxy</a>, <a href="https://github.com/aramperes/onetun">onetun</a></p></td><td>2022-07-16T15:05:26.864Z</td></tr><tr><td>ValdikSS</td><td><p>If you already have tun interfaces (regular VPN) and you want to setup proxy <em>on a server</em>, you just need to bind outgoing requests of the proxy to specific tun interface, and also make sure that there’s default route over that interface with higher metric than the regular route.</p>
+<p>ocproxy/tunsocks, on the other hand, allows you to “emulate” tun interface and “convert” it into proxy. There won’t be a real tun interface in the OS in this case.</p></td><td>2022-07-16T15:13:24.787Z</td></tr><tr><td>anon94384997</td><td><p>Собрать tunsocks очень сложно. Я предлагаю менее элегантное, но более доступное решение на базе виртуалки. Достоинством является кроссплатформенность и то, что можно будет преобразовать в прокси любой VPN.</p>
+<p>В главном окне VirtualBox: Файл - Настройки - Сеть - Виртуальные сети хоста - значок + (добавляете новую сеть) vboxnet0. Настройки vboxnet0 такие:<br>
+Адаптер:<br>
+IPv4 адрес: 192.168.56.1<br>
+IPv4 маска сети: 255.255.255.0<br>
+DHCP сервер:<br>
+Отключен</p>
+<p><img src="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/fd9f21af2bdb5dc88f9d926ee2ee37d5556baf2f.png" alt="01" data-base62-sha1="AbDJKkAI9EPQRCE7Dmjg9hIkfzV" width="567" height="393"></p>
+<p>Устанавливаете Windows в виртуалку.<br>
+У виртуалки должно быть два сетевых адаптера.<br>
+Это уже настройки самой виртуалки, а не глобальные:<br>
+Адаптер 1. NAT, тут всё понятно, по умолчанию.<br>
+Адаптер 2. Тип подключения: Виртуальный адаптер хоста. Имя: vboxnet0 (которое мы создавали в глобальных настройках).</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/7fc72bbd0ce4c0d77dbc0f5d24fb40eb7f4f03c6.png" data-download-href="https://ntc.party/uploads/default/7fc72bbd0ce4c0d77dbc0f5d24fb40eb7f4f03c6" title="02"><img src="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/7fc72bbd0ce4c0d77dbc0f5d24fb40eb7f4f03c6_2_690x409.png" alt="02" data-base62-sha1="ienml7jQWnvxJWgfgPILSyd9V2u" width="690" height="409" srcset="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/7fc72bbd0ce4c0d77dbc0f5d24fb40eb7f4f03c6_2_690x409.png, convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/7fc72bbd0ce4c0d77dbc0f5d24fb40eb7f4f03c6.png 1.5x, convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/7fc72bbd0ce4c0d77dbc0f5d24fb40eb7f4f03c6.png 2x" data-dominant-color="E9E9EA"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">02</span><span class="informations">767×455 49.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>В реальной системе (в хосте) должен появиться адаптер vboxnet0. Если нет (например, в Linux), в Network Manager’е выберите “Добавить подключение - Ethernet”.<br>
+Его нужно настроить. Имя: VirtualBox.<br>
+Параметры IPv6: Игнорировать<br>
+Параметры IPv4: Вручную<br>
+Адрес: 192.168.56.1<br>
+Маска: 24 (указать надо 255.255.255.0, оно превратится в 24)<br>
+Шлюз: пустой (обязательно должен быть пустой, иначе пропадет интернет)<br>
+DNS: Любой, например 8.8.8.8<br>
+Вкладка Ethernet:<br>
+Устройство: vboxnet0</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/d3304839333513d3cb67fffa275c6be8fa8af0da.png" data-download-href="https://ntc.party/uploads/default/d3304839333513d3cb67fffa275c6be8fa8af0da" title="03"><img src="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/d3304839333513d3cb67fffa275c6be8fa8af0da_2_690x423.png" alt="03" data-base62-sha1="u8gbNgvLz1z2LlU0gCiVWw5lI6e" width="690" height="423" srcset="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/d3304839333513d3cb67fffa275c6be8fa8af0da_2_690x423.png, convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/d3304839333513d3cb67fffa275c6be8fa8af0da.png 1.5x, convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/d3304839333513d3cb67fffa275c6be8fa8af0da.png 2x" data-dominant-color="DAD9D7"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">03</span><span class="informations">709×435 32.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Запустите виртуальную Windows, установите гостевые дополнения.<br>
+Теперь настройка сети внутри виртуальной Windows:<br>
+1-ый адаптер (можно переименовать в NAT): Свойства - оставить только галочку на “Протокол Интернета (TCP/IP)” - Свойства - “Получить IP адрес автоматически”, DNS тоже автоматически или можно указать свой.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/20edf83d87f9d2c23dc97eb6aee04db78e515a1c.png" data-download-href="https://ntc.party/uploads/default/20edf83d87f9d2c23dc97eb6aee04db78e515a1c" title="04"><img src="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/20edf83d87f9d2c23dc97eb6aee04db78e515a1c.png" alt="04" data-base62-sha1="4Hj7RgNqi43a45Nb3qfTlUY0mGo" width="690" height="401" data-dominant-color="DDDDD2"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">04</span><span class="informations">759×442 25.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>2-ый адаптер (можно переименовать в Internal): Свойства - оставить только галочку на “Протокол Интернета (TCP/IP)” - Свойства:<br>
+IP-адрес: 192.168.56.2<br>
+Маска подсети: 255.255.255.0<br>
+Основной шлюз: пустой (обязательно должен быть пустой, иначе пропадет интернет)<br>
+DNS сервера по желанию, например 192.168.56.1, 8.8.8.8 или пустой</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/0c00c61c1be7af8e8164bad3906f133c6af2b05f.png" data-download-href="https://ntc.party/uploads/default/0c00c61c1be7af8e8164bad3906f133c6af2b05f" title="05"><img src="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/0c00c61c1be7af8e8164bad3906f133c6af2b05f.png" alt="05" data-base62-sha1="1Ibo271hULncsyr4LBKJOq6Hhq7" width="690" height="402" data-dominant-color="DDDDD3"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">05</span><span class="informations">757×442 25.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Итак, мы создали виртуальную внутреннюю сеть между хостом (192.168.56.1) и виртуалкой (192.168.56.2). (Адаптер 2)<br>
+При этом виртуалка также получает интернет через NAT. (Адаптер 1)</p>
+<p>Поднимаете в виртуальной Windows любой VPN.<br>
+А теперь надо установить в виртуальную Windows какой-нибудь локальный прокси, например, Proxomitron, который примет интернет от виртуального VPN и перешлет в хост с помощью прокси.<br>
+Proxomitron соответственно должен быть запущен вместе с виртуальным VPN.<br>
+Настройки Proxomitron такие:<br>
+В главном окне снимаете все галочки.</p>
+<p><img src="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/c13050a924b2f2143213c6b58cf6e5bbf3002335.png" alt="06" data-base62-sha1="rz1Fjz2QXNEHaUBsAImZAq05mQJ" width="294" height="261"></p>
+<p>Config - Don’t use textures (отключает цветную тему, требуется перезапуск)<br>
+Access - Allow access to the following IP address range - From 192.168.56.1 to 192.168.56.2<br>
+Blockfile - удаляете все строчки<br>
+HTTP - локальный порт любой, например 8020, следите чтобы не было конфликтов<br>
+File - Save default settings</p>
+<p><img src="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/557c312c2c100b4a7702b4b859c593ea4458800b.png" alt="07" data-base62-sha1="cceFfnWFrTZ0XmJQtsqb8OThB9x" width="314" height="278"></p>
+<p>Теперь в реальной системе (в хосте) в браузерах вы можете указать HTTP и HTTPS прокси<br>
+192.168.56.2 порт 8020<br>
+И браузеры получат доступ к VPN через прокси.<br>
+Получится VPN &gt; Proxy конвертер с помощью виртуалки.</p>
+<p>Чтобы не было утечек (коннектов мимо прокси) браузеры нужно дополнительно настроить.<br>
+На примере Firefox отключить в about:config следующие опции:<br>
+media.peerconnection.enabled - false (WebRTC)<br>
+network.dns.disableIPv6 - true (IPv6)<br>
+network.notify.IPv6 - false (IPv6)<br>
+network.http.http3.enable - false (HTTP3/QUIC UDP) в хромобраузерах chrome://flags <span class="hashtag-raw">#enable-quic</span> - Disabled<br>
+network.proxy.failover_direct - false (из-за проблем с прокси может быть fallback в direct)</p>
+<p>Но, во всей этой системе нет Kill switch. Если виртуальный VPN отключится (во время реконнекта tun шлюз разорвется), то Proxomitron будет транслировать в прокси интернет, который виртуалка получает по NAT.<br>
+Так что забота о Kill switch перекладывается на виртуальный VPN. С OpenVPN наверняка будут проблемы. Wireguard держит шлюз надежнее.</p>
+<p>Необязательно:<br>
+Можно сделать 100% рабочий Kill Switch. Но это ограничит протоколы VPN до TCP на 443 порту.<br>
+В виртуалке отключаем NAT адаптер (в VirtualBox снимаем галочку “кабель подключен” или можно отключить адаптер в самой виртуальной системе). Итак, виртуалка лишена интернета. Надо ей его провести. Проведем его все через тот же виртуальный сетевой интерфейс.<br>
+Для этого на реальной системе поднимаем другой локальный прокси. Это может быть тоже Proxomitron. В Linux хосте это может быть polipo. Вот его конфиг:</p>
+<pre><code class="lang-auto">logSyslog = false
+#logFile = polipo.log
+
+proxyAddress = 192.168.56.1
+proxyPort = 8060
+
+allowedClients = 192.168.56.2, 192.168.56.1, 127.0.0.1
+allowedPorts = 1-65535
+
+proxyName = "direct"
+
+cacheIsShared = false
+
+#socksParentProxy = 127.0.0.1:9050
+#socksProxyType = socks5
+#parentProxy = 127.0.0.1:8080
+
+chunkHighMark = 67108864
+
+diskCacheRoot = ""
+localDocumentRoot = ""
+
+disableLocalInterface = true
+disableConfiguration = true
+
+dnsUseGethostbyname = yes
+
+disableVia = true
+
+censoredHeaders = from,accept-language,x-pad,link
+censorReferer = maybe
+
+maxConnectionAge = 10m
+maxConnectionRequests = 120
+serverMaxSlots = 16
+serverSlots = 8
+tunnelAllowedPorts = 1-65535
+</code></pre>
+<p>Теперь в виртуальном VPN мы должны указать этот вышестоящий HTTP прокси: 192.168.56.1:8060<br>
+Через прокси могут работать, например OpenVPN TCP и SoftEther.</p>
+<p>Если у виртуального VPN будут проблемы и он разорвет шлюз, то в виртуалке интернета не будет (кроме вышестоящего прокси, но о нем знает только VPN клиент и будет через него реконнектится). А Proxomitron, который раздает нам VPN интернет в реальную систему, останется без интернета и будет ждать реконнекта VPN. Тем самый предотвращается утечка в случае сбоев.</p>
+<p>Вообще, такой способ позволяет проводить хитрые манипуляции. Можно, например, пустить OpenVPN через любой прокси (если в polipo указать еще более вышестоящий). Но все прокси ограничены TCP.</p>
+<p>У меня появилась возможность использовать SoftEther VPNGate в Linux, хотя SoftEther VPNGate не поддерживает Linux.</p></td><td>2022-12-02T11:06:10.389Z</td></tr><tr><td>anon94384997</td><td><p>По поводу tunsocks поясните, пожалуйста. Я правильно понимаю, сначала я должен скомпилировать tunsocks <a href="https://github.com/russdill/tunsocks" rel="noopener nofollow ugc">https://github.com/russdill/tunsocks</a> потом openvpn-tunpipe <a href="https://github.com/ValdikSS/openvpn-tunpipe" rel="noopener nofollow ugc">https://github.com/ValdikSS/openvpn-tunpipe</a> потому что в оригинальном openvpn клиенте нет поддержки tunpipe/tunsocks? Или есть? Если нет, ValdikSS, как ты умудрился добавить поддержку tunpipe в openvpn (2.5) и следить за актуальностью openvpn в своем репозитории? Где эти патчи? Сейчас в твоем репозитории последний коммит от 16 июля 2022 года, что примерно соответствует 2.5.7. А если я соберу коммит от 2 мая 2021 (2.5.2) там будет поддержка tunpipe?</p>
+<p>А запускать потом все это дело надо будет как-то так?<br>
+openvpn-tunpipe --script-tun --script “tunsocks -D 8080 -R ssh -L 8888:webproxy.example.com:80” <a href="http://vpn.example.com" rel="noopener nofollow ugc">vpn.example.com</a><br>
+Это пример со страницы tunsocks<br>
+Здесь тоже непонятно. Причем тут ssh и зачем два порта?<br>
+<a href="http://vpn.example.com" rel="noopener nofollow ugc">vpn.example.com</a> можно ли заменить на путь к конфигу .ovpn или как потом скормить конфиг проге?</p>
+<p>В общем, я полагаю openvpn (с поддержкой tunpipe) будет передавать управление tun’ом скрипту tunsocks (команды --script-tun --script)<br>
+Т.е. что-то вроде такого?<br>
+openvpn-tunpipe --script-tun --script “tunsocks -D 8080” config.ovpn<br>
+И будет локальный socks прокси 127.0.0.1:8080 с VPN интернетом?<br>
+Хотелось бы, чтобы прояснили финальную команду запуска.</p></td><td>2022-12-03T04:28:33.026Z</td></tr><tr><td>anon94384997</td><td><p>Я скомпилировал tunsocks и openvpn-tunpipe. И как теперь их подружить?<br>
+Ничего не выходит. Пробовал даже такое:<br>
+sudo openvpn-tunpipe config.ovpn | tunsocks -D 8010<br>
+А за время тестов меня забанил Proton.<br>
+Ничего не понятно из документации. Почти нет примеров.</p></td><td>2022-12-03T08:37:09.579Z</td></tr><tr><td>anonymous75(anonymous75)</td><td><p>Для оригинально патча работало так:</p>
+<pre><code class="lang-auto">./openvpn-tunpipe --config config.ovpn --script-security 2 --dev '|./tunsocks -D 127.0.0.1:8010 -d 8.8.8.8'
+</code></pre>
+<p>sudo не нужен, адрес слушающего прокси лучше указать явно (127.0.0.1 или другой), localhost через hosts файл может оказаться не тем, что нужно, не забыть про днс.</p></td><td>2022-12-03T09:11:51.338Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="anonymous75" data-post="9" data-topic="106">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/eb8c5e/48.png" class="avatar"> anonymous75:</div>
+<blockquote>
+<p>Для оригинально патча работало так:</p>
+<pre><code class="lang-auto">./openvpn-tunpipe --config config.ovpn --script-security 2 --dev '|./tunsocks -D 127.0.0.1:8010 -d 8.8.8.8'
+</code></pre>
+</blockquote>
+</aside>
+<p>Ошибка после openvpn соединения:<br>
+Error: problem with tun vs. tap setting<br>
+Exiting due to fatal error</p>
+<p>Но у меня старая система и tunsocks новее <a href="https://github.com/russdill/tunsocks/commits/master" rel="noopener nofollow ugc">Mar 1, 2017</a> не собирается.</p>
+<p>А openvpn я пробовал 3 версии и со всеми та же ошибка.<br>
+<a href="https://github.com/ValdikSS/openvpn-tunpipe/commit/bf90fcd141996c7f6ca10f74ebebf1160f8db5fc" rel="noopener nofollow ugc">https://github.com/ValdikSS/openvpn-tunpipe/commit/bf90fcd141996c7f6ca10f74ebebf1160f8db5fc</a><br>
+последняя версия Jul 16, 2022 (официальный openvpn был в это время версии 2.5.7)</p>
+<p><a href="https://github.com/ValdikSS/openvpn-tunpipe/commit/c2912912047fdd228faedb6466672288e14dbba6" rel="noopener nofollow ugc">https://github.com/ValdikSS/openvpn-tunpipe/commit/c2912912047fdd228faedb6466672288e14dbba6</a><br>
+May 2, 2021 (официальный openvpn был в это время версии 2.5.2)</p>
+<p><a href="https://github.com/OpenVPN/openvpn/releases/tag/v2.3.18" rel="noopener nofollow ugc">https://github.com/OpenVPN/openvpn/releases/tag/v2.3.18</a><br>
+Sep 25, 2017 (непатченный?)</p>
+<p>Параметры сборки openvpn (последней версии от valdikss) такие, в общем всё включено, кроме systemd и selinux:</p>
+<p><code>./configure --prefix=/opt/tunsocks --enable-silent-rules --enable-static --enable-shared --disable-debug --disable-systemd --disable-selinux --enable-lzo --enable-lz4 --enable-ofb-cfb --enable-plugins --enable-management --enable-pkcs11 --enable-fragment --enable-port-share --enable-iproute2 --enable-plugin-auth-pam --enable-pam-dlopen --disable-unit-tests --with-crypto-library=openssl</code></p>
+<p>Как пропатчить 2.3.18 хотя бы?</p></td><td>2022-12-03T12:09:46.015Z</td></tr><tr><td>anonymous75(anonymous75)</td><td><aside class="quote no-group" data-username="anon94384997" data-post="10" data-topic="106">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/49beb7/48.png" class="avatar"> anon94384997:</div>
+<blockquote>
+<p>Error: problem with tun vs. tap setting</p>
+</blockquote>
+</aside>
+<p>В конфиге для протона нет опции <code>dev-type</code>, возможно добавление исправит, или так:</p>
+<pre><code class="lang-auto">./openvpn-tunpipe --config config.ovpn --script-security 2 --dev '|./tunsocks -D 127.0.0.1:8010 -d 8.8.8.8' --dev-type tun
+</code></pre>
+<p>Но этой ошибки в патченной версии быть не должно</p>
+<aside class="quote no-group">
+<blockquote>
+<pre><code>else if (dev &amp;&amp; *dev == '|')
+{
+    return DEV_TYPE_TUN;
+}
+</code></pre>
+</blockquote>
+</aside></td><td>2022-12-03T12:27:32.336Z</td></tr><tr><td>anon94384997</td><td><p>Ничего не помогает (и я пробовал не только Proton). Я даже скомпилировал <a href="https://github.com/OpenVPN/openvpn/releases/tag/v2.3.3" rel="noopener nofollow ugc">2.3.3</a> с форумными <a href="https://sourceforge.net/p/openvpn/mailman/openvpn-devel/thread/1397366216-657-1-git-send-email-cernekee%40gmail.com/" rel="noopener nofollow ugc">патчами</a>. Чего мне стоило вытащить эти патчи из текста, не буду говорить. tunsocks заменил на ocproxy (он 2014 года) и все равно ошибки.<br>
+Т.е. даже старая патченная версия не работает у меня.</p></td><td>2022-12-03T13:54:19.712Z</td></tr><tr><td>anonymous75(anonymous75)</td><td><p>Интересно, но должно работать.<br>
+Покажите полностью строчку которой запускаете?<br>
+Может ковычки одинарные так срабатывают?<br>
+Может при копировании уникод внедрился<br>
+Двойные меняют ошибку?</p>
+<pre><code class="lang-auto">--dev "|./tunsocks -D 127.0.0.1:8010"
+</code></pre></td><td>2022-12-03T14:16:13.021Z</td></tr><tr><td>anon94384997</td><td><p>Заработало.</p>
+<p>Пересобрал openvpn. На этот раз решил не городить опций в configure (т.е. положился на дефолты) и еще посмотрел как openvpn собирается в Arch и Ubuntu. Сравнил (openvpn --version) системный openvpn и собранный рабочий. Оказалось, что в системном enable-iproute2=yes, а в моем собранном от valdikss enable-iproute2=no. Причем, ни системные (ubuntu ppa, ubuntu repo, arch), ни я не указывали enable-iproute2 в configure. Значит в исходниках оригинального openvpn iproute2 по умолчанию включен, а в исходниках от valdikss по умолчанию отключен. Я же раньше явно включал iproute2.</p>
+<p>Привожу инструкции как я всё собирал.</p>
+<pre><code class="lang-auto">sudo apt install checkinstall autoconf git
+sudo apt build-dep openvpn
+
+git clone https://github.com/russdill/tunsocks
+cd tunsocks
+git checkout 2a85b5ffda7adfeabaa2369a02acbfc4e085b30d
+git submodule update --init
+git checkout 2a85b5ffda7adfeabaa2369a02acbfc4e085b30d
+autoreconf -fi
+./configure --prefix=/usr --enable-silent-rules --enable-pcap
+make
+sudo checkinstall --install=no
+</code></pre>
+<p>Версия tunsocks от 1 марта 2017 года<br>
+Можно собрать версию новее, тогда git checkout указывать не нужно, но будет клонироваться и использоваться больше субмодулей (lwip проекта) и на старых системах может не собраться. lwip клонируется каким-то хитрым способом и на некоторых провайдерах могут быть сбои при клонировании.<br>
+Результатом сборки будет один файл /usr/bin/tunsocks<br>
+Хотя и указано checkinstall --install=no, checkinstall не только создает deb пакет, но и копирует собранные файлы в системные пути (без регистрации в пакетом менеджере), имейте в виду.<br>
+Когда checkinstall спросит создавать ли доки, откажитесь (меньше мусора будет).</p>
+<pre><code class="lang-auto">git clone --depth 1 https://github.com/ValdikSS/openvpn-tunpipe --branch tun_pipe --single-branch
+cd openvpn-tunpipe
+autoreconf -fi
+./configure --help
+./configure --prefix=/usr --sbindir=/sbin --includedir=/usr/include/openvpn-tunpipe --mandir=/usr/share/man/openvpn-tunpipe --docdir=/usr/share/doc/openvpn-tunpipe --libdir=/usr/lib/openvpn-tunpipe --enable-pkcs11 --enable-x509-alt-username --enable-plugins --disable-systemd --disable-unit-tests
+make
+sudo checkinstall --install=no
+</code></pre>
+<p>Эти параметры взяты из Ubuntu и Arch. Я думаю, самое главное --disable-iproute2 но это по умолчанию в исходниках от valdikss, поэтому я не указывал явно.<br>
+Пути изменены, чтобы не затереть системный openvpn.<br>
+include, доки и маны потом можно удалить. lib оставить.<br>
+Нужно потом переименовать /sbin/openvpn в /sbin/openvpn2, т.к. они оба в PATH.</p>
+<p>Вот куда срет openvpn установка:<br>
+/sbin/openvpn<br>
+/usr/lib/openvpn-tunpipe</p>
+<p>можно удалить:<br>
+/usr/include/openvpn-tunpipe<br>
+/usr/share/man/openvpn-tunpipe<br>
+/usr/share/doc/openvpn-tunpipe</p>
+<p>Запуск:<br>
+<code>openvpn2 --config 'config.ovpn' --script-security 2 --dev '|tunsocks -D 127.0.0.1:8010 -d 1.1.1.1'</code></p></td><td>2022-12-04T14:10:05.076Z</td></tr><tr><td>anon94384997</td><td><p>И хотя это вряд ли кому-нибудь будет нужно, вот готовые пакеты для Ubuntu 16.04 i386. Извините, зависимости в deb пакеты не прописывал. Проверить их можно readelf -d или ldd.<br>
+<a class="attachment" href="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/9n93jQyR3SXiRRsyuAKjopm97lc.deb">tunsocks-01.03.2017-xenial-i386.deb</a> (40.6 КБ)<br>
+<a class="attachment" href="convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/yfbnjMUnWdy3gFv6DNG0EgjnSmy.deb">openvpn-tunpipe-2.6-xenial-i386.deb</a> (340.8 КБ)</p></td><td>2022-12-04T14:41:29.160Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="4" data-topic="106">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Windows not supported, yet</p>
+</blockquote>
+</aside>
+<p>А если в Msys (ex Cygwin) собрать? Он вроде эмулирует POSIX. Правда, не будет поддержки XP и библиотеку msys-2.0.dll придется тащить с собой. tunsocks, кстати тоже не хочет кросскомпилиться в mingw.<br>
+В Msys как-то собирал вещи, которые не компилились в mingw. Хотя, рекомендуют именно mingw.</p></td><td>2022-12-05T13:31:17.442Z</td></tr><tr><td>xAffan(xAffan)</td><td><p>Hello Mr.Anon. Does this setup work on Windows? If you use the old patch of openvpn then use tunsocks. Is it possible? I really need to know. Thanks!!!</p></td><td>2024-07-08T14:20:04.777Z</td></tr><tr><td>0ka(0ka)</td><td><p>just use regular openvpn with high metric on interface and sing-box or xray with binding to interface?</p></td><td>2024-07-08T14:22:39.876Z</td></tr><tr><td>xAffan(xAffan)</td><td><p>I don’t understand what you said. I want to run a proxy without root access. Using normal openvpn would negate that. And compiled versions for these programs is not available so it is already a pain.</p></td><td>2024-07-08T15:03:21.804Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="xAffan" data-post="19" data-topic="106">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/xaffan/48/5242_2.png" class="avatar"> xAffan:</div>
+<blockquote>
+<p>I want to run a proxy without root access</p>
+</blockquote>
+</aside>
+<p>if you only have openvpn then you can connect to it from android and then use something like <a href="https://play.google.com/store/apps/details?id=cn.adonet.proxyevery">https://play.google.com/store/apps/details?id=cn.adonet.proxyevery</a> to expose it as a proxy</p></td><td>2024-07-08T15:13:52.531Z</td></tr><tr><td>xAffan(xAffan)</td><td><p>Luckily, I had wireguard so it worked out but openvpn is more convenient.</p></td><td>2024-07-08T15:59:10.402Z</td></tr><tr><td>ValdikSS</td><td><p>This exact patch won’t work on Windows, but in general it is possible to adapt it for Windows. I’m planning to do that in my free time.</p></td><td>2024-07-08T16:18:26.251Z</td></tr>
+    </table>
+      </body>
+    </html>

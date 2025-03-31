@@ -1,0 +1,110 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>3x-ui-тормоза-после-обновления</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Fewcher</td><td><p>Имеется сервер с установленным docker образом на 3x-UI. Использую VLESS и SOCKS5 прокси.</p>
+<p>Целый год пользовался версией 3X-UI 1.7.8 на Xray 1.8.4 и проблем никаких не было, но вчера обновился до 3X-UI 2.4.3 + Xray 24.9.30 и появились сильные тормоза в начале каждого запроса. Например Firefox висит на “performing a tls handshake”, а видео на YT сперва долго думают а потом грузятся без проблем.</p>
+<p>Пробовал сбрасывать Xray Configs. Менять версию xray внутри админки, даже на ту что работала раньше (1.8.4)</p>
+<p>Проблемы даже на SOCKS5 прокси, где настроек то никаких нет.</p></td><td>2024-10-08T07:04:57.000Z</td></tr><tr><td>Nocturnal-ru(Roman)</td><td><p>Может поставить без докера? Ну в порядке бреда …</p></td><td>2024-10-08T07:54:44.051Z</td></tr><tr><td>gcjx4iwxs</td><td><p>Хостинг не в OVH ?</p><aside class="quote quote-modified" data-post="41" data-topic="8029">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-httphttps-%D0%B2-%D1%81%D1%82%D0%BE%D1%80%D0%BE%D0%BD%D1%83-linode-ovh-fastly-digital-ocean-scaleway/8029/41">Блокировка HTTP/HTTPS в сторону Linode, OVH, Fastly, Digital Ocean, Scaleway</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    В сторону OVH (не знаю, только ли его, тестирую только на нём) работают некие пороговые фильтры, приводящие к обнаружению и ручной блокировке HTTPS-прокси. 
+Предположительно, сценарий следующий: 
+
+Большое количество соединений к одному IP-адресу и передача данных, похожих на HTTPS-прокси, вызывают срабатывание пороговых фильтров
+Данные об IP-адресе отправляются оператору
+Оператор, возможно, проводит ручную валидацию/проверку наличия прокси
+Оператор блокирует IP-адрес
+
+Выполняется это вручную еже…
+  </blockquote>
+</aside>
+</td><td>2024-10-08T08:29:23.595Z</td></tr><tr><td>Fewcher</td><td><p>нет, Hostkey, но проблема началась ровно после обновления версии же</p></td><td>2024-10-08T08:31:59.984Z</td></tr><tr><td>0ka(0ka)</td><td><p>а если отключить sniffing в inbounds?</p></td><td>2024-10-08T10:05:51.262Z</td></tr><tr><td>Fewcher</td><td><p>Выключение Sniffing в настройка VLESS Inbound делает еще хуже, вообще не грузится ничего<br>
+и ето никак на socks не влияет, настроек там нет</p></td><td>2024-10-08T10:30:44.907Z</td></tr><tr><td>TheDarkKRONOS(TheDarkKRONOS)</td><td><p>А в самой панели, что по нагрузке идёт? Там на начальной можно посмотреть, не забилось ли чего.</p></td><td>2024-10-08T10:54:27.442Z</td></tr><tr><td>Fewcher</td><td><p>По цифрам все хорошо, как и раньше, нагрузка близка к нулю.<br>
+В Wireshark вижу TCP Reset (RST), но кажется причин может быть дофига</p></td><td>2024-10-08T11:01:46.511Z</td></tr><tr><td>TheDarkKRONOS(TheDarkKRONOS)</td><td><p>Тут либо что-то не нравится в конфиге после обновления (а там они писали в промежуточный пререлизных, что надо сбрасывать конфиг или что-то перезапускать). Либо надо включать логи и читать по ним.</p></td><td>2024-10-08T11:12:35.480Z</td></tr><tr><td>Fewcher</td><td><p>в итоге я ничо не придумал, кроме как откатить версию образа через админку хостера<br>
+все снова отлично работает на 3X-UI 1.7.8 + Xray 1.8.4</p></td><td>2024-10-09T05:38:10.507Z</td></tr><tr><td>Jabius</td><td><p>Аналогичная картина. Чувство, как будто через tor работаешь, так все тормозит при загрузке. А исходящий cloudflare-wg для русайтов это вообще нечто-пока Яндекс загрузится-можно сходить выспаться. Даже роликов на дзене на просмотреть-ждать устанешь <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> Пока поставил xray от Амнезии-и все летает как будто без VPN вообще…</p></td><td>2024-11-09T16:04:29.706Z</td></tr><tr><td>Veon</td><td><p>Ровно такая же ситуация была с 3x-ui v2.4.6 и Xray Core v24.10.31. Так и не понял где проблема.<br>
+Поставил 3x-ui v2.0.2 и Xray Core v1.8.6 и стало всё отлично.</p></td><td>2024-11-12T17:56:44.907Z</td></tr><tr><td>itsabomberr(itsabomberr)</td><td><p>Как ставить конкретные версии?</p></td><td>2024-11-24T14:15:07.459Z</td></tr><tr><td>Nocturnal-ru(Roman)</td><td><p>хз, у меня наоборот после отключения sniffing в inbounds, на версиях 3x-ui 2.4.6 и 2.4.7 (разные сервера в разных локациях) перестал тупить YT, до этого буфер через некоторое время “падал” в 0</p></td><td>2024-11-24T21:12:17.764Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Абсолютно та же история, в посте ниже подробнее расписал способы убрать лаги, но без отключения Sniffing’a</p>
+<aside class="quote" data-post="19" data-topic="13319">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/xx_rup3r7_p4ul50n_xx/48/13752_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-%D1%81%D0%BE%D0%BA%D1%80%D1%8B%D1%82%D0%B8%D0%B5%D0%BC-dns-nekoray/13319/19">Проблемы с сокрытием DNS Nekoray</a> <a class="badge-category__wrapper " href="/c/censorship-circumvention-software/tunneling-software/24"><span data-category-id="24" style="--category-badge-color: #652D90; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #92278F;" data-parent-category-id="11" data-drop-close="true" class="badge-category --has-parent" title="Everything that encapsulates data and transmits it to middlebox server: VPN, proxy, cloaking software"><span class="badge-category__name">Tunneling software</span></span></a>
+  </div>
+  <blockquote>
+    На данный момент 
+
+либо отключать Route Only (лично у меня работает)
+либо отключать QUIC в Sniffing’е, но оставлять Route Only включённым (не проверял, но кому-то помогает)
+либо откатываться на старую версию, где таких проблем нет (например на 3x-ui v2.0.2 и xray core v1.8.6)
+  </blockquote>
+</aside>
+</td><td>2024-11-24T22:24:32.935Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Если с нуля, то:</p>
+<blockquote>
+<p>VERSION=v2.0.2 &amp;&amp; bash &lt;(curl -Ls “<a href="https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh" rel="noopener nofollow ugc">https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh</a>”) $VERSION</p>
+</blockquote>
+<p>Если уже стоит 3x-ui, то:</p>
+<blockquote>
+<p>x-ui<br>
+4<br>
+2.0.2</p>
+</blockquote>
+<p>Полную рботоспособность во втором случае не гарантирую, т.к. это по сути даунгрейд со всеми вытекающими (в теории может что-то сломаться, а может и нет). Лично я сначала сохраняю все конфигурации из 3x-ui панели в отдельный текстовый файл, а потом на свежеустановленную панель вписываю старые данные.</p></td><td>2024-11-24T22:29:57.158Z</td></tr><tr><td>Nocturnal-ru(Roman)</td><td><aside class="quote no-group" data-username="Проблемы с сокрытием DNS Nekoray" data-post="19" data-topic="13319">
+<div class="title">
+<div class="quote-controls"></div>
+<a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-%D1%81%D0%BE%D0%BA%D1%80%D1%8B%D1%82%D0%B8%D0%B5%D0%BC-dns-nekoray/13319/19">Проблемы с сокрытием DNS Nekoray</a></div>
+<blockquote>
+<p>Route Only</p>
+</blockquote>
+</aside>
+<p>где эта настройка в панели?</p></td><td>2024-11-25T20:23:06.395Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Категория Inbounds &gt; Настройки существющего Inbound &gt; Подменю Sniffing (в самом низу) &gt; Route Only</p></td><td>2024-11-25T22:41:57.975Z</td></tr><tr><td>Arch4Arts(Артур)</td><td><p>Не подскажите, зачем она нужна?</p></td><td>2024-11-26T16:00:37.592Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><aside class="quote" data-post="16" data-topic="13319">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-%D1%81%D0%BE%D0%BA%D1%80%D1%8B%D1%82%D0%B8%D0%B5%D0%BC-dns-nekoray/13319/16">Проблемы с сокрытием DNS Nekoray</a> <a class="badge-category__wrapper " href="/c/censorship-circumvention-software/tunneling-software/24"><span data-category-id="24" style="--category-badge-color: #652D90; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #92278F;" data-parent-category-id="11" data-drop-close="true" class="badge-category --has-parent" title="Everything that encapsulates data and transmits it to middlebox server: VPN, proxy, cloaking software"><span class="badge-category__name">Tunneling software</span></span></a>
+  </div>
+  <blockquote>
+    может это и помогает, но выглядит как костыль и баг получается и им надо поставить bug request. 
+И отключаение route only - это плохая затея т.к. IP при вашем запросе на выходе заменяется на Domain. Это вносит путаницу для сервисов которые раскиданы по миру и имеют свои сети CDN.
+  </blockquote>
+</aside>
+</td><td>2024-11-26T18:47:20.121Z</td></tr><tr><td>Nocturnal-ru(Roman)</td><td><p>а где вообще можно почитать описать опций для 3x-ui? конкретно про набор настроек sniffing (внутри там ведь и route only находится), к примеру, что она дает и почему ее отключение так влияет на улучшения скорости? и почему по дефолту в новых версиях она отключена, просто из changelog панели понять почти ничего не возможно, если ты сам хорошо уже не ориентируешься в потрохах панели</p></td><td>2024-11-26T19:25:26.631Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>По идее <a href="https://xtls.github.io/en/config/" rel="noopener nofollow ugc">здесь</a>, но там идёт перевод с китайского и о каждой функции рассказано вскользь, так что только самому додумываттся о всяких тонкостях.</p></td><td>2024-11-27T00:19:57.869Z</td></tr>
+    </table>
+      </body>
+    </html>

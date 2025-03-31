@@ -1,0 +1,179 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>cloak-wireguard-под-windows-клиентов</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>NimuraF(Balbes)</td><td><p>Столкнулся с проблемой при настройке связки WG + Cloak и подключению к ней клиентов с windows. На удалённом VPS в нидерландах поднял чистый WG через образ linuxserver/wireguard (пока, кстати, работает уже пару часов без перебоев и в таком виде), теперь хочу упаковать WG в Cloak, но совсем не понял, как провернуть эту связку на винде + хотелось бы закинуть и сам Cloak в докер-контейнер (это вообще имеет смысл, кстати?). Я в принципе не понял, как запустить клиент Cloak на винде, оф. дока вообще не имеет инфы на этот счёт, экзешники, что лежат на гитхабе вроде как просто плагины под SS-клиенты (хотя я попробовал их запустить и так они просто инстантно закрываются). Возник соответствующий вопрос, такую связку вообще реально реализовать или стоит смотреть в сторону других обфускаторов? Я видел удобные приложухи которые сразу развёртывают OpenVPN+Cloak, но я бы хотел ручками проделать эту задачу и набить руку, ну и речь идёт именно про WG.</p></td><td>2023-09-21T22:58:05.760Z</td></tr><tr><td>Xunlei</td><td><p>Смысла не имеет.</p>
+<p>Вам же ссылки дали на документацию и пример конфигов в соседней ветке. Скачиваете <a href="https://go.dev/dl/go1.21.1.windows-amd64.msi" rel="noopener nofollow ugc">go1.21.1.windows-amd64.msi</a>, и собираете командами:</p>
+<pre><code class="lang-auto">@go.exe build "-ldflags=-s -w" -trimpath -o ck-client.exe github.com/cbeuw/Cloak/cmd/ck-client
+@go.exe build "-ldflags=-s -w" -trimpath -o ck-server.exe github.com/cbeuw/Cloak/cmd/ck-server
+</code></pre>
+<p>Запускаете по шаблону из README. Если что-то не работает, можете отладить в <a href="https://www.jetbrains.com/go/download/#section=windows" rel="noopener nofollow ugc">GoLand</a>. Компиляция и запуск удалённого отладчика <a href="https://github.com/go-delve/delve" rel="noopener nofollow ugc">delve</a> на Linux:</p>
+<pre><code class="lang-auto">/usr/local/go/bin/go build -buildvcs=false -gcflags "all=-N -l" -o ck-server github.com/cbeuw/Cloak/cmd/ck-server
+sudo dlv --listen=:&lt;порт отладки&gt; --headless=true --api-version=2 --accept-multiclient exec ./ck-server
+</code></pre></td><td>2023-09-22T05:03:07.557Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>Благодарю за ответ, но я не видел в доке вообще ничего касательно сборки под винду, я в принципе не думал, что экзешник надо дополнительно собирать через go. Понятия не имею почему, но эта мысль мне даже в голову не пришла.</p></td><td>2023-09-22T12:28:47.106Z</td></tr><tr><td>Xunlei</td><td><p>Да, автор ридми предполагает, что для читателя это само собой разумеющееся.<br>
+Сейчас глянул релиз — там экзешник клиента есть. Попробуйте его запустить с настроенным конфигом под ваш сервер на линукс. Просто выполняйте шаги инструкции, и если шаг вызывает ошибку или затруднения, то уже тогда имеет смысл задавать вопрос с приложенным описанием проделанных действий.</p></td><td>2023-09-22T14:03:01.984Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>Опять же, вот этот шаг я и не понял, есть этот экзешник на релизе, да, я его и загружал, а с ним-то что билдить? Это же по сути уже готовый файл, разве нет? При попытке его запуска просто клиент запускается и сразу же закрывается, конфиг лежит рядом с ним, при запуске через консоль указываю всё по доке - путь к конфигу, ip-адрес удалённого хоста.</p>
+<p>Я в принципе не мастер винды и мне трудно сообразить, чего на ней нужно сделать, на линуксе как раз всё очевидно, скачал бинарник/собрал сам из исходников → запустил буквально одной командой. По моей логике на винде всё должно быть ещё проще, но теперь, получается, я скачал этот экзешник, а с ним ничего даже сделать не могу <img src="https://ntc.party/images/emoji/twitter/confused.png?v=12" title=":confused:" class="emoji" alt=":confused:" loading="lazy" width="20" height="20"> Нет никакого GUI, лога ошибок и т.д.</p></td><td>2023-09-22T16:05:51.182Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>В общем сдался и забил, решил попробовать связку SS + Cloak и опять же поймал ошибку: “Failed to prepare connection to remote: short buffer”, куда дальше копать - вообще хз.</p></td><td>2023-09-23T01:19:37.214Z</td></tr><tr><td>0ka(0ka)</td><td><p>зачем cloak если есть ss? вообще непонятно что значит ss + cloak. что не так с пробросом порта wireguard через чистый ss?</p></td><td>2023-09-23T01:28:45.830Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>Сори, я просто немного неясно выразился, я решил в принципе отказаться от WG + Cloak из-за какого-то лютого бреда с их настройкой под винду (особенно Cloak), он просто не хотел запускаться сам по себе, а не в качестве плагина для SS-клиента (я попробовал 3 разных сборки Винды с разницей в ± 3 месяца обновлений и везде одно и то же). Товарищ сверху меня надоумил на то, что файлы клока нужно собирать, а я уже настолько устал с этой связкой возиться, что реально попытался собрать готовый экзешник, а не вменяемо объяснить, что я взял уже готовый exe-клиент под винду)</p>
+<p>В итоге решил просто поставить себе на сервер SS + Cloak через этот скрипт <a href="https://github.com/HirbodBehnam/Shadowsocks-Cloak-Installer" class="inline-onebox" rel="noopener nofollow ugc">GitHub - HirbodBehnam/Shadowsocks-Cloak-Installer: A one-key script to setup Cloak plugin with Shadowsocks on your server</a> и его доку, но на клиенте ShadowSocks под виндой опять получаю полную ересь в виде “Failed to prepare connection to remote: short buffer” в журнале плагина (то бишь Cloak). И опять хз в какую сторону копать.</p>
+<p>P.S. На сервере всё гуд, установленный ck-server слушает 443 порт.</p>
+<p>P.P.S. А есть какая-то инфа по текущему статусу Outline? А то мб просто его поставить и забить, а то подустал уже возиться…</p></td><td>2023-09-23T01:40:17.517Z</td></tr><tr><td>0ka(0ka)</td><td><p>чем не устраивает чистый ss?</p></td><td>2023-09-23T01:55:10.972Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>Так а Outline это считай не тот же чистый SS?</p>
+<p>Update: попробовал Outline на timeweb’овских серваках в Нидерландах / Польше - вообще не фурычат.</p></td><td>2023-09-23T01:56:30.090Z</td></tr><tr><td>Xunlei</td><td><p>Нет. Да. Если приложение крашится без ошибок, то добро пожаловать в мир самостоятельной отладки и патчинга. Обычно разрабочик забывает обработать какой-нибудь error.</p></td><td>2023-09-23T03:50:34.564Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="NimuraF" data-post="8" data-topic="5755">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/e68b1a/48.png" class="avatar"> NimuraF:</div>
+<blockquote>
+<p>Товарищ сверху меня надоумил на то, что файлы клока нужно собирать, а я уже настолько устал с этой связкой возиться, что реально попытался собрать готовый экзешник, а не вменяемо объяснить, что я взял уже готовый exe-клиент под винду</p>
+</blockquote>
+</aside>
+<p>Так вы сами изначально ошибочную информацию на вход подали, что там нет экзешника клиента, я её не проверяя написал команды сборки.</p></td><td>2023-09-23T03:53:10.200Z</td></tr><tr><td>Xunlei</td><td><p>На timeweb пока идёт крупная DDoS-атака во всех локациях, возможно, не работало поэтому.</p></td><td>2023-09-23T03:58:09.227Z</td></tr><tr><td>0ka(0ka)</td><td><p>discord? telegram?</p></td><td>2023-09-23T03:59:23.658Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>Безусловно, мой косяк, я же не спорю <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> В любом случае спасибо вам за ответ.</p>
+<p>Кстати, раз уж речь об этом зашла, вы, случаем, не знаете, где можно достать хороший гайд по установке SS2022 на сервер?</p></td><td>2023-09-23T04:01:15.794Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>По ssh всё отлично, да и ради интереса быстро закинул пэт-проект на NGINX+PHP и всё окей. Так что сомневаюсь, что в ддосе дело, outline вообще запускаться не хочет. Timeweb, кстати, вроде как даже хотел выпустить образы SS + WG готовые, но у них уже сервера 2-ю неделю отваливаются каждый час, с таким успехом проще у себя в подъезде сервер поставить.</p></td><td>2023-09-23T04:02:30.929Z</td></tr><tr><td>Xunlei</td><td><p>Гайд? Мне хватило инструкции из ридми. Просто начните делать, и когда уже совсем отчаялись спрашивайте других.</p></td><td>2023-09-23T04:03:50.803Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>Вы, случаем, не про вот эту? <a href="https://github.com/shadowsocks/shadowsocks-rust" class="inline-onebox" rel="noopener nofollow ugc">GitHub - shadowsocks/shadowsocks-rust: A Rust port of shadowsocks</a></p></td><td>2023-09-23T04:07:46.165Z</td></tr><tr><td>Xunlei</td><td><p>Да. Собираю в <a href="https://www.jetbrains.com/clion/download/#section=windows" rel="noopener nofollow ugc">CLion</a> в один клик.</p></td><td>2023-09-23T04:09:01.095Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>Понял, спасиб за ответ. Какое-то безумное количество различных репозиториев с чуть ли не идентичным названием сбивало с толку, а я, скорее, ньюфаг, а не лентяй, порой намного проще спросить, чтобы ткнули носом где я не прав и что делаю не так…</p></td><td>2023-09-23T04:21:09.424Z</td></tr><tr><td>anon94384997</td><td><p>Если не хочется собирать самому, я как-то делал сборку с 2022 и aes (для xp) шифрами <a href="https://github.com/artenax/shadowsocks-rust/releases/tag/v1.15.3" class="inline-onebox" rel="noopener nofollow ugc">Release v1.15.3 · artenax/shadowsocks-rust · GitHub</a></p></td><td>2023-09-23T14:31:58.062Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="NimuraF" data-post="20" data-topic="5755">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/e68b1a/48.png" class="avatar"> NimuraF:</div>
+<blockquote>
+<p>Какое-то безумное количество различных репозиториев с чуть ли не идентичным названием сбивало с толку</p>
+</blockquote>
+</aside>
+<p>Есть реализации на разных языках программирования.</p></td><td>2023-09-23T14:33:27.590Z</td></tr><tr><td>4fx</td><td><p>Не знаю актуально ли, но вот про cloak клиент на винде. В докер cloak не засовывал, подсказать не смогу. По ощущениям когда wg в докере впн работает медленнее. На винде клиент .exe с офф гитхаба запускаю с параметрами <code>ck-client.exe -s &lt;IP&gt; -p &lt;PORT&gt; -u -l 51820 -c ckclient.json</code><br>
+ckclient.json взял из примеров так же с гитхаба - <a href="https://github.com/cbeuw/Cloak/blob/master/example_config/ckclient.json" rel="noopener nofollow ugc">https://github.com/cbeuw/Cloak/blob/master/example_config/ckclient.json</a>. Меняю в клиенте wg адрес на 127.0.0.1:51820 и один раз быстро подключаюсь и отключаюсь, жду пока в консоли cloak появится сообщение <code>Session 3292283057 established</code>, затем подключаюсь как обычно. Всё.</p>
+<p>upd: забыл, в wg 127.0.0.1 должен быть исключён. Можно так <code>AllowedIPs = 0.0.0.0/1, 128.0.0.0/1</code> или воспользоваться скриптом <a href="https://www.reddit.com/r/WireGuard/comments/gyb955/comment/ftcw42a/" class="inline-onebox" rel="noopener nofollow ugc">Reddit - Dive into anything</a></p></td><td>2023-09-25T17:57:38.689Z</td></tr><tr><td>Xunlei</td><td><p>Это для чего передёргивать? Чтобы зафиксировать маршрут на сервер через интерфейс сетевой карты? Эту задачу можно решить статическим маршрутом, метриками маршрутов или биндингом исходящего соединения клиента на адрес сетевого интерфейса (если не работает BindAddr, то можно пропатчить, разработчики почему-то редко дают возможность указывать outbound интерфейс; не знаю, не пользовался пока cloak).</p></td><td>2023-09-25T23:06:09.511Z</td></tr><tr><td>4fx</td><td><p>При запуске cloak без передергивания не создаётся сессия. Наверное это из-за ключа -u (udp), без него работает по tcp такого нет и передёргивать не нужно.</p></td><td>2023-09-25T23:15:47.795Z</td></tr><tr><td>Xunlei</td><td><p>Хм, я подумал это из-за рекурсивного туннеля (клоак подключается через виртуальный интерфейс через клоак через виртуальный интерфейс и т.д.).</p></td><td>2023-09-25T23:19:02.311Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>Благодарю за ответ, очень даже актуально.</p>
+<p>На сервере установил WG контейнер отсюда: <a href="https://github.com/linuxserver/docker-wireguard" class="inline-onebox" rel="noopener nofollow ugc">GitHub - linuxserver/docker-wireguard</a> , указал следующий docker-compose:</p>
+<pre><code class="lang-auto">version: "3"
+services:
+  wireguard:
+    image: lscr.io/linuxserver/wireguard:latest
+    container_name: wireguard
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SERVERURL=127.0.0.1 #optional
+      - SERVERPORT=51820 #optional
+      - PEERS=1 #optional
+      - PEERDNS=auto #optional
+      - INTERNAL_SUBNET=10.13.13.0 #optional
+      - ALLOWEDIPS=0.0.0.0/0 #optional
+      - PERSISTENTKEEPALIVE_PEERS= #optional
+      - LOG_CONFS=true #optional
+    volumes:
+      - ./config:/config
+      - /lib/modules:/lib/modules
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
+</code></pre>
+<p>Дальше настроил ckserver следующим образом:</p>
+<pre><code class="lang-auto">{
+  "ProxyBook": {
+    "wireguard": [
+      "udp",
+      "127.0.0.1:51820"
+    ],
+    "openvpn": [
+      "udp",
+      "127.0.0.1:8389"
+    ],
+    "tor": [
+      "tcp",
+      "127.0.0.1:9001"
+    ]
+  },
+  "BindAddr": [
+    ":443",
+    ":80"
+  ],
+  "BypassUID": [
+    "ключ клиента"
+  ],
+  "RedirAddr": "cloudflare.com",
+  "PrivateKey": "приватный ключ сервера",
+  "DatabasePath": "userinfo.db"
+}
+</code></pre>
+<p>Сервер стартую и всё, собственно говоря, гуд.</p>
+<p>Дальше на клиенте WG ставлю следующий конфиг.</p>
+<pre><code class="lang-auto">[Interface]
+PrivateKey = приватный ключик
+ListenPort = 51820
+Address = 10.13.13.2/32
+DNS = 10.13.13.1
+
+[Peer]
+PublicKey = публичный ключик
+PresharedKey = preshared ключик
+AllowedIPs = 0.0.0.0/1, 128.0.0.0/1
+Endpoint = 127.0.0.1:51820
+
+</code></pre>
+<p>Потом настраиваю ck-client следующим образом (кстати, насчёт шифрования не понял, ставил и plain и aes-gcm):</p>
+<pre><code class="lang-auto">{
+    "Transport": "direct",
+    "ProxyMethod": "wireguard",
+    "EncryptionMethod": "aes-gcm",
+    "UID": "ключ юзера",
+    "PublicKey": "публичный ключ сервера",
+    "ServerName": "www.bing.com",
+    "NumConn": 4,
+    "BrowserSig": "chrome",
+    "StreamTimeout": 300
+  }
+</code></pre>
+<p>Далее стартую загруженный с оф. гитхаба экзешник со след. параметрами:</p>
+<pre><code class="lang-auto">.\ck-client.exe -s айпи-сервера -p 443 -u -l 51820 -c .\ckclient.json
+</code></pre>
+<p>Сам сервер стартует нормально:</p>
+<pre><code class="lang-auto">time="2023-09-26T14:09:10+03:00" level=info msg="Starting standalone mode"
+time="2023-09-26T14:09:10+03:00" level=info msg="Listening on UDP 127.0.0.1:51820 for wireguard client"
+</code></pre>
+<p>Но вот как только пробую в клиенте выполнить подключение, то получаю следующее:</p>
+<pre><code class="lang-auto">time="2023-09-26T14:09:14+03:00" level=info msg="Attempting to start a new session"
+time="2023-09-26T14:09:35+03:00" level=error msg="Failed to establish new connections to remote: dial tcp айпи-сервера:443: connectex: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond."
+</code></pre>
+<p>Причём на сервере в консоли cloak-сервера ничего нет, как только отключаюсь в wg-клиенте, то начинаю видеть в консоли сервера следующее:</p>
+<pre><code class="lang-auto">WARN[2023-09-26T14:18:45+03:00] decryption/authentication faliure: timestamp is outside of the accepting window: received timestamp 1695727379  UID="ключ клиента" encryptionMethod=1 proxyMethod=wireguard remoteAddr="айпи-клиента:52234" sessionId=0
+</code></pre>
+<p>В чём может быть причина? В принципе не могу понять значения этой ошибки: " timestamp is outside of the accepting window"</p></td><td>2023-09-26T11:28:41.137Z</td></tr><tr><td>4fx</td><td><p><code>RedirAddr</code> на сервере cloak должен соответствовать <code>ServerName</code> на клиенте, возможно не получается из-за этого. На счёт ошибки <code>timestamp is outside of the accepting window</code> может не соотвествует время на клиенте и севрере, хотя у меня тоже и подключается. На счёт шифрования можно и <code>plain</code> так как wg шифрует трафик сам. А так по конфигам всё нормально.</p>
+<p>upd: ещё <code>ListenPort</code> у wg клиента на какой нибудь другой перекиньте, 51821 например</p></td><td>2023-09-26T12:03:15.173Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>Отписываюсь по результату, 2 недели был в отъезде, так что протестить не мог. В общем попробовал донастроить конфиг по вашему совету, установил такой же ServerName на клиенте, как и RedirAddr на клиенте, в винде поставил автоматическую синхронизацию даты и времени (до этого она была в ручном режиме), по дефолту было глухо.</p>
+<p>После переноса на 51825 всё стало окей, вообще не могу сообразить, как мне не хватило мозгов глянуть, что порт по умолчанию из докер-образа для WG в качестве слушающего и эндпоинта ставился один и тот же</p>
+<p>P.S. Премного благодарен за вашу помощь!</p></td><td>2023-10-10T02:55:08.563Z</td></tr><tr><td>4fx</td><td><p>Рад что у вас всё работает <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"><br>
+P.S А я тут додумался как сделать без передёргивания wg. Нужно поменять <code>AllowedIPs</code> клиента, добавить только ip сервера в исключения. Можно сгенерировать с помощью сайта <a href="https://www.procustodibus.com/blog/2021/03/wireguard-allowedips-calculator/" class="inline-onebox" rel="noopener nofollow ugc">WireGuard AllowedIPs Calculator | Pro Custodibus</a> или скрипт питона из <a href="https://ntc.party/t/cloak-wireguard-%D0%BF%D0%BE%D0%B4-windows-%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%D0%BE%D0%B2/5755/23">поста</a> выше<br>
+В вг клиента вроде нужно убрать галку <code>Block untunneled traffic (kill-switch)</code></p></td><td>2023-10-10T10:35:01.804Z</td></tr>
+    </table>
+      </body>
+    </html>

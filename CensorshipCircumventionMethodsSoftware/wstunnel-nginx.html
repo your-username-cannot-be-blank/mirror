@@ -1,0 +1,76 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>wstunnel-nginx</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>nospace</td><td><p>Мне попадалась статья, которая сейчас разбросана по разным углам Интернета, но первоначально, похоже была опубликована на Хабре. <a href="https://habr.com/ru/post/415977/" rel="nofollow noopener">https://habr.com/ru/post/415977/</a><br>
+В конце статьи описан метод создания туннеля с помощью wstunnel и Nginx. Что вы думаете насчет этого метода. Есть ли похожие реализации, но лучше описанного?<br>
+Похоже весь трафик в этом случае будет заворачиваться в туннель. Можно ли завернуть в туннель трафик только к определенным сайтам?</p></td><td>2019-11-09T12:53:32.234Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="nospace" data-post="1" data-topic="220">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/e47c2d/48.png" class="avatar"> nospace:</div>
+<blockquote>
+<p>Есть ли похожие реализации, но лучше описанного?</p>
+</blockquote>
+</aside>
+<p>Да, программа v2ray поддерживает туннелирование через множество протоколов: TLS/HTTP2, QUIC, WebSocket. V2ray-клиенты есть под все основные десктопные и мобильные ОС.</p>
+<aside class="quote no-group" data-username="nospace" data-post="1" data-topic="220">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/e47c2d/48.png" class="avatar"> nospace:</div>
+<blockquote>
+<p>Похоже весь трафик в этом случае будет заворачиваться в туннель. Можно ли завернуть в туннель трафик только к определенным сайтам?</p>
+</blockquote>
+</aside>
+<p>V2ray штатно поддерживает эту возможность, но если речь об обычных прокси, то можно использовать, например, <a href="https://en.wikipedia.org/wiki/Proxy_auto-config">файл автоконфигурации</a>, внутри которого написать необходимые правила. Правда, работать будет не во всех программах.</p></td><td>2019-11-10T08:51:32.595Z</td></tr><tr><td>nospace</td><td><p>Я вот чего не могу понять. Если просто взять Nginx, настроить его как reverse proxy, соединиться с ним по https и попробовать зайти через него на какой-нибудь заблокированный <a href="http://example.com" rel="nofollow noopener">example.com</a>. sni этого <a href="http://example.com" rel="nofollow noopener">example.com</a> все равно будет виден dpi?</p></td><td>2019-12-05T00:28:22.149Z</td></tr><tr><td>ValdikSS</td><td><p>Если вы имеете в виду настройку а-ля man-in-the-middle, т.е. с перешифровкой трафика средствами nginx, то ваш домашний провайдер будет видеть только трафик с тем SNI, к какому домену у вас привязан прокси, а сам nginx будет совершать запросы до <code>example.com</code> со SNI <code>example.com</code>.</p>
+<p>Если вы настроили nginx локально, на своём компютере, то так работать не будет: провайдер будет видеть запросы от nginx к <code>example.com</code>.</p></td><td>2019-12-05T00:37:03.756Z</td></tr><tr><td>nospace</td><td><p>Нет конечно, не локально. Имеется в виду сервер (VPS)  где-то в Интернете. Настройка man-in-the-middle это нетривиальная задача или все можно сделать штатными средствами Nginx?</p></td><td>2019-12-05T01:05:47.971Z</td></tr><tr><td>ValdikSS</td><td><p>Не знаю, не настраивал nginx в режиме reverse proxy через HTTPS. Должно быть просто.</p></td><td>2019-12-05T01:38:49.318Z</td></tr><tr><td>nospace</td><td><p>Я не особо разбираюсь во всех этих технологиях. Я скорее, как говорят, обычный пользователь ПК. Но если бы все так было легко, почему же тогда этим методом почти никто не пользуется? Ведь все выглядит идеально в теории. Блокировку по IP обойти можно, SNI не виден, соединение по https, то есть оно ничем не примечательно. Нужные сайты можно прописать в hosts, как это сделано было на Рутрекере и остальной трафик пойдет напрямую. Даже соответствующие dns-запросы никуда не идут. Однако же, все изобретают свой велосипед, свои виды обфускации, пытаясь замаскировать трафик под https. В общем, мне кажется это слишком просто, чтобы быть правдой. <img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"></p></td><td>2019-12-05T18:50:50.076Z</td></tr><tr><td>ValdikSS</td><td><p>Это требует корректной настройки, причем от сайта к сайту она может быть разной, и работает только для настроенных сайтов, а не для всех разом.</p>
+<p>В статье по вашей ссылке в первом сообщении описывается способ настройки полноценного прокси, но с туннелированием в Websocket, с целью маскировки. Это не то же самое, что реверс-прокси. При желании, можно и OpenVPN через Websocket настроить, и любое другое ПО.</p></td><td>2019-12-05T19:11:06.753Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>reverse proxy подразумевает, что сервер с nginx также должен выполнять роль удостоверяющего центра, подобно <a href="https://codeberg.org/crimeflare/cloudflare-tor" rel="nofollow noopener">The Great Cloudwall</a>, а в обозреватель должен быть добавлен корневой сертификат УЦ. И даже это далеко не гарантирует связности. TLS очень сложен и крайне глубоко интегрирован в обозреватели, чтобы несовпадение хоть одного параметра не застопорило загрузку, и не стоит забывать, что на reverse proxy придётся позаботиться не только об HTTP, но и например, о проксировании настоящего WebSocket трафика. Ну и конечно, на nginx вы должны настроить eSNI, чтобы скрыть итоговое назначение. В связи с этим, проход через WebSocket выглядит на порядок интереснее, но принципиально не обязателен до тех пор, пока работают и обыкновенные прокси вроде Antizapret.</p></td><td>2019-12-06T16:00:49.391Z</td></tr><tr><td>Nowing(Pols)</td><td><blockquote>
+<p><strong>Be aware that the server will use self signed certificate with weak cryptographic algorithm. It was made in order to add the least possible overhead while still being compliant with tls.</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>Do not rely on wstunnel to protect your privacy, as it only forwards traffic that is already secure by design (ex: https)</strong></p>
+</blockquote>
+<p>В описании сказанно (<a href="https://github.com/erebe/wstunnel" class="inline-onebox" rel="noopener nofollow ugc">GitHub - erebe/wstunnel: Tunnel all your traffic over Websocket or HTTP2 - Bypass firewalls/DPI - Static binary available</a>), что он использует слабые алгоритмы шифрования, можно ли выбрать другие более надежные, чтобы использовать его например как сокс5 без дополнительного использования ssh для надежности шифрования?</p></td><td>2021-09-12T14:29:55.845Z</td></tr><tr><td>sbq-e</td><td><aside class="quote no-group" data-username="Nowing" data-post="10" data-topic="220">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/9e8a1a/48.png" class="avatar"> Nowing:</div>
+<blockquote>
+<p>В описании сказанно (<a href="https://github.com/erebe/wstunnel" rel="noopener nofollow ugc">https://github.com/erebe/wstunnel </a>), что он использует слабые алгоритмы шифрования, можно ли выбрать другие более надежные, чтобы использовать его например как сокс5 без дополнительного использования ssh для надежности шифрования?</p>
+</blockquote>
+</aside>
+<p>wstunnel можно спокойно заворачивать в nginx с сертификатами от Let’s Encrypt</p></td><td>2021-09-12T18:49:50.737Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,95 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>openssl</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>artenox</td><td><p>Привет, <a class="mention" href="/u/valdikss">@ValdikSS</a><br>
+Посоветуй как собрать openssl с маленьким padding. Чтобы tls пакеты не рубились, когда ходят внутри shadowsocks. Слышал, что по размеру секут.<br>
+Я пробовал mbedtls, nss, libressl - не помогает.</p></td><td>2024-08-04T17:32:52.964Z</td></tr><tr><td>ValdikSS</td><td><p>В OpenSSL нужно отключить баги (bugs) в программе, которая его использует. Padding добавляется для исправления проблемы в древнегреческих версиях терминатора SSL от компании F5.</p></td><td>2024-08-05T20:02:49.024Z</td></tr><tr><td>artenox</td><td><p>А как? Не нашёл упоминания bugs в Configure OpenSSL.</p></td><td>2024-08-05T20:19:57.222Z</td></tr><tr><td>ValdikSS</td><td><p>Это не опция сборки, это опция при создании OpenSSL-контекста.<br>
+<a href="https://docs.openssl.org/3.1/man3/SSL_CTX_set_options/#description" class="onebox" target="_blank" rel="noopener">https://docs.openssl.org/3.1/man3/SSL_CTX_set_options/#description</a></p>
+<blockquote>
+<p>SSL_OP_TLSEXT_PADDING</p>
+<p>Adds a padding extension to ensure the ClientHello size is never between 256 and 511 bytes in length. This is needed as a workaround for some implementations.</p>
+</blockquote>
+<p>Можно пропатчить, чтобы он никогда не добавлялся, см. <code>ssl/statem/extensions_clnt.c</code></p>
+<aside class="onebox githubblob" data-onebox-src="https://github.com/openssl/openssl/blob/20bf3fe236d36734a17a08252ed19c9e1bc161cd/ssl/statem/extensions_clnt.c#L946-L954">
+  <header class="source">
+
+      <a href="https://github.com/openssl/openssl/blob/20bf3fe236d36734a17a08252ed19c9e1bc161cd/ssl/statem/extensions_clnt.c#L946-L954" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/openssl/openssl/blob/20bf3fe236d36734a17a08252ed19c9e1bc161cd/ssl/statem/extensions_clnt.c#L946-L954" target="_blank" rel="noopener">openssl/openssl/blob/20bf3fe236d36734a17a08252ed19c9e1bc161cd/ssl/statem/extensions_clnt.c#L946-L954</a></h4>
+
+
+
+    <pre class="onebox"><code class="lang-c">
+      <ol class="start lines" start="946" style="counter-reset: li-counter 945 ;">
+          <li>EXT_RETURN tls_construct_ctos_padding(SSL_CONNECTION *s, WPACKET *pkt,</li>
+          <li>                                      unsigned int context, X509 *x,</li>
+          <li>                                      size_t chainidx)</li>
+          <li>{</li>
+          <li>    unsigned char *padbytes;</li>
+          <li>    size_t hlen;</li>
+          <li></li>
+          <li>    if ((s-&gt;options &amp; SSL_OP_TLSEXT_PADDING) == 0)</li>
+          <li>        return EXT_RETURN_NOT_SENT;</li>
+      </ol>
+    </code></pre>
+
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-08-06T06:08:31.605Z</td></tr><tr><td>artenox</td><td><p>Прости мне мою тупость. Я спросил у ChatGPT как изменить этот код, чтобы паддинг не добавлялся. Он мне сказал, надо удалить строчку<br>
+<code>if ((s-&gt;options &amp; SSL_OP_TLSEXT_PADDING) == 0)</code><br>
+чтобы осталось<br>
+<code>return EXT_RETURN_NOT_SENT;</code><br>
+Я собрал фиксенный openssl, собрал tor  с ним. Но не вижу различий между обычным тором и фиксенным тором. И в первом и во втором случае в начале размер пакетов 1280, потом падает до 588. Через shadowsocks пролезает с трудом.<br>
+Похоже паддинг добавляется или tor использует такие большие tls пакеты сам по себе?<br>
+Я пока проверяю на торе.<br>
+Но ведь если в торе с нефиксенным openssl встречался размер 588, то значит паддинг и не использовался. И значит 1280 это не паддинг, а полезные данные.<br>
+<strong>Может как-то можно ограничить максимальный размер tls пакетов в openssl?</strong></p>
+<p>P.S. Я умею компилировать, но не программировать.</p></td><td>2024-08-06T17:19:56.515Z</td></tr><tr><td>ValdikSS</td><td><p>Так, вероятно, дело не в Padding. Посмотрите в WireShark содержимое ClientHello, поймёте, почему он большой.</p></td><td>2024-08-09T08:58:59.086Z</td></tr>
+    </table>
+      </body>
+    </html>

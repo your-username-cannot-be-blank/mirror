@@ -1,0 +1,113 @@
+[
+    {
+        "id": 25915,
+        "name": "",
+        "username": "tango",
+        "avatar_template": "/letter_avatar_proxy/v4/letter/t/e36b37/{size}.png",
+        "created_at": "2024-05-24T16:23:14.222Z",
+        "cooked": "<p>Bleeding Wall: A Hematologic Examination on the Great Firewall<br>\nSakamoto, Elson Wedwards<br>\n<a href=\"https://censorbib.nymity.ch/#Sakamoto2024a\">https://censorbib.nymity.ch/#Sakamoto2024a</a><br>\n<a href=\"https://archive.org/details/foci2024-1/video-02-sakamoto.mkv\">Presentation video</a><br>\n<a href=\"https://www.petsymposium.org/foci/2024/foci-2024-0002.pdf\">PDF</a></p>\n<p>This paper discovers and investigates an out-of-bounds memory read vulnerability in the DNS injection system of the Great Firewall. When you send a DNS query for a censored hostname through the network border of China, the GFW <em>injects</em> a DNS response with a fake IP address. By crafting a particular kind of DNS query, it was possible to cause the DNS injector to include a small amount of its own memory in the injected response. The contents of leaked memory included network protocols (other traffic that had passed by the injector), and in a small number of cases, x86_64 Linux stack frames. The GFW has <a href=\"https://ntc.party/t/paper-summary-triplet-censors-demystifying-great-firewalls-dns-censorship-behavior-foci-2020/653/1\">several different kinds of DNS injector</a>; this vulnerability affected only one of them. It was fixed in October–November 2023.</p>\n<p>The vulnerability is easy to understand. It is reminiscent of <a href=\"https://gfw.report/blog/gfw_looking_glass/en/\">gfw-looking-glass.sh</a> from way back in 2010. DNS names are represented as a <a href=\"https://datatracker.ietf.org/doc/html/rfc1035#section-3.1\">sequence of length-prefixed labels</a>. In a DNS message, the name <code>example.com</code> looks like <code>\\x07example\\x03com\\x00</code>, where <code>\\x07</code> tells you the length of the <code>example</code> label, <code>\\x03</code> tells you the length of the <code>com</code> label, and <code>\\x00</code> marks the end of the name. The GFW’s DNS parser (here I’m only talking about the one injector that was vulnerable) did not check that label length prefixes stayed inside the bounds of the packet. Also, DNS labels are supposed to have a maximum length of 63 bytes, but the parser didn’t enforce that, instead it interpreted any value up to <code>\\xff</code> as a label length. (For those who know DNS, this means the parser did not support <a href=\"https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.4\">name compression</a>.) If you replaced a label length prefix in a normal DNS query with <code>\\xff</code>, the parser would continue reading past the end of the packet, into its own memory, and include that memory in its injected DNS response.</p>\n<p>The authors describe two payload formats that worked to recover memory from the GFW. Format 1 looks like <code>\\x03www\\x06google\\x03com\\xff</code> (replacing the final label length that should normally be <code>\\x00</code> with <code>\\xff</code>). Format 2 looks like <code>\\xffwww.google.com</code>, replacing the <em>first</em> label length with <code>\\xff</code>, and converting all other label length bytes to literal dot characters. But just because you asked for <code>\\xff</code> bytes doesn’t mean you would actually get that much. There was some other mechanism that limited the total size of injected responses to 158 bytes. Using a very short query hostname (e.g. <code>4.tt</code>), the authors were able to leak a maximum of 124 bytes per query. Over three days in October 2023, they sent several billion queries and recovered over 1 TB of data.</p>\n<p>Below is a sample of what a DNS response with leaked memory looks like. It’s Figure 4(a) from the paper. This one contains part of an HTTP request (some bytes have been redacted with <mark><code>XX</code></mark>). The bytes starting with <code>c0 0c</code> at the end are the GFW’s answer section with a fake IP address (157.240.20.8).</p>\n<pre>00 00 81 80 00 01 00 01 00 00 00 00 03 77 77 77  .............www\n06 67 6f 6f 67 6c 65 03 63 6f 6d ff <mark>2f 66 61 76</mark>  .google.com.<mark>/fav</mark>\n<mark>69 63 6f 6e 2e 69 63 6f 20 48 54 54 50 2f 31 2e</mark>  <mark>icon.ico HTTP/1.</mark>\n<mark>31 0d 0a 55 73 65 72 2d 41 67 65 6e 74 3a 20 XX</mark>  <mark>1..User-Agent: X</mark>\n<mark>XX XX XX XX XX XX XX XX XX XX XX XX XX XX 0d 0a</mark>  <mark>XXXXXXXXXXXXXX..</mark>\n<mark>48 6f 73 74 3a 20 XX XX XX XX XX XX XX XX XX XX</mark>  <mark>Host: XXXXXXXXXX</mark>\n<mark>XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX</mark>  <mark>XXXXXXXXXXXXXXXX</mark>\n<mark>XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX</mark>  <mark>XXXXXXXXXXXXXXXX</mark>\n<mark>XX XX XX XX XX XX XX XX XX XX XX XX XX XX</mark> c0 0c  <mark>XXXXXXXXXXXXXX</mark>..\n00 01 00 01 00 00 00 4d 00 04 9d f0 14 08        .......M......\n</pre>\n<p>The memory contains recognizable network protocols, such as HTTP and SMTP. It includes at least some amount of traffic that passes through the GFW, which the researchers demonstrated by sending their own, specially tagged traffic through the firewall, and then recovering it with DNS queries. The GFW leaking traffic to third parties, besides the obvious privacy problems, could enable off-path attacks such as cookie theft. The fact that responses can be much larger than queries makes the GFW a <a href=\"https://ntc.party/t/paper-summary-weaponizing-middleboxes-for-tcp-reflected-amplification-usenix-security-2021/3065\">more effective DoS amplifier</a>. In a very small number of leaks (fewer than 1 in 100,000), they found byte patterns consistent with Linux x64_64 stack frames.</p>\n<p>The researchers were still running measurements when the vulnerability started to be patched. They had observation points in multiple countries, whose paths into China went through major Internet exchange points in Beijing, Guangzhou, and Shanghai. In early September 2023, all paths had the vulnerability. When they started formal measurements in late October, paths through Beijing had already been patched: only Guangzhou and Shanghai still had memory leaks. Then, as they watched, Guangzhou was patched on 2023-10-30, and Shanghai was patched on 2023-10-31 and 2023-11-01. The DNS injection system is no longer susceptible to the same kind of malformed DNS query.</p>",
+        "post_number": 1,
+        "post_type": 1,
+        "posts_count": 1,
+        "updated_at": "2024-05-24T16:23:57.452Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 70,
+        "reads": 71,
+        "readers_count": 70,
+        "score": 364.2,
+        "yours": false,
+        "topic_id": 7896,
+        "topic_slug": "bleeding-wall-a-hematologic-examination-on-the-great-firewall-foci-2024",
+        "display_username": "",
+        "primary_group_name": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
+        "flair_group_id": null,
+        "badges_granted": [],
+        "version": 1,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_see_hidden_post": false,
+        "can_wiki": false,
+        "link_counts": [
+            {
+                "url": "https://censorbib.nymity.ch/#Sakamoto2024a",
+                "internal": false,
+                "reflection": false,
+                "title": "The Internet censorship bibliography",
+                "clicks": 7
+            },
+            {
+                "url": "https://www.petsymposium.org/foci/2024/foci-2024-0002.pdf",
+                "internal": false,
+                "reflection": false,
+                "clicks": 7
+            },
+            {
+                "url": "https://gfw.report/blog/gfw_looking_glass/en/",
+                "internal": false,
+                "reflection": false,
+                "title": "GFW Archaeology: gfw-looking-glass.sh",
+                "clicks": 2
+            },
+            {
+                "url": "https://archive.org/details/foci2024-1/video-02-sakamoto.mkv",
+                "internal": false,
+                "reflection": false,
+                "title": "FOCI 2024.1 : FOCI : Free Download, Borrow, and Streaming : Internet Archive",
+                "clicks": 2
+            },
+            {
+                "url": "https://ntc.party/t/paper-summary-weaponizing-middleboxes-for-tcp-reflected-amplification-usenix-security-2021/3065",
+                "internal": true,
+                "reflection": false,
+                "title": "Paper summary: Weaponizing Middleboxes for TCP Reflected Amplification (USENIX Security 2021)",
+                "clicks": 2
+            },
+            {
+                "url": "https://datatracker.ietf.org/doc/html/rfc1035#section-3.1",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 1035 - Domain names - implementation and specification",
+                "clicks": 1
+            },
+            {
+                "url": "https://ntc.party/t/paper-summary-triplet-censors-demystifying-great-firewalls-dns-censorship-behavior-foci-2020/653",
+                "internal": true,
+                "reflection": false,
+                "title": "Paper summary: Triplet Censors: Demystifying Great Firewall's DNS Censorship Behavior (FOCI 2020)",
+                "clicks": 0
+            },
+            {
+                "url": "https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.4",
+                "internal": false,
+                "reflection": false,
+                "title": "RFC 1035 - Domain names - implementation and specification",
+                "clicks": 0
+            }
+        ],
+        "read": true,
+        "user_title": "dnstt developer",
+        "title_is_group": false,
+        "bookmarked": false,
+        "actions_summary": [],
+        "moderator": false,
+        "admin": false,
+        "staff": false,
+        "user_id": 26,
+        "hidden": false,
+        "trust_level": 3,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": false,
+        "wiki": false,
+        "post_url": "/t/bleeding-wall-a-hematologic-examination-on-the-great-firewall-foci-2024/7896/1",
+        "can_translate": false
+    }
+]

@@ -1,0 +1,111 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-on-the-importance-of-encrypted-sni-esni-to-censorship-circumvention-foci-19</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Crossposted from <a href="https://github.com/net4people/bbs/issues/10;" rel="nofollow noopener">https://github.com/net4people/bbs/issues/10;</a> I want to see if there’s interest in discussing academic research here.</p>
+<p>On the Importance of Encrypted-SNI (ESNI) to Censorship Circumvention<br>
+Zimo Chai, Amirhossein Ghafari, Amir Houmansadr<br>
+<a href="https://censorbib.nymity.ch/#Chai2019a" class="onebox" target="_blank" rel="nofollow noopener">https://censorbib.nymity.ch/#Chai2019a</a><br>
+<a href="https://www.usenix.org/conference/foci19/presentation/chai" class="onebox" target="_blank" rel="nofollow noopener">https://www.usenix.org/conference/foci19/presentation/chai</a></p>
+<p>The TLS server name indication (SNI) field reveals the destination server name of a TLS connection, and therefore may be used by censors for destination-based filtering. Censors increasingly turn to SNI filtering, because the increase in encrypted protocols such as TLS are obsoleting traditional detection techniques like keyword filtering. <a href="https://datatracker.ietf.org/doc/draft-ietf-tls-esni/?include_text=1" rel="nofollow noopener">ESNI</a> aims to encrypt the SNI field and remove it as a means of traffic classification. This paper measures censorship in China to estimate the possible effectiveness of ESNI to unblock existing sites, measures the current extent of ESNI deployment, and tests for blocking of ESNI itself in multiple countries.</p>
+<p>The authors estimated a bound on the number of existing, censored web sites that could potentially be unblocked by ESNI. They tested each domain in an Alexa top 1 million list for censorship of three kinds: DNS-based, IP-based, and SNI-based. They had one VPS in China and one VPS in the USA. For DNS-based blocking, they did outside-in DNS requests (from the USA VPS to the China VPS) and looked for an injected DNS response. For IP-based blocking, they did inside-out port scans to ports 80 and 443 and compared the results to a USA control scan. For SNI-based blocking, they send outside-in ClientHello probes and looked for injected RST packets. Of the 24,210 domains blocked by either DNS poisoning or SNI filtering, 16,928 are additionally blocked by IP address, so ESNI would not help to unblock them, assuming that they stay at their present hosting. The other 7,282 domains that are blocked only by DNS poisoning, SNI filtering, or both, have the potential to be unblocked by ESNI, assuming that their IP address cannot easily be blocked. Because ESNI presupposes secure DNS, here I’m assuming that ESNI defeats both SNI filtering and DNS poisoning.</p>
+<p>They measured the number of ESNI-supporting web sites among their Alexa top 1 million by checking a special Cloudflare-only debugging page, /cdn-cgi/trace. Their assumption is that only Cloudflare-hosted sites may support ESNI; their technique would have missed ESNI sites that are not on Cloudflare, as well as Cloudflare-hosted sites that do not have the debugging page active, for whatever reason. After making a list of Cloudflare sites by looking for the debugging page, they tested each for ESNI support using an ESNI-enabled Firefox, configured to use <a href="https://1.1.1.1/" rel="nofollow noopener">https://1.1.1.1/</a> as a DNS-over-HTTPS resolver. 10.9% of the 1 million sites had a Cloudflare debugging page; of that fraction, almost all supported ESNI. 66 of the domains blocked by SNI filtering in China currently support ESNI, and are presumably accessible if ESNI is used.</p>
+<p>Finally, they checked for existing censorship of ESNI itself, in 14 countries (13 VPS, 1 VPN). They used an ESNI-enabled Firefox to browse around 100K ESNI-supporting sites, and also did DNS TXT queries for ESNIKeys, which is one of the steps in using ESNI. They did not find blocking of ESNI anywhere, not even in South Korea, where there were rumors that it had taken place in June 2019.</p>
+<p>Other tidbits: In the outside-in SNI filtering tests, naked packets containing a forbidden SNI did not trigger injection; they had to be preceded by a TCP three-way handshake in order to be detected. After detection, new SYN packets triggered an injected SYN/ACK with bad sequence numbers; other kinds of packets triggered an injected RST. OCSP messages may leak the destination domain despite ESNI:</p>
+<ul>
+<li><a href="http://blog.seanmcelroy.com/2019/01/05/ocsp-web-activity-is-not-private" rel="nofollow noopener">http://blog.seanmcelroy.com/2019/01/05/ocsp-web-activity-is-not-private</a></li>
+<li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1535235" rel="nofollow noopener">https://bugzilla.mozilla.org/show_bug.cgi?id=1535235</a></li>
+</ul>
+<p>The authors have published their tools and data at <a href="http://traces.cs.umass.edu/index.php/Network" rel="nofollow noopener">http://traces.cs.umass.edu/index.php/Network</a>.</p></td><td>2019-09-19T17:53:44.110Z</td></tr><tr><td>ValdikSS</td><td><p>I think author’s testing method and the results may be not entirely correct. When you use ESNI, TLS ClientHello packet does not contain SNI entry. Most DPI systems does not handle ESNI yet, and treat this case as “no SNI in ClientHello”.<br>
+So, what the author’s tested is probably not ESNI processing support in DPIs, but how DPI handle ClientHellos without SNI. This also justifies “ESNI Filtering” in South Korea—it could be that DPI was configured to reject TLS connections without SNI at some point.</p>
+<p>CloudFlare does not permit TLS handshakes without SNI (at least for sites hosted on free plans), so you can’t really test SNI/no SNI case on Cloudflare. However, you can try to use it on other censored websites which do not use CDNs. It depends on the webserver and TLS stack configuration, but generally it’s allowed to connect without SNI on a large amount of websites.</p></td><td>2019-09-22T18:09:15.880Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="2" data-topic="83">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>I think author’s testing method and the results may be not entirely correct. When you use ESNI, TLS ClientHello packet does not contain SNI entry. Most DPI systems does not handle ESNI yet, and treat this case as “no SNI in ClientHello”.</p>
+</blockquote>
+</aside>
+<p>That’s a fair distinction, but I still think what the authors tested is meaningful. They wanted to answer the question, “Do any of these 14 countries block TLS connections made using Firefox and the standard ESNI settings?” And they found that at this point in time, the answer is “no.” One of the dangers with ESNI deployment is that censors who are aware of it could try to block it completely (i.e., block all TLS ClientHellos that have <a href="https://tools.ietf.org/html/draft-ietf-tls-esni-04#section-5">extension 0xffce</a>). This paper shows that while it remains a danger, it is not happening yet, at least in the 14 countries they tested.</p>
+<p>I think what you are suggesting is a further research question, which is “Do DPI boxes already know about ESNI (and choose not to block it), or do they treat ESNI connections the same as no-SNI connections (because they don’t know about ESNI yet)?” That also is a worthwhile question, but it’s not what the authors were going for in this case.</p>
+<p>It could be a fun experiment to try all 4 possibilities:</p>
+<ul>
+<li>(no SNI, no ESNI): SNI-less ClientHello (like HTTPS to an IP address)</li>
+<li>(SNI, no ESNI): normal ClientHello with plaintext SNI (the current norm)</li>
+<li>(no SNI, ESNI): ESNI ClientHello (what this paper tested)</li>
+<li>(SNI, ESNI): ESNI ClientHello that also has plaintext SNI set (not sure if any implementations do this; draft-04 says <a href="https://tools.ietf.org/html/draft-ietf-tls-esni-04#section-5.1.3">“when the server cannot decrypt or does not process the <code>encrypted_server_name</code> extension, it continues with the handshake using the cleartext <code>server_name</code> extension instead”</a> and <a href="https://tools.ietf.org/html/draft-ietf-tls-esni-04#section-5.2">“any actual <code>server_name</code> extension is ignored”</a>)</li>
+</ul></td><td>2019-09-23T17:46:13.888Z</td></tr><tr><td>ValdikSS</td><td><p>The author replied to my message over email:</p>
+<blockquote>
+<p>Hello,<br>
+Read your paper on ESNI in China.<br>
+I think your testing method and the results may be not entirely correct.<br>
+When you use ESNI, TLS ClientHello packet does not contain SNI entry. Most DPI systems does not handle ESNI yet, and treat this case as “no SNI in ClientHello”.</p>
+</blockquote>
+<p>I agree that “Most DPI systems does not handle ESNI yet”.</p>
+<blockquote>
+<p>So, what you’ve tested is probably not ESNI processing support in DPIs,</p>
+</blockquote>
+<p>What we tested is indeed how DPIs are processing the ESNI and the conclusion is that the all tested DPIs are not supporting ESNI parsing.</p>
+<blockquote>
+<p>but how DPI handle ClientHellos without SNI.</p>
+</blockquote>
+<p>I agree there may be a different treatment to TLS ClientHello messages with and without SNI extensions. But we did not observe that in all the 14 areas we tested.</p>
+<blockquote>
+<p>This also justifies “ESNI Filtering” in South Korea—it could be that DPI was configured to reject TLS connections without SNI at some point.</p>
+</blockquote>
+<p>In our paper, we were not able to observe ESNI-based censorship in South Korea. As said in the paper, we sent TLS Client Hello messages with ESNI extensions, which do not contain SNI extension, but can still access ESNI supported websites. Thus, we did not observe different reactions to  TLS ClientHello messages with and without a SNI extension in South Korea.</p>
+<blockquote>
+<p>CloudFlare does not permit TLS handshakes without SNI (at least for sites hosted on free plans), so you can’t really test SNI/no SNI case on Cloudflare. However, you can try to use it on other censored websites which do not use CDNs. It depends on the webserver and TLS stack configuration, but generally it’s allowed to connect without SNI on a large amount of websites.</p>
+</blockquote>
+<p>I agree. The related research works are CDNBrowsing and CacheBrowsing:</p>
+<ul>
+<li><a href="https://people.cs.umass.edu/~amir/papers/CacheBrowser.pdf">CacheBrowser: Bypassing Chinese Censorship without Proxies using Cached Content, ACM CCS 2015</a></li>
+<li><a href="https://people.cs.umass.edu/~amir/papers/CDNReaper.pdf">Practical Censorship Evasion Leveraging Content Delivery Networks, ACM CCS 2016</a></li>
+</ul>
+<blockquote>
+<p>I’m researching internet censorship since 2012, mostly in Russia and CIS countries. Here in Russia we have lots of ISPs (1000+), each of which have different hardware and software and implements censorship in a different way. Many ISP disallow TLS handshakes without SNI, so enabling ESNI will makes things worse in terms of website availability for ISPs with DPI (<a href="https://github.com/net4people/bbs/issues/10#issuecomment-532035677">more information</a>).</p>
+</blockquote>
+<p>Thank you so much for informing me this. That’s some very helpful information I am not aware of.</p>
+<p>In the paper, we were focusing on evaluating the effectiveness of ESNI to China’s censorship. But I agree this can be a completely different story for another censoring regime.</p>
+<blockquote>
+<p>You may be interested in my <a href="https://github.com/ValdikSS/blockcheck">BlockCheck</a> software. Unfortunately, it’s only for Russia and contain text only in Russian, but it’s probably the most sophisticated tool to test internet censorship and DPI. It has different tests for HTTP DPI circumvention (Extra space after GET, Line break before GET, Header Fragmentation, Add dot at the end of the domain, Add tab at the end of the domain, “host” header instead of “Host”, UNIX-style like breaks in the header) and today night I’ve made experimental version which also tests different TLS ClientHello composition methods (regular request, ClientHello without SNI, ClientHello with large padding, ClientHello with large padding and SNI only after padding, ClientHello with large padding, fake SNI in the beginning and real SNI before/after padding).<br>
+ClientHello with large padding and SNI only after padding is 100% compatible with RFC, is supported by all tested TLS implementations and CDNs, and it’s pretty effective against certain types of (Russian) DPIs.</p>
+</blockquote>
+<p>That software sounds really cool. Great job!</p>
+<p>One little suggestion is that I am sure it will attract and benefit more people if the README has more English introduction <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2019-09-23T20:15:42.798Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,50 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>как-добавить-свой-домен-в-контейнер-antizapret-2956</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>JockerDock</td><td><p>Antizapret работает в связки с AdGuardHome. Привязал свой домен(“Перезапись DNS-запросов”) в AdGuardHome. Но при nslookup возвращает SERVFAIL, либо NXDOMAIN. Как это исправить?</p></td><td>2022-08-04T20:53:37.124Z</td></tr><tr><td>ValdikSS</td><td><p>Вопрос непонятен, переформулируйте.</p></td><td>2022-08-05T08:14:57.618Z</td></tr><tr><td>JockerDock</td><td><p>Не возвращает IP адрес, который я привязал к домену в AdGuardHome во вкладке “Перезапись DNS-запросов”. В /etc/knot-resolver/kresd.conf указал DNS сервер AdGuardHome.</p></td><td>2022-08-05T16:39:22.647Z</td></tr><tr><td>ValdikSS</td><td><p>Ваше желание сопряжено с рядом проблем, для решения которых необходима особая конфигурация. См. <a href="https://knot-resolver.readthedocs.io/en/stable/modules-policy.html#replacing-part-of-the-dns-tree" class="inline-onebox">Query policies — Knot Resolver 5.5.1 documentation</a></p></td><td>2022-08-05T17:04:45.883Z</td></tr><tr><td>JockerDock</td><td><p>Добавил в <code>/etc/knot-resolver/kresd.conf</code>:</p>
+<blockquote>
+<p>policy.add(policy.all(policy.FORWARD({‘10.2.0.100’})))</p>
+<p>extraTrees = policy.todnames({‘test.test’})<br>
+policy.add(policy.suffix(policy.FLAGS({‘NO_CACHE’, ‘NO_EDNS’}), extraTrees))<br>
+policy.add(policy.suffix(policy.STUB({‘10.2.0.100’}), extraTrees))</p>
+</blockquote>
+<p>Но nslookup отвечает NXDOMAIN</p></td><td>2022-08-09T10:27:11.101Z</td></tr><tr><td>ValdikSS</td><td><p>Поменяйте правила местами. <code>policy.add(policy.all(policy.FORWARD({‘10.2.0.100’})))</code> должен находиться в самом конце.<br>
+Также необходимо очистить кеш: <code>echo "cache.clear()" | socat - /run/knot-resolver/control/1</code></p></td><td>2022-08-09T16:44:59.015Z</td></tr><tr><td>JockerDock</td><td><p>nslookup заработал, но появилась другая проблема. Надо зайти на этот сайт из под VPN, без него он не открывается. Добавил в include-hosts-custom адрес сайта и опять nslookup отвечает NXDOMAIN.</p></td><td>2022-08-12T07:48:18.471Z</td></tr><tr><td>ValdikSS</td><td><p>Полагаю, вы пытаетесь решить задачу гораздо более сложными способами, чем её можно бы было решить.</p>
+<p>Если вам нужно получить доступ ко внутреннему ресурсу через VPN, просто добавьте маршрут до него.</p></td><td>2022-08-12T10:18:29.000Z</td></tr><tr><td>JockerDock</td><td><p>Как?</p></td><td>2022-08-12T10:48:12.390Z</td></tr><tr><td>ValdikSS</td><td><p>Поищите инструкции в интернете. Это не имеет отношения к контейнеру непосредственно.</p></td><td>2022-08-12T10:54:32.000Z</td></tr>
+    </table>
+      </body>
+    </html>

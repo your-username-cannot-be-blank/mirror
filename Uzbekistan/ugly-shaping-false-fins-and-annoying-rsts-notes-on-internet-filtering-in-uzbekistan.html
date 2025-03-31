@@ -1,0 +1,155 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>ugly-shaping-false-fins-and-annoying-rsts-notes-on-internet-filtering-in-uzbekistan</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>critical_error</td><td><p>My observations on how local authorities censor the World Wide Web are very limited. From time to time I have to start a network sniffer to investigate some seemingly absurd network problems. Later these appear to be our new Internet restrictions according to an ‘<em>Uzbekistan</em>’ page of the annual ‘<em>Freedom on the Net</em>’ report by <em>Freedom House</em>. I can summarize what I stumble upon as follows.<br>
+<strong>1. Shaping the traffic for Internet censorship</strong> First noted around 2018 as a <em>Facebook</em> problem, traffic shaping is trending as a filtering technology here. Some connections, which where interrupted or routed to nowhere previously, are now rate limited to turn useless.<br>
+Bandwidth limiting is aggressive. It starts from the very first packets. It’s purely SNI-based. TLS 1.0, 1.2 SNI-less connections to banned resources are not interrupted and do work as needed Server certificates don’t trigger the shaping.<br>
+Curl’ing a blocked resource with an -m option often ends just immediately, as no TLS connection could be established at all. Segments are being lost in both directions. A TCP flow diagram looks really horrible. <em>Twitter</em>, <em>Viber</em>, <em>Skype</em>, and mobile devices’ power sources are among the affected.<br>
+<strong>2. Blocking TLS connections by injection of TCP segments with the FIN flag set in reply to the ‘<em>Client Hello</em>’ messages</strong> It’s still a popular filtering technique, entirely SNI-based again. SNI-less connections to banned resources are not interrupted and do work as needed.<br>
+FIN segments inserted have right syn and ask values, but are still distinguishable by their weird timing (they come too fast to originate from a server abroad), ‘random’ IP IDs, and non-empty data (proudly reporting some ‘<em>Middlebox v 1.0</em>’ usage as a plain text string).<br>
+Dropping these SYNs with nftables causes them to be reinserted several times with one second delay, followed by the final RST segment. The later comes with right syn and ask values and no data, albeit again it has a ‘random’ IP ID and follows the same single second temporal pattern.<br>
+No data from the remote server appear in between these injected segments. That points to the next level of filtering equipment installed in-path.<br>
+Some times ago I also noticed forceful setting of FIN flags in what looked like genuine remote server replies to the ‘<em>Client Hello</em>’ messages. No in-path blocking equipment was seen in such cases. I don’t know, whether such blocking method is being employed now.<br>
+<strong>3. RSTing TCP connections</strong> It’s used, probably, for non-TLS TCP connections our state censors want to interrupt. Injected segments again have proper syn and ask values and no data. They come too fast to originate from a remote server and possess ‘random’ IP IDs. RSTs arrive after several seconds since the 3-way handshake, therefore services blocked in such a way look ‘half-working’ for their users.<br>
+As of what is being blocked in Uzbekistan one could look at <a href="https://explorer.ooni.org/search?since=2021-01-01&amp;probe_cc=UZ" rel="noopener nofollow ugc">OONI measurements</a> (<em>OONI</em> forever!).<br>
+To put things into the context I’d recommend the already mentioned collection of ‘<em>Freedom on the Net</em>’ <a href="https://freedomhouse.org/country/uzbekistan/freedom-net/2021" rel="noopener nofollow ugc">reports on Uzbekistan</a> (a great work by <em>The Freedom House</em>).<br>
+A couple of <a href="https://atlas.ripe.net/probes/?search=&amp;status=&amp;af=&amp;country=UZ" rel="noopener nofollow ugc">RIPE probes</a> seems to be active in the country. Kudos to those, who maintain them!</p></td><td>2021-10-22T17:56:42.174Z</td></tr><tr><td>tango</td><td><p>OONI just published a report on Signal blocking that has a section on Uzbekistan. There were not many Signal measurements from Uzbekistan, but all measurements showed blocking.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://ooni.org/post/2021-how-signal-private-messenger-blocked-around-the-world/#uzbekistan">
+  <header class="source">
+      <img src="ugly-shaping-false-fins-and-annoying-rsts-notes-on-internet-filtering-in-uzbekistan/fd924319b10b030d5f1b82cb42e7d4565f238263.png" class="site-icon" data-dominant-color="60BCE8" width="16" height="16">
+
+      <a href="https://ooni.org/post/2021-how-signal-private-messenger-blocked-around-the-world/#uzbekistan" target="_blank" rel="noopener" title="12:00AM - 21 October 2021">ooni.org – 21 Oct 21</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/207;"><img src="ugly-shaping-false-fins-and-annoying-rsts-notes-on-internet-filtering-in-uzbekistan/3bbc6815a96dad53f3fbe8ecd0bdb086f42d746f_2_690x207.png" class="thumbnail" data-dominant-color="F47204" width="690" height="207"></div>
+
+<h3><a href="https://ooni.org/post/2021-how-signal-private-messenger-blocked-around-the-world/#uzbekistan" target="_blank" rel="noopener">How countries attempt to block Signal Private Messenger App around the world</a></h3>
+
+  <p>This report shares OONI measurements on the blocking of the Signal Private Messenger app in Iran, China, Cuba, and Uzbekistan.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<blockquote>
+<p>When attempting to perform a TLS handshake to all Signal backend services, the connection constantly times out after writing the first data packet to the network, as illustrated through <a href="https://explorer.ooni.org/measurement/20210723T054512Z_signal_UZ_12365_n1_GGIRpuK8XkJxRQcN">OONI data</a> below.</p>
+<pre data-code-wrap="json"><code class="lang-json">{
+  "operation": "connect",
+  "address": "173.194.220.121:443",
+  "proto": "tcp",
+  "t": 0.474921823,
+  "failure": null
+},
+{
+  "operation": "tls_handshake_start",
+  "t": 0.47523901,
+  "failure": null
+},
+{
+  "operation": "write",
+  "num_bytes": 288,
+  "t": 0.478659219,
+  "failure": null
+},
+{
+  "operation": "read",
+  "t": 10.477152913,
+  "failure": "generic_timeout_error"
+},
+{
+  "operation": "tls_handshake_done",
+  "t": 10.47733385,
+  "failure": "generic_timeout_error"
+},
+</code></pre>
+</blockquote>
+<p>What do you think? Are these timeouts an instance of your <strong>1. Shaping the traffic for Internet censorship</strong>? I found <a href="https://explorer.ooni.org/measurement/20210926T222024Z_signal_UZ_201767_n1_DRRr4WJQ5hKHYhs2">another measurement</a> that has some successful <code>"read"</code> events before it starts timing out. (Expand the <code>test_keys.network_events</code> array in the JSON.) The fact that some reads were possible seems to match your observation about rate limiting, rather than complete blocking.</p>
+<blockquote>
+<pre data-code-wrap="json"><code class="lang-json">{
+  "operation": "connect",
+  "address": "76.223.92.165:443",
+  "proto": "tcp",
+  "t": 0.259690886,
+  "failure": null
+},
+{
+  "operation": "tls_handshake_start",
+  "t": 0.259772552,
+  "failure": null
+},
+{
+  "operation": "write",
+  "num_bytes": 307,
+  "t": 0.262190208,
+  "failure": null
+},
+{
+  "operation": "read",
+  "num_bytes": 517,
+  "t": 3.775013176,
+  "failure": null
+},
+{
+  "operation": "read",
+  "num_bytes": 831,
+  "t": 3.77526703,
+  "failure": null
+},
+{
+  "operation": "read",
+  "t": 10.28804083,
+  "failure": "generic_timeout_error"
+},
+{
+  "operation": "tls_handshake_done",
+  "t": 10.288115725,
+  "failure": "generic_timeout_error"
+},
+</code></pre>
+</blockquote></td><td>2021-10-22T19:48:20.415Z</td></tr><tr><td>critical_error</td><td><p>It looks like that ugly shaping. False FINs’ I/O pattern is replicating itself just exactly among measurements. Moreover, false FINs are 1-RTT fast. Only triple handshake’s SYN,ACK segment actually arrives from the remote server.<br>
+But let me remind you again, my observations are very limited.</p></td><td>2021-10-24T18:42:42.673Z</td></tr><tr><td>critical_error</td><td><p>For the first time I’ve observed a Server Certificate-based blocking.  Even SNI-less TLS 1.2 connections turn dead after a ‘wrong’ (from our state censors’ point of view) Server Certificate message.  As Server Certificate messages span over several TCP segments, I still can see their beginning.</p></td><td>2021-12-26T11:19:29.033Z</td></tr>
+    </table>
+      </body>
+    </html>

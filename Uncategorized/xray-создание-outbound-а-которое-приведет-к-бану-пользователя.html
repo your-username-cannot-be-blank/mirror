@@ -1,0 +1,63 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>xray-создание-outbound-а-которое-приведет-к-бану-пользователя</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>stepka(stepka reserva)</td><td><p>Пытаюсь заблокировать возможность скачивать торренты через свой xray-сервер (хостинг не DMCA-free, получаю письма от правообладателей время от времени). сейчас конфиг вот такой:</p>
+<pre><code>"outbounds": [
+  ...
+  {
+    "protocol": "blackhole",
+    "tag": "block"
+  }
+],
+"routing": {
+  "rules": [
+    {
+      "type": "field",
+      "protocol": "bittorrent",
+      "outboundTag": "block"
+    },
+    ...
+  ]
+}
+</code></pre>
+<p>но он почти не препятствует скачиванию торрентов, в логах, конечно, появляются строки вроде</p>
+<p><code>xray[53413]: 2025/01/17 14:45:20 from &lt;user_ip&gt;:&lt;user_port&gt; accepted tcp:79.116.12.2:65002 [reality-in -&gt; **block**] email: vless_user</code></p>
+<p>но блокируется далеко не всё, хотя ip пользователей, которые качают торренты, и выявляются более-менее успешно.</p>
+<p>я написал скрипт, который парсит эти логи, берет ip и банит их на несколько часов через <code>ufw</code>, и это более-менее работает, но хочется лучше, в чем и прошу совета: можно ли создать такой outbound, который будет каким-то образом пересылать исходный запрос на определенный порт, например, 22222 (а я на этом порту размещу небольшой сервер, который будет делать то же, что мой скрипт делает сейчас - банить по ip)</p></td><td>2025-01-17T13:59:32.574Z</td></tr><tr><td>0ka(0ka)</td><td><p>просто пусти все порты кроме 443 на warp outbound</p></td><td>2025-01-17T14:18:20.768Z</td></tr><tr><td>stepka(stepka reserva)</td><td><p>тоже вариант, да, спасибо. а cloudflare за такое не забанит?</p></td><td>2025-01-17T15:08:19.587Z</td></tr><tr><td>0ka(0ka)</td><td><p>не слышал о таком</p></td><td>2025-01-17T15:09:45.694Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,151 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>выявление-пакетов-от-dpi-на-роутере</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Sector</td><td><p>Всем привет! Задача проста: выявлять и направлять через VPS заблокированные ресурсы на уровне домашнего роутера. Сейчас пытаюсь реализовать на базе микротика. На данный момент отлавливаю ответ от DPI следующим правилом:</p>
+<p>/ip firewall filter add action=add-src-to-address-list address-list=rkn address-list-timeout=1w chain=forward comment=<br>
+“RST to Address list” connection-state=established in-interface=pppoe-out1 packet-size=40 protocol=tcp <br>
+src-port=443,80 tcp-flags=rst</p>
+<p>Затем соединения с хостами, из сформировавшегося списка “подозрительных” ip-адресов направляю через VPN:</p>
+<p>/ip firewall mangle<br>
+add action=mark-routing chain=prerouting dst-address-list=rkn new-routing-mark=rkn passthrough=yes</p>
+<p>Проблема в том, что правило фильтра слишком широкое, и в список попадает много лишних, легитимных соединений. В статье на хабре ValdikSS писал: “В случае с HTTPS-сайтами, DPI присылает TCP Reset-пакет, тоже с Identification = 1 и Flags = 0”, но в моём случае это не так почему-то, всё наоборот: DF-флаг на месте (1), identification = 0. Провайдер - ростелеком, Нижний Новгород.</p>
+<p>Подскажите, можно-ли как-то средствами микротика однозначно идентифицировать ответ от DPI (TCP-reset)?</p></td><td>2022-03-18T14:09:31.978Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Sector" data-post="1" data-topic="1990">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/ac91a4/48.png" class="avatar"> Sector:</div>
+<blockquote>
+<p>В статье на хабре ValdikSS писал</p>
+</blockquote>
+</aside>
+<p>Эта информация чуть ли не пятилетней давности, с тех пор многие системы DPI изменились или были заменены.</p>
+<p>Почему из всех возможных методов обхода блокировок вы выбрали именно этот? Вас чем-то не устроили «классические» методы маршрутизации заблокированных адресов (которые тоже могут маршрутизировать много «лишнего»)?</p></td><td>2022-03-20T21:08:27.864Z</td></tr><tr><td>Sector</td><td><p>Приветствую! Так вот как раз и не устроили тем, что маршрутизируют много «лишнего», ищу способ исправить этот момент</p></td><td>2022-03-21T04:16:54.688Z</td></tr><tr><td>Eugen(Евгений)</td><td><p>Привет!<br>
+У меня провайдер тоже ростелеком. В принципе с его DPI (не ТСПУ) в целом легко бороться.<br>
+На микроте две команды:<br>
+под https значение ttl=equal возможно придется подобрать индивидуально Wireshark в помощь.</p>
+<pre><code class="lang-auto">1    block - http
+      chain=forward action=drop protocol=tcp in-interface=ether1 src-port=80 content=Location: http://warning.rt.ru/ log=no log-prefix="" 
+
+ 2    block - https
+      chain=forward action=drop tcp-flags=rst protocol=tcp ttl=equal:118 in-interface=ether1 src-port=443 packet-size=40 log=no log-prefix=""
+</code></pre>
+<p>Ну и в дополнении к этому <a href="https://habr.com/ru/post/549282/" class="inline-onebox" rel="noopener nofollow ugc">Настройка BGP для обхода блокировок, версия 3.1. И немного Q&amp;A / Хабр</a></p>
+<p>P.S.<br>
+Ростелеком вроде не баловался подменой DNS, но все равно запросы лучше также в тунель отправлять</p></td><td>2022-03-21T05:32:37.887Z</td></tr><tr><td>Sector</td><td><p>Привет! Увы, это решение уже не работает должным образом, по крайней мере в Нижнем Новгороде <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p></td><td>2022-03-21T05:58:49.735Z</td></tr><tr><td>Eugen(Евгений)</td><td><p>А DNS заворачиваете в туннель?</p></td><td>2022-03-21T06:15:50.747Z</td></tr><tr><td>Sector</td><td><p>DNS через DoH Cloudflare</p></td><td>2022-03-22T08:48:30.804Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Sector" data-post="3" data-topic="1990">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/ac91a4/48.png" class="avatar"> Sector:</div>
+<blockquote>
+<p>маршрутизируют много «лишнего», ищу способ исправить этот момент</p>
+</blockquote>
+</aside>
+<aside class="quote quote-modified" data-post="1" data-topic="129">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/vpn/129">Контейнер VPN АнтиЗапрета для установки на собственный сервер</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/az-self-hosted/38"><span data-category-id="38" style="--category-badge-color: #0088CC; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #8C6238;" data-parent-category-id="5" data-drop-close="true" class="badge-category --has-parent" title="Вопросы и особенности работы контейнера VPN АнтиЗапрета на своих серверах"><span class="badge-category__name">АнтиЗапрет на собственном сервере (self-hosted)</span></span></a>
+  </div>
+  <blockquote>
+    <a name="antizapret-vpn-container-1" class="anchor" href="#antizapret-vpn-container-1"></a>AntiZapret VPN Container
+Выложил готовый контейнер VPN АнтиЗапрета и все файлы для его сборки на 
+<a href="https://bitbucket.org/anticensority/antizapret-vpn-container/src/" class="onebox" target="_blank" rel="noopener">https://bitbucket.org/anticensority/antizapret-vpn-container/src/</a> 
+Последнее обновление: <a href="https://ntc.party/t/vpn/129/61">26.05.2020</a> 
+Для правильной работы Twitter, Facebook и Instagram <a href="https://ntc.party/t/vpn/129/127">требуются дополнительные действия</a>. 
+
+<a name="vpn-10-2" class="anchor" href="#vpn-10-2"></a>Создайте свой личный VPN АнтиЗапрета за 10 минут!
+Что это? Это полный аналог сервиса для получения доступа к заблокированным сайтам в Российской Федерации <a href="https://antizapret.prostovpn.org/">АнтиЗапрет VPN</a>, пригодный для установки на личный сервер…
+  </blockquote>
+</aside>
+</td><td>2022-03-22T09:23:39.900Z</td></tr><tr><td>Elevator</td><td><p>Поделюсь своим способом.<br>
+Мой провайдер осуществляет блокировку интересным способом, отправляя FIN,ACK пакет после ClientHello. Видимо они думали что это усложнит жизнь тем кто захочет обойти блокировку DPI.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="выявление-пакетов-от-dpi-на-роутере/074978daeddb88ebbbfb823a593813fc7505a843.png" data-download-href="https://ntc.party/uploads/default/074978daeddb88ebbbfb823a593813fc7505a843" title="для статьи"><img src="выявление-пакетов-от-dpi-на-роутере/074978daeddb88ebbbfb823a593813fc7505a843.png" alt="для статьи" data-base62-sha1="12sKQdRXwy3zjKLsBGAptJS6QBJ" width="690" height="245" data-dominant-color="BEC2C3"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">для статьи</span><span class="informations">1129×401 35.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Фейковый пакет FIN,ACK мало чем отличается от других кроме всегда одинакового TTL=57 что недостаточно для выявления блокировки.</p>
+<p>Но я нашел способ его выявлять практически со 100% гарантией.</p>
+<p><strong>Принцип работы</strong><br>
+Мы создаем два правила. Первое помечает все соединения в которых мы нашли ClientHello пакет.<br>
+Второе правило ловит следующий пакет и проверяет его на FIN,ACK при условии что <strong>объем переданных пакетов в соединении не превышает 1000 байт</strong>.  Значение в 1000 байт я подбирал экспериментально. Если 2-ое правило срабатывает то добавляем ip сервера в список для обхода блокировок.</p>
+<p>Вероятность что в первых 1000 байт соединения, отсылая приветствие, мы получим пинок под зад стремится к нулю, следовательно нас блокируют.</p>
+<p><strong>Реализация</strong></p>
+<p>В IP-Firewall-Mangle создаем два правила:</p>
+<p>Первое правило:</p>
+<details>
+<summary>
+Посмотреть</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="выявление-пакетов-от-dpi-на-роутере/e7b767f08652aadbc14fb7019a12c9ca5139932f.png" data-download-href="https://ntc.party/uploads/default/e7b767f08652aadbc14fb7019a12c9ca5139932f" title="rule1_1"><img src="выявление-пакетов-от-dpi-на-роутере/e7b767f08652aadbc14fb7019a12c9ca5139932f.png" alt="rule1_1" data-base62-sha1="x3ReXlINQ6DpicnDuG4wJDbQ6f5" width="436" height="500" data-dominant-color="E6E6E9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">rule1_1</span><span class="informations">603×690 16.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="выявление-пакетов-от-dpi-на-роутере/e27f004bf6dbdb94f1767f434d4af2c32b42fdcb.png" data-download-href="https://ntc.party/uploads/default/e27f004bf6dbdb94f1767f434d4af2c32b42fdcb" title="rule1_2"><img src="выявление-пакетов-от-dpi-на-роутере/e27f004bf6dbdb94f1767f434d4af2c32b42fdcb.png" alt="rule1_2" data-base62-sha1="wjG0r6dbHgLHihCmzDo4F33TZiz" width="438" height="500" data-dominant-color="E3E4E6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">rule1_2</span><span class="informations">607×692 17.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="выявление-пакетов-от-dpi-на-роутере/302236500a15f647ed852563742319dc9e5e287e.png" data-download-href="https://ntc.party/uploads/default/302236500a15f647ed852563742319dc9e5e287e" title="rule1_3"><img src="выявление-пакетов-от-dpi-на-роутере/302236500a15f647ed852563742319dc9e5e287e.png" alt="rule1_3" data-base62-sha1="6ROdvcluafacxI3zZksAm8cCEMK" width="436" height="500" data-dominant-color="E7E8EB"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">rule1_3</span><span class="informations">605×693 11.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>Второе правило:</p>
+<details>
+<summary>
+Посмотреть</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="выявление-пакетов-от-dpi-на-роутере/1cd48cdb37c8ea73dee20944492b88ed7af3d36d.png" data-download-href="https://ntc.party/uploads/default/1cd48cdb37c8ea73dee20944492b88ed7af3d36d" title="rule2_1"><img src="выявление-пакетов-от-dpi-на-роутере/1cd48cdb37c8ea73dee20944492b88ed7af3d36d.png" alt="rule2_1" data-base62-sha1="472KRKAJe4Igbg83VENaoFXfrAN" width="436" height="500" data-dominant-color="E6E6E9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">rule2_1</span><span class="informations">603×690 16.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="выявление-пакетов-от-dpi-на-роутере/a7952384f217147d6a29b426f444b7e900af4bc0.png" data-download-href="https://ntc.party/uploads/default/a7952384f217147d6a29b426f444b7e900af4bc0" title="rule2_2"><img src="выявление-пакетов-от-dpi-на-роутере/a7952384f217147d6a29b426f444b7e900af4bc0.png" alt="rule2_2" data-base62-sha1="nUvgtXi1Bjkq5NPoRUTD3OPwq4M" width="435" height="500" data-dominant-color="E4E4E7"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">rule2_2</span><span class="informations">603×693 17.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="выявление-пакетов-от-dpi-на-роутере/7d8397bfed10083ff889d41879638fa788bd1d1d.png" data-download-href="https://ntc.party/uploads/default/7d8397bfed10083ff889d41879638fa788bd1d1d" title="rule2_3"><img src="выявление-пакетов-от-dpi-на-роутере/7d8397bfed10083ff889d41879638fa788bd1d1d.png" alt="rule2_3" data-base62-sha1="hUlCrmfDvmsbJED9qa8t1jWYPG5" width="436" height="500" data-dominant-color="E7E8EC"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">rule2_3</span><span class="informations">603×691 11 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>Данный способ также хорошо подойдет если провайдер отсылает фейковый RST пакет, т.к мы отсекаем пакеты после 1000 байт и тем самым уменьшаем вероятность ложного срабатывания.</p></td><td>2022-05-16T08:03:07.364Z</td></tr><tr><td>Elevator</td><td><p>Заметил у своего провайдера новый тип блокировки<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="выявление-пакетов-от-dpi-на-роутере/c8b9c95dd2fba5f500170c8f8604732f856415b3.png" data-download-href="https://ntc.party/uploads/default/c8b9c95dd2fba5f500170c8f8604732f856415b3" title="new_type_of_block"><img src="выявление-пакетов-от-dpi-на-роутере/c8b9c95dd2fba5f500170c8f8604732f856415b3.png" alt="new_type_of_block" data-base62-sha1="sDHxtPykbuaD9EcQ4eyWM6Su7g7" width="690" height="108" data-dominant-color="78747B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">new_type_of_block</span><span class="informations">1453×229 21.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Теперь после clienthello делается drop пакетов вместо FIN,ACK</p>
+<p>Добавил новое правило на роутер, теперь ищется пакет от клиента PSH,ACK после clienthello. Пока тестирую на ложные срабатывания</p>
+<p>Также придумал как обнаруживать блокировку по ip. Но скорее всего будет много ложных срабатываний. Тесты покажут.</p>
+<p>Все это наводит меня на мысли что нужно делать active probing на стороне клиента. Чтобы автоматически и достоверно определять факт блокировки</p></td><td>2023-03-10T10:41:17.612Z</td></tr><tr><td>Sector</td><td><p>В этом, собственно, и вопрос: как качественно сделать этот самый “Active Probing”? Желательно, средствами Микротика…</p></td><td>2023-03-10T10:57:59.122Z</td></tr><tr><td>Elevator</td><td><p>Средствами микротика никак. Насколько мне известно функционал routeros не позволяет отправлять свои пакеты.</p></td><td>2023-03-10T11:09:08.202Z</td></tr><tr><td>bolvan</td><td><p>Лишь только дропанием каких-либо пакетов можно обойти только пассивный DPI, который не может блокировать пакеты по признаку соединения. Активный DPI после срабатывания блочит весь tcp сеанс.<br>
+Сейчас провайдеров лишь только с пассивным DPI не так много осталось.</p>
+<p>На routeros есть scripting, возможно с ним что-то можно соорудить.<br>
+Можно запускать докер контейнеры с linux, но не могу сказать насколько они окажутся урезанными в возможностях</p></td><td>2023-03-10T16:47:21.199Z</td></tr><tr><td>Elevator</td><td><p>Речь не про дроп пакетов. Идея состоит в том чтобы роутер мог автоматически определять факт блокировки. Это позволит отказаться от многотысячных списков и ручного наполнения. Комфорт просто несоизмеримый. Заходишь на сайт - connection reset. Нажимаешь F5 и сайт открывается. А если приложение где тысячи доменов заблочены по маске? Пару раз посвайпал и все работает.</p>
+<p>Вот у меня и крутится в голове идея про active probing для клиента.</p></td><td>2023-03-10T17:12:47.203Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="Elevator" data-post="14" data-topic="1990">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/e/ee59a6/48.png" class="avatar"> Elevator:</div>
+<blockquote>
+<p>Вот у меня и крутится в голове идея про active probing для клиента.</p>
+</blockquote>
+</aside>
+<p>Выглядит не просто реализуемым.<br>
+Особенно на таких ограниченных поделках как mikrotik.</p>
+<p>Нужно каким-то образом распознать факт обращения к IP, по факту вызвать некий обработчик<br>
+Либо нужно распознать через пассивный анализ трафика факт сброса соединения и тоже вызвать некий обработчик.<br>
+Либо повеситься на ресолв DNS и проверять каждый заресолвленный IP.<br>
+Обработчик может, например, добавить IP в ipset/nfset. Это не так сложно , сложнее первое.<br>
+Само ядро просто так не может взять и запустить процесс по приходу определенных пакетов.<br>
+Будь такое возможно, и бурст таких пакетов запустил бы тысячи, если не миллионы процессов.<br>
+Напрашивается написание некого NFQUEUE обработчика, а чтобы сократить ему сложноту и снизить нагрузку, можно использовать описанный выше в теме подход с маркировкой соединения через connmark.<br>
+Но это все, разумеется, выходит за уютный счастливый мирок любителя микроты.<br>
+Преодоление сопротивления микротоделателей для доступа к linux явно не стоит того, проще снести это все и накатить openwrt. Или пробовать докер. Но что там с неймспейсами - это вопрос</p>
+<p>Еще потенциальная проблема может быть с отслеживанием аномальных ситуаций. Сброс может произойти по желанию самого сервера, если он, например, перегружен. Чтобы каждый такой чих не приводил к вечному занесению IP. А как сделать невечное ? В ipset это невозможно, там нет даты/времени добавления. Тереть каждый день ? Тогда придется каждый день заново нажимать F5.<br>
+Можно сделать отдельный set для успешных соединений. Если хоть раз прокатило - больше не проверять. Не проверять повторно и неуспешные.</p></td><td>2023-03-11T06:55:35.822Z</td></tr>
+    </table>
+      </body>
+    </html>

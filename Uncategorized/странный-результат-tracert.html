@@ -1,0 +1,87 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>странный-результат-tracert</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>jabacrack(jabacrack)</td><td><p>Сегодня делал tracert (Windows) к паре сайтов, и обнаружил что в некоторых прыжках как домен используется имя моего пользователя (Banderlog). В первый раз такое вижу, что бы это значило?</p>
+<pre><code class="lang-auto">C:\Users\Banderlog&gt;tracert reddit.com
+
+Трассировка маршрута к reddit.com [151.101.129.140]
+с максимальным числом прыжков 30:
+
+  1    &lt;1 мс    &lt;1 мс    &lt;1 мс  firewall.lan [192.168.0.1]
+  2     5 ms     1 ms     4 ms  185.125.112.254
+  3     1 ms     1 ms     1 ms  10.1.1.10
+  4     5 ms     6 ms     2 ms  10.1.1.13
+  5     2 ms     1 ms     1 ms  212.110.156.144
+  6     5 ms     5 ms     2 ms  Banderlog [178.34.152.9]
+  7     *        *        *     Превышен интервал ожидания для запроса.
+  8    49 ms    48 ms    50 ms  87.226.221.10
+  9    47 ms    46 ms    46 ms  188.254.25.77
+ 10     *        *        *     Превышен интервал ожидания для запроса.
+ 11    82 ms   105 ms    82 ms  217.161.68.33
+ 12     *        *        *     Превышен интервал ожидания для запроса.
+ 13    74 ms    71 ms    70 ms  151.101.129.140
+
+Трассировка завершена.
+</code></pre>
+<pre><code class="lang-auto">C:\Users\Banderlog&gt;tracert ya.ru
+
+Трассировка маршрута к ya.ru [5.255.255.242]
+с максимальным числом прыжков 30:
+
+  1    &lt;1 мс    &lt;1 мс    &lt;1 мс  firewall.lan [192.168.0.1]
+  2     4 ms     2 ms     3 ms  185.125.112.254
+  3     1 ms     2 ms     1 ms  10.1.1.10
+  4     2 ms    &lt;1 мс     1 ms  10.1.1.13
+  5     6 ms     1 ms     3 ms  212.110.156.144
+  6     3 ms     1 ms     2 ms  Banderlog [178.34.152.9]
+  7     9 ms    13 ms     6 ms  Banderlog [185.64.45.191]
+  8    29 ms    27 ms    28 ms  Banderlog [178.34.176.182]
+  9    43 ms    49 ms    40 ms  vla-32z1-ae2.yndx.net [93.158.172.19]
+ 10     *        *        *     Превышен интервал ожидания для запроса.
+ 11    30 ms    28 ms    32 ms  ya.ru [5.255.255.242]
+
+Трассировка завершена.
+</code></pre></td><td>2024-04-03T06:42:23.225Z</td></tr><tr><td>ValdikSS</td><td><p>$ host 178.34.152.9<br>
+9.152.34.178.in-addr.arpa domain name pointer localhost.</p>
+<p>А ваша ОС подставляет вместо localhost имя вашего компьютера.</p></td><td>2024-04-03T06:48:54.000Z</td></tr><tr><td>jabacrack(jabacrack)</td><td><p>Немного погуглил, это в миранде (провайдере) забыли что-то до конца настроить (пару месяцев назад точно таких записей не было) или все же попытка подменить localhost?</p></td><td>2024-04-03T07:35:20.441Z</td></tr><tr><td>bolvan</td><td><p>Провайдер может прописывать в зону обратного ресолвинга (PTR DNS) что угодно. PTR значит преобразование IP в host. Но это просто строка, которая не обязана чему-либо соответствовать. Что хочешь, то и пиши. Хоть “<a href="http://ya.vasya.pupkin.ochen.lublu.pivo.com">ya.vasya.pupkin.ochen.lublu.pivo.com</a>”<br>
+localhost тоже можно прописать<br>
+tracert получает PTR, дальше уже зависит от программы или ОС что с этим делать. подменять или отображать как-то иначе , если localhost</p></td><td>2024-04-03T07:39:01.881Z</td></tr><tr><td>jabacrack(jabacrack)</td><td><p>Спасибо, понял.<br>
+Одно непонятно, почему там появился localhost, что провайдер хотел этим сказать <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-04-03T08:50:04.317Z</td></tr><tr><td>bolvan</td><td><p>Он сделал localhost дефолтным для диапазона. Если делать dig -x на случайные адреса из /24, то везде localhost.<br>
+Не стоит искать в этом большого смысла. Такая погода была в голове у сисадмина в тот момент. Надо что-то вписать, давайте я впишу от балды первое, что пришло на ум</p></td><td>2024-04-03T09:43:39.904Z</td></tr><tr><td>jabacrack(jabacrack)</td><td><p>Спасибо</p></td><td>2024-04-03T10:05:42.825Z</td></tr>
+    </table>
+      </body>
+    </html>

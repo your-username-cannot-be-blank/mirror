@@ -1,0 +1,70 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-detecting-probe-resistant-proxies-ndss-20</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Detecting Probe-resistant Proxies<br>
+Sergey Frolov, Jack Wampler, Eric Wustrow<br>
+<a href="https://censorbib.nymity.ch/#Frolov2020a" class="onebox" target="_blank" rel="nofollow noopener">https://censorbib.nymity.ch/#Frolov2020a</a></p>
+<p>This research finds weaknesses in proxy-resistant proxy protocols, like obfs4 and Shadowsocks, that make them more prone to detection by active probing than previously thought. These are protocols that require the client to prove knowledge of a secret before using the proxy. Despite the fact that probe-resistant proxy servers are designed not to respond to unauthorized clients, they may have characteristic timeouts or disconnection behaviors that distinguish them from non-proxies.</p>
+<p>The evaluated protocols have in common that the server reads some number of bytes from the client, then checks the authentication on those bytes. A typical code pattern is the following:</p>
+<pre><code class="lang-auto">client, _ := listener.Accept()
+client.SetDeadline(30 * time.Second)
+buf := make([]byte, 50)
+_, err = io.ReadFull(client, buf)
+if err != nil {
+	client.Close()
+	return
+}
+if !checkAuthentication(buf) {
+	client.Close()
+	return
+}
+// client is authorized, server may now respond
+</code></pre>
+<p>The server reads exactly 50 bytes from the client, then checks the client’s credentials. If the client doesn’t send 50 bytes before the timeout, the server closes the connection. If the credentials are bad, the server closes the connection. Consider what happens when a unauthorized client sends 49, 50, or 51 bytes.</p>
+<ul>
+<li>With 49 bytes, the server times out after 30 seconds and closes the connection with a FIN.</li>
+<li>With 50 bytes, the server closes the connection immediately with a FIN (<code>io.ReadFull</code> succeeds but <code>checkAuthentication</code> fails).</li>
+<li>With 51 bytes, the server closes the connection immediately, but with a RST, not a FIN.</li>
+</ul>
+<p>Why a RST in the 51-byte case? It’s a peculiarity of Linux: if a user-space process closes a socket without draining the kernel socket buffer, the kernel sends a RST instead of a FIN. Put together, these distinctive timeout and FIN/RST thresholds form a fingerprint of the probe-resistant protocol, despite the server never sending application data.</p>
+<p>The authors evaluate six protocols: <a href="https://gitlab.com/yawning/obfs4" rel="nofollow noopener">obfs4</a>; <a href="https://github.com/getlantern/lampshade" rel="nofollow noopener">Lampshade</a> (used in Lantern); Shadowsocks (the <a href="https://github.com/shadowsocks/shadowsocks/tree/master" rel="nofollow noopener">Python implementation</a> and the <a href="https://github.com/Jigsaw-Code/outline-ss-server" rel="nofollow noopener">Outline implementation</a>, both with AEAD ciphers); <a href="https://core.telegram.org/mtproto/" rel="nofollow noopener">MTProto</a> (used in Telegram); and <a href="https://github.com/Psiphon-Labs/psiphon-tunnel-core/blob/master/psiphon/common/obfuscator/obfuscatedSshConn.go" rel="nofollow noopener">obfuscated SSH</a> (used in Psiphon). They test a pool of known proxies, as well as large number of endpoints derived from a random ZMap scan (1.5 million) and from a passive ISP tap (0.4 million). They send these endpoints a selection of probes of different lengths. From these they derive simple decision trees for identifying probe-resistant proxy servers. (Where the root of the tree is always “discard endpoints that send application data in response to any probe.”)</p>
+<p>The decision trees classify a few endpoints from the ZMap and ISP tap sets as proxies. In the case of obfuscated SSH, the authors confirmed with Psiphon developers that 7 of the 8 identified proxies actually were proxies operated by the developers. In some other cases, there is corroborating evidence that the endpoints really are proxies, even if not direct confirmation. By far the most difficult protocol to identify is MTProto, because it never times out and never closes the connection. The authors recommend this strategy for the best probe resistance: when a client fails to authenticate, just keep reading from it forever.</p>
+<p>For the most part, the developers of the examined protocols have fixed the identified flaws, at least by continuing to read from the client and not closing the connection immediately when there’s an authentication failure. They may still have a timeout instead of reading forever, but the server will have identical reactions to the three cases examined above.</p>
+<p>Thanks to Sergey Frolov for commenting on a draft of this summary and providing the code sample.</p></td><td>2020-03-16T18:56:09.960Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,144 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>балансировка-в-marzban-marzban-node</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>sadkin(Илья)</td><td><p>Всем добрейшего времени суток и всех с наступающими.<br>
+Столкнулся с проблемой (коротко сама суть):<br>
+Имеем сервер 1 в Нидерландах, сервер 2 в Германии (от разных облачных провайдеров), на обоих был поднят 3x-ui (Xray + Reality).<br>
+На гите увидел варнинг про 3x-ui, что-то про взятку от Ирана, а я человек беспокойный, поэтому решил не разбираться в вопросе и сразу рассмотреть альтернативу.<br>
+Выбор пал на marzban из-за наличия/возможности развернуть панель + отдельно ноды.<br>
+Забегая на перед: в голове сразу появилась идея по “автоматической” балансировке через haproxy, поскольку бывает, что кто-то из облачных провайдеров может “тупить”.<br>
+В общем, поднял панель (пускай будет panel.sub.domain), развернул marzban-node (пускай будет node-1.sub.domain), в самом marzban подключил node-1.sub.domain. Все ок.<br>
+Скажу больше, после создания пользователя в marzban я с этими же кредами могу постучаться напрямую в node-1.sub.domain и все будет работать.<br>
+Часа 2-3 я терроризировал конфиг haproxy и документацию самого marzban, выставлял acceptProxyProtocol в true (в конфиге подключения xray) - ничего не получилось.<br>
+Дальше я попробовал настроить балансировку через outbounds исключительно средствами xray:</p>
+<details>
+<summary>
+Пример outbounds</summary>
+<pre><code class="lang-auto">"outbounds": [
+    {
+      "protocol": "vless",
+      "tag": "Marzban-node-1",
+      "settings": {
+        "vnext": [
+          {
+            "address": "node-1.sub.domain",
+            "port": 12000,
+            "users": [
+              {
+                "encryption": "none",
+                "id": "&lt;user_id&gt;",
+                "flow": "",
+                "security": "auto"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "tcpSettings": {},
+        "security": "reality",
+        "realitySettings": {
+          "show": false,
+          "dest": "docker.com:443",
+          "xver": 0,
+          "serverNames": [
+            "docker.com",
+            "www.docker.com"
+          ],
+		  "privateKey": "&lt;private_key&gt;",
+          "shortIds": [
+            "&lt;shorts_id&gt;"
+          ]
+        }
+      }
+    },
+    {
+      "protocol": "freedom",
+      "tag": "DIRECT"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "BLOCK"
+    },
+   {
+      "protocol": "vless",
+      "tag": "LEAST_PING",
+      "settings": {
+        "vnext": [
+          {
+            "address": "node-1.sub.domain",
+            "port": 12000,
+            "users": [
+              {
+                "encryption": "none",
+                "id": "&lt;user_id&gt;",
+                "flow": "",
+                "security": "reality"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "show": false,
+          "dest": "docker.com:443",
+          "xver": 0,
+          "serverNames": ["docker.com", "www.docker.com"],
+		  "privateKey": "&lt;private_key&gt;",
+          "shortIds": [
+            "&lt;shorts_id&gt;"
+          ]
+        },
+        "leastPing": true
+      }
+    }
+  ]
+</code></pre>
+</details>
+<p>Тоже ничего не вышло.</p>
+<p>Отсюда вопросы:</p>
+<ol>
+<li>Реально ли организовать в xray/marzban автоматическую балансировку между нодами?</li>
+<li>Если реально, где найти тутор для “деревянных” в виде меня?</li>
+</ol></td><td>2024-12-26T06:42:45.614Z</td></tr><tr><td>Xunlei</td><td><p>Знаю, что есть способ балансировки в GOST: <a href="https://gost.run/en/concepts/selector/" rel="noopener nofollow ugc">Selector</a>, <a href="https://gost.run/en/concepts/load-balancing/" rel="noopener nofollow ugc">Load Balancing</a>.</p></td><td>2024-12-26T10:49:09.238Z</td></tr><tr><td>sadkin(Илья)</td><td><p>Удалось все же сделать балансировку через haproxy (на нем же и health check).</p></td><td>2024-12-26T11:49:08.007Z</td></tr><tr><td>m1cr0Ni(M1cr0Ni)</td><td><p>Здравствуйте. Если Вас не затруднит,  скиньте туториал. Или конф, для таких деревянных, как я)))</p></td><td>2024-12-29T16:14:09.092Z</td></tr>
+    </table>
+      </body>
+    </html>

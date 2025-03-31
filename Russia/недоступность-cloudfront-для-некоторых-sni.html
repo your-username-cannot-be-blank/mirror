@@ -1,0 +1,114 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>недоступность-cloudfront-для-некоторых-sni</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>m0xfff</td><td><p>При запросе к IP cloudfront (проверял на 108.156.46.43) с некоторыми SNI соединение блокируется (timeout). С cloudflare и другими CDN провайдерами не наблюдается.</p>
+<p>timeout:</p>
+<pre><code class="lang-auto">google.com
+yandex.ru
+rutube.ru
+vk.com
+www.gosuslugi.ru
+www.sberbank.ru
+mts.ru
+dzen.ru
+</code></pre>
+<p>ok:</p>
+<pre><code class="lang-auto">gosuslugi.ru
+www.yandex.ru
+google.ru
+www.google.ru
+sberbank.ru
+www.google.com
+youtube.com
+www.mts.ru
+&lt;любой несуществующий домен&gt;
+</code></pre>
+<p>Проверял так:</p>
+<pre><code class="lang-auto">curl -4ko /dev/null https://vk.com/ --connect-timeout 5 --connect-to ::108.156.46.43
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0
+curl: (28) SSL connection timeout
+</code></pre>
+<p>Провайдер - проводной мтс. Предположу, что это попытка противодействия zapret\gdpi.</p></td><td>2024-12-21T10:45:32.293Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>РТ так же себя ведет</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>C:&gt;curl -4ko NUL <a href="https://vk.com/" rel="noopener nofollow ugc">https://vk.com/</a> --connect-timeout 5 --connect-to ::108.156.46.43<br>
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current<br>
+Dload  Upload   Total   Spent    Left  Speed<br>
+0     0    0     0    0     0      0      0 --:–:--  0:00:05 --:–:--     0<br>
+curl: (28) Connection timed out after 5008 milliseconds</p>
+<p>C:&gt;curl -4ko NUL <a href="https://youtube.com/" rel="noopener nofollow ugc">https://youtube.com/</a> --connect-timeout 5 --connect-to ::108.156.46.43<br>
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current<br>
+Dload  Upload   Total   Spent    Left  Speed<br>
+100   321  100   321    0     0   1143      0 --:–:-- --:–:-- --:–:--  1146</p>
+</details></td><td>2024-12-21T12:04:20.074Z</td></tr><tr><td>anon60595749</td><td><p>Амазон разве до сих не зарубил фронтинг?</p></td><td>2024-12-21T17:29:32.246Z</td></tr><tr><td>anon60595749</td><td><p>Аналогичное поведение с IP-адресами OVH.</p>
+<pre><code class="lang-auto">$ curl -sv --connect-to ::ovh.net https://ya.ru/
+* Connecting to hostname: ovh.net
+* Host ovh.net:443 was resolved.
+* IPv6: (none)
+* IPv4: 54.39.46.56
+*   Trying 54.39.46.56:443...
+* Connected to ovh.net (54.39.46.56) port 443
+* ALPN: curl offers h2,http/1.1
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+висим (^C)
+
+$ curl -sv --connect-to ::ovh.net https://test.ru/
+* Connecting to hostname: ovh.net
+* Host ovh.net:443 was resolved.
+* IPv6: (none)
+* IPv4: 54.39.46.56
+*   Trying 54.39.46.56:443...
+* Connected to ovh.net (54.39.46.56) port 443
+* ALPN: curl offers h2,http/1.1
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (OUT), TLS alert, unknown CA (560):
+* SSL certificate problem: self-signed certificate
+* Closing connection
+</code></pre></td><td>2024-12-21T17:40:29.019Z</td></tr><tr><td>m0xfff</td><td><p>Да, с ovh аналогичное поведение, но список доменов разный. Например для SNI <a href="http://ya.ru" rel="noopener nofollow ugc">ya.ru</a> cloudfront отвечает, а ovh уходит в timeout. Для SNI <a href="http://yandex.ru" rel="noopener nofollow ugc">yandex.ru</a> наоборот - у cloudfront timeout, а ovh отвечает</p></td><td>2024-12-22T05:11:56.948Z</td></tr>
+    </table>
+      </body>
+    </html>

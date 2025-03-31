@@ -1,0 +1,184 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>gfw-archaeology-gfw-looking-glasssh</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>gfw.report(gfw.report)</td><td><p>Author: Anonymous</p>
+<p>Date: Sunday, March 08, 2020</p>
+<p><strong>Credits</strong>: GFW Report did not contribute in any step of this work. All credits goes to <a href="https://twitter.com/gfwrev" rel="noopener nofollow ugc">gfwrev</a>.</p>
+<p><a href="https://gfw.report/blog/gfw_looking_glass/zh" rel="noopener nofollow ugc">中文版： GFW考古：gfw-looking-glass.sh</a></p>
+<p>This report first appeared on <a href="https://gfw.report/blog/gfw_looking_glass/en/" rel="noopener nofollow ugc">GFW Report</a>. We also maintain an up-to-date copy of the report on both net4people and ntc.party.</p>
+<hr>
+<p>I came across <a href="https://twitter.com/gfwrev/status/25220534979" rel="noopener nofollow ugc">a one-liner script</a> by <a href="https://twitter.com/gfwrev" rel="noopener nofollow ugc">@gfwrev</a> and got seriously impressed by it. Although it does not work anymore, I still would like to have a writeup on it for its beauty and for the author’s creativity.</p>
+<p>The one-liner named <code>gfw-looking-glass.sh</code> is as follows:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">while true; do printf "\0\0\1\0\0\1\0\0\0\0\0\0\6wux.ru\300" | nc -uq1 $SOME_IP 53 | hd -s20; done
+</code></pre>
+<p>As shown in the figure below, it was able to <a href="https://twitter.com/gfwrev/status/25222642896" rel="noopener nofollow ugc">print out part of the memory of the GFW</a>. But how?</p>
+<p><img src="gfw-archaeology-gfw-looking-glasssh/7dd94f6d9797fb4c8474bc378a794cd66fa29248.png" alt="KBCrx" data-base62-sha1="hXjgFFiqdfp0dFbbJTETkPAG20M" width="675" height="456"></p>
+<h2><a name="p-1016-nc-1" class="anchor" href="#p-1016-nc-1"></a>nc</h2>
+<p><code>nc -uq1 $SOME_IP 53</code> sends input from stdin to the port 53 of <code>$SOME_IP</code> as a UDP packet. As <a href="https://twitter.com/gfwrev/status/25221199247" rel="noopener nofollow ugc">explained</a> by <span class="mention">@gfwrev</span>, <code>$SOME_IP</code> can be any host that 1) does <strong>not</strong> response to DNS query on port 53 and 2) is on the other side of the GFW (meaning if the query is sent from China, <code>$SOME_IP</code> should be outside of China). Requirement 1 makes sure any response was from the GFW, rather than the destination host; while requirement 2 makes sure the well-crafted DNS query would be seen by the GFW.</p>
+<h2><a name="p-1016-background-2" class="anchor" href="#p-1016-background-2"></a>Background</h2>
+<p>A little bit background on DNS format and DNS compression pointer can be very helpful to understand this exploitation.</p>
+<h4><a name="p-1016-general-dns-format-3" class="anchor" href="#p-1016-general-dns-format-3"></a>General DNS Format</h4>
+<p>Below is the general format of DNS queries and responses:</p>
+
+<pre><code class="lang-auto"> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Identification        |              flags            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      number of questions      |      number of answer RRs     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     number of authority RRs   |    number of additional RRs   |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                            questions                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                 answers(varaible number of RRs)               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                anthority(varaible number of RRs)              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         additional information(varaible number of RRs)        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</code></pre>
+<h4><a name="p-1016-questions-field-format-4" class="anchor" href="#p-1016-questions-field-format-4"></a>Questions Field Format</h4>
+
+<p>The format of questions field is as follows:</p>
+<pre><code class="lang-auto"> 0                   1
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           query name          |
+\                               \
+|                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           query type          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           query class         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</code></pre>
+<h4><a name="p-1016-query-name-field-format-5" class="anchor" href="#p-1016-query-name-field-format-5"></a>Query Name Field Format</h4>
+<p>The query name of <code>www.google.com</code> can be represented as follows:</p>
+<pre><code class="lang-auto"> 0                   1
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|3| www |6|   google  |3| com |0|
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</code></pre>
+
+<p>When <a href="https://www.freesoft.org/CIE/RFC/1035/43.htm" rel="noopener nofollow ugc">compression pointer</a> is used, one example is as follows:</p>
+<pre><code class="lang-auto"> 0                   1
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|3|  www|1|1|           offset          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</code></pre>
+
+<p>We can see <code>www</code> is followed by a two-byte pointer, whose two higher-order bits are turned on. The 14 bits after the two high-order bits in the pointer are offset. When offset == n, it points to the nth byte of DNS query message.</p>
+<h2><a name="p-1016-explainations-on-the-crafted-dns-query-6" class="anchor" href="#p-1016-explainations-on-the-crafted-dns-query-6"></a>Explainations on the crafted DNS query</h2>
+<p>We now take a closer look at this well-crafted DNS query:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">printf "\0\0\1\0\0\1\0\0\0\0\0\0\6wux.ru\300" | xxd -b -c 4
+</code></pre>
+<pre><code class="lang-auto">00000000: 00000000 00000000 00000001 00000000  ....
+00000004: 00000000 00000001 00000000 00000000  ....
+00000008: 00000000 00000000 00000000 00000000  ....
+0000000c: 00000110 01110111 01110101 01111000  .wux
+00000010: 00101110 01110010 01110101 11000000  .ru.
+</code></pre>
+<p>The first 12 bytes is just a typical DNS query where:</p>
+<ul>
+<li>ID=0;</li>
+<li>Recursion Desired Flag is set;</li>
+<li>number of questions = 1;</li>
+<li>number of answer RRs = 0;</li>
+<li>number of authority RRs = 0;</li>
+<li>number of additional RRs = 0.</li>
+</ul>
+<p>The most interesting part is in the questions field from byte 12 to 19.</p>
+<p>I first thought <code>\6wux.ru</code> was a typo, which was supposed to be <code>\3wux\2ru</code>. But then I realized <code>\6wux.ru</code> was intentionally used to demonstrate how GFW parses the query name. In particular, although <code>\6wux.ru</code> does not follow the query name format, the fact it could equivalently trigger the GFW as what <code>\3wux\2ru</code> could do suggested the GFW <a href="https://gfwrev.blogspot.com/2009/11/gfwdns.html" rel="noopener nofollow ugc">“converted query name to string before pattern matching”</a>.</p>
+<p>As introduced in the background section, a pointer takes 2 bytes. However, the crafted query has only 1 byte of the pointer. This incomplete pointer caused the GFW treating the following byte in the buffer as part of the offset. It can be inferred the offset in this query ranges from <code>0</code> to <code>2^8-1</code> and when the offset was greater than the DNS query length, the GFW would jump out of the DNS query and treat some bytes in its memory as part of the domain name. The GFW seemed not to validate if the offset is smaller than the DNS query length.</p>
+<p>Now that the GFW has included its memory as part of the query name, all we have to do is to trigger the GFW to send a forged DNS response. <span class="mention">@gfwrev</span> used <code>wux.ru</code> as the <code>kw{rnd}</code> like keyword in this query. Note different keyword patterns are summarized in the Table 2 (b) of this <a href="https://www.usenix.org/system/files/conference/foci14/foci14-anonymous.pdf#page=5" rel="noopener nofollow ugc">paper</a>.</p>
+<h2><a name="p-1016-explainations-on-the-forged-response-7" class="anchor" href="#p-1016-explainations-on-the-forged-response-7"></a>Explainations on the forged response</h2>
+<p>After receveing the forged DNS response, <code>hd -s20</code> helps to truncate the first 20 bytes of it. The 20 bytes contain 12 bytes of the fields before questions field and the first 8 bytes of the questions field: <code>\6wux.ru\300</code>.</p>
+<p>The parts that are not truncated are 1) what in GFW’s memory 2) followed by a forged answers field. Taking the first hex dump in the screenshot above as one example, the 2) forged answers field is:</p>
+<pre><code class="lang-auto">c0 0c 00 01 00 01 00 00 01 2c 00 04 cb 62 07 41
+</code></pre>
+<ul>
+<li><code>c0 0c</code> represents the domain name, it is essentially a pointer to the query name in the question field.</li>
+<li><code>00 01</code> and <code>00 01</code> tells the answer type is A and class type is 1 respetively. This is interesting because back to the time <code>gfw-looking-glass.sh</code> worked, the <a href="https://gfwrev.blogspot.com/2009/11/gfwdns.html" rel="noopener nofollow ugc">type 1 DNS responses</a> forged by the GFW would set answer type to A and class type to 1 regardless of the query type and query class type.</li>
+<li><code>00 00 01 2c</code> sets the DNS TTL to 300 seconds.</li>
+<li><code>00 04</code> specifies the data length is 4.</li>
+<li><code>cb 62 07 41</code> is the forged IP address: <code>203.98.7.65</code>.</li>
+</ul>
+<p>Excluding 2) the bytes for answers field, we thus know 1) the bytes in GFW’s memory.</p>
+<p>One thing interesting is the length of the questions field in these forged responses. The questions field started with 8 bytes <code>\6wux.ru\300</code> and was followed by 122 bytes GFW memory: <code>cb 9e ... 65 61</code>. Interestingly, the hexdump of both exploits in the screenshot have a questions field of exactly 130 bytes. Since the maximum length of a domain name and a label of domain name are 253 bytes and 63 bytes respectively, I conjectured 130 bytes was an artifitial limitation set by the GFW for each question name.</p>
+<h2><a name="p-1016-sidenote-8" class="anchor" href="#p-1016-sidenote-8"></a>Sidenote</h2>
+<ul>
+<li>
+<p><strong>Story after gfw-looking-glass.sh</strong> In November 2014, <span class="mention">@gfwrev</span> <a href="https://twitter.com/gfwrev/status/533564218113789952" rel="noopener nofollow ugc">found</a> GFW “gave up checking the pointers entirely”. <span class="mention">@gfwrev</span> thus <a href="https://gist.github.com/klzgrad/f124065c0616022b65e5" rel="noopener nofollow ugc">created a new way to evade DNS detection by crafting compression pointers</a>. The testing results in November 2014 showed both V2EX and Google DNS servers could successfully parse those crafted DNS queries containing pointers.</p>
+</li>
+<li>
+<p><strong>Why was pointer left incomplete?</strong> One intuitive question to ask is whether it was possible to check certain relative location of GFW device’s memory by specifying an offset greater than the query message length ourselves. Since the GFW has given checking the pointers entirely, it cannot be tested anymore.</p>
+</li>
+<li>
+<p><strong>kw{rnd} like keywords</strong> I tested a few previously known <code>kw{rnd}</code> like keywords, but none of them can still trigger the GFW as March 2020.</p>
+</li>
+<li>
+<p><strong>Conjectured 130 bytes domain name limitation</strong> As of March 2020, GFW can prase and generate forged responses with maximum length. One can test it by:</p>
+</li>
+</ul>
+<pre data-code-wrap="sh"><code class="lang-sh">dig $(python -c "print( 'a.'*121 + 'twitter.com')") @"$SOME_IP"
+</code></pre>
+<h2><a name="p-1016-credits-9" class="anchor" href="#p-1016-credits-9"></a>Credits</h2>
+<p>GFW Report did not contribute in any step of this work. All credits goes to <a href="https://twitter.com/gfwrev" rel="noopener nofollow ugc">@gfwrev</a>.</p></td><td>2020-03-09T19:37:11.451Z</td></tr><tr><td>ValdikSS</td><td><p>Impressive. I with <a class="mention" href="/u/darkk">@darkk</a> had an idea to fuzz DPI packet parsers, but I did not even consider using DNS as one of the attack methods.<br>
+I’ll try to check whether this or similar methods work on Russian DPI systems.</p></td><td>2020-03-09T20:14:29.748Z</td></tr><tr><td>fortuna</td><td><p>The long domain trick can be really useful. I wonder if it works for SNI too.<br>
+If it does, then we have a way to bypass both DNS and SNI censorship.</p></td><td>2020-10-23T05:55:36.591Z</td></tr><tr><td>gfw.report(gfw.report)</td><td><blockquote>
+<p>The long domain trick can be really useful. I wonder if it works for SNI too.<br>
+If it does, then we have a way to bypass both DNS and SNI censorship.</p>
+</blockquote>
+<p>Our test and understanding is that “[a]s of March 2020, GFW can prase and generate forged responses with maximum length”.</p>
+<p>So “the long domain trick” does not work for DNS censorship.<br>
+It may never work before actually as the 130 bytes limitation is just our conjecture.</p>
+<p>‐‐‐‐‐‐‐ Original Message ‐‐‐‐‐‐‐</p></td><td>2020-10-25T16:18:33.000Z</td></tr><tr><td>gfw.report(gfw.report)</td><td><blockquote>
+<p>I’ll try to check whether this or similar methods work on Russian DPI systems.</p>
+</blockquote>
+<p>That sounds like a plan. Any update on this?</p>
+<p>It’s very interesting to know whether the DPI machine is:</p>
+<ol>
+<li>parsing pointers correctly;</li>
+<li>parsing pointers incorrectly;</li>
+<li>not parsing pointers at all.</li>
+</ol></td><td>2020-10-25T16:27:28.590Z</td></tr>
+    </table>
+      </body>
+    </html>

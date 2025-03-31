@@ -1,0 +1,158 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>openwrt-и-wifivpn</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>meow</td><td><p>В интернете есть куча гайдов по автоматическому(точечному) обходу блокировок, но мне хочется сделать банально и просто: wifi_vpn и wifi_base<br>
+Все что удалось найти <a href="https://youtu.be/JpJTC3kY4Kg?t=2222" rel="noopener nofollow ugc">https://youtu.be/JpJTC3kY4Kg?t=2222</a><br>
+Но это для openVPN, попытка вручную переделать способ под wireguard/amneziaWG успехом не увенчалась.<br>
+Может кто поделится полным гайдом для такого, если он есть?</p></td><td>2024-08-28T15:55:07.137Z</td></tr><tr><td>zzr</td><td><p>ответ от нееросети:</p>
+<p>Чтобы настроить две Wi-Fi сети на OpenWrt с разными маршрутами трафика (одна через VPN WireGuard, другая без VPN), выполните следующие шаги:</p>
+<ol>
+<li>
+<p>Настройте WireGuard VPN:</p>
+<ul>
+<li>Установите пакет WireGuard: <code>opkg update &amp;&amp; opkg install wireguard</code></li>
+<li>Настройте WireGuard интерфейс и соединение</li>
+</ul>
+</li>
+<li>
+<p>Создайте две виртуальные беспроводные сети (VAP):</p>
+<ul>
+<li>Войдите в веб-интерфейс LuCI</li>
+<li>Перейдите в Network → Wireless</li>
+<li>Добавьте две новые виртуальные сети: wifi_base и wifi_vpn</li>
+</ul>
+</li>
+<li>
+<p>Настройте сетевые интерфейсы:</p>
+<ul>
+<li>Создайте новый интерфейс для VPN-сети: Network → Interfaces → Add new interface</li>
+<li>Назовите его, например, “vpn_network”</li>
+<li>Присвойте ему отдельную подсеть, например 192.168.2.0/24</li>
+</ul>
+</li>
+<li>
+<p>Настройте DHCP и DNS:</p>
+<ul>
+<li>Network → DHCP and DNS</li>
+<li>Добавьте новый DHCP-сервер для VPN-сети</li>
+</ul>
+</li>
+<li>
+<p>Настройте правила маршрутизации:</p>
+<ul>
+<li>Перейдите в Network → Firewall</li>
+<li>Создайте новую зону для VPN-трафика</li>
+<li>Настройте правила для перенаправления трафика из VPN-зоны через WireGuard</li>
+</ul>
+</li>
+<li>
+<p>Настройте политику маршрутизации:</p>
+<ul>
+<li>Установите пакет ip-full: <code>opkg install ip-full</code></li>
+<li>Создайте новую таблицу маршрутизации для VPN-трафика</li>
+<li>Добавьте правило для маркировки пакетов из VPN-сети</li>
+<li>Добавьте маршрут по умолчанию через WireGuard для помеченных пакетов</li>
+</ul>
+</li>
+<li>
+<p>Примените изменения и перезагрузите маршрутизатор</p>
+</li>
+</ol>
+<p>Пример настройки через командную строку:</p>
+<pre><code class="lang-auto"># Создание таблицы маршрутизации
+ip route add table 200 default dev wg0
+
+# Добавление правила маркировки пакетов
+ip rule add from 192.168.2.0/24 table 200
+
+# Добавление маршрута по умолчанию через WireGuard
+ip route add default dev wg0 table 200
+</code></pre>
+<p>Эти шаги создадут две Wi-Fi сети: wifi_base будет использовать обычное интернет-соединение, а wifi_vpn будет направлять весь трафик через WireGuard VPN.</p></td><td>2024-08-29T08:19:05.498Z</td></tr><tr><td>meow</td><td><p>Да нейросеть за 3 попытки выдало 3 разных способа и никакой не работает. То траффик идет в обход vpn, то вообще не работает подключение.</p></td><td>2024-08-29T11:41:52.243Z</td></tr><tr><td>meow2</td><td><p>Пропали ответы где было решение.</p><aside class="onebox discoursetopic" data-onebox-src="https://forum.openwrt.org/t/use-wireguard-only-with-wlan/193761/8">
+  <header class="source">
+      <img src="openwrt-и-wifivpn/b0013e6ecf94f4275c738c06725e21e83467f5d6.png" class="site-icon" data-dominant-color="C5D8E4" width="32" height="32">
+
+      <a href="https://forum.openwrt.org/t/use-wireguard-only-with-wlan/193761/8" target="_blank" rel="noopener nofollow ugc" title="07:35AM - 05 April 2024">OpenWrt Forum – 5 Apr 24</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:628/500;"><img src="openwrt-и-wifivpn/88851b33609d10f02578512d7eae210fb7a6002c_2_628x500.png" class="thumbnail" data-dominant-color="2D7DAC" width="628" height="500"></div>
+
+<div class="title-wrapper">
+  <h3><a href="https://forum.openwrt.org/t/use-wireguard-only-with-wlan/193761/8" target="_blank" rel="noopener nofollow ugc">Use Wireguard only with WLAN</a></h3>
+  <div class="topic-category">
+      <span class="badge-wrapper bullet">
+        <span class="badge-category-bg" style="background-color: #c0f0c0;"></span>
+        <span class="badge-category clear-badge">
+          <span class="category-name">Installing and Using OpenWrt</span>
+        </span>
+      </span>
+      <span class="badge-wrapper bullet">
+        <span class="badge-category-bg" style="background-color: #AB9364;"></span>
+        <span class="badge-category clear-badge">
+          <span class="category-name">Network and Wireless Configuration</span>
+        </span>
+      </span>
+  </div>
+</div>
+
+  <p>In wg0 interface, set Advanced Settings → Override IPv4 routing table and Override IPv6 routing table to 1000 In wlan interface, also set these to 1000 In Routing → IPv4 Rules add new rule  Incoming interface: wlan Table 1000   Repeat the same for...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Но решение частично</p>
+<ol>
+<li>Нет killswitch, при каждом сбое траффик идет напрямую</li>
+<li>Не работает без “ip route add table 1000 default dev wg0”, а так же слетает при каждом сбое сети/перезагрузке роутера</li>
+</ol></td><td>2024-10-10T08:41:04.095Z</td></tr><tr><td>meow2</td><td><p>второе было решено через<br>
+/etc/hotplug.d/iface/30-vpnroute</p>
+<p>#!/bin/sh</p>
+<p>sleep 5<br>
+ip route add default dev awg table 999</p>
+<p>killswitch еще думаю как реализовать.</p></td><td>2024-10-21T20:46:51.898Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,201 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>подключение-базы-антизапрета-в-nekobox</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>usr(user)</td><td><p>Привет. Пытаюсь подключить базу Антизапрета, скомпилированную в бинарник, к NekoBox через rule_set. Default outbound стоит bypass, в Routes, во вкладке Common, в Custom Route (Global) прописал следующее:</p>
+<pre><code class="lang-auto">{
+    "route": {
+        "rule_set": [
+            {
+                "download_detour": "direct",
+                "format": "binary",
+                "tag": "antizapret",
+                "type": "remote",
+                "url": "https://github.com/savely-krasovsky/antizapret-sing-box/releases/latest/download/antizapret.srs"
+            }
+        ],
+        "rules": [
+            {
+                "outbound": "proxy",
+                "rule_set": "antizapret"
+            }
+        ]
+    }
+}
+</code></pre>
+<p>Не работает, заблокированные сайты не проксируются (в качестве теста захожу на facebook). Может кто помочь с правильной настройкой?</p></td><td>2024-08-02T11:17:57.159Z</td></tr><tr><td>boltor</td><td><p>А Nekobox’овский родной бинарник с базой и антизапретовский бинарник совместимы вообще? Может быть они изначально в разных форматах собраны и несовместимы?</p></td><td>2024-08-02T16:29:11.362Z</td></tr><tr><td>usr(user)</td><td><p>В Nekobox’е используется ядро sing-box, бинарник скомпилирован под него как раз. Поэтому, думаю, совместимы, но могу и ошибаться.</p></td><td>2024-08-02T16:55:28.612Z</td></tr><tr><td>Progresso(Viktor)</td><td><p>Тоже столкнулся с такой проблемой. Помогло засовывание своих правил прямо в конфиг подключения (дважды нажать на подключение и задать Custom Config Settings). Еще на всякий случай убедитесь, что стоит NekoBox 4.0 beta, как я понимаю, в релизной версии sing-box староват и еще не поддерживает rulesets.</p></td><td>2024-08-03T22:23:26.591Z</td></tr><tr><td>usr(user)</td><td><p>Огромное спасибо, помогло.</p></td><td>2024-08-04T00:50:29.538Z</td></tr><tr><td>DiamondKesha(DiamondKesha)</td><td><p>У меня такая ошибка при подключении:</p>
+<pre><code class="lang-auto">start service: initialize rule-set[0]: initial rule-set: antizapret: Get "https://github.com/savely-krasovsky/antizapret-sing-box/releases/latest/download/antizapret.srs": exchange4: context canceled | exchange6: context canceled | upstream: context deadline exceeded
+WARN[0005] router: initialize rule-set take too much time to finish!
+</code></pre>
+<p>Как  можно пофиксить?</p></td><td>2024-08-05T06:26:40.701Z</td></tr><tr><td>iCloud</td><td><p>Огромное вам спасибо! Очень выручили.</p></td><td>2024-08-06T12:14:45.002Z</td></tr><tr><td>xuser(xuy)</td><td><p>Привет. Может кто-нибудь скинуть дураку готовый конфиг с правилами для проксирования сайтов базы антизапрета?</p></td><td>2024-08-12T16:35:47.178Z</td></tr><tr><td>Cyric</td><td><p>Добрый день! Все делаю также как вы описали выше, версия nekobox последняя бета (4ая вроде), при подключении получаю ошибку:“rule_set: json: unknown field “rule_set””. Не пойму в какую сторону копать дальше. Не сталкивались?</p></td><td>2024-10-09T14:32:07.381Z</td></tr><tr><td>xtropi(Xtropi)</td><td><p>Спасибо тебе мил человек.</p></td><td>2024-10-09T20:05:35.879Z</td></tr><tr><td>REIONE</td><td><p>Пользуюсь 4.0-beta4 и получаю ошибку:<br>
+<code>start service: initialize rule-set[0]: initial rule-set: antizapret: Get "https://github.com/savely-krasovsky/antizapret-sing-box/releases/latest/download/antizapret.srs": exchange6: context canceled | exchange4: context canceled | upstream: context deadline exceeded</code></p>
+<p>(UDP: Проблема в TUN режиме, при подключении обрывает соединение и не может загрузить список с github, решение не придумал…)<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="подключение-базы-антизапрета-в-nekobox/ff55af3de51b9639c15a2f5841d352f66cca47dc.png" data-download-href="https://ntc.party/uploads/default/ff55af3de51b9639c15a2f5841d352f66cca47dc" title="изображение"><img src="подключение-базы-антизапрета-в-nekobox/ff55af3de51b9639c15a2f5841d352f66cca47dc.png" alt="изображение" data-base62-sha1="AqNkEYDXOym3cWsrdlIG0tQpM16" width="684" height="500" data-dominant-color="2B2B2C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">809×591 28 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-10-12T12:44:23.843Z</td></tr><tr><td>glikoliz</td><td><p>То же самое. Всё работает хорошо с системным прокси, но дискорд например работает только через TUN. Не нашёл решения?</p></td><td>2024-10-13T11:36:51.016Z</td></tr><tr><td>MasterYoba</td><td><p>Решение очень простое, выгрузить этот файл любым удобным способом, и подключить его как локальный файл (local вместо remote). Да, он не будет автоматом обновляться, но это не столь важно. Пока разработчик чинит баг.</p></td><td>2024-10-13T14:18:57.521Z</td></tr><tr><td>glikoliz</td><td><p>Короче, откатился на стабильную версию 3.26, включил режим TUN, там поставил белый список и вписал Discord.exe. В базовых маршрутах стоит bypass, в кастомных(общие-кастомные маршруты(global)) стоит<br>
+{<br>
+“rules”: [<br>
+{<br>
+“geoip”: “antizapret”,<br>
+“geosite”: “antizapret”,<br>
+“outbound”: “proxy”<br>
+},<br>
+{<br>
+“domain_keyword”: “chatgpt”,<br>
+“outbound”: “proxy”<br>
+}<br>
+]<br>
+}</p>
+<p>Перед этим скачал отсюда <a href="https://github.com/savely-krasovsky/antizapret-sing-box" class="inline-onebox" rel="noopener nofollow ugc">GitHub - savely-krasovsky/antizapret-sing-box: sing-box ruleset generator using Antizapret lists</a> файлы geosite.db и geoip.db и поместил их в папку с nekoray<br>
+Пока что не понял, как заставлять их качаться автоматом на старой версии sing-box, документация не очень понятна для меня. но пока что таким образом проксируются только запрещенные сайты и дискорд.</p></td><td>2024-10-13T14:19:04.620Z</td></tr><tr><td>REIONE</td><td><p>Вчера пробовал, вроде как работает с включённым System Proxy и TUN режимом.<br>
+Хотя что-то раньше не заводилось с process_name, что крайне загадочно для меня…</p>
+<pre><code class="lang-auto">{
+    "route": {
+        "rule_set": [
+            {
+                "format": "binary",
+                "path": "F:/Other/antizapret.srs",
+                "tag": "antizapret",
+                "type": "local"
+            }
+        ],
+        "rules": [
+            {
+                "outbound": "proxy",
+                "rule_set": "antizapret"
+            },
+            {
+                "outbound": "proxy",
+                "process_name": [
+                    "Discord.exe",
+                    "Spotify.exe",
+                    "Discord",
+                    "Spotify"
+                ]
+            }
+        ]
+    }
+}
+</code></pre></td><td>2024-10-15T16:02:24.486Z</td></tr><tr><td>DHHH(Down House)</td><td><p>Предложенные варианты работают, только с большой задержкой перед открытием любых сайтов, из списка и не из списка.</p>
+<p>Nekobox не создаёт локальный прокси, чтобы указать его в настройках плагина типа “обход блокировок рунета”?<br>
+Сейчас приходится еще и сокс свой держать, чтобы указывать его в плагине.</p>
+<p>Глобальная задача состоит в том чтобы в один клик добавлять сайты в обход, в браузере.</p></td><td>2025-01-23T11:08:06.113Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="DHHH" data-post="16" data-topic="8468">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/f19dbf/48.png" class="avatar"> DHHH:</div>
+<blockquote>
+<p>Nekobox не создаёт локальный прокси, чтобы указать его в настройках плагина типа “обход блокировок рунета”?</p>
+</blockquote>
+</aside>
+<p>127.0.0.1:2080 socks/http proxy</p></td><td>2025-01-23T20:37:46.061Z</td></tr><tr><td>DHHH(Down House)</td><td><p>Это я пробовал, но всё идет напрямую. Может где-то еще надо указать чтобы он заворачивал в туннель всё приходящее в локальный прокси?</p></td><td>2025-01-23T21:34:25.322Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="DHHH" data-post="18" data-topic="8468">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/f19dbf/48.png" class="avatar"> DHHH:</div>
+<blockquote>
+<p>чтобы он заворачивал в туннель всё приходящее в локальный прокси?</p>
+</blockquote>
+</aside>
+<p>это дефолтный конфиг без правил роутинга и т.п.</p></td><td>2025-01-23T21:40:39.364Z</td></tr><tr><td>DHHH(Down House)</td><td><aside class="quote no-group" data-username="0ka" data-post="19" data-topic="8468">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>это дефолтный конфиг без правил роутинга и т.п.</p>
+</blockquote>
+</aside>
+<p>и как его настроить?</p></td><td>2025-01-23T21:47:09.645Z</td></tr><tr><td>0ka(0ka)</td><td><p>скачать nekobox, добавить ключ, нажать enter, вписать прокси сервер в браузер, готово</p></td><td>2025-01-23T21:55:35.367Z</td></tr><tr><td>DHHH(Down House)</td><td><p>так напрямую всё продолжает идти</p></td><td>2025-01-23T21:58:00.557Z</td></tr><tr><td>0ka(0ka)</td><td><p>дефолтные настройки - всё через прокси, вы делаете что-то не так, смотрите логи, мне больше сказать нечего</p></td><td>2025-01-23T22:01:15.899Z</td></tr><tr><td>DHHH(Down House)</td><td><p>У меня дефолтные действия - пускать напрямую.<br>
+Мне не нужно всё через прокси.<br>
+Мне нужно пускать через прокси то что идет в 127.0.0.1:2080</p></td><td>2025-01-23T22:10:25.966Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="DHHH" data-post="24" data-topic="8468">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/f19dbf/48.png" class="avatar"> DHHH:</div>
+<blockquote>
+<p>У меня дефолтные действия - пускать напрямую.</p>
+</blockquote>
+</aside>
+<p>дефолтные настройки это - нулевые, заводские, стандартные, настройки как задумал АВТОР проги а не вы, и автор задумал чтобы весь трафик который пойдёт на локальный прокси пошёл и на удаленный прокси.</p>
+<aside class="quote no-group" data-username="DHHH" data-post="24" data-topic="8468">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/f19dbf/48.png" class="avatar"> DHHH:</div>
+<blockquote>
+<p>Мне не нужно всё через прокси</p>
+</blockquote>
+</aside>
+<p>роутингом у вас занимается расширение браузера а не некобокс</p></td><td>2025-01-23T22:44:51.573Z</td></tr><tr><td>DHHH(Down House)</td><td><p>Автор задумал дать выбор пользователю.<br>
+Если включить всё в прокси, то расширение уже ничем не занимается и в принципе бесполезно, как и прописывание в нем адреса.</p>
+<p>Короче, то что я хочу возможно или невозможно?</p></td><td>2025-01-23T23:04:02.398Z</td></tr><tr><td>0ka(0ka)</td><td><p>вы вообще не понимаете или не читаете что я отвечаю. ваша проблема была решена несколько постов назад.</p></td><td>2025-01-23T23:10:31.707Z</td></tr><tr><td>DHHH(Down House)</td><td><p>не понимаю</p></td><td>2025-01-23T23:29:31.087Z</td></tr><tr><td>bv0</td><td><ol>
+<li>Запускаете Nekobox с локальным прокси 127.0.0.1:2080</li>
+<li>В браузере ставите расширение SmartProxy</li>
+<li>Добавляете в расширение 127.0.0.1:2080 и включаете режим умного прокси<br>
+Теперь сайты добавленные в список будут идти через прокси</li>
+</ol></td><td>2025-01-24T09:26:21.765Z</td></tr><tr><td>DHHH(Down House)</td><td><p>Разобрался. Надо выключить режим tun и выставить выход по-умолчанию через прокси.<br>
+При этом все маршруты указанные в самом некобоксе перестают работать?</p></td><td>2025-01-24T11:32:44.276Z</td></tr><tr><td>bv0</td><td><p>Режим Tun и системный прокси надо выключить. Outbound proxy. Вам же надо добалять сайты в браузере, в нем и добавляйте.</p></td><td>2025-01-24T11:53:28.141Z</td></tr><tr><td>DHHH(Down House)</td><td><p>Выключил.<br>
+Хотелось бы не только в браузере, но и отдельные программы проксировать. Дискорд например.</p></td><td>2025-01-24T12:28:26.182Z</td></tr><tr><td>bv0</td><td><aside class="onebox githubrepo" data-onebox-src="https://github.com/runetfreedom/discord-voice-proxy">
+  <header class="source">
+
+      <a href="https://github.com/runetfreedom/discord-voice-proxy" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="подключение-базы-антизапрета-в-nekobox/4d62f3e22f701554ede8850f2513efd687c0debe_2_690x344.png" class="thumbnail" data-dominant-color="F4F0F3">
+
+  <h3><a href="https://github.com/runetfreedom/discord-voice-proxy" target="_blank" rel="noopener nofollow ugc">GitHub - runetfreedom/discord-voice-proxy: Solution to route discord voice chat traffic to...</a></h3>
+
+    <p><span class="github-repo-description">Solution to route discord voice chat traffic to socks5 proxy</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2025-01-24T12:31:22.747Z</td></tr><tr><td>DHHH(Down House)</td><td><p>Понятно, что для всего есть отдельные решения, но хотелось бы просто правила в некобоксе добавлять и не плодить кучу других решений для каждой нужной программы.</p></td><td>2025-01-24T12:46:06.160Z</td></tr><tr><td>Pahin</td><td><p>Столкнулся с подобным вопросом, как у топикстартера<br>
+По теме вижу 2 решения, но оба меня не устраивают:</p>
+<ol>
+<li>Добавить rule_set и правила в настройки конфига конкретного подключения<br>
+Не устраивает потому, что подключений у меня несколько, кроме того, при применении подобных настроек отлетают все “Базовые маршруты”.</li>
+<li>Скачать geoip.db и geosite.db и заменить ими штатные файлы в папке программы<br>
+Не устраивает потому, что в этих db нет многих стандартных наборов geosite и категорий, которые есть в штатных. А отказываться от них и переписывать всё на домены мне не хочется.</li>
+</ol>
+<p>Есть ли всё же нормальное решение, которое позволит воспользоваться всеми возможностями некобокса?<br>
+Оптимальным решением видится использовать “Кастомные маршруты”, но мне не удалось.</p></td><td>2025-03-12T15:51:18.695Z</td></tr>
+    </table>
+      </body>
+    </html>

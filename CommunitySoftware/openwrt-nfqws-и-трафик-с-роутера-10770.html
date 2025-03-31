@@ -1,0 +1,60 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>openwrt-nfqws-и-трафик-с-роутера-10770</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>spv82</td><td><p>Здравствуйте. Прошу помочь разобраться. Роутер MI-R3G на OpenWrt 21.02 (iptables). Настроил nfqws только для Wireguard - из локальной сети все работает, соединение проходит и в статистике iptables NFQUEUE есть изменения. Но если с самого роутера запустить wg-клиент или просто <code>netcat -vuz 162.159.193.8 4500</code>, то соединения нет и в статистике iptables тоже не добавляется. Гугл подсказал на похожую тему <a href="https://github.com/bol-van/zapret/discussions/262" class="inline-onebox" rel="noopener nofollow ugc">NFQUEUE doesn't work for routed traffic inside logical bridge (br-lan) on OpenWrt with nftables · bol-van/zapret · Discussion #262 · GitHub</a>, но там речь про nftables. Хотя тоже попробовал установить этот kmod br_netfilter и включить в sysctl, но после этого ничего не изменилось. В чем может быть причина?</p>
+<p><code>nfqws --debug=@/tmp/zapret-wg.txt --qnum=220 --user=daemon --dpi-desync-fwmark=0x40000000 --dpi-desync=fake --dpi-desync-repeats=6</code></p>
+<pre><code class="lang-auto"># iptables-save | grep NFQUEUE
+-A POSTROUTING -o wan -p udp -m multiport --dports 2408,4500,1018,1074 -m mark ! --mark 0x40000000/0x40000000 -m connbytes --connbytes 1:1 --connbytes-mode packets --connbytes-dir original -m set ! --match-set nozapret dst -j NFQUEUE --queue-num 220 --queue-bypass
+</code></pre>
+<pre><code class="lang-auto"># cat /tmp/zapret-wg.txt 
+initializing conntrack with timeouts tcp=60:300:60 udp=60
+opening library handle
+unbinding existing nf_queue handler for AF_INET (if any)
+binding nfnetlink_queue as nf_queue handler for AF_INET
+binding this socket to queue '220'
+setting copy_packet mode
+initializing raw sockets bind-fix4=0 bind-fix6=0
+set_socket_buffers fd=5 rcvbuf=2048 sndbuf=32768
+fd=5 SO_RCVBUF=4096
+fd=5 SO_SNDBUF=65536
+set_socket_buffers fd=6 rcvbuf=2048 sndbuf=32768
+fd=6 SO_RCVBUF=4096
+fd=6 SO_SNDBUF=65536
+</code></pre></td><td>2024-09-26T10:06:37.650Z</td></tr><tr><td>spv82</td><td><p>Заметил еще такую особенность. Похоже, в conntrack вообще не попадают UDP-запросы отправленные с роутера.  К примеру, “netcat -vuz 8.8.8.8 53” - в “conntrack -E -p udp -d 8.8.8.8 --dport 53” - ничего.  Если сделать запрос с хоста из LAN, то все ок. Пол дня гуглил на эту тему, так ничего и не нашел похожего.</p></td><td>2024-09-27T15:22:35.751Z</td></tr><tr><td>spv82</td><td><p>После пересоздания wg-интерфейса проблема решилась.</p></td><td>2024-09-28T06:06:48.027Z</td></tr>
+    </table>
+      </body>
+    </html>

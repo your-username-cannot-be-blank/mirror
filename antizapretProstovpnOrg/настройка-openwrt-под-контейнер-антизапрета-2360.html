@@ -1,0 +1,77 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>настройка-openwrt-под-контейнер-антизапрета-2360</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>3Dward</td><td><p>Привет. Никак не могу настроить VPN на OpenWRT. На AmazonAWS висит контейнер Антизапрета. По иснтрукциям создаю подключение по *.ovpn конфигу, создаю tun0 интерфейс, создаю правило для firewall, но доступа к закрытым сайтам нет. Может еще что надо прописать? Я же правильно понимаю что надо как-то еще завернуть все DNS запросы на него?</p></td><td>2022-05-04T14:40:13.200Z</td></tr><tr><td>ValdikSS</td><td><p>Да, нужно прописать DNS из VPN-туннеля.</p></td><td>2022-05-04T20:32:48.012Z</td></tr><tr><td>3Dward</td><td><p>А можно уточнить куда именно его вписать? Мне кажется я везде, где только можно пробовал добавить, но толку ноль )))<br>
+Спасибо!</p></td><td>2022-05-04T20:58:33.756Z</td></tr><tr><td>ValdikSS</td><td><p>Зайдите в <code>Network -&gt; Interfaces -&gt; WAN -&gt; Edit -&gt; Advanced Settings</code><br>
+уберите галочку <code>Use DNS servers advertised by peer</code> и в появившемся поле ввода <code>Use custom DNS servers</code> введите <code>8.8.8.8</code>.<br>
+А через VPN добавьте маршрут до 8.8.8.8.</p></td><td>2022-05-04T22:13:31.212Z</td></tr><tr><td>3Dward</td><td><ol>
+<li>Получается что DNS не в контейнере настроен, а через Google?</li>
+<li>И как это добавить в VPN маршрут до 8.8.8.8? Прописать route 8.8.8.8 в *.ovpn файл?</li>
+</ol>
+<p>Вроде заработало. Но вопросы остались ))) DNS Google, но показывает что якобы IP моего контейнера…<br>
+И вот еще. Запускаю doall.sh, скачивает списки и потом пишет:<br>
+idn: could not convert from ANSI_X3.4-1968 to UTF-8<br>
+Куда копать?</p></td><td>2022-05-07T10:58:26.128Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="3Dward" data-post="5" data-topic="2360">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/3/9fc29f/48.png" class="avatar"> 3Dward:</div>
+<blockquote>
+<p>И вот еще. Запускаю doall.sh, скачивает списки и потом пишет:<br>
+idn: could not convert from ANSI_X3.4-1968 to UTF-8<br>
+Куда копать?</p>
+</blockquote>
+</aside>
+<p><code>LANG=C.UTF-8 /root/antizapret/doall.sh</code></p></td><td>2022-05-08T14:58:34.552Z</td></tr><tr><td>3Dward</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="6" data-topic="2360">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>LANG=C.UTF-8 /root/antizapret/doall.sh</p>
+</blockquote>
+</aside>
+<p>т.е. теперь всегда запускать в такой связке команду?</p></td><td>2022-05-08T19:04:26.676Z</td></tr><tr><td>ValdikSS</td><td><p>Запускать её вручную не нужно, списки заблокированных сайтов обновляются автоматически, раз в 6 часов.</p></td><td>2022-05-08T22:44:27.123Z</td></tr><tr><td>K14M.ua(Константин)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="4" data-topic="2360">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>А через VPN добавьте маршрут до 8.8.8.8.</p>
+</blockquote>
+</aside>
+<p>Можно поподробнее, где это делается?</p></td><td>2022-12-05T22:33:33.212Z</td></tr>
+    </table>
+      </body>
+    </html>

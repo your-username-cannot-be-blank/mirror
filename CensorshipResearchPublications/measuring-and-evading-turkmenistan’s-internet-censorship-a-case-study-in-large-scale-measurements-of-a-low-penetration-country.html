@@ -1,0 +1,92 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>measuring-and-evading-turkmenistan’s-internet-censorship-a-case-study-in-large-scale-measurements-of-a-low-penetration-country</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><h3><a name="measuring-and-evading-turkmenistans-internet-censorship-a-case-study-in-large-scale-measurements-of-a-low-penetration-country-1" class="anchor" href="#measuring-and-evading-turkmenistans-internet-censorship-a-case-study-in-large-scale-measurements-of-a-low-penetration-country-1"></a>Measuring and Evading Turkmenistan’s Internet Censorship: A Case Study in Large-Scale Measurements of a Low-Penetration Country</h3>
+<p><strong>Abstract</strong></p>
+<p>Since 2006, Turkmenistan has been listed as one of the few Internet enemies by Reporters without Borders due to its extensively censored Internet and strictly regulated information control policies. Existing reports of filtering in Turkmenistan rely on a handful of vantage points or test a small number of websites. Yet, the country’s poor Internet adoption rates and small population can make more comprehensive measurement challenging. With a population of only six million people and an Internet penetration rate of only 38%, it is challenging to either recruit in-country volunteers or obtain vantage points to conduct remote network measurements at scale.</p>
+<p>We present the largest measurement study to date of Turkmenistan’s Web censorship. To do so, we developed TMC, which tests the blocking status of millions of domains across the three foundational protocols of the Web (DNS, HTTP, and HTTPS). Importantly, TMC does not require access to vantage points in the country. We apply TMC to 15.5M domains, our results reveal that Turkmenistan censors more than 122K domains, using different blocklists for each protocol. We also reverse-engineer these censored domains, identifying 6K over-blocking rules causing incidental filtering of more than 5.4M domains. Finally, we use , an open-source censorship evasion tool, to discover five new censorship evasion strategies that can defeat Turkmenistan’s censorship at both transport and application layers. We will publicly release both the data collected by TMC and the code for censorship evasion.</p>
+<aside class="onebox pdf" data-onebox-src="https://arxiv.org/pdf/2304.04835.pdf">
+  <header class="source">
+
+      <a href="https://arxiv.org/pdf/2304.04835.pdf" target="_blank" rel="noopener">arxiv.org</a>
+  </header>
+
+  <article class="onebox-body">
+    <a href="https://arxiv.org/pdf/2304.04835.pdf" target="_blank" rel="noopener"><span class="pdf-onebox-logo"></span></a>
+
+<h3><a href="https://arxiv.org/pdf/2304.04835.pdf" target="_blank" rel="noopener">2304.04835.pdf</a></h3>
+
+  <p class="filesize">915.10 KB</p>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2023-07-26T07:09:41.334Z</td></tr><tr><td>tango</td><td><p>Measuring and Evading Turkmenistan’s Internet Censorship: A Case Study in Large-Scale Measurements of a Low-Penetration Country<br>
+Sadia Nourin, Van Tran, Xi Jiang, Kevin Bock, Nick Feamster, Nguyen Phong Hoang, Dave Levin<br>
+<a href="https://censorbib.nymity.ch/#Nourin2023a">https://censorbib.nymity.ch/#Nourin2023a</a><br>
+<a href="https://github.com/breakerspace/turkmenistan-censorship">https://github.com/breakerspace/turkmenistan-censorship</a><br>
+<a href="https://tmc.np-tokumei.net/">Measurement dashboard</a><br>
+<a href="https://www.youtube.com/watch?v=jzLBfBVy5so">Lightning talk</a> (3 min)<br>
+<a href="https://drive.google.com/file/d/1efFlUr3ywqow7gI8OF3mDU-81-tstDK3/view">Presentation slides</a></p>
+<p>This is a study of DNS, HTTP, and TLS censorship in Turkmenistan, notably encompassing every IP address in the country. Turkmenistan poses a challenge for censorship measurement because of its low population and low availability of Internet access. It is difficult to take direct measurements from inside the country. This study uses remote measurement techniques, taking advantage of the bidirectionality of the firewall to do experiments without controlling a vantage point in Turkmenistan. The paper covers data collected in September and October 2022. The team has continued to do tests and made the results available in a dashboard at <a href="https://tmc.np-tokumei.net/">https://tmc.np-tokumei.net/</a>.</p>
+<p>Bidirectionality means the firewall filters incoming packets as well as outgoing ones. Sending a DNS query for a filtered domain name <em>into</em> the country results in an injected DNS response with a false IP address being sent back to the sender, just as if the query had been sent <em>out of</em> the country. Similarly, an HTTP request with a filtered Host header, or a TLS Client Hello with a filtered SNI, elicits an injected TCP RST packet, regardless of direction. In the case of HTTP and TLS, censorship persists for 30 seconds: any packet with the same source–destination 4-tuple within that interval gets another RST. Injected packets are easy to identify because they have a distinctive IP ID and initial TTL. In a change from <a href="https://github.com/net4people/bbs/issues/80#issuecomment-906533865" class="inline-onebox">Bidirectional DNS, HTTPS, HTTP injection in Turkmenistan · Issue #80 · net4people/bbs · GitHub</a> (August 2021), injection happens on all port numbers.</p>
+<p>There are two big complications that make straightforward application of the bidirectionality property insufficient for large-scale measurement. The first is that—in what seems to be a first—source IP addresses that send many probes into the country may eventually stop getting injected responses, as if the censor were deliberately trying to frustrate analysis. To deal with this, the measurement system uses a diverse and changing set of source IP addresses from commercial VPSes. The second complication is that not all IP addresses in Turkmenistan are equal, in terms of whether they cause injection when they appear in the destination address of a probe. Different networks—and even neighboring addresses—differ in whether they trigger censorship responses. For this reason, the authors undertook to test every IP address in the country, some 22,700 addresses across 6 ASes. But this gives rise to another challenge, which is that while DNS probes do not require the probed IP address to be live, the HTTP and TLS tests occur in the context of a TCP connection, which requires that there be a live, responsive host at the destination. To work around this, the authors found a new sequence of probes that can detect TCP-based censorship injection without an established TCP connection: send a PSH+ACK packet containing the probe text (i.e. HTTP request or TLS Client Hello), wait 5 to 29 seconds, then send another packet. If the second packet gets a RST, it means the probe was recognized as one to censor. By combining these techniques, they were able to scan every IP address in Turkmenistan for DNS, HTTP, and TLS censorship.</p>
+<p>The measurement process began with a pre-scan of all the IP addresses using a small number of domains, to find which ones were susceptible to censorship at all. They filtered out hosts that were found to be responsive during the pre-scan, in order to avoid sending them a lot of traffic in later phases. There were about 7,500 addresses (33%) that could trigger injection. Using the addresses in this smaller set, they probed 15.5 million domain names on DNS, HTTP, and TLS. They found 122,000 blocked domains in total. Blocklists differed by protocol, with HTTP having the most censored domains and DNS having the fewest. From the list of blocked domains and further probing they inferred regular expression blocking rules. Over-broad expressions like <code>.*\.cyou.*</code> and <code>doh\..*</code> cause a high degree of overblocking.</p>
+<p>Finally, the authors use <a href="https://geneva.cs.umd.edu/">Geneva</a> to find new circumvention strategies at the TCP/IP and application layers. These include setting one of the <a href="https://www.rfc-editor.org/rfc/rfc1035#section-4.1.1"><code>COUNT</code></a> fields in a DNS query to 25 or greater, breaking the <a href="https://www.rfc-editor.org/rfc/rfc7230#section-3.1.1"><code>HTTP-version</code></a> in an HTTP request across TCP segments, and inserting whitespace into the HTTP <a href="https://www.rfc-editor.org/rfc/rfc7230#section-5.4">Host</a> header.</p>
+<p>Thanks to Sadia Nourin and Nguyen Phong Hoang for comments on a draft of this summary.</p></td><td>2023-08-07T17:44:15.475Z</td></tr><tr><td>snourin(Sadia Nourin)</td><td><p>Hi everyone, I’m Sadia, one of the authors of this paper. In order to measure Turkmenistan’s censorship, we had to take advantage of bidirectional censorship, in which we had a client outside of Turkmenistan send censored requests to non-responsive IP addresses inside of Turkmenistan to trigger the censor. However, one question we frequently asked ourselves is whether our measurements from the outside→inside direction corroborates with measurements from the inside→outside direction.</p>
+<p>It would be great if there were some volunteers within Turkmenistan who could spot-check some of our measurements for us from the inside→outside direction. Please ensure your safety and <a href="https://ooni.org/about/risks" rel="noopener nofollow ugc">understand the risks</a> of doing so before proceeding.</p>
+<p>You can check whether TMC considers you to be censored by searching for your own IP address <a href="https://tmc.np-tokumei.net/filtered_ips" rel="noopener nofollow ugc">here</a>. If you are deemed to be censored, you could test some of the domains that TMC believes to be censored. These domains can be found <a href="https://tmc.np-tokumei.net/overview" rel="noopener nofollow ugc">here</a> and <a href="https://tmc.np-tokumei.net/censored_domains" rel="noopener nofollow ugc">here</a>. In order to test these domains, you could try to use the packet sequence we use for our measurements mentioned in the paper, or just send a simple DNS and HTTP(S) request.</p>
+<p>If you determine that your IP address is NOT considered to be censored by TMC, you could still test some domains to determine whether the IP address is uncensored from the inside→outside direction as well.</p>
+<p>Thank you.</p></td><td>2023-08-09T17:14:06.920Z</td></tr><tr><td>0ka(0ka)</td><td><p>What do you mean by “You can check whether TMC considers you to be censored”? Home, work, mobile internet is always censored. My vps, home and work IP adresses are there, but no mobile. Which IP is not censored? In <a href="https://tmc.np-tokumei.net/overview" class="inline-onebox">TMC Dashboard</a> it says that <a href="http://wikipedia.org">wikipedia.org</a>, <a href="http://yandex.net">yandex.net</a>, <a href="http://github.com">github.com</a> are censored, what does it mean? They load fine (some ips for yandex and github are blocked but it loads from others)</p></td><td>2023-08-09T18:21:46.038Z</td></tr><tr><td>snourin(Sadia Nourin)</td><td><p>Apologies for my vagueness. TMC considers an IP address to be censored when sending a request to a censored domain (such as <a href="http://twitter.com" rel="noopener nofollow ugc">twitter.com</a>, <a href="http://wikipedia.org" rel="noopener nofollow ugc">wikipedia.org</a>, <a href="http://yandex.net" rel="noopener nofollow ugc">yandex.net</a>, <a href="http://github.com" rel="noopener nofollow ugc">github.com</a>) from a client outside of Turkmenistan to a non-responsive IP address inside Turkmenistan causes an injected response from the censor.</p>
+<p>If the censor does not respond with an injection when we send a <em>confirmed censored domain</em> to a non-responsive IP address in Turkmenistan, then we deem that IP address to not be subjected to censorship/filtering by Turkmenistan. As such, TMC does not consider your mobile IP address to be subjected to censorship/filtering.</p></td><td>2023-08-09T20:07:05.136Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="snourin" data-post="3" data-topic="4902">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/snourin/48/2945_2.png" class="avatar"> snourin:</div>
+<blockquote>
+<p>However, one question we frequently asked ourselves is whether our measurements from the outside→inside direction corroborates with measurements from the inside→outside direction.</p>
+</blockquote>
+</aside>
+<p>While some filters may be applied to both inbound and outbound traffic (bi-directional), outbound traffic gets filtered much heavier (if it were bi-directional, most of the internet won’t be able to access websites hosted in Turkmenistan), and in addition there’s destination-related filters, like <a href="https://ntc.party/t/domain-existence-check-for-fastly-ips/3871">DNS check for Fastly destinations</a>.</p></td><td>2023-08-10T03:57:44.594Z</td></tr>
+    </table>
+      </body>
+    </html>

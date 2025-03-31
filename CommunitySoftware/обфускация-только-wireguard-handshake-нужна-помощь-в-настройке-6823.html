@@ -1,0 +1,247 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>обфускация-только-wireguard-handshake-нужна-помощь-в-настройке-6823</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ThisNameHasBeenTaken</td><td><p>Добрый день!</p>
+<p>Прошу совета по настройке zapret для обфускации handshake пакета Wireguard в сети Билайн.<br>
+DPI билайна распознаёт handshake initiation пакет wireguard’а, и если он идёт к запрещённому VPN провайдеру блокирует ответный пакет handshake response. В некоторых случаях (если долго не было попыток подключения к серверу и DPI “забыл” сигнатуру) один handshake response проходит, остальные блокируются.</p>
+<p>Я пытался сделать следующее:</p>
+<ol>
+<li>Поставил режим запуска custom, что бы иметь возможность добавить правило в iptables.</li>
+<li>Сервис запускаю с параметрами:<br>
+<code>/opt/zapret/nfq/nfqws --user=tpws --dpi-desync-fwmark=0x40000000 --debug=1 --qnum=200 --dpi-desync=fake,udplen --dpi-desync-ttl=7 --dpi-desync-udplen-increment=6 --dpi-desync-any-protocol=1</code></li>
+<li>В iptables добавляю правило:<br>
+<code>Chain POSTROUTING (policy ACCEPT 0 packets, 0 bytes) pkts bytes target     prot opt in     out     source               destination  0     0 NFQUEUE    udp  --  *      *       0.0.0.0/0            0.0.0.0/0            multiport dports 51820 mark match ! 0x40000000/0x40000000 connbytes 1:4 connbytes mode packets connbytes direction original ! match-set nozapret dst NFQUEUE num 200 bypass</code></li>
+<li>Всё это делается на виртуальном ubuntu server (с режимом подключения bridge).</li>
+</ol>
+<p>При попытке подключения к серверу wg я вижу, что количество пакетов и байт, захваченным правилом увеличивается, однако трафик через туннель не идёт.<br>
+Если же добавить правило для отлавливания просто http/https трафика: такое же, только для протокола TCP и портов 80, 443, - обфускация работает и трафик до запрещённых хостов ходит.</p>
+<p>К сожалению, скрипт <code>blockcheck.sh</code> не умеет определять стратегии обхода для udp-пакетов wireguard.<br>
+Также, похоже, что <code>debug=1</code> не отрабатывает или отрабатывает не так, как ожидается: в /var/log/syslog не появляется дополнительной информации.</p>
+<p>Подскажите:</p>
+<ol>
+<li>Есть ли какая-то рабочая стратегия для обсускации udp-пакета wireguard handshake?</li>
+<li>Корректны ли указанные выше настройки или я где-то ошибся?</li>
+<li>Как пользоваться параметром <code>debug=1</code> - куда пишутся логи в этом случае?</li>
+</ol></td><td>2024-01-08T11:57:06.570Z</td></tr><tr><td>bolvan</td><td><p>Для udp можно безболезненно сделать только отсылку фейк пакетов перед handshake initiation.<br>
+На летних блокировках требовалось то ли 4, то ли 5 фейков (dpi-desync-repeats)<br>
+для ipv6 можно попытаться поиграться с дополнительными хедерами ipv6 протокола.<br>
+udplen для wireguard категорически не годится. любая модификация будет молча отброшена сервером.<br>
+Есть вариант ipfrag2, но может сработать только на белом IP клиента со своим сервером, и то не факт. К тому же там есть сложности с iptables, лучше использовать nftables</p>
+<p>логи не пишуется никуда. они выводятся в stdout. для тестирования следует отказаться от скриптов запуска и делать все вручную.</p>
+<p>если сервер свой, то существует amnezia vpn. это поделие на базе wg с широкими возможностями издевательств над базовым протоколом. к сожалению, пока только tun версия<br>
+опять же, если сервер свой, можно использовать легковесное, но сложное решение, ipobfs. модуль ядра, ксорящий ip пейлоады по заданным правилам<br>
+или какой-нибудь udp прокси-обфускатор, но это user mode, что не лучшим образом скажется на скорости</p></td><td>2024-01-08T15:45:36.184Z</td></tr><tr><td>ThisNameHasBeenTaken</td><td><aside class="quote no-group" data-username="bolvan" data-post="2" data-topic="6823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>dpi-desync-repeats</p>
+</blockquote>
+</aside>
+<p>Спасибо!<br>
+Эта стратегия сработала! Буду пользоваться.<br>
+И с логами разобрался - nfqws корректно определяет пакет.<br>
+Если что - VPN не свой собственный (не на своём сервере), а покупной (как сервис). Поэтому я в манёврах ограничен.</p></td><td>2024-01-08T17:22:56.595Z</td></tr><tr><td>anon57137390</td><td><p>Как вы определили, что блокируют ответ? Такие блокировки редки, машина цензора выбирает кратчайший путь до блокировки. При этом, как правило, исходящие не учитывают, поэтому клиентские трюки там не работают. Это не значит, что такое невозможно, но проверять исходящие, блокируя входящие – расточительство.</p></td><td>2024-01-08T22:19:08.607Z</td></tr><tr><td>ThisNameHasBeenTaken</td><td><p>Я подключил Wireshark и смотрел как проходит соединение.<br>
+Если соединения давно не было, то в ответ на handshake initiation приходит пакет handshake response, но трафик через тоннель не идёт. Все последующие handshake initiation остаются без ответа. Если соединение было недавно, и затем происходит повторно то и на первый пакет initiation не приходит response.<br>
+Я сделал такой вывод (о блокировке ответов на основе первого пакета initiation). Хотя что на самом деле там происходит - сказать не могу. У меня нет глубоких знаний в том, как соединения отслеживаются и блокируются.<br>
+В итоге сработала стратегия <code>--dpi-desync=fake,disorder --dpi-desync-fooling=md5sig --dpi-desync-any-protocol=1 --dpi-desync-repeats=4</code><br>
+Чему я очень рад, поскольку не нужно теперь пробивать какие-то обходные пути через ещё один сервер (VPS).</p></td><td>2024-01-09T16:55:15.792Z</td></tr><tr><td>bolvan</td><td><p>disorder и md5sig относятся только к tcp, для wireguard это не имеет смысла<br>
+но если 1 и тот же nfqws используется для разных целей, то норм</p>
+<p>летом блокировали только по исходящим пакетам , анализируя только несколько первых</p>
+<p>DPI устроено так. есть таблица типа conntrack. туда заносится протокол и туплы ip:port src/dst и признак allow/deny/check<br>
+если allow/deny, то решение принимается сразу. бывает аппаратный offload на эту таблицу, а бывает где-то в глубине ядра софтварно. но быстрее, чем дальше проверять.<br>
+если check, то идем на проверку. чекер может вынести вердикт<br>
+они стараются сделать так, чтобы чека было как можно меньше, чтобы сэкономить ресурсы<br>
+это все называется stateful DPI.   stateless - это когда нет состояний и чек каждый пакет</p>
+<p>если начнут проверять и входящие, то на своем сервере тоже можно подвесить nfqws</p></td><td>2024-01-09T18:10:49.626Z</td></tr><tr><td>ThisNameHasBeenTaken</td><td><p>Большое спасибо за объяснение!</p>
+<p>Тогда выходит, что действительно исходящие блокируются - но я это уже не вижу, т.к. трафик ушел дальше, т.е. за границу перехвата пакетов wireshark’ом.</p>
+<p>Что касается tcp - я планирую оставить в команде запуска на случай если понадобится. А какой трафик обфусцировать - это разруливать с помощью iptables.</p></td><td>2024-01-09T19:13:14.471Z</td></tr><tr><td>wigeance(Wigeance)</td><td><p>Саратовская область, Билайн, wireguard и openvpn udp работает после одного фейка в nfqws:</p>
+<blockquote>
+<p>–dpi-desync=fake --dpi-desync-cutoff=d4 --dpi-desync-any-protocol=1</p>
+</blockquote>
+<p>P.S. quic тоже работает этой стратегией, использование dpi-desync-repeats ломает quic, но vpn’ы работают</p></td><td>2024-01-10T05:27:20.775Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="wigeance" data-post="8" data-topic="6823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wigeance/48/3861_2.png" class="avatar"> wigeance:</div>
+<blockquote>
+<p>–dpi-desync=fake --dpi-desync-cutoff=d4 --dpi-desync-any-protocol=1</p>
+</blockquote>
+</aside>
+<p>Уже довольно давно nfqws распознает wireguard hanshake initiation, так что можно без any protocol</p></td><td>2024-01-13T11:30:54.235Z</td></tr><tr><td>antidpi</td><td><p>Hi <a class="mention" href="/u/bolvan">@bolvan</a> , there is a fork of wireguard-go that can unblock wg hadshake in my region. so some network experties user(s) maybe inspire from it:</p><aside class="onebox githubrepo" data-onebox-src="https://github.com/bepass-org/warp-plus">
+  <header class="source">
+
+      <a href="https://github.com/bepass-org/warp-plus" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="обфускация-только-wireguard-handshake-нужна-помощь-в-настройке-6823/c1ff0954e4e0e3fb06181fe3d66fa1de3849a8fc_2_690x344.png" class="thumbnail" data-dominant-color="EFF4F6">
+
+  <h3><a href="https://github.com/bepass-org/warp-plus" target="_blank" rel="noopener nofollow ugc">GitHub - bepass-org/warp-plus: Warp+Psiphon, an anti censorship utility for iran</a></h3>
+
+    <p><span class="github-repo-description">Warp+Psiphon, an anti censorship utility for iran</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>I have a question:<br>
+Does it possible use a trick as same as above trick with  --dpi-desync-fake-wireguard zapret or something like that?</p>
+<p>Thank you.</p></td><td>2024-02-24T19:25:27.941Z</td></tr><tr><td>bolvan</td><td><p>Probably yes.<br>
+Wireguard does not allow tampering with their packets but allow inserting any garbage before or between them. Garbage is silently ignored.<br>
+Any software giving more options is likely incompatible with original WG</p>
+<p>You should redirect first UDP packet in “connection” to nfqws (connbytes filter 1:1) and use --dpi-desync=fake<br>
+That’s all</p></td><td>2024-02-27T11:07:47.069Z</td></tr><tr><td>Bronner(Roman)</td><td><p>Не пойму с чем может быть связана проблема. Обход настроен на роутере и там же подключаюсь по WG - всё работает, а с десктопного клиента WG рукопожатие не проходит.</p>
+<p><code>--dpi-desync=fake --dpi-desync-ttl=7 --dpi-desync-cutoff=d4</code><br>
+<code>-p udp -m mark ! --mark 0x40000000/0x40000000 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:1 </code><br>
+В чём еще может быть дело?</p></td><td>2024-08-07T16:31:05.952Z</td></tr><tr><td>wigeance(Wigeance)</td><td><p>у вас ttl fooling на udp<br>
+он там не нужен, плюс попробуйте repeats сделать 6-10</p></td><td>2024-08-07T16:34:48.675Z</td></tr><tr><td>Bronner(Roman)</td><td><aside class="quote no-group" data-username="wigeance" data-post="13" data-topic="6823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wigeance/48/3861_2.png" class="avatar"> wigeance:</div>
+<blockquote>
+<p>он там не нужен, плюс попробуйте repeats сделать 6-10</p>
+</blockquote>
+</aside>
+<p>Согласен, ttl убрал.</p>
+<p>UPD: Заработало, какие-то проблемы с NAT на роутере были.</p></td><td>2024-08-07T17:07:39.646Z</td></tr><tr><td>uneasy(uneasy)</td><td><p>У меня тоже не работает, вроде же все верно делаю?</p>
+<pre><code class="lang-auto">nfqws --daemon --dpi-desync=fake --dpi-desync-repeats=10 --dpi-desync-cutoff=d4 --qnum=200
+
+iptables -t mangle -I POSTROUTING -p udp -m mark ! --mark 0x40000000/0x40000000 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:1 -j NFQUEUE --queue-num 200 --queue-bypass
+
+</code></pre></td><td>2024-08-07T19:18:14.645Z</td></tr><tr><td>Bronner(Roman)</td><td><aside class="quote no-group" data-username="uneasy" data-post="15" data-topic="6823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/eada6e/48.png" class="avatar"> uneasy:</div>
+<blockquote>
+<p>У меня тоже не работает, вроде же все верно делаю?</p>
+</blockquote>
+</aside>
+<p>Единственное чем отличается от моего это попробуйте правило добавлять не через <code>-I</code> а через <code>-A</code><br>
+<code>iptables -t mangle -A POSTROUTING ...</code><br>
+Ну и естественно удалить добавленное ранее.<br>
+Еще можно убрать <code>--daemon</code> добавить <code>--debug</code> и посмотреть отрабатывает ли вообще правило</p></td><td>2024-08-08T09:13:55.110Z</td></tr><tr><td>uneasy(uneasy)</td><td><p>Попробовал с -A и --debug, забавно получается, ровно наоборот: при активации туннеля на роутере, в логе пусто. При активации на дектопе, сообщения идут. Вот такие:</p>
+<pre><code class="lang-auto">packet: id=1 len=176 mark=00000000
+IP4: ... =&gt; ... proto=udp ttl=127 sport=... dport=...
+UDP: ...
+desync-cutoff not reached (mode d): 1/4
+packet contains wireguard handshake initiation
+dpi desync src=... dst=...
+sending fake request : 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ... : ................................ ...
+reinjecting original packet. len=176 len_payload=148
+applying linux postnat conntrack workaround
+packet: id=1 pass modified. len=28
+</code></pre>
+<p>Соединение проходит, но потом интернет не работает. При этом, если отключить zapret и воспользоваться известным “мусорным” методом при помощи nping, после этого подключение реально работает.</p></td><td>2024-08-08T15:58:36.745Z</td></tr><tr><td>uneasy(uneasy)</td><td><p>Да что ты будешь делать, заработало. Правда, не совсем <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"><br>
+На десктопе без изменений, а вот на роутере что-то протухло в старой настройке, удалил подключение и пересоздал заново из файла, и теперь не только соединяется, но и работает. Но в логах (–debug) по прежнему пусто! Но работает, а до этого даже хендшейк не проходил.</p>
+<p>Как там у Карцева? Вот и выбирай: либо не работает, но с логами, либо работает, но без логов <img src="https://ntc.party/images/emoji/twitter/rofl.png?v=12" title=":rofl:" class="emoji" alt=":rofl:" loading="lazy" width="20" height="20"></p></td><td>2024-08-08T16:22:13.822Z</td></tr><tr><td>0ka(0ka)</td><td><p>del</p></td><td>2024-08-08T16:38:05.918Z</td></tr><tr><td>uneasy(uneasy)</td><td><p>Поменял POSTROUTING на OUTPUT, логи появились, но соединение теперь не проходит <img src="https://ntc.party/images/emoji/twitter/rofl.png?v=12" title=":rofl:" class="emoji" alt=":rofl:" loading="lazy" width="20" height="20"></p>
+<p>“Я слишком стар для этого дерьма” (с)</p></td><td>2024-08-08T16:54:12.641Z</td></tr><tr><td>0ka(0ka)</td><td><p>не надо было, я же удалил пост. mangle postrouting работает и с исходящими и с проходящими пакетами. посмотрите через iptables -t mangle -vnL, проходят ли пакеты через нужное правило (1 столбец, пакеты должны увеличиваться после каждой попытки соединения).<br>
+и еще для вашей цели подойдёт amneziaWG, есть и на пк и на мобилу.</p>
+<p>вот только что проверил на awg, фейки приходят на сервер и в логе есть запись, подключался с другого устройства в lan со сменой шлюза (кстати может надо ребутнуть девайс из-за кеша таблицы маршрутизации)</p>
+<pre><code class="lang-auto">/opt/zapret/nfq/nfqws --qnum=250 --dpi-desync-any-protocol=1 --dpi-desync-repeats=20 --dpi-desync=fake --debug=1
+</code></pre>
+<pre><code class="lang-auto">iptables -t mangle -A POSTROUTING -p udp -m udp --dport 100 -m connbytes --connbytes 1:1 --connbytes-mode packets --connbytes-dir original -j NFQUEUE --queue-num 250 --queue-bypass
+</code></pre>
+<p>port 100 = awg server</p></td><td>2024-08-08T17:11:21.792Z</td></tr><tr><td>uneasy(uneasy)</td><td><aside class="quote no-group" data-username="0ka" data-post="21" data-topic="6823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>iptables -t mangle -vnL</p>
+</blockquote>
+</aside>
+<p>Спасибо, попробую. Про амнезию я знаю, но у меня пока стоит цель претворить в жизнь решения партии и правительства, не прибегая к платным методам <img src="https://ntc.party/images/emoji/twitter/rofl.png?v=12" title=":rofl:" class="emoji" alt=":rofl:" loading="lazy" width="20" height="20"> Пока недостатка в бесплатных вариантах нет, осталось только разобраться. И для общего развития полезно. Как бесплатные варианты закончатся, уже буду копать в сторону Vision/Reality, все надежней, чем амнезия</p></td><td>2024-08-08T17:23:56.395Z</td></tr><tr><td>0ka(0ka)</td><td><p>дополнил</p></td><td>2024-08-08T17:38:25.217Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="uneasy" data-post="22" data-topic="6823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/eada6e/48.png" class="avatar"> uneasy:</div>
+<blockquote>
+<p>уже буду копать в сторону Vision/Reality, все надежней, чем амнезия</p>
+</blockquote>
+</aside>
+<p>Между прочим AmneziaVPN поднимает Vision/Reality на вашем сервере за пару нажатий.</p></td><td>2024-08-09T03:15:33.679Z</td></tr><tr><td>Eugen(Евгений)</td><td><p>Доброе.<br>
+Тоже столкнулся с тем что нужно обрусифицировать трафик WG. но мне это нужно делать на роуторе mikrotik.<br>
+Есть возможность поставить контейнер или вдруг каким-то чудом сделать это непосредственно средствами самой железки.</p>
+<p>Подскажите, zapret существует в виде контейнера?</p></td><td>2024-08-17T05:28:23.580Z</td></tr><tr><td>ThisNameHasBeenTaken</td><td><p>Добрый день!</p>
+<p>Я перехожу на OpenWRT с nftables, с которыми раньше не работал.<br>
+Для запуска zapret хочу использовать кастомный init.d (для инъекции правила firewall), но не знаю, как его написать. Подскажите, пожалуйста, как должно звучать правило для zapert “перехватывай и отправляй в zapret первые 4 пакета любого соединения udp на порт 51280” и его модификация “перехватывай и отправляй в zapret первые 4 пакета соединения udp на порт 51280, если оно идёт на адрес &lt;такой-то&gt;”.</p>
+<p>Спасибо!</p></td><td>2024-09-19T17:25:28.382Z</td></tr><tr><td>spv82</td><td><p>del</p></td><td>2024-09-20T08:04:33.158Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="uneasy" data-post="15" data-topic="6823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/eada6e/48.png" class="avatar"> uneasy:</div>
+<blockquote>
+<p><code>nfqws --daemon --dpi-desync=fake --dpi-desync-repeats=10 --dpi-desync-cutoff=d4</code></p>
+</blockquote>
+</aside>
+<p>cutoff здесь не нужен, потому что nfqws и так распознает wireguard handshake, а к остальным дурение не будет применено, поскольку нет --dpi-desync-any-protocol</p></td><td>2024-09-20T08:51:32.328Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ThisNameHasBeenTaken" data-post="26" data-topic="6823">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/4af34b/48.png" class="avatar"> ThisNameHasBeenTaken:</div>
+<blockquote>
+<p>Для запуска zapret хочу использовать кастомный init.d (для инъекции правила firewall), но не знаю, как его написать.</p>
+</blockquote>
+</aside>
+<p>В openwrt трогать правила таблиц из init.d - крайне плохой тон, поскольку это чревато гонками с системой управления фаерволом и потерей правил при любых сохранениях или рестартах.<br>
+У fw3 с iptables и fw4 с nftables есть свои хуки и инклуды, но разные.<br>
+К ним и следует прикручиваться</p></td><td>2024-09-20T08:53:04.641Z</td></tr><tr><td>ThisNameHasBeenTaken</td><td><p>Полагаю, возникло недопонимание. Под “кастомным init.d” я имел в виду скрипт /opt/zapret/init.d/&lt;архитектура&gt;/custom.<br>
+С правилами разобрался. Взял за основу пример из указанной папки и переделал его.</p></td><td>2024-09-20T12:02:45.716Z</td></tr><tr><td>a0x1</td><td><p>Добрый день. Тестирую в ручном режиме обфускацию только хэндшейка. Пакет уходит в нужную очередь, модифицируется, но после первого пакета пинга соединение зависает. Подскажите, пожалуйста, в какую сторону копать?</p>
+<p>Запускаю так:<br>
+~ # /opt/zapret/nfq/nfqws --dpi-desync=fake --dpi-desync-repeats=20 --dpi-desync-fake-tls=/opt/zapret/files/fake/tls_clienthello_www_google_com.bin --qnum=200 --debug=1</p>
+<p>IPTABLES:</p>
+<p>~ # iptables-save | grep NFQUEUE<br>
+-A POSTROUTING -o eth3 -p udp -m multiport --dports 51820 -m mark ! --mark 0x40000000/0x40000000 -m connbytes --connbytes 1:1 --connbytes-mode packets --connbytes-dir original -j NFQUEUE --queue-num 200 --queue-bypass</p>
+<p>Результат:<br>
+IP4: x.x.x.x =&gt; x.x.x.x proto=udp ttl=64 sport=41605 dport=51820<br>
+UDP: 01 00 00 00 58 CB FC 6C 1B 29 C7 6A B5 22 7C 28 B7 75 D5 4D F4 6E 0E 43 C3 D6 15 30 AF 8F 92 4A … : …X…l.).j."|(.u.M.n.C…0…J …<br>
+desync profile search for hostname=‘’ ipv6=0 tcp_port=0 udp_port=51820<br>
+desync profile 1 matches<br>
+packet contains wireguard handshake initiation<br>
+dpi desync src=x.x.x.x:41605 dst=x.x.x.x:51820<br>
+sending fake request : 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 … : … …<br>
+reinjecting original packet. len=176 len_payload=148<br>
+applying linux postnat conntrack workaround<br>
+packet: id=3 pass modified. len=28</p></td><td>2024-10-11T14:39:46.777Z</td></tr><tr><td>spv82</td><td><p>nfqws --qnum=220 --user=daemon --dpi-desync-fwmark=0x40000000 --dpi-desync=fake --dpi-desync-repeats=6</p>
+<p>У меня так работает.</p></td><td>2024-10-11T16:33:04.674Z</td></tr>
+    </table>
+      </body>
+    </html>

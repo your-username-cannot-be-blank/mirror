@@ -1,0 +1,506 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>использование-3x-ui-в-связке-с-traefik</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>moocluck(Alexander)</td><td><p>Привет!</p>
+<p>Использую 3X-UI на VPS, место WG, OpenVPN и Outline. Но столкнулся с проблемой. VPS хочется использовать не только для обхода ограничений, но еще и для других целей, вроде своего сайта, бота в телеграмме и тп.</p>
+<p>Понял, что для решения проблемы стоит использовать реверс-прокси, остановил свой выбор на Traefik, но не получается настроить его для 3X-UI <em>(с условным приложением на React все получилось)</em>.</p>
+<p>Пробовал искать конфиги, но нашел только пару для X-UI, но с ними не завелось <img src="https://ntc.party/images/emoji/twitter/slightly_frowning_face.png?v=12" title=":slightly_frowning_face:" class="emoji" alt=":slightly_frowning_face:" loading="lazy" width="20" height="20">.</p>
+<details>
+<summary>
+Первый вариант</summary>
+<blockquote>
+<p>В x-ui для inbound с Reality включен только этот Reality. По поводу путей панели и подписок у меня договорённость между x-ui и Traefik. Для HOSTNAME перед запуском был выполнен экспорт из bash: export HOSTNAME. Энтрипоинт на :54321 был добавлен для удобства с панелью. Сейчас у меня x-ui, а у 3x-ui другой дефолтный порт. Да и вообще обратите внимание на имена энтрипоинтов, вдруг не совпадают.</p>
+</blockquote>
+<pre><code class="lang-auto">version: '3.9'
+services:
+  xui:  
+    image: alireza7/x-ui:1.5.5
+    container_name: x-ui
+    hostname: ${HOSTNAME}
+    volumes:
+      - "./db/:/etc/x-ui/"
+      - "./cert/:/cert/"
+    environment:
+      - XRAY_VMESS_AEAD_FORCED=false
+      - XUI_LOG_LEVEL=warn
+    restart: unless-stopped
+#    network_mode: host
+    labels:
+      - "traefik.enable=true"
+      # Web panel
+      - "traefik.http.routers.xui-panel-r.entrypoints=websecure"
+      - "traefik.http.routers.xui-panel-r.rule=HostRegexp(`{host:.+}`) &amp;&amp; PathPrefix(`/xuipanel`)"
+      - "traefik.http.routers.xui-panel-r.tls=true"
+      - "traefik.http.routers.xui-panel-r.service=xui-panel-s"
+      - "traefik.http.services.xui-panel-s.loadbalancer.server.port=54321"
+      # Web panel fix port
+      - "traefik.http.routers.xui-panel-rr.entrypoints=p54321"
+      - "traefik.http.routers.xui-panel-rr.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.xui-panel-rr.tls=true"
+      - "traefik.http.routers.xui-panel-rr.middlewares=xui-redirect"
+      - "traefik.http.middlewares.xui-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.xui-redirect.redirectscheme.port=443"
+      - "traefik.http.routers.xui-panel-rr.service=noop@internal"
+      # Subscriptions
+      - "traefik.http.routers.xui-sub-r.entrypoints=websecure"
+      - "traefik.http.routers.xui-sub-r.rule=HostRegexp(`{host:.+}`) &amp;&amp; PathPrefix(`/xuisub`)"
+      - "traefik.http.routers.xui-sub-r.tls=true"
+      - "traefik.http.routers.xui-sub-r.service=xui-sub-s"
+      - "traefik.http.services.xui-sub-s.loadbalancer.server.port=4430"
+      # Shadowsocks
+      - "traefik.tcp.routers.xui-shadowsocks-r.rule=ClientIP(`0.0.0.0/0`)"
+      - "traefik.tcp.routers.xui-shadowsocks-r.service=xui-shadowsocks-s"
+      - "traefik.tcp.routers.xui-shadowsocks-r.entrypoints=p8080"
+      - "traefik.tcp.services.xui-shadowsocks-s.loadbalancer.server.port=8080"
+      # Vless/Reality
+      - "traefik.tcp.routers.xui-reality-r.rule=HostSNI(`microsoft.com`)"
+      - "traefik.tcp.routers.xui-reality-r.tls.passthrough=true"
+      - "traefik.tcp.routers.xui-reality-r.service=xui-reality-s"
+      - "traefik.tcp.routers.xui-reality-r.entrypoints=websecure"
+      - "traefik.tcp.services.xui-reality-s.loadbalancer.server.port=443"
+    networks:
+      traefik:
+#      xui-bridge:
+networks:
+  traefik:
+    external: true
+#  xui-bridge:
+#    name: xui
+
+</code></pre>
+</details>
+<details>
+<summary>
+Второй вариант</summary>
+<blockquote>
+<p>Идея в том, что нужно создать роутер, который будет отправлять запросы на поддельный адрес (<a href="http://www.microsoft.com" rel="noopener nofollow ugc">www.microsoft.com</a> в моем случае) на 443 порт контейнера. Для этого используется директива HostSNI.<br>
+443 порт в контейнере должен быть свободен, веб-морду и сервис подписок вешайте на другие порты (я на них делаю роутинг через отдельные поддомены, traefik запрашивает сертификат сразу на все поддомены, wildcard certificate).</p>
+</blockquote>
+<pre><code class="lang-auto">version: "3.9"
+
+services:
+  xui:
+    image: alireza7/x-ui
+    container_name: x-ui
+    volumes:
+      - ПУТЬ_ДЛЯ_БЕКАПА_НАСТРОЕК:/etc/x-ui/
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: America/Los_Angeles #ПОМЕНЯЙТЕ НА СВОЙ ЧАСОВОЙ ПОЯС
+      XRAY_VMESS_AEAD_FORCED: "false"
+    networks:
+      - intranet
+    restart: unless-stopped
+    labels:
+      - traefik.http.routers.xui.rule=Host(`xui.ДОМЕН_TRAEFIK.com`)
+      - traefik.http.routers.xui.service=xui-web-config
+      - traefik.http.services.xui-web-config.loadbalancer.server.port=54321 #ПОРТ ДЛЯ Web-морды
+
+      - traefik.http.routers.xui-sub.rule=Host(`sssub.ДОМЕН_TRAEFIK.com`)
+      - traefik.http.routers.xui-sub.service=xui-subscription
+      - traefik.http.services.xui-subscription.loadbalancer.server.port=4433 #ПОРТ для подписок
+
+      - traefik.tcp.routers.vless.rule=HostSNI(`www.microsoft.com`) 
+      - traefik.tcp.routers.vless.tls.passthrough=true
+      - traefik.tcp.routers.vless.service=xui-reality
+      - traefik.tcp.services.xui-reality.loadbalancer.server.port=443
+      
+networks:
+  intranet: #СЕТЬ В КОТОРОЙ РАБОТАЕТ TRAEFIK
+    external: true
+</code></pre>
+<blockquote>
+<p>Единственная проблема в том, что в веб-морде неправильно отображается ссылка на подписки, приходится менять http на https в начале и удалять порт.</p>
+</blockquote>
+</details>
+<p>Думаю тема достаточно актуальна и может быть полезна для настройки нескольких протоколов на сервере не только для меня.</p>
+<p>Если кто-то уже использует связку Traefik и 3X-UI, не могли бы вы поделиться своим конфигом compose файла?</p></td><td>2024-03-21T23:08:35.036Z</td></tr><tr><td>0ka(0ka)</td><td><p>это для того, чтобы все сервисы были на 1 порту?</p></td><td>2024-03-21T23:27:27.163Z</td></tr><tr><td>moocluck(Alexander)</td><td><p>Ну можно и так сказать. Просто сайт который стоит на VPS желательно тоже на 443/80 ставить, чтоб посетители не указывали порт при подключении, и Reality очень желательно на 443 ставить.</p>
+<p>По сути на 443/80 стоит Traefik, а он уже в зависимости от запроса направляет его куда нужно.</p>
+<p>Можно место traefik использовать nginx, но мне traefik показался более удобным ещё и certbot отдельно ставить не нужно.</p></td><td>2024-03-22T07:06:44.713Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="moocluck" data-post="3" data-topic="7535">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/73ab20/48.png" class="avatar"> moocluck:</div>
+<blockquote>
+<p>Reality очень желательно на 443 ставить.</p>
+</blockquote>
+</aside>
+<p>В китае возможно да, но если вы в рф, то reality будет только замедлять соединение, в данный момент не вижу в нем смысла</p></td><td>2024-03-22T09:41:18.483Z</td></tr><tr><td>lll</td><td><p>Настраивал на основе этих конфигов и рекомендаций.</p>
+<aside class="onebox githubblob" data-onebox-src="https://github.com/Team418-git/easyXray/blob/2de299fddf5a972b1946fe2a5585f4dd5eb472b7/docker-compose.yml">
+  <header class="source">
+
+      <a href="https://github.com/Team418-git/easyXray/blob/2de299fddf5a972b1946fe2a5585f4dd5eb472b7/docker-compose.yml" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/Team418-git/easyXray/blob/2de299fddf5a972b1946fe2a5585f4dd5eb472b7/docker-compose.yml" target="_blank" rel="noopener nofollow ugc">Team418-git/easyXray/blob/2de299fddf5a972b1946fe2a5585f4dd5eb472b7/docker-compose.yml</a></h4>
+
+
+      <pre><code class="lang-yml">version: "3.9"
+
+services:
+  3x-ui:
+    image: ghcr.io/mhsanaei/3x-ui:v1.7.8
+    container_name: 3x-ui
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.3x-ui.rule=Host(`${XUI_HOSTNAME}`)"
+      - "traefik.http.routers.3x-ui.tls.certresolver=myresolver"
+      - "traefik.http.services.3x-ui.loadbalancer.server.port=2053"
+    environment:
+      XRAY_VMESS_AEAD_FORCED: "false"
+      XUI_USERNAME: ${XUI_USERNAME}
+      XUI_PASSWORD: ${XUI_PASSWORD}
+      XUI_PANEL_PORT: ${XUI_PANEL_PORT}
+      XUI_HOSTNAME: ${XUI_HOSTNAME}
+      XUI_EMAIL: ${XUI_EMAIL}
+      TGTOKEN: ${TGTOKEN}
+      ADMINID: ${ADMINID}
+</code></pre>
+
+
+
+  This file has been truncated. <a href="https://github.com/Team418-git/easyXray/blob/2de299fddf5a972b1946fe2a5585f4dd5eb472b7/docker-compose.yml" target="_blank" rel="noopener nofollow ugc">show original</a>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://habr.com/ru/articles/735536/comments/#comment_25847250">
+  <header class="source">
+      <img src="использование-3x-ui-в-связке-с-traefik/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://habr.com/ru/articles/735536/comments/#comment_25847250" target="_blank" rel="noopener nofollow ugc">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="использование-3x-ui-в-связке-с-traefik/402af0a397458beb8d452c685f57a4cb5666d085.png" class="thumbnail" data-dominant-color="4B6677" width="690" height="362"></div>
+
+<h3><a href="https://habr.com/ru/articles/735536/comments/#comment_25847250" target="_blank" rel="noopener nofollow ugc">3X-UI: Shadowsocks-2022 &amp; XRay (XTLS) сервер с простой настройкой и...</a></h3>
+
+  <p>Статья опубликована под лицензией Creative Commons BY-NC-SA . В серии предыдущих статей я описывал, почему повсеместно используемые VPN- и прокси-протоколы такие как OpenVPN и L2TP&nbsp; очень уязвимы...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<aside class="onebox githubblob" data-onebox-src="https://github.com/sa-mustafa/xray-v2ray-trojan-docker/blob/main/docker-compose.yml">
+  <header class="source">
+
+      <a href="https://github.com/sa-mustafa/xray-v2ray-trojan-docker/blob/main/docker-compose.yml" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/sa-mustafa/xray-v2ray-trojan-docker/blob/main/docker-compose.yml" target="_blank" rel="noopener nofollow ugc">sa-mustafa/xray-v2ray-trojan-docker/blob/main/docker-compose.yml</a></h4>
+
+
+      <pre><code class="lang-yml">version: '3.9'
+
+services:
+  traefik:
+    image: traefik:v2.9.5
+    ports:
+      - target: 80
+        published: 80
+        mode: host
+      - target: 443
+        published: 443
+        mode: host
+    networks: [web]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web
+      # Use the custom label "traefik.constraint-label=traefik"
+      # This public Traefik will only use services with this label
+      - traefik.constraint-label=traefik
+    command:
+</code></pre>
+
+
+
+  This file has been truncated. <a href="https://github.com/sa-mustafa/xray-v2ray-trojan-docker/blob/main/docker-compose.yml" target="_blank" rel="noopener nofollow ugc">show original</a>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>У меня конфиг самого прокси аналогичен роутеру <code>xui-reality-r</code> из первого варианта; но использую другой домен, не <code>www.microsoft.com</code>.<br>
+В итоге имею 3 сервиса: 1) поддомен веб-морды 3X-UI; 2) поддомен для подписок (публично доступный); 3) поддомен для самого прокси reality.</p>
+<h2><a name="p-23956-h-1" class="anchor" href="#p-23956-h-1"></a>Пример конфига</h2>
+<p>docker-compose.yml</p>
+<pre data-code-wrap="yml"><code class="lang-yml">---
+version: '3'
+
+networks:
+  traefik_network:
+    external:
+      name: xxx
+
+services:
+  3x-ui:
+    image: ghcr.io/mhsanaei/3x-ui:latest
+    container_name: 3x-ui
+    networks:
+      - xxx
+    volumes:
+      - $PWD/db/:/etc/x-ui/
+      - $PWD/cert/:/root/cert/
+    environment:
+      XRAY_VMESS_AEAD_FORCED: "false"
+    tty: true
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=xxx"
+
+      - "traefik.tcp.routers.xui-proxy.service=xui-proxy"
+      - "traefik.tcp.routers.xui-proxy.entrypoints=https"
+      - "traefik.tcp.routers.xui-proxy.rule=HostSNI(`foo.bar`,`foo.{{ mydomain }}`)"
+      - "traefik.tcp.routers.xui-proxy.tls=true"
+      - "traefik.tcp.routers.xui-proxy.tls.passthrough=true"
+      - "traefik.tcp.services.xui-proxy.loadbalancer.server.port=443"
+
+      - "traefik.http.routers.xui-admin.service=xui-admin"
+      - "traefik.http.services.xui-admin.loadbalancer.server.scheme=http"
+      - "traefik.http.services.xui-admin.loadbalancer.server.port=2053"
+      - "traefik.http.routers.xui-admin-http.service=xui-admin"
+      - "traefik.http.routers.xui-admin-http.rule=Host(`xui-admin.{{ mydomain }}`)"
+      - "traefik.http.routers.xui-admin-http.entrypoints=http"
+      - "traefik.http.routers.xui-admin.rule=Host(`xui-admin.{{ mydomain }}`)"
+      - "traefik.http.routers.xui-admin.entrypoints=https"
+      - "traefik.http.routers.xui-admin.tls=true"
+      - "traefik.http.routers.xui-admin.tls.certresolver=http"
+
+      - "traefik.http.routers.xui-sub.service=xui-sub"
+      - "traefik.http.services.xui-sub.loadbalancer.server.scheme=http"
+      - "traefik.http.services.xui-sub.loadbalancer.server.port=2096"
+      - "traefik.http.routers.xui-sub-http.service=xui-sub"
+      - "traefik.http.routers.xui-sub-http.rule=Host(`xui-sub.{{ mydomain }}`)"
+      - "traefik.http.routers.xui-sub-http.entrypoints=http"
+      - "traefik.http.routers.xui-sub-http.middlewares=redirect@file"
+      - "traefik.http.routers.xui-sub.rule=Host(`xui-sub.{{ mydomain }}`)"
+      - "traefik.http.routers.xui-sub.entrypoints=https"
+      - "traefik.http.routers.xui-sub.tls=true"
+      - "traefik.http.routers.xui-sub.tls.certresolver=http"
+      # Fix host for subscription response body
+      - "traefik.http.middlewares.xui-sub-fix-host.headers.customrequestheaders.host=foo.{{ mydomain }}"
+      - "traefik.http.routers.xui-sub.middlewares=xui-sub-fix-host@docker"
+
+</code></pre>
+<p>traefik.yaml</p>
+<pre data-code-wrap="yml"><code class="lang-yml">entryPoints:
+  http:
+    address: :80
+  https:
+    address: :443
+    http:
+      tls:
+        options: default
+        certResolver: 'http'
+
+</code></pre></td><td>2024-03-22T19:20:35.996Z</td></tr><tr><td>moocluck(Alexander)</td><td><p>Я попробовал настроить еще раз, раньше вообще ничего не работало, теперь веб-морда запустилась, но xrey и подписки не заводится.</p>
+<p>Может вы заметите чего-нибудь?</p>
+<details>
+<summary>
+traefik.yml</summary>
+<pre><code class="lang-auto">entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+
+http:
+  routers:
+    http-catchall:
+      rule: hostregexp(`{host:.+}`)
+      entrypoints:
+      - http
+      middlewares:
+      - redirect-to-https
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: false
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: traefik
+  file:
+    directory: /traefik/config
+    watch: true
+
+certificatesResolvers:
+  letsEncrypt:
+    acme:
+      email: myemail@email.com
+      storage: /ssl/acme.json
+      httpChallenge:
+        entryPoint: http
+</code></pre>
+</details>
+<details>
+<summary>
+traefik docker-compose.yml</summary>
+<pre><code class="lang-auto">version: '3.9'
+
+services:
+  traefik:
+    image: traefik:v2.2
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 80:80
+      - 443:443 
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./logs/:/var/log/traefik/
+      - ./traefik.yml:/traefik.yml:ro
+      - ./config/:/traefik/config/:ro
+      - ./ssl/acme.json:/ssl/acme.json
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=https"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.mydomain.io`)"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsEncrypt"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=login:password"
+      - "traefik.http.routers.traefik.middlewares=traefik-auth"
+
+networks:
+  default:
+    name: traefik
+</code></pre>
+</details>
+<details>
+<summary>
+3x-ui docker-compose.yml</summary>
+<pre><code class="lang-auto">version: "3.9"
+
+services:
+  3x-ui:
+    image: ghcr.io/mhsanaei/3x-ui:latest
+    container_name: 3x-ui
+    volumes:
+      - $PWD/db/:/etc/x-ui/
+      - $PWD/cert/:/root/cert/
+    environment:
+      XRAY_VMESS_AEAD_FORCED: "false"
+    restart: unless-stopped
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+
+      # Web panel
+      - "traefik.http.routers.xui-admin-http.service=xui-admin"
+      - "traefik.http.routers.xui-admin-http.rule=Host(`vless.mydomain.io`)"
+      - "traefik.http.routers.xui-admin-http.entrypoints=http"
+
+      - "traefik.http.routers.xui-admin.service=xui-admin"
+      - "traefik.http.routers.xui-admin.rule=Host(`vless.mydomain.io`)"
+      - "traefik.http.routers.xui-admin.entrypoints=https"
+      - "traefik.http.routers.xui-admin.tls=true"
+      - "traefik.http.routers.xui-admin.tls.certresolver=http"
+
+      - "traefik.http.services.xui-admin.loadbalancer.server.scheme=http"
+      - "traefik.http.services.xui-admin.loadbalancer.server.port=web-panel-port"
+
+      # Subscriptions
+      - "traefik.http.routers.xui-sub-http.service=xui-sub"
+      - "traefik.http.routers.xui-sub-http.rule=Host(`vless-sub.mydomain.io`)"
+      - "traefik.http.routers.xui-sub-http.entrypoints=http"
+
+      - "traefik.http.routers.xui-sub.service=xui-sub"
+      - "traefik.http.routers.xui-sub.rule=Host(`vless-sub.moocluck.ru`)"
+      - "traefik.http.routers.xui-sub.entrypoints=https"
+      - "traefik.http.routers.xui-sub.tls=true"
+      - "traefik.http.routers.xui-sub.tls.certresolver=http"
+
+      - "traefik.http.services.xui-sub.loadbalancer.server.scheme=http"
+      - "traefik.http.services.xui-sub.loadbalancer.server.port=subscriptions-port"
+
+      # Vless/Reality
+      - "traefik.tcp.routers.xui-proxy.service=xui-proxy"
+      - "traefik.tcp.routers.xui-proxy.entrypoints=https"
+      - "traefik.tcp.routers.xui-proxy.rule=HostSNI(`preinformer.com`)"
+      - "traefik.tcp.routers.xui-proxy.tls=true"
+      - "traefik.tcp.routers.xui-proxy.tls.passthrough=true"
+
+      - "traefik.tcp.services.xui-proxy.loadbalancer.server.port=443"
+
+networks:
+  traefik: 
+    external: true
+
+</code></pre>
+</details>
+<p>Ошибка xrey:</p>
+<pre><code class="lang-auto">XRAY: Failed to start: app/proxyman/inbound: failed to listen TCP on 443 &gt; transport/internet:failed to listen on address: 188.212.125.206:443 &gt; transport/internet/tcp: failed to listen TCP on 188.212.125.206:443 &gt; listen tcp 188.212.125.206:443: bind: cannot assign requested address
+</code></pre></td><td>2024-03-24T02:08:10.621Z</td></tr><tr><td>lll</td><td><p>Похоже на проблемы в конфигурации самого docker / traefik, без учета специфики 3x-ui. Поищи документацию или начни с рабочего примера traefik.</p>
+<p>Для network traefik у меня определено так:</p>
+<pre data-code-wrap="yml"><code class="lang-yml">networks:
+  traefik:
+    name: foo
+    driver: bridge
+</code></pre></td><td>2024-03-24T12:46:31.871Z</td></tr><tr><td>moocluck(Alexander)</td><td><p>Проверю, но думаю дело не в настройке сети, потому что веб морда заводится, а значит traefik видит контейнер с 3x-ui и направляет трафик на морду, значит контейнеры работают в одной сети</p></td><td>2024-03-24T13:27:13.738Z</td></tr><tr><td>gaarysn(Igor)</td><td><p>Если у вас всё же получилось, можете скинуть компоузы traefik и 3x-ui?</p></td><td>2025-01-10T19:40:37.787Z</td></tr>
+    </table>
+      </body>
+    </html>

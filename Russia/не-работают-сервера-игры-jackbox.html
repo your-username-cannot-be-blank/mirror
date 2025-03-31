@@ -1,0 +1,68 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>не-работают-сервера-игры-jackbox</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>dessad</td><td><p>С 6 декабря  перестали прогружатся сервера джекбокса , скорее всего из за очередных блокировок РКН<br>
+Самое странное в этой проблеме в том, что хостить и подключатся к серверам возможно через Польский впн , но вот через впн Нидерладнов,Австрии и других некоторых стран все равно не давал подключатся.<br>
+Как вы думаете, как можно решать проблему?</p></td><td>2024-12-08T16:57:39.603Z</td></tr><tr><td>Chatlanin</td><td><p>Адреса серверов то какие ? Те сайты  jackbox что мне выдал поисковик на CloudFlare. По блокировке CloudFlare тут есть отдельная тема.</p></td><td>2024-12-08T17:58:39.144Z</td></tr><tr><td>dessad</td><td><p>Посмотрел какие адреса<br>
+Адрес  jackbox.fun показывают что он работает через Cloudflare<br>
+А адрес <a href="http://jackbox.tv" rel="noopener nofollow ugc">jackbox.tv</a> уже работает через AWS. Ни тот ,ни этот адрес подключатся даже с некоторым впн-ами .</p></td><td>2024-12-09T02:16:29.468Z</td></tr><tr><td>Nara</td><td><p>Тоже была проблема недавно, что на jackbox.fun были проблемы при заходе через vpn, который хостится в Швеции, но когда заходил через vpn, поднятый на меннее известном vps в Литве, то все работало нормально. Причем сайт всегда открывался нормально, но при поиске комнаты через Швецию они отдавали HTTP 403.</p></td><td>2024-12-09T06:28:21.364Z</td></tr><tr><td>Chatlanin</td><td><p>Консоль разработчика в браузере → переходите во вкладку сеть → пытаетесь зайти на сервер или сайт(что у вас не открывает)-&gt;красным будут адреса с ошибками(например <a href="http://play.google.com" rel="noopener nofollow ugc">play.google.com</a>)-&gt;копируем и вставляем в блеклист программы для обхода которой вы пользуетесь.<br>
+P.S это автору темы</p></td><td>2024-12-09T08:36:26.902Z</td></tr><tr><td>Kurliykin</td><td><p>В принципе я нашел временное решение проблемы, для этого нужно создать bat файл в директории игры, в нем прописать это:</p>
+<pre><code class="lang-auto">echo off
+:start
+
+cd Ваш\путь\до\Джекбокса
+Ваш_джекбокс.exe -jbg.config serverUrl=ecast-qa.jackboxgames.com
+cd ...
+
+goto start
+</code></pre>
+<p>Стоит отметить, что в названии exe файла и в пути не должно быть пробелов/кириллицы. Этот способ работает на пиратке. Для стим версии достаточно вписать в параметры запуска строчку:</p>
+<pre><code class="lang-auto">-jbg.config serverUrl=ecast-qa.jackboxgames.com
+</code></pre>
+<p>Если всё это сделать, то с сайта jackbox.fun будет заходить в игру без препятствий</p></td><td>2024-12-20T18:21:27.375Z</td></tr><tr><td>dessad</td><td><p>Спасибо, проверю, как раз решение искал и на пиратском джекбоксе.</p></td><td>2024-12-20T18:53:04.176Z</td></tr><tr><td>plstxz(Plstxz)</td><td><p>Пробовали это</p>
+<p>-jbg.config <a href="http://serverUrl=ecast-qa.jackboxgames.com" rel="noopener nofollow ugc">serverUrl=ecast-qa.jackboxgames.com</a></p>
+<p>но сервер рандомно разрывает соединение. Из четырех партий Drawful до конца доиграли только одну <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"> В других паках аналогично.</p>
+<p>Читал, что у других юзеров такая же проблема.</p></td><td>2025-01-01T19:19:21.994Z</td></tr><tr><td>Harvechevskiy(Harvechevskiy)</td><td><p>Спасибо большое, но странная фигня, работает со всеми кроме пятой части, кк ни пытался, не воркает, есть теории как исправить?</p></td><td>2025-01-02T20:25:42.263Z</td></tr><tr><td>Kurliykin</td><td><p>Да, такое может быть из-за странного запуска самого exe файла. Для этого надо зайти в корневую папку игры, открыть файл config.jet , вы увидите строчку следующую:</p>
+<pre><code class="lang-auto">"serverUrl":"blobcast.jackboxgames.com",
+</code></pre>
+<p>и ее поменять на строчку</p>
+<pre><code class="lang-auto">"serverUrl":"ecast-qa.jackboxgames.com",
+</code></pre>
+<p>Затем вы должны вернуться в корневую папку игры, перейти в подкаталог games, выбираете каталог игры, в которую вы хотите поиграть (я проверял на SplitTheRoom), там будет файл jbg.config.jet , с ним надо проделать то же самое, что и с файлом config.jet . Стоит отметить, что данный способ теоретически подходит любому боксу, можете его использовать, если не нравится запуск с помощью bat файла.</p></td><td>2025-01-04T23:41:04.806Z</td></tr><tr><td>Harvechevskiy(Harvechevskiy)</td><td><p>Спс бро, легенда)</p></td><td>2025-01-06T20:04:12.074Z</td></tr>
+    </table>
+      </body>
+    </html>

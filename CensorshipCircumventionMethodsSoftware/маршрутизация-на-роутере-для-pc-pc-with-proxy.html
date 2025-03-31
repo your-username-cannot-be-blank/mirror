@@ -1,0 +1,235 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>маршрутизация-на-роутере-для-pc-pc-with-proxy</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>demike</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="маршрутизация-на-роутере-для-pc-pc-with-proxy/3626d6205e66dd75811398cfe3d472ff86ca7d5b.png" data-download-href="https://ntc.party/uploads/default/3626d6205e66dd75811398cfe3d472ff86ca7d5b" title="image"><img src="маршрутизация-на-роутере-для-pc-pc-with-proxy/3626d6205e66dd75811398cfe3d472ff86ca7d5b.png" alt="image" data-base62-sha1="7J2ZnQxQjHSvXtYcKcDLPElpw8z" width="690" height="493" data-dominant-color="070808"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1297×928 13.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Приветствую, задача переводить весь трафик от определенных машин в локальной сети через машину в той же локальной сети на которой установлена прокси dokodemo-door.<br>
+У меня обычный роутер ASUS с дефолтной прошивкой, перепрошивать на OpenWRT и т.д. я не планирую. На текущей прошифки доступны буквально route \ iptables.</p>
+<p>Я создал скрипт для этого. И проблема в том, что на client машине пропадает интернет. В статистике я вижу что на вход прокси идет трафик, НО выходного(обратного на клиент) трафика 0 байт. Прокси настроена правильно, весь входной трафик идет на DIRECT (в директ статистике я также вижу на выход в интернет идущие байты).<br>
+В чём может быть проблема?</p>
+<p>Во второй версии я добавил правила MASQUERADE.<br>
+В третьем варианте я добавил правила FORWARD.<br>
+Поведение абсолютно одинаковое… Просто пробовал, насколько понимаю MASQUERADE, FORWARD не нужны, т.к. на роутере будут обратные NAT адреса определяться по таблице DNAT.<br>
+Вообще концепция работоспособная или я запутался?<br>
+<img src="маршрутизация-на-роутере-для-pc-pc-with-proxy/3e458080c385edde67550bdcf300a41306327cac.jpeg" alt="image" data-base62-sha1="8SSvE8idDMRRpezRZUOxgWtpMni" width="211" height="101"></p>
+<pre><code class="lang-auto">#!/bin/sh
+
+# Конфигурация
+PROXY_IP="192.168.0.3"    
+PROXY_PORT="43844"           
+CHAIN_NAME="xchain"       
+CLIENTS="192.168.0.2"
+
+    iptables -t nat -N $CHAIN_NAME 2&gt;/dev/null
+
+    # Убедимся, что цепочка подключена к PREROUTING
+    iptables -t nat -C PREROUTING -j $CHAIN_NAME 2&gt;/dev/null || iptables -t nat -A PREROUTING -j $CHAIN_NAME
+
+    for CLIENT in $CLIENTS; do
+      iptables -t nat -A $CHAIN_NAME -s $CLIENT -p tcp -j DNAT --to-destination $PROXY_IP:$PROXY_PORT
+      iptables -t nat -A $CHAIN_NAME -s $CLIENT -p udp -j DNAT --to-destination $PROXY_IP:$PROXY_PORT
+    done
+
+    iptables -t nat -A POSTROUTING -d $PROXY_IP -p tcp --dport $PROXY_PORT -j MASQUERADE
+    iptables -t nat -A POSTROUTING -d $PROXY_IP -p udp --dport $PROXY_PORT -j MASQUERADE
+
+    iptables -A FORWARD -s $CLIENTS -d $PROXY_IP -p tcp -j ACCEPT
+    iptables -A FORWARD -s $CLIENTS -d $PROXY_IP -p udp -j ACCEPT
+    iptables -A FORWARD -s $PROXY_IP -d $CLIENTS -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT
+    iptables -A FORWARD -s $PROXY_IP -d $CLIENTS -p udp -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+   
+</code></pre></td><td>2024-11-22T07:27:59.875Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="demike" data-post="1" data-topic="13288">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> demike:</div>
+<blockquote>
+<p>Вообще концепция работоспособная или я запутался?</p>
+</blockquote>
+</aside>
+<p>Второй вариант.</p></td><td>2024-11-22T11:48:02.983Z</td></tr><tr><td>0ka(0ka)</td><td><p>для теста будет достаточно двух правил, зачем раздувать до скрипта когда еще ничего не работает?<br>
+на 192.168.0.2 команда <code>curl --connect-to ::192.168.0.3:43844 https://2ip.me</code> работает?</p></td><td>2024-11-22T12:03:03.579Z</td></tr><tr><td>demike</td><td><p>Если без каких изменений в iptables , интернет в браузере работает, ваша команда выдает:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="маршрутизация-на-роутере-для-pc-pc-with-proxy/b194625f4842e1714cc1229629bd29e97d816001.png" data-download-href="https://ntc.party/uploads/default/b194625f4842e1714cc1229629bd29e97d816001" title="image"><img src="маршрутизация-на-роутере-для-pc-pc-with-proxy/b194625f4842e1714cc1229629bd29e97d816001_2_690x30.png" alt="image" data-base62-sha1="pkWqidtWblTc1xB6L8gVTvpqAud" width="690" height="30" srcset="маршрутизация-на-роутере-для-pc-pc-with-proxy/b194625f4842e1714cc1229629bd29e97d816001_2_690x30.png, маршрутизация-на-роутере-для-pc-pc-with-proxy/b194625f4842e1714cc1229629bd29e97d816001.png 1.5x, маршрутизация-на-роутере-для-pc-pc-with-proxy/b194625f4842e1714cc1229629bd29e97d816001.png 2x" data-dominant-color="46243B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">744×33 9.69 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-11-22T12:41:37.079Z</td></tr><tr><td>0ka(0ka)</td><td><p>вы же пытаетесь сделать прозрачный прокси, ну так он у вас не работает, вы не написали какой у вас прокси сервер и с каким конфигом</p></td><td>2024-11-22T12:50:50.019Z</td></tr><tr><td>demike</td><td><p>dokodemo-door.<br>
+Когда я через него пытался Wireguard перекинуть, то он работал. Я посчитал что он корректно работает.<br>
+Возможно такие настройки подходят для WG, но не clear трафика?</p>
+<pre><code class="lang-auto">{
+  "id": 2,
+  "userId": 0,
+  "up": 3240,
+  "down": 0,
+  "total": 0,
+  "remark": "in_proxy",
+  "enable": true,
+  "expiryTime": 0,
+  "listen": "",
+  "port": 43844,
+  "protocol": "dokodemo-door",
+  "settings": "{\n  \"network\": \"tcp,udp\",\n  \"followRedirect\": true\n}",
+  "streamSettings": "",
+  "tag": "inbound-35466",
+  "sniffing": "{\n  \"enabled\": true,\n  \"destOverride\": [\n    \"http\",\n    \"tls\",\n    \"quic\"\n  ],\n  \"metadataOnly\": false,\n  \"routeOnly\": true\n}",
+  "clientStats": []
+}
+</code></pre></td><td>2024-11-22T12:55:20.568Z</td></tr><tr><td>0ka(0ka)</td><td><p>логи нужно было включать с самого начала, и вы скорее всего взяли конфиг xray из примера где использовалcя iptables TPROXY а не DNAT. у вас в сниффинге как минимум включен routeOnly, значит xray даже не будет резолвить адрес ваших доменов и будет гонять трафик из direct out в свой же in_proxy.</p>
+<p>включайте debug лог и запускайте мою команду заново, смотрите что в нём</p></td><td>2024-11-22T12:59:57.057Z</td></tr><tr><td>demike</td><td><p>Там бесконечно повторяется access. Походу зацикливается сам на себя<br>
+192.168.50.198 - это IP сервера с прокси. 35466  порт прокси</p>
+<pre><code class="lang-auto">2024/11/22 16:36:47 from 192.168.50.198:57407 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:47 from 192.168.50.198:57224 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:47 from 192.168.50.198:57226 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:47 from 192.168.50.198:57228 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:48 from 192.168.50.198:57230 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:48 from 192.168.50.198:57395 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:48 from 192.168.50.198:57415 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:48 from 192.168.50.198:57417 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:49 from 192.168.50.198:57429 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:49 from 192.168.50.198:57431 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:49 from 192.168.50.198:57441 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:49 from 192.168.50.198:57451 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:49 from 192.168.50.198:57457 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:50 from 192.168.50.198:57463 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:50 from 192.168.50.198:57473 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:50 from 192.168.50.198:57477 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:50 from 192.168.50.198:57489 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:51 from 192.168.50.198:57493 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+2024/11/22 16:36:51 from 192.168.50.198:57232 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]
+</code></pre></td><td>2024-11-22T13:10:46.167Z</td></tr><tr><td>0ka(0ka)</td><td><p>routeOnly: false</p>
+<p>или вот уже готовый конф sing-box</p>
+<pre><code class="lang-auto">{
+    "dns": {
+        "servers": [
+            {
+                "address": "1.1.1.1",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "domain_strategy": "prefer_ipv4",
+            "listen": "0.0.0.0",
+            "listen_port": 43844,
+            "sniff": true,
+            "sniff_override_destination": true,
+            "tag": "direct-proxy",
+            "type": "direct"
+        }
+    ],
+    "log": {
+        "level": "debug"
+    },
+    "outbounds": [
+		{
+            "tag": "direct",
+            "type": "direct"
+        },
+        {
+            "tag": "direct-proxy",
+            "type": "direct",
+			"override_port": 443
+        },
+        {
+            "tag": "block",
+            "type": "block"
+        },
+        {
+            "tag": "dns-out",
+            "type": "dns"
+        }
+    ],
+    "route": {
+      "final": "direct",
+        "rules": [
+            {
+                "outbound": "dns-out",
+                "protocol": "dns"
+            },
+            {
+                "inbound": "direct-proxy",
+                "outbound": "direct-proxy"
+            }
+        ]
+    }
+}
+
+
+</code></pre></td><td>2024-11-22T13:11:39.137Z</td></tr><tr><td>demike</td><td><p>Да так не зацикливается</p>
+<p>всего 1 строка от CLIENT → PROXY SERVER<br>
+<strong>access.log</strong><br>
+<code>2024/11/22 16:42:18 from 192.168.50.36:53548 accepted tcp:192.168.50.198:35466 [inbound-35466 &gt;&gt; direct]</code></p>
+<p><strong>error.log info:</strong></p>
+<blockquote>
+<p>2024/11/22 16:45:22 [Info] [1036928119] proxy/dokodemo: received request for 192.168.50.36:38966<br>
+2024/11/22 16:45:22 [Info] [1036928119] app/dispatcher: sniffed domain: <a href="http://2ip.me" rel="noopener nofollow ugc">2ip.me</a><br>
+2024/11/22 16:45:22 [Info] [1036928119] app/dispatcher: default route for tcp:2ip.me:35466<br>
+2024/11/22 16:45:22 [Info] [1036928119] transport/internet/tcp: dialing TCP to tcp:2ip.me:35466</p>
+</blockquote>
+<p>Ошибка:<br>
+curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to <a href="http://2ip.me:443" rel="noopener nofollow ugc">2ip.me:443</a></p></td><td>2024-11-22T13:17:23.832Z</td></tr><tr><td>0ka(0ka)</td><td><p>почему-то порт назначения стал 35466, хз откуда это число, xray не пользуюсь, пробуй конф синга который выше дал, но я бы порт прокси на 443 сменил чтобы не писать правило override</p></td><td>2024-11-22T13:19:20.628Z</td></tr><tr><td>demike</td><td><p>у меня xray , конфиг выше не подходит.</p>
+<p>Да вижу странно что стало <strong>tcp:2ip.me:35466</strong></p></td><td>2024-11-22T13:20:48.172Z</td></tr><tr><td>0ka(0ka)</td><td><p>а, так ты сам поменял порт, в начале ты кидал конфиг с другим портом, нужно правило override как я сделал на синге, или делай порт прокси 443</p></td><td>2024-11-22T13:22:19.918Z</td></tr><tr><td>demike</td><td><aside class="quote no-group" data-username="demike" data-post="8" data-topic="13288">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> demike:</div>
+<blockquote>
+<p>35466</p>
+</blockquote>
+</aside>
+<p>да в первом посте был другой порт прокси, просто я удалил и еще раз создал, сейчас порт прокси 35466.<br>
+Но я как понимаю порт всеравно в логах не должен меняться , если я вызвал curl <a href="http://2ip.me:433" rel="noopener nofollow ugc">2ip.me:433</a>, то в логах xray dialing TCP to должен быть 433, а не <strong><a href="http://2ip.me:35466" rel="noopener nofollow ugc">2ip.me:35466</a></strong>.</p></td><td>2024-11-22T13:27:59.187Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="demike" data-post="14" data-topic="13288">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> demike:</div>
+<blockquote>
+<p>Но я как понимаю порт всеравно в логах не должен меняться</p>
+</blockquote>
+</aside>
+<p>он и не меняется, curl отправляет пакеты на 192.168.50.198:35466, порта 443 в данных нигде нет, в данных пакета есть домен который xray сниффит и меняет адрес назначения с 192.168.50.198 на адрес домена, больше ничего не происходит, порт назначения нужно менять вручную: нужен новый direct outbound с редиректом на порт 443, хз можно ли сделать такой в xray, для синга я уже дал готовый конфиг, советую перейти на него</p></td><td>2024-11-22T13:31:55.211Z</td></tr><tr><td>demike</td><td><p>а для чего это нужно? чтобы только HTTPS сайты работали? Странный move, например если я захочу сделать запрос к 80.80.80.80:555, то мне не нужно чтобы порт override на 443.</p></td><td>2024-11-22T13:39:01.293Z</td></tr><tr><td>0ka(0ka)</td><td><p>тогда вам нужна другая схема проксирования трафика, например можно сделать шлюзом не роутер а 192.168.50.198, на котором уже будет tproxy или tun</p></td><td>2024-11-22T13:40:07.717Z</td></tr><tr><td>demike</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="маршрутизация-на-роутере-для-pc-pc-with-proxy/338e7c39d00eb181f5779f20f9efa68c5d9bb123.png" data-download-href="https://ntc.party/uploads/default/338e7c39d00eb181f5779f20f9efa68c5d9bb123" title="image"><img src="маршрутизация-на-роутере-для-pc-pc-with-proxy/338e7c39d00eb181f5779f20f9efa68c5d9bb123_2_690x250.png" alt="image" data-base62-sha1="7m5CHBSLQr1pDa4csweEfU7LnRV" width="690" height="250" srcset="маршрутизация-на-роутере-для-pc-pc-with-proxy/338e7c39d00eb181f5779f20f9efa68c5d9bb123_2_690x250.png, маршрутизация-на-роутере-для-pc-pc-with-proxy/338e7c39d00eb181f5779f20f9efa68c5d9bb123_2_1035x375.png 1.5x, маршрутизация-на-роутере-для-pc-pc-with-proxy/338e7c39d00eb181f5779f20f9efa68c5d9bb123.png 2x" data-dominant-color="BDE8EA"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1141×414 70.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+вот такой исходный пакет TCP пакете отправлен в прокси, соответственно когда прокси примит его, у прокси будет информация и о 555 порте  и  о 35466 порте.<br>
+У меня ощущение что это должно работать без tproxy или tun, но он берет свой Destination port и лепит к REQUEST , вместо Source port 555.</p></td><td>2024-11-22T13:53:59.515Z</td></tr><tr><td>0ka(0ka)</td><td><p>Source port это рандомный порт который генерится для каждого исх. соединения, 555 в вашем примере это dest port, 35466 это тоже dest port.<br>
+Пример: Чтобы подключиться к 1.1.1.1(dest addr):443(dest port) используется 192.168.1.123(source addr):7375(source port)</p></td><td>2024-11-22T14:03:18.150Z</td></tr><tr><td>demike</td><td><p>Я в тильте до вечера. Почитал о механизмах работы сети.<br>
+Как я понял и пообщавшись в chatgpt</p>
+<ol>
+<li>установка TCP соединения где нету никакой информации о протокольной информации. Установка соединения будет от случайного порта TCP: 192.168.50.36:1234 → 192.168.50.198:35466</li>
+<li>После установки TCP, в этом канале  идет пакет HTTP, у которого уже есть и адрес и заголовки<br>
+GET /<br>
+HOST: Host: <a href="http://myip.com:8080" rel="noopener nofollow ugc">myip.com:8080</a></li>
+</ol>
+<p>Когда в xray sniffer с опцией HTTP включён, как раз и получает эту информацию, по этой информации идет маршрутизация. Так почему он не делает DIRECT запрос по этой информации.<br>
+Разве это не баг? Где я ошибаюсь?</p></td><td>2024-11-23T09:47:26.923Z</td></tr><tr><td>0ka(0ka)</td><td><p>В реальности для сниффинга чаще всего используется https sni, там порта нет, и в http трафике в 99% случаев порт не указывается, я не вижу в этом проблемы, но если вы захотите подключиться к 80.80.80.80:555 там скорее всего будет неизвестный xray протокол и подключение не пройдет. Почитайте про fakeip/smartdns/antizapret (одна и та же технология) может вам подойдет</p></td><td>2024-11-23T13:04:22.650Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,74 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>перенос-lxc-контейнера-antizapret-vpn-на-другой-сервер-4776</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>kirill</td><td><p>Доброго времени суток</p>
+<p>Подскажите последовательность (с командами) по правильному переносу уже настроенного контейнера ‘antizapret-vpn’ на другой VPS в связи со сменой хостера.<br>
+Очень не хочется опять заново настраивать всё, применять все твики.</p></td><td>2023-06-29T19:08:13.501Z</td></tr><tr><td>kirill</td><td><p>вот, примерно так, наверное</p>
+<p>• экспорт</p>
+<pre><code class="lang-auto">lxc stop antizapret-vpn
+lxc snapshot antizapret-vpn backup
+lxc publish antizapret-vpn/backup --alias antizapret-vpn-backup
+lxc image export antizapret-vpn-backup
+lxc image delete antizapret-vpn-backup
+</code></pre>
+<p>копируем-переносим <code>TARBALL-NAME.tar.gz</code> на новый сервер</p>
+<p>• импорт:</p>
+<pre><code class="lang-auto">lxc image import TARBALL-NAME.tar.gz --alias antizapret-vpn-backup
+lxc launch antizapret-vpn-backup antizapret-vpn
+lxc image delete antizapret-vpn-backup
+</code></pre>
+<p>вроде так, но<br>
+ещё не пробовал</p>
+<p>upd.<br>
+алгоритм работает</p></td><td>2023-06-29T20:32:29.446Z</td></tr><tr><td>pikapikapikaaa(Pikapikapikaaa)</td><td><p>Ответьте валенку:<br>
+что при этом нужно доустановить и поменять?</p></td><td>2023-10-01T23:34:54.099Z</td></tr><tr><td>pikapikapikaaa(Pikapikapikaaa)</td><td><p>Короче, то ли руки кривые, то ли еще что…</p>
+<p>После переноса столкнулся сначала с проблемой неполучения ip адреса, потом (так и не смог победить)  <em>- не формируются конфигурационные файлы antizapret-client-tcp.ovpn (ну и UDP тоже);</em> при этом <strong>скрипт работает</strong>, доступ ко всем каталогам есть, а <strong>файлы не создаются</strong> и не переписываются<br>
+Времени потратил больше, чем с нуля создавать… (хотя тут тоже сломался на ошибке проверки сертификата, а точнее, порт ovpn чем-то занят (на чистой машине то!)<br>
+Буду пока ставить 20.04…<br>
+Если кто успешно перенёс по выше указанной инструкции, дайте знать…</p></td><td>2023-10-03T00:34:25.179Z</td></tr><tr><td>tkmw1985(VALLY-VULLY)</td><td><p>Можно сразу в контейнере создать  резерв и отправить на другую машинку предварительно настроев открыть доступ и порт по умолчанию 8443 если не ошибаюсь.<br>
+С первой машинке создаем резерв<br>
+lxc list<br>
+lxc snapshot antizapret-vpn snap1<br>
+lxc remote list<br>
+lxc remote add  vps(любое название) xxxx(IP second VPS)<br>
+lxc copy --mode=relay antizapret-vpn/snap1 vps:antizapret-vpn<br>
+lxc start antizapret-vpn (in second VPS)<br>
+Редактируем конфиг и меняем IP адрес с первого на второй<br>
+Дальше думаю разберетесь сами.</p></td><td>2023-10-03T10:11:56.791Z</td></tr>
+    </table>
+      </body>
+    </html>

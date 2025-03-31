@@ -1,0 +1,151 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>не-работает-ipv6-маршрут-по-wi-fi</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>vanyaindigo</td><td><p>В связи с тем, что английский у меня корявый, хочу попросить помощи здесь (надеюсь, ответите по-русски).<br>
+Имеется роутер OpenWRT с полученным префиксом ipv6 из туннеля. Стационарный ПК подключен по проводу и имеет доступ по ipv6. Мобильный телефон также получает ipv6 адреса, но доступ по ipv6 не работает. Пакеты застревают в точке доступа и дальше идет time out.<br>
+Как это можно исправить?</p>
+<p>Часть /etc/config/network выглядит так:</p>
+<details>
+<summary>
+/etc/config/network</summary>
+<p>config interface ‘wg0’<br>
+option listen_port ‘51820’<br>
+option proto ‘wireguard’<br>
+option private_key ‘(hidden)’<br>
+list addresses ‘10.0.0.2/16’<br>
+list addresses ‘fd42:42:42::2/60’</p>
+<p>config wireguard_wg0<br>
+option endpoint_host ‘(hidden)’<br>
+option persistent_keepalive ‘25’<br>
+option endpoint_port ‘51820’<br>
+option public_key ‘(hidden)’<br>
+list allowed_ips ‘0.0.0.0/0’<br>
+list allowed_ips ‘::/0’<br>
+option route_allowed_ips ‘1’</p>
+<p>config interface ‘wg06’<br>
+option ifname ‘<span class="mention">@wg0</span>’<br>
+option proto ‘static’<br>
+option ip6prefix ‘fd42:42:42::2/60’</p>
+<p>config route6<br>
+option interface ‘wg0’<br>
+option target ‘fd42:42:42::2/128’</p>
+<p>config route6<br>
+option interface ‘wg0’<br>
+option gateway ‘fd42:42:42::2’<br>
+option target ‘::/0’</p>
+</details>
+<p>Часть /etc/config/firewall выглядит так:</p>
+<details>
+<summary>
+/etc/config/firewall</summary>
+<p>config zone<br>
+option name ‘wan’<br>
+option input ‘REJECT’<br>
+option output ‘ACCEPT’<br>
+option forward ‘REJECT’<br>
+option masq ‘1’<br>
+option mtu_fix ‘1’<br>
+option network ‘wan  wg0’</p>
+<p>config    zone<br>
+option    name ‘wan6’<br>
+option    family ‘ipv6’<br>
+option    input ‘ACCEPT’<br>
+option    output ‘ACCEPT’<br>
+option    forward ‘REJECT’<br>
+option    network ‘wg06’</p>
+<p>config    forwarding<br>
+option    dest ‘lan’<br>
+option    src    ‘wan6’</p>
+<p>config    forwarding<br>
+option    dest ‘wan6’<br>
+option    src    ‘lan’</p>
+</details>
+<p>Трасировка на мобильном идет так:</p>
+<details>
+<summary>
+Tracert Openwrt.org</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="не-работает-ipv6-маршрут-по-wi-fi/aad668fbc37414911862739138070547a1224208.jpeg" data-download-href="https://ntc.party/uploads/default/aad668fbc37414911862739138070547a1224208" title="photo_2019-10-16_22-42-48"><img src="не-работает-ipv6-маршрут-по-wi-fi/aad668fbc37414911862739138070547a1224208_2_236x500.jpeg" alt="photo_2019-10-16_22-42-48" data-base62-sha1="onixzrBJoPUKI27ZfBa2rlmW0CA" width="236" height="500" srcset="не-работает-ipv6-маршрут-по-wi-fi/aad668fbc37414911862739138070547a1224208_2_236x500.jpeg, не-работает-ipv6-маршрут-по-wi-fi/aad668fbc37414911862739138070547a1224208_2_354x750.jpeg 1.5x, не-работает-ipv6-маршрут-по-wi-fi/aad668fbc37414911862739138070547a1224208_2_472x1000.jpeg 2x" data-dominant-color="EAECED"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">photo_2019-10-16_22-42-48</span><span class="informations">606×1280 24.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2019-10-22T08:14:30.377Z</td></tr><tr><td>ValdikSS</td><td><p>У вас везде используются ULA-адреса, и маршрутизируемых адресов в ваших конфигурационных файлах не видно. Они как-то автоматически выдаются клиентам? Или у вас NAT на сервере, где установлен Wireguard?<br>
+Запустите tcpdump и посмотрите, уходит ли трафик на сервер вообще.<br>
+В любом случае, вам лучше с такими частными вопросами обращаться на форум OpenWRT или куда-то ещё.</p></td><td>2019-10-22T11:04:38.309Z</td></tr><tr><td>vanyaindigo</td><td><p>ULA-префикс используется везде и всем раздается (да, он тут не приведен, но он есть). На сервере действительно NAT66 есть.<br>
+В настройкал dhcp lan еще прописано option ra_default ‘1’.</p>
+<details>
+<summary>
+На мобильном клиенте так настроено</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="не-работает-ipv6-маршрут-по-wi-fi/205ed024ecd072afdfc24d29e731b476dec84e59.jpeg" data-download-href="https://ntc.party/uploads/default/205ed024ecd072afdfc24d29e731b476dec84e59" title="photo_2019-10-16_23-09-18"><img src="не-работает-ipv6-маршрут-по-wi-fi/205ed024ecd072afdfc24d29e731b476dec84e59_2_236x500.jpeg" alt="photo_2019-10-16_23-09-18" data-base62-sha1="4CmpJFmwKerpBWCvVAsVLJ6zPHX" width="236" height="500" srcset="не-работает-ipv6-маршрут-по-wi-fi/205ed024ecd072afdfc24d29e731b476dec84e59_2_236x500.jpeg, не-работает-ipv6-маршрут-по-wi-fi/205ed024ecd072afdfc24d29e731b476dec84e59_2_354x750.jpeg 1.5x, не-работает-ipv6-маршрут-по-wi-fi/205ed024ecd072afdfc24d29e731b476dec84e59_2_472x1000.jpeg 2x" data-dominant-color="E6E7E8"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">photo_2019-10-16_23-09-18</span><span class="informations">606×1280 135 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<aside class="quote no-group" data-username="ValdikSS" data-post="2" data-topic="182">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Запустите tcpdump</p>
+</blockquote>
+</aside>
+<p>не владею им настолько, чтобы самостоятельно понять, что именно запускать, что смотреть и что должно быть.</p></td><td>2019-10-22T11:12:06.155Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="vanyaindigo" data-post="3" data-topic="182">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/vanyaindigo/48/1958_2.png" class="avatar"> vanyaindigo:</div>
+<blockquote>
+<p>не владею им настолько, чтобы самостоятельно понять, что именно запускать, что смотреть и что должно быть.</p>
+</blockquote>
+</aside>
+<p>В таком случае, вам лучше задать вопрос на форуме OpenWRT или в каком-то другом профильном.</p></td><td>2019-10-22T19:08:04.596Z</td></tr><tr><td>vanyaindigo</td><td><p>Отловил пакеты ipv6, но ничего криминального не вижу. Может посоветуете какие-то специфические тесты сделать?</p>
+<details>
+<summary>
+Запрос DNS</summary>
+<p>IP6 (flowlabel 0x90d1b, hlim 64, next-header UDP (17) payload length: 39) fd42:42:42:0:b85a:2394:f6a8:6b0e.51949 &gt; fd42:42:42:0:8e59:73ff:fef9:d50e.53: [udp sum ok] 3412+ A? <a href="http://instagram.com" rel="nofollow noopener">instagram.com</a>. (31)</p>
+</details>
+<details>
+<summary>
+Трасировка пошла и захлебнулась</summary>
+<p>IP6 (hlim 255, next-header ICMPv6 (58) payload length: 24) fd42:42:42:0:b85a:2394:f6a8:6b0e &gt; fe80::8e59:73ff:fef9:d50e: [icmp6 sum ok] ICMP6, neighbor advertisement, length 24, tgt is fd42:42:42:0:b85a:2394:f6a8:6b0e, Flags [router, solicited]</p>
+</details>
+<p>Прикол еще в том, что на ноуте, подключенном по Wi-Fi, ipv6 тоже работает.</p></td><td>2019-10-22T19:15:45.882Z</td></tr><tr><td>vanyaindigo</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="4" data-topic="182">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>на форуме OpenWRT</p>
+</blockquote>
+</aside>
+<p>В общем, там тоже разводят руками.<br>
+На самом деле, в самый первый момент включения он даже работал. Но не работал DNS по ipv6, я начал докапываться и на мобильнике сломал доступ по ipv6, зато DNS работает.</p>
+<p>P.S. Все, нашли <a href="https://forum.openwrt.org/t/ipv6-not-working-on-my-phone/46976/9" rel="noopener nofollow ugc">решение</a>))</p></td><td>2019-10-22T21:09:24.102Z</td></tr>
+    </table>
+      </body>
+    </html>

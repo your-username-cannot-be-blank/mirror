@@ -1,0 +1,168 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>хочу-понять-как-это-неработает-сколько-фэйковых-пакетов-за-один-ввод-в-адресную-строку-7967</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Quqas(Quqas)</td><td><p>запускаю<br>
+“C:*\goodbyedpi-0.2.2\x86_64\goodbyedpi.exe” -f 4 -e 4 --reverse-frag --set-ttl 7 --port 22222 --port 22224 --port 25656 --port 25735 --port 25500</p>
+<p>так всё что по ip не блочено открывает (порты для holavpn в хроме)</p>
+<p>с целью сделать <em>более-лучше</em> убираю <code> -f 4 -e 4 --reverse-frag</code> и продолжает открываться большинство, но не все  блоченые сайты. те которые не открываются без заглушки, просто net err. увеличение ttl до предпоследнего хопа неработающего сайта никак не помогает.</p>
+<p>а если  <code> -f 4 -e 4 --reverse-frag</code> оставить, но убрать  <code>--set-ttl 7</code> то, по крайней мере в хроме, перестают открываться (бесконечно белый экран) вообще любые сайты (не понимаю почему)</p>
+<p>т.е. знаем что dpi прова на седьмом хопе (если меньше 7 лезет заглушка)<br>
+но видимо и после 7го ещё есть другие dpi и их обманывает фрагментация, но тогда почему <strong>такая</strong> фрагментация не мешает сайтам открываться? а без ttl7 мешает…</p>
+<p>отсюда и непонятно в моём случае <code> -f 4 -e 4 --reverse-frag --set-ttl 7</code> сколько и каких фэйковых пакетов шлётся? если только 1 и с ttl7 то как тогда фрагментация помoгает “пробить” dpi который дальше 7го хопа?</p></td><td>2024-06-16T09:13:01.936Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Quqas" data-post="1" data-topic="7967">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>тогда почему <strong>такая</strong> фрагментация не мешает сайтам открываться? а без ttl7 мешает…</p>
+</blockquote>
+</aside>
+<p>Вероятно, соединение разрывает ваш провайдер.</p>
+<aside class="quote no-group" data-username="Quqas" data-post="1" data-topic="7967">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>сколько и каких фэйковых пакетов шлётся?</p>
+</blockquote>
+</aside>
+<p>1 пакет, TLS ClientHello на домен w3.org</p>
+<aside class="quote no-group" data-username="Quqas" data-post="1" data-topic="7967">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>то как тогда фрагментация помoгает “пробить” dpi который дальше 7го хопа?</p>
+</blockquote>
+</aside>
+<p>Вероятно, фейковый пакет отключает дальнейшую обработку сессии, а фрагментированный пакет без фейкового, наоборот, ведёт к разрыву сессии.</p></td><td>2024-06-18T13:39:37.856Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>всё равно не до конца понимаю принцип обмана</p>
+<p>ну допустим (в моём случае) на 7м хопе dpi видит <a href="http://w3.org" rel="noopener nofollow ugc">w3.org</a> и пропускает его(который никуда дальше не доходит из-за ttl7) а следом идёт пакет с настоящим адресом</p>
+<p>так и где тут спрятана фрагментация? в первом или в следующем?</p>
+<p>даже Microsoft Network Monitor не помогает понять<br>
+если первый ясен</p>
+<pre><code class="lang-auto">  Frame: Number = 513, Captured Frame Length = 571, MediaType = ETHERNET
+
+- TLS: TLS Rec Layer-1 HandShake: Client Hello.
+  - TlsRecordLayer: TLS Rec Layer-1 HandShake:
+     ContentType: HandShake:
+   + Version: TLS 1.0
+     Length: 512 (0x200)
+   - SSLHandshake: SSL HandShake ClientHello(0x01)
+      HandShakeType: ClientHello(0x01)
+      Length: 508 (0x1FC)
+    - ClientHello: TLS 1.2
+
+     - ClientHelloExtension: Server Name(0x0000)
+        ExtensionType: Server Name(0x0000)
+        ExtensionLength: 15 (0xF)
+        NameListLength: 13 (0xD)
+        NameType: Host Name (0)
+        NameLength: 10 (0xA)
+        ServerName: www.w3.org
+     
+</code></pre>
+<p>то в следующем я вижу истинный адрес 68 64 72 65 7A 6B 61 2E 69 6E hdrezka.in<br>
+но вот чтоб в заголовках пакета его не найти…</p>
+<ul>
+<li>сам адрес без “разрывов” или \n каких нибудь<br>
+поэтому как -e 4 позволяет пробить путь к ней неясно<br>
+именно она без фрагментации а только с ttl не открывается</li>
+</ul>
+<p>но то что именно ещё 1 dpi дальше седьмого не возьмусь утверждать и уже не уверен</p></td><td>2024-06-23T21:41:18.292Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Quqas" data-post="3" data-topic="7967">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>так и где тут спрятана фрагментация?</p>
+</blockquote>
+</aside>
+<p>Фейковый пакет не фрагментируется, а отправляется целиком, либо с низким TTL, либо с неправильной чексуммой, в зависимости от настроек.</p>
+<p>Оригинальный пакет отправляется фрагментированным, либо задом наперед, либо последовательно (также зависит от настроек).</p></td><td>2024-06-24T12:38:20.996Z</td></tr><tr><td>Quqas(Quqas)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="4" data-topic="7967">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>либо задом наперед, либо последовательно (также зависит от настроек).</p>
+</blockquote>
+</aside>
+<p>ок. это соответствует моим представлениям</p>
+<p>осталось придти к пониманию понятий</p>
+<aside class="quote no-group" data-username="ValdikSS" data-post="4" data-topic="7967">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Оригинальный пакет отправляется фрагментированным</p>
+</blockquote>
+</aside>
+<p>ориг пакет это тот что сразу за <a href="http://w3.org" rel="noopener nofollow ugc">w3.org</a> ? (на 99% уверен что да но всё же вдруг и ещё шлётся а я не нахожу)<br>
+и видимо я плохо понимаю что есть “фрагментация” как её увидеть в сниффере? ибо думал что это адрес хоста делится частями но как уже говорил</p>
+<blockquote>
+<p>сам адрес без “разрывов” или \n каких нибудь</p>
+</blockquote>
+<p>и</p>
+<blockquote>
+<p>в заголовках пакета его не найти</p>
+</blockquote></td><td>2024-06-25T22:39:33.950Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Quqas" data-post="5" data-topic="7967">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>ориг пакет это тот что сразу за <a href="http://w3.org">w3.org</a> ?</p>
+</blockquote>
+</aside>
+<p>Да.</p>
+<aside class="quote no-group" data-username="Quqas" data-post="5" data-topic="7967">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>и видимо я плохо понимаю что есть “фрагментация”</p>
+</blockquote>
+</aside>
+<p>Отправка TLS ClientHello двумя TCP-сегментами (пакетами) вместо одного.</p>
+<aside class="quote no-group" data-username="Quqas" data-post="5" data-topic="7967">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/quqas/48/1133_2.png" class="avatar"> Quqas:</div>
+<blockquote>
+<p>что это адрес хоста делится частями</p>
+</blockquote>
+</aside>
+<p>Такой функции нет.</p></td><td>2024-06-26T10:30:05.135Z</td></tr>
+    </table>
+      </body>
+    </html>

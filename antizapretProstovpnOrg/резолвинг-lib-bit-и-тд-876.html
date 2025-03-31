@@ -1,0 +1,190 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>резолвинг-lib-bit-и-тд-876</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>User69</td><td><p>Здравствуйте,<br>
+<a href="https://bitbucket.org/anticensority/antizapret-vpn-container/src/master/" rel="noopener nofollow ugc">https://bitbucket.org/anticensority/antizapret-vpn-container/src/master/</a> здесь написано, что контейнер позволяет работать со всякими интересными зонами.<br>
+А «обычный» Antizapret VPN это поддерживает?<br>
+У меня не резолвятся flibusta.lib, nx.bit, например.</p></td><td>2021-02-10T13:28:11.693Z</td></tr><tr><td>ValdikSS</td><td><p>Да, Namecoin и EMCDNS-домены резолвятся также через обычный VPN АнтиЗапрета. На одном сервере были частичные проблемы с резолвингом (устранены 5 минут назад), а второй сервер успешно резолвит все протестированные домены.</p>
+<p>flibusta.lib указывает на неправильный IP-адрес больше года (<a href="http://flibusta.is/comment/3134236#comment-3134236">1</a>, <a href="http://flibusta.is/comment/3167782#comment-3167782">2</a>, <a href="http://flibusta.is/comment/3214612#comment-3214612">3</a>), nx.bit открывается.</p></td><td>2021-02-10T13:46:02.555Z</td></tr><tr><td>level001</td><td><p>Почему то у меня не резолвятся rutor.lib , nnm-club.lib ,rutracker.lib (через опенниковские днс всё норм).<br>
+Мало того сегодня перестал отвечать <a href="http://d3.ru" rel="noopener nofollow ugc">d3.ru</a></p></td><td>2021-02-12T11:54:16.827Z</td></tr><tr><td>ValdikSS</td><td><p>С d3 разбираюсь, возможно, нашли баг в резолвере knot-resolver. Другие посмотрю позже.<br>
+Временно выключен один VPN-сервер.</p></td><td>2021-02-12T13:50:30.838Z</td></tr><tr><td>ValdikSS</td><td><p>Как именно не резолвятся сторонние домены? Предоставьте вывод <code>dig nx.bit</code>, например.</p></td><td>2021-02-12T19:58:36.855Z</td></tr><tr><td>doxomo(doxomo3962)</td><td><p>А какие именно домены резолвятся через Антизапрет? Все OpenNIC-овские operated/peered, или как-то выборочно? Ниже актуальный списочек, на всякий.</p>
+<p>Operated:<br>
+.bbs<br>
+.chan<br>
+.cyb<br>
+.dyn<br>
+.epic<br>
+.geek<br>
+.gopher<br>
+.indy<br>
+.libre<br>
+.neo<br>
+.null<br>
+.o<br>
+.oss<br>
+.oz<br>
+.parody<br>
+.pirate</p>
+<p>Peered:<br>
+.bazar<br>
+.coin<br>
+.emc<br>
+.lib<br>
+.fur<br>
+.ku<br>
+.te<br>
+.ti<br>
+.uu</p>
+<p>Кстати, через ProstoVPN (который просто VPN) резолвятся все вышеуказанные домены, кроме .bit - он почему-то перестал. Через Антизапрет .bit резолвится, сейчас проверял.</p></td><td>2021-02-12T21:47:07.704Z</td></tr><tr><td>ValdikSS</td><td><p>Нет .epic, разве что.</p>
+<pre><code class="lang-auto">policy.todnames({'bbs.', 'chan.', 'cyb.', 'dyn.', 'geek.', 'gopher.',
+                    'indy.', 'libre.', 'neo.', 'null.', 'o.', 'oss.', 'oz.',
+                    'parody.', 'pirate.', 'free.', 'bazar.', 'coin.',
+                    'emc.', 'lib.', 'fur.', 'bit.', 'ku.', 'te.', 'ti.', 'uu.'
+                    }
+</code></pre></td><td>2021-02-12T21:54:59.765Z</td></tr><tr><td>level001</td><td><p>d3 работает ,и bit тоже . Все lib тоже работают кроме nnm-club.lib ,вылетает заглушка рт .<br>
+Не очень понятно как на нее попадает ,ведь их днс у меня нет совсем.<br>
+dig nx.bit</p>
+<p>; &lt;&lt;&gt;&gt; DiG 9.17.9 &lt;&lt;&gt;&gt; nx.bit<br>
+;; global options: +cmd<br>
+;; Got answer:<br>
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 42088<br>
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1</p>
+<p>;; OPT PSEUDOSECTION:<br>
+; EDNS: version: 0, flags:; udp: 4096<br>
+;; QUESTION SECTION:<br>
+;nx.bit.                                IN      A</p>
+<p>;; ANSWER SECTION:<br>
+nx.bit.                 83318   IN      A       178.248.244.15</p>
+<p>;; Query time: 1 msec<br>
+;; SERVER: 192.168.1.1#53(192.168.1.1) (UDP)<br>
+;; WHEN: Sat Feb 13 09:24:37 RTZ 2 (;; MSG SIZE  rcvd: 51</p>
+<p>C:\Program Files\ISC BIND 9\bin&gt;dig nnm-club.lib</p>
+<p>; &lt;&lt;&gt;&gt; DiG 9.17.9 &lt;&lt;&gt;&gt; nnm-club.lib<br>
+;; global options: +cmd<br>
+;; Got answer:<br>
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 47951<br>
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1</p>
+<p>;; OPT PSEUDOSECTION:<br>
+; EDNS: version: 0, flags:; udp: 4096<br>
+;; QUESTION SECTION:<br>
+;nnm-club.lib.                  IN      A</p>
+<p>;; ANSWER SECTION:<br>
+nnm-club.lib.           3499    IN      A       185.145.130.74</p>
+<p>;; Query time: 0 msec<br>
+;; SERVER: 192.168.1.1#53(192.168.1.1) (UDP)<br>
+;; WHEN: Sat Feb 13 09:27:36 RTZ 2 (;; MSG SIZE  rcvd: 57</p>
+<pre><code>C:\Program Files\ISC BIND 9\bin&gt;tracert nnm-club.lib
+</code></pre>
+<p>Не удается разрешить системное имя узла nnm-club.lib.</p></td><td>2021-02-13T06:41:30.406Z</td></tr><tr><td>ValdikSS</td><td><p>В данный момент Tier 1 и Tier 2 серверы OpenNIC не резолвят домены Namecoin. Например, <code>nx.bit</code> выдаёт NXDOMAIN на всех серверах, на которых я пробовал его резолвить.<br>
+Похоже, они убрали поддержку Namecoin: <a href="https://wiki.opennic.org/votings/drop_namecoin" class="inline-onebox">Should OpenNIC drop support for NameCoin [OpenNIC Wiki]</a><br>
+Не каждый Tier 2 сервер также резолвит EMCDNS.</p></td><td>2021-02-13T08:41:01.269Z</td></tr><tr><td>level001</td><td><p>Опять отвалилась lib . <img src="https://ntc.party/images/emoji/twitter/flushed.png?v=9" title=":flushed:" class="emoji" alt=":flushed:"><br>
+За 2 дня я уже раз 50 днс в роутере поменял.</p></td><td>2021-02-13T11:39:37.754Z</td></tr><tr><td>ValdikSS</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.nic.cz/knot/knot-resolver/-/issues/493#note_197415">
+  <header class="source">
+      <img src="резолвинг-lib-bit-и-тд-876/1b9ed5c9db3047a561e2ca4cbcbc8a1623700ed9.png" class="site-icon" data-dominant-color="EE5C28" width="32" height="32">
+
+      <a href="https://gitlab.nic.cz/knot/knot-resolver/-/issues/493#note_197415" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="https://ntc.party/uploads/default/original/2X/d/daee9eece684a345448510dac3d298aa09bf8d4b.svg" class="thumbnail onebox-avatar" data-dominant-color="">
+
+<h3><a href="https://gitlab.nic.cz/knot/knot-resolver/-/issues/493#note_197415" target="_blank" rel="noopener">Resolver stops working and returns SERVFAIL until restarted (#493) · Issues ·...</a></h3>
+
+  <p>Some time after normal operation, knot-resolver stops resolving any domains and returns SERVFAIL on all DNS queries. I have the following configuration:</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-02-13T12:35:59.836Z</td></tr><tr><td>doxomo(doxomo3962)</td><td><p>Вероятность наличия бага, конечно, есть, но вот что примечательно:</p>
+<ul>
+<li>полагаю, на ProstoVPN реализована та же схема резолвинга, что и на Антизапрете? При этом на ProstoVPN вообще не возникало подобных проблем ни разу (ну не считая траблов с .bit) - всё работало и работает, как часики. На Антизапрете же оно, видимо, работает ИНОГДА (я оттого и спросил, какие домены резолвятся - потому что не резолвились никакие. Вчера вот .lib вроде поработал чуток, и снова спёкся).<br>
+Может, стоит копнуть в этом направлении? Что такого есть в настройках ProstoVPN, чего нет в Антизапрете?</li>
+</ul>
+<p>Выхлопы dig с разницей в несколько сек (сперва ProstoVPN, затем Антизапрет):</p>
+<p>; &lt;&lt;&gt;&gt; DiG 9.10.3-P4-Ubuntu &lt;&lt;&gt;&gt; rutracker.lib <span class="mention">@192.168.102.1</span><br>
+;; global options: +cmd<br>
+;; Got answer:<br>
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 63696<br>
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1</p>
+<p>;; OPT PSEUDOSECTION:<br>
+; EDNS: version: 0, flags:; udp: 4096<br>
+;; QUESTION SECTION:<br>
+;rutracker.lib.			IN	A</p>
+<p>;; ANSWER SECTION:<br>
+rutracker.lib.		3473	IN	A	195.82.146.214</p>
+<p>;; Query time: 76 msec<br>
+;; SERVER: 192.168.102.1#53(192.168.102.1)<br>
+;; WHEN: Sat Feb 13 22:20:19 +05 2021<br>
+;; MSG SIZE  rcvd: 58</p>
+<hr>
+<p>; &lt;&lt;&gt;&gt; DiG 9.10.3-P4-Ubuntu &lt;&lt;&gt;&gt; rutracker.lib <span class="mention">@192.168.104.1</span><br>
+;; global options: +cmd<br>
+;; Got answer:<br>
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NXDOMAIN, id: 20486<br>
+;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1</p>
+<p>;; OPT PSEUDOSECTION:<br>
+; EDNS: version: 0, flags:; udp: 1232<br>
+;; QUESTION SECTION:<br>
+;rutracker.lib.			IN	A</p>
+<p>;; AUTHORITY SECTION:<br>
+.			86358	IN	SOA	<a href="http://a.root-servers.net" rel="noopener nofollow ugc">a.root-servers.net</a>. <a href="http://nstld.verisign-grs.com" rel="noopener nofollow ugc">nstld.verisign-grs.com</a>. 2021021300 1800 900 604800 86400</p>
+<p>;; Query time: 75 msec<br>
+;; SERVER: 192.168.104.1#53(192.168.104.1)<br>
+;; WHEN: Sat Feb 13 22:20:26 +05 2021<br>
+;; MSG SIZE  rcvd: 117</p>
+<p>P.S. Может, заодно уж и .epic в Антизапрет добавите?</p></td><td>2021-02-13T18:05:20.062Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="doxomo" data-post="12" data-topic="876">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/c4cdca/48.png" class="avatar"> doxomo:</div>
+<blockquote>
+<p>полагаю, на ProstoVPN реализована та же схема резолвинга, что и на Антизапрете?</p>
+</blockquote>
+</aside>
+<p>Нет, другая.</p>
+<p>Я знаю о наличии проблем в резолвинге на АнтиЗапрете. Не чиню и не трогаю, жду ответа от разработчиков knot-resolver, чтобы они посмотрели.</p></td><td>2021-02-13T19:53:07.747Z</td></tr><tr><td>ValdikSS</td><td><p>Проблема исправлена и не должна больше повторяться. Также в список была добавлена зона epic.</p></td><td>2021-02-14T16:00:35.483Z</td></tr><tr><td>level001</td><td><p><a href="http://btdig.com" rel="noopener nofollow ugc">btdig.com</a> не хочет .</p>
+<p>ps. Написал сообщение и начал отвечать .</p></td><td>2021-02-19T06:37:42.433Z</td></tr><tr><td>level001</td><td><p>Что-то опять lib не отвечает ни один.</p></td><td>2021-08-24T16:36:06.134Z</td></tr><tr><td>ValdikSS</td><td><p>Все три публичных резолвера, которые использовались на АнтиЗапрете,<br>
+перестали отвечать. Заменил их на работающие.</p></td><td>2021-08-24T16:56:02.000Z</td></tr><tr><td>level001</td><td><p>Спасибо, а то неделю периодически пробовал ,думал у меня глючит опять.</p></td><td>2021-08-24T17:20:19.785Z</td></tr><tr><td>level001</td><td><p>Похоже опять lib умерла</p></td><td>2022-04-16T10:54:59.740Z</td></tr><tr><td>ValdikSS</td><td><p>Обновил набор резолверов, должно работать.</p></td><td>2022-04-16T11:23:43.000Z</td></tr>
+    </table>
+      </body>
+    </html>

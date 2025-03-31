@@ -1,0 +1,97 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>entware-hosts-keenetic</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ivanixa333(Ivanixa333)</td><td><p>доброе утро у меня такая проблема я добавил сайты с айпишниками в файл host через командную строку роутера но когда я включаю opkg dns-override он перестает работать сайты добавленные host перестают открываться можно ли в entware как то добавит host файл или заставит работать системный host роутера</p></td><td>2025-01-13T10:02:29.736Z</td></tr><tr><td>bolvan</td><td><p>entware  специально патчится и собирается для /opt<br>
+проги из entware будут смотреть в /opt/etc/hosts, а не /etc/hosts<br>
+проги, не собранные для entware, будут смотреть /etc/hosts</p></td><td>2025-01-13T10:05:50.387Z</td></tr><tr><td>ivanixa333(Ivanixa333)</td><td><p>Благодарю Спасибо. Что подсказали. Всё работает</p></td><td>2025-01-13T11:34:56.955Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="bolvan" data-post="2" data-topic="14547">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>проги, не собранные для entware, будут смотреть /etc/hosts</p>
+</blockquote>
+</aside>
+<p>Если точнее, это делает системный DNS-резолвер,  а проги уже обращаются к нему.<br>
+А вот в какой файл будет смотреть системный резолвер, зависит от того, кто этот резолвер.</p>
+<p>Топикстартер отключил системный резолвер командой <code>opkg dns-override</code>. После этого системный dns-proxy освобождает 53 порт, чтобы туда мог встать AdguardHome или dnsmasq (или ещё какой резолвер) из Entware. А эти DNS-резолверы из Entware, в свою очередь, смотрят в энтварский <code>/opt/etc/hosts</code>.</p>
+<p>Таким образом, если бы топикстартер не отключал системный резолвер, то даже проги из Entware учитывали бы записи в <code>/etc/hosts</code>. Это легко проверить: достаточно создать запись в <code>/etc/hosts</code> командой <code>ip host my.comp 192.168.1.33</code>, а затем установить в Entware wget и дёрнуть этот домен</p>
+<pre><code class="lang-auto">~ # wget my.comp
+--2025-01-13 18:45:20--  http://my.comp/
+Resolving my.comp... 192.168.1.33
+</code></pre></td><td>2025-01-13T15:35:14.881Z</td></tr><tr><td>bolvan</td><td><p>Клиентская часть системного ресолвера находится в libc.<br>
+У entware glibc патчен на /opt. Все, что линковано на патченый glibc, будет искать в /opt/etc/hosts при вызове getaddrinfo<br>
+Но если в /opt/etc/resolv.conf  локалхост стоит, и там dnsmasq родной от прошивки, то он посмотрит /etc/hosts  и вернет результат оттуда</p></td><td>2025-01-13T15:59:22.683Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>/opt/bin/wget слинкован с /opt/lib/libc.so.6</p>
+<pre><code class="lang-auto"># ldd /opt/bin/wget
+        linux-vdso.so.1 (0x77404000)
+        libpcre2-8.so.0 =&gt; /opt/lib/libpcre2-8.so.0 (0x77329000)
+        libssl.so.3 =&gt; /opt/lib/libssl.so.3 (0x77286000)
+        libcrypto.so.3 =&gt; /opt/lib/libcrypto.so.3 (0x76f19000)
+        libdl.so.2 =&gt; /opt/lib/libdl.so.2 (0x76f05000)
+        libz.so.1 =&gt; /opt/lib/libz.so.1 (0x76ee0000)
+        libgcc_s.so.1 =&gt; /opt/lib/libgcc_s.so.1 (0x76ebc000)
+        libc.so.6 =&gt; /opt/lib/libc.so.6 (0x76d29000)
+        libpthread.so.0 =&gt; /opt/lib/libpthread.so.0 (0x76cfb000)
+        libatomic.so.1 =&gt; /opt/lib/libatomic.so.1 (0x76ce6000)
+        /opt/lib/ld.so.1 (0x773d2000)
+</code></pre>
+<p>Запись в /opt/etc/hosts есть</p>
+<pre><code class="lang-auto"># cat /opt/etc/hosts
+192.168.1.66 my.site
+</code></pre>
+<p>Но домен не резолвится</p>
+<pre><code class="lang-auto"># /opt/bin/wget my.site
+--2025-01-13 19:03:30--  http://my.site/
+wget: unable to resolve host address ‘my.site’
+</code></pre>
+<p>/opt/etc/resolv.conf вообще отсутствует</p>
+<p>То есть, всё равно используется родной прошивочный резолвер, а самостоятельно wget в /opt/etc/hosts не заглядывет.</p></td><td>2025-01-13T16:12:55.782Z</td></tr><tr><td>bolvan</td><td><p>Посмотрел исходники.<br>
+Действительно, ошибаюсь. В libc там запатчены passwd,group и некоторые другие.<br>
+resolv.conf и hosts запатчены только в dnsmasq, но не в libc.<br>
+таким образом проги будут использовать стандартные /etc/resolv.conf и /etc/hosts<br>
+Но если используется dnsmasq от entware, то он будет смотреть еще в /opt и возвращать ответы оттуда.</p>
+<pre><code class="lang-auto">-#define HOSTSFILE "/etc/hosts"
+-#define ETHERSFILE "/etc/ethers"
++#define HOSTSFILE "/opt/etc/hosts"
++#define ETHERSFILE "/opt/etc/ethers"
+-#      define RESOLVFILE "/etc/resolv.conf"
++#      define RESOLVFILE "/opt/etc/resolv.conf"
+</code></pre>
+<p>Вся эта котовасья идет из расчета , что root может быть readonly, а /etc/resolv.conf может быть линком на динамически генерируемый файл в /tmp.<br>
+То, что наверняка нужно модифицировать, уносится из /etc в /opt</p></td><td>2025-01-13T16:27:48.846Z</td></tr>
+    </table>
+      </body>
+    </html>

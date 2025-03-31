@@ -1,0 +1,238 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>release-v1202405130-7848</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><ul>
+<li><a href="https://www.bamsoftware.com/software/dnstt/#download">https://www.bamsoftware.com/software/dnstt/#download</a></li>
+<li><a href="https://www.bamsoftware.com/software/dnstt/dnstt-20240513.zip">dnstt-20240513.zip</a> (<a href="https://www.bamsoftware.com/software/dnstt/dnstt-20240513.zip.asc">sig</a>, <a href="https://www.bamsoftware.com/david/david.asc">key</a>)</li>
+<li><a href="https://repo.or.cz/dnstt.git/shortlog/refs/tags/v1.20240513.0">https://repo.or.cz/dnstt.git/shortlog/refs/tags/v1.20240513.0</a></li>
+<li><a href="https://repo.or.cz/dnstt.git/blob/v1.20240513.0:/CHANGELOG">CHANGELOG</a></li>
+</ul>
+<p>The purpose of this release is to upgrade <a href="https://github.com/refraction-networking/utls">uTLS</a> from v1.0.0 to v1.6.6 to get access to <a href="https://repo.or.cz/dnstt.git/blob/01100d2288c4c7a8d47c9d118c6f9599080b0568:/dnstt-client/utls.go#l25">newer TLS fingerprints</a>.</p>
+<p>You can now use <code>-utls random</code> to get a randomized fingerprint (randomized ciphersuites and extensions, not the same as any of the standard fingerprints, called <code>RandomizedALPN</code> internally by uTLS). A randomized fingerprint has worked well as the <a href="https://gitlab.torproject.org/tpo/applications/tor-browser-build/-/merge_requests/540">default for Snowflake</a> for some time now.</p>
+<p>The required minimum version of the Go compiler is now <a href="https://go.dev/doc/go1.21">go1.21</a>. It’s unfortunate to require such a recent compiler, but it is forced by dependencies. go1.21 is newer than what’s available by default in Debian stable (bookworm): you can install <a href="https://packages.debian.org/bookworm-backports/golang-1.21">golang-1.21</a> from bookworm-backports.</p>
+<p>The default weighted random distribution of TLS fingerprints has been updated to:</p>
+<blockquote>
+<p><code>4*random,3*Firefox_120,1*Firefox_105,3*Chrome_120,1*Chrome_102,1*iOS_14,1*iOS_13</code></p>
+</blockquote>
+<p>What this means is: add up all the numeric weights to get 14. Then there is a 4/14 chance of selecting <code>random</code>, 3/14 chance of selecting <code>Firefox_120</code>, 1/14 chance of selecting <code>Firefox_105</code>, and so on. You can specify your own weighted distribution using the <code>-utls</code> option.</p>
+<p>I did another round of TLS fingerprint compatibility tests, as in <a href="https://ntc.party/t/testing-branch-for-utls-support/1593/2" class="inline-onebox">Testing branch for uTLS support - #2 by tango</a>. All the fingerprints are compatible with dns.google and 1.1.1.1 in both DoH and DoT modes, except for some of the oldest Chrome fingerprints.</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>fingerprint</th>
+<th><code>-doh dns.google</code></th>
+<th><code>-dot dns.google</code></th>
+<th><code>-doh 1.1.1.1</code></th>
+<th><code>-dot 1.1.1.1</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>none</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>random</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Firefox_55</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Firefox_56</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Firefox_63</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Firefox_65</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Firefox_99</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Firefox_102</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Firefox_105</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Firefox_120</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Chrome_58</td>
+<td>ERROR</td>
+<td>ERROR</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Chrome_62</td>
+<td>ERROR</td>
+<td>ERROR</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Chrome_70</td>
+<td>ERROR</td>
+<td>ERROR</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Chrome_72</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Chrome_83</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Chrome_87</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Chrome_96</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Chrome_100</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Chrome_102</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>Chrome_120</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>iOS_11_1</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>iOS_12_1</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>iOS_13</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>iOS_14</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+<td>ok</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2024-05-13T20:33:53.493Z</td></tr>
+    </table>
+      </body>
+    </html>

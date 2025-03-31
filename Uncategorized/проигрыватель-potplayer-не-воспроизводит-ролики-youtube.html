@@ -1,0 +1,429 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проигрыватель-potplayer-не-воспроизводит-ролики-youtube</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>vas</td><td><p>Сразу извинюсь за вопрос по личной проблеме, возможно, перегружающий тему, только самостоятельный поиск решения ничего не дал, поэтому обращаюсь к этому форуму, который мне помогал ранее и неоднократно.<br>
+Уже давно я пользуюсь для просмотра, а чаще для прослушивания роликов Youtube<br>
+проигрывателем Potplayer. Это очень удобно.<br>
+После истории с "замедлением youtube " проблема решилась установкой последней<br>
+версии GDPI 0.2.3rc1, которая использовалась с настройками по умолчанию. Potplayer для воспроизведения Youtube заработал почти идеально.<br>
+12 сентября Potplayer перестал грузить ролики с использованием GDPI 0.2.3rc1 с<br>
+настройками по умолчанию. Только считывал название ролика, продолжительность, загрузка и воспроизведение не удавались.<br>
+Проблема открытия сайта Youtube и воспроизведения роликов непосредственно в<br>
+браузере была решена изменением параметра с -9 на -7. Только Potplayer с этим<br>
+параметром GDPI не заработал. Даже не считывает параметры ролика.<br>
+Попытки применить другие предлагаемые варианты параметров результата не дали.<br>
+Возвращение параметра -9, а также применение параметров -8, -6 оживляло работу<br>
+Potplayer только без воспроизведения роликов. Как я понял эти параметры предполагают работу т.н wrong-seq, которую заблокировали 12.09.<br>
+Я не специалист по сетевым настройкам, обычный пользователь.<br>
+В наличии старый ноут HP6730s. Поэтому - Windows 7, поэтому браузер FF 115.15 ESR.<br>
+Столичный федеральный провайдер.<br>
+Может кто-то сможет помочь или знает как решить проблему с воспроизведением<br>
+Youtube в Potplayer путем изменения его настроек, если такое вообще возможно?</p></td><td>2024-09-14T16:01:13.114Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>7ой - это конфиг с wrong-chksum. Странно, что у вас браузер с ним работает…<br>
+А с таким конфигом:  <code>goodbyedpi.exe -f 2 -e 2 --reverse-frag --max-payload --dns-addr 77.88.8.8 --dns-port 1253 --dnsv6-addr 2a02:6b8::feed:0ff --dnsv6-port 1253 --blacklist ..\russia-blacklist.txt --blacklist ..\russia-youtube.txt</code> как работает?</p></td><td>2024-09-14T17:06:09.493Z</td></tr><tr><td>vas</td><td><p>у меня  не работали “1_russia_blacklist_dnsredir.cmd” и “service_install_russia_blacklist_dnsredir.cmd”  и я ими не пользовался.<br>
+использовал “1_russia_blacklist.cmd” и “service_install_russia_blacklist.cmd” и в них менял настройку с - 9 на - 7 по рекомендации на этом форуме.<br>
+но параметр " <code>-f 2 -e 2 --reverse-frag --max-payload</code>"  не пробовал в используемых .cmd, т.к такой комбинации не встречал.<br>
+она подойдёт для  “service_install_russia_blacklist.cmd” ?</p></td><td>2024-09-14T18:15:40.757Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Подойдет. Только вся строка целиком будет выглядеть так:<br>
+<code>sc create "GoodbyeDPI" binPath= "\"%CD%\%_arch%\goodbyedpi.exe\" -f 2 -e 2 --reverse-frag --max-payload --blacklist \"%CD%\russia-blacklist.txt\" --blacklist \"%CD%\russia-youtube.txt\"" start= "auto"</code></p></td><td>2024-09-14T18:20:03.386Z</td></tr><tr><td>vas</td><td><p>спасибо. я уже представляю как это сделать. сейчас попробую.</p></td><td>2024-09-14T18:23:02.400Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Вначале только service_remove.cmd от админа запустите на всякий</p></td><td>2024-09-14T18:24:05.507Z</td></tr><tr><td>vas</td><td><p>конечно.<br>
+только у меня файл “1_russia_blacklist.cmd” выглядит вот так:<br>
+<span class="mention">@ECHO</span> OFF<br>
+PUSHD “%~dp0”<br>
+set _arch=x86<br>
+IF “%PROCESSOR_ARCHITECTURE%”==“AMD64” (set _arch=x86_64)<br>
+IF DEFINED PROCESSOR_ARCHITEW6432 (set _arch=x86_64)<br>
+PUSHD “%_arch%”</p>
+<p>start “” goodbyedpi.exe -7 --blacklist …\russia-blacklist.txt --blacklist …\russia-youtube.txt</p>
+<p>POPD<br>
+POPD</p>
+<p>вопрос: куда вставить (вместо чего) предлагаемую строку?</p>
+<p>понимаю что -7 можно заменить на <code>-f 2 -e 2 --reverse-frag --max-payload</code>, а вот всю строку втавить, чтобы не сломать - не очень понимаю. можете пояснить?</p></td><td>2024-09-14T18:32:06.709Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Смотрите. <code>start “”</code> - это запускает программу в отдельном окне<br>
+goodbyedpi.exe - запускаемый exe-ник<br>
+<code>-7 --blacklist …\russia-blacklist.txt --blacklist …\russia-youtube.txt</code> - параметры, с которыми запускается exe-ник. Т.е. менять всегда нужно лишь параметры, остальное не трогать.<br>
+В вашем случае <code>-7</code> меняете на  <code>-f 2 -e 2 --reverse-frag --max-payload</code><br>
+<code>start “” goodbyedpi.exe  -f 2 -e 2 --reverse-frag --max-payload --blacklist …\russia-blacklist.txt --blacklist …\russia-youtube.txt</code><br>
+Так чуть понятнее?</p></td><td>2024-09-14T18:35:05.289Z</td></tr><tr><td>vas</td><td><p>да. спасибо. понял. попробую.</p></td><td>2024-09-14T18:36:15.730Z</td></tr><tr><td>vas</td><td><p>К сожалению Potplayer не заработал с этими настройками. Повёл себя так же как я описывал в начальном посте после смены с -9 на -7.<br>
+а браузер открыл и сайт Youtube и воспроизвёл ролики, даже стрим.</p></td><td>2024-09-14T18:52:05.911Z</td></tr><tr><td>vas</td><td><p>К сожалению Potplayer не заработал с этими настройками. Повёл себя так же как я описывал в начальном посте после смены с -9 на -7.<br>
+а браузер открыл и сайт Youtube и воспроизвёл ролики, даже стрим.</p></td><td>2024-09-14T19:02:33.856Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Интересно… Ну из того, что приходит в голову:<br>
+может, у вас на уровне системы какой-то прокси прописан, нет?<br>
+в файле hosts ничего не меняли?<br>
+или может проблема в самом potplayer? фаерволл/антивирус его не блокирует?<br>
+попробуйте обновить скрипты ютуба в самом плеере: настройки (F5) -Расширения - отметьте все галками  - обновить<br>
+Если будут ошибки, возможно, плеер что-то блокирует</p></td><td>2024-09-14T19:05:39.621Z</td></tr><tr><td>vas</td><td><aside class="quote no-group" data-username="TesterTi" data-post="12" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>может, у вас на уровне системы какой-то прокси прописан, нет?</p>
+</blockquote>
+</aside>
+<ul>
+<li>нет, вроде, не прописан.</li>
+</ul>
+<aside class="quote no-group" data-username="TesterTi" data-post="12" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>фаерволл/антивирус его не блокирует?</p>
+</blockquote>
+</aside>
+<ul>
+<li>не блокирует. Ссылка в плейлист potplayer’ а добавляется, только без заголовка ролика. только в виде “watch”.</li>
+</ul>
+<aside class="quote no-group" data-username="TesterTi" data-post="12" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>попробуйте обновить скрипты ютуба в самом плеере</p>
+</blockquote>
+</aside>
+<ul>
+<li>ни один из скриптов не нуждается в обновлении. Принудительно обновить не получается, т.е установить галку и нажав “обновление”</li>
+</ul>
+<aside class="quote no-group" data-username="TesterTi" data-post="12" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>может проблема в самом potplayer?</p>
+</blockquote>
+</aside>
+<ul>
+<li>да, думаю, что именно в нём. Точнее сказать, это не проблема проигрывателя, а созданная проблема извне, с которой он уже не может справиться со своими настройками, во всяком случае у меня . Смущает то, что до 12.09 он работал хорошо с настройками GDPI 0.2.3rc1 по умолчанию.</li>
+</ul></td><td>2024-09-14T19:27:06.932Z</td></tr><tr><td>vas</td><td><p>Единственное, что я менял - это файл “russia-youtube.txt”.<br>
+Он у меня сейчас такой:<br>
+<a class="attachment" href="проигрыватель-potplayer-не-воспроизводит-ролики-youtube/q11kzPNLaCc4fvXnyVLypvcltq1.txt">russia-youtube.txt</a> (476 байтов)</p></td><td>2024-09-14T19:41:10.845Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><details>
+<summary>
+Вот такого достаточно</summary>
+<p><a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a><br>
+youtu.be<br>
+yt.be<br>
+<a href="http://ytimg.com" rel="noopener nofollow ugc">ytimg.com</a><br>
+<a href="http://ggpht.com" rel="noopener nofollow ugc">ggpht.com</a><br>
+<a href="http://gstatic.com" rel="noopener nofollow ugc">gstatic.com</a><br>
+<a href="http://gvt1.com" rel="noopener nofollow ugc">gvt1.com</a><br>
+<a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a><br>
+<a href="http://youtube-nocookie.com" rel="noopener nofollow ugc">youtube-nocookie.com</a><br>
+<a href="http://withyoutube.com" rel="noopener nofollow ugc">withyoutube.com</a><br>
+<a href="http://nhacmp3youtube.com" rel="noopener nofollow ugc">nhacmp3youtube.com</a><br>
+<a href="http://google.com" rel="noopener nofollow ugc">google.com</a><br>
+<a href="http://google.ru" rel="noopener nofollow ugc">google.ru</a><br>
+goo.gl<br>
+<a href="http://googleusercontent.com" rel="noopener nofollow ugc">googleusercontent.com</a><br>
+<a href="http://googleapis.com" rel="noopener nofollow ugc">googleapis.com</a><br>
+<a href="http://googlesyndication.com" rel="noopener nofollow ugc">googlesyndication.com</a></p>
+</details>
+<p>Но не думаю, что это из-за блэклиста. А ссылки для потплеера вы как получаете? Через расширение? Может, ссылки битые?</p></td><td>2024-09-14T19:50:41.171Z</td></tr><tr><td>vas</td><td><p>блэклист исправлю, согласно вашему списку.</p>
+<aside class="quote no-group" data-username="TesterTi" data-post="15" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>А ссылки для потплеера вы как получаете? Через расширение?</p>
+</blockquote>
+</aside>
+<ul>
+<li>да, в основном через расширение. Но пробовал и напрямую через меню potplayer. Результат тот же.</li>
+</ul></td><td>2024-09-14T19:58:51.886Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>У вас так же выглядит? <code>potplayer:https://www.youtube.com/watch?v=xxx</code><br>
+(CTRL+E в плейлисте)</p></td><td>2024-09-14T20:01:40.064Z</td></tr><tr><td>vas</td><td><p>нет. ссылка выглядит <code>https://www.youtube.com/watch?v=xxx</code>.<br>
+Дело в том, что я пользуюсь расширением PotPlayer YouTube Shortcut старой версии 1.21<br>
+А последующие версии не открывают ссылки в виде <code>potplayer:https://www.youtube.com/watch?v=xxx</code>  в проигрывателе, потому что я пользуюсь браузером FF 115.15 ESR - он считается устаревшим для последующих версий расширения PotPlayer YouTube Shortcut. Это был мой опыт использования этого расширения.</p></td><td>2024-09-14T20:14:52.727Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Все чудесатее и чудесатее) Т.к.  у меня тоже FF 115.15 ESR и последняя версия PotPlayer YouTube Shortcut (1.24). Все работает. А сам PotPlayer какой у вас версии?</p></td><td>2024-09-14T20:24:24.771Z</td></tr><tr><td>vas</td><td><p>Может я и не прав сейчас.<br>
+Когда вышла следующая версия  PotPlayer YouTube Shortcut 1.22, у меня не сработало воспрозведение в PotPlayer и я вернулся на предыдущую 1.21. И так на ней и остаюсь до сих пор, хотя сам плеер последней версии.<br>
+Я попробовал добавить <code>potplayer:</code> перед ссылкой - плеер среагировал побыстрее, но ролик не завёлся, ссылка в плейлисте отразилась как “watch” потом вылезло стандартное окно "“Произошла ошибка воспроизведения. Сервер перегружен или ошибка ввода адреса”</p></td><td>2024-09-14T20:28:21.810Z</td></tr><tr><td>vas</td><td><p>Надо же…я рад что у Вас работает.<br>
+Попробую обновить версию расширения до 1.24. Но вряд ли поможет…<br>
+Ведь, если я добавляю ссылку напрямую через меню - ролик всё равно не воспроизводится.</p></td><td>2024-09-14T20:35:03.989Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>А сам плеер-то у вас какой версии? Вы так и не сказали. У меня <a href="https://iimg.su/i/jSRk5" rel="noopener nofollow ugc"><img src="проигрыватель-potplayer-не-воспроизводит-ролики-youtube/b2ef3ad620ae0a720805fdbec450409521c2a65d.png" data-base62-sha1="pwVxjkpML9x18Yatz9uPuMY1OAB" width="500" height="295"></a><br>
+Может, в этом дело?</p></td><td>2024-09-14T20:38:05.593Z</td></tr><tr><td>vas</td><td><p>Я не знаю как вставить здесь похожую картинку, но у меня версия плеера поновее 240827(1.7.223318) от 24 авг 2024</p></td><td>2024-09-14T20:43:31.929Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Нет, это я уже явный бред несу, причем тут potplayer, у вас же недавно все работало…<br>
+Если вам нужен именно potplayer, то попробуйте вместо gdpi последнюю версию zapret <a href="https://ntc.party/t/%D0%BF%D0%B5%D1%80%D0%B5%D1%87%D0%B8%D1%82%D0%B0%D0%BB-%D0%BA%D1%83%D1%87%D1%83-%D0%B3%D0%B0%D0%B9%D0%B4%D0%BE%D0%B2-%D0%BD%D0%B8%D1%87%D0%B5%D0%B3%D0%BE-%D0%BD%D0%B5-%D0%BF%D0%BE%D0%BC%D0%BE%D0%B3%D0%B0%D0%B5%D1%82-%D0%B8-%D0%BD%D0%B5-%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%D0%B5%D1%82/8601/50" class="inline-onebox">Перечитал кучу гайдов, ничего не помогает и не работает - #50 by TesterTi</a><br>
+Если с дефолтным конфигом не выйдет, то возьмите отсюда<br>
+<a href="https://ntc.party/t/%D0%B5%D1%81%D0%BB%D0%B8-%D1%83-%D0%B2%D0%B0%D1%81-%D1%81%D0%B5%D0%B3%D0%BE%D0%B4%D0%BD%D1%8F-%D0%BF%D0%B5%D1%80%D0%B5%D1%81%D1%82%D0%B0%D0%BB%D0%B8-%D0%B3%D1%80%D1%83%D0%B7%D0%B8%D1%82%D1%8C%D1%81%D1%8F-%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE-%D0%BD%D0%B0-youtube-%D0%B2%D0%B0%D0%BC-%D1%81%D1%8E%D0%B4%D0%B0/10007/530" class="inline-onebox">Если у вас сегодня перестали грузиться видео на YouTube - вам сюда - #530 by Ori</a><br>
+Самый крайний случай <a href="https://ntc.party/t/%D0%BF%D0%BE%D0%B4%D0%B1%D0%BE%D1%80-%D1%80%D0%B0%D0%B1%D0%BE%D1%87%D0%B5%D0%B3%D0%BE-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D0%B0-%D0%B4%D0%BB%D1%8F-ggc-%D1%8E%D1%82%D1%83%D0%B1%D0%B0-%D1%87%D0%B5%D1%80%D0%B5%D0%B7-blockcheck">https://ntc.party/t/подбор-рабочего-конфига-для-ggc-ютуба-через-blockcheck</a><br>
+Ну или попробуйте с gdpi через другие плееры - вдруг там не будет такой проблемы</p></td><td>2024-09-14T20:50:00.220Z</td></tr><tr><td>vas</td><td><p>Спасибо за поддержку и советы.<br>
+Попробую, но уже завтра.<br>
+Да, potplayer лучше всего мне подошёл, учитывая мой старый ноут.</p></td><td>2024-09-14T20:58:22.170Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>Пожалуйста, удачи!<br>
+UPD лучше попробуйте завтра новую сборку gdpi <a href="https://github.com/ValdikSS/GoodbyeDPI/releases/download/0.2.3rc2/goodbyedpi-0.2.3rc3.zip" rel="noopener nofollow ugc">https://github.com/ValdikSS/GoodbyeDPI/releases/download/0.2.3rc2/goodbyedpi-0.2.3rc3.zip</a></p></td><td>2024-09-14T21:08:28.177Z</td></tr><tr><td>Ori</td><td><p>Я так понимаю, что potplayer сам делает запрос, в отличии от большинства других плееров, которые используют yt-dlp. Наверное, проблема в нем.<br>
+Я глянул чё там в файле <code>\PotPlayer\Extension\Media\UrlList\MediaUrlList - YouTube.as</code>, увидел вот такую строчку:</p>
+<pre><code class="lang-auto">item["url"] = "http://www.youtube.com/watch?v=" + vid;
+</code></pre>
+<p>Запрос отправляется по http. Возможно в этом проблема?<br>
+Аналогично, в файле <code>\PotPlayer\Extension\Media\PlayParse\MediaPlayParse - YouTube.as</code> присутствует вот такое чудо:</p>
+<pre><code class="lang-auto">url = "http" + YOUTUBE_URL + "v=" + id;
+</code></pre>
+<p>и опять вот такое:</p>
+<pre><code class="lang-auto">string url = "http://www.youtube.com/watch?v=" + id;
+</code></pre>
+<p>Попробуй из гудбая убрать опцию -f 2, чтобы не обрабатывать http-трафик.</p>
+<p>Не получилось? Попробуй исправить http на https в файлах и посмотреть что будет.</p>
+<p>Если не получится и это, либо используй mpc-hc/mpv или другой плеер, который опирается на yt-dlp. Либо ищи как подцепить yt-dlp к potplayer’у. Либо ищи какие-то обновленные скрипты. Либо проблема где-то ещё.</p></td><td>2024-09-14T21:27:41.810Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><aside class="quote no-group" data-username="Ori" data-post="27" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Запрос отправляется по http. Возможно в этом проблема?</p>
+</blockquote>
+</aside>
+<p>Возможно. Но как тогда у меня работает? И сама ссылка в плеере начинается с https</p></td><td>2024-09-14T21:38:26.904Z</td></tr><tr><td>Ori</td><td><p>Хз. Возможно его провайдер блочит сам youtube, а у тебя только googlevideo? И http запрос не проходит.</p>
+<p>Ну или просто в браузере ему подсовываются множество серверов, а в потплеере только нерабочий. Это уже будет проблематичнее. Простейший способо проверить - через mpc-hc + yt-dlp. Если заведется - проблема в кривом запросе от потплеера. Если нет - то в серверах.</p>
+<p>Там вроде гудбай обновили, возможно заработает потплеер.</p></td><td>2024-09-14T21:39:41.018Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><p>У меня и сам ютуб тоже блочится. Вот скорее второе</p></td><td>2024-09-14T21:40:21.727Z</td></tr><tr><td>vas</td><td><aside class="quote no-group" data-username="TesterTi" data-post="26" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>UPD лучше попробуйте завтра новую сборку gdpi</p>
+</blockquote>
+</aside>
+<ul>
+<li>спасибо. это очень интересно. обязательно попробую.</li>
+</ul>
+<aside class="quote no-group" data-username="TesterTi" data-post="24" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/testerti/48/5423_2.png" class="avatar"> TesterTi:</div>
+<blockquote>
+<p>попробуйте вместо gdpi последнюю версию zapret</p>
+</blockquote>
+</aside>
+<ul>
+<li>попробовал с настройками по умолчанию. Реакция potplayer оказалась быстрее.<br>
+ссылка добавилась шустро, прочитался заголовок. но ролик не завёлся - бесконечно крутится кружок воспроизведения. В общем такое поведение potplayer как и с  gdpi с настрокой -9, только реакция медленее.<br>
+Обратил внимание, что при запуске ролика в potplayer не “подцепляются”  фильтры.<br>
+Обычно они сразу появлялись. Может в этом дело…</li>
+</ul></td><td>2024-09-14T21:46:27.561Z</td></tr><tr><td>Ori</td><td><p>Если фильтры не появились, значит всё застопорилось ещё на этапе сплиттера. Значит ссылка не приходит. Ну или приходит кривая и сплиттер не может извлечь видео/аудиопотоки. Метадата отдельно тянется.</p>
+<p>Ещё можно попоробовать <code>googleapis.com</code> в блеклист добавить, если нет. Там какие-то запросы к нему идут, может он заблочен. А хотя это уже рекомендовали…</p></td><td>2024-09-14T21:48:02.302Z</td></tr><tr><td>vas</td><td><aside class="quote no-group" data-username="Ori" data-post="32" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Если фильтры не появились, значит всё застопорилось ещё на этапе сплиттера. Значит ссылка не приходит. Ну или приходит кривая и сплиттер не может</p>
+</blockquote>
+</aside>
+<ul>
+<li>выглядит вот так:</li>
+<li></li>
+</ul>
+<p><img src="проигрыватель-potplayer-не-воспроизводит-ролики-youtube/1d8aa13f8325aef0d3fbd3d632787807e6125f01.png" alt="PTPL" data-base62-sha1="4dkRiZVOtNxJh9BtG3DehJblMHL" width="655" height="370"><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="проигрыватель-potplayer-не-воспроизводит-ролики-youtube/da3578f9af89991a607218992647993fa13102fd.png" data-download-href="https://ntc.party/uploads/default/da3578f9af89991a607218992647993fa13102fd" title="PTPL2"><img src="проигрыватель-potplayer-не-воспроизводит-ролики-youtube/da3578f9af89991a607218992647993fa13102fd.png" alt="PTPL2" data-base62-sha1="v8mEu5AAGjbt5oxH3SxprxkLHTn" width="690" height="485" data-dominant-color="5C5B5A"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">PTPL2</span><span class="informations">829×583 21.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<aside class="quote no-group" data-username="Ori" data-post="32" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Ещё можно попоробовать <code>googleapis.com</code> в блеклист добавить</p>
+</blockquote>
+</aside>
+<ul>
+<li>в “russia-youtube.txt”  есть такое.</li>
+</ul></td><td>2024-09-14T22:00:47.044Z</td></tr><tr><td>Ori</td><td><p>Попробуй mpchc+ytdlp. Просто чтобы понять куда копать.<br>
+Вот <a href="https://github.com/clsid2/mpc-hc/releases/" rel="noopener nofollow ugc">отсюда</a> берешь mpc-hc, zip архив без установки. Вот <a href="https://github.com/yt-dlp/yt-dlp/releases" rel="noopener nofollow ugc">отсюда</a> exe’шник для yt-dlp. Кладешь его рядом с mpc-hc.exe. Проверяешь чтобы в настройках на вкладке advanced/расширенные параметр UseYDL стоял в true/верно. Пробуешь открыть видос.</p></td><td>2024-09-14T22:05:37.527Z</td></tr><tr><td>vas</td><td><p>Ладно. Только уже не сейчас.<br>
+Завтра попробую новую версию GDPI сначала.<br>
+Может имеет смысл переустановить potplayer, как вариант.<br>
+Спокойной ночи всем …<br>
+Очень благодарен за поддержку и советы.</p></td><td>2024-09-14T22:13:13.375Z</td></tr><tr><td>meadow_seed</td><td><p>Пользуюсь портативной сборкой PotPlayer от SamLab <a href="https://samlab.ws/soft/potplayer" class="inline-onebox" rel="noopener nofollow ugc">SamLab.ws - PotPlayer SamLab Edition 1.7.22319 Final - SamLab.ws Рекомендует!</a><br>
+Парсер ютуба беру от автора сборки 7sh3 <a href="https://forum.ru-board.com/topic.cgi?forum=5&amp;topic=51115&amp;start=5&amp;limit=1&amp;m=1#1" class="inline-onebox" rel="noopener nofollow ugc">Daum PotPlayer (часть 11) - [6] :: Программы :: Компьютерный форум Ru.Board</a> <a href="https://disk.yandex.ru/d/ZSIs0iN0hlLuNg" class="inline-onebox" rel="noopener nofollow ugc">!YouTubeParse — Яндекс&nbsp;Диск</a><br>
+На новой версии GoodbyeDPI с версией для ютуба заработало</p></td><td>2024-09-15T04:11:02.885Z</td></tr><tr><td>ani917(ani)</td><td><p>на варпе таких проблем нет</p></td><td>2024-09-15T05:37:55.848Z</td></tr><tr><td>vas</td><td><p>Новая версия GDPI 0.2.3rc3 решила проблему с воспроизведением Youtube в Potplayer.<br>
+Всё отлично. Спасибо всем. Тему можно покамест закрыть.</p></td><td>2024-09-15T07:50:24.926Z</td></tr><tr><td>vas</td><td><p>Добрый день.<br>
+Снова прошу о помощи у тех кто использует Potplayer для просмотра или прослушивания Youtube.<br>
+Сегодня 22.11.24 перестали открываться ссылки Youtube в Potplayer.<br>
+Точнее сказать ссылки корректно транслируются в Potplayer, но проигрывание не происходит. Попытка соединения заканчивается сообщением “произошла ошибка или сервер перегружен”.<br>
+Заметил что не подхватываются фильтры во время соединения.<br>
+Использую версии YTDisBystro (самую первую) и YTDisBystro 2.3 (при запуске preset_russia_zl)<br>
+У меня Windows 7.Potplayer версия 240827</p></td><td>2024-11-22T14:32:52.002Z</td></tr><tr><td>1pa4vel(Павел)</td><td><p>Здравствуйте<br>
+У меня похожая проблема<br>
+Это началось пару дней назад, сначала не могли воспроизвестись только что добавленные видео ютуба в плейлист - решил я это перемещая его повыше в плейлисте, сейчас это не работает полностью<br>
+PotPlayer последней версии, переустанавливал, скачивал старые версии - результат такой же<br>
+Все по стандарту<br>
+Беларусь если что</p>
+<p>Также прикладываю видео того, как это происходит:<br>
+Оно открывается, быстро переключается между разрешением и выходит с ошибкой<br>
+Только с ютубом</p>
+<p>Windows 8.1</p>
+<p><a class="attachment" href="проигрыватель-potplayer-не-воспроизводит-ролики-youtube/mACQeCcGcUzzyj20ZNjk2lED1nY.wmv">Video_2024-11-22_193602.wmv</a> (544,7 КБ)</p></td><td>2024-11-22T16:47:47.820Z</td></tr><tr><td>vas</td><td><aside class="quote no-group" data-username="1pa4vel" data-post="40" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/1/b2d939/48.png" class="avatar"> 1pa4vel:</div>
+<blockquote>
+<p>быстро переключается между разрешением и выходит с ошибкой<br>
+Только с ютубом</p>
+</blockquote>
+</aside>
+<p>Да, все так же и у меня, как у Вас на видео. Спасибо за информацию.</p>
+<aside class="quote no-group" data-username="1pa4vel" data-post="40" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/1/b2d939/48.png" class="avatar"> 1pa4vel:</div>
+<blockquote>
+<p>Беларусь если что</p>
+</blockquote>
+</aside>
+<p>московский крупный провайдер.<br>
+Win 7</p>
+<p>У меня предпоследняя версия Potplayer , но это, похоже, роли не играет.<br>
+Началось сегодня. Чуть раньше стали появлятся эти проблемы, но решались простыми способами. А сегодня уже совсем конкретно перестал работать.<br>
+Слабо надеюсь, что это проблема взаимодействия PotPlayer  и YT и может стоит подождать. Такое случалось, правда, до всяких там “блокировок” и “замедлений”<br>
+Если Вы уже пытались переустанавливать PotPlayer, то, очевидно, файл парсера YT в PotPlayer  обновлялся, а результата не дало.<br>
+Если у Вас появятся изменения буду благодарен сообщению.</p></td><td>2024-11-22T17:13:52.739Z</td></tr><tr><td>ani917(ani)</td><td><p>aeza + potplayer + ytdlp<br>
+видео начало проигрываться, но думало с минуту<br>
+в браузере же просто медленно грузит</p></td><td>2024-11-23T14:42:34.375Z</td></tr><tr><td>pdi77</td><td><p>Вероятнее всего что-то в ютубе обновили, и парсер стандартный не работает, нужно ждать обновления. В данный момент у меня ролики открываются с этим парсером <a href="https://github.com/Alexey71/PotPlayer-SponsorBlock" class="inline-onebox" rel="noopener nofollow ugc">GitHub - Alexey71/PotPlayer-SponsorBlock: Modified version of the default PotPlayer YouTube extension that adds SponsorBlock support.</a></p></td><td>2024-11-24T10:46:23.241Z</td></tr><tr><td>vas</td><td><p>Большое спасибо за рекомендацию!<br>
+Заменил парсеры по инструкции, PotPlayer стал воспроизводить ролики.</p></td><td>2024-11-24T11:22:29.882Z</td></tr><tr><td>1pa4vel(Павел)</td><td><p>Заработало!<br>
+Большое спасибо за помощь <img src="https://ntc.party/images/emoji/twitter/pray.png?v=12" title=":pray:" class="emoji" alt=":pray:" loading="lazy" width="20" height="20"></p></td><td>2024-11-24T12:16:06.172Z</td></tr><tr><td>TikTak(TikTak)</td><td><p><a class="mention" href="/u/1pa4vel">@1pa4vel</a> <a class="mention" href="/u/vas">@vas</a><br>
+А это какую то определённую версию пот-плеера надо? у меня на вин 7 версия 241015(1.7.22347) закинул эти 2 файла в C:\Program Files\DAUM\PotPlayer\Extension\Media\PlayParse<br>
+и тут же  консоль с ошибками вываливается(<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="проигрыватель-potplayer-не-воспроизводит-ролики-youtube/282ca9036518acdca07680134c1357d34f8dfbbb.png" data-download-href="https://ntc.party/uploads/default/282ca9036518acdca07680134c1357d34f8dfbbb" title="pot"><img src="проигрыватель-potplayer-не-воспроизводит-ролики-youtube/282ca9036518acdca07680134c1357d34f8dfbbb.png" alt="pot" data-base62-sha1="5JoMxmpYHtJUXoDewXPNdtZVSfp" width="585" height="500" data-dominant-color="252526"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">pot</span><span class="informations">664×567 21.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-11-25T00:53:07.602Z</td></tr><tr><td>1pa4vel(Павел)</td><td><p>Так же, последняя версия - все работает<br>
+Но это скорее всего у вас уже семерка шалит</p>
+<p>Дайте ей отдохнуть <img src="https://ntc.party/images/emoji/twitter/headstone.png?v=12" title=":headstone:" class="emoji" alt=":headstone:" loading="lazy" width="20" height="20"></p></td><td>2024-11-25T06:53:47.002Z</td></tr><tr><td>TikTak(TikTak)</td><td><p>Возможно и семёрка, но так то она у меня довольно стабильная)<br>
+В общем, подошёл другой парсер с руборда, который " от greeple"<br>
+<a href="https://forum.ru-board.com/topic.cgi?forum=5&amp;topic=51508&amp;start=140#21" class="onebox" target="_blank" rel="noopener nofollow ugc">https://forum.ru-board.com/topic.cgi?forum=5&amp;topic=51508&amp;start=140#21</a></p>
+<p>0фициальной версии корейского разработчика пока не наблюдается. а ютуб что-то мутит опять :\</p></td><td>2024-11-25T07:12:01.756Z</td></tr><tr><td>vas</td><td><p>Windows 7х64.Potplayer версия 240827 для win7х64<br>
+Судя по сообщениям на руборде с парсерами плеера просто чехарда началась.<br>
+Становится всё более очевидным, что это проблема взаимодействия PotPlayer и YT.<br>
+Спасибо за еще одну рекомендацию варианта парсера.<br>
+Наверно, мне повезло с первого раза по рекомендации <a href="https://ntc.party/u/pdi77">pdi77</a><br>
+Хорошо, что есть еще…</p></td><td>2024-11-25T08:37:13.894Z</td></tr><tr><td>meadow_seed</td><td><p>парсер по ссылке 7sh3 тоже обновился <a href="https://disk.yandex.ru/d/ZSIs0iN0hlLuNg" class="inline-onebox" rel="noopener nofollow ugc">!YouTubeParse — Яндекс&nbsp;Диск</a></p></td><td>2024-11-25T11:35:32.328Z</td></tr><tr><td>1pa4vel(Павел)</td><td><p>Стандартный парсер обновите в приложении - оно доступно<br>
+И перезапустите плеер<br>
+У меня заработало</p></td><td>2024-11-25T11:53:12.831Z</td></tr><tr><td>vas</td><td><p>Да, так и есть.<br>
+Стандартный парсер можно обновить в настройках плеера и выставить по умолчанию (первым в списке “Плей-лист медиа”)<br>
+После перезапуска у меня тоже заработало.</p></td><td>2024-11-25T14:15:03.651Z</td></tr><tr><td>1pa4vel(Павел)</td><td><p>На стороне ютуба опять шаманят<br>
+Только сегодня утром работало<br>
+И счас все по новой</p>
+<p>Наверно ждать, пока парсер обновят</p></td><td>2024-12-09T12:05:01.713Z</td></tr><tr><td>meadow_seed</td><td><aside class="quote no-group" data-username="1pa4vel" data-post="53" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/1/b2d939/48.png" class="avatar"> 1pa4vel:</div>
+<blockquote>
+<p>На стороне ютуба опять шаманят</p>
+</blockquote>
+</aside>
+<p>у меня потплеер начал открывать видео с ютуба после добавления <code>--fake-with-sni www.google.com</code></p>
+<p>в браузере ютубу требуется только <code>-e 1 -q --reverse-frag --fake-from-hex 160303 --set-ttl 3</code></p>
+<p>возможно потплеер как-то по-другому соединяется с сайтом ютуба</p></td><td>2024-12-13T04:25:11.237Z</td></tr><tr><td>TikTak(TikTak)</td><td><p>Yтро недоброе коллегам по плееру. Пот снова перестал открывать ютуб. Всё то же что и в прошлый раз: разрешения видео в строке информации перебирает и не может воспроизвести в итоге</p>
+<p>Есть какая то инфа, это парсер\экстрактор устарел или ркн шалит? В браузере без перемен вроде<br>
+версия: 241216(1.7.22398)</p></td><td>2025-01-17T11:04:35.033Z</td></tr><tr><td>vas</td><td><p>да, тоже заметил сегодня такое поведение Potplayer.<br>
+Пользуюсь парсером <a href="https://github.com/Alexey71/PotPlayer-SponsorBlock" rel="noopener nofollow ugc">https://github.com/Alexey71/PotPlayer-SponsorBlock</a> - открывает через раз.</p>
+<p>UPD: обновил этот парсер (релиз от 02.01.25) - заработало нормально.</p></td><td>2025-01-17T14:29:33.691Z</td></tr><tr><td>TikTak(TikTak)</td><td><p>В общем, другие альтернативные парсеры (о которых выше) в т.ч. спонсорблок в целом работают, но не всегда(</p>
+<aside class="quote no-group" data-username="vas" data-post="56" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/v/ac91a4/48.png" class="avatar"> vas:</div>
+<blockquote>
+<p>обновил этот парсер (релиз от 02.01.25) - заработало нормально.</p>
+</blockquote>
+</aside>
+<p>Тоже пока на нём, но по наблюдениям- его работа с ютуб от аудио зависит: где то формат opus работает где-то m4a<br>
+Видимо, надо снова обновления ждать…</p></td><td>2025-01-17T17:14:33.876Z</td></tr><tr><td>meadow_seed</td><td><aside class="quote no-group" data-username="TikTak" data-post="55" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/cc9497/48.png" class="avatar"> TikTak:</div>
+<blockquote>
+<p>версия: 241216</p>
+</blockquote>
+</aside>
+<p>Открывает видео с дефолтным парсером, хеш файла CRC32: 9ECDEAEC<br>
+Скорее всего провайдеру поставили новый блокиратор.<br>
+Или ютуб выборочно тестирует своё обновление.</p></td><td>2025-01-18T04:37:26.451Z</td></tr><tr><td>TikTak(TikTak)</td><td><p>мне думается, что это ютуб, ибо даже yt-dlp последние дни обновлялся как ненормальный<br>
+а например на версии 2025.01.01.093014 выдавал на некоторых видосах:<br>
+[info]  Downloading 1 format(s): 160+251<br>
+ERROR: unable to download video data: HTTP Error 403: Forbidden</p></td><td>2025-01-19T00:53:18.964Z</td></tr><tr><td>vas</td><td><p>Сегодня 22.01 Potplayer совершенно перестал реагировать на открытие ссылок с любым парсером как дефолтным, так и сторонним…<br>
+А у Вас?<br>
+Есть какие-нибудь решения, предложения, догадки?<br>
+UPD: немного “пошаманил” с фильтрами - ссыдки стали открываться, трудно сказать насколько это стабильно будет работать далее и нет уверенности, что мои действия с фильтрами помогли…</p></td><td>2025-01-22T08:57:05.082Z</td></tr><tr><td>TikTak(TikTak)</td><td><p>Да, тоже самое. Началось ещё вчера вечером.<br>
+До этого проблема была на некоторых ново-загруженных видео, а теперь на всех.<br>
+Из предположений, что это обновление на ютубе, т.к в ют-длп поменялись многие id аудио\видео форматов, но я совершенно не специалист в этом.<br>
+Был бы признателен за рабочие парсеры, но вообще не понимаю почему никто нигде практически не пишет об этом…<br>
+Неужели не смотряю ютуб через плеер</p></td><td>2025-01-22T09:49:32.226Z</td></tr><tr><td>vas</td><td><p>Спасибо за ответ.<br>
+Мои действия не помогли, ссылки снова перестали открываться.<br>
+Я тоже полагаю, что это обновления на ютубе и нужны новые парсеры…а их пока нет.</p></td><td>2025-01-22T10:03:57.695Z</td></tr><tr><td>abc555</td><td><p>Зачем вы вообще пользуетесь этим шлаком ?<br>
+У меня SimpleTV и всё работает, я сам собираю себе сборку, к примеру вот пацан делает свою <a href="https://m24.do.am/download.html" rel="noopener nofollow ugc">https://m24.do.am/download.html</a> можете поюзать для ознакомления. Можете чистую скачать если шарите и сделать свою</p></td><td>2025-01-22T10:43:03.257Z</td></tr><tr><td>meadow_seed</td><td><aside class="quote no-group" data-username="vas" data-post="60" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/v/ac91a4/48.png" class="avatar"> vas:</div>
+<blockquote>
+<p>Есть какие-нибудь решения, предложения, догадки?</p>
+</blockquote>
+</aside>
+<p>Подождать пока разработчики или энтузиасты не обновят свои парсеры.<br>
+Или настроить плеер <a href="https://sourceforge.net/projects/mpv-player-windows/files/" rel="noopener nofollow ugc">mpv</a> + <a href="https://github.com/yt-dlp/yt-dlp/releases" rel="noopener nofollow ugc">yt-dlp</a> (<a href="https://github.com/yt-dlp/yt-dlp-nightly-builds/releases" rel="noopener nofollow ugc">nightly</a>) + <a href="https://github.com/christoph-heinrich/mpv-quality-menu/releases" rel="noopener nofollow ugc">quality-menu </a>.<br>
+yt-dlp также поддерживается <a href="https://github.com/clsid2/mpc-hc/releases" rel="noopener nofollow ugc">MPC-HC</a> и <a href="https://github.com/Aleksoid1978/MPC-BE/releases" rel="noopener nofollow ugc">MPC-BE</a>, но по гибкости настройки выбора форматов они даже рядом не стояли с mpv.</p>
+<details>
+<summary>
+пример mpv.conf</summary>
+<pre><code class="lang-auto"># выбор формата для всех открываемых видео со всех сайтов
+# предпочитать 1080p и ниже в одном потоке с аудио, игнорировать кодек av1 если возможно
+ytdl-format=best[height&lt;=?1080][vcodec!*=av01]/bestvideo[height&lt;=?1080][vcodec!*=av01]+bestaudio/best/bestvideo+bestaudio
+
+# отдельный профиль для ссылок ютуба
+[youtube]
+profile-cond=path:find('youtu%.?be')
+profile-restore=copy
+ytdl-raw-options=sub-lang="all,-live_chat",write-sub=,format-sort="+hdr,res:1080" # сортировка форматов (hdr и 1440p и выше убирать в конец очереди)
+ytdl-format=bestvideo[vcodec!*=av01]+bestaudio
+</code></pre>
+</details>
+<aside class="quote no-group" data-username="TikTak" data-post="61" data-topic="10169">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/cc9497/48.png" class="avatar"> TikTak:</div>
+<blockquote>
+<p>Неужели не смотряю ютуб через плеер</p>
+</blockquote>
+</aside>
+<p>Ну так главный функционал ютуба это рекомендации на основе истории просмотренного и чат онлайн-трансляций.</p></td><td>2025-01-22T13:29:02.792Z</td></tr><tr><td>TikTak(TikTak)</td><td><p>Ну так я из рекомендаций и добавляю в плейлист плеера. а сидеть в ютубовских чатах опасно для  ментального здоровья имхо)</p>
+<blockquote>
+<p>mpv+yt-dlp</p>
+</blockquote>
+<p>в pot тоже можно  yt-dlp приделать. или сборку 7sh3 взять. но я ванильную версию юзаю.<br>
+вообще не знаю какой либо опции,  которая есть у мпв, а тут нету. и большинство “изкаробки”</p>
+<p>Говоря по теме- дефолтный парсер с некоторыми видео старше ~недели частично работает. помогает вышеописанный трюк со сменой аудиоформата… но не везде</p></td><td>2025-01-22T19:43:17.586Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>вообще не знаю какой либо опции, которая есть у мпв, а тут нету</p>
+</blockquote>
+<p>Оо. Тема действительно ли PotPlayer настолько крут мной давно исхожена. И найти недостатки потплеера можно только, если вплотную попользоваться другими плеерами. Так что есть недостатки, есть. Не всемогущ. Но не думаю, что имеет смысл здесь их перечислять, чтобы не провоцировать спор. Скажу только, что зависит от потребностей. У некоторых весьма специфичные.</p></td><td>2025-01-22T19:59:50.475Z</td></tr><tr><td>TikTak(TikTak)</td><td><p>Соглашусь, зависит от задач. на линуксе я мпв и юзал. (влц отдельная печальная тема)<br>
+А на винде мне нормальный гуи надо, я конфиги править не хочу.<br>
+Или чтобы переключить разрешение у ютуба лезь в какие то расширенные доп.настройки как у мпк-хс</p></td><td>2025-01-22T22:36:30.044Z</td></tr><tr><td>ani917(ani)</td><td><p>это уже оффтоп<br>
+просто парсер устарел</p></td><td>2025-01-22T22:48:50.547Z</td></tr><tr><td>vas</td><td><p><a href="https://github.com/Alexey71/PotPlayer-SponsorBlock" rel="noopener nofollow ugc">Парсер SponsorBlock</a> обновили.<br>
+У меня Potplayer  стал открывать и воспроизводить ссылки YT, правда, с небольшой задержкой.</p></td><td>2025-01-24T12:06:30.576Z</td></tr><tr><td>TikTak(TikTak)</td><td><p>Да, спасибо. Но у меня он снова ошибками сыпет почему то…</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="проигрыватель-potplayer-не-воспроизводит-ролики-youtube/7ed89b9da37b82b419754955f8788761d5e1ab89.png" data-download-href="https://ntc.party/uploads/default/7ed89b9da37b82b419754955f8788761d5e1ab89" title="sbpot"><img src="проигрыватель-potplayer-не-воспроизводит-ролики-youtube/7ed89b9da37b82b419754955f8788761d5e1ab89.png" alt="sbpot" data-base62-sha1="i68eYlMk3HsV3TvXAWp74wvfayJ" width="690" height="385" data-dominant-color="272729"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">sbpot</span><span class="informations">874×488 27.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<img src="проигрыватель-potplayer-не-воспроизводит-ролики-youtube/e8bd1f1e791e7b8c08b42c0ef4a7d8daf1bde932.png" alt="sbpot2" data-base62-sha1="xcTXMrrthOdzeR5rsMTEwcGqRNM" width="659" height="463"></p>
+</details>
+<p>А <strong>обновившийся сегодня</strong> оф. парсер как раз работает! Ура</p>
+<p>PS<br>
+На днях ещё выкладывали <a href="https://github.com/Alexey71/PotPlayer-yt-dlp">парсер на основе ют-длп</a> , который, видимо, берёт кукисы из файерфокса, но у меня не заводился.<br>
+7sh3  тоже <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B8%D0%B3%D1%80%D1%8B%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8C-potplayer-%D0%BD%D0%B5-%D0%B2%D0%BE%D1%81%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%B2%D0%BE%D0%B4%D0%B8%D1%82-%D1%80%D0%BE%D0%BB%D0%B8%D0%BA%D0%B8-youtube/10169/50">обновил</a>, пока не пробовал.</p>
+<p><a class="mention" href="/u/abc555">@abc555</a> И вам спасибо! От сайта чуть глаза не вытекли) но будто вернули год эдак 2004 с веб1.0</p></td><td>2025-01-24T14:31:48.066Z</td></tr>
+    </table>
+      </body>
+    </html>

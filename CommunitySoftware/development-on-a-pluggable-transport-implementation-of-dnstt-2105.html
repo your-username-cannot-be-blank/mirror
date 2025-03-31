@@ -1,0 +1,158 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>development-on-a-pluggable-transport-implementation-of-dnstt-2105</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>The Guardian Project and others have started working on implementing dnstt as a <a href="https://tb-manual.torproject.org/circumvention/">pluggable transport</a>, with plans to make it an option for circumvention in Tor Browser in the future. You can follow the work or help with it here:</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/trac/-/issues/40001">
+  <header class="source">
+      <img src="development-on-a-pluggable-transport-implementation-of-dnstt-2105/a6cfb41d9563539f92c446405d8b9db9971f8b5f.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/trac/-/issues/40001" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="development-on-a-pluggable-transport-implementation-of-dnstt-2105/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/trac/-/issues/40001" target="_blank" rel="noopener">Add support for dnstt (#40001) · Issues · The Tor Project / Anti-censorship /...</a></h3>
+
+  <p>This is the main issue for all the things that need to happen in order to add support for dnstt PT. Please...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2022-03-27T16:21:35.686Z</td></tr><tr><td>zinoid</td><td><p>The idea is interesting, but it looks like it must be slow and for some reason doesn’t work.</p>
+<p>LOG 1:</p>
+<pre><code class="lang-auto">Apr 01 14:24:56.000 [notice] Tor 0.4.3.5 opening new log file.
+Apr 01 14:24:56.796 [notice] Tor 0.4.3.5 running on Linux with Libevent 2.0.21-stable, OpenSSL 1.0.2g, Zlib 1.2.8, Liblzma 5.1.0alpha, and Libzstd N/A.
+Apr 01 14:24:56.796 [notice] Tor can't help you if you use it wrong! Learn how to be safe at https://www.torproject.org/download/download#warning
+Apr 01 14:24:56.796 [notice] Read configuration file "/usr/share/tor/tor-service-defaults-torrc".
+Apr 01 14:24:56.796 [notice] Read configuration file "/etc/tor/torrc".
+Apr 01 14:24:56.802 [notice] Opening Socks listener on 127.0.0.1:9050
+Apr 01 14:24:56.802 [notice] Opened Socks listener on 127.0.0.1:9050
+Apr 01 14:24:56.802 [notice] Opening DNS listener on 127.0.0.2:53
+Apr 01 14:24:56.802 [notice] Opened DNS listener on 127.0.0.2:53
+Apr 01 14:24:56.802 [notice] Opening HTTP tunnel listener on 127.0.0.1:8073
+Apr 01 14:24:56.802 [notice] Opened HTTP tunnel listener on 127.0.0.1:8073
+Apr 01 14:24:56.000 [warn] Your log may contain sensitive information - you disabled SafeLogging. Don't log unless it serves an important reason. Overwrite the log afterwards.
+Apr 01 14:24:56.000 [notice] Parsing GEOIP IPv4 file /usr/share/tor/geoip.
+Apr 01 14:24:57.000 [notice] Parsing GEOIP IPv6 file /usr/share/tor/geoip6.
+Apr 01 14:24:57.000 [notice] Bootstrapped 0% (starting): Starting
+Apr 01 14:24:59.000 [notice] Starting with guard context "bridges"
+Apr 01 14:24:59.000 [notice] Delaying directory fetches: No running bridges
+Apr 01 14:24:59.000 [notice] Signaled readiness to systemd
+Apr 01 14:25:00.000 [notice] Opening Control listener on /run/tor/control
+Apr 01 14:25:00.000 [notice] Opened Control listener on /run/tor/control
+Apr 01 14:25:00.000 [notice] Bootstrapped 5% (conn): Connecting to a relay
+Apr 01 14:25:00.000 [notice] Bootstrapped 10% (conn_done): Connected to a relay
+Apr 01 14:25:13.000 [notice] Bootstrapped 14% (handshake): Handshaking with a relay
+Apr 01 14:25:17.000 [notice] Bootstrapped 15% (handshake_done): Handshake with a relay done
+Apr 01 14:25:17.000 [notice] Bootstrapped 20% (onehop_create): Establishing an encrypted directory connection
+Apr 01 14:25:28.000 [notice] Bootstrapped 25% (requesting_status): Asking for networkstatus consensus
+Apr 01 14:26:19.000 [notice] new bridge descriptor 'ThisIsATorRelay' (fresh): $E5C9F39FE0AD6D7596859BAEC762CFBCDD928229~ThisIsATorRelay at 127.0.0.1
+Apr 01 14:26:19.000 [notice] Bootstrapped 75% (enough_dirinfo): Loaded enough directory info to build circuits
+Apr 01 14:26:20.000 [notice] Bootstrapped 80% (ap_conn): Connecting to a relay to build circuits
+Apr 01 14:26:20.000 [notice] Bootstrapped 85% (ap_conn_done): Connected to a relay to build circuits
+Apr 01 14:28:04.000 [notice] Bootstrapped 89% (ap_handshake): Finishing handshake with a relay to build circuits
+Apr 01 14:28:21.000 [notice] Delaying directory fetches: No running bridges
+Apr 01 14:28:25.000 [notice] Bootstrapped 90% (ap_handshake_done): Handshake finished with a relay to build circuits
+Apr 01 14:28:25.000 [notice] Bootstrapped 95% (circuit_create): Establishing a Tor circuit
+Apr 01 14:29:25.000 [notice] No circuits are opened. Relaxed timeout for circuit 9 (a General-purpose client 1-hop circuit in state doing handshakes with channel state open) to 60000ms. However, it appears the circuit has timed out anyway.
+Apr 01 14:29:43.000 [notice] Tried for 120 seconds to get a connection to 116.202.120.181:443. Giving up. (waiting for circuit)
+</code></pre>
+<p>LOG 2:</p>
+<pre><code class="lang-auto">Apr 01 14:31:46.000 [notice] Tor 0.4.3.5 opening new log file.
+Apr 01 14:31:46.861 [notice] Tor 0.4.3.5 running on Linux with Libevent 2.0.21-stable, OpenSSL 1.0.2g, Zlib 1.2.8, Liblzma 5.1.0alpha, and Libzstd N/A.
+Apr 01 14:31:46.861 [notice] Tor can't help you if you use it wrong! Learn how to be safe at https://www.torproject.org/download/download#warning
+Apr 01 14:31:46.861 [notice] Read configuration file "/usr/share/tor/tor-service-defaults-torrc".
+Apr 01 14:31:46.861 [notice] Read configuration file "/etc/tor/torrc".
+Apr 01 14:31:46.868 [notice] Opening Socks listener on 127.0.0.1:9050
+Apr 01 14:31:46.869 [notice] Opened Socks listener on 127.0.0.1:9050
+Apr 01 14:31:46.869 [notice] Opening DNS listener on 127.0.0.2:53
+Apr 01 14:31:46.869 [notice] Opened DNS listener on 127.0.0.2:53
+Apr 01 14:31:46.869 [notice] Opening HTTP tunnel listener on 127.0.0.1:8073
+Apr 01 14:31:46.869 [notice] Opened HTTP tunnel listener on 127.0.0.1:8073
+Apr 01 14:31:46.000 [warn] Your log may contain sensitive information - you disabled SafeLogging. Don't log unless it serves an important reason. Overwrite the log afterwards.
+Apr 01 14:31:46.000 [notice] Parsing GEOIP IPv4 file /usr/share/tor/geoip.
+Apr 01 14:31:47.000 [notice] Parsing GEOIP IPv6 file /usr/share/tor/geoip6.
+Apr 01 14:31:47.000 [notice] Bootstrapped 0% (starting): Starting
+Apr 01 14:31:48.000 [notice] Starting with guard context "bridges"
+Apr 01 14:31:48.000 [notice] new bridge descriptor 'ThisIsATorRelay' (cached): $E5C9F39FE0AD6D7596859BAEC762CFBCDD928229~ThisIsATorRelay at 127.0.0.1
+Apr 01 14:31:48.000 [notice] Signaled readiness to systemd
+Apr 01 14:31:49.000 [notice] Bootstrapped 5% (conn): Connecting to a relay
+Apr 01 14:31:49.000 [notice] Opening Control listener on /run/tor/control
+Apr 01 14:31:49.000 [notice] Opened Control listener on /run/tor/control
+Apr 01 14:31:50.000 [notice] Bootstrapped 10% (conn_done): Connected to a relay
+Apr 01 14:31:59.000 [notice] Bootstrapped 14% (handshake): Handshaking with a relay
+Apr 01 14:32:03.000 [notice] Bootstrapped 15% (handshake_done): Handshake with a relay done
+Apr 01 14:32:03.000 [notice] Bootstrapped 75% (enough_dirinfo): Loaded enough directory info to build circuits
+Apr 01 14:32:03.000 [notice] Bootstrapped 95% (circuit_create): Establishing a Tor circuit
+Apr 01 14:33:04.000 [notice] No circuits are opened. Relaxed timeout for circuit 2 (a General-purpose client 3-hop circuit in state doing handshakes with channel state open) to 60000ms. However, it appears the circuit has timed out anyway.
+Apr 01 14:33:36.000 [notice] Delaying directory fetches: No running bridges
+Apr 01 14:39:40.000 [warn] Problem bootstrapping. Stuck at 95% (circuit_create): Establishing a Tor circuit. (DONE; DONE; count 1; recommendation warn; host E5C9F39FE0AD6D7596859BAEC762CFBCDD928229 at 127.0.0.1:7000)
+Apr 01 14:39:40.000 [warn] 1 connections have failed:
+Apr 01 14:39:40.000 [warn]  1 connections died in state handshaking (TLS) with SSL state SSLv2/v3 read server hello A in HANDSHAKE
+Apr 01 14:41:18.000 [warn] Problem bootstrapping. Stuck at 95% (circuit_create): Establishing a Tor circuit. (DONE; DONE; count 2; recommendation warn; host E5C9F39FE0AD6D7596859BAEC762CFBCDD928229 at 127.0.0.1:7000)
+Apr 01 14:41:18.000 [warn] 2 connections have failed:
+Apr 01 14:41:18.000 [warn]  2 connections died in state handshaking (TLS) with SSL state SSLv2/v3 read server hello A in HANDSHAKE
+Apr 01 14:45:33.000 [warn] Problem bootstrapping. Stuck at 95% (circuit_create): Establishing a Tor circuit. (DONE; DONE; count 3; recommendation warn; host E5C9F39FE0AD6D7596859BAEC762CFBCDD928229 at 127.0.0.1:7000)
+Apr 01 14:45:33.000 [warn] 3 connections have failed:
+Apr 01 14:45:33.000 [warn]  3 connections died in state handshaking (TLS) with SSL state SSLv2/v3 read server hello A in HANDSHAKE
+</code></pre>
+<p>LOG 3:</p>
+<pre><code class="lang-auto">dnstt-client -doh https://cloudflare-dns.com/dns-query --pubkey 00458e603fd162507a1fda7ab0df486691d0646bfa10405b3c1225cbaf78ff38 d.openinternetproject.org 127.0.0.1:7000
+2022/04/01 07:31:38 uTLS fingerprint Firefox 65
+2022/04/01 07:31:38 effective MTU 127
+2022/04/01 07:31:38 begin session 39743b2f
+2022/04/01 07:31:49 begin stream 39743b2f:3
+2022/04/01 07:34:54 stream 39743b2f:3 copy local←stream: write tcp 127.0.0.1:7000-&gt;127.0.0.1:42710: write: broken pipe
+2022/04/01 07:39:40 handle: session 39743b2f opening stream: io: read/write on closed pipe
+2022/04/01 07:39:40 end stream 39743b2f:3
+2022/04/01 07:41:18 handle: session 39743b2f opening stream: io: read/write on closed pipe
+2022/04/01 07:45:33 handle: session 39743b2f opening stream: io: read/write on closed pipe
+2022/04/01 07:48:56 handle: session 39743b2f opening stream: io: read/write on closed pipe
+</code></pre>
+<p>Maybe I need to create a rule in /etc/apparmor.d/abstractions/tor similar to obfs4proxy?</p></td><td>2022-04-01T07:57:19.332Z</td></tr><tr><td>anadahz</td><td><p>Thank you for reporting this issue and sending the logs. The servers had quite low RAM (512M) it is now upgraded to 2G.</p>
+<p>Could you check if you can connect now?</p></td><td>2022-04-07T15:02:51.762Z</td></tr>
+    </table>
+      </body>
+    </html>

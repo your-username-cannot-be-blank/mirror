@@ -1,0 +1,634 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>tor-через-vless-без-нужды-в-мостах</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>4nonch(4nonch)</td><td><p>Есть желание настроить использование тора через арендованную VPS с поднятым VLESS. Само подключение к тору работает только с мостами, однако хотелось бы подключаться напрямую через мою VLESS прокси без нужды в мостах.</p>
+<p>На текущий момент использую схему <a href="https://github.com/XTLS/Xray-examples/tree/main/VLESS-WSS-Nginx" rel="noopener nofollow ugc">VLESS - WSS - Nginx</a>. Однако не удаётся добиться подключения через проксю (Tor Browser could not connect to Tor).</p>
+<p>В самом браузере в настройках сети указываю socks5 прокси 127.0.0.1:1080 для vless. Результатов не дало. Также оборачивал весь трафик в vless туннель через v2rayN. Всё также, подключения нет.</p>
+<p>Попытался на самой VPS поставить tor (<code>apt install tor</code>) и проверить доступность подключения через <code>torsocks curl ...</code> - подключение проходило. Не знаю, использует ли сервис тора мосты по умолчанию, но если нет, то является признаком того что с VPS сеть тора доступна и не заблокирована.</p>
+<p>В чём может быть проблема? VLESS не поддерживает передачу тор траффика или как? Но почему? Vless же должен выглядеть как обычновенное tls подключение, особенно в схеме с nginx’ом. Нужно использовать Reality? Но так ли сильно оно будет отличаться от моей схемы, ведь у меня всё сделано через nginx с подписанным сертификатом.</p>
+<p>Ниже приведу свои конфигурации. Хост, UUID, а также path заменил на подходящие к демонстрации эквиваленты. (<a href="http://my.host.com" rel="noopener nofollow ugc">my.host.com</a>; myuuid; mypath…)</p>
+<p>Клиент xray:</p>
+<pre data-code-wrap="json"><code class="lang-json">{
+    "log": {
+
+    },
+    "inbounds": [
+        {
+            "port": "1080",
+            "protocol": "socks",
+            "settings": {
+                "auth": "noauth",
+                "udp": true
+            }
+        },
+        {
+            "port": "1081",
+            "protocol": "http",
+            "settings": {  }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "vless",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "my.host.com",
+                        "port": 443,
+                        "users": [ { "id": "myuuid", "encryption": "none" } ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "ws",
+                "security": "tls",
+                "wsSettings": { "path": "/mypath" },
+                "tlsSettings": { "allowInsecure": false, "serverName": "my.host.com", "fingerprint": "chrome" }
+            }
+        },
+        { "tag": "direct", "protocol": "freedom", "settings": {  } },
+        { "tag": "blocked", "protocol": "blackhole", "settings": {  } }
+    ],
+    "routing": {
+        "domainStrategy": "IPOnDemand",
+        "rules": [
+            {
+                "type": "field",
+                "ip": [ "geoip:private" ],
+                "outboundTag": "direct"
+            }
+        ]
+    }
+}
+
+</code></pre>
+<p>Сервер xray:</p>
+<pre data-code-wrap="json"><code class="lang-json">{
+    "log": {
+        "loglevel": "none",
+        "access": "/var/log/xray/access.log",
+        "error": "/var/log/xray/error.log",
+        "dnsLog": false
+    },
+    "inbounds": [
+        {
+            "listen": "127.0.0.1",
+            "port": 8088 ,
+            "protocol": "vless",
+            "settings": {
+                "clients": [
+                    {
+                        "id": "myuuid"
+                    }
+                ],
+                "decryption": "none"
+            },
+            "streamSettings": {
+                "network": "ws",
+                "wsSettings": {
+                    "path": "/mypath"
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls"
+                ]
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "tag": "direct",
+            "protocol": "freedom",
+            "settings": {}
+        },
+        {
+            "tag": "blocked",
+            "protocol": "blackhole",
+            "settings": {}
+        }
+    ],
+    "routing": {
+        "domainStrategy": "IPIfNonMatch",
+        "rules": [
+            {
+                "type": "field",
+                "ip": [
+                    "geoip:cn",
+                    "geoip:private"
+                ],
+                "outboundTag": "blocked"
+            },
+            {
+                "type": "field",
+                "domain": ["geosite:category-ads-all"],
+                "outboundTag": "block"
+            }
+        ]
+    }
+}
+</code></pre>
+<p>Конфигурация nginx (сделано поверх существующего конфига для одного приложения, важная часть реализующая перенаправление подключений в xray находится в <code>location /mypath</code>):</p>
+<pre data-code-wrap="nginx"><code class="lang-nginx">upstream myhost {
+    server unix:/srv/.venvs/myhost/run/gunicorn.sock fail_timeout=0;
+}
+
+server {
+    server_name my.host.com;
+    listen 80;
+    return 301 https://my.host.com$request_uri;
+}
+
+server {
+    server_name my.host.com;
+    listen 443 ssl;
+    listen 443 quic reuseport ipv6only=off;
+
+    ssl_protocols TLSv1.3 TLSv1.2;
+    ssl_certificate /etc/letsencrypt/live/my.host.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/my.host.com/privkey.pem;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GC    M-SHA384;
+
+    client_header_timeout 5m;
+    keepalive_timeout 5m;
+
+    client_max_body_size 15M;
+
+    access_log /var/log/myhost/nginx/access/access.log;
+    error_log /var/log/myhost/nginx/error/error.log;
+
+    location /mypath {
+        if ($http_upgrade != "websocket") {
+            return 404;
+        }
+        proxy_pass http://127.0.0.1:8088;
+        proxy_redirect off;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 5d;
+    }
+
+    location /static/ {
+        alias /srv/myhost/static/;
+    }
+
+    location / {
+        proxy_pass http://myhost/;
+        proxy_http_version 1.1;
+
+        proxy_connect_timeout 1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+</code></pre></td><td>2025-01-04T11:17:53.368Z</td></tr><tr><td>Xunlei</td><td><p>Для настройки прокси исходящих подключений тора есть параметр</p>
+<pre><code class="lang-auto">[[Socks5Proxy]] **Socks5Proxy** __host__[:__port__]::
+    Tor will make all OR connections through the SOCKS 5 proxy at host:port
+    (or host:1080 if port is not specified).
+</code></pre></td><td>2025-01-04T11:35:02.530Z</td></tr><tr><td>denium</td><td><p>Посмотрите лог тора. Попробуйте ограничить порты до 80,443. Или можно попробовать только 9001.<br>
+Возможно VLESS пытается влезть в трафик, думая что там TLS, а там не TLS. И 80 наверняка не HTTP, а CONNECT. Возможно 9001 трогать не будет.</p></td><td>2025-01-04T11:46:42.839Z</td></tr><tr><td>4nonch(4nonch)</td><td><p>Я подозреваю вы привели настройку для torrc? Как я описал в заголовочном посте, я пытался указывать прокси через UI браузера (пример на картинке ниже).<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="tor-через-vless-без-нужды-в-мостах/0bb84c7b6d3eba3f1e7975c9bfe8cb2f031ed95e.png" data-download-href="https://ntc.party/uploads/default/0bb84c7b6d3eba3f1e7975c9bfe8cb2f031ed95e" title="Screenshot_1"><img src="tor-через-vless-без-нужды-в-мостах/0bb84c7b6d3eba3f1e7975c9bfe8cb2f031ed95e_2_647x500.png" alt="Screenshot_1" data-base62-sha1="1FG6QxO3Xphi6NPgQkRfH8p32DI" width="647" height="500" srcset="tor-через-vless-без-нужды-в-мостах/0bb84c7b6d3eba3f1e7975c9bfe8cb2f031ed95e_2_647x500.png, tor-через-vless-без-нужды-в-мостах/0bb84c7b6d3eba3f1e7975c9bfe8cb2f031ed95e_2_970x750.png 1.5x, tor-через-vless-без-нужды-в-мостах/0bb84c7b6d3eba3f1e7975c9bfe8cb2f031ed95e.png 2x" data-dominant-color="A4A2A3"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_1</span><span class="informations">1053×813 39.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Однако попробую сейчас указать напрямую в <code>Tor Browser\Browser\TorBrowser\Data\Tor\torrc</code> и сообщу результат строчкой ниже. Привожу установленную скриншот с установленной настройкой (надеюсь не ошибся, лол).<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="tor-через-vless-без-нужды-в-мостах/5aed0d2d9b1cb39733efed8b57626ce0a0aff3ab.png" data-download-href="https://ntc.party/uploads/default/5aed0d2d9b1cb39733efed8b57626ce0a0aff3ab" title="Screenshot_2"><img src="tor-через-vless-без-нужды-в-мостах/5aed0d2d9b1cb39733efed8b57626ce0a0aff3ab.png" alt="Screenshot_2" data-base62-sha1="cYmQS7e68vPXC6z0LQlJ8d0qotR" width="690" height="141" data-dominant-color="1B1B1B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_2</span><span class="informations">808×166 5.16 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>P.S. Всё также нет подключения.</p></td><td>2025-01-04T11:49:18.450Z</td></tr><tr><td>Xunlei</td><td><p>Да, для <a href="https://ntc.party/t/tor-expert-bundle-%D0%B8-%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D0%B0-torrc/4558">Tor Expert Bundle</a>. Как работает Tor Browser я не знаю. Добейтесь для начала того, чтобы просто сайты открывались через ваш прокси.</p>
+<aside class="quote no-group" data-username="4nonch" data-post="1" data-topic="14318">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/4nonch/48/14681_2.png" class="avatar"> 4nonch:</div>
+<blockquote>
+<p>Нужно использовать Reality?</p>
+</blockquote>
+</aside>
+<p>Вроде бы этот метод работает только с https трафиком.</p></td><td>2025-01-04T11:54:06.500Z</td></tr><tr><td>4nonch(4nonch)</td><td><blockquote>
+<p>Посмотрите лог тора</p>
+</blockquote>
+<p>Точно, надо было сразу их привести. Убрал запись из torrc на всякий, указал socks5 вновь через UI. Подключаюсь. Прикреплю лог в самом конце. БТВ, что-то я не вижу чтобы браузер пытался использовать 127.0.0.1:1080 в нём, но может конкретно это подключение не логируется. Падает на хендшейке.</p>
+<blockquote>
+<p>Попробуйте ограничить порты до 80,443. Или можно попробовать только 9001</p>
+</blockquote>
+<p>Извините, не очень понял. Локальное socks5 прокси с xray инстансом (клиент) поднят на 1080, он же в свою очередь отправляет трафик на <a href="http://my.host.com:443/mypath" rel="noopener nofollow ugc">my.host.com:443/mypath</a>.</p>
+<pre><code class="lang-auto">2025-01-04 11:53:07.958 [NOTICE] DisableNetwork is set. Tor will not make or accept non-control network connections. Shutting down all existing connections.
+2025-01-04 11:53:14.547 [NOTICE] Opening Socks listener on 127.0.0.1:9150
+2025-01-04 11:53:14.547 [NOTICE] Opened Socks listener connection (ready) on 127.0.0.1:9150
+2025-01-04 11:53:15.109 [NOTICE] Bootstrapped 3% (conn_proxy): Connecting to proxy
+2025-01-04 11:53:15.111 [NOTICE] Bootstrapped 4% (conn_done_proxy): Connected to proxy
+2025-01-04 11:53:15.112 [NOTICE] Bootstrapped 10% (conn_done): Connected to a relay
+2025-01-04 11:53:27.881 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (unexpected eof while reading; TLS_ERROR; count 10; recommendation warn; host 8238952147AAD596A49540DD146215D5F5627913 at 146.70.120.58:9001)
+2025-01-04 11:53:27.881 [WARN] 10 connections have failed:
+2025-01-04 11:53:27.881 [WARN] 10 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.881 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (unexpected eof while reading; TLS_ERROR; count 11; recommendation warn; host E14B30A83FF80C576B2EC0F2C8A5F29D41B8DC8E at 116.203.64.212:8080)
+2025-01-04 11:53:27.881 [WARN] 11 connections have failed:
+2025-01-04 11:53:27.881 [WARN] 11 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.881 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (unexpected eof while reading; TLS_ERROR; count 12; recommendation warn; host 3AF33BF8811F282580045FFD87579461B6D8D5F3 at 83.77.218.29:30002)
+2025-01-04 11:53:27.881 [WARN] 12 connections have failed:
+2025-01-04 11:53:27.881 [WARN] 12 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.882 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (unexpected eof while reading; TLS_ERROR; count 13; recommendation warn; host 392051FDD20D371CF90EE7BCA39F4763427B118D at 95.216.23.120:9001)
+2025-01-04 11:53:27.882 [WARN] 13 connections have failed:
+2025-01-04 11:53:27.882 [WARN] 13 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.896 [NOTICE] Closing no-longer-configured Socks listener on 127.0.0.1:9150
+2025-01-04 11:53:27.896 [NOTICE] DisableNetwork is set. Tor will not make or accept non-control network connections. Shutting down all existing connections.
+2025-01-04 11:53:27.897 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 14; recommendation warn; host 66C102FA5DDF48C9EEEB048C1630933B66C50ECC at 94.140.115.114:8443)
+2025-01-04 11:53:27.897 [WARN] 14 connections have failed:
+2025-01-04 11:53:27.897 [WARN] 13 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.897 [WARN] 1 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] connection_connect_sockaddr: Bug: Tried to open a socket with DisableNetwork set. (on Tor 0.4.8.13 e153e72c01315f86)
+2025-01-04 11:53:27.898 [WARN] tor_bug_occurred_: Bug: connection.c:2204: connection_connect_sockaddr: This line should not have been reached. (Future instances of this warning will be silenced.) (on Tor 0.4.8.13 e153e72c01315f86)
+2025-01-04 11:53:27.898 [WARN] Bug: Tor 0.4.8.13 (git-e153e72c01315f86): Line unexpectedly reached at connection_connect_sockaddr at connection.c:2204. (Stack trace not available) (on Tor 0.4.8.13 e153e72c01315f86)
+2025-01-04 11:53:27.898 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 15; recommendation warn; host CB19C930356F4F321CC87E063EBDE473674F2F97 at 162.19.171.180:9010)
+2025-01-04 11:53:27.898 [WARN] 15 connections have failed:
+2025-01-04 11:53:27.898 [WARN] 13 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] 2 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 16; recommendation warn; host 52E78985D513594EA087D1B2AE280CCF7B954EBB at 192.42.116.188:587)
+2025-01-04 11:53:27.898 [WARN] 16 connections have failed:
+2025-01-04 11:53:27.898 [WARN] 13 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] 3 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 17; recommendation warn; host 1815E96EDB9444E9CD0D11FB9BB695B687C21E82 at 137.226.34.45:9006)
+2025-01-04 11:53:27.898 [WARN] 17 connections have failed:
+2025-01-04 11:53:27.898 [WARN] 13 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] 4 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 18; recommendation warn; host D9D4BCE7133616C8C9FA4C4156EB14D344E6229D at 77.221.152.105:443)
+2025-01-04 11:53:27.898 [WARN] 18 connections have failed:
+2025-01-04 11:53:27.898 [WARN] 13 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] 5 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 19; recommendation warn; host 67BE9A0658EF0106FCCB98FF1C68D6AAFFFC3CA9 at 85.195.244.251:28123)
+2025-01-04 11:53:27.898 [WARN] 19 connections have failed:
+2025-01-04 11:53:27.898 [WARN] 13 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] 6 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 20; recommendation warn; host F3DE41C519A29899C9E1F6DC59715C72EBD4C3C3 at 45.138.16.147:143)
+2025-01-04 11:53:27.898 [WARN] 20 connections have failed:
+2025-01-04 11:53:27.898 [WARN] 13 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] 7 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 21; recommendation warn; host 09BFE6A362D2CE435C45F99B56171B6DA486D0F1 at 89.58.33.214:443)
+2025-01-04 11:53:27.898 [WARN] 21 connections have failed:
+2025-01-04 11:53:27.898 [WARN] 13 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] 8 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 22; recommendation warn; host B8F8E84576DE8CC6CDE136D2374F9385A2AFFAD0 at 194.55.13.207:443)
+2025-01-04 11:53:27.898 [WARN] 22 connections have failed:
+2025-01-04 11:53:27.898 [WARN] 13 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] 9 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 23; recommendation warn; host D7C218579374ED6525E12362A0B2A3DAEB0B5CEC at 135.181.63.118:9101)
+2025-01-04 11:53:27.898 [WARN] 23 connections have failed:
+2025-01-04 11:53:27.898 [WARN] 13 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 11:53:27.898 [WARN] 10 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 11:53:28.105 [NOTICE] Delaying directory fetches: DisableNetwork is set.
+</code></pre></td><td>2025-01-04T11:58:14.473Z</td></tr><tr><td>4nonch(4nonch)</td><td><blockquote>
+<p>Добейтесь для начала того, чтобы просто сайты открывались через ваш прокси.</p>
+</blockquote>
+<p>Если ничего не путаю, то тор браузер не позволяет использовать его без подключения непосредственно к сети тора. А так прокси точно работает вне тор браузера, я сейчас через него сижу в лисе.</p>
+<blockquote>
+<p>Да, для <a href="https://ntc.party/t/tor-expert-bundle-%D0%B8-%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D0%B0-torrc/4558">Tor Expert Bundle</a>.</p>
+</blockquote>
+<p>Попробую посмотреть.</p>
+<blockquote>
+<p>Вроде бы этот метод работает только с https трафиком.</p>
+</blockquote>
+<p>Разве прокси не будет любой трафик заворачивать в https до моего сайта-заглушки, а затем проводить обыкновенное соединение через тор уже с сети VPS-провайдера?</p></td><td>2025-01-04T12:03:09.757Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="4nonch" data-post="7" data-topic="14318">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/4nonch/48/14681_2.png" class="avatar"> 4nonch:</div>
+<blockquote>
+<p>Разве прокси не будет любой трафик заворачивать в https до моего сайта-заглушки, а затем проводить обыкновенное соединение через тор уже с сети VPS-провайдера?</p>
+</blockquote>
+</aside>
+<p>Обычный VLESS наверное будет, а вот reality не знаю, смысла в этом мало, т. к. этот метод сделан для сокрытия обычного HTTPS веб трафика от статистического анализа, а для тора почти наверняка уже известен китайским цензорам отпечаток трафика. В РФ пока работает простой метод добавления HTTPS-подобного хэндшейка в начало TCP потока.</p></td><td>2025-01-04T12:08:55.446Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>что-то я не вижу чтобы браузер пытался использовать 127.0.0.1:1080 в нём</p>
+</blockquote>
+<p>Использует, просто не пишет адрес:</p>
+<blockquote>
+<p>Connecting to proxy<br>
+Connected to proxy</p>
+</blockquote>
+<blockquote>
+<p>Извините, не очень понял</p>
+</blockquote>
+<p>Я имел в виду, чтобы Tor браузер использовал определённые порты. На скрине настройка в самом низу (This computer goes through… certain ports). Но уже в логе видно, что это не влияет.</p>
+<blockquote>
+<p>Падает на хендшейке</p>
+</blockquote>
+<p>Да, VLESS копается в трафике. Советую воспользоваться webtunnel мостом в Tor браузере. Надеюсь, поможет. Он маскируется под обычный HTTPS.<br>
+Я имею в виду, что webtunnel и ещё прокси. Хотя, не знаю, можно ли так. А может и одного webtunnel хватит, но он пойдёт через провайдера, а не через VLESS тогда (если галочку прокси снять). В принципе, прокси должен передаваться мосту.</p></td><td>2025-01-04T12:59:28.313Z</td></tr><tr><td>4nonch(4nonch)</td><td><blockquote>
+<p>Я имел в виду, чтобы Tor браузер использовал определённые порты</p>
+</blockquote>
+<p>Точно. Поставил, сохранил, перезапустил браузер.<br>
+<img src="tor-через-vless-без-нужды-в-мостах/77c2065c501e3323ecfabd149b6ae59b27e0df81.png" alt="Screenshot_1" data-base62-sha1="h5qvWObbuTsc9eFYJCNuTEAhxzb" width="589" height="389"></p>
+<p>Подключение всё ещё не доступно, лог прикреплю в самом конце.</p>
+<blockquote>
+<p>Советую воспользоваться webtunnel мостом в Tor браузере</p>
+</blockquote>
+<p>Проверил, он у меня и без моей прокси работает, впрочем как и obfs4. Но, что интересно, с моей прокси не работает, когда как obfs4 работал. Правда как будто бы весь смысл теряется, я хотел подключаться через vless напрямую, а тут всё равно приходится использовать мосты. Не понимаю почему так происходит, видимо трафик как-то странно передаётся.</p>
+<p>Собственно ошибка при webtunnel + мой сокс</p>
+<pre><code class="lang-auto">2025-01-04 13:10:17.896 [NOTICE] DisableNetwork is set. Tor will not make or accept non-control network connections. Shutting down all existing connections.
+2025-01-04 13:10:17.899 [NOTICE] Opening Socks listener on 127.0.0.1:9150
+2025-01-04 13:10:17.899 [NOTICE] Opened Socks listener connection (ready) on 127.0.0.1:9150
+2025-01-04 13:10:18.948 [NOTICE] Bridge 'bauruine' has both an IPv4 and an IPv6 address.  Will prefer using its IPv6 address ([2001:db8:5985:711a:a60e:61a0:1260:b42e]:443) based on the configured Bridge address.
+2025-01-04 13:10:18.948 [NOTICE] Bootstrapped 1% (conn_pt): Connecting to pluggable transport
+2025-01-04 13:10:18.949 [NOTICE] Bootstrapped 2% (conn_done_pt): Connected to pluggable transport
+2025-01-04 13:10:19.471 [NOTICE] Bootstrapped 10% (conn_done): Connected to a relay
+2025-01-04 13:10:19.585 [NOTICE] Bootstrapped 14% (handshake): Handshaking with a relay
+2025-01-04 13:10:19.701 [NOTICE] Bootstrapped 15% (handshake_done): Handshake with a relay done
+2025-01-04 13:10:19.701 [NOTICE] Bootstrapped 20% (onehop_create): Establishing an encrypted directory connection
+2025-01-04 13:10:19.818 [NOTICE] Bootstrapped 25% (requesting_status): Asking for networkstatus consensus
+2025-01-04 13:10:19.938 [NOTICE] Bridge 'bauruine' has both an IPv4 and an IPv6 address.  Will prefer using its IPv6 address ([2001:db8:5985:711a:a60e:61a0:1260:b42e]:443) based on the configured Bridge address.
+2025-01-04 13:11:40.204 [ERR] Managed proxy "TorBrowser\Tor\PluggableTransports\lyrebird.exe": Error dialing: EOF
+2025-01-04 13:11:40.204 [WARN] Proxy Client: unable to connect OR connection (handshaking (proxy)) with [2001:db8:17e6:8669:9ae4:38cc:f71c:9577]:443 ID=&lt;none&gt; RSA_ID=0242A01C5ED89032AB50911166698E75C2E84C89 ("general SOCKS server failure")
+2025-01-04 13:11:40.475 [NOTICE] Bootstrapped 75% (enough_dirinfo): Loaded enough directory info to build circuits
+2025-01-04 13:11:40.476 [NOTICE] Bootstrapped 90% (ap_handshake_done): Handshake finished with a relay to build circuits
+2025-01-04 13:11:40.476 [NOTICE] Bootstrapped 95% (circuit_create): Establishing a Tor circuit
+2025-01-04 13:11:40.476 [NOTICE] Failed to find node for hop #1 of our path. Discarding this circuit.
+2025-01-04 13:11:40.476 [NOTICE] Failed to find node for hop #1 of our path. Discarding this circuit.
+2025-01-04 13:11:40.476 [NOTICE] Failed to find node for hop #1 of our path. Discarding this circuit.
+2025-01-04 13:11:40.476 [NOTICE] Failed to find node for hop #1 of our path. Discarding this circuit.
+2025-01-04 13:11:40.476 [NOTICE] Our circuit 0 (id: 8) died due to an invalid selected path, purpose Unlinked conflux circuit. This may be a torrc configuration issue, or a bug.
+2025-01-04 13:11:41.458 [NOTICE] Failed to find node for hop #1 of our path. Discarding this circuit.
+2025-01-04 13:11:41.458 [NOTICE] Failed to find node for hop #1 of our path. Discarding this circuit.
+2025-01-04 13:11:41.458 [NOTICE] Failed to find node for hop #1 of our path. Discarding this circuit.
+2025-01-04 13:11:41.458 [NOTICE] Failed to find node for hop #1 of our path. Discarding this circuit.
+2025-01-04 13:11:42.393 [NOTICE] Delaying directory fetches: No running bridges
+2025-01-04 13:13:03.062 [ERR] Managed proxy "TorBrowser\Tor\PluggableTransports\lyrebird.exe": Error dialing: EOF
+2025-01-04 13:13:03.062 [WARN] Proxy Client: unable to connect OR connection (handshaking (proxy)) with [2001:db8:17e6:8669:9ae4:38cc:f71c:9577]:443 ID=&lt;none&gt; RSA_ID=0242A01C5ED89032AB50911166698E75C2E84C89 ("general SOCKS server failure")
+</code></pre>
+<p>Лог с 80 и 443 ограничением:</p>
+<pre><code class="lang-auto">2025-01-04 12:59:54.797 [NOTICE] DisableNetwork is set. Tor will not make or accept non-control network connections. Shutting down all existing connections.
+2025-01-04 13:00:02.553 [NOTICE] Opening Socks listener on 127.0.0.1:9150
+2025-01-04 13:00:02.553 [NOTICE] Opened Socks listener connection (ready) on 127.0.0.1:9150
+2025-01-04 13:00:02.903 [NOTICE] Bootstrapped 3% (conn_proxy): Connecting to proxy
+2025-01-04 13:00:02.904 [NOTICE] Bootstrapped 4% (conn_done_proxy): Connected to proxy
+2025-01-04 13:00:02.904 [NOTICE] Bootstrapped 10% (conn_done): Connected to a relay
+2025-01-04 13:00:08.696 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (unexpected eof while reading; TLS_ERROR; count 10; recommendation warn; host 3151FB419FAB0FD86D7BE4F7DFD620E99E105D92 at 135.181.41.38:443)
+2025-01-04 13:00:08.696 [WARN] 10 connections have failed:
+2025-01-04 13:00:08.696 [WARN] 10 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 13:00:08.697 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (unexpected eof while reading; TLS_ERROR; count 11; recommendation warn; host D9D4BCE7133616C8C9FA4C4156EB14D344E6229D at 77.221.152.105:443)
+2025-01-04 13:00:08.697 [WARN] 11 connections have failed:
+2025-01-04 13:00:08.697 [WARN] 11 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 13:00:08.697 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (unexpected eof while reading; TLS_ERROR; count 12; recommendation warn; host D405FCCF06ADEDF898DF2F29C9348DCB623031BA at 5.45.111.149:443)
+2025-01-04 13:00:08.697 [WARN] 12 connections have failed:
+2025-01-04 13:00:08.697 [WARN] 12 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 13:00:08.715 [NOTICE] Closing no-longer-configured Socks listener on 127.0.0.1:9150
+2025-01-04 13:00:08.715 [NOTICE] DisableNetwork is set. Tor will not make or accept non-control network connections. Shutting down all existing connections.
+2025-01-04 13:00:08.716 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 13; recommendation warn; host E742E7FA67A780F36C0F1FB108FC9BEA0B9EF9BA at 157.90.150.83:443)
+2025-01-04 13:00:08.716 [WARN] 13 connections have failed:
+2025-01-04 13:00:08.717 [WARN] 12 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 13:00:08.717 [WARN] 1 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 13:00:08.717 [WARN] connection_connect_sockaddr: Bug: Tried to open a socket with DisableNetwork set. (on Tor 0.4.8.13 e153e72c01315f86)
+2025-01-04 13:00:08.717 [WARN] tor_bug_occurred_: Bug: connection.c:2204: connection_connect_sockaddr: This line should not have been reached. (Future instances of this warning will be silenced.) (on Tor 0.4.8.13 e153e72c01315f86)
+2025-01-04 13:00:08.717 [WARN] Bug: Tor 0.4.8.13 (git-e153e72c01315f86): Line unexpectedly reached at connection_connect_sockaddr at connection.c:2204. (Stack trace not available) (on Tor 0.4.8.13 e153e72c01315f86)
+2025-01-04 13:00:08.717 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 14; recommendation warn; host F8947935FD32976596CEFC35EC71591ECA155B45 at 38.152.218.13:443)
+2025-01-04 13:00:08.717 [WARN] 14 connections have failed:
+2025-01-04 13:00:08.717 [WARN] 12 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 13:00:08.717 [WARN] 2 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 13:00:08.717 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 15; recommendation warn; host B0F85CDA415870CCB1BDF96B5E5ACF4E4D1CA009 at 136.243.144.86:443)
+2025-01-04 13:00:08.717 [WARN] 15 connections have failed:
+2025-01-04 13:00:08.717 [WARN] 12 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 13:00:08.717 [WARN] 3 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 13:00:08.717 [NOTICE] Delaying directory fetches: DisableNetwork is set.
+2025-01-04 13:00:08.717 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 16; recommendation warn; host 63BF46A63F9C21FD315CD061B3EAA3EB05283A0A at 65.21.94.13:443)
+2025-01-04 13:00:08.717 [WARN] 16 connections have failed:
+2025-01-04 13:00:08.717 [WARN] 12 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 13:00:08.717 [WARN] 4 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 13:00:08.717 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 17; recommendation warn; host 7C0CB581733D7F2739AB92C80C9F17400B13DACA at 88.99.227.34:443)
+2025-01-04 13:00:08.717 [WARN] 17 connections have failed:
+2025-01-04 13:00:08.717 [WARN] 12 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 13:00:08.717 [WARN] 5 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 13:00:08.717 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 18; recommendation warn; host B4E3546B058FEB655A6D8698D97C1459A2DF8E77 at 130.225.244.90:443)
+2025-01-04 13:00:08.717 [WARN] 18 connections have failed:
+2025-01-04 13:00:08.717 [WARN] 12 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 13:00:08.717 [WARN] 6 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 13:00:08.718 [WARN] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 19; recommendation warn; host 4236EA92D6B758A98C5334051C2D88FCB4843CC5 at 85.215.66.179:443)
+2025-01-04 13:00:08.718 [WARN] 19 connections have failed:
+2025-01-04 13:00:08.718 [WARN] 12 connections died in state handshaking (TLS) with SSL state error in HANDSHAKE
+2025-01-04 13:00:08.718 [WARN] 7 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE
+2025-01-04 13:00:08.718 [NOTICE] Our circuit 0 (id: 36) died due to an invalid selected path, purpose Unlinked conflux circuit. This may be a torrc configuration issue, or a bug.
+</code></pre></td><td>2025-01-04T13:16:19.488Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>Не понимаю почему так происходит, видимо трафик как-то странно передаётся</p>
+</blockquote>
+<p>VLESS пытается разобраться что в трафике шифровано, а что нет и дошифровать нешифрованное (например, sni). Чтобы избежать двойного шифрования (его детектят в Китае). И видимо он не понимает торовский трафик, считает, что он TLS, а он не совсем стандартный, не как HTTPS. obfs4 же выглядит как непонятно что и пропускается как есть, скорее всего.</p></td><td>2025-01-04T13:35:37.107Z</td></tr><tr><td>4nonch(4nonch)</td><td><p>Хм, звучит логично. Видимо VLESS все же не подходит для прямого доступа к тору.</p>
+<p>Из альтернативы для обеспечения быстрого доступа без задержек выходит лучше поднять свой webtunnel на ВПС’ке? Он же легковеснее obfs4 по идее будет? Этот мост случаем не будет доступен всем пользователям?</p></td><td>2025-01-04T13:40:59.241Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="4nonch" data-post="12" data-topic="14318">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/4nonch/48/14681_2.png" class="avatar"> 4nonch:</div>
+<blockquote>
+<p>быстрого доступа без задержек выходит лучше поднять свой webtunnel на ВПС’ке?</p>
+</blockquote>
+</aside>
+<p>Предполагаю будет бытрее работать если запустить тор на удалённой машине и ходить через обычный тунель/прокси на удаленную машину.</p>
+<aside class="quote no-group" data-username="4nonch" data-post="12" data-topic="14318">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/4nonch/48/14681_2.png" class="avatar"> 4nonch:</div>
+<blockquote>
+<p>Он же легковеснее obfs4 по идее будет?</p>
+</blockquote>
+</aside>
+<p>obfs4 выглядит более простым, можете оба попробовать и сравнить.</p>
+<aside class="quote no-group" data-username="4nonch" data-post="12" data-topic="14318">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/4nonch/48/14681_2.png" class="avatar"> 4nonch:</div>
+<blockquote>
+<p>Этот мост случаем не будет доступен всем пользователям?</p>
+</blockquote>
+</aside>
+<p><s>Будет.</s></p>
+<p>UPD:<br>
+Если <a href="https://community.torproject.org/relay/setup/webtunnel/" rel="noopener nofollow ugc">указать</a> случайный длинный PATH в nginx, то обычным пользователям незнающим этот токен будет показыватся заглушка.</p></td><td>2025-01-04T13:55:25.371Z</td></tr><tr><td>Simple_logic</td><td><p>А в чем вообще смысл запуска тор через впн, кто-то может обьяснить? Никак не могу понять.</p></td><td>2025-01-04T14:03:38.992Z</td></tr><tr><td>4nonch(4nonch)</td><td><p>Тор блокнут в РФ и без мостов не зайти. Предполагалось что я смогу подключиться напрямую через vless прокси без использования промежуточных мостов.</p></td><td>2025-01-04T14:05:05.440Z</td></tr><tr><td>Simple_logic</td><td><aside class="quote no-group" data-username="4nonch" data-post="15" data-topic="14318">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/4nonch/48/14681_2.png" class="avatar"> 4nonch:</div>
+<blockquote>
+<p>Тор блокнут в РФ и без мостов не зайти.</p>
+</blockquote>
+</aside>
+<p>Пока что тор прекрасно работает в РФ с мостами вебтуннель. И если есть впн, зачем тогда нужен тор, так и остается загадкой.</p></td><td>2025-01-04T14:20:08.523Z</td></tr><tr><td>4nonch(4nonch)</td><td><blockquote>
+<p>без мостов не зайти.<br>
+работает в РФ с мостами вебтуннель</p>
+</blockquote>
+<p>Я и говорю, что без мостов не работает. Только зачем использовать чужие мосты, когда можно задействовать свои ресурсы и не иметь задержек трафика?</p>
+<blockquote>
+<p>зачем тогда нужен тор</p>
+</blockquote>
+<p>Доступ к луковым доменам.</p></td><td>2025-01-04T14:24:00.280Z</td></tr><tr><td>Simple_logic</td><td><aside class="quote no-group" data-username="4nonch" data-post="17" data-topic="14318">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/4nonch/48/14681_2.png" class="avatar"> 4nonch:</div>
+<blockquote>
+<p>Доступ к луковым доменам.</p>
+</blockquote>
+</aside>
+<p>И всего-то? Задержки, создаваемые сетью тора, не идут ни в какое сравнение со скоростью работы сайтов onion и им подобных.</p></td><td>2025-01-04T14:29:56.123Z</td></tr><tr><td>4nonch(4nonch)</td><td><p>Всё, поднял свой webtunnel. Стало быстрее работать.</p>
+<p>Кому интересно, то <a href="https://community.torproject.org/relay/setup/webtunnel/" class="inline-onebox" rel="noopener nofollow ugc">Tor Project | WebTunnel Bridge</a> + <a href="https://community.torproject.org/relay/setup/webtunnel/source/" class="inline-onebox" rel="noopener nofollow ugc">Tor Project | Compile and run WebTunnel from the source</a></p>
+<p>Вкратце:<br>
+Добавляем локацию в нгингкс с рандомной строкой</p>
+<pre><code class="lang-auto">location /yourpath{
+    proxy_pass http://127.0.0.1:15000;
+    proxy_http_version 1.1;
+
+    ### Set WebSocket headers ###
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+
+    ### Set Proxy headers ###
+    proxy_set_header        Accept-Encoding   "";
+    proxy_set_header        Host            $host;
+    proxy_set_header        X-Real-IP       $remote_addr;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header        X-Forwarded-Proto $scheme;
+    add_header              Front-End-Https   on;
+
+    proxy_redirect     off;
+    access_log  off;
+    error_log /dev/null;
+}
+</code></pre>
+<p>Устанавливаем всё нужное как из гайда.<br>
+Добавляем в torrc:</p>
+<pre><code class="lang-auto">BridgeRelay 1
+ORPort 127.0.0.1:auto
+AssumeReachable 1
+ServerTransportPlugin webtunnel exec /usr/local/bin/webtunnel
+ServerTransportListenAddr webtunnel 127.0.0.1:15000
+ServerTransportOptions webtunnel url=https://yourdomain/path # хост + путь
+ExtORPort auto
+Nickname WebTunnelTest # любой
+SocksPort 0
+</code></pre>
+<p>А также раскоментите <code>PublishServerDescriptor 0</code> если хотите чтобы мост был доступен только вам, иначе он будет распределяться всем участникам при запросе.<br>
+(ещё можно <code>BridgeDistribution none</code> поставить на всякий случай)</p>
+<p>Мост для вставки в тот же браузер строится так:<br>
+<code>webtunnel 10.0.0.2:443 FINGERPRINT url=https://yourdomain/path</code><br>
+FINGERPRINT берём отсюда: <code>/var/lib/tor/fingerprint</code><br>
+А url как в torrc.<br>
+<code>10.0.0.2:443 </code> можно так и оставить, я так понимаю это заглушка из-за спецификацаии, сам адрес не используется.</p></td><td>2025-01-04T15:52:27.146Z</td></tr><tr><td>voper</td><td><p>На xray сервере можно весь трафик гонять в Тор, а клиент только vless, так мосты будут не нужны</p></td><td>2025-01-04T16:15:36.278Z</td></tr><tr><td>4nonch(4nonch)</td><td><p>Но я так понимаю вместо vless другой протокол? Можно пожалуйста ссылочку на ближайший конфиг?<br>
+Можно паралельно же несколько протоколов настроить?</p>
+<p>P.S. а, я понял о чём вы. Имеется ввиду выпускать весь трафик по умолчанию в тор с сервера, а до сервера как и раньше vless’ом стучаться? Звучит громоздко и не всегда удобно иметь торовый адрес постоянно меняющийся. Промедления будут ощутимые. Мне бы только для самого тора отдельно гонять было бы неплохо.</p></td><td>2025-01-04T16:22:10.704Z</td></tr><tr><td>denium</td><td><blockquote>
+<p>Задержки, создаваемые сетью тора, не идут ни в какое сравнение со скоростью работы сайтов onion</p>
+</blockquote>
+<p>Что имеете в виду? Не очень понял, под вечер плохо соображаю.<br>
+Что у тора задержки относительно низкие (для интернет сайтов), а onion сайты медленно работают?</p></td><td>2025-01-04T16:38:56.905Z</td></tr><tr><td>skyrunner(name)</td><td><p>Попробуйте с любыми мостами тора, интересно, так тоже не будет работаьь?</p></td><td>2025-01-04T17:27:01.217Z</td></tr><tr><td>Simple_logic</td><td><aside class="quote no-group" data-username="denium" data-post="22" data-topic="14318">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>Что у тора задержки относительно низкие (для интернет сайтов), а onion сайты медленно работают?</p>
+</blockquote>
+</aside>
+<p>Именно.</p></td><td>2025-01-04T18:00:23.826Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Поднимите обычный SOCKS5 с авторизацией и не мудрите. Смысл в том, что если вы подняли мост, то этот мост ни для чего, кроме Tor не годен. А сокс-прокси могут использовать другие приложения, если приспичит какое-то приложение выпустить через свой сервер.</p>
+<details>
+<summary>
+Моя серверная часть - dante-server</summary>
+<p>/etc/danted.conf</p>
+<pre><code class="lang-auto">logoutput: syslog
+internal: 0.0.0.0 port = 1080
+internal: :: port = 1080
+external: ens3
+socksmethod: username
+clientmethod: none
+user.privileged: root
+user.unprivileged: nobody
+user.libwrap: nobody
+client pass {
+    from: 0/0 to: 0/0
+}
+socks pass {
+    from: 0/0 to: 0/0
+}
+</code></pre>
+</details>
+<details>
+<summary>
+Клиентская часть</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="tor-через-vless-без-нужды-в-мостах/3b1e389a9893409f44c4c6362654af10962e0f5d.png" data-download-href="https://ntc.party/uploads/default/3b1e389a9893409f44c4c6362654af10962e0f5d" title="firefox_XkrXdYT9UL"><img src="tor-через-vless-без-нужды-в-мостах/3b1e389a9893409f44c4c6362654af10962e0f5d_2_690x199.png" alt="firefox_XkrXdYT9UL" data-base62-sha1="8qYUZleE1y0GVqtzVguTaKlP8dv" width="690" height="199" srcset="tor-через-vless-без-нужды-в-мостах/3b1e389a9893409f44c4c6362654af10962e0f5d_2_690x199.png, tor-через-vless-без-нужды-в-мостах/3b1e389a9893409f44c4c6362654af10962e0f5d_2_1035x298.png 1.5x, tor-через-vless-без-нужды-в-мостах/3b1e389a9893409f44c4c6362654af10962e0f5d.png 2x" data-dominant-color="41404B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">firefox_XkrXdYT9UL</span><span class="informations">1051×304 19.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>Учётные данные вписывать от пользователя, под которым заходите на сервер. Либо создать в системе отдельного пользователя, урезанного (без шелла). Особенно, если прокси будет пользоваться ещё какой-то человек - в этом случае уместно каждому создать отдельную учётную запись, чтобы при необходимости можно было пользователя удалить и тем самым закрыть ему доступ к вашему прокси.</p></td><td>2025-01-04T23:24:03.750Z</td></tr><tr><td>4nonch(4nonch)</td><td><p>Справедливо. Благодарю, думаю так и сделаю потом.</p></td><td>2025-01-05T02:11:03.488Z</td></tr><tr><td>denium</td><td><p>Кроме того мост выполняет функцию guard, что несколько снижает поворотливость тора. Т.к. это ограничивает entry node одним вашим IP.</p></td><td>2025-01-05T02:56:26.761Z</td></tr><tr><td>Ode2(Serg )</td><td><p>У меня все работает без каких либо проблем, vless, на Торе трафик через obfs4 . Что то неправильно сделано?</p></td><td>2025-01-07T04:57:15.416Z</td></tr><tr><td>mipeje</td><td><p>У меня через nekoray и hiddify работало, но как перешёл на xhttp и v2rayn перестало)</p></td><td>2025-01-07T08:16:05.026Z</td></tr><tr><td>4nonch(4nonch)</td><td><blockquote>
+<p>vless, на Торе трафик через obfs4 . Что то неправильно сделано?</p>
+</blockquote>
+<p>У меня через obfs4 тоже работало. Просто я не понимал почему мне нужен obfs4, разве это не признак того что сеть заблокирована? Но как она заблокирована, если тор спокойно доступен со стороны VPS’ки?</p>
+<p>Мне казалось должно было работать без obfs4</p></td><td>2025-01-07T15:40:30.534Z</td></tr><tr><td>zzr</td><td><p>спасибо занаводку бро, понтднял етого дантеса всё збс стало по быстрей открывает ети .онион сайты</p>
+<p>пс<br>
+я ваще удивляюсь как досих пор не заблочили ети голые соксы и прочие, но ето “обсуждается” в соседней <a href="https://ntc.party/t/%D0%BA%D0%B0%D0%BA-%D0%B2%D1%8B-%D0%B4%D1%83%D0%BC%D0%B0%D0%B5%D1%82%D0%B5-%D0%BF%D0%BE%D1%87%D0%B5%D0%BC%D1%83-%D0%B4%D0%BE-%D1%81%D0%B8%D1%85-%D0%BF%D0%BE%D1%80-%D0%BD%D0%B5-%D0%B7%D0%B0%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D1%8B-http-https-socks-%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8/14407/1">теме</a></p></td><td>2025-01-08T16:56:02.532Z</td></tr><tr><td>NowAndThen</td><td><p>Тоже не понимаю, чего вы так мучаетесь. Vless сервера умеют в обычный SOCKS. Поднимаете новый инбаунд и прописываете его настройки как прокси в Торе. 3X-UI, например, такой код генерирует.</p>
+<pre><code class="lang-auto">{
+      "listen": null,
+      "port": 1234,
+      "protocol": "socks",
+      "settings": {
+        "auth": "password",
+        "accounts": [
+          {
+            "user": "Tw1DCA3mm6",
+            "pass": "xltirSxtkT"
+          }
+        ],
+        "udp": false,
+        "ip": "127.0.0.1"
+      },
+      "streamSettings": null,
+      "tag": "inbound-4443",
+      "sniffing": {
+        "enabled": false,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic",
+          "fakedns"
+        ],
+        "metadataOnly": false,
+        "routeOnly": false
+      },
+      "allocate": {
+        "strategy": "always",
+        "refresh": 5,
+        "concurrency": 3
+      }
+}
+</code></pre></td><td>2025-01-08T17:28:00.827Z</td></tr><tr><td>zzr</td><td><p>хах, а ведь и правда суде по всему xray умеет в том числе и обычный socks делать <span class="spoiler">figures</span></p>
+<p>вот тока бл НЮАНС</p>
+<details>
+<summary>
+Summary</summary>
+<p><img src="tor-через-vless-без-нужды-в-мостах/b41fc47f00226515c5b526f3f4712ac9d2892b3c.jpeg" alt="Screenshot_20250108_212100" data-base62-sha1="pHs0ouf1MFtSUtl8TkV0qa0dahu" width="321" height="233"></p>
+</details></td><td>2025-01-08T18:21:27.107Z</td></tr><tr><td>Ode2(Serg )</td><td><p>Там какая то разница в пакетах, без obsf4 vless не дружит с Тор. Если я правильно запомнил</p></td><td>2025-01-08T18:43:47.488Z</td></tr>
+    </table>
+      </body>
+    </html>

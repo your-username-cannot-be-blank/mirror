@@ -1,0 +1,55 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-detecting-and-evading-censorship-in-depth-a-case-study-of-irans-protocol-filter-foci-2020</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Detecting and Evading Censorship-in-Depth: A Case Study of Iran’s Protocol Filter<br>
+Kevin Bock, Yair Fax, Kyle Reese, Jasraj Singh, Dave Levin<br>
+<a href="https://censorbib.nymity.ch/#Bock2020a" class="onebox" target="_blank" rel="nofollow noopener">https://censorbib.nymity.ch/#Bock2020a</a><br>
+<a href="https://www.usenix.org/conference/foci20/presentation/bock" rel="nofollow noopener">https://www.usenix.org/conference/foci20/presentation/bock</a> (video and slides)<br>
+<a href="https://geneva.cs.umd.edu/posts/iran-whitelister/" rel="nofollow noopener">https://geneva.cs.umd.edu/posts/iran-whitelister/</a> (blog post)</p>
+<p>The paper is about a new component of the Internet censorship system in Iran: a <em>protocol filter</em> that permits only certain protocols on certain TCP ports. The protocol filter, newly activated in February 2020, is separate from, but operates in concert with, the previously existing “standard” DPI-based censorship in Iran. A connection is blocked if it trips <em>either</em> of the two censorship systems.</p>
+<p>The protocol filter operates on TCP ports 53, 80, and 443 only. On these ports, connections are only allowed if they match the protocol fingerprint of DNS, HTTP, or TLS. The protocol fingerprint is not paired with a specific port as you might expect: any of the three protocols may be used on any of the three ports. The filter looks at the first two data-carrying packets after the TCP handshake. If the two packets together do not match one of the permitted protocol fingerprints, then every packet after the first will be dropped for 60 seconds. If another non-protocol-conforming flow is sent to the same destination before the 60 seconds are up, the timer is reset. The protocol filter does not do TCP reassembly, nor verify packet checksums. It is unidirectional, only operating on flows that originate in Iran. Curiously, not all destination IP addresses are affected equally. Of an Alexa top 20K list of destinations, only about 18% were consistently affected by the protocol filter.</p>
+<p>Section 4.3 gives precise descriptions of the protocol fingerprints the filter looks for. For example, to qualify as HTTP, the combined payload of the first two packets must be at least 8 bytes long, and begin with <code>GET </code>, <code>POST </code>, <code>HEAD </code>, <code>CONNECT </code>, <code>OPTIONS </code>, <code>DELETE </code>, or <code>PUT </code>. The DNS protocol fingerprint has a bug, which is that it matches the format of DNS over UDP, and doesn’t account for the <a href="https://tools.ietf.org/html/rfc1035#section-4.2.2" rel="nofollow noopener">length prefixes</a> that are a feature of DNS over TCP. DNS over TCP still works in Iran, despite the bug in the protocol filter, because an entire DNS query fits in one TCP packet, and the filter never blocks the first packet in a flow.</p>
+<p>The authors use <a href="https://censorbib.nymity.ch/#Bock2019a" rel="nofollow noopener">Geneva</a> (see <a href="https://github.com/net4people/bbs/issues/23" rel="nofollow noopener">previous summary</a>) to automatically discover ways to evade the protocol filter. They find four evasion strategies, three client-side and one server-side:</p>
+<ol>
+<li>(client-side) At the beginning of the flow, send a packet with a protocol-conforming payload but a bad checksum. The filter, which does not verify checksums, marks the entire flow as protocol-conforming, while the packet with the bad checksum is ignored by the destination.</li>
+<li>(client-side) Send two or more FIN packets before the TCP handshake.</li>
+<li>(client-side) Send nine ACK, RST, or SYN packets at the end of the handshake.</li>
+<li>(server-side) Send nine SYN/ACK packets with incorrect acknowledgement numbers. This causes the client to send nine RSTs, effectively inducing the client to perform Strategy 3.</li>
+</ol></td><td>2020-08-26T15:33:51.428Z</td></tr>
+    </table>
+      </body>
+    </html>

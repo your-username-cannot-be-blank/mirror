@@ -1,0 +1,457 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>обход-блокировки-youtube-и-некоторых-сайтов-на-mikrotik-за-5-минут</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>bunkerfox(bunkerfox)</td><td><p>Вопреки распространенному и вводящему в заблуждение мнению, на MikroTik можно настроить работу антиDPi. Основные требования: роутер должен быть на ARM/ARM64/x86/x64(mipsbe/smips итд не подойдет, на hap ac2 обязательно поставить галочку single process в routing-&gt;settings для освобождения ram, а так же стоит установить старый модуль wireless вместо wifi-qcom-ac или отказаться от wifi в виду ограниченного кол-ва ram) и установлен пакет для поддержки контейнеров, а так же его работа разрешена, ну и очень желательно иметь внешнюю флешку для этого дела (фс только ext4). Огромная благодарность за решение и разрешение на публикацию: <a class="mention" href="/u/wiktorbgu">@wiktorbgu</a> . К сожалению, лично у меня на таттелекоме не работает после этого вообще, но, возможно, кто-то найдется и внесет свои дополнительные исправления в этот набор. На ROS6/mipsbe думаю можно завести аналогичную тему через MetaRouter - виртуализация openwrt с последующей насадкой модулей. Оригинальная статья: <a href="https://habr.com/ru/articles/838452/" rel="noopener nofollow ugc">https://habr.com/ru/articles/838452/</a> (доступна только под vpn)<br>
+Команды в настройку за один присест (стоит их скопировать сначала в notepad++ и потом только в terminal):</p>
+<details>
+<summary>
+Summary</summary>
+<pre><code class="lang-auto">/interface/bridge add name=Bridge-Docker port-cost-mode=short
+/ip/address add address=192.168.254.1/24 interface=Bridge-Docker network=192.168.254.0
+/interface/veth add address=192.168.254.5/24 gateway=192.168.254.1 name=BYEDPI-SOCKS
+/interface/veth add address=192.168.254.2/24 gateway=192.168.254.1 name=TUN2SOCKS
+/interface/bridge/port add bridge=Bridge-Docker interface=BYEDPI-SOCKS
+/interface/bridge/port add bridge=Bridge-Docker interface=TUN2SOCKS
+
+/container/config set registry-url=https://registry-1.docker.io tmpdir=/usb1/docker/pull
+
+/container/add remote-image=tazihad/byedpi:latest interface=BYEDPI-SOCKS cmd="--disorder 1 --auto=torst --tlsrec 1+s --debug 1" root-dir=/usb1/docker/byedpi start-on-boot=yes
+/container/envs/ add key=LOCAL_ROUTE name=tun2socks value="ip r a 192.168.0.0/16 via 192.168.254.1;ip r a 10.0.0.0/8 via 192.168.254.1;ip r a 172.16.0.0/12 via 192.168.254.1"
+/container/envs/ add key=SOCKS5_ADDR name=tun2socks value=192.168.254.5
+/container/add remote-image=snegowiki/hev-socks5-tunnel-mikrotik:latest interface=TUN2SOCKS root-dir=usb1/docker/hev-socks5-tunnel start-on-boot=yes envlist=tun2socks
+
+/ip/dns set address-list-extra-time=1d
+
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=googlevideo.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=youtube.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=youtubei.googleapis.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=ytimg.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=youtu.be type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=ggpht.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=rutracker.org type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=rutracker.cc type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=medium.com type=FWD
+
+/routing/table add disabled=no fib name=dpi_mark
+
+/ip/route add disabled=no distance=1 dst-address=0.0.0.0/0 gateway=192.168.254.2%Bridge-Docker pref-src="" routing-table=dpi_mark scope=30 suppress-hw-offload=no target-scope=10
+
+/ip firewall mangle add action=mark-routing chain=prerouting comment="List DNS FWD route to tun2socks =&gt; byedpi" connection-state=""  dst-address-list=za_dpi_FWD in-interface-list=LAN new-routing-mark=dpi_mark passthrough=no
+
+/ip/firewall/address-list/ add address=10.0.0.0/8 list=local
+/ip/firewall/address-list/ add address=172.16.0.0/12 list=local
+/ip/firewall/address-list/ add address=192.168.0.0/16 list=local
+
+/ip firewall nat add action=redirect chain=dstnat dst-address-list=!local dst-port=53 in-interface-list=LAN protocol=udp
+/ip firewall nat add action=redirect chain=dstnat dst-address-list=!local dst-port=53 in-interface-list=LAN protocol=tcp
+</code></pre>
+</details>
+<p>После выполнения команд необходимо запустить 2 добавленных контейнера и перезагрузить роутер.<br>
+UPD: Вариант размещения антиdpi на роутере не совместим с антизапретом через openvpn на нем же, потому что происходит наложение маршрутов, просьба помочь с этим. У меня лично завелось все с --fake -1 --ttl 10 --auto=ssl_err --fake -1 --ttl 5  в аргументах контейнера.<br>
+UPD2: Если нет возможности использовать DoH или 7.16rc4(якобы все еще сырая прошивка), то нужно указать dns заместо localhost в dns static.<br>
+UPD3: Удалось совместить АнтиЗапрет и ютаб с другими сайтами путем указания им публичного dns снова через dns static.</p>
+<details>
+<summary>
+Summary</summary>
+<p><img src="обход-блокировки-youtube-и-некоторых-сайтов-на-mikrotik-за-5-минут/591681d55d552f6e1a03dcd7cea400a61770c1fd.png" alt="image" data-base62-sha1="cI6IpewHzpfYtztkkS6t0PJb9WR" width="599" height="446"></p>
+</details>
+<p>ВНИМАНИЕ: Обход DPI работает только в случае блокировки сайта не по IP-адресу, тот же <a href="http://xvideos.com" rel="noopener nofollow ugc">xvideos.com</a> не откроется таким методом. Проверить можно по выдаче nslookup и проверкой ip.<br>
+P.S.Огромная благодарность <a class="mention" href="/u/wiktorbgu">@wiktorbgu</a> , <a class="mention" href="/u/dartraiden">@dartraiden</a> , <a class="mention" href="/u/hufrea">@hufrea</a> и другим кого не смог упомянуть.</p></td><td>2024-09-17T20:24:26.744Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>Обновил инструкцию, для тех у кого не открывается оригинальная статья</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://web.archive.org/web/20240917203256/https://habr.com/ru/articles/838452/">
+  <header class="source">
+      <img src="обход-блокировки-youtube-и-некоторых-сайтов-на-mikrotik-за-5-минут/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://web.archive.org/web/20240917203256/https://habr.com/ru/articles/838452/" target="_blank" rel="noopener nofollow ugc">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://web.archive.org/web/20240917203256/https://habr.com/ru/articles/838452/" target="_blank" rel="noopener nofollow ugc">Решаем проблему блокировок (и YouTube) за 5 минут на роутере Mikrotik через...</a></h3>
+
+  <p>Всем привет! Это моя первая статья на хабре, которая точно кому-то пригодится в данное время. Здесь я расскажу как ускорить ютуб и разблокировать доступ к некоторым заблокированным ресурсам прямо на...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-09-17T20:34:54.919Z</td></tr><tr><td>zzr</td><td><p>наверное к требованиям стоит допипсать что нужно ещё кучу оперативной памятьи, как вот <a href="https://ntc.party/t/mkirotik-vless-reality/8708/21">тут</a> обсуждалось, например ас2 сосвоими 128 метрами идёт на…</p></td><td>2024-09-18T05:16:20.290Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>UPD4: Оптимальный вариант для себя пошел с такими аргументами и обязательным указанием статики в arp для контейнеров (после ребута mac сменится у них, добавить заново придется)<br>
+–disorder 1 --split 1 --fake -1 --ttl 10 --auto=ssl_err --fake -1 --ttl 5 --debug 1</p></td><td>2024-09-26T01:24:20.213Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>UPD5: Тк нельзя стало почему-то по не понятным причинам отредачить первый пост, для контейнеров рекомендую использовать ветки test вместо latest</p>
+<pre><code class="lang-auto">/container/add remote-image=tazihad/byedpi:test interface=BYEDPI-SOCKS cmd="--disorder 1 --auto=torst --tlsrec 1+s --debug 1" root-dir=/usb1/docker/byedpi start-on-boot=yes
+
+/container/add remote-image=snegowiki/hev-socks5-tunnel-mikrotik:test interface=TUN2SOCKS root-dir=usb1/docker/hev-socks5-tunnel start-on-boot=yes envlist=tun2socks
+</code></pre>
+<p>По ощущениям работает реще все, ну и для просто arm тиков только с них возможна установка на текущий момент. И да, контейнеры можно удалять и переставлять независимо от проделанных действий, если у кого есть вопросы на этот счет. Для дескорда этот способ разблокировки тоже можно использовать, но только для статики без голоса по понятной всем причине.</p></td><td>2024-10-11T01:12:33.684Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Новая версия <a href="https://hub.docker.com/r/wiktorbgu/byedpi-mikrotik" rel="noopener nofollow ugc">https://hub.docker.com/r/wiktorbgu/byedpi-mikrotik</a> и достаточно только одного модуля теперь, занимает куда меньше ресурсов</p></td><td>2024-11-03T21:31:34.941Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Любителям byedpi <img src="https://ntc.party/images/emoji/twitter/grin.png?v=12" title=":grin:" class="emoji" alt=":grin:" loading="lazy" width="20" height="20"> велком ту тестинг ))<br>
+<a href="https://hub.docker.com/r/wiktorbgu/byedpi-hev-socks5-tunnel" class="onebox" target="_blank" rel="noopener nofollow ugc">https://hub.docker.com/r/wiktorbgu/byedpi-hev-socks5-tunnel</a><br>
+наконец-то все в одном контейнере <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"><br>
+tag:test</p></td><td>2024-11-04T12:45:47.586Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Новый вариант настройки и контейнера в ориге статьи уже есть: [<a href="https://habr.com/ru/articles/838452/" class="inline-onebox" rel="noopener nofollow ugc">Решаем проблему блокировок (и YouTube) за 5 минут на роутере Mikrotik через контейнеры и без VPN / Хабр</a>]<br>
+ВНИМАНИЕ!!! Предыдущие варианты настроек должны быть удалены перед установкой нового контейнера, чтобы не возникало проблем на пустом месте.</p>
+<details>
+<summary>
+Для тех кто не хочет далеко ходить, быстрая настройка тут</summary>
+<pre><code class="lang-auto">/tool fetch https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem
+/certificate import file-name=DigiCertGlobalRootG2.crt.pem passphrase=""
+/ip dns set use-doh-server=https://1.1.1.1/dns-query verify-doh-cert=yes
+
+/interface/bridge add name=Bridge-Docker port-cost-mode=short
+/ip/address add address=192.168.254.1/24 interface=Bridge-Docker network=192.168.254.0
+/interface/veth add address=192.168.254.2/24 gateway=192.168.254.1 name=BYEDPI-TUN
+/interface/bridge/port add bridge=Bridge-Docker interface=BYEDPI-TUN
+
+/container/config set registry-url=https://registry-1.docker.io tmpdir=/usb1/docker/pull
+
+/container/add remote-image=wiktorbgu/byedpi-hev-socks5-tunnel interface=BYEDPI-TUN cmd="--disorder 1 --auto=torst --tlsrec 1+s" root-dir=/usb1/docker/byedpi-hev-socks5-tunnel start-on-boot=yes
+
+/ip/dns set address-list-extra-time=0s # set to default
+
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=googlevideo.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=youtube.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=youtubei.googleapis.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=ytimg.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=youtu.be type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=ggpht.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=rutracker.org type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=rutracker.cc type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=medium.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=facebook.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=fbcdn.net type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=x.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=twitter.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=linkedin.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=prntscr.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=prnt.sc type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=t.co type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=protonvpn.com type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=nnmclub.to type=FWD
+/ip/dns/static/ add address-list=za_dpi_FWD forward-to=localhost match-subdomain=yes name=ntc.party type=FWD
+
+/routing/table add disabled=no fib name=dpi_mark
+
+/ip/route add disabled=no distance=1 dst-address=0.0.0.0/0 gateway=192.168.254.2%Bridge-Docker pref-src="" routing-table=dpi_mark scope=30 suppress-hw-offload=no target-scope=10
+
+/ip firewall mangle add action=mark-connection chain=prerouting connection-mark=no-mark dst-address-list=za_dpi_FWD in-interface-list=LAN new-connection-mark=to_dpi passthrough=yes
+/ip firewall mangle add action=mark-routing chain=prerouting comment="To DPI" connection-mark=to_dpi in-interface-list=LAN new-routing-mark=dpi_mark passthrough=no routing-mark=!dpi_mark
+
+/ip firewall filter set [find action=fasttrack-connection] packet-mark=no-mark connection-mark=no-mark
+
+/ip/firewall/address-list/ add address=10.0.0.0/8 list=local
+/ip/firewall/address-list/ add address=172.16.0.0/12 list=local
+/ip/firewall/address-list/ add address=192.168.0.0/16 list=local
+
+/ip firewall nat add action=redirect chain=dstnat dst-address-list=!local dst-port=53 in-interface-list=LAN protocol=udp
+/ip firewall nat add action=redirect chain=dstnat dst-address-list=!local dst-port=53 in-interface-list=LAN protocol=tcp
+
+:delay 10s
+
+/container start [find interface=BYEDPI-SOCKS]
+/container start [find interface=TUN2SOCKS]
+</code></pre>
+</details>
+<p><img src="обход-блокировки-youtube-и-некоторых-сайтов-на-mikrotik-за-5-минут/7309f9585056414b3620c4d7f5fd2c8174f19fa1.png" alt="image" data-base62-sha1="gpGhfOaIXcmkfbeRSuiZuzlqL3b" width="617" height="169"></p></td><td>2024-11-07T20:12:01.341Z</td></tr><tr><td>keymaster(D)</td><td><p>Уважаемый bunkerfox, а можно, пожалуйста, подробнее, как Вы совместили контейнер с “впн-антизапретом”, с учетом нового варианта настройки от 7 ноября и выхода stable ROS 7.16.1?</p></td><td>2024-11-29T12:49:51.167Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Через перенаправление dns для доменов</p></td><td>2024-11-29T16:36:50.611Z</td></tr><tr><td>keymaster(D)</td><td><p>Т.е. без использования DOH?</p></td><td>2024-11-29T16:58:34.954Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>DoH у меня стоит, который потом убирается скриптом при подключении АнтиЗапрета и наоборот. Но сидеть в нынешнем интернете без DoH вообще…равносильно выстрелу в ногу себе, другой вопрос если провайдер его зачем-то режет. И в целом щас контейнер обновился уже, свежий вариант тут:<br>
+<a href="https://hub.docker.com/r/wiktorbgu/byedpi-hev-socks5-tunnel" rel="noopener nofollow ugc">https://hub.docker.com/r/wiktorbgu/byedpi-hev-socks5-tunnel</a> и он же щас вполне дружит с hap ac2<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="обход-блокировки-youtube-и-некоторых-сайтов-на-mikrotik-за-5-минут/e9d912cb485c3e791afc9f177b36d291f3c4eddd.jpeg" data-download-href="https://ntc.party/uploads/default/e9d912cb485c3e791afc9f177b36d291f3c4eddd" title="image"><img src="обход-блокировки-youtube-и-некоторых-сайтов-на-mikrotik-за-5-минут/e9d912cb485c3e791afc9f177b36d291f3c4eddd_2_690x405.jpeg" alt="image" data-base62-sha1="xmIklPxmsrgcxz5I9fl5sEeBiqh" width="690" height="405" srcset="обход-блокировки-youtube-и-некоторых-сайтов-на-mikrotik-за-5-минут/e9d912cb485c3e791afc9f177b36d291f3c4eddd_2_690x405.jpeg, обход-блокировки-youtube-и-некоторых-сайтов-на-mikrotik-за-5-минут/e9d912cb485c3e791afc9f177b36d291f3c4eddd_2_1035x607.jpeg 1.5x, обход-блокировки-youtube-и-некоторых-сайтов-на-mikrotik-за-5-минут/e9d912cb485c3e791afc9f177b36d291f3c4eddd_2_1380x810.jpeg 2x" data-dominant-color="242D36"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1919×1129 146 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-11-29T17:11:24.840Z</td></tr><tr><td>keymaster(D)</td><td><p>Вон чего! Спасибо! Вроде в ROS 7.17, которая на подходе, обещают в раздел dns static включить возможность редиректа через DOH, который там же и будет задаваться, т.е. индивидуально для каждого домена.</p></td><td>2024-11-29T17:27:07.663Z</td></tr><tr><td>smoke96</td><td><p>Добрый день всем, кто поможет настроить микротик по этой теме? Сам не разбираюсь вообще. Контакты боюсь оставлять , не знаю разрешено ли это. Отблагодарю.</p></td><td>2024-12-01T07:14:32.143Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>UPD6: Дискорд тоже возможно распломбировать через контейнер путем маркировки трафика. Скорее всего и остальное udp реалтайм можно завернуть.<br>
+На компе в powershell от рута:<br>
+New-NetQosPolicy -name “discord” -NetworkProfile All -DSCPAction 34 -AppPathName discord.exe -IPProtocol Both -PolicyStore “ActiveStore”</p>
+<p>На роутере:<br>
+/ip firewall mangle add action=mark-connection chain=prerouting comment=“34 - to_dpi” connection-mark=no-mark dscp=34 in-interface-list=LAN new-connection-mark=to_dpi<br>
+И расположить над существующими правилами контейнера<br>
+Огромная благодаронсть <a class="mention" href="/u/wiktorbgu">@wiktorbgu</a></p></td><td>2024-12-01T14:57:22.796Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>в текущей версии 7.17rc2 можно добавить файл подкачки и будет ему легче работаться</p>
+<p>здесь в качестве подкачки используется раздел флешки</p>
+<pre><code class="lang-auto">/disk format-drive usb1 file-system=wipe duration=10s
+
+/disk add type=partition parent=usb1 partition-size=8G
+/disk add type=partition parent=usb1 partition-size=512M
+
+/disk format-drive usb1-part1 file-system=ext4
+
+/disk set swap=yes usb1-part2
+
+</code></pre>
+<p>здесь используется файл, но нужно установить пакет rose-storage</p>
+<pre><code class="lang-auto">/disk add file-path=usb1/swap file-size=1024M slot=swap type=file
+/disk set swap swap=yes
+</code></pre></td><td>2024-12-01T15:11:59.131Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Влажное уточнение, в settings у disks должны быть галочки сняты перед этим или будет ошибка при установке подкачки</p></td><td>2024-12-01T17:16:46.669Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>это я недоскопировал<br>
+в самом начале - для варианта с разделом</p>
+<pre><code class="lang-auto">/ip smb set enabled=no
+/disk settings set auto-smb-sharing=no auto-media-sharing=no
+</code></pre></td><td>2024-12-01T17:24:17.176Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>4к новый микротик <a href="https://www.ozon.ru/product/mikrotik-marshrutizator-hap-ax-lite-l41g-2axd-1244924805" rel="noopener nofollow ugc">https://www.ozon.ru/product/mikrotik-marshrutizator-hap-ax-lite-l41g-2axd-1244924805</a> кому надо</p></td><td>2024-12-18T19:12:22.681Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>tpws под mikrotik от <a class="mention" href="/u/wiktorbgu">@wiktorbgu</a><br>
+<a href="https://hub.docker.com/r/wiktorbgu/tpws-zapret-mikrotik" class="onebox" target="_blank" rel="noopener nofollow ugc">https://hub.docker.com/r/wiktorbgu/tpws-zapret-mikrotik</a><br>
+пока только как сокс прокси, но с браузера шустро работает</p></td><td>2024-12-23T22:35:19.134Z</td></tr><tr><td>Vrn</td><td><p>Настроил на ax3 по последней инструкции, в браузере Ютуб заработал, но приложения на мобиле а так же воспроизведение с мобилы на коди работать отказалось. Всяко разно упражнялся с аргументами контейнера-так и не заработало. Может быть не все домены ютуба в списке указаны? Или куда ещё можно посмотреть? Трассировку с мобилы снимал, там домен <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a> заворачивался в контейнер. Ещё не разобрался как tmdb завернуть в контейнер, вроде кучу всяких доменов tmdb завернул по типу остальных доменов но Коди ругается на невозможность соединения с ней.<br>
+В общем, айнидхелп.<br>
+И ещё вопрос- аргументы настроек контейнера можно брать из подборки в byebyedpi для андроида?</p></td><td>2025-01-08T13:44:59.810Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>да можно брать команды из разных подборок для байдпи<br>
+можете настроить сокс если ПО поддерживает и проверить прямо через контейнер работает ли ресурс, если да то будете искать хосты для добавления в список на роутер или можно так и оставить)</p></td><td>2025-01-08T16:36:17.649Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Отключите ipv6 везде где можно, зачастую он сам себе проблемы из ничего создает, тк SLAAC. Ну и практика показывает, что не все домены надо пропускать через byedpi и на теликах так вообще стоит погасить быстрый запуск, чтобы из кэша не тянуло не понятно что. Плюс на перехват dns еще добавить порты 1253, 5353, чтобы наверняка. И да, выше для dscp стереть -PolicyStore “ActiveStore”, чтобы работала маркировка трафика всегда, а не только до ребута, почему-то нельзя редачить посты.</p><aside class="onebox githubissue" data-onebox-src="https://github.com/hufrea/byedpi/issues/112#issuecomment-2347007426">
+  <header class="source">
+
+      <a href="https://github.com/hufrea/byedpi/issues/112#issuecomment-2347007426" target="_blank" rel="noopener nofollow ugc">github.com/hufrea/byedpi</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row">
+  <div class="github-icon-container" title="Issue" data-github-private-repo="false">
+	  <svg width="60" height="60" class="github-icon" viewBox="0 0 14 16" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+  </div>
+
+  <div class="github-info-container">
+    <h4>
+      <a href="https://github.com/hufrea/byedpi/issues/112#issuecomment-2347007426" target="_blank" rel="noopener nofollow ugc">Не работает youtube.com на WebOS</a>
+    </h4>
+
+    <div class="github-info">
+      <div class="date">
+        opened <span class="discourse-local-date" data-format="ll" data-date="2024-08-31" data-time="08:18:58" data-timezone="UTC">08:18AM - 31 Aug 24 UTC</span>
+      </div>
+
+
+      <div class="user">
+        <a href="https://github.com/Jenstel" target="_blank" rel="noopener nofollow ugc">
+          <img alt="Jenstel" src="обход-блокировки-youtube-и-некоторых-сайтов-на-mikrotik-за-5-минут/8b4d73c30e190b51b2ff107607609a2e0fff2dc4.jpeg" class="onebox-avatar-inline" width="20" height="20" data-dominant-color="6B574C">
+          Jenstel
+        </a>
+      </div>
+    </div>
+
+    <div class="labels">
+    </div>
+  </div>
+</div>
+
+  <div class="github-row">
+    <p class="github-body-container">Настроил это решение по гайду https://habr.com/ru/articles/838452/ на микротике.<span class="show-more-container"><a href="" rel="noopener" class="show-more">…</a></span><span class="excerpt hidden"> На компе и на телефонах, а также на телевизоре с Android все работает прекрасно. А вот на двух телеках LG приложение ютуб просто не запускается, пишет либо не удалось найти адрес youtube.com, либо отсутствует сетевое подключение. Но стоит только завернуть запрос к youtube.com (только на этот адрес) на ВПН, как приложение тут же запускается и дальше работает нормально уже давно с выключенным ВПНом. После закрытия приложения все повторяется. Помогите, в чем может быть проблема?</span></p>
+  </div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2025-01-08T17:55:49.760Z</td></tr><tr><td>Vrn</td><td><p>Ставит в тупик то, что в браузере на мобиле Ютуб работает а из приложения на той же мобиле не работает. По логике получается что приложение идёт на какие-то другие домены.<br>
+Не совсем понимаю как настроить работу именно приложения Ютуба через сокс.<br>
+Переборка аргументов это отдельный кекс.<br>
+Как правильно их менять? Надо ли тормозить контейнер и ребутать роутер после изменения аргументов?</p></td><td>2025-01-08T18:11:53.762Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Да, контейнер перезапускать надо после изменений. И частные dns не включены ли еще на телефоне?</p></td><td>2025-01-08T18:13:51.892Z</td></tr><tr><td>Vrn</td><td><p>Ipv6 вроде отключал. У меня на Коди не совсем приложение. Есть функция в телефоне при просмотре Ютуба из браузера или приложения перенести воспроизведение выбранного ролика на Коди. Как это реализовано я хз. По факту раньше все это работало абсолютно стабильно и без глюков, выбрал ролик и отправил его в Коди. Сейчас получилось, что в браузере я ролик смотрю, но отправив его на Коди воспроизведения нет. Из логического объяснения только то, что какие-то домены пролетают мимо контейнера, тем самым не работает оно как должно. Вроде понятно расписал.</p></td><td>2025-01-08T18:15:43.649Z</td></tr><tr><td>Vrn</td><td><p>Нет, никаких днс нет, пробовал статический адрес указать телефону и в качестве днс был адрес роутера, картина не менялась. В браузере работал Ютуб, в приложении нет.</p></td><td>2025-01-08T18:17:03.629Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>А приложение банально пробовали остановить и ему кэш сбросить? nslookup на телефоне правильно все выводит или у вас ифон?</p></td><td>2025-01-08T18:18:43.284Z</td></tr><tr><td>Vrn</td><td><p>Я ребутал телефон полностью и Коди неоднократно. Лукапом не смотрел, через приложуху Fing посмотрел трассировку нескольких доменов Ютуба из руководства по настройке, все заворачивались на ip контейнера. Опять таки если следовать логике и в браузере работает а приложение нет, то 99,9% что-то не заворачивается в контейнер а идёт через днс провайдера а не через контейнер и DoH</p></td><td>2025-01-08T18:22:24.757Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Попробуйте заново все настроить с соблюдением актуальной инструкции и без переделок после.</p></td><td>2025-01-08T18:24:30.521Z</td></tr><tr><td>Vrn</td><td><p>На выходных ещё раз попробую. Откатился пока на состояние до настройки. Как можно поймать трафик от приложения мобилы? Глянуть бы куда оно ломится и скорее всего это бы сняло вопрос</p></td><td>2025-01-08T18:25:59.283Z</td></tr><tr><td>Vrn</td><td><p>Либо ещё как дурацкое предположение может быть стоит попробовать не через 1.1.1.1 DoH а через 9.9.9.9? Хотя с точки зрения логики пофигу. Если бы была проблема с днс то нигде бы не работало, в браузере в том числе. И да, рутрекер работал тоже. Остальные домены я не добавлял в контейнер</p></td><td>2025-01-08T18:28:31.267Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>В вашем случае может быть все что угодно, пробуйте - что будет работать, то и оставьте.</p></td><td>2025-01-08T18:33:27.336Z</td></tr><tr><td>keymaster(D)</td><td><p>Подскажите, пожалуйста: В инструкции на Хабре в разделе про установку mangle - правил указано 2 правила:</p>
+<pre><code class="lang-auto">/ip firewall mangle add action=mark-connection chain=prerouting connection-mark=no-mark dst-address-list=za_dpi_FWD in-interface-list=LAN new-connection-mark=to_dpi passthrough=yes
+/ip firewall mangle add action=mark-routing chain=prerouting comment="To DPI" connection-mark=to_dpi in-interface-list=LAN new-routing-mark=dpi_mark passthrough=no routing-mark=!dpi_mark
+</code></pre>
+<p>При этом непосредственно у Wiktorbgu  на <a href="http://hub.docker.com/r/wiktorbgu/byedpi-hev-socks5-tunnel" rel="noopener nofollow ugc">hub.docker.com/r/wiktorbgu/byedpi-hev-socks5-tunnel</a>, указано одно правило:</p>
+<pre><code class="lang-auto">/ip firewall mangle add action=mark-routing chain=prerouting comment="List DNS FWD route to byedpi tunnel" dst-address-list=za_dpi_FWD in-interface-list=LAN new-routing-mark=dpi_mark passthrough=no
+</code></pre>
+<p>Как я понимаю, это два разных варианта одного и того же действия, при этом второй вариант проще первого.  Правильно ли я понял, и если да, то какой вариант предпочтительнее?</p></td><td>2025-01-09T13:38:23.508Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>На докер хабе просто образно набросок для понимания как это использовать.<br>
+На хабре более правильно и там обновляемая инфа.</p></td><td>2025-01-09T13:40:39.585Z</td></tr><tr><td>keymaster(D)</td><td><p>Ясно, спасибо Вам огромное!<br>
+Очень Вам признателен за потрясающие разработки!</p></td><td>2025-01-09T13:44:58.721Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Решил немного подобновить инструкцию от себя с учетом некоторых моментов:</p>
+<details>
+<summary>
+Summary</summary>
+<pre><code class="lang-auto">Если команда /system/device-mode print показывает container: yes , то все ок, если нет, то для включения режима контейнеров на устройстве нужно выполнить следующую команду и следовать инструкциям в консоли(перезагрузить или нажать кнопку на роутере):
+
+/system/device-mode/update container=yes 
+
+/tool fetch https://upgrade.mikrotik.com/routeros/7.17rc7/container-7.17rc7-arm64.npk
+# или в зависимости от проца
+/tool fetch https://upgrade.mikrotik.com/routeros/7.17rc7/container-7.17rc7-arm.npk
+# и ребут для установки
+/system/reboot
+
+
+/ip smb set enabled=no
+#необязательно, если не будет использоваться флешка, но таки рекомендуется, чтобы не изнашивать встроенную память
+/disk settings set auto-smb-sharing=no auto-media-sharing=no
+/disk format-drive usb1 file-system=wipe duration=10s
+/disk add type=partition parent=usb1 partition-size=8G 
+#основной раздел, поменяйте размеры по необходимости в зависимости от размера флешки
+/disk add type=partition parent=usb1 partition-size=512M
+#подкачка
+/disk format-drive usb1-part1 file-system=ext4
+/disk set swap=yes usb1-part2
+
+/ip dns set servers=1.1.1.2,1.0.0.2
+# задает опорные plaindns с фильтрацией от вредоносных доменов
+/tool fetch https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem
+# дождаться скачивания сертификата и затем можно копировать все команды целиком
+/certificate import file-name=DigiCertGlobalRootG2.crt.pem passphrase=""
+
+/ip dns set use-doh-server=https://security.cloudflare-dns.com/dns-query verify-doh-cert=yes
+# задает dns over https с фильтрацией от вредоносных доменов
+
+/interface/bridge add name=Bridge-Docker port-cost-mode=short
+# создание интерфейсов для контейнера
+/ip/address add address=192.168.254.1/24 interface=Bridge-Docker network=192.168.254.0
+/interface/veth add address=192.168.254.2/24 gateway=192.168.254.1 name=BYEDPI-TUN
+/interface/bridge/port add bridge=Bridge-Docker interface=BYEDPI-TUN
+
+/container/config set registry-url=https://registry-1.docker.io tmpdir=/usb1-part1/docker/pull
+#настройка адреса для получения контейнеров
+/container/add remote-image=wiktorbgu/byedpi-hev-socks5-tunnel:mikro interface=BYEDPI-TUN cmd="-K u -a 5 --auto=none -Kt,h -d1 -s0+s -d3+s -s6+s -d9+s -s12+s -d15+s -s20+s -d25+s -s30+s -d35+s -An -Ku -a1 -An --debug 1" root-dir=/usb1-part1/docker/byedpi-hev-socks5-tunnel logging=yes start-on-boot=yes
+#скачивает контейнер и задает аргументы для byedpi, впишите свои в cmd="если не работают эти"
+
+# set to default
+/ip/dns set address-list-extra-time=0s
+#внесение в список сайтов и доменов, которые нужно гонять через контейнер 
+/ip dns static
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=cloudflare-ech.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=googlevideo.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=googleapis.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=youtube.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=ytimg.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=youtu.be ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=ggpht.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=rutracker.org ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=rutracker.cc ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=medium.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=facebook.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=fbcdn.net ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=fbcdn.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=x.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=twitter.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=linkedin.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=prntscr.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=prnt.sc ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=t.co ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=protonvpn.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=nnmclub.to ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=ntc.party ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discord.gg ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discord.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discord.co ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=dis.gd ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discordstatus.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discord.gift ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discord.new ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discord.dev ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discordcdn.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discord.media ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discord.app ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discordapp.net ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=discordapp.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=instagram.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=cdninstagram.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=deviantart.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=parastorage.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=wixstatic.com ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=e621.net ttl=1d type=FWD
+add address-list=za_dpi_FWD disabled=no forward-to=localhost match-subdomain=\
+    yes name=dragonfru.it ttl=1d type=FWD	
+	
+/routing/table add disabled=no fib name=dpi_mark
+#настройка таблицы для обработки контейнером byedpi
+
+/ip/route add disabled=no distance=1 dst-address=0.0.0.0/0 gateway=192.168.254.2%Bridge-Docker pref-src="" routing-table=dpi_mark scope=30 suppress-hw-offload=no target-scope=10
+
+/ip firewall mangle add action=mark-connection chain=prerouting connection-mark=no-mark dst-address-list=za_dpi_FWD in-interface-list=LAN new-connection-mark=to_dpi passthrough=yes
+#прописывание правил маркировки трафика в контейнер
+/ip firewall mangle add action=mark-routing chain=prerouting comment="To DPI" connection-mark=to_dpi in-interface-list=LAN new-routing-mark=dpi_mark passthrough=no routing-mark=!dpi_mark
+
+/ip firewall filter set [find action=fasttrack-connection] packet-mark=no-mark connection-mark=no-mark
+
+/ip/firewall/address-list/ add address=10.0.0.0/8 list=local
+#указываем адреса локальных подсетей
+/ip/firewall/address-list/ add address=172.16.0.0/12 list=local
+/ip/firewall/address-list/ add address=192.168.0.0/16 list=local
+
+/ip firewall nat add action=redirect chain=dstnat dst-address-list=!local dst-port=53,1253,5353 in-interface-list=LAN protocol=udp
+/ip firewall nat add action=redirect chain=dstnat dst-address-list=!local dst-port=53,1253,5353 in-interface-list=LAN protocol=tcp
+
+:delay 20s
+#задержка на 20 секунд перед стартом, чтобы успел контейнер скачаться и развернуться
+
+/container start [find interface=BYEDPI-TUN]
+#запускаем byedpi и можно проверять как открываются сайты из списка выше
+
+для настройки обхода с discord:
+1. на компе в powershell от админа (работать будет только на Windows, глючнекс и макака с ведроидом требуют аналогичной маркировки трафика, а без нее только статичный контент)
+New-NetQosPolicy -name "discord" -NetworkProfile All -DSCPAction 34 -AppPathName discord.exe -IPProtocol Both
+2. добавить маркировку на роутере и правило поднять выше ранее созданных в Mangle
+/ip firewall mangle add action=mark-connection chain=prerouting comment="34 - to_dpi" connection-mark=no-mark dscp=34 in-interface-list=LAN new-connection-mark=to_dpi
+</code></pre>
+</details></td><td>2025-01-11T04:53:30.265Z</td></tr><tr><td>Vrn</td><td><p>Привет, парни.<br>
+Перенастроил железку через DoH 9.9.9.9 и все заработало как раньше.<br>
+Ютуб заработал на телефоне через приложуху, получилась трансляция<br>
+с телефона в коди и т.п. Спасибо вам за советы и ответы.<br>
+Остался один маленький нюанс- как правильно перебирать аргументы DPI в контейнере.<br>
+Алгоритм, если я правильно все понимаю, такой- стоп контейнер, выставляем параметры, старт контейнер. А перезагрузка роутера нужна? А перезагрузка клиентов?</p></td><td>2025-01-11T14:41:19.370Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>Все правильно понимаете. Больше никого перезагружать не надо.</p></td><td>2025-01-11T15:46:54.693Z</td></tr><tr><td>Vrn</td><td><p>Спасибо Вам и Лису большое за ваш труд и ответы</p></td><td>2025-01-11T18:40:18.933Z</td></tr><tr><td>keymaster(D)</td><td><p>Уважаемый wiktorbgu, извините, что не в рамках текущей темы, не знал, где это лучше написать. Подскажите, пожалуйста, Вы не разрабатывали контейнер  “shadowsocks  -hev-socks5-tunnel-mikrotik” , т.е. клиент для микротика для ss-сервера (по аналогии с текущим проектом, где и туннель и прокси в одном контейнере)? Если да, то где его можно найти?</p></td><td>2025-01-20T11:47:53.170Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>Берете <a href="https://hub.docker.com/r/wiktorbgu/vless-hev-socks5-tunnel-mikrotik" rel="noopener nofollow ugc">контейнер</a>, редачите конфиг xray для коннекта к <a href="https://xtls.github.io/en/config/outbounds/shadowsocks.html" rel="noopener nofollow ugc">shadowsocks</a> и редачите entrypoint.sh в корне контейнера чтобы не затирал конфиг и всё<br>
+достаточно открыть smb шару до папки контейнера на микротике и все редачится через проводник (я юзаю total commander)</p></td><td>2025-01-20T12:02:12.812Z</td></tr><tr><td>keymaster(D)</td><td><p>Спасибо, попытаюсь, но не уверен, что получится, т.к. я обладаю только небольшой частью всей этой магии.</p></td><td>2025-01-20T12:19:48.915Z</td></tr>
+    </table>
+      </body>
+    </html>

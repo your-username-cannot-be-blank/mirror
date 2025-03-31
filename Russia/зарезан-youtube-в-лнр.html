@@ -1,0 +1,260 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>зарезан-youtube-в-лнр</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Delion</td><td><p>Есть подозрение, что на ЛДНР сейчас испытывают замедление Ютуба.</p>
+<p>Сам сайт открывается без проблем, но видео иначе как в качестве 144p смотреть невозможно – буфер не подгружается. Началось вчера вечером. Провы отнекиваются. Сидим смотрим через VPN, помогают даже российские.</p>
+<p>Интернет вся Республика (все местные провайдеры без исключения) получает через фирму в Ростове, “Телематика” называется. В начале мая нам подключили блокировки РКН, что стало неприятным сюрпризом; допрежь все эти годы их не было.</p>
+<p>Пилообразный буфер при просмотре в 144p: <a href="https://prnt.sc/LHP5NiruZCV_" class="inline-onebox" rel="noopener nofollow ugc">Screenshot by Lightshot</a></p>
+<p>Новость в группе ВК местного государственного провайдера: <a href="https://vk.com/wall-137517650_2515" class="inline-onebox" rel="noopener nofollow ugc">Ошибка 429</a></p>
+<p>В ДНР: <a href="https://t.me/itsdonetsk/14902" class="inline-onebox" rel="noopener nofollow ugc">Telegram: Contact @itsdonetsk</a></p></td><td>2022-05-22T13:20:34.909Z</td></tr><tr><td>mp446</td><td><p>Подтверждаю (провайдер Магеал, Луганск). Добавлю, что antizapret vpn через Firefox мне не помог, равно как и настроенный на роутере zapret (настроен с опциями NFQWS_OPT_DESYNC="–dpi-desync=fake --dpi-desync-ttl=4", все остальные заблокированные сайты открываются нормально). Windscribe VPN подключился в режиме Stealth, но не заработал в режиме IKEv2. Я уж было думал, что сам YouTube по диапазону IP-адресов и их расположению урезает канал, но если российские VPN работают, то такой вариант ограничения уже маловероятен.</p></td><td>2022-05-22T16:40:01.255Z</td></tr><tr><td>ValdikSS</td><td><p>Удостовериться в ограничении скорости по домену (а именно так все предыдущие разы оно выполнялось на оборудовании ТСПУ) можно достаточно просто:</p>
+<ol>
+<li>Зайдите на Youtube</li>
+<li>Нажмите F12 в браузере, перейдите во вкладку Network (сеть)</li>
+<li>Откройте любой видеоролик</li>
+<li>Во вкладке Network будет множество запросов на домены вида <code>rr3---sn-5goeen7r.googlevideo.com</code>. Нажмите на любом из них правой кнопкой → Copy URL</li>
+<li>Загрузите этот URL с помощью <a href="https://curl.se/windows/">cURL</a> (cURL встроен в Windows 10 и 11, есть на сайте для более старых версий Windows):<br>
+<code>curl -o /dev/null 'https://rr3---sn-5goeen7r.googlevideo.com/videoplayback?expire=…'</code><br>
+И еще один, но с подменой SNI. Для этого необходимо получить IP-адрес домена с помощью команды nslookup и вызвать cURL с дополнительными параметрами:</li>
+</ol>
+<pre><code class="lang-bash">$ nslookup rr3---sn-5goeen7r.googlevideo.com
+Server:         127.0.0.53
+Address:        127.0.0.53#53
+
+Non-authoritative answer:
+rr3---sn-5goeen7r.googlevideo.com       canonical name = rr3.sn-5goeen7r.googlevideo.com.
+Name:   rr3.sn-5goeen7r.googlevideo.com
+Address: 173.194.150.217
+Name:   rr3.sn-5goeen7r.googlevideo.com
+Address: 2a00:1450:400f:11::9
+
+curl -o /dev/null -k -H "Host: rr3---sn-5goeen7r.googlevideo.com" 'https://173.194.150.217/videoplayback?expire=…'
+</code></pre>
+<p>Т.е. вместо домена указываем IP-адрес, а домен вписываем в заголовок Host.</p>
+<p>Если cURL будет из раза к разу показывать высокую скорость во втором запросе, но низкую в первом, это, с большой вероятностью, действительно замедление.</p></td><td>2022-05-22T17:07:23.448Z</td></tr><tr><td>drygdryg</td><td><p>Луганск, Магеал</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">$  nslookup 'rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com'
+Server:		192.168.1.1
+Address:	192.168.1.1#53
+
+Non-authoritative answer:
+rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com	canonical name = rr3.sn-gvnuxaxjvh-5n4e.googlevideo.com.
+Name:	rr3.sn-gvnuxaxjvh-5n4e.googlevideo.com
+Address: 213.59.213.46
+Name:	rr3.sn-gvnuxaxjvh-5n4e.googlevideo.com
+Address: 2a01:620:1:a04e::e
+
+$  curl -o /dev/null 'https://rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com/videoplayback?expire=1653261272&amp;ei=eG-KYqPzCNmNv_IPueOGsAM&amp;ip=178.158.66.204&amp;id=o-AJGmb9rlIPJzyEZrXpkQblk8UWjoOPO02ckkuFUS1q6p&amp;itag=250&amp;source=youtube&amp;requiressl=yes&amp;mh=dn&amp;mm=31,29&amp;mn=sn-gvnuxaxjvh-5n4e,sn-n8v7znss&amp;ms=au,rdu&amp;mv=m&amp;mvi=3&amp;pl=17&amp;initcwndbps=35000&amp;spc=4ocVCz0kVG4tV1sHafb1KRZffH2P81CVWp_iQGNR7w&amp;vprv=1&amp;mime=audio/webm&amp;ns=XM0aKbYKDn8FJ05KPh8yawYG&amp;gir=yes&amp;clen=12275336&amp;dur=1902.461&amp;lmt=1652826204634703&amp;mt=1653239335&amp;fvip=10&amp;keepalive=yes&amp;fexp=24001373,24007246&amp;c=WEB&amp;txp=6318224&amp;n=wkn2QqWRYaAZAQ&amp;sparams=expire,ei,ip,id,itag,source,requiressl,spc,vprv,mime,ns,gir,clen,dur,lmt&amp;sig=AOq0QJ8wRQIhAIkS4Mpc4UcMe_ALH1fiU5s9TqkfiDdUvtGDHfjQL-1XAiBYEB7H-Yhaafxkp1Dv-4thq1-2lQ8EPV0dJnqReA2-Nw==&amp;lsparams=mh,mm,mn,ms,mv,mvi,pl,initcwndbps&amp;lsig=AG3C_xAwRgIhAIA9L7G6YcrPo2SmKSUMIB6pj0aPkL02AWRx0EriL5tWAiEAnFaWnQXAbcnfJR73wndifvmBQeZU1L64aR6oFqIf3NM=&amp;alr=yes&amp;cpn=ZCKkq33fBhvYtrTe&amp;cver=2.20220519.09.00&amp;range=69046-134581&amp;rn=4&amp;rbuf=7690&amp;pot=V0U6MTE6UnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXTpFcnJvcjogUnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXQogICAgYXQgbmV3IFJpIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYxNTo0NikKICAgIGF0IE9iamVjdC48YW5vbnltb3VzPiAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo2NjU6MTA3KQogICAgYXQgYWcgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6MzcxOjIwNikKICAgIGF0IE9iamVjdC5kaXNwYXRjaEV2ZW50IChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYyNTQ6Mzg2KQogICAgYXQgdWRhIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjU4MDozNCkKICAgIGF0IHdkYSAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo1ODE6MzgzKQogICAgYXQgT2JqZWN0LlFaIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYzMzU6MTkpCiAgICBhdCBPYmplY3QuY1EgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjMzNDo3OCk='
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 65536  100 65536    0     0  18515      0  0:00:03  0:00:03 --:--:-- 18518
+$  curl -o /dev/null -k -H "Host: rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com" 'https://213.59.213.46/videoplayback?expire=1653261272&amp;ei=eG-KYqPzCNmNv_IPueOGsAM&amp;ip=178.158.66.204&amp;id=o-AJGmb9rlIPJzyEZrXpkQblk8UWjoOPO02ckkuFUS1q6p&amp;itag=250&amp;source=youtube&amp;requiressl=yes&amp;mh=dn&amp;mm=31,29&amp;mn=sn-gvnuxaxjvh-5n4e,sn-n8v7znss&amp;ms=au,rdu&amp;mv=m&amp;mvi=3&amp;pl=17&amp;initcwndbps=35000&amp;spc=4ocVCz0kVG4tV1sHafb1KRZffH2P81CVWp_iQGNR7w&amp;vprv=1&amp;mime=audio/webm&amp;ns=XM0aKbYKDn8FJ05KPh8yawYG&amp;gir=yes&amp;clen=12275336&amp;dur=1902.461&amp;lmt=1652826204634703&amp;mt=1653239335&amp;fvip=10&amp;keepalive=yes&amp;fexp=24001373,24007246&amp;c=WEB&amp;txp=6318224&amp;n=wkn2QqWRYaAZAQ&amp;sparams=expire,ei,ip,id,itag,source,requiressl,spc,vprv,mime,ns,gir,clen,dur,lmt&amp;sig=AOq0QJ8wRQIhAIkS4Mpc4UcMe_ALH1fiU5s9TqkfiDdUvtGDHfjQL-1XAiBYEB7H-Yhaafxkp1Dv-4thq1-2lQ8EPV0dJnqReA2-Nw==&amp;lsparams=mh,mm,mn,ms,mv,mvi,pl,initcwndbps&amp;lsig=AG3C_xAwRgIhAIA9L7G6YcrPo2SmKSUMIB6pj0aPkL02AWRx0EriL5tWAiEAnFaWnQXAbcnfJR73wndifvmBQeZU1L64aR6oFqIf3NM=&amp;alr=yes&amp;cpn=ZCKkq33fBhvYtrTe&amp;cver=2.20220519.09.00&amp;range=69046-134581&amp;rn=4&amp;rbuf=7690&amp;pot=V0U6MTE6UnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXTpFcnJvcjogUnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXQogICAgYXQgbmV3IFJpIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYxNTo0NikKICAgIGF0IE9iamVjdC48YW5vbnltb3VzPiAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo2NjU6MTA3KQogICAgYXQgYWcgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6MzcxOjIwNikKICAgIGF0IE9iamVjdC5kaXNwYXRjaEV2ZW50IChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYyNTQ6Mzg2KQogICAgYXQgdWRhIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjU4MDozNCkKICAgIGF0IHdkYSAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo1ODE6MzgzKQogICAgYXQgT2JqZWN0LlFaIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYzMzU6MTkpCiAgICBhdCBPYmplY3QuY1EgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjMzNDo3OCk='
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 65536  100 65536    0     0   579k      0 --:--:-- --:--:-- --:--:--  581k
+</code></pre>
+</details></td><td>2022-05-22T17:19:17.691Z</td></tr><tr><td>ValdikSS</td><td><p>Похоже на замедление, что сказать.<br>
+Попробуйте с доменом поиграться, вот таким образом:</p>
+<p><code>curl -o /dev/null -k -H "Host: rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com" --connect-to ::213.59.213.46 'https://change-this.com/videoplayback?expire=</code></p>
+<p>Полагаю, замедлению подвергаются все <code>*.googlevideo.com</code>?</p></td><td>2022-05-22T17:26:43.481Z</td></tr><tr><td>drygdryg</td><td><details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">$  curl -o /dev/null -k -H "Host: rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com" --connect-to ::213.59.213.46 'https://213.59.213.46/videoplayback?expire=1653261272&amp;ei=eG-KYqPzCNmNv_IPueOGsAM&amp;ip=178.158.66.204&amp;id=o-AJGmb9rlIPJzyEZrXpkQblk8UWjoOPO02ckkuFUS1q6p&amp;itag=250&amp;source=youtube&amp;requiressl=yes&amp;mh=dn&amp;mm=31,29&amp;mn=sn-gvnuxaxjvh-5n4e,sn-n8v7znss&amp;ms=au,rdu&amp;mv=m&amp;mvi=3&amp;pl=17&amp;initcwndbps=35000&amp;spc=4ocVCz0kVG4tV1sHafb1KRZffH2P81CVWp_iQGNR7w&amp;vprv=1&amp;mime=audio/webm&amp;ns=XM0aKbYKDn8FJ05KPh8yawYG&amp;gir=yes&amp;clen=12275336&amp;dur=1902.461&amp;lmt=1652826204634703&amp;mt=1653239335&amp;fvip=10&amp;keepalive=yes&amp;fexp=24001373,24007246&amp;c=WEB&amp;txp=6318224&amp;n=wkn2QqWRYaAZAQ&amp;sparams=expire,ei,ip,id,itag,source,requiressl,spc,vprv,mime,ns,gir,clen,dur,lmt&amp;sig=AOq0QJ8wRQIhAIkS4Mpc4UcMe_ALH1fiU5s9TqkfiDdUvtGDHfjQL-1XAiBYEB7H-Yhaafxkp1Dv-4thq1-2lQ8EPV0dJnqReA2-Nw==&amp;lsparams=mh,mm,mn,ms,mv,mvi,pl,initcwndbps&amp;lsig=AG3C_xAwRgIhAIA9L7G6YcrPo2SmKSUMIB6pj0aPkL02AWRx0EriL5tWAiEAnFaWnQXAbcnfJR73wndifvmBQeZU1L64aR6oFqIf3NM=&amp;alr=yes&amp;cpn=ZCKkq33fBhvYtrTe&amp;cver=2.20220519.09.00&amp;range=69046-134581&amp;rn=4&amp;rbuf=7690&amp;pot=V0U6MTE6UnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXTpFcnJvcjogUnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXQogICAgYXQgbmV3IFJpIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYxNTo0NikKICAgIGF0IE9iamVjdC48YW5vbnltb3VzPiAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo2NjU6MTA3KQogICAgYXQgYWcgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6MzcxOjIwNikKICAgIGF0IE9iamVjdC5kaXNwYXRjaEV2ZW50IChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYyNTQ6Mzg2KQogICAgYXQgdWRhIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjU4MDozNCkKICAgIGF0IHdkYSAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo1ODE6MzgzKQogICAgYXQgT2JqZWN0LlFaIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYzMzU6MTkpCiAgICBhdCBPYmplY3QuY1EgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjMzNDo3OCk='
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 65536  100 65536    0     0   674k      0 --:--:-- --:--:-- --:--:--  680k
+$  curl -o /dev/null -k -H "Host: rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com" --connect-to ::213.59.213.46 'https://rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com/videoplayback?expire=1653261272&amp;ei=eG-KYqPzCNmNv_IPueOGsAM&amp;ip=178.158.66.204&amp;id=o-AJGmb9rlIPJzyEZrXpkQblk8UWjoOPO02ckkuFUS1q6p&amp;itag=250&amp;source=youtube&amp;requiressl=yes&amp;mh=dn&amp;mm=31,29&amp;mn=sn-gvnuxaxjvh-5n4e,sn-n8v7znss&amp;ms=au,rdu&amp;mv=m&amp;mvi=3&amp;pl=17&amp;initcwndbps=35000&amp;spc=4ocVCz0kVG4tV1sHafb1KRZffH2P81CVWp_iQGNR7w&amp;vprv=1&amp;mime=audio/webm&amp;ns=XM0aKbYKDn8FJ05KPh8yawYG&amp;gir=yes&amp;clen=12275336&amp;dur=1902.461&amp;lmt=1652826204634703&amp;mt=1653239335&amp;fvip=10&amp;keepalive=yes&amp;fexp=24001373,24007246&amp;c=WEB&amp;txp=6318224&amp;n=wkn2QqWRYaAZAQ&amp;sparams=expire,ei,ip,id,itag,source,requiressl,spc,vprv,mime,ns,gir,clen,dur,lmt&amp;sig=AOq0QJ8wRQIhAIkS4Mpc4UcMe_ALH1fiU5s9TqkfiDdUvtGDHfjQL-1XAiBYEB7H-Yhaafxkp1Dv-4thq1-2lQ8EPV0dJnqReA2-Nw==&amp;lsparams=mh,mm,mn,ms,mv,mvi,pl,initcwndbps&amp;lsig=AG3C_xAwRgIhAIA9L7G6YcrPo2SmKSUMIB6pj0aPkL02AWRx0EriL5tWAiEAnFaWnQXAbcnfJR73wndifvmBQeZU1L64aR6oFqIf3NM=&amp;alr=yes&amp;cpn=ZCKkq33fBhvYtrTe&amp;cver=2.20220519.09.00&amp;range=69046-134581&amp;rn=4&amp;rbuf=7690&amp;pot=V0U6MTE6UnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXTpFcnJvcjogUnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXQogICAgYXQgbmV3IFJpIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYxNTo0NikKICAgIGF0IE9iamVjdC48YW5vbnltb3VzPiAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo2NjU6MTA3KQogICAgYXQgYWcgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6MzcxOjIwNikKICAgIGF0IE9iamVjdC5kaXNwYXRjaEV2ZW50IChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYyNTQ6Mzg2KQogICAgYXQgdWRhIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjU4MDozNCkKICAgIGF0IHdkYSAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo1ODE6MzgzKQogICAgYXQgT2JqZWN0LlFaIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYzMzU6MTkpCiAgICBhdCBPYmplY3QuY1EgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjMzNDo3OCk='
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 65536  100 65536    0     0  19075      0  0:00:03  0:00:03 --:--:-- 19073
+
+</code></pre>
+</details></td><td>2022-05-22T17:31:35.567Z</td></tr><tr><td>ValdikSS</td><td><p>Вы <code>https://rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com</code> замените на, например, <code>https://something.googlevideo.com</code>, затем <code>https://googlevideo.com</code>, затем <code>https://google.com</code> (домен может быть любой, не обязательно существующий. Это то, что передаётся в TLS SNI.).</p></td><td>2022-05-22T17:33:56.361Z</td></tr><tr><td>nucleo(nucleo)</td><td><details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">[root@root ~]# curl -o /dev/null 'https://rr2---sn-gvnuxaxjvh-vb1l.googlevideo.com/videoplayback?expire=1653261866&amp;ei=ynGKYuKHLpXJyAWDrpSwBg&amp;ip=176.109.188.57&amp;id=o-AG3DYDbBCrW-gbgX0wvefhZHIkETVMBPAO-mFr5JkkpR&amp;itag=394&amp;aitags=133%2C134%2C135%2C136%2C137%2C160%2C242%2C243%2C244%2C247%2C248%2C278%2C394%2C395%2C396%2C397%2C398%2C399&amp;source=youtube&amp;requiressl=yes&amp;mh=n3&amp;mm=31%2C29&amp;mn=sn-gvnuxaxjvh-vb1l%2Csn-n8v7kn7l&amp;ms=au%2Crdu&amp;mv=m&amp;mvi=2&amp;pcm2cms=yes&amp;pl=21&amp;initcwndbps=25000&amp;spc=4ocVC6F9oyNOkwi-KhSEB9uss4BEX1JANaFvQ-nW5Q&amp;vprv=1&amp;mime=video%2Fmp4&amp;ns=q_nRhIUbdJ592VU5dPOodQUG&amp;gir=yes&amp;clen=1781709&amp;dur=217.791&amp;lmt=1601777925146459&amp;mt=1653239823&amp;fvip=11&amp;keepalive=yes&amp;fexp=24001373%2C24007246&amp;c=WEB&amp;txp=5531432&amp;n=XiQxRCBcmESVYg&amp;sparams=expire%2Cei%2Cip%2Cid%2Caitags%2Csource%2Crequiressl%2Cspc%2Cvprv%2Cmime%2Cns%2Cgir%2Cclen%2Cdur%2Clmt&amp;lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpcm2cms%2Cpl%2Cinitcwndbps&amp;lsig=AG3C_xAwRQIgDNM_wPr5wg7kFXOAQ6iSrRPX-fxE4MxeZdvjcgXIn_ACIQDibq7ch-MkJ9-lj74rCMGr7lSHI11S8RW3g8rhvksaHQ%3D%3D&amp;alr=yes&amp;sig=AOq0QJ8wRgIhAK__SmvWr6ib-iF-JB7R_TRp8XzoWhZ9ktTg-GbrKXQ7AiEA4L6KqPDRGKWZ5q5qmvXWc2-V_MLM1rLxa4nMv3EsEvM%3D&amp;cpn=azqEuHMUdbYTCKBu&amp;cver=2.20220519.09.00&amp;range=114522-183127&amp;rn=5&amp;rbuf=13667&amp;pot=V0U6MTE6UnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXTpFcnJvcjogUnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXQogICAgYXQgbmV3IFJpIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYxNTo0NikKICAgIGF0IGcuQ2kuPGFub255bW91cz4gKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjY1OjEwNykKICAgIGF0IGFnIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjM3MToyMDYpCiAgICBhdCBnLkNpLmcuay5kaXNwYXRjaEV2ZW50IChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYyNTQ6Mzg2KQogICAgYXQgdWRhIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjU4MDozNCkKICAgIGF0IHdkYSAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo1ODE6MzgzKQogICAgYXQgZy5DaS5nLmsuUVogKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjMzNToxOSkKICAgIGF0IGcuQ2kuZy5rLmNRIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYzMzQ6Nzgp'
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 68606  100 68606    0     0   6568      0  0:00:10  0:00:10 --:--:--  9584
+[root@root ~]# curl -o /dev/null -k -H 'Host: rr2---sn-gvnuxaxjvh-vb1l.googlevideo.com' 'https://213.59.213.109/videoplayback?expire=1653261866&amp;ei=ynGKYuKHLpXJyAWDrpSwBg&amp;ip=176.109.188.57&amp;id=o-AG3DYDbBCrW-gbgX0wvefhZHIkETVMBPAO-mFr5JkkpR&amp;itag=394&amp;aitags=133%2C134%2C135%2C136%2C137%2C160%2C242%2C243%2C244%2C247%2C248%2C278%2C394%2C395%2C396%2C397%2C398%2C399&amp;source=youtube&amp;requiressl=yes&amp;mh=n3&amp;mm=31%2C29&amp;mn=sn-gvnuxaxjvh-vb1l%2Csn-n8v7kn7l&amp;ms=au%2Crdu&amp;mv=m&amp;mvi=2&amp;pcm2cms=yes&amp;pl=21&amp;initcwndbps=25000&amp;spc=4ocVC6F9oyNOkwi-KhSEB9uss4BEX1JANaFvQ-nW5Q&amp;vprv=1&amp;mime=video%2Fmp4&amp;ns=q_nRhIUbdJ592VU5dPOodQUG&amp;gir=yes&amp;clen=1781709&amp;dur=217.791&amp;lmt=1601777925146459&amp;mt=1653239823&amp;fvip=11&amp;keepalive=yes&amp;fexp=24001373%2C24007246&amp;c=WEB&amp;txp=5531432&amp;n=XiQxRCBcmESVYg&amp;sparams=expire%2Cei%2Cip%2Cid%2Caitags%2Csource%2Crequiressl%2Cspc%2Cvprv%2Cmime%2Cns%2Cgir%2Cclen%2Cdur%2Clmt&amp;lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpcm2cms%2Cpl%2Cinitcwndbps&amp;lsig=AG3C_xAwRQIgDNM_wPr5wg7kFXOAQ6iSrRPX-fxE4MxeZdvjcgXIn_ACIQDibq7ch-MkJ9-lj74rCMGr7lSHI11S8RW3g8rhvksaHQ%3D%3D&amp;alr=yes&amp;sig=AOq0QJ8wRgIhAK__SmvWr6ib-iF-JB7R_TRp8XzoWhZ9ktTg-GbrKXQ7AiEA4L6KqPDRGKWZ5q5qmvXWc2-V_MLM1rLxa4nMv3EsEvM%3D&amp;cpn=azqEuHMUdbYTCKBu&amp;cver=2.20220519.09.00&amp;range=114522-183127&amp;rn=5&amp;rbuf=13667&amp;pot=V0U6MTE6UnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXTpFcnJvcjogUnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXQogICAgYXQgbmV3IFJpIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYxNTo0NikKICAgIGF0IGcuQ2kuPGFub255bW91cz4gKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjY1OjEwNykKICAgIGF0IGFnIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjM3MToyMDYpCiAgICBhdCBnLkNpLmcuay5kaXNwYXRjaEV2ZW50IChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYyNTQ6Mzg2KQogICAgYXQgdWRhIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjU4MDozNCkKICAgIGF0IHdkYSAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo1ODE6MzgzKQogICAgYXQgZy5DaS5nLmsuUVogKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjMzNToxOSkKICAgIGF0IGcuQ2kuZy5rLmNRIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYzMzQ6Nzgp'
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 68606  100 68606    0     0   332k      0 --:--:-- --:--:-- --:--:--  970k
+</code></pre>
+</details></td><td>2022-05-22T17:34:59.560Z</td></tr><tr><td>drygdryg</td><td><details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">$  curl -o /dev/null -k -H "Host: rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com" --connect-to ::213.59.213.46 'https://abcdef.googlevideo.com/videoplayback?expire=1653261272&amp;ei=eG-KYqPzCNmNv_IPueOGsAM&amp;ip=178.158.66.204&amp;id=o-AJGmb9rlIPJzyEZrXpkQblk8UWjoOPO02ckkuFUS1q6p&amp;itag=250&amp;source=youtube&amp;requiressl=yes&amp;mh=dn&amp;mm=31,29&amp;mn=sn-gvnuxaxjvh-5n4e,sn-n8v7znss&amp;ms=au,rdu&amp;mv=m&amp;mvi=3&amp;pl=17&amp;initcwndbps=35000&amp;spc=4ocVCz0kVG4tV1sHafb1KRZffH2P81CVWp_iQGNR7w&amp;vprv=1&amp;mime=audio/webm&amp;ns=XM0aKbYKDn8FJ05KPh8yawYG&amp;gir=yes&amp;clen=12275336&amp;dur=1902.461&amp;lmt=1652826204634703&amp;mt=1653239335&amp;fvip=10&amp;keepalive=yes&amp;fexp=24001373,24007246&amp;c=WEB&amp;txp=6318224&amp;n=wkn2QqWRYaAZAQ&amp;sparams=expire,ei,ip,id,itag,source,requiressl,spc,vprv,mime,ns,gir,clen,dur,lmt&amp;sig=AOq0QJ8wRQIhAIkS4Mpc4UcMe_ALH1fiU5s9TqkfiDdUvtGDHfjQL-1XAiBYEB7H-Yhaafxkp1Dv-4thq1-2lQ8EPV0dJnqReA2-Nw==&amp;lsparams=mh,mm,mn,ms,mv,mvi,pl,initcwndbps&amp;lsig=AG3C_xAwRgIhAIA9L7G6YcrPo2SmKSUMIB6pj0aPkL02AWRx0EriL5tWAiEAnFaWnQXAbcnfJR73wndifvmBQeZU1L64aR6oFqIf3NM=&amp;alr=yes&amp;cpn=ZCKkq33fBhvYtrTe&amp;cver=2.20220519.09.00&amp;range=69046-134581&amp;rn=4&amp;rbuf=7690&amp;pot=V0U6MTE6UnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXTpFcnJvcjogUnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXQogICAgYXQgbmV3IFJpIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYxNTo0NikKICAgIGF0IE9iamVjdC48YW5vbnltb3VzPiAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo2NjU6MTA3KQogICAgYXQgYWcgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6MzcxOjIwNikKICAgIGF0IE9iamVjdC5kaXNwYXRjaEV2ZW50IChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYyNTQ6Mzg2KQogICAgYXQgdWRhIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjU4MDozNCkKICAgIGF0IHdkYSAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo1ODE6MzgzKQogICAgYXQgT2JqZWN0LlFaIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYzMzU6MTkpCiAgICBhdCBPYmplY3QuY1EgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjMzNDo3OCk='
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 65536  100 65536    0     0  19033      0  0:00:03  0:00:03 --:--:-- 19029
+$  curl -o /dev/null -k -H "Host: rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com" --connect-to ::213.59.213.46 'https://yrtasdijwe.googlevideo.com/videoplayback?expire=1653261272&amp;ei=eG-KYqPzCNmNv_IPueOGsAM&amp;ip=178.158.66.204&amp;id=o-AJGmb9rlIPJzyEZrXpkQblk8UWjoOPO02ckkuFUS1q6p&amp;itag=250&amp;source=youtube&amp;requiressl=yes&amp;mh=dn&amp;mm=31,29&amp;mn=sn-gvnuxaxjvh-5n4e,sn-n8v7znss&amp;ms=au,rdu&amp;mv=m&amp;mvi=3&amp;pl=17&amp;initcwndbps=35000&amp;spc=4ocVCz0kVG4tV1sHafb1KRZffH2P81CVWp_iQGNR7w&amp;vprv=1&amp;mime=audio/webm&amp;ns=XM0aKbYKDn8FJ05KPh8yawYG&amp;gir=yes&amp;clen=12275336&amp;dur=1902.461&amp;lmt=1652826204634703&amp;mt=1653239335&amp;fvip=10&amp;keepalive=yes&amp;fexp=24001373,24007246&amp;c=WEB&amp;txp=6318224&amp;n=wkn2QqWRYaAZAQ&amp;sparams=expire,ei,ip,id,itag,source,requiressl,spc,vprv,mime,ns,gir,clen,dur,lmt&amp;sig=AOq0QJ8wRQIhAIkS4Mpc4UcMe_ALH1fiU5s9TqkfiDdUvtGDHfjQL-1XAiBYEB7H-Yhaafxkp1Dv-4thq1-2lQ8EPV0dJnqReA2-Nw==&amp;lsparams=mh,mm,mn,ms,mv,mvi,pl,initcwndbps&amp;lsig=AG3C_xAwRgIhAIA9L7G6YcrPo2SmKSUMIB6pj0aPkL02AWRx0EriL5tWAiEAnFaWnQXAbcnfJR73wndifvmBQeZU1L64aR6oFqIf3NM=&amp;alr=yes&amp;cpn=ZCKkq33fBhvYtrTe&amp;cver=2.20220519.09.00&amp;range=69046-134581&amp;rn=4&amp;rbuf=7690&amp;pot=V0U6MTE6UnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXTpFcnJvcjogUnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXQogICAgYXQgbmV3IFJpIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYxNTo0NikKICAgIGF0IE9iamVjdC48YW5vbnltb3VzPiAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo2NjU6MTA3KQogICAgYXQgYWcgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6MzcxOjIwNikKICAgIGF0IE9iamVjdC5kaXNwYXRjaEV2ZW50IChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYyNTQ6Mzg2KQogICAgYXQgdWRhIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjU4MDozNCkKICAgIGF0IHdkYSAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo1ODE6MzgzKQogICAgYXQgT2JqZWN0LlFaIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYzMzU6MTkpCiAgICBhdCBPYmplY3QuY1EgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjMzNDo3OCk='
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 65536  100 65536    0     0  19323      0  0:00:03  0:00:03 --:--:-- 19326
+$  curl -o /dev/null -k -H "Host: rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com" --connect-to ::213.59.213.46 'https://googlevideo.com/videoplayback?expire=1653261272&amp;ei=eG-KYqPzCNmNv_IPueOGsAM&amp;ip=178.158.66.204&amp;id=o-AJGmb9rlIPJzyEZrXpkQblk8UWjoOPO02ckkuFUS1q6p&amp;itag=250&amp;source=youtube&amp;requiressl=yes&amp;mh=dn&amp;mm=31,29&amp;mn=sn-gvnuxaxjvh-5n4e,sn-n8v7znss&amp;ms=au,rdu&amp;mv=m&amp;mvi=3&amp;pl=17&amp;initcwndbps=35000&amp;spc=4ocVCz0kVG4tV1sHafb1KRZffH2P81CVWp_iQGNR7w&amp;vprv=1&amp;mime=audio/webm&amp;ns=XM0aKbYKDn8FJ05KPh8yawYG&amp;gir=yes&amp;clen=12275336&amp;dur=1902.461&amp;lmt=1652826204634703&amp;mt=1653239335&amp;fvip=10&amp;keepalive=yes&amp;fexp=24001373,24007246&amp;c=WEB&amp;txp=6318224&amp;n=wkn2QqWRYaAZAQ&amp;sparams=expire,ei,ip,id,itag,source,requiressl,spc,vprv,mime,ns,gir,clen,dur,lmt&amp;sig=AOq0QJ8wRQIhAIkS4Mpc4UcMe_ALH1fiU5s9TqkfiDdUvtGDHfjQL-1XAiBYEB7H-Yhaafxkp1Dv-4thq1-2lQ8EPV0dJnqReA2-Nw==&amp;lsparams=mh,mm,mn,ms,mv,mvi,pl,initcwndbps&amp;lsig=AG3C_xAwRgIhAIA9L7G6YcrPo2SmKSUMIB6pj0aPkL02AWRx0EriL5tWAiEAnFaWnQXAbcnfJR73wndifvmBQeZU1L64aR6oFqIf3NM=&amp;alr=yes&amp;cpn=ZCKkq33fBhvYtrTe&amp;cver=2.20220519.09.00&amp;range=69046-134581&amp;rn=4&amp;rbuf=7690&amp;pot=V0U6MTE6UnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXTpFcnJvcjogUnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXQogICAgYXQgbmV3IFJpIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYxNTo0NikKICAgIGF0IE9iamVjdC48YW5vbnltb3VzPiAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo2NjU6MTA3KQogICAgYXQgYWcgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6MzcxOjIwNikKICAgIGF0IE9iamVjdC5kaXNwYXRjaEV2ZW50IChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYyNTQ6Mzg2KQogICAgYXQgdWRhIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjU4MDozNCkKICAgIGF0IHdkYSAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo1ODE6MzgzKQogICAgYXQgT2JqZWN0LlFaIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYzMzU6MTkpCiAgICBhdCBPYmplY3QuY1EgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjMzNDo3OCk='
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 65536  100 65536    0     0   689k      0 --:--:-- --:--:-- --:--:--  695k
+$  curl -o /dev/null -k -H "Host: rr3---sn-gvnuxaxjvh-5n4e.googlevideo.com" --connect-to ::213.59.213.46 'https://google.com/videoplayback?expire=1653261272&amp;ei=eG-KYqPzCNmNv_IPueOGsAM&amp;ip=178.158.66.204&amp;id=o-AJGmb9rlIPJzyEZrXpkQblk8UWjoOPO02ckkuFUS1q6p&amp;itag=250&amp;source=youtube&amp;requiressl=yes&amp;mh=dn&amp;mm=31,29&amp;mn=sn-gvnuxaxjvh-5n4e,sn-n8v7znss&amp;ms=au,rdu&amp;mv=m&amp;mvi=3&amp;pl=17&amp;initcwndbps=35000&amp;spc=4ocVCz0kVG4tV1sHafb1KRZffH2P81CVWp_iQGNR7w&amp;vprv=1&amp;mime=audio/webm&amp;ns=XM0aKbYKDn8FJ05KPh8yawYG&amp;gir=yes&amp;clen=12275336&amp;dur=1902.461&amp;lmt=1652826204634703&amp;mt=1653239335&amp;fvip=10&amp;keepalive=yes&amp;fexp=24001373,24007246&amp;c=WEB&amp;txp=6318224&amp;n=wkn2QqWRYaAZAQ&amp;sparams=expire,ei,ip,id,itag,source,requiressl,spc,vprv,mime,ns,gir,clen,dur,lmt&amp;sig=AOq0QJ8wRQIhAIkS4Mpc4UcMe_ALH1fiU5s9TqkfiDdUvtGDHfjQL-1XAiBYEB7H-Yhaafxkp1Dv-4thq1-2lQ8EPV0dJnqReA2-Nw==&amp;lsparams=mh,mm,mn,ms,mv,mvi,pl,initcwndbps&amp;lsig=AG3C_xAwRgIhAIA9L7G6YcrPo2SmKSUMIB6pj0aPkL02AWRx0EriL5tWAiEAnFaWnQXAbcnfJR73wndifvmBQeZU1L64aR6oFqIf3NM=&amp;alr=yes&amp;cpn=ZCKkq33fBhvYtrTe&amp;cver=2.20220519.09.00&amp;range=69046-134581&amp;rn=4&amp;rbuf=7690&amp;pot=V0U6MTE6UnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXTpFcnJvcjogUnBjIGZhaWxlZCBkdWUgdG8geGhyIGVycm9yLiBlcnJvciBjb2RlOiA2LCBlcnJvcjogIFswXQogICAgYXQgbmV3IFJpIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYxNTo0NikKICAgIGF0IE9iamVjdC48YW5vbnltb3VzPiAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo2NjU6MTA3KQogICAgYXQgYWcgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6MzcxOjIwNikKICAgIGF0IE9iamVjdC5kaXNwYXRjaEV2ZW50IChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYyNTQ6Mzg2KQogICAgYXQgdWRhIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjU4MDozNCkKICAgIGF0IHdkYSAoaHR0cHM6Ly93d3cueW91dHViZS5jb20vcy9wbGF5ZXIvZWMwY2VkOTEvcGxheWVyX2lhcy52ZmxzZXQvcnVfUlUvYmFzZS5qczo1ODE6MzgzKQogICAgYXQgT2JqZWN0LlFaIChodHRwczovL3d3dy55b3V0dWJlLmNvbS9zL3BsYXllci9lYzBjZWQ5MS9wbGF5ZXJfaWFzLnZmbHNldC9ydV9SVS9iYXNlLmpzOjYzMzU6MTkpCiAgICBhdCBPYmplY3QuY1EgKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3MvcGxheWVyL2VjMGNlZDkxL3BsYXllcl9pYXMudmZsc2V0L3J1X1JVL2Jhc2UuanM6NjMzNDo3OCk='
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 65536  100 65536    0     0   587k      0 --:--:-- --:--:-- --:--:--  587k
+
+</code></pre>
+</details></td><td>2022-05-22T17:36:42.403Z</td></tr><tr><td>ValdikSS</td><td><p>Замедляют <code>*.googlevideo.com</code>, но не сам <code>googlevideo.com</code>.<br>
+Увы, это однозначно замедление средствами DPI.</p></td><td>2022-05-22T17:38:49.636Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group quote-modified" data-username="mp446" data-post="2" data-topic="2476">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/e68b1a/48.png" class="avatar"> mp446:</div>
+<blockquote>
+<p>Добавлю, что […] мне не помог, равно как и настроенный на роутере zapret</p>
+</blockquote>
+</aside>
+<p>Должно работать, возможно, нужно увеличить TTL, или использовать что-то вроде <code>--dpi-desync=fake,split2 --dpi-desync-ttl=4</code>.</p></td><td>2022-05-22T17:42:08.190Z</td></tr><tr><td>ValdikSS</td><td><p>Удобный способ проверки:</p>
+<pre><code class="lang-bash">curl -o /dev/null -k -H "Host: speed.hetzner.de" --connect-to ::speed.hetzner.de https://test.googlevideo.com/100MB.bin
+</code></pre></td><td>2022-05-22T17:51:06.928Z</td></tr><tr><td>mp446</td><td><p>Да, со split2 работает, замедления нет. Как оказалось, и без него тоже работает - у меня был настроен фильтр по hostlist и домены *.googlevideo.com не обходились.<br>
+А если вот в таком виде " *.googlevideo.com" этот адрес добавить в hostlist, блокировки будут обходиться выборочно для этих доменов? А то как-то не хочется делать desync для всех пакетов <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2022-05-22T17:57:33.131Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="mp446" data-post="13" data-topic="2476">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/e68b1a/48.png" class="avatar"> mp446:</div>
+<blockquote>
+<p>А если вот в таком виде " *.googlevideo.com" этот адрес добавить в hostlist, блокировки будут обходиться выборочно для этих доменов?</p>
+</blockquote>
+</aside>
+<p>Нужно добавить просто <code>googlevideo.com</code>.</p></td><td>2022-05-22T18:02:26.317Z</td></tr><tr><td>mp446</td><td><p>Спасибо, всё работает!</p></td><td>2022-05-22T18:13:11.794Z</td></tr><tr><td>Tarasus</td><td><p>Уже нашёл обход для тех кто смотрит с компа и пользуется goodbyedpi:</p>
+<ul>
+<li>Добавляете “<a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a>” в russia-blacklist.txt,</li>
+<li>Перезапускаете сервис goodbyedpi.</li>
+<li>Профит!</li>
+</ul></td><td>2022-05-22T18:16:05.762Z</td></tr><tr><td>drygdryg</td><td><p>Помог zapret (nfqws) в режиме hostlist: добавил <code>googlevideo.com</code> в <code>/opt/zapret/ipset/zapret-hosts-user.txt</code></p>
+<pre><code class="lang-auto">NFQWS_OPT_DESYNC="--dpi-desync=fake --dpi-desync-ttl=4"
+</code></pre>
+<p>либо</p>
+<pre><code class="lang-auto">NFQWS_OPT_DESYNC="--dpi-desync=fake,split2 --dpi-desync-ttl=5"
+</code></pre></td><td>2022-05-22T18:37:37.203Z</td></tr><tr><td>vanyaindigo</td><td><p><a href="https://tjournal.ru/news/630820-internet-provaydery-iz-lnr-soobshchili-o-sboyah-v-rabote-youtube-polzovateli-schitayut-chto-servis-nachali-blokirovat" class="onebox" target="_blank" rel="noopener nofollow ugc">https://tjournal.ru/news/630820-internet-provaydery-iz-lnr-soobshchili-o-sboyah-v-rabote-youtube-polzovateli-schitayut-chto-servis-nachali-blokirovat</a></p></td><td>2022-05-23T18:01:58.927Z</td></tr><tr><td>Delion</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="зарезан-youtube-в-лнр/fadc7aa42371b83616be0ac6ce5addb6f3934b63.png" data-download-href="https://ntc.party/uploads/default/fadc7aa42371b83616be0ac6ce5addb6f3934b63" title="Безымянный-1"><img src="зарезан-youtube-в-лнр/fadc7aa42371b83616be0ac6ce5addb6f3934b63.png" alt="Безымянный-1" data-base62-sha1="zNdJZC198XNFmnayO5jkEPA1LV1" width="330" height="500" data-dominant-color="31363B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Безымянный-1</span><span class="informations">497×752 34.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Из местной Переклички.</p></td><td>2022-05-23T18:32:29.467Z</td></tr><tr><td>ValdikSS</td><td><ul>
+<li><a href="http://ltk.com.ua/news/4815-vnimaniyu-abonentov.html" class="inline-onebox">Вниманию абонентов!!! » Луганская Телефонная Компания</a></li>
+<li><a href="http://mageal.net/index.php?categoryid=1&amp;p2_articleid=370" class="inline-onebox">- youtube-error - Главная</a></li>
+<li><a href="https://rck.su/">https://rck.su/</a></li>
+</ul></td><td>2022-05-23T19:00:40.910Z</td></tr><tr><td>Delion</td><td><p>По состоянию на сейчас – работает без нареканий.</p></td><td>2022-05-23T20:00:10.365Z</td></tr><tr><td>drygdryg</td><td><p>Подтверждаю: видео сейчас загружаются нормально. Луганск, Магеал.</p>
+<details>
+<summary>
+curl test</summary>
+<pre><code class="lang-auto">$ curl -o /dev/null -k -H "Host: speed.hetzner.de" --connect-to ::speed.hetzner.de https://googlevideo.com/100MB.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  100M  100  100M    0     0  2293k      0  0:00:44  0:00:44 --:--:-- 2586k
+
+$ curl -o /dev/null -k -H "Host: speed.hetzner.de" --connect-to ::speed.hetzner.de https://test.googlevideo.com/100MB.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  100M  100  100M    0     0  3554k      0  0:00:28  0:00:28 --:--:-- 2752k
+
+</code></pre>
+</details></td><td>2022-05-23T20:17:54.935Z</td></tr><tr><td>vanyaindigo</td><td><p><a href="https://t.me/ordercomru/3312" rel="noopener nofollow ugc">Пишут</a>, что GGC в ОРДЛО отключены Гуглом в одностороннем порядке.</p></td><td>2022-05-25T10:57:01.051Z</td></tr><tr><td>drygdryg</td><td><p>Судя по всему, сейчас замедляется до 0 бит/с <a href="https://play.google.com" rel="noopener nofollow ugc">браузерная версия Google Play</a>:</p>
+<details>
+<summary>
+curl test</summary>
+<pre><code class="lang-auto">$  curl -o /dev/null -k -H "Host: speed.hetzner.de" --connect-to ::speed.hetzner.de https://play.google.com/100MB.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0
+</code></pre>
+</details>
+<p>С включённым zapret и добавленным в zapret-hosts-user.txt доменом <a href="http://play.google.com" rel="noopener nofollow ugc">play.google.com</a>:</p>
+<details>
+<summary>
+curl test</summary>
+<pre><code class="lang-auto">$  curl -o /dev/null -k -H "Host: speed.hetzner.de" --connect-to ::speed.hetzner.de https://play.google.com/100MB.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  1  100M    1 1583k    0     0   593k      0  0:02:52  0:00:02  0:02:50  593k
+</code></pre>
+</details>
+<p>В браузере при попытке соединения с <a href="https://play.google.com" rel="noopener nofollow ugc">https://play.google.com</a> сначала происходит длительное ожидание, затем срабатывает таймаут подключения.</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="зарезан-youtube-в-лнр/38d177a7e516704a6f0c50e17faed863936cf164.png" data-download-href="https://ntc.party/uploads/default/38d177a7e516704a6f0c50e17faed863936cf164" title="image"><img src="зарезан-youtube-в-лнр/38d177a7e516704a6f0c50e17faed863936cf164_2_690x405.png" alt="image" data-base62-sha1="86DwfCiN94Yl33hef5ZntfoGgW8" width="690" height="405" srcset="зарезан-youtube-в-лнр/38d177a7e516704a6f0c50e17faed863936cf164_2_690x405.png, зарезан-youtube-в-лнр/38d177a7e516704a6f0c50e17faed863936cf164.png 1.5x, зарезан-youtube-в-лнр/38d177a7e516704a6f0c50e17faed863936cf164.png 2x" data-dominant-color="E4E5E6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">964×566 29.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>Мобильное приложение Google Play на Android работает без проблем (<a href="https://mitmproxy.org/" rel="noopener nofollow ugc">Mitmproxy</a> помог выяснить, что мобильное приложение не обращается к <a href="http://play.google.com" rel="noopener nofollow ugc">play.google.com</a>).</p></td><td>2022-05-25T11:47:26.934Z</td></tr><tr><td>ValdikSS</td><td><p><a href="https://bitbucket.org/anticensority/russian-unlisted-blocks/src/master/readme.txt" class="onebox" target="_blank" rel="noopener">https://bitbucket.org/anticensority/russian-unlisted-blocks/src/master/readme.txt</a></p></td><td>2022-05-25T14:15:23.089Z</td></tr><tr><td>Tarasus</td><td><p>19 Июля, снова режется скорость доступа к видосам с youtube<br>
+<img src="зарезан-youtube-в-лнр/dc8807874707818892c22abb172a85892002f0e6.png" alt="image" data-base62-sha1="vsUu4Xu6MOl16Uf52SFMPXXNQ2i" width="476" height="139"><br>
+Обходится точно так же как и в мае, через добавление <a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a> в блэклист</p></td><td>2022-07-19T10:47:48.205Z</td></tr><tr><td>drygdryg</td><td><p>15 сентября, утро — снова наблюдается замедление.<br>
+<img src="зарезан-youtube-в-лнр/79aab4cbb426ade10e4ca27a9d527a606497d2ca.png" alt="image" data-base62-sha1="hmjvDKSdNjuGsq2LUkq23IHYXMK" width="499" height="172"></p>
+<pre><code class="lang-auto">$ curl -o /dev/null -k -H "Host: speed.hetzner.de" --connect-to ::speed.hetzner.de https://test.googlevideo.com/100MB.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0  100M    0  255k    0     0  19572      0  1:29:17  0:00:13  1:29:04 13548
+$ curl -o /dev/null  https://speed.hetzner.de/100MB.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  100M  100  100M    0     0  9691k      0  0:00:10  0:00:10 --:--:-- 10.9M
+</code></pre>
+<p>Теперь замедление распространяется и на IPv6. Включил в <code>/opt/zapret/config</code> поддержку IPv6 — YouTube заработал нормально.</p>
+<pre><code class="lang-auto">#DISABLE_IPV6=1
+</code></pre></td><td>2022-09-15T07:48:10.750Z</td></tr><tr><td>anon94384997</td><td><p>Логично. Грибной сезон начался.</p></td><td>2022-09-15T15:44:55.636Z</td></tr><tr><td>drygdryg</td><td><p>Сегодня снова наблюдаю замедление YouTube с помощью DPI, судя по всему, у всех кабельных провайдеров Луганска (как минимум, у Магеал и ЛДС).</p>
+<details>
+<summary>
+curl test</summary>
+<pre><code class="lang-auto">$ curl -o /dev/null -k -H "Host: speed.hetzner.de" --connect-to ::speed.hetzner.de https://test.googlevideo.com/100MB.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0  100M    0  319k    0     0  23368      0  1:14:47  0:00:14  1:14:33 26859
+
+$ curl -o /dev/null  https://speed.hetzner.de/100MB.bin
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+ 12  100M   12 12.1M    0     0  1458k      0  0:01:10  0:00:08  0:01:02 1412k
+</code></pre>
+</details>
+<p><img src="зарезан-youtube-в-лнр/8f8d239315309df0de706ae40295593e3e45b7a5.png" alt="2022-09-28_19-54" data-base62-sha1="ktUFmmvkqB46cU2uDnOE4i0cFDL" width="622" height="221"></p>
+<p>ISP Магеал <a href="https://t.me/ispmageal/295" rel="noopener nofollow ugc">сообщает в своём Телеграм-канале</a>, что проблема у поставщика трафика (то есть у <a href="https://lugacom.com/" rel="noopener nofollow ugc">Лугакома</a>, который является единственным поставщиков внешнего трафика в ЛНР).</p>
+<p>Помог <a href="https://github.com/ValdikSS/GoodbyeDPI" rel="noopener nofollow ugc">GoodbyeDPI</a> с дефолтными настройками: в файл <code>russia-blacklist.txt</code> нужно добавить домен <code>googlevideo.com</code> и запустить установку сервиса через <code>service_install_russia_blacklist.cmd</code>.<br>
+Также чудесно работает <a href="https://github.com/bol-van/zapret" rel="noopener nofollow ugc">zapret</a>.</p></td><td>2022-09-28T18:40:52.523Z</td></tr><tr><td>CRACKen(panic!("this is a terrible mistake!");)</td><td><p>Также можно внести <code>ytimg.com</code> для того, чтобы появился доступ к превью у видео (если он отсутствует конечно).</p></td><td>2022-09-28T20:49:00.371Z</td></tr><tr><td>mp446</td><td><p>Сегодня обнаружил, что резко упростился механизм блокировок - хватает подмены DNS на 1.1.1.1 или 8.8.8.8. Провайдер “Магеал”: после замены DNS открываются <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>, <a href="http://torproject.org" rel="noopener nofollow ugc">torproject.org</a>, facebook, twitter и многие другие, заблокированные ранее. Два часа назад не открывался Instagram, сейчас открывается и он. YouTube, соответственно, тоже работает на полную скорость. Похоже, реализацию блокировок опять перенесли на местных провайдеров, у которых нет возможностей/желания устанавливать оборудование для DPI и они ограничиваются фильтрацией через DNS. Не знаю, надолго ли такое улучшение, но пока ситуация радует (тьфу-тьфу-тьфу, чтобы не сглазить).</p></td><td>2022-10-22T19:09:27.953Z</td></tr><tr><td>drygdryg</td><td><p>Наблюдаю замедление доменов <code>*.googlevideo.com</code> средствами DPI. Видео не загружаются в браузере Firefox (Linux и Android), а также в неофициальном клиенте NewPipe для Android. При этом в Chromium (Linux), Vivaldi (Linux), Google Chrome (Windows, Android), а также в YouTube для Android видео воспроизводятся нормально.<br>
+Тесты с помощью curl показывают, что с любого поддомена <code>googlevideo.com</code> в первую секунду загружаются 32510 байт, после чего скорость загрузки падает в 0:<br>
+<img src="https://ntc.party/uploads/default/original/2X/9/9fae94c3028af46fa3ed61e23d48a8a7ec5f533b.gif" alt="googlevideo_slowdown" data-base62-sha1="mMBXhbGF4TwH9nuEnZw7tsdCG2T" width="690" height="164" class="animated"></p>
+<p>Если включить инструменты противодействия DPI (я использовал zapret) и применить их к <code>googlevideo.com</code>, то скорость приходит в норму:<br>
+<img src="https://ntc.party/uploads/default/original/2X/c/cb7bab771656f2e81f9acd12891844414177bb51.gif" alt="googlevideo_slowdown_with_dpi_bypass" data-base62-sha1="t25T2GviPA4bnDStOeE8XVplHFL" width="690" height="164" class="animated"></p>
+<p>Команда, которую использовал для тестирования:</p>
+<pre><code class="lang-auto">curl -o /dev/null -k -H "Host: ash-speed.hetzner.com" --connect-to ::ash-speed.hetzner.com 'https://test.googlevideo.com/1GB.bin'
+</code></pre></td><td>2024-04-24T14:59:58.515Z</td></tr><tr><td>Delion</td><td><p><img src="зарезан-youtube-в-лнр/d0ce5057adbf3e598bee8114872b573ae6e9805c.png" alt="изображение" data-base62-sha1="tNbl1VP1c7oc0FcTNPlbPkHEfVy" width="519" height="203"></p>
+<p>Подтверждается практикой.</p></td><td>2024-04-24T15:59:56.316Z</td></tr>
+    </table>
+      </body>
+    </html>

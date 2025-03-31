@@ -1,0 +1,48 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-balboa-bobbing-and-weaving-around-network-censorship-usenix-security-2021</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Balboa: Bobbing and Weaving around Network Censorship<br>
+Marc B. Rosen, James Parker, Alex J. Malozemoff<br>
+<a href="https://censorbib.nymity.ch/#Rosen2021a">https://censorbib.nymity.ch/#Rosen2021a</a><br>
+<a href="https://www.usenix.org/conference/usenixsecurity21/presentation/rosen">Presentation video and slides</a></p>
+<p>Balboa is a framework for link obfuscation that is in the same vein as <a href="https://censorbib.nymity.ch/#Bocovich2016a">Slitheen</a> and <a href="https://github.com/net4people/bbs/issues/55">Protozoa</a>. The goal of all these systems is to embed a hidden communications channel inside some other network flow, without changing any externally observable features of the flow, particularly the traffic analysis features of packet sizes and packet timings. Balboa, like the others, works by <em>traffic replacement</em>: it removes some encrypted portions of the carrier flow and replaces them with identically sized encryptions of covert data. Balboa assumes TLS for the carrier flow (Slitheen also used TLS, Protozoa used WebRTC video). It has some unique advantages: by hooking into TLS libraries and intercepting networking system calls, it can use unmodified application binaries at both ends; and it undoes its traffic replacement before passing decrypted TLS payloads to upper network layers, which means the application programs behave identically to how they would behave in the absence of traffic replacement. The authors provide two instantiations of system, one that uses an Icecast audio stream, and one that works over HTTPS web browsing.</p>
+<p>The most significant difference in Balboa is its use of a preshared <em>traffic model</em>. Client and server are assumed not only to share a symmetric key, but also to know in advance some portion of what the application program on the other side will send through the tunnel—this is the portion that is eligible for traffic replacement. For example, in an audio streaming setting, the Balboa client may already have a copy of some of the audio files that the server will later stream. The Balboa server also knows in advance what audio files the client has. When the Balboa server would stream one of the files the client already has, it instead replaces (under TLS encryption) the file’s contents with a pointer into the traffic model (“for the next file, substitute ‘Metallica - Fuel.ogg’”), followed by covert data for the remainder of the file size. The Balboa client sees and interprets the traffic model pointer, and re-substitutes its local copy of the file (i.e., the very same bytes the client would have received from the server if there had been no traffic replacement) into the data stream that it passes up the network stack, meanwhile saving the covert data somewhere else. Covert data is sent only when an application program would be sending data anyway, and only when what is being sent is part of the shared traffic model. The traffic model is what enables both sides to “fill in the gaps” that traffic replacement creates in the data stream. In the authors’ two instantiations of Balboa, the traffic model is a full copy of files to be sent later (in order to send <em>N</em> bytes of covert data, the peers need to have preshared <em>N</em> bytes’ worth of files), but one can imagine a procedural, or other more concise representation of a traffic model (<a href="https://www.usenix.org/system/files/sec21-rosen.pdf#page=5">Section 2.1</a>).</p>
+<p>A considerable part of the paper is devoted to showing how various engineering challenges were overcome. Balboa sets the <a href="https://wiki.wireshark.org/TLS"><code>SSLKEYLOGFILE</code></a> environment variable, or uses other means, to recover the keys necessary for decrypting and re-encrypting TLS application data records on the fly. But in order to work with unmodified applications while not disturbing packet boundaries, Balboa needs to hook into the network stack even below the TLS library, at the level of C library functions like <a href="https://pubs.opengroup.org/onlinepubs/9699919799/functions/read.html"><code>read</code></a> and <a href="https://pubs.opengroup.org/onlinepubs/9699919799/functions/write.html"><code>write</code></a>. This occasions considerable complexity, as Balboa needs to cope with TLS records that are not aligned with the buffers used by the low-level calls (<a href="https://www.usenix.org/system/files/sec21-rosen.pdf#page=6">Section 2.5</a>). Balboa also needs to run its decryption and re-encryption quickly, because any small processing delays are potential distinguishers. But because of the way Balboa works, such delays are really the <em>only</em> leverage a censor has to distinguish flows.</p>
+<p>Thanks to the authors for reviewing a draft of this summary.</p></td><td>2022-04-18T22:49:17.426Z</td></tr>
+    </table>
+      </body>
+    </html>

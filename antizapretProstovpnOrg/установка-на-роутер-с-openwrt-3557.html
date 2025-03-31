@@ -1,0 +1,729 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>установка-на-роутер-с-openwrt-3557</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>K14M.ua(Константин)</td><td><p>Добрый день, недавно руки дошли до OpenWrt. Это прошивка на роутер с возможностью установки прокси и вроде даже VPN. В связи с этим вопрос. А есть подробная инструкция для установки антизапрета на роутер? Я находил инструкцию с настройкой VPN Monster через файл настроек *.ovpn и утилиту OpenVPN которую можно поставить на OpenWrt. Но инструкция 2018 года и довольно запутанная под конец. Не уверен что она актуальна и подойдет для антизапрета.</p></td><td>2022-12-03T23:51:51.630Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Итак, с помощью гугла пытаюсь все настроить. Тут на форуме инструкцию не нашел, если все получится то ДАННАЯ тема может быть послужит инструкцией для других.</p>
+<p>В наличии должен быть роутер с уже установленным OpenWrt. Так же я поставил русификатор “luci-i18n-base-ru”</p>
+<p>Далее ставим OpenVPN, а именно “openvpn-openssl” ну и может быть " luci-i18n-openvpn-ru"<br>
+Все это делается на странице роутера → Система → Software, перед этим нужно нажать кнопку “Update lists…” ну и естественно роутер должен быть подключен к интернету.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/c3e12d0813f36c03098f20d37aedc90d73c8cb91.png" data-download-href="https://ntc.party/uploads/default/c3e12d0813f36c03098f20d37aedc90d73c8cb91" title="image"><img src="установка-на-роутер-с-openwrt-3557/c3e12d0813f36c03098f20d37aedc90d73c8cb91.png" alt="image" data-base62-sha1="rWPxIHJQhv9drknRqso5IwAJgZP" width="690" height="359" data-dominant-color="282929"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">968×504 26.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Cкачиваем файл “antizapret-tcp.ovpn”, например отсюда <a href="https://antizapret.prostovpn.org/" rel="noopener nofollow ugc">https://antizapret.prostovpn.org/</a></p>
+<p>После установки OpenVPN на странице роутера сверху появится новая кнопка - VPN<br>
+Заходим туда и загружаем скачанный конфигурационный файл OVPN</p>
+<p>Перед загрузкой нужно указать новое имя файла, я так и написал OVPN</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/851329734aed198c69b4330000db3891969cc516.png" data-download-href="https://ntc.party/uploads/default/851329734aed198c69b4330000db3891969cc516" title="image"><img src="установка-на-роутер-с-openwrt-3557/851329734aed198c69b4330000db3891969cc516.png" alt="image" data-base62-sha1="iZeyA7C7PYmvzfKrlEhjMOf7r2S" width="690" height="142" data-dominant-color="313334"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">966×199 7.68 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Этот файл должен появится в списке выше</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/5b8fbf420ac1b7d8fc6bca8e72bc387e607cd997.png" data-download-href="https://ntc.party/uploads/default/5b8fbf420ac1b7d8fc6bca8e72bc387e607cd997" title="image"><img src="установка-на-роутер-с-openwrt-3557/5b8fbf420ac1b7d8fc6bca8e72bc387e607cd997.png" alt="image" data-base62-sha1="d3ZqrG5NEJiY84wc83alp8dfQzR" width="690" height="243" data-dominant-color="292A2B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">968×342 20 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Далее идем в Сеть → Интерфейсы → Добавить новый интерфейс…</p>
+<p>Имя - OVPN<br>
+Протокол - Неуправляемый<br>
+Устройство - пользовательское, вручную вводим “tun0” без кавычек</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/dbb4e49f1bfcff5d263e18c572ec4a9c1f219271.png" data-download-href="https://ntc.party/uploads/default/dbb4e49f1bfcff5d263e18c572ec4a9c1f219271" title="image"><img src="установка-на-роутер-с-openwrt-3557/dbb4e49f1bfcff5d263e18c572ec4a9c1f219271.png" alt="image" data-base62-sha1="vlC7UwdMrD23uydhXWsd1E1eGCR" width="690" height="269" data-dominant-color="262727"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">898×351 16.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>После сохранения в интернете рекомендуют еще раз открыть его через кнопку “изменить” и убедится что на первой вкладке стоит галочка “Запустить при загрузке”.</p>
+<p>Во вкладке “Дополнительные параметры” убедитесь, что built-in IPv6-management is selected. - у себя я такое не нашел, хотя и менял язык на английский. Так что ХЗ</p>
+<p>Во вкладке “Настройки межсетевого экрана” создать новую зону “ovpn_fw”</p>
+<p>Теперь идем в Сеть → Межсетевой экран → находим только что созданный <strong>ovpn_fw</strong> и жмем “изменить”</p>
+<p>Настраиваем все примерно так</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/8ea093d0c5e9593b33adbaf23a8aa1dd83e5f653.png" data-download-href="https://ntc.party/uploads/default/8ea093d0c5e9593b33adbaf23a8aa1dd83e5f653" title="image"><img src="установка-на-роутер-с-openwrt-3557/8ea093d0c5e9593b33adbaf23a8aa1dd83e5f653.png" alt="image" data-base62-sha1="klJPQL7UAD1MKa4DSd5JJKNzaKf" width="626" height="500" data-dominant-color="272828"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">900×718 34.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/f1b9166cbf5ba84681434f69a58bf94b9546a295.png" data-download-href="https://ntc.party/uploads/default/f1b9166cbf5ba84681434f69a58bf94b9546a295" title="image"><img src="установка-на-роутер-с-openwrt-3557/f1b9166cbf5ba84681434f69a58bf94b9546a295_2_690x269.png" alt="image" data-base62-sha1="yunCmnDGBVya0PnBrCjnJjwf6n3" width="690" height="269" srcset="установка-на-роутер-с-openwrt-3557/f1b9166cbf5ba84681434f69a58bf94b9546a295_2_690x269.png, установка-на-роутер-с-openwrt-3557/f1b9166cbf5ba84681434f69a58bf94b9546a295.png 1.5x, установка-на-роутер-с-openwrt-3557/f1b9166cbf5ba84681434f69a58bf94b9546a295.png 2x" data-dominant-color="292B2B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">977×382 23.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Сохраняем и применяем</p>
+<p>Снова идем в VPN → OpenVPN → выбираем наш антизапрет и запускаем если он не запустился автоматически</p>
+<p>Иииии…</p>
+<p>Судя по инструкциям из интернета после этого VPN должен заработать, но у меня че-то как-то нет. Что я сделал не так?</p></td><td>2022-12-04T01:18:00.788Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Дополняю инструкцию. И этого сообщения:</p><aside class="quote" data-post="4" data-topic="2360">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/openwrt/2360/4">Настройка OpenWRT под контейнер антизапрета</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/5"><span data-category-id="5" style="--category-badge-color: #8C6238; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Proxy and VPN service for Russian censorship circumvention, discussion and official support forum. Обсуждение работы сервиса обхода блокировок России АнтиЗапрет. Новости, уведомления о проблемах и помощь в настройке."><span class="badge-category__name">antizapret.prostovpn.org</span></span></a>
+  </div>
+  <blockquote>
+    Зайдите в Network -&gt; Interfaces -&gt; WAN -&gt; Edit -&gt; Advanced Settings 
+уберите галочку Use DNS servers advertised by peer и в появившемся поле ввода Use custom DNS servers введите 8.8.8.8. 
+А через VPN добавьте маршрут до 8.8.8.8.
+  </blockquote>
+</aside>
+
+<p>Прочитал что в интерфейс WAN нужно прописать DNS гугла<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/6a56369ae6d9f46f227caf1031e5770d670e854e.png" data-download-href="https://ntc.party/uploads/default/6a56369ae6d9f46f227caf1031e5770d670e854e" title="image"><img src="установка-на-роутер-с-openwrt-3557/6a56369ae6d9f46f227caf1031e5770d670e854e.png" alt="image" data-base62-sha1="faHk1F7SPS9t1NANwzQiUY8OVky" width="658" height="500" data-dominant-color="2B2B2C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">958×727 55.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/0a16e356fc109646b52fb8862560525e4fb0db0c.png" data-download-href="https://ntc.party/uploads/default/0a16e356fc109646b52fb8862560525e4fb0db0c" title="image"><img src="установка-на-роутер-с-openwrt-3557/0a16e356fc109646b52fb8862560525e4fb0db0c.png" alt="image" data-base62-sha1="1rfOlMcX2BK29Tu53ZiHPT4Fo1m" width="690" height="445" data-dominant-color="292828"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">879×567 20.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p><img src="установка-на-роутер-с-openwrt-3557/3c96152e93c8b4b95d161b3c488af2da232e74f6.png" alt="image" data-base62-sha1="8DYcl1I28eP3jAMT5FgZ4jiB13w" width="664" height="174"></p>
+<blockquote>
+<p>А через VPN добавьте маршрут до 8.8.8.8.</p>
+</blockquote>
+<p>Тут слишком расплывчато, не о конца понимаю где именно в VPN это прописывать…</p></td><td>2022-12-05T18:57:13.595Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group quote-modified" data-username="K14M.ua" data-post="3" data-topic="3557">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/k14m.ua/48/2001_2.png" class="avatar"> K14M.ua:</div>
+<blockquote>
+<blockquote>
+<p>А через VPN добавьте маршрут до 8.8.8.8.</p>
+</blockquote>
+<p>Тут слишком расплывчато, не о конца понимаю где именно в VPN это прописывать…</p>
+</blockquote>
+</aside>
+<p><code>route 8.8.8.8</code> в конфигурационный файл OpenVPN.</p></td><td>2022-12-12T16:05:59.163Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>И куда конкретно это писать? я прописал в конец файла</p>
+<pre><code class="lang-auto">-----END PRIVATE KEY-----
+&lt;/key&gt;
+
+route 8.8.8.8
+</code></pre>
+<p>Применил настройки, перезапустил роутер. Но файл запустить не могу. Жму start, страница обновляется а файл |Запущено|нет|</p>
+<p>Что я делаю не так?</p></td><td>2022-12-12T16:36:57.235Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="K14M.ua" data-post="5" data-topic="3557">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/k14m.ua/48/2001_2.png" class="avatar"> K14M.ua:</div>
+<blockquote>
+<p>Но файл запустить не могу. Жму start, страница обновляется а файл |Запущено|нет|</p>
+</blockquote>
+</aside>
+<p>Смотрите журнал (лог), чтобы понять причину проблемы.</p></td><td>2022-12-15T22:47:34.330Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Понимал бы я еще что-то в этом</p>
+<pre><code class="lang-auto">Fri Dec 16 05:10:12 2022 daemon.notice netifd: wan (1833): udhcpc: lease of 172.16.136.199 obtained from 172.16.136.1, lease time 360
+Fri Dec 16 05:13:12 2022 daemon.notice netifd: wan (1833): udhcpc: sending renew to server 172.16.136.1
+Fri Dec 16 05:13:13 2022 daemon.notice netifd: wan (1833): udhcpc: lease of 172.16.136.199 obtained from 172.16.136.1, lease time 360
+Fri Dec 16 05:16:13 2022 daemon.notice netifd: wan (1833): udhcpc: sending renew to server 172.16.136.1
+Fri Dec 16 05:16:13 2022 daemon.notice netifd: wan (1833): udhcpc: lease of 172.16.136.199 obtained from 172.16.136.1, lease time 360
+Fri Dec 16 05:19:13 2022 daemon.notice netifd: wan (1833): udhcpc: sending renew to server 172.16.136.1
+Fri Dec 16 05:19:13 2022 daemon.notice netifd: wan (1833): udhcpc: lease of 172.16.136.199 obtained from 172.16.136.1, lease time 360
+Fri Dec 16 05:19:19 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: dns.msftncsi.com
+Fri Dec 16 05:19:19 2022 daemon.warn dnsmasq[138]: possible DNS-rebind attack detected: dns.msftncsi.com
+Fri Dec 16 05:19:19 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: retracker.sevstar.net
+Fri Dec 16 05:19:19 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: dns.msftncsi.com
+Fri Dec 16 05:19:19 2022 daemon.warn dnsmasq[139]: possible DNS-rebind attack detected: dns.msftncsi.com
+Fri Dec 16 05:19:19 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: dns.msftncsi.com
+Fri Dec 16 05:19:19 2022 daemon.warn dnsmasq[140]: possible DNS-rebind attack detected: dns.msftncsi.com
+Fri Dec 16 05:19:19 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: dns.msftncsi.com
+Fri Dec 16 05:19:19 2022 daemon.warn dnsmasq[141]: possible DNS-rebind attack detected: dns.msftncsi.com
+Fri Dec 16 05:19:20 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: dns.msftncsi.com
+Fri Dec 16 05:19:20 2022 daemon.warn dnsmasq[142]: possible DNS-rebind attack detected: dns.msftncsi.com
+Fri Dec 16 05:19:24 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: retracker.sevstar.net
+Fri Dec 16 05:19:26 2022 user.info : luci: failed login on / for root from 192.168.1.10
+Fri Dec 16 05:19:33 2022 user.info : luci: accepted login on / for root from 192.168.1.10
+Fri Dec 16 05:19:41 2022 daemon.err uhttpd[1398]: sh: /etc/init.d/openvpn: not found
+Fri Dec 16 05:19:44 2022 daemon.err uhttpd[1398]: sh: /etc/init.d/openvpn: not found
+Fri Dec 16 05:19:46 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: retracker.sevstar.net
+Fri Dec 16 05:19:47 2022 daemon.err uhttpd[1398]: sh: /etc/init.d/openvpn: not found
+Fri Dec 16 05:19:51 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: retracker.sevstar.net
+</code></pre></td><td>2022-12-16T02:21:47.705Z</td></tr><tr><td>ValdikSS</td><td><p>Видимо, у вас не установлен OpenVPN.</p></td><td>2022-12-16T10:04:01.730Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Интересное заявление. А это что?</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/2cbbd8c1bfd7dc4052c805d930d6b3cfc4ae3a88.png" data-download-href="https://ntc.party/uploads/default/2cbbd8c1bfd7dc4052c805d930d6b3cfc4ae3a88" title="image"><img src="установка-на-роутер-с-openwrt-3557/2cbbd8c1bfd7dc4052c805d930d6b3cfc4ae3a88_2_690x364.png" alt="image" data-base62-sha1="6nJt2zHUSeV1a2WMYAUArkjly9a" width="690" height="364" srcset="установка-на-роутер-с-openwrt-3557/2cbbd8c1bfd7dc4052c805d930d6b3cfc4ae3a88_2_690x364.png, установка-на-роутер-с-openwrt-3557/2cbbd8c1bfd7dc4052c805d930d6b3cfc4ae3a88_2_1035x546.png 1.5x, установка-на-роутер-с-openwrt-3557/2cbbd8c1bfd7dc4052c805d930d6b3cfc4ae3a88.png 2x" data-dominant-color="2A2B2B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1165×615 29.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2022-12-16T15:20:34.238Z</td></tr><tr><td>K14M.ua(Константин)</td><td><aside class="quote no-group" data-username="K14M.ua" data-post="2" data-topic="3557">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/k14m.ua/48/2001_2.png" class="avatar"> K14M.ua:</div>
+<blockquote>
+<p>ovpn_fw</p>
+</blockquote>
+</aside>
+<p>Так, я полностью сбросил настройки роутера и заново поставил OpenVPN, настроил все как написано выше. И файл OVPN запустился.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/10af35de96f2106c5536e3e1bd5365dff73f0866.png" data-download-href="https://ntc.party/uploads/default/10af35de96f2106c5536e3e1bd5365dff73f0866" title="image"><img src="установка-на-роутер-с-openwrt-3557/10af35de96f2106c5536e3e1bd5365dff73f0866_2_690x488.png" alt="image" data-base62-sha1="2nB1CteZxj5kir8bV37tzZdy8Zw" width="690" height="488" srcset="установка-на-роутер-с-openwrt-3557/10af35de96f2106c5536e3e1bd5365dff73f0866_2_690x488.png, установка-на-роутер-с-openwrt-3557/10af35de96f2106c5536e3e1bd5365dff73f0866.png 1.5x, установка-на-роутер-с-openwrt-3557/10af35de96f2106c5536e3e1bd5365dff73f0866.png 2x" data-dominant-color="2A2B2B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">974×689 33.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2022-12-16T15:44:18.860Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Перезапустил роутер и посмотрел лог</p>
+<details>
+<summary>
+Спойлер</summary>
+<p>В сообщение все не влазит, обрезал начало…</p>
+<pre><code class="lang-auto">Fri Dec 16 18:34:35 2022 kern.info kernel: [    0.607406] mtk_soc_eth 10100000.ethernet eth0: mediatek frame engine at 0xb0100000, irq 5
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    0.617879] NET: Registered protocol family 10
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    0.628437] Segment Routing with IPv6
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    0.632398] NET: Registered protocol family 17
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    0.637001] bridge: filtering via arp/ip/ip6tables is no longer available by default. Update your scripts to load br_netfilter if you need this.
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    0.650184] 8021q: 802.1Q VLAN Support v1.8
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    0.669861] VFS: Mounted root (squashfs filesystem) readonly on device 31:3.
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    0.683875] Freeing unused kernel memory: 1204K
+Fri Dec 16 18:34:35 2022 kern.warn kernel: [    0.688472] This architecture does not have kernel memory protection.
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    0.695044] Run /sbin/init as init process
+Fri Dec 16 18:34:35 2022 kern.debug kernel: [    0.699195]   with arguments:
+Fri Dec 16 18:34:35 2022 kern.debug kernel: [    0.699200]     /sbin/init
+Fri Dec 16 18:34:35 2022 kern.debug kernel: [    0.699205]   with environment:
+Fri Dec 16 18:34:35 2022 kern.debug kernel: [    0.699212]     HOME=/
+Fri Dec 16 18:34:35 2022 kern.debug kernel: [    0.699217]     TERM=linux
+Fri Dec 16 18:34:35 2022 user.info kernel: [    1.858745] init: Console is alive
+Fri Dec 16 18:34:35 2022 user.info kernel: [    1.862920] init: - watchdog -
+Fri Dec 16 18:34:35 2022 user.info kernel: [    3.467314] kmodloader: loading kernel modules from /etc/modules-boot.d/*
+Fri Dec 16 18:34:35 2022 user.info kernel: [    3.646491] kmodloader: done loading kernel modules from /etc/modules-boot.d/*
+Fri Dec 16 18:34:35 2022 user.info kernel: [    3.666219] init: - preinit -
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    3.714309] rt3050-esw 10110000.esw: port 0 link up
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    4.135817] rt3050-esw 10110000.esw: port 1 link up
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [    5.579675] random: jshn: uninitialized urandom read (4 bytes read)
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [    5.702703] random: jshn: uninitialized urandom read (4 bytes read)
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [    5.970779] random: jshn: uninitialized urandom read (4 bytes read)
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    6.748594] rt3050-esw 10110000.esw: port 0 link down
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    6.753740] rt3050-esw 10110000.esw: port 1 link down
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [    7.068333] random: procd: uninitialized urandom read (4 bytes read)
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    9.835121] rt3050-esw 10110000.esw: port 0 link up
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    9.840141] IPv6: ADDRCONF(NETDEV_CHANGE): eth0: link becomes ready
+Fri Dec 16 18:34:35 2022 kern.info kernel: [    9.847114] IPv6: ADDRCONF(NETDEV_CHANGE): eth0.1: link becomes ready
+Fri Dec 16 18:34:35 2022 kern.info kernel: [   10.383854] rt3050-esw 10110000.esw: port 1 link up
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [   11.656029] jffs2: notice: (394) jffs2_build_xattr_subsystem: complete building xattr subsystem, 76 of xdatum (42 unchecked, 34 orphan) and 120 of xref (17 dead, 33 orphan) found.
+Fri Dec 16 18:34:35 2022 user.info kernel: [   11.676463] mount_root: switching to jffs2 overlay
+Fri Dec 16 18:34:35 2022 kern.warn kernel: [   11.688602] overlayfs: upper fs does not support tmpfile.
+Fri Dec 16 18:34:35 2022 user.warn kernel: [   11.708481] urandom-seed: Seeding with /etc/urandom.seed
+Fri Dec 16 18:34:35 2022 user.info kernel: [   11.926890] procd: - early -
+Fri Dec 16 18:34:35 2022 user.info kernel: [   11.930277] procd: - watchdog -
+Fri Dec 16 18:34:35 2022 user.info kernel: [   12.756524] procd: - watchdog -
+Fri Dec 16 18:34:35 2022 user.info kernel: [   12.761846] procd: - ubus -
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [   12.917436] random: ubusd: uninitialized urandom read (4 bytes read)
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [   12.927500] random: ubusd: uninitialized urandom read (4 bytes read)
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [   12.944469] random: ubusd: uninitialized urandom read (4 bytes read)
+Fri Dec 16 18:34:35 2022 user.info kernel: [   12.962295] procd: - init -
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [   14.033319] random: jshn: uninitialized urandom read (4 bytes read)
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [   14.055796] random: ubusd: uninitialized urandom read (4 bytes read)
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [   14.062752] random: ubus: uninitialized urandom read (4 bytes read)
+Fri Dec 16 18:34:35 2022 user.info kernel: [   14.789864] kmodloader: loading kernel modules from /etc/modules.d/*
+Fri Dec 16 18:34:35 2022 user.info kernel: [   15.447885] urngd: v1.0.2 started.
+Fri Dec 16 18:34:35 2022 kern.info kernel: [   15.474987] tun: Universal TUN/TAP device driver, 1.6
+Fri Dec 16 18:34:35 2022 kern.info kernel: [   15.511495] Loading modules backported from Linux version v5.15.58-0-g7d8048d4e064
+Fri Dec 16 18:34:35 2022 kern.info kernel: [   15.519194] Backport generated by backports.git v5.15.58-1-0-g42a95ce7
+Fri Dec 16 18:34:35 2022 kern.info kernel: [   15.694575] mt76_wmac 10300000.wmac: ASIC revision: 76280001
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [   15.858606] random: crng init done
+Fri Dec 16 18:34:35 2022 kern.notice kernel: [   15.862135] random: 23 urandom warning(s) missed due to ratelimiting
+Fri Dec 16 18:34:35 2022 kern.info kernel: [   16.736135] mt76_wmac 10300000.wmac: Firmware Version: 20151201
+Fri Dec 16 18:34:35 2022 kern.info kernel: [   16.742235] mt76_wmac 10300000.wmac: Build Time: 20151201183641
+Fri Dec 16 18:34:35 2022 kern.info kernel: [   16.770758] mt76_wmac 10300000.wmac: firmware init done
+Fri Dec 16 18:34:35 2022 kern.debug kernel: [   16.944042] ieee80211 phy0: Selected rate control algorithm 'minstrel_ht'
+Fri Dec 16 18:34:35 2022 kern.info kernel: [   17.211670] PPP generic driver version 2.4.2
+Fri Dec 16 18:34:35 2022 kern.info kernel: [   17.221872] NET: Registered protocol family 24
+Fri Dec 16 18:34:35 2022 user.info kernel: [   17.245548] kmodloader: done loading kernel modules from /etc/modules.d/*
+Fri Dec 16 18:34:38 2022 user.notice dnsmasq: DNS rebinding protection is active, will discard upstream RFC1918 responses!
+Fri Dec 16 18:34:38 2022 user.notice dnsmasq: Allowing 127.0.0.0/8 responses
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: started, version 2.86 cachesize 150
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: DNS service limited to local subnets
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: compile time options: IPv6 GNU-getopt no-DBus UBus no-i18n no-IDN DHCP no-DHCPv6 no-Lua TFTP no-conntrack no-ipset no-auth no-cryptohash no-DNSSEC no-ID loop-detect inotify dumpfile
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: UBus support enabled: connected to system bus
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: using only locally-known addresses for test
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: using only locally-known addresses for onion
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: using only locally-known addresses for localhost
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: using only locally-known addresses for local
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: using only locally-known addresses for invalid
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: using only locally-known addresses for bind
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: using only locally-known addresses for lan
+Fri Dec 16 18:34:40 2022 daemon.warn dnsmasq[1]: no servers found in /tmp/resolv.conf.d/resolv.conf.auto, will retry
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: read /etc/hosts - 4 addresses
+Fri Dec 16 18:34:40 2022 daemon.info dnsmasq[1]: read /tmp/hosts/dhcp.cfg01411c - 4 addresses
+Fri Dec 16 18:34:40 2022 authpriv.info dropbear[1050]: Not backgrounding
+Fri Dec 16 18:34:46 2022 kern.info kernel: [   31.398486] rt3050-esw 10110000.esw: port 0 link down
+Fri Dec 16 18:34:46 2022 kern.info kernel: [   31.403633] rt3050-esw 10110000.esw: port 1 link down
+Fri Dec 16 18:34:46 2022 daemon.notice wpa_supplicant[1158]: Successfully initialized wpa_supplicant
+Fri Dec 16 18:34:47 2022 user.notice : Added device handler type: bonding
+Fri Dec 16 18:34:47 2022 user.notice : Added device handler type: 8021ad
+Fri Dec 16 18:34:47 2022 user.notice : Added device handler type: 8021q
+Fri Dec 16 18:34:47 2022 user.notice : Added device handler type: macvlan
+Fri Dec 16 18:34:47 2022 user.notice : Added device handler type: veth
+Fri Dec 16 18:34:47 2022 user.notice : Added device handler type: bridge
+Fri Dec 16 18:34:47 2022 user.notice : Added device handler type: Network device
+Fri Dec 16 18:34:47 2022 user.notice : Added device handler type: tunnel
+Fri Dec 16 18:34:49 2022 kern.info kernel: [   34.546299] rt3050-esw 10110000.esw: port 0 link up
+Fri Dec 16 18:34:50 2022 kern.info kernel: [   35.056887] rt3050-esw 10110000.esw: port 1 link up
+Fri Dec 16 18:34:51 2022 user.notice ucitrack: Setting up /etc/config/network reload dependency on /etc/config/dhcp
+Fri Dec 16 18:34:51 2022 user.notice ucitrack: Setting up /etc/config/wireless reload dependency on /etc/config/network
+Fri Dec 16 18:34:52 2022 user.notice ucitrack: Setting up /etc/config/firewall reload dependency on /etc/config/luci-splash
+Fri Dec 16 18:34:52 2022 user.notice ucitrack: Setting up /etc/config/firewall reload dependency on /etc/config/qos
+Fri Dec 16 18:34:52 2022 user.notice ucitrack: Setting up /etc/config/firewall reload dependency on /etc/config/miniupnpd
+Fri Dec 16 18:34:52 2022 user.notice ucitrack: Setting up /etc/config/dhcp reload dependency on /etc/config/odhcpd
+Fri Dec 16 18:34:53 2022 user.notice ucitrack: Setting up non-init /etc/config/fstab reload handler: /sbin/block mount
+Fri Dec 16 18:34:53 2022 user.notice ucitrack: Setting up /etc/config/system reload trigger for non-procd /etc/init.d/led
+Fri Dec 16 18:34:54 2022 user.notice ucitrack: Setting up /etc/config/system reload dependency on /etc/config/luci_statistics
+Fri Dec 16 18:34:54 2022 user.notice ucitrack: Setting up /etc/config/system reload dependency on /etc/config/dhcp
+Fri Dec 16 18:34:57 2022 daemon.notice procd: /etc/rc.d/S96led: setting up led wlan2g
+Fri Dec 16 18:34:57 2022 daemon.notice procd: /etc/rc.d/S96led: setting up led lan
+Fri Dec 16 18:34:57 2022 daemon.notice procd: /etc/rc.d/S96led: setting up led wan
+Fri Dec 16 18:34:58 2022 daemon.warn openvpn(OVPN)[1667]: DEPRECATED OPTION: --cipher set to 'AES-128-CBC' but missing in --data-ciphers (AES-256-GCM:AES-128-GCM). Future OpenVPN version will ignore --cipher for cipher negotiations. Add 'AES-128-CBC' to --data-ciphers or change --cipher 'AES-128-CBC' to --data-ciphers-fallback 'AES-128-CBC' to silence this warning.
+Fri Dec 16 18:34:58 2022 kern.info kernel: [   43.083978] br-lan: port 1(eth0.1) entered blocking state
+Fri Dec 16 18:34:58 2022 kern.info kernel: [   43.089478] br-lan: port 1(eth0.1) entered disabled state
+Fri Dec 16 18:34:58 2022 kern.info kernel: [   43.095451] device eth0.1 entered promiscuous mode
+Fri Dec 16 18:34:58 2022 kern.info kernel: [   43.100322] device eth0 entered promiscuous mode
+Fri Dec 16 18:34:58 2022 daemon.notice openvpn(OVPN)[1667]: OpenVPN 2.5.7 mipsel-openwrt-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [MH/PKTINFO] [AEAD]
+Fri Dec 16 18:34:58 2022 daemon.notice openvpn(OVPN)[1667]: library versions: OpenSSL 1.1.1s  1 Nov 2022, LZO 2.10
+Fri Dec 16 18:34:58 2022 kern.info kernel: [   43.161639] br-lan: port 1(eth0.1) entered blocking state
+Fri Dec 16 18:34:58 2022 kern.info kernel: [   43.167141] br-lan: port 1(eth0.1) entered forwarding state
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'lan' is enabled
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'lan' is setting up now
+Fri Dec 16 18:34:58 2022 daemon.warn openvpn(OVPN)[1667]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'lan' is now up
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: bridge 'br-lan' link is up
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'lan' has link connectivity
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: VLAN 'eth0.1' link is up
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'loopback' is enabled
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'loopback' is setting up now
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'loopback' is now up
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'wan' is enabled
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'wan6' is enabled
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Network device 'eth0' link is up
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Network device 'lo' link is up
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'loopback' has link connectivity
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: VLAN 'eth0.2' link is up
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'wan' has link connectivity
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'wan' is setting up now
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'wan6' has link connectivity
+Fri Dec 16 18:34:58 2022 daemon.notice netifd: Interface 'wan6' is setting up now
+Fri Dec 16 18:34:59 2022 kern.info kernel: [   44.091010] IPv6: ADDRCONF(NETDEV_CHANGE): br-lan: link becomes ready
+Fri Dec 16 18:34:59 2022 daemon.err odhcpd[1279]: Failed to send to ff02::1%lan@br-lan (Address not available)
+Fri Dec 16 18:35:00 2022 daemon.notice netifd: wan (1917): udhcpc: started, v1.35.0
+Fri Dec 16 18:35:02 2022 daemon.notice netifd: wan (1917): udhcpc: broadcasting discover
+Fri Dec 16 18:35:02 2022 daemon.notice netifd: wan (1917): udhcpc: broadcasting select for 172.16.136.199, server 172.16.136.1
+Fri Dec 16 18:35:03 2022 daemon.notice netifd: wan (1917): udhcpc: lease of 172.16.136.199 obtained from 172.16.136.1, lease time 360
+Fri Dec 16 18:35:03 2022 user.notice firewall: Reloading firewall due to ifup of lan (br-lan)
+Fri Dec 16 18:35:03 2022 daemon.info procd: - init complete -
+Fri Dec 16 18:35:04 2022 daemon.notice netifd: Interface 'wan' is now up
+Fri Dec 16 18:35:04 2022 daemon.info dnsmasq[1]: reading /tmp/resolv.conf.d/resolv.conf.auto
+Fri Dec 16 18:35:04 2022 daemon.info dnsmasq[1]: using nameserver 1.1.1.1#53
+Fri Dec 16 18:35:04 2022 daemon.info dnsmasq[1]: using nameserver 195.208.4.1#53
+Fri Dec 16 18:35:04 2022 daemon.info dnsmasq[1]: using only locally-known addresses for test
+Fri Dec 16 18:35:04 2022 daemon.info dnsmasq[1]: using only locally-known addresses for onion
+Fri Dec 16 18:35:04 2022 daemon.info dnsmasq[1]: using only locally-known addresses for localhost
+Fri Dec 16 18:35:04 2022 daemon.info dnsmasq[1]: using only locally-known addresses for local
+Fri Dec 16 18:35:04 2022 daemon.info dnsmasq[1]: using only locally-known addresses for invalid
+Fri Dec 16 18:35:04 2022 daemon.info dnsmasq[1]: using only locally-known addresses for bind
+Fri Dec 16 18:35:04 2022 daemon.info dnsmasq[1]: using only locally-known addresses for lan
+Fri Dec 16 18:35:05 2022 daemon.notice hostapd: Configuration file: /var/run/hostapd-phy0.conf (phy wlan0) --&gt; new PHY
+Fri Dec 16 18:35:05 2022 daemon.notice openvpn(OVPN)[1667]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.158.187.25:1194
+Fri Dec 16 18:35:05 2022 daemon.notice openvpn(OVPN)[1667]: Attempting to establish TCP connection with [AF_INET]51.158.187.25:1194 [nonblock]
+Fri Dec 16 18:35:05 2022 kern.info kernel: [   50.192206] br-lan: port 2(wlan0) entered blocking state
+Fri Dec 16 18:35:05 2022 kern.info kernel: [   50.197618] br-lan: port 2(wlan0) entered disabled state
+Fri Dec 16 18:35:05 2022 kern.info kernel: [   50.203545] device wlan0 entered promiscuous mode
+Fri Dec 16 18:35:05 2022 daemon.notice hostapd: ACS: Automatic channel selection started, this may take a bit
+Fri Dec 16 18:35:05 2022 daemon.notice hostapd: wlan0: interface state UNINITIALIZED-&gt;ACS
+Fri Dec 16 18:35:05 2022 daemon.notice hostapd: wlan0: ACS-STARTED
+Fri Dec 16 18:35:05 2022 daemon.notice openvpn(OVPN)[1667]: TCP connection established with [AF_INET]51.158.187.25:1194
+Fri Dec 16 18:35:05 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link local: (not bound)
+Fri Dec 16 18:35:05 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link remote: [AF_INET]51.158.187.25:1194
+Fri Dec 16 18:35:06 2022 daemon.err openvpn(OVPN)[1667]: Connection reset, restarting [0]
+Fri Dec 16 18:35:06 2022 daemon.notice openvpn(OVPN)[1667]: SIGUSR1[soft,connection-reset] received, process restarting
+Fri Dec 16 18:35:07 2022 daemon.notice netifd: Wireless device 'radio0' is now up
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: exiting on receipt of SIGTERM
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: started, version 2.86 cachesize 150
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: DNS service limited to local subnets
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: compile time options: IPv6 GNU-getopt no-DBus UBus no-i18n no-IDN DHCP no-DHCPv6 no-Lua TFTP no-conntrack no-ipset no-auth no-cryptohash no-DNSSEC no-ID loop-detect inotify dumpfile
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: UBus support enabled: connected to system bus
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq-dhcp[1]: DHCP, IP range 192.168.1.100 -- 192.168.1.249, lease time 12h
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for test
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for onion
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for localhost
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for local
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for invalid
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for bind
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for lan
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: reading /tmp/resolv.conf.d/resolv.conf.auto
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using nameserver 1.1.1.1#53
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using nameserver 195.208.4.1#53
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for test
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for onion
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for localhost
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for local
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for invalid
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for bind
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: using only locally-known addresses for lan
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: read /etc/hosts - 4 addresses
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq[1]: read /tmp/hosts/dhcp.cfg01411c - 6 addresses
+Fri Dec 16 18:38:51 2022 daemon.info dnsmasq-dhcp[1]: read /etc/ethers - 0 addresses
+Fri Dec 16 18:38:52 2022 daemon.warn openvpn(OVPN)[1667]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+Fri Dec 16 18:38:52 2022 daemon.notice openvpn(OVPN)[1667]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.75.70.203:1194
+Fri Dec 16 18:38:52 2022 daemon.notice openvpn(OVPN)[1667]: Attempting to establish TCP connection with [AF_INET]51.75.70.203:1194 [nonblock]
+Fri Dec 16 18:38:52 2022 daemon.notice openvpn(OVPN)[1667]: TCP connection established with [AF_INET]51.75.70.203:1194
+Fri Dec 16 18:38:52 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link local: (not bound)
+Fri Dec 16 18:38:52 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link remote: [AF_INET]51.75.70.203:1194
+Fri Dec 16 18:38:52 2022 daemon.err openvpn(OVPN)[1667]: Connection reset, restarting [-1]
+Fri Dec 16 18:38:52 2022 daemon.notice openvpn(OVPN)[1667]: SIGUSR1[soft,connection-reset] received, process restarting
+Fri Dec 16 18:38:53 2022 daemon.notice hostapd: ACS: Survey is missing noise floor
+Fri Dec 16 18:38:53 2022 daemon.notice hostapd: ACS: Survey is missing noise floor
+Fri Dec 16 18:38:53 2022 daemon.notice hostapd: wlan0: ACS-COMPLETED freq=2462 channel=11
+Fri Dec 16 18:38:54 2022 kern.info kernel: [   57.653800] IPv6: ADDRCONF(NETDEV_CHANGE): wlan0: link becomes ready
+Fri Dec 16 18:38:54 2022 kern.info kernel: [   57.660587] br-lan: port 2(wlan0) entered blocking state
+Fri Dec 16 18:38:54 2022 kern.info kernel: [   57.665985] br-lan: port 2(wlan0) entered forwarding state
+Fri Dec 16 18:38:54 2022 daemon.notice netifd: Network device 'wlan0' link is up
+Fri Dec 16 18:38:54 2022 user.notice firewall: Reloading firewall due to ifup of wan (eth0.2)
+Fri Dec 16 18:38:54 2022 daemon.notice hostapd: wlan0: interface state ACS-&gt;ENABLED
+Fri Dec 16 18:38:54 2022 daemon.notice hostapd: wlan0: AP-ENABLED
+Fri Dec 16 18:38:57 2022 daemon.warn openvpn(OVPN)[1667]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+Fri Dec 16 18:38:57 2022 daemon.notice openvpn(OVPN)[1667]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.158.181.228:1194
+Fri Dec 16 18:38:57 2022 daemon.notice openvpn(OVPN)[1667]: Attempting to establish TCP connection with [AF_INET]51.158.181.228:1194 [nonblock]
+Fri Dec 16 18:38:57 2022 daemon.notice openvpn(OVPN)[1667]: TCP connection established with [AF_INET]51.158.181.228:1194
+Fri Dec 16 18:38:57 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link local: (not bound)
+Fri Dec 16 18:38:57 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link remote: [AF_INET]51.158.181.228:1194
+Fri Dec 16 18:38:57 2022 daemon.err openvpn(OVPN)[1667]: Connection reset, restarting [-1]
+Fri Dec 16 18:38:57 2022 daemon.notice openvpn(OVPN)[1667]: SIGUSR1[soft,connection-reset] received, process restarting
+Fri Dec 16 18:38:59 2022 daemon.info hostapd: wlan0: STA a4:77:33:86:ae:70 IEEE 802.11: authenticated
+Fri Dec 16 18:38:59 2022 daemon.info dnsmasq-dhcp[1]: DHCPDISCOVER(br-lan) 192.168.1.10 b4:2e:99:97:0c:23
+Fri Dec 16 18:38:59 2022 daemon.info dnsmasq-dhcp[1]: DHCPOFFER(br-lan) 192.168.1.10 b4:2e:99:97:0c:23
+Fri Dec 16 18:38:59 2022 daemon.info dnsmasq-dhcp[1]: DHCPREQUEST(br-lan) 192.168.1.10 b4:2e:99:97:0c:23
+Fri Dec 16 18:38:59 2022 daemon.info dnsmasq-dhcp[1]: DHCPACK(br-lan) 192.168.1.10 b4:2e:99:97:0c:23 K14M-PC
+Fri Dec 16 18:39:00 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: retracker.sevstar.net
+Fri Dec 16 18:39:02 2022 daemon.warn openvpn(OVPN)[1667]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+Fri Dec 16 18:39:02 2022 daemon.notice openvpn(OVPN)[1667]: TCP/UDP: Preserving recently used remote address: [AF_INET]141.95.17.71:1194
+Fri Dec 16 18:39:02 2022 daemon.notice openvpn(OVPN)[1667]: Attempting to establish TCP connection with [AF_INET]141.95.17.71:1194 [nonblock]
+Fri Dec 16 18:39:02 2022 daemon.notice openvpn(OVPN)[1667]: TCP connection established with [AF_INET]141.95.17.71:1194
+Fri Dec 16 18:39:02 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link local: (not bound)
+Fri Dec 16 18:39:02 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link remote: [AF_INET]141.95.17.71:1194
+Fri Dec 16 18:39:02 2022 daemon.err openvpn(OVPN)[1667]: Connection reset, restarting [-1]
+Fri Dec 16 18:39:02 2022 daemon.notice openvpn(OVPN)[1667]: SIGUSR1[soft,connection-reset] received, process restarting
+Fri Dec 16 18:39:05 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: retracker.sevstar.net
+Fri Dec 16 18:39:07 2022 daemon.warn openvpn(OVPN)[1667]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+Fri Dec 16 18:39:07 2022 daemon.notice openvpn(OVPN)[1667]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.158.176.255:1194
+Fri Dec 16 18:39:07 2022 daemon.notice openvpn(OVPN)[1667]: Attempting to establish TCP connection with [AF_INET]51.158.176.255:1194 [nonblock]
+Fri Dec 16 18:39:08 2022 daemon.notice openvpn(OVPN)[1667]: TCP connection established with [AF_INET]51.158.176.255:1194
+Fri Dec 16 18:39:08 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link local: (not bound)
+Fri Dec 16 18:39:08 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link remote: [AF_INET]51.158.176.255:1194
+Fri Dec 16 18:39:08 2022 daemon.err openvpn(OVPN)[1667]: Connection reset, restarting [0]
+Fri Dec 16 18:39:08 2022 daemon.notice openvpn(OVPN)[1667]: SIGUSR1[soft,connection-reset] received, process restarting
+Fri Dec 16 18:39:11 2022 daemon.info hostapd: wlan0: STA e0:1f:88:c5:ab:f6 IEEE 802.11: authenticated
+Fri Dec 16 18:39:11 2022 daemon.info hostapd: wlan0: STA e0:1f:88:c5:ab:f6 IEEE 802.11: associated (aid 1)
+Fri Dec 16 18:39:11 2022 daemon.notice hostapd: wlan0: AP-STA-CONNECTED e0:1f:88:c5:ab:f6
+Fri Dec 16 18:39:11 2022 daemon.info hostapd: wlan0: STA e0:1f:88:c5:ab:f6 WPA: pairwise key handshake completed (RSN)
+Fri Dec 16 18:39:11 2022 daemon.notice hostapd: wlan0: EAPOL-4WAY-HS-COMPLETED e0:1f:88:c5:ab:f6
+Fri Dec 16 18:39:11 2022 daemon.info dnsmasq-dhcp[1]: DHCPDISCOVER(br-lan) e0:1f:88:c5:ab:f6
+Fri Dec 16 18:39:11 2022 daemon.info dnsmasq-dhcp[1]: DHCPOFFER(br-lan) 192.168.1.11 e0:1f:88:c5:ab:f6
+Fri Dec 16 18:39:11 2022 daemon.info dnsmasq-dhcp[1]: DHCPREQUEST(br-lan) 192.168.1.11 e0:1f:88:c5:ab:f6
+Fri Dec 16 18:39:11 2022 daemon.info dnsmasq-dhcp[1]: DHCPACK(br-lan) 192.168.1.11 e0:1f:88:c5:ab:f6 K14M-Android
+Fri Dec 16 18:39:13 2022 daemon.warn openvpn(OVPN)[1667]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+Fri Dec 16 18:39:13 2022 daemon.notice openvpn(OVPN)[1667]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.75.75.245:1194
+Fri Dec 16 18:39:13 2022 daemon.notice openvpn(OVPN)[1667]: Attempting to establish TCP connection with [AF_INET]51.75.75.245:1194 [nonblock]
+Fri Dec 16 18:39:13 2022 daemon.notice openvpn(OVPN)[1667]: TCP connection established with [AF_INET]51.75.75.245:1194
+Fri Dec 16 18:39:13 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link local: (not bound)
+Fri Dec 16 18:39:13 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link remote: [AF_INET]51.75.75.245:1194
+Fri Dec 16 18:39:13 2022 daemon.err openvpn(OVPN)[1667]: Connection reset, restarting [0]
+Fri Dec 16 18:39:13 2022 daemon.notice openvpn(OVPN)[1667]: SIGUSR1[soft,connection-reset] received, process restarting
+Fri Dec 16 18:39:14 2022 daemon.info hostapd: wlan0: STA a4:77:33:86:ae:70 IEEE 802.11: authenticated
+Fri Dec 16 18:39:14 2022 daemon.info hostapd: wlan0: STA a4:77:33:86:ae:70 IEEE 802.11: associated (aid 2)
+Fri Dec 16 18:39:14 2022 daemon.notice hostapd: wlan0: AP-STA-CONNECTED a4:77:33:86:ae:70
+Fri Dec 16 18:39:14 2022 daemon.info hostapd: wlan0: STA a4:77:33:86:ae:70 WPA: pairwise key handshake completed (RSN)
+Fri Dec 16 18:39:14 2022 daemon.notice hostapd: wlan0: EAPOL-4WAY-HS-COMPLETED a4:77:33:86:ae:70
+Fri Dec 16 18:39:15 2022 daemon.info dnsmasq-dhcp[1]: DHCPREQUEST(br-lan) 192.168.1.20 a4:77:33:86:ae:70
+Fri Dec 16 18:39:15 2022 daemon.info dnsmasq-dhcp[1]: DHCPACK(br-lan) 192.168.1.20 a4:77:33:86:ae:70 Chromecast
+Fri Dec 16 18:39:17 2022 daemon.info dnsmasq[1]: read /etc/hosts - 4 addresses
+Fri Dec 16 18:39:17 2022 daemon.info dnsmasq[1]: read /tmp/hosts/dhcp.cfg01411c - 6 addresses
+Fri Dec 16 18:39:17 2022 daemon.info dnsmasq[1]: read /tmp/hosts/odhcpd - 0 addresses
+Fri Dec 16 18:39:17 2022 daemon.info dnsmasq-dhcp[1]: read /etc/ethers - 0 addresses
+Fri Dec 16 18:39:18 2022 daemon.warn openvpn(OVPN)[1667]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+Fri Dec 16 18:39:18 2022 daemon.notice openvpn(OVPN)[1667]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.158.181.161:1194
+Fri Dec 16 18:39:18 2022 daemon.notice openvpn(OVPN)[1667]: Attempting to establish TCP connection with [AF_INET]51.158.181.161:1194 [nonblock]
+Fri Dec 16 18:39:18 2022 daemon.notice openvpn(OVPN)[1667]: TCP connection established with [AF_INET]51.158.181.161:1194
+Fri Dec 16 18:39:18 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link local: (not bound)
+Fri Dec 16 18:39:18 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link remote: [AF_INET]51.158.181.161:1194
+Fri Dec 16 18:39:18 2022 daemon.err openvpn(OVPN)[1667]: Connection reset, restarting [-1]
+Fri Dec 16 18:39:18 2022 daemon.notice openvpn(OVPN)[1667]: SIGUSR1[soft,connection-reset] received, process restarting
+Fri Dec 16 18:39:23 2022 daemon.warn openvpn(OVPN)[1667]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+Fri Dec 16 18:39:23 2022 daemon.notice openvpn(OVPN)[1667]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.158.187.25:1194
+Fri Dec 16 18:39:23 2022 daemon.notice openvpn(OVPN)[1667]: Attempting to establish TCP connection with [AF_INET]51.158.187.25:1194 [nonblock]
+Fri Dec 16 18:39:23 2022 daemon.notice openvpn(OVPN)[1667]: TCP connection established with [AF_INET]51.158.187.25:1194
+Fri Dec 16 18:39:23 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link local: (not bound)
+Fri Dec 16 18:39:23 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link remote: [AF_INET]51.158.187.25:1194
+Fri Dec 16 18:39:23 2022 daemon.err openvpn(OVPN)[1667]: Connection reset, restarting [-1]
+Fri Dec 16 18:39:23 2022 daemon.notice openvpn(OVPN)[1667]: SIGUSR1[soft,connection-reset] received, process restarting
+Fri Dec 16 18:39:28 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: retracker.sevstar.net
+Fri Dec 16 18:39:28 2022 daemon.warn openvpn(OVPN)[1667]: NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+Fri Dec 16 18:39:28 2022 daemon.notice openvpn(OVPN)[1667]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.75.70.203:1194
+Fri Dec 16 18:39:28 2022 daemon.notice openvpn(OVPN)[1667]: Attempting to establish TCP connection with [AF_INET]51.75.70.203:1194 [nonblock]
+Fri Dec 16 18:39:28 2022 daemon.notice openvpn(OVPN)[1667]: TCP connection established with [AF_INET]51.75.70.203:1194
+Fri Dec 16 18:39:28 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link local: (not bound)
+Fri Dec 16 18:39:28 2022 daemon.notice openvpn(OVPN)[1667]: TCP_CLIENT link remote: [AF_INET]51.75.70.203:1194
+Fri Dec 16 18:39:30 2022 daemon.notice openvpn(OVPN)[1667]: [antizapret-server] Peer Connection Initiated with [AF_INET]51.75.70.203:1194
+Fri Dec 16 18:39:32 2022 daemon.err openvpn(OVPN)[1667]: Options error: Unrecognized option or missing or extra parameter(s) in [PUSH-OPTIONS]:3: block-outside-dns (2.5.7)
+Fri Dec 16 18:39:32 2022 daemon.notice netifd: Interface 'OVPN' is enabled
+Fri Dec 16 18:39:32 2022 daemon.notice netifd: Network device 'tun0' link is up
+Fri Dec 16 18:39:32 2022 daemon.notice openvpn(OVPN)[1667]: TUN/TAP device tun0 opened
+Fri Dec 16 18:39:32 2022 daemon.notice openvpn(OVPN)[1667]: net_iface_mtu_set: mtu 1500 for tun0
+Fri Dec 16 18:39:32 2022 daemon.notice netifd: Interface 'OVPN' has link connectivity
+Fri Dec 16 18:39:32 2022 daemon.notice netifd: Interface 'OVPN' is setting up now
+Fri Dec 16 18:39:32 2022 daemon.notice openvpn(OVPN)[1667]: net_iface_up: set tun0 up
+Fri Dec 16 18:39:32 2022 daemon.notice netifd: Interface 'OVPN' is now up
+Fri Dec 16 18:39:32 2022 daemon.notice openvpn(OVPN)[1667]: net_addr_v4_add: 192.168.105.107/21 dev tun0
+Fri Dec 16 18:39:32 2022 daemon.notice openvpn(OVPN)[1667]: /usr/libexec/openvpn-hotplug up OVPN tun0 1500 1554 192.168.105.107 255.255.248.0 init
+Fri Dec 16 18:39:32 2022 daemon.warn openvpn(OVPN)[1667]: WARNING: this configuration may cache passwords in memory -- use the auth-nocache option to prevent this
+Fri Dec 16 18:39:32 2022 daemon.notice openvpn(OVPN)[1667]: Initialization Sequence Completed
+Fri Dec 16 18:39:33 2022 daemon.warn dnsmasq[1]: possible DNS-rebind attack detected: retracker.sevstar.net
+Fri Dec 16 18:39:33 2022 user.notice firewall: Reloading firewall due to ifup of OVPN (tun0)
+Fri Dec 16 18:39:37 2022 user.info : luci: accepted login on / for root from 192.168.1.10
+</code></pre>
+</details>
+<p>Но… хоть и написано что он работает, я результат его работы не замечаю. Открываю браузер без установленного прокси расширения, и пытают перейти например на рутрекер.</p>
+<p>Браузер ни секунды не думая показывает что нет доступа</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/6d857062dd1c0d7137b35a7581bb80eb04a151ee.png" data-download-href="https://ntc.party/uploads/default/6d857062dd1c0d7137b35a7581bb80eb04a151ee" title="image"><img src="установка-на-роутер-с-openwrt-3557/6d857062dd1c0d7137b35a7581bb80eb04a151ee_2_690x388.png" alt="image" data-base62-sha1="fCRW27DMGHqb7aftmEPYwz1DN70" width="690" height="388" srcset="установка-на-роутер-с-openwrt-3557/6d857062dd1c0d7137b35a7581bb80eb04a151ee_2_690x388.png, установка-на-роутер-с-openwrt-3557/6d857062dd1c0d7137b35a7581bb80eb04a151ee_2_1035x582.png 1.5x, установка-на-роутер-с-openwrt-3557/6d857062dd1c0d7137b35a7581bb80eb04a151ee_2_1380x776.png 2x" data-dominant-color="202529"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1920×1080 160 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2022-12-16T15:46:46.189Z</td></tr><tr><td>apache51000(Igor)</td><td><p>Rebind, смотрю, включен.<br>
+Попробуй отключить в настройках Network → DHCP and DNS → Rebind protection.<br>
+<img src="установка-на-роутер-с-openwrt-3557/c3915061d2cd4c91da2706d16c227a03af6c2f20.png" alt="1" data-base62-sha1="rU4rjoS3Gh4BfedUfuc9zXbKsiQ" width="503" height="292"></p></td><td>2022-12-16T15:52:08.929Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Только что вспомнил что днс гугла забыл прописать в интерефейс. В файл настроек прописал путь а в интерфейс нет - исправил</p>
+<p><img src="установка-на-роутер-с-openwrt-3557/632f7377ea9f1c3d534b0a5cd5544f0e5899c7f5.png" alt="image" data-base62-sha1="e9qVQmyBKZ8wNHrJwWKY3flxmeh" width="658" height="138"></p>
+<p>Результат не изменился</p>
+<p>“Защита от DNS Rebinding” нужно выключить?</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/a39c3a3649d891eaf25637e0f7b237b3eb209c41.png" data-download-href="https://ntc.party/uploads/default/a39c3a3649d891eaf25637e0f7b237b3eb209c41" title="image"><img src="установка-на-роутер-с-openwrt-3557/a39c3a3649d891eaf25637e0f7b237b3eb209c41.png" alt="image" data-base62-sha1="nlmxGxqIqxK8IdkRgaqlvg1xLtT" width="690" height="378" data-dominant-color="282929"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">878×482 23.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Выключил</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/eb8efc37d22d0317188ea718bab8b4c17c6013eb.png" data-download-href="https://ntc.party/uploads/default/eb8efc37d22d0317188ea718bab8b4c17c6013eb" title="image"><img src="установка-на-роутер-с-openwrt-3557/eb8efc37d22d0317188ea718bab8b4c17c6013eb.png" alt="image" data-base62-sha1="xBQy6ag48Mj45NSMAb6L8pgQ58D" width="690" height="310" data-dominant-color="282829"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">918×413 20.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2022-12-16T16:06:27.369Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Но ничего не изменилось.</p>
+<p><a class="attachment" href="установка-на-роутер-с-openwrt-3557/kBY2fU4S7BwHtouwdeo5tgEKLVo.txt">log.txt</a> (56.7 КБ)</p></td><td>2022-12-16T16:10:09.840Z</td></tr><tr><td>apache51000(Igor)</td><td><p>Сверься с моими настройками, возможно что-то упустил.</p>
+<p>Установленные пакеты:</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/8c46c99303a74078c4ba25982da7f926981f9ea4.png" data-download-href="https://ntc.party/uploads/default/8c46c99303a74078c4ba25982da7f926981f9ea4" title="image"><img src="установка-на-роутер-с-openwrt-3557/8c46c99303a74078c4ba25982da7f926981f9ea4.png" alt="image" data-base62-sha1="k0Wvry3Y8szO19kS70pdoUqbP4o" width="690" height="254" data-dominant-color="EFEFF0"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1107×408 17.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>В интерфейсах WAN и WAN6 (и если есть WWAN) использовать гугловский 8.8.8.8 :</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/cdb9140d61152792500f225dbee1acec8284afe5.png" data-download-href="https://ntc.party/uploads/default/cdb9140d61152792500f225dbee1acec8284afe5" title="image"><img src="установка-на-роутер-с-openwrt-3557/cdb9140d61152792500f225dbee1acec8284afe5.png" alt="image" data-base62-sha1="tlUppMD0Hx3gFWUIYssz4Y3u1eZ" width="690" height="452" data-dominant-color="F9F9F9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">853×560 13.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/be69bbef58618aa9b917e87e4482c1d0db2e45a1.png" data-download-href="https://ntc.party/uploads/default/be69bbef58618aa9b917e87e4482c1d0db2e45a1" title="image"><img src="установка-на-роутер-с-openwrt-3557/be69bbef58618aa9b917e87e4482c1d0db2e45a1.png" alt="image" data-base62-sha1="ratfJcvpduamWy3XYKfNjhIURvH" width="690" height="314" data-dominant-color="F6F6F6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">824×376 11.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/32a3c16f0f70904a4106a97d25e148870458b245.png" data-download-href="https://ntc.party/uploads/default/32a3c16f0f70904a4106a97d25e148870458b245" title="image"><img src="установка-на-роутер-с-openwrt-3557/32a3c16f0f70904a4106a97d25e148870458b245.png" alt="image" data-base62-sha1="7dYIx44bcXvVwuZaKDSPzKAR3h3" width="690" height="200" data-dominant-color="F2F1EF"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">831×242 8.19 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>Firewall:</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/185a869b234979396cc470a2d5226370c9261d39.png" data-download-href="https://ntc.party/uploads/default/185a869b234979396cc470a2d5226370c9261d39" title="image"><img src="установка-на-роутер-с-openwrt-3557/185a869b234979396cc470a2d5226370c9261d39_2_690x378.png" alt="image" data-base62-sha1="3trppMu76hYDFpB2VFhjryUm3up" width="690" height="378" srcset="установка-на-роутер-с-openwrt-3557/185a869b234979396cc470a2d5226370c9261d39_2_690x378.png, установка-на-роутер-с-openwrt-3557/185a869b234979396cc470a2d5226370c9261d39_2_1035x567.png 1.5x, установка-на-роутер-с-openwrt-3557/185a869b234979396cc470a2d5226370c9261d39_2_1380x756.png 2x" data-dominant-color="F9F8F8"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1602×879 28.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/de05c676d9c4f28b529cc01e6453b2e0b6eb3994.png" data-download-href="https://ntc.party/uploads/default/de05c676d9c4f28b529cc01e6453b2e0b6eb3994" title="image"><img src="установка-на-роутер-с-openwrt-3557/de05c676d9c4f28b529cc01e6453b2e0b6eb3994_2_690x488.png" alt="image" data-base62-sha1="vG6n3q9H4SFGL035BPuU3wimIUA" width="690" height="488" srcset="установка-на-роутер-с-openwrt-3557/de05c676d9c4f28b529cc01e6453b2e0b6eb3994_2_690x488.png, установка-на-роутер-с-openwrt-3557/de05c676d9c4f28b529cc01e6453b2e0b6eb3994.png 1.5x, установка-на-роутер-с-openwrt-3557/de05c676d9c4f28b529cc01e6453b2e0b6eb3994.png 2x" data-dominant-color="F5F7F5"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">899×637 31.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p>DNS rebinding отключен. В конец конфигурационного файла ovpn добавить route 8.8.8.8.<br>
+Не забывай сохранять и применять настройки каждый раз.</p></td><td>2022-12-16T16:39:32.632Z</td></tr><tr><td>ValdikSS</td><td><p>Лог выглядит нормально. Вы не можете подключиться к серверу, потому что на серверах нет свободных слотов для подключения.</p></td><td>2022-12-16T17:19:05.552Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Может и напутал.</p>
+<aside class="quote no-group" data-username="apache51000" data-post="15" data-topic="3557">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/apache51000/48/2092_2.png" class="avatar"> apache51000:</div>
+<blockquote>
+<p>Установленные пакеты:</p>
+</blockquote>
+</aside>
+<p>Первого нет. Он обязателен?</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/575f62eb3b304016cba71c027f8e4558ebcbc2b5.png" data-download-href="https://ntc.party/uploads/default/575f62eb3b304016cba71c027f8e4558ebcbc2b5" title="image"><img src="установка-на-роутер-с-openwrt-3557/575f62eb3b304016cba71c027f8e4558ebcbc2b5.png" alt="image" data-base62-sha1="csVU4kwnqVWgOd4IkPQ14tbgvFX" width="690" height="250" data-dominant-color="282828"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">951×345 18.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<aside class="quote no-group" data-username="apache51000" data-post="15" data-topic="3557">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/apache51000/48/2092_2.png" class="avatar"> apache51000:</div>
+<blockquote>
+<p>В интерфейсах WAN и WAN6 (и если есть WWAN) использовать гугловский 8.8.8.8 :</p>
+</blockquote>
+</aside>
+<p>В WAN6 тоже? Ок, добавил.</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/92798bb85eca83ca7bb6f2cf00d4402d31c89da9.png" data-download-href="https://ntc.party/uploads/default/92798bb85eca83ca7bb6f2cf00d4402d31c89da9" title="image"><img src="установка-на-роутер-с-openwrt-3557/92798bb85eca83ca7bb6f2cf00d4402d31c89da9.png" alt="image" data-base62-sha1="kTM7wmyvkmuj7JBMX1sAIrRIG5X" width="690" height="276" data-dominant-color="272827"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">891×357 19.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/389119beb2378bfb7aa6ae603b095e7f72638694.png" data-download-href="https://ntc.party/uploads/default/389119beb2378bfb7aa6ae603b095e7f72638694" title="image"><img src="установка-на-роутер-с-openwrt-3557/389119beb2378bfb7aa6ae603b095e7f72638694_2_463x499.png" alt="image" data-base62-sha1="84pC7zIYwDbBdSaEtEtRXEitLTe" width="463" height="499" srcset="установка-на-роутер-с-openwrt-3557/389119beb2378bfb7aa6ae603b095e7f72638694_2_463x499.png, установка-на-роутер-с-openwrt-3557/389119beb2378bfb7aa6ae603b095e7f72638694_2_694x748.png 1.5x, установка-на-роутер-с-openwrt-3557/389119beb2378bfb7aa6ae603b095e7f72638694.png 2x" data-dominant-color="2A2A2A"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">802×866 50.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/50d5a6a224b4dbeb06d3c044146a8df724deab4e.png" data-download-href="https://ntc.party/uploads/default/50d5a6a224b4dbeb06d3c044146a8df724deab4e" title="image"><img src="установка-на-роутер-с-openwrt-3557/50d5a6a224b4dbeb06d3c044146a8df724deab4e.png" alt="image" data-base62-sha1="bx5WrmFYM4POJ11IgI4uqEd0XW6" width="690" height="168" data-dominant-color="2B2C2C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">887×216 16.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/e5e77356e2c721d90c2cd85478b9524808267bb1.png" data-download-href="https://ntc.party/uploads/default/e5e77356e2c721d90c2cd85478b9524808267bb1" title="image"><img src="установка-на-роутер-с-openwrt-3557/e5e77356e2c721d90c2cd85478b9524808267bb1.png" alt="image" data-base62-sha1="wNPdIr5AGym1SZIbZEbTo6VpFmN" width="690" height="131" data-dominant-color="272A29"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">886×169 9.11 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/f43228343903650b95a0198495c02fe11287ff3a.png" data-download-href="https://ntc.party/uploads/default/f43228343903650b95a0198495c02fe11287ff3a" title="image"><img src="установка-на-роутер-с-openwrt-3557/f43228343903650b95a0198495c02fe11287ff3a_2_690x388.png" alt="image" data-base62-sha1="yQfXKICPbe61KVPYpe79ahHd38m" width="690" height="388" srcset="установка-на-роутер-с-openwrt-3557/f43228343903650b95a0198495c02fe11287ff3a_2_690x388.png, установка-на-роутер-с-openwrt-3557/f43228343903650b95a0198495c02fe11287ff3a_2_1035x582.png 1.5x, установка-на-роутер-с-openwrt-3557/f43228343903650b95a0198495c02fe11287ff3a_2_1380x776.png 2x" data-dominant-color="151616"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1920×1080 121 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/cb63a8d75f53baa99f670370247481f87b2eed97.png" data-download-href="https://ntc.party/uploads/default/cb63a8d75f53baa99f670370247481f87b2eed97" title="image"><img src="установка-на-роутер-с-openwrt-3557/cb63a8d75f53baa99f670370247481f87b2eed97_2_690x388.png" alt="image" data-base62-sha1="t1grEHGj3fbur3Ox6TINwQ4uXun" width="690" height="388" srcset="установка-на-роутер-с-openwrt-3557/cb63a8d75f53baa99f670370247481f87b2eed97_2_690x388.png, установка-на-роутер-с-openwrt-3557/cb63a8d75f53baa99f670370247481f87b2eed97_2_1035x582.png 1.5x, установка-на-роутер-с-openwrt-3557/cb63a8d75f53baa99f670370247481f87b2eed97_2_1380x776.png 2x" data-dominant-color="151515"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1920×1080 116 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/baaf0a6b75fc5da99cc71a7e80c9373b9c3e51b3.png" data-download-href="https://ntc.party/uploads/default/baaf0a6b75fc5da99cc71a7e80c9373b9c3e51b3" title="image"><img src="установка-на-роутер-с-openwrt-3557/baaf0a6b75fc5da99cc71a7e80c9373b9c3e51b3.png" alt="image" data-base62-sha1="qDtPC2Vh7rOVc4uPIao7DXOcELh" width="690" height="485" data-dominant-color="2A2B2C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">966×679 50.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<aside class="quote no-group" data-username="apache51000" data-post="15" data-topic="3557">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/apache51000/48/2092_2.png" class="avatar"> apache51000:</div>
+<blockquote>
+<p>Firewall:</p>
+</blockquote>
+</aside>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/bac1e2b319f9002bc52e5df5387bb0094b7101a2.png" data-download-href="https://ntc.party/uploads/default/bac1e2b319f9002bc52e5df5387bb0094b7101a2" title="image"><img src="установка-на-роутер-с-openwrt-3557/bac1e2b319f9002bc52e5df5387bb0094b7101a2_2_575x500.png" alt="image" data-base62-sha1="qE8cR7LoXQ7tPMgmoxKc5LBzmvM" width="575" height="500" srcset="установка-на-роутер-с-openwrt-3557/bac1e2b319f9002bc52e5df5387bb0094b7101a2_2_575x500.png, установка-на-роутер-с-openwrt-3557/bac1e2b319f9002bc52e5df5387bb0094b7101a2_2_862x750.png 1.5x, установка-на-роутер-с-openwrt-3557/bac1e2b319f9002bc52e5df5387bb0094b7101a2.png 2x" data-dominant-color="272828"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">956×831 38.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/eb800616165b89cda43a4f925b7598c586d9b2a7.png" data-download-href="https://ntc.party/uploads/default/eb800616165b89cda43a4f925b7598c586d9b2a7" title="image"><img src="установка-на-роутер-с-openwrt-3557/eb800616165b89cda43a4f925b7598c586d9b2a7.png" alt="image" data-base62-sha1="xBkuHEz26XLvP5geIH0FiMOKoHJ" width="633" height="500" data-dominant-color="282828"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">889×702 35.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/0c07fbafa9d60580160834702c1dba62bbf300b5.png" data-download-href="https://ntc.party/uploads/default/0c07fbafa9d60580160834702c1dba62bbf300b5" title="image"><img src="установка-на-роутер-с-openwrt-3557/0c07fbafa9d60580160834702c1dba62bbf300b5.png" alt="image" data-base62-sha1="1IqPFPHXSIR5mSccfgUp247sj1r" width="690" height="210" data-dominant-color="282929"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">715×218 7.58 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/f1a66f5098b65c15954a933e72a608f986fccaba.png" data-download-href="https://ntc.party/uploads/default/f1a66f5098b65c15954a933e72a608f986fccaba" title="image"><img src="установка-на-роутер-с-openwrt-3557/f1a66f5098b65c15954a933e72a608f986fccaba.png" alt="image" data-base62-sha1="ytJED8CobsiDxhP6deXFqMtXoGS" width="676" height="500" data-dominant-color="2B2B2B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">967×715 32.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2022-12-16T17:20:38.290Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Что то изменилось. Вместо того что б мгновенно сказать что рутрекер недоступен. Браузер пытается его загрузить. Но в итоге все равно не может…</p></td><td>2022-12-16T17:25:50.695Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Вот свежий лог. Там все так же?</p>
+<p><a class="attachment" href="установка-на-роутер-с-openwrt-3557/sy8isp5zuR1UBspdVT3cpZTV4YU.txt">log.txt</a> (66.6 КБ)</p></td><td>2022-12-16T17:27:37.788Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>О! Рутрекер открылся в браузере без прокси! Порнолаб пока грузится.</p>
+<p>Похоже через роутер это работает куда хуже чем через расширение браузера или OpenVPN на ПК. Вполне вероятно что роутер слабый, или на роутерах оно само по себе плохо работает?</p>
+<p>В общем работает. Всем спасибо. Дальше буду думать над тем как WireGuard для ютуба настроить и подружить его с тем что уже сделал…</p></td><td>2022-12-16T17:32:41.436Z</td></tr><tr><td>dmbubnov(Бубнов)</td><td><p>По итогу получился отличный гайд. Спасибо большое!</p></td><td>2023-01-06T18:41:18.040Z</td></tr><tr><td>NullOne01</td><td><p>Может быть кому-то помогу. Напишу свои ошибки:</p>
+<ol>
+<li>Если сделали по гайду, но на пк не работает, то проверьте другие устройства (например, через WIFI). Мб у них всё будет хорошо)</li>
+<li>Если ставите VPN на второй роутер в сети (например, у меня главный - это ISP (МГТС) роутер, который я не могу убрать), то не забудьте поменять ему IP LAN, чтобы юзать другую сеть. Например, у меня главный роутер был на 192.168.1.254, а второй поставил на 192.168.2.1 (чтобы второе число с конца было другое).</li>
+</ol></td><td>2023-01-12T21:57:39.308Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="NullOne01" data-post="22" data-topic="3557">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/nullone01/48/2181_2.png" class="avatar"> NullOne01:</div>
+<blockquote>
+<p>Если ставите VPN на второй роутер в сети (например, у меня главный - это ISP (МГТС) роутер, который я не могу убрать), то не забудьте поменять ему IP LAN, чтобы юзать другую сеть. Например, у меня главный роутер был на 192.168.1.254, а второй поставил на 192.168.2.1 (чтобы второе число с конца было другое).</p>
+</blockquote>
+</aside>
+<p>Гораздо лучшим решением будет перевести железку от ADSL или PON в режим моста<br>
+Чтобы не было лишних NATов</p></td><td>2023-01-13T08:03:00.300Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>На фопде давно есть гайд<br>
+<a href="https://4pda.to/forum/index.php?showtopic=911457&amp;st=0#Spoil-75782612-1" class="onebox" target="_blank" rel="noopener nofollow ugc">https://4pda.to/forum/index.php?showtopic=911457&amp;st=0#Spoil-75782612-1</a></p></td><td>2023-01-13T18:16:55.733Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>А зачем там просят веб-интерфейс LuCi если все равно все через консоль делают? Ничего же не понятно.</p>
+<p>Мне нужен был гайд именно для графического интерфейса.</p></td><td>2023-01-13T20:28:16.111Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="K14M.ua" data-post="25" data-topic="3557">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/k14m.ua/48/2001_2.png" class="avatar"> K14M.ua:</div>
+<blockquote>
+<p>все равно все через консоль делают</p>
+</blockquote>
+</aside>
+<p>Там нет ни одного действия в консоли. Всё делается через веб-интерфейс, два раза редактируются файлы (это вполне можно сделать через WinSCP или любым другим SCP-клиентом без всякой консоли).</p>
+<p>Единственное, там нет скриншотов, но если пользователь OpenWrt не может найти в веб-интерфейсе “System → Software → Update lists”… я таких пользователей пока не встречал.</p></td><td>2023-01-13T20:49:51.209Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Конечно не смогу, ведь надо искать “Система → Software → Update lists”</p></td><td>2023-01-13T21:04:23.310Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Достаточно переключить язык на английский. Русского в OpenWrt в официальных сборках “из коробки”, вроде бы, нет, поэтому в инструкции используется английский, как дефолтный.</p>
+<p>(вкусовщина, конечно, но лучше английский, чем английский с вкраплениями русского <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> )</p></td><td>2023-01-13T21:10:15.585Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>хочется же хоть примерно понимать что ты делаешь. а не волшебные заклинания заучивать которые потом без инструкции не повторишь.</p></td><td>2023-01-13T21:16:13.689Z</td></tr><tr><td>ekosyakin(Evgeny)</td><td><p>Спасибо автору!!!<br>
+Заработало и на рутрекер заходит <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p>
+<p>Я думал, что разблокирую много чего <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> жена сможет без VPN инстаграмм свой смотреть <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> Видимо уже это пофиксили.</p>
+<p>Поработало часик и перестало <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> ничего не трогал. Просто перестало заходить на рутрекер и всё.</p>
+<p>Подскажите, что может быть не так?<br>
+Пакеты через интерфейс идут.<br>
+Может какие-то pac скрипты не подгружаются?<br>
+<img src="установка-на-роутер-с-openwrt-3557/65f5800de560d9915d319b14a5323178fdbc657d.png" alt="image" data-base62-sha1="exYcMZB5YmUCCjG5xIAUVRrPXsh" width="458" height="84"></p>
+<p>Через плагин браузера все работает отлично!</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/5d32f4ec5aa6d71be57b6fe73e6f8ea965572cff.png" data-download-href="https://ntc.party/uploads/default/5d32f4ec5aa6d71be57b6fe73e6f8ea965572cff" title="image"><img src="установка-на-роутер-с-openwrt-3557/5d32f4ec5aa6d71be57b6fe73e6f8ea965572cff.png" alt="image" data-base62-sha1="ditzTQK4hFwq4Oyv9ouL5renEbJ" width="690" height="419" data-dominant-color="363636"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1154×702 34.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Вот что в системном логе</p>
+<p>Options error: Unrecognized option or missing or extra parameter(s) in [PUSH-OPTIONS]:4: block-outside-dns (2.6.8)<br>
+Смущает вот это. Как это лечится?</p>
+<p>Видимо я скачал неверный antizapret-tcp.ovpn<br>
+Может кто поделиться?</p></td><td>2024-02-15T17:06:05.578Z</td></tr><tr><td>TheRealMaN(Roman)</td><td><p>Если в логе<br>
+UDP link local: (not bound)</p>
+<p>Это значит не удалось подключиться?<br>
+Со вчерашнего дня чтото перестало работать(</p>
+<p>Если на компе клиент OpenVPN запустить с файлом antizapret-tcp.ovpn, все работает нормально, а на роутере - нет((</p></td><td>2024-02-17T09:28:26.442Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Добавьте в конфиг <code>verb 5</code> и OpenVPN станет намного больше сведений писать в журнал.</p></td><td>2024-02-17T16:27:48.546Z</td></tr><tr><td>User69</td><td><aside class="quote no-group" data-username="ekosyakin" data-post="31" data-topic="3557">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ekosyakin/48/4446_2.png" class="avatar"> ekosyakin:</div>
+<blockquote>
+<p>Смущает вот это. Как это лечится?</p>
+</blockquote>
+</aside>
+<aside class="quote quote-modified" data-post="1" data-topic="3174">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/user69/48/2306_2.png" class="avatar">
+    <a href="https://ntc.party/t/tunnelblick-%D0%B2%D1%8B%D0%B4%D0%B0%D1%91%D1%82-%D0%BF%D1%80%D0%B5%D0%B4%D1%83%D0%BF%D1%80%D0%B5%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BF%D1%80%D0%B8-%D1%80%D0%B0%D0%B7%D1%80%D1%8B%D0%B2%D0%B5-%D1%81%D0%BE%D0%B5%D0%B4%D0%B8%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F/3174">Tunnelblick выдаёт предупреждение при разрыве соединения</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/5"><span data-category-id="5" style="--category-badge-color: #8C6238; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Proxy and VPN service for Russian censorship circumvention, discussion and official support forum. Обсуждение работы сервиса обхода блокировок России АнтиЗапрет. Новости, уведомления о проблемах и помощь в настройке."><span class="badge-category__name">antizapret.prostovpn.org</span></span></a>
+  </div>
+  <blockquote>
+    Всем привет! 
+Mac клиент Tunnelblick 3.8.7a при закрытии соединения показывает такое предупреждение: 
+ <a class="lightbox" href="установка-на-роутер-с-openwrt-3557/7649fa64e0d3062b191a572b2850b94d6541d164.jpeg" data-download-href="https://ntc.party/uploads/default/7649fa64e0d3062b191a572b2850b94d6541d164" title="Screen Shot 2022-08-30 at 16.02.08">[Screen Shot 2022-08-30 at 16.02.08]</a> 
+Всё работает, в логах такая ошибка: 
+Options error: Unrecognized option or missing or extra parameter(s) in [PUSH-OPTIONS]:4: block-outside-dns (2.5.4) 
+Лечится добавлением строки: 
+--ignore-unknown-option block-outside-dns 
+в конфиг клиента (наверное). 
+Жить, в общем, не мешает. 
+Начитал в <a href="https://help.keenetic.com/hc/ru/articles/360003444059-%D0%9E%D1%88%D0%B8%D0%B1%D0%BA%D0%B0-Unrecognized-option-or-missing-or-extra-parameter-s-in-configuration-block-outside-dns-%D0%BF%D1%80%D0%B8-%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B5-OpenVPN-%D0%BF%D0%BE%D0%B4%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%BD%D0%B8%D1%8F" rel="noopener nofollow ugc">интернетах</a> про 
+pull-filter ignore "block-outside-dns" 
+но клиент н…
+  </blockquote>
+</aside>
+</td><td>2024-02-18T09:34:48.869Z</td></tr><tr><td>TheRealMaN(Roman)</td><td><p>Вставил verb 5, посмотрел лог. Вроде все нормально проходит при подключении, но перестало работать(( до этого все нормально было, работало пару лет наверное. С компа проверяю, нормально подключается клиент OpenVPN к серверу и работает. На роутера перестало почему-то( Пробовал протокол менять на TCP, потом обратно вернул UDP, результата нет.</p>
+<p>Из перемен в конфигурации сети, за сутки до этого, провайдер перестал давать белый статичный IP, теперь стал серый динамический выдаваться, может в этом проблема быть?</p>
+<details>
+<summary>
+Лог</summary>
+<pre><code class="lang-auto">Mon Feb 19 21:25:42 2024 daemon.notice openvpn(antizapret)[32041]: OpenVPN 2.4.11 mipsel-openwrt-linux-gnu [SSL (mbed TLS)] [LZO] [LZ4] [EPOLL] [MH/PKTINFO] [AEAD]
+Mon Feb 19 21:25:42 2024 daemon.notice openvpn(antizapret)[32041]: library versions: mbed TLS 2.16.12, LZO 2.10
+Mon Feb 19 21:25:42 2024 daemon.notice openvpn(antizapret)[32041]: LZO compression initializing
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: Control Channel MTU parms [ L:1622 D:1212 EF:38 EB:0 ET:0 EL:3 ]
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: Data Channel MTU parms [ L:1622 D:1450 EF:122 EB:406 ET:0 EL:3 ]
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: Local Options String (VER=V4): 'V4,dev-type tun,link-mtu 1542,tun-mtu 1500,proto UDPv4,comp-lzo,cipher BF-CBC,auth SHA1,keysize 128,key-method 2,tls-client'
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: Expected Remote Options String (VER=V4): 'V4,dev-type tun,link-mtu 1542,tun-mtu 1500,proto UDPv4,comp-lzo,cipher BF-CBC,auth SHA1,keysize 128,key-method 2,tls-server'
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: TCP/UDP: Preserving recently used remote address: [AF_INET]51.158.187.25:1194
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: Socket Buffers: R=[163840-&gt;163840] S=[163840-&gt;163840]
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: UDP link local: (not bound)
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: UDP link remote: [AF_INET]51.158.187.25:1194
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: TLS: Initial packet from [AF_INET]51.158.187.25:1194, sid=0a3689d9 2d76a349
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: VERIFY OK: depth=1, CN=AntiZapret CA2
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: Validating certificate key usage
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: VERIFY KU OK
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: Validating certificate extended key usage
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: ++ Certificate has EKU (str) TLS Web Server Authentication, expects TLS Web Server Authentication
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: VERIFY EKU OK
+Mon Feb 19 21:25:43 2024 daemon.notice openvpn(antizapret)[32041]: VERIFY OK: depth=0, CN=antizapret-server-shared
+Mon Feb 19 21:25:44 2024 daemon.notice openvpn(antizapret)[32041]: Control Channel: TLSv1.2, cipher TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384, 2048 bit key
+Mon Feb 19 21:25:44 2024 daemon.notice openvpn(antizapret)[32041]: [antizapret-server-shared] Peer Connection Initiated with [AF_INET]51.158.187.25:1194
+Mon Feb 19 21:25:45 2024 daemon.notice openvpn(antizapret)[32041]: SENT CONTROL [antizapret-server-shared]: 'PUSH_REQUEST' (status=1)
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: PUSH: Received control message: 'PUSH_REPLY,route 10.224.0.0 255.254.0.0,dhcp-option DNS 192.168.100.1,block-outside-dns,route-gateway 192.168.100.1,topology subnet,ping 25,ping-restart 60,route 103.246.200.0 255.255.252.0,route 178.239.88.0 255.255.248.0,route 185.104.45.0 255.255.255.0,route 193.105.213.36 255.255.255.252,route 203.104.128.0 255.255.240.0,route 203.104.144.0 255.255.248.0,route 203.104.152.0 255.255.252.0,route 68.171.224.0 255.255.224.0,route 74.82.64.0 255.255.224.0,ifconfig 192.168.100.10 255.255.252.0,peer-id 42,cipher AES-128-GCM'
+Mon Feb 19 21:25:46 2024 daemon.err openvpn(antizapret)[32041]: Options error: Unrecognized option or missing or extra parameter(s) in [PUSH-OPTIONS]:3: block-outside-dns (2.4.11)
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: OPTIONS IMPORT: timers and/or timeouts modified
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: OPTIONS IMPORT: --ifconfig/up options modified
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: OPTIONS IMPORT: route options modified
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: OPTIONS IMPORT: route-related options modified
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: OPTIONS IMPORT: --ip-win32 and/or --dhcp-option options modified
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: OPTIONS IMPORT: peer-id set
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: OPTIONS IMPORT: adjusting link_mtu to 1625
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: OPTIONS IMPORT: data channel crypto options modified
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: Data Channel: using negotiated cipher 'AES-128-GCM'
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: Data Channel MTU parms [ L:1553 D:1450 EF:53 EB:406 ET:0 EL:3 ]
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: Outgoing Data Channel: Cipher 'AES-128-GCM' initialized with 128 bit key
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: Incoming Data Channel: Cipher 'AES-128-GCM' initialized with 128 bit key
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: TUN/TAP device tun0 opened
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: TUN/TAP TX queue length set to 100
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: do_ifconfig, tt-&gt;did_ifconfig_ipv6_setup=0
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/ifconfig tun0 192.168.100.10 netmask 255.255.252.0 mtu 1500 broadcast 192.168.103.255
+Mon Feb 19 21:25:46 2024 daemon.notice netifd: Interface 'openvpn' is enabled
+Mon Feb 19 21:25:46 2024 daemon.notice netifd: Network device 'tun0' link is up
+Mon Feb 19 21:25:46 2024 daemon.notice netifd: Interface 'openvpn' has link connectivity
+Mon Feb 19 21:25:46 2024 daemon.notice netifd: Interface 'openvpn' is setting up now
+Mon Feb 19 21:25:46 2024 daemon.notice netifd: Interface 'openvpn' is now up
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 1.1.1.1 netmask 255.255.255.255 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 8.8.8.8 netmask 255.255.255.255 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 77.88.8.8 netmask 255.255.255.255 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 10.224.0.0 netmask 255.254.0.0 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 103.246.200.0 netmask 255.255.252.0 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 178.239.88.0 netmask 255.255.248.0 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 185.104.45.0 netmask 255.255.255.0 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 193.105.213.36 netmask 255.255.255.252 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 203.104.128.0 netmask 255.255.240.0 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 203.104.144.0 netmask 255.255.248.0 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 203.104.152.0 netmask 255.255.252.0 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 68.171.224.0 netmask 255.255.224.0 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: /sbin/route add -net 74.82.64.0 netmask 255.255.224.0 gw 192.168.100.1
+Mon Feb 19 21:25:46 2024 daemon.warn openvpn(antizapret)[32041]: WARNING: this configuration may cache passwords in memory -- use the auth-nocache option to prevent this
+Mon Feb 19 21:25:46 2024 daemon.notice openvpn(antizapret)[32041]: Initialization Sequence Completed
+Mon Feb 19 21:25:49 2024 user.notice firewall: Reloading firewall due to ifup of openvpn (tun0)
+</code></pre>
+</details>
+<details>
+<summary>
+Лог скриншотом</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/7de5a5488aaa8240a2b824507c69b2c826759997.png" data-download-href="https://ntc.party/uploads/default/7de5a5488aaa8240a2b824507c69b2c826759997" title="Screenshot 2024-02-19 at 21.33.31"><img src="установка-на-роутер-с-openwrt-3557/7de5a5488aaa8240a2b824507c69b2c826759997.png" alt="Screenshot 2024-02-19 at 21.33.31" data-base62-sha1="hXJHeu6aZIdR3cGxxWdSWFRzaAv" width="690" height="443" data-dominant-color="31302D"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot 2024-02-19 at 21.33.31</span><span class="informations">1528×982 58.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2024-02-19T14:30:51.359Z</td></tr><tr><td>ValdikSS</td><td><p>Подключайтесь только по TCP.<br>
+Если после подключения у вас проходит ping на адрес <code>192.168.104.1</code>, то ищите проблему на стороне роутера. Возможно, у вас не применяются настройки DNS.</p></td><td>2024-02-21T08:14:55.282Z</td></tr><tr><td>TheRealMaN(Roman)</td><td><p>Хорошо, спасибо, проверю. Где-то видел, что рекомендовали UDP протокол включить, так как он требует меньше ресурсов роутера, но Вы настоятельно рекомендуете только TCP?</p></td><td>2024-02-21T10:58:12.209Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>UDP раньше был основным протоколом, но уже несколько лет как Antizapret перешёл на TCP.</p>
+<p>Кроме того, о какой экономии ресурсов может идти речь, если через VPN идёт лишь трафик до заблокированных сайтов? Я сомневаюсь, что вы эту экономию даже измерить сможете на таком мизерном трафике.</p></td><td>2024-02-21T17:31:59.026Z</td></tr><tr><td>TheRealMaN(Roman)</td><td><p>Спасибо за разъяснение, теперь все стало понятно.<br>
+Решил свою проблему. Оказалось, после того как провайдер сменил публичный статический адрес роутера на серый динамический, перестал работать Антизапрет в схеме с Pi-Hole, когда устройства получали в качестве адреса DNS ip роутера, роутер в свою очередь отправлял запрос к Pi-Hole, если имя не заблокировано, запрос шел к 1.1.1.1, 8.8.8.8, 78.88.8.8. Работало все отлично до смены, после - не проходили запросы к Антизапрет сайтам. Решил проблему снятием галочки в “Network” → “Interfaces” → “WAN” → “Advanced Settings” → “Use DNS servers advertised by peer”. Сразу все заработало как раньше)</p></td><td>2024-02-23T07:02:02.345Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Если у вас OpenVPN соединяется с сервером по имени домена, то при перезагрузке роутера может быть сюрприз. Потому что отрезолвить домен VPN-сервера ему теперь стало нечем после того, как провайдерских DNS вы его лишили. Тоннель попросту не поднимется.</p>
+<p>Я не знаю ваш сетап (кто на ком стоит) и в глаза не видел Pi-Hole (думаю, он в общих чертах не отличается от AdGuardHome), но я бы сделал так: в настройках WAN указал Pi-Hole в качестве DNS, в настройках Pi-Hole указал апстримом несколько публичных DNS (те самые <code>1.1.1.1</code>, <code>8.8.8.8</code>, <code>78.88.8.8</code>), а в ovpn-конфиге пустил трафик до этих публичных серверов в туннель (<code>route 1.1.1.1</code>, <code>route 8.8.8.8</code>, <code>route 78.88.8.8</code>). Главное, чтобы эти публичные адреса <strong>везде</strong> совпадали.</p>
+<p>Тогда, пока туннель ещё не поднят (например, роутер только что загрузился), будут использоваться эти публичные серверы, роутер сможет отрезолвить домен, поднимет туннель и дальше уже OpenVPN создаст маршруты и все DNS-запросы будут резолвиться через Antizapret.</p></td><td>2024-02-25T23:46:10.132Z</td></tr><tr><td>EugeneRymarev(Eugene Rymarev)</td><td><p>Возможно, что кому-то пригодится.</p>
+<p>Рабочий конфиг для OpenWRT с установленным антизапретом.<br>
+<a class="attachment" href="установка-на-роутер-с-openwrt-3557/5I8fTXiYciloMlCYsulsYMdOb1C.gz">backup-OpenWrt-2024-06-28.tar.gz</a> (11,2 КБ)<br>
+Веб/ssh: root/root<br>
+Wi-Fi: WIFI/WIFI_5G, пароль 12345678</p></td><td>2024-06-28T15:47:21.735Z</td></tr><tr><td>Subrosa</td><td><p>Добрый день.<br>
+Значит все работает отлично по сети на компе. Но почему то на телефоне по вай вай не открывает запрещенные сайты вообще.<br>
+Чтобы я не крутил уже, сети в ван, лан ван. не помогает.<br>
+Может кто нибудь помочь? или ткнуть в туториал?</p></td><td>2024-08-11T13:02:30.819Z</td></tr><tr><td>Rodion-Khametov(Rodion Khametov)</td><td><p>Всем привет! С недавних пор (где-то пару дней назад) перестал работать antizapret на openWrt. Причем если закидывать конфиг напрямую на телефон через openVpnConnect, то все прекрасно работает, также, как и раньше.</p>
+<p>Настраивал все по рекомендациям сверху: в конфиг прописал route 8.8.8.8 и route 1.1.1.1. ДНС провайдера заменил на 8.8.8.8 и 1.1.1.1. Защита от DNS rebinding отключена. Кто-нибудь сталкивался с таким? В чем может быть проблема?</p></td><td>2024-09-24T12:15:08.738Z</td></tr><tr><td>Cybersim</td><td><aside class="quote no-group" data-username="K14M.ua" data-post="2" data-topic="3557">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/k14m.ua/48/2001_2.png" class="avatar"> K14M.ua:</div>
+<blockquote>
+<p>Далее идем в Сеть → Интерфейсы → Добавить новый интерфейс…</p>
+<p>Имя - OVPN<br>
+Протокол - Неуправляемый<br>
+Устройство - пользовательское, вручную вводим “tun0” без кавычек</p>
+</blockquote>
+</aside>
+<p>Привет. вот тут я не совсем понял. у меня Openwrt 23.05.5<br>
+В интерфейсах данного не нахожу.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/13c8a47c59c2f9fce0f4487fbe5e87037266b0e7.png" data-download-href="https://ntc.party/uploads/default/13c8a47c59c2f9fce0f4487fbe5e87037266b0e7" title="Снимок экрана 2024-10-01 214000"><img src="установка-на-роутер-с-openwrt-3557/13c8a47c59c2f9fce0f4487fbe5e87037266b0e7_2_690x287.png" alt="Снимок экрана 2024-10-01 214000" data-base62-sha1="2P0WGzP1GYC4JIraayerK78hM8v" width="690" height="287" srcset="установка-на-роутер-с-openwrt-3557/13c8a47c59c2f9fce0f4487fbe5e87037266b0e7_2_690x287.png, установка-на-роутер-с-openwrt-3557/13c8a47c59c2f9fce0f4487fbe5e87037266b0e7_2_1035x430.png 1.5x, установка-на-роутер-с-openwrt-3557/13c8a47c59c2f9fce0f4487fbe5e87037266b0e7.png 2x" data-dominant-color="7F898E"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Снимок экрана 2024-10-01 214000</span><span class="informations">1373×572 42.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Если имелось ввиду так?<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="установка-на-роутер-с-openwrt-3557/1423ccb92a8b04cf51204d7fc506f9497d6c26b2.png" data-download-href="https://ntc.party/uploads/default/1423ccb92a8b04cf51204d7fc506f9497d6c26b2" title="image"><img src="установка-на-роутер-с-openwrt-3557/1423ccb92a8b04cf51204d7fc506f9497d6c26b2_2_689x179.png" alt="image" data-base62-sha1="2SafuFlZkDHZ5LVUryW22EHgrHI" width="689" height="179" srcset="установка-на-роутер-с-openwrt-3557/1423ccb92a8b04cf51204d7fc506f9497d6c26b2_2_689x179.png, установка-на-роутер-с-openwrt-3557/1423ccb92a8b04cf51204d7fc506f9497d6c26b2_2_1033x268.png 1.5x, установка-на-роутер-с-openwrt-3557/1423ccb92a8b04cf51204d7fc506f9497d6c26b2.png 2x" data-dominant-color="D7E9EF"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1308×341 24 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-10-01T18:43:30.243Z</td></tr><tr><td>Cybersim</td><td><p>Приветствую. всё настроил по инструкции сверху на Openwrt 23.5. но через день два, приходится передёргивать. Перестают резолвиться сайты. есть ли решение и какое?</p></td><td>2024-10-06T12:06:24.426Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Напишите скрипт, который будет делать это периодически сам, допустим, в 3 часа ночи.</p></td><td>2024-10-06T14:37:41.744Z</td></tr><tr><td>Cybersim</td><td><p>На Padavan старом роутере без всяких скриптов работал как часы, особенность openwrt?</p></td><td>2024-10-06T15:00:32.334Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Это проблема серверов АнтиЗапрета, оно и на других прошивках (KeeneticOS, Mikrotik) так.</p></td><td>2024-10-06T17:10:01.615Z</td></tr><tr><td>shinenn</td><td><p>А есть кто-нибудь кто на OpenWRT настроил антизапрет через AmneziaWG? Поделитесь опытом.</p></td><td>2024-10-22T05:00:35.001Z</td></tr><tr><td>al30gg</td><td><p>видимо потерли, нет актуальной ссылки ?</p></td><td>2024-12-10T18:02:25.517Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Они перенесли всё подобное в отдельный раздел, куда закрыт доступ из РФ.</p>
+<p>Копия есть <a href="https://t.me/FuckYouRKN/9">тут</a>, хотя, какие-то названия пунктов и разделов настроек могли устареть, это писалось 6 лет назад.</p></td><td>2024-12-10T18:11:45.231Z</td></tr><tr><td>al30gg</td><td><p>Благодарю! на днях приедет новый роутер с поддержкой owrt попробую.</p></td><td>2024-12-10T18:17:01.591Z</td></tr>
+    </table>
+      </body>
+    </html>

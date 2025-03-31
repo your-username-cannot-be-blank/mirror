@@ -1,0 +1,95 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>idea-dnsbl-alike-dns-server-to-use-with-pac-file</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p><a class="mention" href="/u/ilyaigpetrov">@ilyaigpetrov</a>, <a class="mention" href="/u/darkk">@darkk</a> and I are thinking about DNSBL-alike server, to use it as a censorship list storage, which returns predefined DNS reply if the domain or IP address is blocked and another reply if not.<br>
+It could be used from Proxy Auto-Configuration file using <code>dnsResolve</code> function.</p>
+<p>Example:<br>
+<code>A</code> query for <code>blocked.com.anticensorshipdnsbl.com</code> returns <code>192.0.2.1</code>,<br>
+<code>A</code> query for <code>notblocked.com.anticensorshipdnsbl.com</code> returns <code>192.0.2.2</code>.</p>
+<blockquote>
+<p>Side note: while using private ranges like <code>192.168.0.0/16</code> or <code>10.0.0.0/8</code> or localhost <code>127.0.0.0/8</code> may seem to be more appropriate, some DNS resolvers could filter responses with these ranges. For example, such filter is available in dnsmasq and could be enabled in OpenWRT.</p>
+</blockquote>
+<p>This method:</p>
+<ul>
+<li>Does not require additional software on client</li>
+<li>Allows instant list updates without redownloading it on client</li>
+<li>Requires a very small stub PAC file</li>
+<li>Could be combined with other PAC file content, to decrease DNSBL load</li>
+<li>Could be used to circumvent 1 MB PAC file size limit and various memory limits in browsers</li>
+<li>Harder to block due to its unusual nature (uses only DNS), likely to work even if blocked by changing DNS server</li>
+<li>Could be cached on recursive resolvers for a predefined time period.</li>
+</ul>
+<p>Cons:</p>
+<ul>
+<li>DNSBL server <strong>must</strong> be stable, fast and always available. Unavailable DNSBL server which does not reply will result in several second freezes in browser at least, totally broken web at most.</li>
+<li>DNSBL server load will be high if implemented without any filtering. Every domain, blocked and not blocked, would be sent to the server.</li>
+<li>DNS cache is not as effective as many may think, especially for lots and lots random “subdomains” of a single domain.</li>
+</ul></td><td>2019-12-27T04:08:07.354Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>The story behind me raising this discussion is the folowing one: I’m facing more and more minor websites being blocked by IP addresses blacklisted due to ongoing attempts to ban telegram (at least the IP addresses are attributed with that court decision). Currently the number of IP addresses banned one-by-one is 1.8M (+150k domains, +several subnets).</p>
+<p>I was under impression that the PAC file size is limited by 1MiB in the modern browsers and that was the reason for <a class="mention" href="/u/valdikss">@valdikss</a> to strip of the attempt of telegramocide from the antizapret PAC.</p>
+<p>My requirements for a circumvention tool are:</p>
+<ul>
+<li>to use the PAC file to configure browser and nothing but the browser for the circumvention and leave OS network configuration intact</li>
+<li>to route the minimal required amount of traffic through the proxy due to performance reasons</li>
+</ul>
+<p>So my idea was to fill the PAC file with a bloom-filter (or <a href="https://lemire.me/blog/2019/12/19/xor-filters-faster-and-smaller-than-bloom-filters/">xor-filter</a>) to prevent a separate blocking DNS query for each and every request and bring the “ground truth” knowledge to the browser via the means of DNSBL responding to <code>${domain}.${ip}.blocklist.rkngov.рф</code>.</p>
+<p>Probably, the pre-filter should only be filled with IP addressess responding to 80/tcp and/or 443/tcp and should only include the domains those are alive and responding to http/https queries. But that’s a matter of zgrab/zmap, so that’s trivial.</p>
+<p>Yet, I’m still unsure if that’s a useful approach given that <a class="mention" href="/u/ilyaigpetrov">@ilyaigpetrov</a> has found a reasonable way to circumvent <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=678022">1MiB limitation of Chrome</a>.</p>
+<p>On the other hand, Firefox plugins can’t update the PAC file (per <a class="mention" href="/u/ilyaigpetrov">@ilyaigpetrov</a> words) and dnsbl may be theoretically useful for this case. We still have to update the pre-filter one way or another, and it’s unclear to me what is the practical periodicity of FF updates.</p></td><td>2019-12-27T13:23:51.401Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="darkk" data-post="2" data-topic="285">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/darkk/48/470_2.png" class="avatar"> darkk:</div>
+<blockquote>
+<p>Yet, I’m still unsure if that’s a useful approach given that <a class="mention" href="/u/ilyaigpetrov">@ilyaigpetrov</a> has found a reasonable way to circumvent <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=678022">1MiB limitation of Chrome</a>.</p>
+</blockquote>
+</aside>
+<p>Chrome on Windows uses wininet (=IE) proxy configuration settings with 1 MB size limit, and this limit could be circumvented only for Chrome itself, with an extension. You can’t configure &gt;1 MB PAC file system-wide, since both Windows and Chrome follow 1 MB file size limit.</p>
+<p>Firefox, as I recall, doesn’t have file size limit (at least not 1 MB), but has tight dynamic memory limits: I had to optimize AntiZapret PAC file to make it work with older 32 bit ESR versions for (crazy) people with Windows XP.<br>
+Firefox takes HTTP Expires header into account, properly caches PAC file and updates it only when necessary.</p></td><td>2019-12-27T13:48:55.090Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><blockquote>
+<p>Probably, the pre-filter should only be filled with IP addressess responding to 80/tcp and/or 443/tcp</p>
+</blockquote>
+<p>I’ve done a quick <code>zmap</code>. Out of 1_844_367 IP addressess blacklisted with blockType=“ip”</p>
+<ul>
+<li>150_345 respond to tcp/80</li>
+<li>165_015 respond to tcp/443</li>
+<li>88_899 respond both to tcp/80 and to tcp/443</li>
+<li>226_461 respond at least to one of tcp/80 or tcp/443</li>
+</ul>
+<p>Given that a website has to listen at tcp/80 to be reachable without HSTS preload, it’s safe to assume that only 150k IPs are reasonable to add to the PAC file.<br>
+That’s still a lot compared to 3k of selected IP addressess of antizapret PAC.</p></td><td>2019-12-28T13:49:29.669Z</td></tr>
+    </table>
+      </body>
+    </html>

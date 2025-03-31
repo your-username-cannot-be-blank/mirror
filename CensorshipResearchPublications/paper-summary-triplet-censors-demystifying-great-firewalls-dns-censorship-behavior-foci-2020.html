@@ -1,0 +1,50 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-triplet-censors-demystifying-great-firewalls-dns-censorship-behavior-foci-2020</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Triplet Censors: Demystifying Great Firewall’s DNS Censorship Behavior<br>
+Anonymous, Arian Akhavan Niaki, Nguyen Phong Hoang, Phillipa Gill, Amir Houmansadr<br>
+<a href="https://censorbib.nymity.ch/#Anonymous2020a" class="onebox" target="_blank" rel="nofollow noopener">https://censorbib.nymity.ch/#Anonymous2020a</a><br>
+<a href="https://www.usenix.org/conference/foci20/presentation/anonymous" rel="nofollow noopener">https://www.usenix.org/conference/foci20/presentation/anonymous</a> (video and slides)<br>
+<a href="https://gfw.report/publications/foci20_dns/en/" rel="nofollow noopener">https://gfw.report/publications/foci20_dns/en/</a> (code and data)</p>
+<p>The paper is a study of DNS injection by the GFW. While there have been many similar studies, this one goes further in its methodology, finds interesting new behavior, and explains phenomena that past work could not. The most striking observations are that different groups of domains are poisoned by different subsets of the poison IP address pool; and that there are (at least) three different DNS injectors, each with its own network fingerprint, responding to distinct but overlapping subsets of domains.</p>
+<p>The primary experiment is nine months of querying a million domains every two hours. The queries are sent from outside China to a controlled VPS inside China, taking advantage of the bidirectionality of DNS injection. The overall trend is for more domains to be blocked over time, increasing from 24000 in September 2019 to 24600 in May 2020. Examining the hour-by-hour changes reveals certain implementation details, for example an evident pattern change from <code>*youtube.com</code> to the more specific <code>*.youtube.com</code> resulted in the sudden unblocking of about 50 domains. Before 2019-11-23, DNS injections drew from a pool of 1510 phony IP addresses; but on that date, the size of the pool suddenly shrank to 216. Curiously, the selection of a phony IP address is not uniform for every injection; each domain draws from only a subset of the total pool. Domains may be organized into groups, according to which subset of phony IP addresses they use. Group 4, for example, consists of 33 Google-related domains, each of which is poisoned by a subset of only four IP addresses. The IP addresses making up the total pool are not random—most of them belong to US-based organizations like Facebook, Dropbox, and Twitter, though most do not point to a live host.</p>
+<p>There is more than one DNS injector. The authors provide robust network fingerprints for three, using features such as the flags in the IP and DNS headers, and trends in the IP ID and IP TTL fields. The injectors handle different (but overlapping) subsets of domains and draw from different (but overlapping) IP address pools, corresponding to the domain groups mentioned earlier. Injector 1 handles the fewest domains, but the most popular. Injector 3’s domains are a subset of Injector 2’s. Injector 1 uses incrementing TTLs and Injector 2’s TTLs are random, but Injector 3 does something weird: it reflects the TTL of the query in the response, meaning that the original TTL must be at least <em>twice</em> the distance to the injector for the injected response to make it back to the sender. Taking this quirk of TTL into account, all three injectors lie at the same hop distance away from the probe host, and timing measurements are consistent with all three being co-located.</p>
+<p>The authors then do a separate, one-time, multi-path experiment, querying a single blocked domain name against a random IP address in virtually every network prefix announced in China, 36146 addresses and 417 ASes in total. 92% of prefixes are affected by at least one injector, and 62% are affected by all three. 4% are affected by yet a fourth injector, whose fingerprint does not match that of the other three.</p>
+<p>Thanks to the authors for reviewing a draft of this summary.</p></td><td>2020-08-24T17:14:01.763Z</td></tr>
+    </table>
+      </body>
+    </html>

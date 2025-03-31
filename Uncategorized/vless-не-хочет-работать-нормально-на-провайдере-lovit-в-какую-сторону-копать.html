@@ -1,0 +1,113 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>vless-не-хочет-работать-нормально-на-провайдере-lovit-в-какую-сторону-копать</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>sobaki</td><td><p>привет! есть подруга, у которой не работает некорректно vless на ее домашнем wi-fi.</p>
+<p>детали:<br>
+есть личный сервер для друзей. проблем с ним не наблюдаю, никто вроде не жалуется. но вот в подруги в Москве на провайдере lovit vpn работает нестабильно: половину картиной инсты грузит, половину нет, speedtest то высокие результаты, то низкие (не знаю, как описать, как будто половина пакетов теряется)</p>
+<p>после этого я подумал, что мб в серый список попал, поэтому с vpngen сделал конфиг, но он ведет себя так же</p>
+<p>на чем тестировалось?<br>
+1.1) личный сервер, арендованный у aeza, на 3x-ui с vless xtls-rprx-vision на 443 порту. sni - yahoo<br>
+1.2) другой конфиг - vless, тоже 443, тоже xtls-rprx-vision, тоже reality, но, соответственно, ip и sni - другие</p>
+<p>2.1) из клиентов - karing, foxray, nekobox, vpn4tv (форк hiddify-next)<br>
+2.2) то есть из платформ android, android tv, ios, macos</p>
+<p>аналогичное поведение наблюдается, как при включенном на iphone comss.one dns и при выключенном.</p>
+<p>вопрос: куда потенциально можно копать?</p></td><td>2025-01-20T20:35:15.518Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><aside class="quote no-group" data-username="sobaki" data-post="1" data-topic="14752">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/b9e5f3/48.png" class="avatar"> sobaki:</div>
+<blockquote>
+<p>sni - yahoo</p>
+</blockquote>
+</aside>
+<p>Я бы на это обратил внимание, т.к. это дефолтная настройка в 3X-UI, её многие не меняют, соответственно отдельные провайдеры могут замедлять всё с SNI yahoo или пропускать известные ASN принадлежащие ему, а всех остальных замедлять / блокировать.</p>
+<p>А так, мне кажется что ещё проблема может крыться в… DNS? В последнее время у некоторых наблюдались проблемы с DoH, возможно стоит копать в эту сторону.</p></td><td>2025-01-20T21:16:29.348Z</td></tr><tr><td>sobaki</td><td><aside class="quote no-group" data-username="xX_RUP3R7_P4UL50N_Xx" data-post="2" data-topic="14752">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/xx_rup3r7_p4ul50n_xx/48/13752_2.png" class="avatar"> xX_RUP3R7_P4UL50N_Xx:</div>
+<blockquote>
+<p>Я бы на это обратил внимание, т.к. это дефолтная настройка в 3X-UI, её многие не меняют, соответственно отдельные провайдеры могут замедлять всё с SNI yahoo или пропускать известные ASN принадлежащие ему, а всех остальных замедлять / блокировать.</p>
+</blockquote>
+</aside>
+<p>спасибо за ответ!</p>
+<p>да, я согласен. после первого гуглинга и просмотра этого форума, я в первую очередь про это и подумал. мол, либо sni надо менять, либо ip. но после того, как другой конфиг потестил (там sni - вообще малоизвестный сайт) и там поведение оказалось таким же, я стал сомневаться.</p>
+<aside class="quote no-group" data-username="xX_RUP3R7_P4UL50N_Xx" data-post="2" data-topic="14752">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/xx_rup3r7_p4ul50n_xx/48/13752_2.png" class="avatar"> xX_RUP3R7_P4UL50N_Xx:</div>
+<blockquote>
+<p>А так, мне кажется что ещё проблема может крыться в… DNS? В последнее время у некоторых наблюдались проблемы с DoH, возможно стоит копать в эту сторону.</p>
+</blockquote>
+</aside>
+<p>про это у меня была мысль, но я в этом вообще не шарю</p>
+<p>глупый вопрос: вы имеете в виду поставить на роутере другой dns вместо стандартного? или что?</p>
+<p>просто я просил потестировать с включенным и выключенным comss.one dns на iphone, там вроде есть шифрование, но какое оно в профиле для айфона - я не знаю. разницы вроде нет</p></td><td>2025-01-20T21:38:08.257Z</td></tr><tr><td>spotted_giraffe</td><td><aside class="quote no-group" data-username="sobaki" data-post="1" data-topic="14752">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/s/b9e5f3/48.png" class="avatar"> sobaki:</div>
+<blockquote>
+<p>nekobox</p>
+</blockquote>
+</aside>
+<p>В настройках маршрутизации можете попробовать выставить Final DNS Out - proxy. Тогда по идее запросы будут ресолвиться на вашей VPS</p>
+<p>А маршруты вы как реализовали, все чисто через vless идет или самостоятельно выписывали?</p></td><td>2025-01-20T21:51:09.395Z</td></tr><tr><td>sobaki</td><td><aside class="quote no-group" data-username="spotted_giraffe" data-post="4" data-topic="14752">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/spotted_giraffe/48/12771_2.png" class="avatar"> spotted_giraffe:</div>
+<blockquote>
+<p>В настройках маршрутизации можете попробовать выставить Final DNS Out - proxy. Тогда по идее запросы будут ресолвиться на вашей VPS</p>
+</blockquote>
+</aside>
+<p>спасибо большое за ответ!</p>
+<p>если не обидитесь, добью тупым вопросом: а в karing - это не оно?</p>
+<p>просто я даже в nekobox (на андроиде) не нашел этого, но некобокс в той локации (мое устройство на анжроиде) будет нескоро. там только iOS для теста есть и соответственно другие клиенты - например, karing, foxray и т.п.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="vless-не-хочет-работать-нормально-на-провайдере-lovit-в-какую-сторону-копать/f28c243bbd9e179f67dc5d1aad531b9265bb149d.jpeg" data-download-href="https://ntc.party/uploads/default/f28c243bbd9e179f67dc5d1aad531b9265bb149d" title="IMG_20250121_011249_526"><img src="vless-не-хочет-работать-нормально-на-провайдере-lovit-в-какую-сторону-копать/f28c243bbd9e179f67dc5d1aad531b9265bb149d_2_230x500.jpeg" alt="IMG_20250121_011249_526" data-base62-sha1="yBFNA4kWZH3lt6Wwzg5LBfgimsJ" width="230" height="500" srcset="vless-не-хочет-работать-нормально-на-провайдере-lovit-в-какую-сторону-копать/f28c243bbd9e179f67dc5d1aad531b9265bb149d_2_230x500.jpeg, vless-не-хочет-работать-нормально-на-провайдере-lovit-в-какую-сторону-копать/f28c243bbd9e179f67dc5d1aad531b9265bb149d_2_345x750.jpeg 1.5x, vless-не-хочет-работать-нормально-на-провайдере-lovit-в-какую-сторону-копать/f28c243bbd9e179f67dc5d1aad531b9265bb149d_2_460x1000.jpeg 2x" data-dominant-color="232323"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">IMG_20250121_011249_526</span><span class="informations">591×1280 11.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="vless-не-хочет-работать-нормально-на-провайдере-lovit-в-какую-сторону-копать/1c7ebbf09b5dc89f044c6b479b4002617eb10056.jpeg" data-download-href="https://ntc.party/uploads/default/1c7ebbf09b5dc89f044c6b479b4002617eb10056" title="IMG_20250121_011249_767"><img src="vless-не-хочет-работать-нормально-на-провайдере-lovit-в-какую-сторону-копать/1c7ebbf09b5dc89f044c6b479b4002617eb10056_2_230x500.jpeg" alt="IMG_20250121_011249_767" data-base62-sha1="444TxvV0ROZWF7cs2ltVBbw11Fc" width="230" height="500" srcset="vless-не-хочет-работать-нормально-на-провайдере-lovit-в-какую-сторону-копать/1c7ebbf09b5dc89f044c6b479b4002617eb10056_2_230x500.jpeg, vless-не-хочет-работать-нормально-на-провайдере-lovit-в-какую-сторону-копать/1c7ebbf09b5dc89f044c6b479b4002617eb10056_2_345x750.jpeg 1.5x, vless-не-хочет-работать-нормально-на-провайдере-lovit-в-какую-сторону-копать/1c7ebbf09b5dc89f044c6b479b4002617eb10056_2_460x1000.jpeg 2x" data-dominant-color="262626"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">IMG_20250121_011249_767</span><span class="informations">591×1280 19.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<aside class="quote no-group" data-username="spotted_giraffe" data-post="4" data-topic="14752">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/spotted_giraffe/48/12771_2.png" class="avatar"> spotted_giraffe:</div>
+<blockquote>
+<p>А маршруты вы как реализовали, все чисто через vless идет или самостоятельно выписывали?</p>
+</blockquote>
+</aside>
+<p>на сервере я прописал: примые ip - Russia, ipv4 - Google, meta, warp - openai, speedtest</p>
+<p>на клиенте - у пользователей раздельное туннелирование, все, кроме инсты, ютуба и пары сайтов идёт напрямую</p>
+<p>в конкретно этом случае у подруги стояла amnezia на iPhone с раздельным туннелированием, но в какой-то момент массово умерло на амнезии раздельное туннелирование (просто отвалилось), из-за этого за полтора месяца 70 гб было потрачено, а обычно люди тратят у меня меньше. как раз из-за всей этой ситуации была гипотеза с серым списком. но почему-то вот другой конфиг с другим ip и sni не заработал лучше</p>
+<p>когда я приехал, я перенастроил на karing с разделным туннелированим. уже на нем и тестировался и новый конфиг</p></td><td>2025-01-20T22:33:17.312Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,97 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>передача-маршрутов-xray-на-клиент-x-ui3x-ui</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>mcdemon(mcdemon)</td><td><p>Привет!<br>
+Есть различные панели типа x-ui или 3x-ui.<br>
+В них создаются shadowsocks интерфейсы и не только.</p>
+<p>Возможно ли с сервера на клиент (например v2rayNG) передать маршруты/правила маршрутизации?</p>
+<p>Пока я вижу только, что можно настраивать правила на самом клиенте.<br>
+Но хотелось бы, правила делать на сервере и передавать их на клиенты.<br>
+(как например в OpenVPN можно передавать маршруты через push route)</p>
+<p>Дело в том, что в x-ui/3x-ui даже есть преднастроенные правила, которые можно активировать:</p>
+<blockquote>
+<p>Прямое подключение к диапазонам IP-адресов России<br>
+Прямое подключение к доменам России</p>
+</blockquote>
+<p>Но активация этих правил никакого результата не дает, трафик на конечно устройстве продолжает ходить через TUN</p></td><td>2024-01-30T06:11:52.936Z</td></tr><tr><td>0ka(0ka)</td><td><p>через ссылку на подписку (файл конфиг с нужными вам правилами)</p></td><td>2024-01-30T14:27:19.480Z</td></tr><tr><td>sakontwist</td><td><p>Решил для себя этот вопрос промежуточным узлом в ru, который отправляет все ru и ru-ip от клиентов в direct, а остальное - дальше в транк</p></td><td>2024-01-30T21:11:48.759Z</td></tr><tr><td>mcdemon(mcdemon)</td><td><p>в ссылке на подписку нет этих правил<br>
+там только параметры подключения (ss, vless итд)<br>
+может подскажите как эти правила добавить в подписку</p></td><td>2024-01-30T23:23:11.172Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="mcdemon" data-post="4" data-topic="7019">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/mcdemon/48/4313_2.png" class="avatar"> mcdemon:</div>
+<blockquote>
+<p>в ссылке на подписку нет этих правил<br>
+там только параметры подключения (ss, vless итд)</p>
+</blockquote>
+</aside>
+<p>ссылка на подписку это URL</p>
+<aside class="quote no-group" data-username="mcdemon" data-post="4" data-topic="7019">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/mcdemon/48/4313_2.png" class="avatar"> mcdemon:</div>
+<blockquote>
+<p>может подскажите как эти правила добавить в подписку</p>
+</blockquote>
+</aside>
+<p>создаете конфиг файл вручную или экспортируете из v2rayN/NG/nekoray и заливаете на свой веб сервер, пример <a href="https://github.com/XTLS/Xray-examples/blob/main/VLESS-TCP-TLS-WS%20(recommended)/config_client_tcp_tls.json" class="inline-onebox">Xray-examples/VLESS-TCP-TLS-WS (recommended)/config_client_tcp_tls.json at main · XTLS/Xray-examples · GitHub</a></p></td><td>2024-01-31T03:41:12.091Z</td></tr><tr><td>mcdemon(mcdemon)</td><td><p>в приложении v2rayNG создаю конфиг shadowsocks<br>
+экспортирую конфиг в файл<br>
+заливаю на веб сервер</p>
+<p>потом добавляю URL на этот конфиг как подписку<br>
+пишет ошибка</p>
+<p>в логах ругается<br>
+bad base-64</p>
+<p>тоже самое пробовал делать в приложении NekoBox<br>
+там создаю конфиг shadowsocks<br>
+экспортирую конфиг в файл<br>
+заливаю на веб сервер</p>
+<p>ругается в логах Not http proxy</p>
+<p>у вас получалось вообще?)</p></td><td>2024-02-01T11:14:59.997Z</td></tr><tr><td>0ka(0ka)</td><td><p>похожую функцию уже просили у разраба v2rayNG <a href="https://github.com/2dust/v2rayNG/issues/2008" class="inline-onebox">Adding Capability to Subscribe for CUSTOM JSON v2ray configs · Issue #2008 · 2dust/v2rayNG · GitHub</a>, но в итоге оказывается что “2dust closed this as completed” означает что разраб забил на предложение, а не выполнил его. (еще там написано “app is already capable to subscribe to a url that contain single json v2ray config” но у меня так не работает) Поэтому пользуйтесь “+, custom config, import custom config from url”. если хотите с обновлением через 1 кнопку то переходите на sing-box, там в офф приложении есть импорт по ссылке с авто или ручным обновлением конфига по 1 клику</p></td><td>2024-02-01T11:22:42.033Z</td></tr><tr><td>Kokoboom(Aleksey)</td><td><p>На каком клиенте xray для openwrt можно использовать конфиг в формате json. В клиентах вроде passwall в gui интерфейсе нет такой возможности.</p></td><td>2024-02-19T10:25:33.986Z</td></tr><tr><td>mezhgano(Dmitry Meshkoff)</td><td><p>Возможно нубский вопрос, только разбираюсь, но как в таком случае огранизовать безопасное хранение конфига где указаны все явки-пароли для доступа?</p>
+<p>Также не понятно как в таком случае разграничивать пользователей (клиентов) между собой, делать под каждого отдельный конфиг с разницей лишь в реквизитах для доступа? Как-то не рационально…</p>
+<p>UPD:<br>
+Можно создать приватный репозиторий на Github и дать клиентам прямую ссылку на конфиг, в URL ссылки содержится token для доступа к файлу (конфигу), но этот токен будет действительным около недели, потом доступ прекратится. Вроде как можно настроить постоянный токен в настройках Github-а и подставить его в URL конфига чтобы доступ был постоянным, но я пока не протестировал этот момент…</p></td><td>2024-06-15T13:04:28.400Z</td></tr><tr><td>0ka(0ka)</td><td><p>если у вас уже где-то запущен прокси сервер то и для веб сервера место найдётся, если всё же нет веб сервера, то гугл диск даёт постоянные ссылки</p></td><td>2024-06-15T19:00:25.539Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><aside class="quote no-group" data-username="0ka" data-post="10" data-topic="7019">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>если у вас уже где-то запущен прокси сервер то и для веб сервера место найдётся</p>
+</blockquote>
+</aside>
+<p>Ох не факт. Если там на 443 порту уже XTLS-Reality, то веб-сервер там вешать просто некуда. А городить SNI-прокси - это будет уже демаскировка самого Reality</p></td><td>2024-06-16T18:47:23.457Z</td></tr><tr><td>sakontwist</td><td><p>Сгородить через SNI какой-то обычный веб-сервер на порту XTLS - это отличная маскировка!</p></td><td>2024-06-18T08:33:04.271Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Так люди обычно используют SNI каких-нибудь популярных ресурсов, которые во-первых с большим шансом окажутся в белых списках, а во-вторых чтобы не покупать свой домен.</p>
+<p>Если при такой конфигурации на тот же адрес и тот же порт повесить ещё свой “обычный веб-сервер”, это будет не маскировка, а наоборот демаскировка.</p></td><td>2024-06-18T08:41:51.529Z</td></tr>
+    </table>
+      </body>
+    </html>

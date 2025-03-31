@@ -1,0 +1,129 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>удаление-cname-8059</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ShiGhost(ShiGhost)</td><td><p>Здравствуйте. Подскажите как это можно сделать на своём antizapret.</p>
+<aside class="quote" data-post="3" data-topic="4224">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BD%D0%B5%D0%BA%D0%BE%D0%BD%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BD%D1%82%D0%BD%D0%B0%D1%8F-%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0-dns/4224/3">Неконсистентная работа DNS</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/5"><span data-category-id="5" style="--category-badge-color: #8C6238; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Proxy and VPN service for Russian censorship circumvention, discussion and official support forum. Обсуждение работы сервиса обхода блокировок России АнтиЗапрет. Новости, уведомления о проблемах и помощь в настройке."><span class="badge-category__name">antizapret.prostovpn.org</span></span></a>
+  </div>
+  <blockquote>
+    Сделал удаление CNAME из ответа на A-запрос и перезапись домена CNAME’а на запрашиваемый домен. 
+Может, поможет, а может и не решит проблему полностью, так как в случае CNAME’а при других запросах (не-A) он не убирается, и умный кеширующий резолвер, наверное, может всё равно продолжать его использовать. 
+Однако, как я полагаю, резолвер делает только A/AAAA/HTTPS-запросы при типичном браузинге сайтов, а все эти случаи должны работать корректно.
+  </blockquote>
+</aside>
+</td><td>2024-07-12T14:28:33.938Z</td></tr><tr><td>ValdikSS</td><td><p>Примерно так:</p>
+<pre><code class="lang-auto">root@antizapret-vpn:~/dnsmap# diff -u proxy.py_ proxy.py
+--- proxy.py_	2022-04-19 01:36:20.007487333 +0200
++++ proxy.py	2023-05-20 23:47:00.743846804 +0200
+@@ -94,16 +94,26 @@
+                                 tcp=True,timeout=self.timeout)
+             reply = DNSRecord.parse(proxy_r)
+ 
+-            if request.q.qtype == QTYPE.AAAA:
+-                print('GOT AAAA')
++            if request.q.qtype == QTYPE.AAAA or request.q.qtype == QTYPE.HTTPS:
++                print('GOT AAAA or HTTPS')
+                 reply = request.reply()
+                 return reply
+-            
++
+             if request.q.qtype == QTYPE.A:
+                 print('GOT A')
++
++                newrr = []
++                for record in reply.rr:
++                    if record.rtype == QTYPE.CNAME:
++                        continue
++                    newrr.append(record)
++                reply.rr = newrr
++
+                 for record in reply.rr:
+                     if record.rtype != QTYPE.A:
+                         continue
++
++                    print("Got RECORD:", record)
+                     #print(dir(record))
+                     #print(type(record.rdata))
+ 
+@@ -118,6 +128,7 @@
+                         return reply
+ 
+                     record.rdata = A(fake_addr)
++                    record.rname = request.q.qname
+                     record.ttl = 300
+                     #print(a.rdata)
+                 return reply
+</code></pre></td><td>2024-07-12T14:36:29.848Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>В итоге получил это</p>
+<blockquote>
+<p>nslookup <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a><br>
+Address:  192.168.1.1<br>
+Не заслуживающий доверия ответ:<br>
+╚ь :     <a href="http://photos-ugc.l.googleusercontent.com" rel="noopener nofollow ugc">photos-ugc.l.googleusercontent.com</a><br>
+Address:  142.250.74.33<br>
+Aliases:  <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a></p>
+</blockquote>
+<p>Не то что я хотел, он возвращает ip адрес <a href="http://photos-ugc.l.googleusercontent.com" rel="noopener nofollow ugc">photos-ugc.l.googleusercontent.com</a>, хотел чтобы из ответа пропал CNAME и возвращал ip адрес для проксирования, так как этот домен заблокирован.</p></td><td>2024-07-12T18:57:03.639Z</td></tr><tr><td>ValdikSS</td><td><p>Да вроде не должен, самая последняя строка перезаписывает домен. Вы точно применили патч, перезапустили dnsmap и очистили кэш? Я так понимаю, у вас еще и промежуточный резолвер, его кэш вы также очистили?</p></td><td>2024-07-12T20:05:55.074Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>Кэш везде почистил. Как перезапустить dnsmap?</p></td><td>2024-07-12T20:39:41.733Z</td></tr><tr><td>ValdikSS</td><td><p><code>systemctl restart dnsmap</code></p></td><td>2024-07-12T21:06:02.394Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>Теперь все заблокированные домены не работают.</p>
+<blockquote>
+<p>nslookup <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a><br>
+╤хЁтхЁ:  UnKnown<br>
+Address:  192.168.1.1<br>
+DNS request timed out.<br>
+timeout was 2 seconds.<br>
+*** UnKnown не удалось найти <a href="http://yt3.ggpht.com" rel="noopener nofollow ugc">yt3.ggpht.com</a>: Query refused</p>
+</blockquote>
+<p>systemctl status dnsmap пишет что активен, но нету логов, которые были до изменения.</p>
+<p><a class="attachment" href="удаление-cname-8059/ysfcoY829PKRoTYaFx6jz3tKabS.py">proxy.py</a> (9,1 КБ)</p></td><td>2024-07-12T21:12:44.307Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>Логи не появлялись потому что в systemd не было параметра запуска python3 -u. В итоге имеем такие логи:</p>
+<blockquote>
+<p>Jul 13 07:00:24 fb380a5377b3 python3[116]: Request: [127.0.0.1:45683] (udp) / ‘<a href="http://yT3.gGphT.COm" rel="noopener nofollow ugc">yT3.gGphT.COm</a>.’ (AAAA)<br>
+Jul 13 07:00:24 fb380a5377b3 python3[116]: Invalid Request: [127.0.0.1:50178] (udp) :: QTYPE: Invalid reverse lookup: [HTTPS]<br>
+Jul 13 07:00:24 fb380a5377b3 python3[116]: GOT AAAA or HTTPS<br>
+Jul 13 07:00:24 fb380a5377b3 python3[116]: Reply: [127.0.0.1:45683] (udp) / ‘<a href="http://yT3.gGphT.COm" rel="noopener nofollow ugc">yT3.gGphT.COm</a>.’ (AAAA) / RRs:<br>
+Jul 13 07:00:25 fb380a5377b3 python3[116]: Request: [127.0.0.1:44505] (udp) / ‘<a href="http://I.InsTaGRaM.COm" rel="noopener nofollow ugc">I.InsTaGRaM.COm</a>.’ (A)<br>
+Jul 13 07:00:25 fb380a5377b3 python3[116]: Invalid Request: [127.0.0.1:44505] (udp) :: QTYPE: Invalid reverse lookup: [HTTPS]<br>
+Jul 13 07:00:26 fb380a5377b3 python3[116]: Request: [127.0.0.1:56641] (udp) / ‘<a href="http://Yt3.GGPht.cOm" rel="noopener nofollow ugc">Yt3.GGPht.cOm</a>.’ (A)<br>
+Jul 13 07:00:26 fb380a5377b3 python3[116]: Invalid Request: [127.0.0.1:56641] (udp) :: QTYPE: Invalid reverse lookup: [HTTPS]<br>
+Jul 13 07:00:27 fb380a5377b3 python3[116]: Request: [127.0.0.1:36188] (udp) / ‘<a href="http://i.INStAgRaM.COM" rel="noopener nofollow ugc">i.INStAgRaM.COM</a>.’ (A)<br>
+Jul 13 07:00:27 fb380a5377b3 python3[116]: Invalid Request: [127.0.0.1:36188] (udp) :: QTYPE: Invalid reverse lookup: [HTTPS]</p>
+</blockquote></td><td>2024-07-13T07:04:35.390Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a> может были ещё какие то патчи? Почему может не работать?</p></td><td>2024-07-13T17:14:47.833Z</td></tr><tr><td>ValdikSS</td><td><p>Не в курсе. На серверах АнтиЗапрета файл один-в-один как у вас.</p></td><td>2024-07-13T18:33:04.548Z</td></tr><tr><td>ValdikSS</td><td><pre><code class="lang-auto">apt remove python3-dnslib &amp;&amp; apt -y install python3-pip
+pip3 install dnslib
+</code></pre></td><td>2024-07-13T18:34:24.931Z</td></tr><tr><td>ShiGhost(ShiGhost)</td><td><p>Получилось. Огромное спасибо Вам.</p></td><td>2024-07-13T19:11:23.340Z</td></tr>
+    </table>
+      </body>
+    </html>

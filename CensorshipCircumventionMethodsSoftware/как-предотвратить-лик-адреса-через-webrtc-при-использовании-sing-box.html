@@ -1,0 +1,387 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>как-предотвратить-лик-адреса-через-webrtc-при-использовании-sing-box</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>telerk(telerk)</td><td><p>Конфигурация моей сети такова: провайдер → сервер (sing-box тут) → роутер → клиенты. У сервера раздельные порты WAN и LAN. Пытаюсь завести Discord, добавил в фильтр по ruleset geosite-discord, приложение работает исправно, но при попытке зайти в головой чат - ошибка при подключении к WebRTC. В логах sing-box видны обращения к frankfurt2034.discord.media:443 через vpn-out. UDP трафик у меня не блокируется.</p>
+<p>DNS запросы под Discord идут через VPN. Весь QUIC на не-RU адреса идет через VPN. Идеи кончились. Думаю сейчас на утечку адреса через WebRTC, но как ее предотвратить с такой конфигурацией, я не нашел. Прошу помочь.</p>
+<p>Прикладываю конфиг sing-box.</p>
+<pre><code class="lang-auto">{
+  "log": {
+    "level": "warn"
+  },
+  "dns": {
+    "rules": [
+      {
+        "rule_set": [
+          "antizapret",
+          "db-google-deepmind",
+          "db-google-trust-services",
+          "db-google-play",
+          "db-openai",
+          "db-youtube",
+          "db-speedtest",
+          "db-figma",
+          "db-jetbrains",
+          "db-jetbrains-ai",
+          "db-microsoft",
+          "db-intel",
+          "db-imgur",
+          "db-cisco",
+          "db-custom",
+          "db-discord",
+          "db-oracle"
+        ],
+        "server": "g-doh-dns-au"
+      }
+    ],
+    "servers": [
+      {
+        "tag": "g-doh-dns-ru",
+        "address": "https://8.8.8.8/dns-query",
+        "detour": "direct-out"
+      },
+      {
+        "tag": "g-doh-dns-au",
+        "address": "https://8.8.8.8/dns-query",
+        "detour": "vpn-out"
+      },
+      {
+        "tag": "g-dns-au",
+        "address": "8.8.8.8",
+        "detour": "vpn-out"
+      },
+      {
+        "tag": "block",
+        "address": "rcode://success"
+      }
+    ],
+    "strategy": "ipv4_only"
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "interface_name": "tun0",
+      "inet4_address": "172.20.0.1/30",
+
+      "mtu": 1500,
+      "stack": "gvisor",
+      "gso": true,
+      "auto_route": true,
+      "auto_redirect": true,
+
+      // Exclude Avahi, nginx, paper
+      "exclude_uid": [70, 981, 982, 961],
+      // Exclude WAN
+      "exclude_interface": "enp6s0",
+
+      "udp_timeout": "5m",
+
+      "sniff": true,
+      "sniff_override_destination": true,
+      "sniff_timeout": "500ms",
+      "domain_strategy": "ipv4_only"
+    },
+    // Make LAN use sing-box's DNS resolving results
+    {
+      "type": "direct",
+      "tag": "direct-in",
+
+      "listen": "192.168.128.1",
+      "network": "udp",
+      "listen_port": 53,
+
+      "override_port": 53,
+      "override_address": "8.8.8.8",
+
+      "domain_strategy": "ipv4_only",
+      "detour": "vpn-out"
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "vless",
+      "tag": "vpn-out",
+      "server": "",
+      "server_port": 443,
+      "uuid": "",
+      "flow": "xtls-rprx-vision",
+      "packet_encoding": "xudp",
+      "tcp_fast_open": true,
+      "connect_timeout": "5s",
+      "tls": {
+          "enabled": true,
+          "insecure": false,
+          "server_name": "google.com",
+          "utls": {
+              "enabled": true,
+              "fingerprint": "chrome"
+          },
+          "reality": {
+              "enabled": true,
+              "public_key": "",
+              "short_id": ""
+          }
+      }
+    },
+    {
+      "type": "direct",
+      "tag": "direct-out"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    },
+    {
+      "type": "block",
+      "tag": "block-out"
+    }
+  ],
+  "route": {
+    "rules": [
+      // At first, process antizapret rules.
+      {
+        "rule_set": "antizapret",
+        "outbound": "vpn-out"
+      },
+      // Then, forward some externally blocked websites through VPN.
+      {
+        "rule_set": [
+          "db-google-deepmind",
+          "db-google-play",
+          "db-google-trust-services",
+          "db-openai",
+          "db-youtube",
+          "db-speedtest",
+          "db-figma",
+          "db-jetbrains",
+          "db-jetbrains-ai",
+          "db-microsoft",
+          "db-intel",
+          "db-imgur",
+          "db-cisco",
+          "db-custom",
+          "db-discord",
+          "db-oracle"
+        ],
+        "outbound": "vpn-out"
+      },
+      // Then, allow government websites - they don't like VPN.
+      {
+        "rule_set": [
+          "db-category-gov-ru"
+        ],
+        "outbound": "direct-out"
+      },
+      // Allow QUIC for russian IPs through direct - it's not being filtered on TSPU
+      {
+        "protocol": "quic",
+        "rule_set": "ip-ru",
+        "outbound": "direct-out"
+      },
+      // Forward all other QUIC connections to VPN
+      {
+        "protocol": "quic",
+        "outbound": "vpn-out"
+      },
+       // Forward DNS requests to specified DNS servers
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      }
+    ],
+    "rule_set": [
+      {
+        "tag": "db-custom",
+        "type": "inline",
+        "rules": [
+          {
+            "domain_regex": [
+              "yt[0-9]\\.ggpht.*"
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "antizapret",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/savely-krasovsky/antizapret-sing-box/releases/latest/download/antizapret.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-openai",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-openai.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-google-deepmind",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-google-deepmind.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-google-play",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-google-play.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-google-trust-services",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-google-trust-services.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-youtube",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-youtube.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-speedtest",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-ookla-speedtest.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-figma",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-figma.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-jetbrains",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-jetbrains.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-jetbrains-ai",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-jetbrains-ai.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-microsoft",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-microsoft.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-intel",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-intel.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-imgur",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-imgur.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-cisco",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-cisco.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-category-gov-ru",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-category-gov-ru.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-discord",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-discord.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "db-oracle",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geosite/raw/rule-set/geosite-oracle.srs",
+        "download_detour": "vpn-out"
+      },
+      {
+        "tag": "ip-ru",
+        "type": "remote", 
+        "format": "binary",
+        "url": "https://github.com/SagerNet/sing-geoip/raw/rule-set/geoip-ru.srs",
+        "download_detour": "vpn-out"
+      }
+    ],
+    "final": "direct-out",
+    "default_interface": "enp6s0"
+  },
+  "experimental": {
+    // Cache DNS resolving results
+    "cache_file": {
+      "enabled": true
+    }
+  }
+}
+</code></pre></td><td>2024-10-23T15:50:40.185Z</td></tr><tr><td>0ka(0ka)</td><td><p>в <a href="https://github.com/v2fly/domain-list-community/blob/master/data/discord">листах v2ray</a> (предполагаемый источник ruleset файлов) нету ip адресов дискорда</p>
+<aside class="quote no-group" data-username="telerk" data-post="1" data-topic="12214">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/telerk/48/11651_2.png" class="avatar"> telerk:</div>
+<blockquote>
+<p>UDP трафик у меня не блокируется</p>
+</blockquote>
+</aside>
+<p>поверить на слово не получается, если вы пытаетесь завести дискорд, то значит udp трафик у вас всё же заблокирован</p></td><td>2024-10-24T02:18:27.805Z</td></tr>
+    </table>
+      </body>
+    </html>

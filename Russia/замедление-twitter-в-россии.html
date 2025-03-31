@@ -1,0 +1,1011 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>замедление-twitter-в-россии</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>libneko</td><td><p>Сегодня роскомнадзор начал кошмарить твиттер. У меня точно шейпятся <a href="http://abs.twimg.com" rel="noopener nofollow ugc">abs.twimg.com</a> и <a href="http://pbs.twimg.com" rel="noopener nofollow ugc">pbs.twimg.com</a>. На первом лежат твиттерские js-бандлы, на втором - медиа.</p>
+<p>Анонс от РКН по теме: <a href="https://rkn.gov.ru/news/rsoc/news73464.htm" class="inline-onebox" rel="noopener nofollow ugc">Роскомнадзор - Роскомнадзор принял меры по защите российских граждан от влияния противоправного контента</a></p>
+<hr>
+<p><strong>10.03.2021 примерно с 10:00</strong> Роскомнадзор начал замедлять работу Twitter, в частности доменов <a href="http://abs.twimg.com" rel="noopener nofollow ugc">abs.twimg.com</a>, <a href="http://pbs.twimg.com" rel="noopener nofollow ugc">pbs.twimg.com</a>, <a href="http://video.twimg.com" rel="noopener nofollow ugc">video.twimg.com</a>, <a href="http://t.co" rel="noopener nofollow ugc">t.co</a>, которые используются для загрузки картинок, видео и служебных скриптов сервиса.<br>
+Ограничение скорости был реализовано некорректно: поиск домена проводился по подстроке, что приводило к замедлению любых доменов, в которых содержится <strong>t<span>.</span>co</strong> (microso<b>ft<span>.</span>c</b>om, reddi<strong>t<span>.</span>co</strong>m). Ошибка была исправлена примерно в 11:30 11.03.2021 по московскому времени.</p>
+<p>Наиболее подробно и точно о ситуации написал РБК: <a href="https://www.rbc.ru/technology_and_media/10/03/2021/6049043d9a79475bf3296e87" class="inline-onebox" rel="noopener nofollow ugc">Эксперты поспорили о проблемах с доступом к RT из-за мер по Twitter :: Технологии и медиа :: РБК</a><br>
+А также, спустя месяц, Медуза: <a href="https://meduza.io/feature/2021/04/08/roskomnadzor-uspeshno-zamedlyaet-tvitter-amerikanskie-issledovateli-ob-yasnili-kak-u-nego-eto-poluchilos" class="inline-onebox" rel="noopener nofollow ugc">Роскомнадзор успешно замедляет твиттер. Американские исследователи объяснили, как у него это получилось Они даже нашли небольшую лазейку для пользователей — жаль, что она им вряд ли поможет — Meduza</a></p>
+<p>Обойти ограничение скорости возможно без использования VPN и прокси, программами <a href="https://github.com/ValdikSS/GoodbyeDPI" rel="noopener nofollow ugc">GoodbyeDPI</a> и <a href="https://github.com/bol-van/zapret" rel="noopener nofollow ugc">zapret</a>.</p>
+<hr>
+<p>For English-speaking users, <a href="https://github.com/net4people/bbs/issues/65" rel="noopener nofollow ugc">net4people</a> has a good summary of the events.</p>
+<p><strong><a href="https://censoredplanet.org/throttling" rel="noopener nofollow ugc">Throttling of Twitter in Russia Report</a> by Censored Planet</strong></p></td><td>2021-03-10T07:35:17.786Z</td></tr><tr><td>libneko</td><td><p>Очень интересно как именно они это осуществляют, пинги у меня до <a href="http://pbs.twimg.com" rel="noopener nofollow ugc">pbs.twimg.com</a> в норме, и какое-то время не смотря на медленную загрузку картинок через браузер, curl качал картинки моментально. Сейчас же и с curl всё плохо.</p>
+<pre><code class="lang-bash">▲ ~ curl -Lo /dev/null -skw "\ntime_connect: %{time_connect}s\ntime_namelookup: %{time_namelookup}s\ntime_pretransfer: %{time_pretransfer}\ntime_starttransfer: %{time_starttransfer}s\ntime_redirect: %{time_redirect}s\ntime_total: %{time_total}s\n\n" https://abs.twimg.com/responsive-web/client-web/main.ba59e0f5.js
+
+time_connect: 0.109328s
+time_namelookup: 0.014423s
+time_pretransfer: 0.316707
+time_starttransfer: 0.413606s
+time_redirect: 0.000000s
+time_total: 82.467500s
+</code></pre></td><td>2021-03-10T07:43:16.360Z</td></tr><tr><td>ValdikSS</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://meduza.io/news/2021/03/10/roskomnadzor-ob-yavil-chto-nachal-zamedlyat-skorost-raboty-twitter-v-rossii">
+  <header class="source">
+      <img src="замедление-twitter-в-россии/61f4368bee47f12594ac12021ab2f3f1845ffc7b.png" class="site-icon" data-dominant-color="372C1F" width="32" height="32">
+
+      <a href="https://meduza.io/news/2021/03/10/roskomnadzor-ob-yavil-chto-nachal-zamedlyat-skorost-raboty-twitter-v-rossii" target="_blank" rel="noopener">Meduza</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="замедление-twitter-в-россии/113d423aed25d4348273556496a6ec8fab13064e_2_690x362.png" class="thumbnail" data-dominant-color="2D2D2D" width="690" height="362"></div>
+
+<h3><a href="https://meduza.io/news/2021/03/10/roskomnadzor-ob-yavil-chto-nachal-zamedlyat-skorost-raboty-twitter-v-rossii" target="_blank" rel="noopener">Роскомнадзор объявил, что начал замедлять скорость работы Twitter в России —...</a></h3>
+
+  <p>С&nbsp;10&nbsp;марта на&nbsp;территории России замедляется скорость работы Twitter&nbsp;— из-за того, что соцсеть не&nbsp;удаляет противоправный контент. Об&nbsp;этом заявили в&nbsp;Роскомнадзоре.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-03-10T07:54:34.808Z</td></tr><tr><td>ValdikSS</td><td><p>Смогу протестировать доступность и скорость через час.</p></td><td>2021-03-10T07:54:59.020Z</td></tr><tr><td>ValdikSS</td><td><p>Подтверждаю: скорость замедлена примерно до 128 кбит/с. Провайдер OBIT, Санкт-Петербург. Трафик идёт транзитом через retn.</p>
+<p>Видео с <a href="http://video.twimg.com">video.twimg.com</a> грузятся примерно с burst 512 kbps, speed 64 kbps.</p></td><td>2021-03-10T08:20:06.223Z</td></tr><tr><td>libneko</td><td><p>Game Service, Красноярск, магистральный - TTK, так же около 128 кбит/с. Надо бы посмотреть, не порезали ли еще чего акамаевского между делом.</p></td><td>2021-03-10T08:25:15.178Z</td></tr><tr><td>kawodil(kawodil)</td><td><p>Ростелеком, Екатеринбург. 12.8 KB/s (kilobytes per second).</p></td><td>2021-03-10T08:36:43.471Z</td></tr><tr><td>libneko</td><td><blockquote>
+<p>Как пояснил РБК источник в одном из крупных интернет-провайдеров, Роскомнадзор может самостоятельно ограничить скорость доступа к Twitter через оборудование, установленное на сетях операторов в рамках так называемого закона «о суверенном Рунете».</p>
+</blockquote>
+<blockquote>
+<p>Провайдер «ЭР-Телеком Холдинг» сообщил, что ограничение скорости работы Twitter в России технически реализуемо. В компании подтвердили, что это может быть осуществлено независимо от операторов связи. «К сожалению, это влияет на качество предоставляемых пользователям услуг. В случае с Twitter могут незагружаться изображения или видеоконтент», — пояснили в «ЭР-Телеком Холдинг».</p>
+</blockquote>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://www.rbc.ru/technology_and_media/10/03/2021/60487dc59a79471d2d611600">
+  <header class="source">
+      <img src="замедление-twitter-в-россии/7a27141ca75718a961e771549a397aa05fff800b.png" class="site-icon" data-dominant-color="519989" width="32" height="32">
+
+      <a href="https://www.rbc.ru/technology_and_media/10/03/2021/60487dc59a79471d2d611600" target="_blank" rel="noopener">РБК</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/362;"><img src="замедление-twitter-в-россии/6261bb08108eec5f482b0a439543ccaed1280dd8_2_690x362.jpeg" class="thumbnail" data-dominant-color="E7EEEA" width="690" height="362"></div>
+
+<h3><a href="https://www.rbc.ru/technology_and_media/10/03/2021/60487dc59a79471d2d611600" target="_blank" rel="noopener">Власти России ограничили работу Twitter. Главное</a></h3>
+
+  <p>РКН обвинил Twitter в многочисленных нарушениях и неудалении запрещенной информации. Работу соцсети в России начали замедлять: для этого можно использовать оборудование, установленное по закону о «суверенном Рунете»</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-03-10T08:42:39.217Z</td></tr><tr><td>lolwat</td><td><p>Может, какие-нибудь хитрости, что “шейпим все, если обращался на abs, шейпим 50%, если нет”?<br>
+Ну и с учетом того, что это РКН, можно ожидать, что 50% - это “есть два стула, мы пошейпили один”.</p>
+<p>Алсо, МГТС, Москва, твиттер работает как работал и через приложение на мобилках, и через сайт на десктопе.</p></td><td>2021-03-10T08:48:22.151Z</td></tr><tr><td>FenechkinFeliks(Феликс)</td><td><p>Ртк, Смоленск, магистральный — 128 кбит/с.</p></td><td>2021-03-10T08:50:23.828Z</td></tr><tr><td>ValdikSS</td><td><p>Итак, ограничение скорости осуществляется по именам доменов, через DPI. Причем не только доменов twitter непосредственно, но и CNAME-имен Akamai.<br>
+В частности, замедление видеоконтента наблюдается на <a href="http://video.twimg.com">video.twimg.com</a>, <a href="http://eip-ntt.video.twimg.com.akahost.net">eip-ntt.video.twimg.com.akahost.net</a>, <a href="http://video.twimg.com.eip.akadns.net">video.twimg.com.eip.akadns.net</a>, но не на более технических доменах, таких как <a href="http://cs531.wpc.edgecastcdn.net">cs531.wpc.edgecastcdn.net</a>.</p>
+<p>При обращении к IP-адресу напрямую, без SNI, скорость высокая.</p>
+<p></p><div class="video-placeholder-container" data-video-src="/uploads/default/original/1X/f7f31ae98ea8b8092f5e789e28dc4fe438fb3029.mp4">
+  </div><p></p></td><td>2021-03-10T08:55:07.270Z</td></tr><tr><td>m0xfff</td><td><p>Пассивный обход DPI помогает обходить замедление (использую nfqws).</p></td><td>2021-03-10T08:56:30.006Z</td></tr><tr><td>ValdikSS</td><td><p>Также шейпят релизы Github (домен <a href="http://github-releases.githubusercontent.com">github-releases.githubusercontent.com</a>). По домену. Это не техническая ошибка.<br>
+<a href="https://habr.com/ru/news/t/546280/#comment_22785976" class="inline-onebox-loading">https://habr.com/ru/news/t/546280/#comment_22785976</a></p>
+<blockquote>
+<p>Подтверждаю: низкая скорость вызвана этим новым ограничением Роскомнадзора. Это не ошибка, это намеренное ограничение конкретно домена github (<a href="http://github-releases.githubusercontent.com">github-releases.githubusercontent.com</a>).<br>
+Как удостовериться:</p>
+<p>1.Добавьте в hosts</p>
+<pre><code class="lang-auto">   185.199.108.154 govno.com
+   185.199.108.154 github-releases.githubusercontent.com
+</code></pre>
+<p>(это один из оригинальных IP-адресов <a href="http://github-releases.githubusercontent.com">github-releases.githubusercontent.com</a>)</p>
+<ol start="2">
+<li>Через curl выплоните:<br>
+<code>curl -o /dev/null -v -L https://github.com/docker/compose/releases/download/1.28.5/docker-compose-Linux-x86_64</code> — низкая скорость</li>
+</ol>
+<p>В консоли увидите перенаправление на домен <a href="http://github-releases.githubusercontent.com">github-releases.githubusercontent.com</a> по длинной ссылке. У меня она следующая:<br>
+<a href="https://github-releases.githubusercontent.com/15045751/63484f00-781d-11eb-826a-890a00f7d1e5?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20210310%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20210310T091425Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=18d355b70d3eb3ce2daf66bd357dd5074afa215dd48686f17142ff30cf4efbd0&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;key_id=0&amp;repo_id=15045751&amp;response-content-disposition=attachment%3B%20filename%3Ddocker-compose-Linux-x86_64&amp;response-content-type=application%2Foctet-stream" class="inline-onebox-loading">https://github-releases.githubusercontent.com/15045751/63484f00-781d-11eb-826a-890a00f7d1e5?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20210310%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20210310T091425Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=18d355b70d3eb3ce2daf66bd357dd5074afa215dd48686f17142ff30cf4efbd0&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;key_id=0&amp;repo_id=15045751&amp;response-content-disposition=attachment%3B%20filename%3Ddocker-compose-Linux-x86_64&amp;response-content-type=application%2Foctet-stream</a></p>
+<p>Попробуйте её скачать — качается медленно.<br>
+Теперь замените в ссылке <a href="http://github-releases.githubusercontent.com">github-releases.githubusercontent.com</a> на <a href="http://govno.com">govno.com</a> — качается быстро.</p>
+<p>curl -o /dev/null -H “Host: <a href="http://github-releases.githubusercontent.com">github-releases.githubusercontent.com</a>” -k -vL ‘<a href="https://govno.com/15045751/63484f00-781d-11eb-826a-890a00f7d1e5?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20210310%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20210310T091425Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=18d355b70d3eb3ce2daf66bd357dd5074afa215dd48686f17142ff30cf4efbd0&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;key_id=0&amp;repo_id=15045751&amp;response-content-disposition=attachment%3B%20filename%3Ddocker-compose-Linux-x86_64&amp;response-content-type=application%2Foctet-stream" class="inline-onebox-loading">https://govno.com/15045751/63484f00-781d-11eb-826a-890a00f7d1e5?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20210310%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20210310T091425Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=18d355b70d3eb3ce2daf66bd357dd5074afa215dd48686f17142ff30cf4efbd0&amp;X-Amz-SignedHeaders=host&amp;actor_id=0&amp;key_id=0&amp;repo_id=15045751&amp;response-content-disposition=attachment%3B%20filename%3Ddocker-compose-Linux-x86_64&amp;response-content-type=application%2Foctet-stream</a>’</p>
+<p>Ограничение по конкретному домену. Это не ошибка.</p>
+</blockquote></td><td>2021-03-10T09:21:00.067Z</td></tr><tr><td>ValdikSS</td><td><p>Похоже, отключили шейпер вообще. И гитхаб быстро грузит, и видео с твиттера на полной скорости грузится.</p></td><td>2021-03-10T09:33:29.198Z</td></tr><tr><td>bolvan</td><td><p>Пока еще ограничение было, успел засечь такую картинку.</p>
+<p>тестировал на<br>
+<a href="https://video.twimg.com/ext_tw_video/1241417690197131264/pu/vid/12000/15000/640x360/X4VMbImfbf7u-drH.ts" class="onebox" target="_blank" rel="noopener nofollow ugc">https://video.twimg.com/ext_tw_video/1241417690197131264/pu/vid/12000/15000/640x360/X4VMbImfbf7u-drH.ts</a><br>
+<a href="https://github.com/docker/compose/releases/download/1.28.5/docker-compose-Linux-x86_64" class="onebox" target="_blank" rel="noopener nofollow ugc">https://github.com/docker/compose/releases/download/1.28.5/docker-compose-Linux-x86_64</a></p>
+<p>sknt - суверенного DPI нет - все быстро<br>
+RT - туда еще не успели поставить суверенный - все быстро<br>
+tiera - суверенный DPI - твиттер быстро, гитхаб от 2 до 10 кб/с</p>
+<p>nfqws проверить не успел. вскоре шейпер выключили</p></td><td>2021-03-10T09:44:06.880Z</td></tr><tr><td>libneko</td><td><p>У меня <a href="http://abs.twimg.com" rel="noopener nofollow ugc">abs.twimg.com</a> все еще режут:</p>
+<pre><code class="lang-bash">time_connect: 0.230977s
+time_namelookup: 0.130364s
+time_pretransfer: 0.441102
+time_starttransfer: 0.543505s
+time_redirect: 0.000000s
+time_total: 80.341080s
+</code></pre>
+<p>pbs - аналогично</p>
+<pre><code class="lang-bash">▲ ~ curl -Lo /dev/null -skw "\ntime_connect: %{time_connect}s\ntime_namelookup: %{time_namelookup}s\ntime_pretransfer: %{time_pretransfer}\ntime_starttransfer: %{time_starttransfer}s\ntime_redirect: %{time_redirect}s\ntime_total: %{time_total}s\n\n" https://pbs.twimg.com/media/EwHAmncXIAMgPJy\?format\=jpg\&amp;name\=small
+
+time_connect: 0.097993s
+time_namelookup: 0.024220s
+time_pretransfer: 0.253719
+time_starttransfer: 0.329501s
+time_redirect: 0.000000s
+time_total: 3.947705s
+</code></pre>
+<p>Еще снова режутся релизы гитхаба, 117 кбит/с</p></td><td>2021-03-10T09:54:43.510Z</td></tr><tr><td>ctf</td><td><p>pbs</p>
+<p>time_connect: 0.042448s<br>
+time_namelookup: 0.022455s<br>
+time_pretransfer: 0.101030<br>
+time_starttransfer: 0.122412s<br>
+time_redirect: 0.000000s<br>
+time_total: 7.648320s</p>
+<p>видео качаются на скорости 8kb/s</p></td><td>2021-03-10T10:00:19.518Z</td></tr><tr><td>ValdikSS</td><td><p>Ага, включили заново. Github опять замедляется.</p>
+<p>Записываю наглядное видео.<br>
+</p><div class="video-placeholder-container" data-video-src="/uploads/default/original/1X/ba7e3455fd14c6848e1c2e1e19ec982f377b4d33.mp4">
+  </div><p></p></td><td>2021-03-10T10:03:46.674Z</td></tr><tr><td>libneko</td><td><p>У меня помимо <code>github-releases.githubusercontent.com</code> судя по всему режется ВЕСЬ <code>*.githubusercontent.com</code>, включая картинки, аватарки и файлы из гистов.</p>
+<pre><code class="lang-auto">▲ ~ curl -Lo /dev/null -skw "\ntime_connect: %{time_connect}s\ntime_namelookup: %{time_namelookup}s\ntime_pretransfer: %{time_pretransfer}\ntime_starttransfer: %{time_starttransfer}s\ntime_redirect: %{time_redirect}s\ntime_total: %{time_total}s\n\n" https://gist.githubusercontent.com/brettlangdon/85942af486eb79118467/raw/2a7409cd3c26a90b2e82bdc40dc7db18b92b3517/01151_inthedeep_2560x1600.jpg
+
+time_connect: 0.109184s
+time_namelookup: 0.017873s
+time_pretransfer: 0.295267
+time_starttransfer: 0.492951s
+time_redirect: 0.000000s
+time_total: 58.627166s
+</code></pre></td><td>2021-03-10T10:37:16.629Z</td></tr><tr><td>ctf</td><td><pre><code>time_connect: 0.082141s
+time_namelookup: 0.041076s
+time_pretransfer: 0.175151
+time_starttransfer: 0.448990s
+time_redirect: 0.000000s
+time_total: 63.107377s</code></pre></td><td>2021-03-10T10:40:19.703Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="18" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Ага, включили заново. Github опять замедляется.</p>
+</blockquote>
+</aside>
+<p>Действительно.<br>
+nfqws с --dpi-desync=fake помогает от суверенной блокировки сайтов, но не помогает от шейпинга<br>
+зато<br>
+nfqws с --dpi-desync=fake,split2 помогает и от того, и от другого</p>
+<p>провайдер tiera</p></td><td>2021-03-10T10:48:10.320Z</td></tr><tr><td>ValdikSS</td><td><p>Подтверждаю: на моём провайдере <strong>zapret и GoodbyeDPI</strong> не могут обойти блокировки сайтов, но <strong>обходят ограничение скорости</strong>.<br>
+С определенной долей уверенности это говоорит о наличии разного оборудования DPI на пути пакетов.</p>
+<p>На заметку: TTL быстрых и замедленных пакетов одинаков.</p></td><td>2021-03-10T11:02:45.809Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Ещё потенциально может быть интересно проверить, что будет если послать тот же SNI на <em>свой</em> сервер (т.е. на сервер не в подсетях Twitter, а других). На сервере можно поднять NAT в сторону твиттера или socat’ом проксю. Если трафик будет троттлиться - можно будет увидеть, что происходит в pcap на другой стороне соединения и, возможно, что-то из этого понять. А если не будет - то Твиттер получает тривиальную конструкцию для убегания всем миром <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=9" title=":slight_smile:" class="emoji" alt=":slight_smile:"></p></td><td>2021-03-10T11:16:31.748Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="darkk" data-post="23" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/darkk/48/470_2.png" class="avatar"> darkk:</div>
+<blockquote>
+<p>Ещё потенциально может быть интересно проверить, что будет если послать тот же SNI на <em>свой</em> сервер</p>
+</blockquote>
+</aside>
+<p>Валдик совершенно прав. Блокировка идет по SNI<br>
+Прописал в hosts <a href="http://github-releases.githubusercontent.com">github-releases.githubusercontent.com</a>  на IP своего VPS<br>
+Создал там файл на 100 mb. Дернул по https через curl -k (игнорировать сертификат)<br>
+Медленно. С разбиением запроса через nfqws - быстро</p></td><td>2021-03-10T11:22:28.307Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Прикольный артефакт. Запишешь pcap с обоих сторон “хорошей” и “плохой” сессии? Ну не 100 MiB, наверное, поменьше… Хватит ли мегабайта-двух для наблюдения эффекта?</p></td><td>2021-03-10T11:43:20.381Z</td></tr><tr><td>libneko</td><td><p>Красноярск, Orion Telecom через магистальщика ertelecom аналогично режет <code>gist.githubusercontent.com</code></p></td><td>2021-03-10T11:53:03.801Z</td></tr><tr><td>ValdikSS</td><td><p>Я провёл больше тестов. Сообщаю вам первым. Сравнение доменов происходит по подстроке, и блокируется строка “<span>t.co</span>” (короткий домен твиттера)</p>
+<p>Любой домен, содержащий в каком-либо месте в названии домена строку <span>t.co</span>, замедляется.</p>
+<p>У Github домен, на котором видно замедление — <a href="https://t.co/LA2jdkK37V?amp=1">http://githubusercontent.com</a></p>
+<p>githubuserconten<b>t.co</b>m</p></td><td>2021-03-10T12:52:13.205Z</td></tr><tr><td>hookz(Talya)</td><td><p>жесть</p></td><td>2021-03-10T12:57:37.797Z</td></tr><tr><td>ValdikSS</td><td><p>Проверил: замедляются r<b>t.co</b>m, reddi<b>t.co</b>m, microsof<b>t.co</b>m.</p>
+<p></p><div class="video-placeholder-container" data-video-src="/uploads/default/original/1X/c33c6e9b2939ed70566b2a7f7ee8022ae479ee2d.mp4">
+  </div><p></p>
+<p></p><div class="video-placeholder-container" data-video-src="/uploads/default/original/1X/0f76be87c95cf2421f874cbbaca9eb5aa14c3950.mp4">
+  </div><p></p></td><td>2021-03-10T13:14:32.905Z</td></tr><tr><td>ctf</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="замедление-twitter-в-россии/c01ebd92893bdb35aedc3942df86a0e21b0d14e1.png" data-download-href="https://ntc.party/uploads/default/c01ebd92893bdb35aedc3942df86a0e21b0d14e1" title="ApplicationFrameHost_LGaAeELjIR"><img src="замедление-twitter-в-россии/c01ebd92893bdb35aedc3942df86a0e21b0d14e1_2_690x228.png" alt="ApplicationFrameHost_LGaAeELjIR" data-base62-sha1="rpzxcLQS6yaK9FYbFmat6R4BGnL" width="690" height="228" srcset="замедление-twitter-в-россии/c01ebd92893bdb35aedc3942df86a0e21b0d14e1_2_690x228.png, замедление-twitter-в-россии/c01ebd92893bdb35aedc3942df86a0e21b0d14e1_2_1035x342.png 1.5x, замедление-twitter-в-россии/c01ebd92893bdb35aedc3942df86a0e21b0d14e1.png 2x" data-dominant-color="2E5262"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">ApplicationFrameHost_LGaAeELjIR</span><span class="informations">1136×377 15.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Иконки у предлагаемых приложений в Microsoft Store выглядят примерно вот так, через несколько секунд они подгружаются<br>
+Сам Store тоже работает медленнно</p>
+<p>упд: шейпер работает, хром сообщает что образ винды скачается через 5 дней</p></td><td>2021-03-10T13:18:13.477Z</td></tr><tr><td>mittus(mittus)</td><td><p>Сделал наглядное сравнение. Ситуация дерьмовая <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p>
+<p>ОС windows 10, последняя версия chrome, провайдер мегафон северозапад, LTE.</p>
+<p>С замедлением</p><div class="youtube-onebox lazy-video-container" data-video-id="ITWEM6aeLmU" data-video-title="twitter работа с замедлением" data-video-start-time="" data-provider-name="youtube">
+  <a href="https://www.youtube.com/watch?v=ITWEM6aeLmU" target="_blank" class="video-thumbnail" rel="noopener nofollow ugc">
+    <img class="youtube-thumbnail" src="замедление-twitter-в-россии/db016fe4d14617cf7033fa6961322b5523d95482.jpeg" title="twitter работа с замедлением" data-dominant-color="8A8B8B" width="690" height="388">
+  </a>
+</div>
+
+<p>Без замедления</p><div class="youtube-onebox lazy-video-container" data-video-id="DWZ_V5nXdfg" data-video-title="Twitter нормальный режим работы" data-video-start-time="" data-provider-name="youtube">
+  <a href="https://www.youtube.com/watch?v=DWZ_V5nXdfg" target="_blank" class="video-thumbnail" rel="noopener nofollow ugc">
+    <img class="youtube-thumbnail" src="замедление-twitter-в-россии/c27e1c60004e32322d2ab6192a754d57c6ff8fe8.jpeg" title="Twitter нормальный режим работы" data-dominant-color="4C4949" width="690" height="388">
+  </a>
+</div>
+</td><td>2021-03-10T13:20:23.565Z</td></tr><tr><td>libneko</td><td><p><code>googleusercontent.com</code>…</p>
+<pre><code class="lang-bash">wget https://lh3.googleusercontent.com/86arOE_jc_FYR6_mPbeXrzWB4LwvgCRWPGXbbftgG4_zAjY05ajbmq3xiG0Xc_uYCoTccikGvLdo5WIlofH5pmySn1VRejqngh2pwDLquiLJYayCOJKUrZKFnOwmSxKzQqqOM1y5o42TPk6LYR1vbPjrEPx3dQIUEwS4IPRjzt3JdPZT32TkqCECm-PoQtsBAPnyN6g46PbiyD9fblgzuBcT2xuO1AaZgOkR53bom8ATCBkDgcYT_mnsxWuxLGp6cNFUR4lWBFKyYkYJWJY--KmIVCWDDoJ3SxwjimGjwRG-X2Qu3AP4wa6tRazHuBo3a8IOofm6f5arSRdpVy4AaXoacTPz8TSkcofA0YaIttHpek1Gi5v1yMSbi5mHV6Mfv4lyczXPp8c5iNR7IFPvgMz1BiCETTxNwSvDjb2JCN94_256Fzejrs-Dk-kMYeCCYQh2Zd_lt9xiEQDgZ5gufdpxxM9xDiP447vrOqKbBMcAS_6hu43EwRi97ILAhBpS3QLP-4WhKf4GHauWqML_EcBvhszB-6T1iGeCWvpAT9jZVDVgekalBvLZiZNoy5Ow9QlnHA=w1827-h711-no
+</code></pre>
+<p>=&gt; 15 КБ/с</p></td><td>2021-03-10T13:21:38.502Z</td></tr><tr><td>zhenyolka</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a> я уже написал на хабре, напишу и здесь. Проверял на домру и теле2. На первом все ок, но на теле2 режет, причем обходится сменой SNI.<br>
+Из интересного: обычные блокировки не обходятся добавлением точки, а обрезка скорости обходится. Плюс, я тут прочитал, что блочатся все сайты с “<a href="http://t.co" rel="noopener nofollow ugc">t.co</a>”. Учитывая все это, мне кажется, что централизовано поставили DPI где-то на границе, ведь обычно провайдерам даются определенные списки доменов, а тут такое ощущение, что тупо grep’ом сделано.</p></td><td>2021-03-10T13:24:23.709Z</td></tr><tr><td>vdlftrvuknyrukmztb</td><td><p>У крупных провайдеров уже стоят ТСПУ (на базе EcoDPI) от РКН.</p></td><td>2021-03-10T13:28:29.330Z</td></tr><tr><td>ValdikSS</td><td><p>То, что goodbyedpi/zapret/добавление точки обходит ограничение, но не блокировки,  с определенной долей уверенности говорит о наличии разного оборудования DPI на пути пакетов. Т.е. один может быть провайдерский (блокирующий), а другой — Роскомнадзоровский («суверенный», rdp ru), где-то дальше на магистрали. Такое встречается, это не нетипичная ситуация, но всё равно.</p></td><td>2021-03-10T13:29:17.884Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>История про <code>.*t.co.*</code> вместо <code>^t.co$</code> напомнила мне про <a href="https://github.com/ooni/spec/tree/master/techniques" class="inline-onebox">spec/techniques at master · ooni/spec · GitHub</a></p>
+<p>Возможно, если в техниках поковыряться – можно ещё какие-то интересные гипотезы для проверки найти.</p></td><td>2021-03-10T13:30:26.755Z</td></tr><tr><td>zhenyolka</td><td><p>И все же я бы предложил провести тест, чтобы понять, где именно стоят DPI, реализующие новые блокировки. Для этого надо взять какой-нибудь сайт без “<a href="http://t.co" rel="noopener nofollow ugc">t.co</a>”. Потом отправить ему пакет с определенным низким ttl. В sni этого пакета указать “<a href="http://t.co" rel="noopener nofollow ugc">t.co</a>”. Далее необходимо начать нормальный обмен данными с этим сайтом на том же сокете, измеряя при этом скорость. Алгоритм повторять увеличивая значение ttl до тех пор, пока не станет резаться скорость. В этом случае пакет дойдет до фильтра и вся сессия пометиться, что ее надо блокировать.</p></td><td>2021-03-10T13:37:03.658Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Можно нагрепать ещё кучу домендов на:</p>
+<ul>
+<li><a href="https://opendata.rapid7.com/sonar.fdns_v2/" class="inline-onebox">Forward DNS (FDNS) | Rapid7 Open Data</a></li>
+<li><a href="http://s3-us-west-1.amazonaws.com/umbrella-static/top-1m.csv.zip">http://s3-us-west-1.amazonaws.com/umbrella-static/top-1m.csv.zip</a></li>
+<li><a href="https://umbrella.cisco.com/blog/cisco-umbrella-1-million" class="inline-onebox">Cisco Umbrella 1 Million - Cisco Umbrella</a></li>
+<li><a href="https://majestic.com/reports/majestic-million">https://majestic.com/reports/majestic-million</a></li>
+</ul>
+<p>Возможно, там найдётся что-то пожирнее <code>rt.com</code>.</p></td><td>2021-03-10T13:40:16.374Z</td></tr><tr><td>ValdikSS</td><td><p>Сайты с t<span>.</span>co, отсортированы по популярности.</p>
+<p>Из наиболее популярных в РФ:</p>
+<pre><code class="lang-auto">pinterest.com
+microsoft.com
+blogspot.com
+reddit.com
+snapchat.com
+googleusercontent.com (специальный домен для раздачи различных файлов от Google, вкл. медиа)
+deviantart.com
+beget.com (российский хостер Бегет)
+appspot.com (домены сервиса Google App Engine)
+</code></pre>
+<p>Также <a href="https://vc.ru/tech/218742-roskomnadzor-vmeste-s-twitter-zamedlil-sayty-github-microsoft-reddit-i-vse-ostalnye-s-sochetaniem-t-co-v-domene">vc.ru</a> сообщает, что под ограничение скорости попадает домен steam *.steamcontent.com.</p>
+<pre><code class="lang-auto">9,pinterest.com,84
+10,microsoft.com,82
+18,enable-javascript.com,79
+48,blogspot.com,75
+60,bluehost.com,72
+71,mydomaincontact.com,70
+72,reddit.com,70
+78,namebright.com,70
+79,dreamhost.com,70
+84,t.co,69
+112,akismet.com,
+140,trustpilot.com,
+159,dynadot.com,
+193,constantcontact.com,
+245,hubspot.com,
+247,cointernet.com.co,
+254,getpocket.com,
+256,washingtonpost.com,
+286,opencart.com,
+301,sciencedirect.com,
+314,shinystat.com,
+318,huffingtonpost.com,
+351,snapchat.com,
+352,proofpoint.com,
+354,googleusercontent.com,
+389,pinterest.co.uk,
+434,cnet.com,
+463,format.com,
+472,cookiebot.com,
+486,onetrust.com,
+495,independent.co.uk,
+504,ewebdevelopment.com,
+526,matterport.com,
+532,deviantart.com,
+537,indiamart.com,
+538,blogspot.co.uk,
+542,quantcast.com,
+578,ft.com,
+579,angieslist.com,
+584,blogspot.com.es,
+585,mapquest.com,
+591,xinhuanet.com,
+610,sharepoint.com,
+615,swsoft.com,
+670,walmart.com,
+693,marriott.com,
+695,cdnbest.com,
+716,justhost.com,
+727,beget.com,
+767,aparat.com,
+781,about.com,
+785,appspot.com,
+786,carecredit.com,
+788,zdnet.com,
+831,cookieconsent.com,
+843,vistaprint.com,
+854,redhat.com,
+887,economist.com,
+911,photobucket.com,
+942,venturebeat.com,
+987,childnet.com,
+996,providesupport.com,
+1061,domainmarket.com,
+1063,lbpicmt.com,
+1064,pardot.com,
+1088,target.com,
+1089,netcraft.com,
+1127,yoast.com,
+1128,hotmart.com,
+1144,shieldbreakfast.com,
+1159,wolt.com,
+1163,nypost.com,
+1167,allaboutdnt.com,
+1172,projectrockit.com.au,
+1174,geotrust.com,
+1233,huffpost.com,
+1238,engadget.com,
+1251,theknot.com,
+1294,cvent.com,
+1318,pinterest.com.au,
+1319,zibbet.com,
+1323,themezhut.com,
+1324,b-eat.co.uk,
+1325,just-eat.com,
+1353,att.com,
+1384,talabat.com,
+1408,facebookblueprint.com,
+1417,mimecast.com,
+1508,toreta-takeout.com,
+1544,tencent.com,
+1594,techtarget.com,
+1613,adjust.com,
+1660,intuit.com,
+1696,producthunt.com,
+1723,thelancet.com,
+1731,semalt.com,
+1736,dropboxusercontent.com,
+1740,githubusercontent.com,
+1747,provenexpert.com,
+1776,pixieset.com,
+</code></pre>
+<p>Источник: <a href="https://www.domainrank.io/top-one-million-domains/" class="inline-onebox">Top 1 Million Domains - DomainRank</a></p></td><td>2021-03-10T14:09:38.181Z</td></tr><tr><td>hookz(Talya)</td><td><p><a href="http://icloud-content.com" class="onebox" target="_blank" rel="noopener nofollow ugc">icloud-content.com</a></p>
+<p>Вот айфоноводы удивятся</p></td><td>2021-03-10T14:17:13.203Z</td></tr><tr><td>Mixaill(Mikhail Paulyshka)</td><td><p>Steam</p>
+<p><a href="https://github.com/uklans/cache-domains/blob/master/steam.txt" rel="noopener nofollow ugc">cache-domains/steam.txt at master · uklans/cache-domains (github.com)</a></p>
+<p>*.steamcontent.com<br>
+<a href="http://clientconfig.akamai.steamtransparent.com" class="onebox" target="_blank" rel="noopener nofollow ugc">clientconfig.akamai.steamtransparent.com</a></p></td><td>2021-03-10T14:37:10.759Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="zhenyolka" data-post="37" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/b77776/48.png" class="avatar"> zhenyolka:</div>
+<blockquote>
+<p>И все же я бы предложил провести тест, чтобы понять, где именно стоят DPI, реализующие новые блокировки. Для этого надо взять какой-нибудь сайт без “<a href="http://t.co">t.co </a>”. Потом отправить ему пакет с определенным низким ttl. В sni этого пакета указать “<a href="http://t.co">t.co </a>”. Далее необходимо начать нормальный обмен данными с этим сайтом на том же сокете, измеряя при этом скорость. Алгоритм повторять увеличивая значение ttl до тех пор, пока не станет резаться скорость.</p>
+</blockquote>
+</aside>
+<p>Это делается средствами nfqws<br>
+nfqws --qnum=200 --debug --dpi-desync=fake --dpi-desync-ttl=5 --dpi-desync-fake-tls=/tmp/x/microsoft.sni.bin</p>
+<p>провайдер tiera<br>
+Обращаюсь к незаблокированному сайту без <a href="http://t.co">t.co</a>. Скачиваю файл 50 мб. Скорость норм.<br>
+Запускаю nfqws. Скорость медленная.<br>
+Уменьшаю TTL до 4. Скорость нормальная.<br>
+На 5 хопе находится суверенный DPI. Мой обычный обход блокировок работает с ttl=5.<br>
+Значит замедление выполняется на том же девайсе или девайсе с тем же хопом</p>
+<p>TLS client hello 517 байт от <a href="http://microsoft.com">microsoft.com</a> дампануто через wireshark и записано в файл</p>
+<p>Если сделать наоборот. То есть взять сайт с <a href="http://t.co">t.co</a>, подсунуть tls client hello без <a href="http://t.co">t.co</a> (вариант fake по умолчанию), то скорость все равно медленная.<br>
+Следовательно логично предположить, что DPI мониторит всю сессию или по крайней мере не только первый запрос на предмет TLS ClientHello, и если видит совпадение по правилу, то включает TCB (TCP Control Block) в замедление<br>
+Сплита  TLS ClientHello достаточно, чтобы триггер замедления не сработал</p></td><td>2021-03-10T14:46:40.984Z</td></tr><tr><td>ValdikSS</td><td><p>dropboxuserconten<b>t.co</b>m</p></td><td>2021-03-10T14:50:17.507Z</td></tr><tr><td>ValdikSS</td><td><p>Из комментариев на TJ: <a href="https://tjournal.ru/news/351416-roskomnadzor-vmeste-s-tvitterom-zamedlil-vse-sayty-s-t-co-v-domene-vklyuchaya-rt-microsoft-i-github" class="inline-onebox">TJ</a></p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="замедление-twitter-в-россии/c1a0ab30ee4e5aba11cb7654007cea3d2cdf5517.png" data-download-href="https://ntc.party/uploads/default/c1a0ab30ee4e5aba11cb7654007cea3d2cdf5517" title="f5c93219-eb83-5dd1-be1f-7a27f75cd400"><img src="замедление-twitter-в-россии/c1a0ab30ee4e5aba11cb7654007cea3d2cdf5517_2_690x229.png" alt="f5c93219-eb83-5dd1-be1f-7a27f75cd400" data-base62-sha1="rCUnJZmHajCl6bnN94OaRcfNvPp" width="690" height="229" srcset="замедление-twitter-в-россии/c1a0ab30ee4e5aba11cb7654007cea3d2cdf5517_2_690x229.png, замедление-twitter-в-россии/c1a0ab30ee4e5aba11cb7654007cea3d2cdf5517_2_1035x343.png 1.5x, замедление-twitter-в-россии/c1a0ab30ee4e5aba11cb7654007cea3d2cdf5517.png 2x" data-dominant-color="1A242E"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">f5c93219-eb83-5dd1-be1f-7a27f75cd400</span><span class="informations">1060×352 72 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2021-03-10T15:07:39.597Z</td></tr><tr><td>ValdikSS</td><td><p><img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji only-emoji" alt=":thinking:" loading="lazy" width="20" height="20"> <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji only-emoji" alt=":thinking:" loading="lazy" width="20" height="20"> <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji only-emoji" alt=":thinking:" loading="lazy" width="20" height="20"></p>
+<blockquote>
+<p>Ростелеком с игровым тарифом 800 Мбит/c: после запуска h2load на <a href="https://t.co/0AtK90CD60?amp=1">http://microsoft.com</a> у половины города начинает лагать интернет</p>
+<p>сразу после этого все начинает работать как обычно (быстро), наверное ТСПУ уходи в байпас</p>
+</blockquote>
+<p><a href="https://twitter.com/dimon49468174/status/1369665878762156033" class="onebox" target="_blank" rel="noopener">https://twitter.com/dimon49468174/status/1369665878762156033</a></p></td><td>2021-03-10T15:16:08.214Z</td></tr><tr><td>hookz(Talya)</td><td><p>Всё таки сэкономили черти <img src="https://ntc.party/images/emoji/twitter/rofl.png?v=9" title=":rofl:" class="emoji" alt=":rofl:"></p></td><td>2021-03-10T15:21:48.922Z</td></tr><tr><td>Mixaill(Mikhail Paulyshka)</td><td><p>DigiCert CRL &amp; OCSP</p>
+<p>crl3.digicer<strong><a href="http://t.co" rel="noopener nofollow ugc">t.co</a></strong>m<br>
+crl4.digicer<strong><a href="http://t.co" rel="noopener nofollow ugc">t.co</a></strong>m<br>
+ocsp.digicer<strong><a href="http://t.co" rel="noopener nofollow ugc">t.co</a></strong>m</p></td><td>2021-03-10T15:36:57.178Z</td></tr><tr><td>ValdikSS</td><td><p>На двух каналах в Санкт-Петербурге ТСПУ настроен так, как будто стоит <em>сразу</em> за клиентом, на первом хопе. Т.е. я запускаю GoodbyeDPI с ttl=2, и шейпер обходится.<br>
+Я уже здесь где-то писал об этом.</p></td><td>2021-03-10T16:22:56.658Z</td></tr><tr><td>justguest</td><td><p>Грепнул список траффистых доменов и сабов, ситуация рука-лицо <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p>
+<p><a href="https://arxius.io/f/c87c8677" class="onebox" target="_blank" rel="noopener nofollow ugc">https://arxius.io/f/c87c8677</a></p></td><td>2021-03-10T16:30:41.639Z</td></tr><tr><td>ValdikSS</td><td><p><a href="http://eset.com">eset.com</a>, <a href="http://avast.com">avast.com</a>, мило.</p></td><td>2021-03-10T17:18:49.765Z</td></tr><tr><td>ValdikSS</td><td><p>На всякий случай документирую: у меня всё ещё (20:21 10.03.2021 МСК) ничего не исправлено, загрузка <a href="http://rt.com">rt.com</a> происходит со скоростью 128 кбит/с.</p></td><td>2021-03-10T17:21:39.740Z</td></tr><tr><td>Grunge(Grunge)</td><td><p>Рекомендованная схема установки ТСПУ на сети операторов связи - в разрыв аплинковых интерфейсов BNG/BRAS</p></td><td>2021-03-10T17:37:12.641Z</td></tr><tr><td>ValdikSS</td><td><blockquote>
+<p>В копилку <a href="http://yt3.ggpht.com">yt3.ggpht.com</a>, у ютуба там картинки. По 19 секунд грузятся.</p>
+</blockquote>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://habr.com/ru/news/546280/">
+  <header class="source">
+      <img src="замедление-twitter-в-россии/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://habr.com/ru/news/546280/" target="_blank" rel="noopener">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="замедление-twitter-в-россии/ff833decc6cfd67f4b846839b04df9f08cfcfa11.png" class="thumbnail" data-dominant-color="3D515E" width="690" height="362"></div>
+
+<h3><a href="https://habr.com/ru/news/546280/" target="_blank" rel="noopener">РКН замедляет Twitter</a></h3>
+
+  <p>Роскомнадзор сообщил , что ведомство приняло «срочные меры по защите российских граждан от влияния противоправного контента в соцсети Twitter, поскольку компания систематически не исполняет требования...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-03-10T18:24:27.460Z</td></tr><tr><td>ValdikSS</td><td><p>Протестировал картинку с твиттера на всех российских серверах ping-admin — замедления не вижу.<br>
+Тем временем, на моём домашнем подключении оно сохраняется (для всех доменов, содержащих t co). У меня загрузка картинки занимает 20 секунд.</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="замедление-twitter-в-россии/fa92a67ce0649ec019f249639de75446a39d67e2.png" data-download-href="https://ntc.party/uploads/default/fa92a67ce0649ec019f249639de75446a39d67e2" title="Screenshot_2021-03-10 Бесплатная проверка доступности сайта из различных частей мира Ping-Admin Ru — мониторинг сайтов и се...(2)-fs8"><img src="замедление-twitter-в-россии/fa92a67ce0649ec019f249639de75446a39d67e2_2_112x500.png" alt="Screenshot_2021-03-10 Бесплатная проверка доступности сайта из различных частей мира Ping-Admin Ru — мониторинг сайтов и се...(2)-fs8" data-base62-sha1="zKFz01DAQEXKsZ3ka82CbhGVYLo" width="112" height="500" srcset="замедление-twitter-в-россии/fa92a67ce0649ec019f249639de75446a39d67e2_2_112x500.png, замедление-twitter-в-россии/fa92a67ce0649ec019f249639de75446a39d67e2_2_168x750.png 1.5x, замедление-twitter-в-россии/fa92a67ce0649ec019f249639de75446a39d67e2_2_224x1000.png 2x" data-dominant-color="E7EBE9"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_2021-03-10 Бесплатная проверка доступности сайта из различных частей мира Ping-Admin Ru — мониторинг сайтов и се...(2)-fs8</span><span class="informations">1125×4997 473 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2021-03-10T20:11:19.795Z</td></tr><tr><td>GabbyFreez</td><td><p>Пытаюсь разобраться в теме, а как вы подключаетесь напрямую по IP по HTTPS?<br>
+Миссклик был)</p></td><td>2021-03-10T20:14:55.777Z</td></tr><tr><td>ValdikSS</td><td><p>Почти все сегодняшние тесты делал через curl. Он имеет опцию <code>--resolve</code>, которая присваивает IP-адрес любому домену, позволяя таким образом использовать домен в TLS SNI.<br>
+Также можно просто передавать верный заголовок Host, а в адресе указывать IP.</p>
+<p>Выше в видео есть примеры, посмотрите.</p></td><td>2021-03-10T20:21:15.854Z</td></tr><tr><td>delete-user</td><td><p>извеняюсь, но я правильно понял что по стандарту TLS SNI клиент явно передает домен при начале TLS соединения и именно момент TLS соединения замедляет РКН?</p></td><td>2021-03-10T20:42:38.454Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="delete-user" data-post="59" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/delete-user/48/490_2.png" class="avatar"> delete-user:</div>
+<blockquote>
+<p>я правильно понял что по стандарту TLS SNI клиент явно передает домен при начале TLS соединения</p>
+</blockquote>
+</aside>
+<p>Правильно.</p>
+<aside class="quote no-group" data-username="delete-user" data-post="59" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/delete-user/48/490_2.png" class="avatar"> delete-user:</div>
+<blockquote>
+<p>и именно момент TLS соединения замедляет РКН?</p>
+</blockquote>
+</aside>
+<p>Замедляется вся TCP-сессия (все дальнейшие пакеты в пределах сессии).</p></td><td>2021-03-10T20:48:08.632Z</td></tr><tr><td>GabbyFreez</td><td><p>Вот тут конкретно не могу понять, что происходит, как идёт подключение без SNI, вообще без шифрования?<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="замедление-twitter-в-россии/ed540d20135534b6c1d38143ee2b200f7c77c9ed.jpeg" data-download-href="https://ntc.party/uploads/default/ed540d20135534b6c1d38143ee2b200f7c77c9ed" title="20210310_235832"><img src="замедление-twitter-в-россии/ed540d20135534b6c1d38143ee2b200f7c77c9ed_2_690x99.jpeg" alt="20210310_235832" data-base62-sha1="xRveQGJJfxC6cjfZrnPvTdumZBP" width="690" height="99" srcset="замедление-twitter-в-россии/ed540d20135534b6c1d38143ee2b200f7c77c9ed_2_690x99.jpeg, замедление-twitter-в-россии/ed540d20135534b6c1d38143ee2b200f7c77c9ed_2_1035x148.jpeg 1.5x, замедление-twitter-в-россии/ed540d20135534b6c1d38143ee2b200f7c77c9ed.jpeg 2x" data-dominant-color="121212"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">20210310_235832</span><span class="informations">1280×184 50.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+И блокировка сторонних доменов может быть вызвана неправильно настроенным DPI?<br>
+<img src="замедление-twitter-в-россии/3a379c3eeaf56b2cd38c8e23eae5a32d44292e42.jpeg" alt="20210311_001721" data-base62-sha1="8j0PWO7xngN0CIQetTWyTzrpH1g" width="512" height="347"></p></td><td>2021-03-10T21:13:06.944Z</td></tr><tr><td>ValdikSS</td><td><p>Оно идёт со SNI, на самом деле (я немного соврал). В SNI в этом случае передаётся не домен, а IP-адрес: 192.229.220.133.</p>
+<ol>
+<li>Устанавливается TLS-подключение, в ClientHello SNI передаётся 192.229.220.133.</li>
+<li>Сервер отвечает каким-то сертификатом, неважно каким. curl игнорирует его проверку (опция <code>-k</code>)</li>
+<li>Внутри TLS-сессии, в HTTP-запросе передается правильный домен (<code>Host: video.twimg.com</code>).</li>
+</ol>
+<p>Итого — DPI видит только IP-адрес в SNI, а сервер на этом IP-адресе видит корректный домен в HTTP-запросе.</p></td><td>2021-03-10T21:19:58.076Z</td></tr><tr><td>ValdikSS</td><td><p>Мегафон 4G — замедление любых доменов t co есть прямо сейчас, как минимум, в Московской области.</p></td><td>2021-03-10T21:21:55.095Z</td></tr><tr><td>koderr</td><td><p>Ростелеком Самарская обл. — замедления нет.<br>
+Ростелеком Пермский край перестал замедлять все сайты по маске <code>*t.co*</code>, остался только твиттер.</p></td><td>2021-03-10T21:33:02.627Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>В Питере тоже наблюдаю дурь с <code>*t.co*</code> на мобильном Мегафоне.</p>
+<p>Пару-тройку раз сравнил скорости скачивания одного и того же файла с одного и того же сервера по двум разным DNS-именам:</p>
+<ul>
+<li>
+<a href="https://foot.code.wafl.darkk.net.ru/10M">https://foot.code.wafl.darkk.net.ru/10M</a> - скачивается где-то пять минут</li>
+<li>
+<a href="https://wafl.darkk.net.ru/10M">https://wafl.darkk.net.ru/10M</a> - скачивается единицы секунд</li>
+</ul>
+<p>Справедливости ради отмечу, что в текущую секунду проблема не повсеместная, я потыкал свои старые пробники на домашних подключениямх у десятка разных провайдеров в тройке регионов – нигде не заметил замедления, кроме как на пробнике у <a class="mention" href="/u/valdikss">@ValdikSS</a></p></td><td>2021-03-10T21:43:49.606Z</td></tr><tr><td>T1MOX4(Timofey)</td><td><p>Нашел вот такой сервис, по его версии по маске <a href="http://t.co" rel="noopener nofollow ugc">t.co</a> попало под фильтр почти 3млн доменов.<br>
+<a href="https://index.woorank.com/en/reviews?url=t.co" rel="noopener nofollow ugc">https://index.woorank.com/en/reviews?url=t.co</a></p></td><td>2021-03-10T22:20:18.530Z</td></tr><tr><td>hookz(Talya)</td><td><p>Хорошая находка, но интересуют конечно же RU-владельцы (<a href="https://index.woorank.com/en/reviews?countries=RU&amp;url=t.co" rel="noopener nofollow ugc">https://index.woorank.com/en/reviews?countries=RU&amp;url=t.co</a>)</p></td><td>2021-03-10T22:23:05.622Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Вдохновился идеей Здольникова и сделал чуть более методологически корректный тест в браузере: <a href="https://speed.gulag.link/">https://speed.gulag.link/</a></p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="замедление-twitter-в-россии/4557f919e16a4a2fa85232fcbfda06c0a2707bca.jpeg" data-download-href="https://ntc.party/uploads/default/4557f919e16a4a2fa85232fcbfda06c0a2707bca" title="photo_2021-03-11_03-02-38"><img src="замедление-twitter-в-россии/4557f919e16a4a2fa85232fcbfda06c0a2707bca_2_352x500.jpeg" alt="photo_2021-03-11_03-02-38" data-base62-sha1="9TrqsPdrAhFr8EJG5iMUWUgW8Jk" width="352" height="500" srcset="замедление-twitter-в-россии/4557f919e16a4a2fa85232fcbfda06c0a2707bca_2_352x500.jpeg, замедление-twitter-в-россии/4557f919e16a4a2fa85232fcbfda06c0a2707bca_2_528x750.jpeg 1.5x, замедление-twitter-в-россии/4557f919e16a4a2fa85232fcbfda06c0a2707bca_2_704x1000.jpeg 2x" data-dominant-color="F1F2F2"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">photo_2021-03-11_03-02-38</span><span class="informations">714×1013 42.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Исходники и собранный с помощью <a href="https://twitter.com/bassosimone/">дорогого коллеги</a> бинарь живут на <a href="https://github.com/darkk/ru-twi-ndt7" class="inline-onebox">GitHub - darkk/ru-twi-ndt7: Rapid test for *t.co* throttling</a> Используются домены <code>speed.gulag.link</code> и <code>t.co.speed.gulag.link</code>. Сервер крутится на минимальном Startdust-инстансе в Scaleway, т.е. больше 100 мегабит он не выдаст никогда, но для детекта разницы между одним мегабитом и десятью – сойдёт.</p></td><td>2021-03-11T00:09:41.005Z</td></tr><tr><td>GabbyFreez</td><td><p>Так, для полноты картины опишу свою модель понимания.<br>
+Соединение происходит по следующей схеме:</p>
+<ol>
+<li>Я пишу в строку браузера URL</li>
+<li>Моя система знает IP DNS и передает на него запрос ip сервера под нужным мне доменом, dns возвращает мне нужный ip</li>
+<li>Я зная ip сервера отравляю TCP пакет, в котором данные о типе шифрования<br>
+3.1 Если на ip один домен, то он сразу дает мне сертификат<br>
+3.2 Если на ip много доменов то я в TCP включаю SNI, чтобы  сервер вернул нужный сертификат.</li>
+<li>Я сверяю домен и сертификат.</li>
+<li>Обмениваемся ключами с сервером</li>
+<li>Отправляю шифрованный http запрос</li>
+</ol>
+<p>Если я правильно понял схему, то вопрос, зачем в SNI передавать IP? Мы же игнорируем проверку сертификата, следовательно, можно любую тарабарщину передавать и соединяться, при этом DPI РКН не увидит домена в SNI, а в http тем более, так как он зашифрован в TLS</p></td><td>2021-03-11T05:57:40.524Z</td></tr><tr><td>libneko</td><td><aside class="quote no-group quote-modified" data-username="GabbyFreez" data-post="69" data-topic="907" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/gabbyfreez/48/488_2.png" class="avatar"> GabbyFreez:</div>
+<blockquote>
+<p>Так, для полноты картины опишу свою модель понимания.<br>
+Соединение происходит по следующей схеме:</p>
+<ol>
+<li>Я пишу в строку браузера URL</li>
+<li>Моя система знает IP DNS и передает на него запрос ip сервера под нужным мне доменом, dns его возвращает</li>
+<li>Я зная ip сервера отравляю TCP пакет, в котором данные о типе шифрования<br>
+3.1 Если на ip один домен, то он сразу дает мне сертификат<br>
+3.2 Если на ip много доменов то я в TCP включаю SNI, чтобы сервер вернул нужный сертификат.</li>
+<li>Я сверяю домен и сертификат.</li>
+<li>Обмениваемся ключами с сервером</li>
+<li>Шифрованный http запрос</li>
+</ol>
+<p>Если я правильно понял схему, то вопрос, зачем в SNI передавать IP? Мы же игнорируем проверку сертификата, следовательно, можно любую тарабарщину передавать.</p>
+</blockquote>
+</aside>
+<p>Не совсем. SNI передается современными браузерами всегда, и уже на его основе сервер выдает нам сертификат. Курлом в SNI передается IP чисто потому что курл всегда передает хост в SNI, айпи нужен чтобы в SNI не попал оригинальный домен и сессия не зашейпилась. В дальнейшем уже в HTTP-хедерах передается хост, чтобы конечный веб-сервер верно определил на какой vhost ему пришел запрос, SNI для этого не используется.</p></td><td>2021-03-11T06:04:29.605Z</td></tr><tr><td>libneko</td><td><p>Подсказали простое решение для iOS, которое обходит шейпер: Cloudflare-овский 1.1.1.1 + WARP</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://apps.apple.com/us/app/1-1-1-1-faster-internet/id1423538627">
+  <header class="source">
+
+      <a href="https://apps.apple.com/us/app/1-1-1-1-faster-internet/id1423538627" target="_blank" rel="noopener">App Store</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="замедление-twitter-в-россии/d279afa12de8443dcf1a100dc39524043a2de209_2_690x362.png" class="thumbnail" data-dominant-color="DCD8DC" width="690" height="362"></div>
+
+<h3><a href="https://apps.apple.com/us/app/1-1-1-1-faster-internet/id1423538627" target="_blank" rel="noopener">‎1.1.1.1: Faster Internet</a></h3>
+
+  <p>‎1.1.1.1 w/ WARP – the free app that makes your Internet more private.
+
+1.1.1.1 w/ WARP makes your Internet more private and safer. No one should be able to snoop on what you do on the Internet. We’ve created 1.1.1.1 so that you can connect to the...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-03-11T06:18:27.260Z</td></tr><tr><td>bolvan</td><td><p>tiera SPB<br>
+9:55 11.03.2021</p>
+<p>все по старому. замедление на github user content, на microsoft, reddit<br>
+на твиттер по прежнему быстро. страницы и видео без проблем</p></td><td>2021-03-11T06:56:11.953Z</td></tr><tr><td>libneko</td><td><p>Немного личных наблюдений:</p>
+<ol>
+<li>
+<span class="bbcode-s">http с <code>t.co</code> в хосте не шейпится, только SSL</span> шейпится!</li>
+<li>
+<code>tco</code> (без точки) не шейпится</li>
+<li>Судя по всему, ВСЕ урлы выбираются регуляркой, просто на остальных это не так заметно (вряд ли у кого-то в домене случайно затесается <code>pbs.twimg.com</code>). Проверял на поддомене вида <code>pbs.twimg.com.my.own.domain</code>. Надо посмотреть, к каким еще достаточно коротким доменам у РКН есть претензии</li>
+</ol></td><td>2021-03-11T07:10:22.321Z</td></tr><tr><td>Evg(Evg)</td><td><p>ValdikSS, вы уже знаменитость</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://www.rbc.ru/technology_and_media/10/03/2021/6049043d9a79475bf3296e87">
+  <header class="source">
+      <img src="замедление-twitter-в-россии/7a27141ca75718a961e771549a397aa05fff800b.png" class="site-icon" data-dominant-color="519989" width="32" height="32">
+
+      <a href="https://www.rbc.ru/technology_and_media/10/03/2021/6049043d9a79475bf3296e87" target="_blank" rel="noopener nofollow ugc">РБК</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/362;"><img src="замедление-twitter-в-россии/449cf407421874e0e9bd7473605dc0a7088866ed_2_690x362.jpeg" class="thumbnail" data-dominant-color="E3E9E6" width="690" height="362"></div>
+
+<h3><a href="https://www.rbc.ru/technology_and_media/10/03/2021/6049043d9a79475bf3296e87" target="_blank" rel="noopener nofollow ugc">Эксперты поспорили о проблемах с доступом к RT из-за мер по Twitter</a></h3>
+
+  <p>Ограничения Роскомнадзора в отношении Twitter действительно могли повлиять на работу ресурсов с сочетанием t.co в домене, но вряд ли могли сказаться на доступе к сайтам госорганов, считают эксперты</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-03-11T07:12:27.885Z</td></tr><tr><td>GabbyFreez</td><td><p>Я предполагаю их правило примерно как слева, понятное дело сложнее, и включены еще другие домены, но выглядит как тривиальная ошибка регулярки и игнорирование предварительных правил тестирования.<br>
+<img src="замедление-twitter-в-россии/437f365f729aba278812245de0bc1b82984db1e3.jpeg" alt="photo_2021-03-10_20-19-37" data-base62-sha1="9D6xAKaU2OFROze4UCgFc9h1Coj" width="512" height="347"></p></td><td>2021-03-11T07:40:22.584Z</td></tr><tr><td>StudioMaX</td><td><p>Ради интереса, проверял ли кто-нибудь домены <code>*t.co*</code> через QUIC, т.е. UDP?</p></td><td>2021-03-11T07:45:48.563Z</td></tr><tr><td>libneko</td><td><p>Кажется, шейпится и простой HTTP, без SSL:</p>
+<pre><code class="lang-bash">curl -Lo /dev/null -v http://a.t.co.kanamori.loweffort.media/100MB.bin -k -H "Host: a.t.co.kanamori.loweffort.media"
+</code></pre>
+<p>15 КБ/с</p></td><td>2021-03-11T07:46:13.345Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="libneko" data-post="73" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/libneko/48/46_2.png" class="avatar"> libneko:</div>
+<blockquote>
+<p><code>tco</code> (без точки) не шейпится</p>
+</blockquote>
+</aside>
+<p>точка в regexp это любой символ. пустой символ к точке не относится, поэтому tco не подпадает под <a href="http://t.co">t.co</a>.  подпадает toco, например. проверил на grep -E</p></td><td>2021-03-11T07:46:51.832Z</td></tr><tr><td>libneko</td><td><aside class="quote no-group" data-username="bolvan" data-post="78" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>точка в regexp это любой символ. пустой символ к точке не относится, поэтому tco не подпадает под <a href="http://t.co">t.co</a>. подпадает toco, например. проверил на grep -E</p>
+</blockquote>
+</aside>
+<p>У меня на доменах вроде “taco” не шейпит:</p>
+<pre data-code-wrap="bash"><code class="lang-bash">curl -Lo /dev/null -v https://taco.kanamori.loweffort.media/100MB.bin -k
+</code></pre>
+<p>2-3 МБ/с</p>
+<p>При этом,</p>
+<pre data-code-wrap="bash"><code class="lang-bash">curl -Lo /dev/null -v https://t.co.kanamori.loweffort.media/100MB.bin -k
+</code></pre>
+<p>15 КБ/с</p></td><td>2021-03-11T07:49:49.421Z</td></tr><tr><td>curl</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="62" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>В SNI в этом случае передаётся не домен, а IP-адрес: 192.229.220.133.</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="ValdikSS" data-post="62" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>в ClientHello SNI передаётся 192.229.220.133.</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="libneko" data-post="70" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/libneko/48/46_2.png" class="avatar"> libneko:</div>
+<blockquote>
+<p>Курлом в SNI передается IP чисто потому что курл всегда передает хост в SNI</p>
+</blockquote>
+</aside>
+<p>Nope</p>
+<aside class="onebox githubblob" data-onebox-src="https://github.com/curl/curl/blob/master/lib/vtls/gtls.c#L530">
+  <header class="source">
+
+      <a href="https://github.com/curl/curl/blob/master/lib/vtls/gtls.c#L530" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/curl/curl/blob/master/lib/vtls/gtls.c#L530" target="_blank" rel="noopener nofollow ugc">curl/curl/blob/master/lib/vtls/gtls.c#L530</a></h4>
+
+
+
+    <pre class="onebox"><code class="lang-c">
+      <ol class="start lines" start="520" style="counter-reset: li-counter 519 ;">
+          <li>            config-&gt;CRLfile, gnutls_strerror(rc));</li>
+          <li>      return CURLE_SSL_CRL_BADFILE;</li>
+          <li>    }</li>
+          <li>    else</li>
+          <li>      infof(data, "found %d CRL in %s", rc, config-&gt;CRLfile);</li>
+          <li>  }</li>
+          <li></li>
+          <li>  /* Initialize TLS session as a client */</li>
+          <li>  init_flags = GNUTLS_CLIENT;</li>
+          <li></li>
+          <li class="selected">#if defined(GNUTLS_FORCE_CLIENT_CERT)</li>
+          <li>  init_flags |= GNUTLS_FORCE_CLIENT_CERT;</li>
+          <li>#endif</li>
+          <li></li>
+          <li>#if defined(GNUTLS_NO_TICKETS)</li>
+          <li>  /* Disable TLS session tickets */</li>
+          <li>  init_flags |= GNUTLS_NO_TICKETS;</li>
+          <li>#endif</li>
+          <li></li>
+          <li>  rc = gnutls_init(&amp;gtls-&gt;session, init_flags);</li>
+          <li>  if(rc != GNUTLS_E_SUCCESS) {</li>
+      </ol>
+    </code></pre>
+
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-03-11T08:11:42.670Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Да, я тоже шейпинга на <code>taco</code> не наблюдал. Собственно, оттуда и имя файла <code>https://speed.gulag.link/taco.js</code> и потому в заголовке <code>*t.co*</code> в стиле unix glob, а не regexp <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=9" title=":slight_smile:" class="emoji" alt=":slight_smile:"></p></td><td>2021-03-11T08:14:40.650Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="darkk" data-post="81" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/darkk/48/470_2.png" class="avatar"> darkk:</div>
+<blockquote>
+<p><a href="https://speed.gulag.link/taco.js">https://speed.gulag.link/taco.js</a></p>
+</blockquote>
+</aside>
+<p>Они могут видеть только домен. После / - не могут</p></td><td>2021-03-11T08:25:06.094Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Да, я понимаю. Я про натужную попытку пошутить в имени файла, не более <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=9" title=":slight_smile:" class="emoji" alt=":slight_smile:"></p></td><td>2021-03-11T08:29:34.886Z</td></tr><tr><td>libneko</td><td><p>У меня перестало шейпить адреса, содержащие заблокированные домены.</p>
+<p>В тесте от <a class="mention" href="/u/darkk">@darkk</a> всё ок, на моих собственных поддоменах - аналогично</p>
+<pre><code class="lang-bash">$ curl -Lo /dev/null -v https://pbs.twimg.com.kanamori.loweffort.media/100MB.bin -k
+$ curl -Lo /dev/null -v https://t.co.kanamori.loweffort.media/100MB.bin -k
+</code></pre>
+<p>Оба выдают полную скорость</p></td><td>2021-03-11T09:46:10.222Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Да. В околопровайдерском чате пишут, что около 11 утра по Москве перестала тормозилка тормозить ковровыми бомбардировками по <code>*t.co*</code> и осталась только на твиттере. Можно по логам ndt7 попробовать понять, во сколько именно.</p>
+<p>UPD: по логам <code>speed.gulag.link</code>: где-то между 11:20 и 11:30 по Москве процесс сошёлся: тормозить стали не ≈10…20% запросов а ≈0.5%</p></td><td>2021-03-11T09:58:12.582Z</td></tr><tr><td>ValdikSS</td><td><p>На моём провайдере тоже.</p></td><td>2021-03-11T10:16:11.008Z</td></tr><tr><td>TRI(Дмитрий)</td><td><p>в ТТК скорость норм стала, твиттер тоже грузится шустрее, чем вчера, видео в лент хорошо подгружаются, только если по картинкам нажать увеличить, они долго грузятся.</p></td><td>2021-03-11T10:33:07.427Z</td></tr><tr><td>zhenyolka</td><td><p>Подтверждаю. У меня до 10:30 на теле2 фильтрация работала точно. Сейчас проверил, все ок, режется только твиттер. Но факт того, что они исправляли такой косяк, уложивший много популярных сайтов, целые сутки, это просто пипец конечно.</p></td><td>2021-03-11T11:31:34.430Z</td></tr><tr><td>libneko</td><td><p><a class="mention" href="/u/darkk">@darkk</a> Наверное, нужно как-то более явно на странице указать, что страничка <strong>не</strong> покажет, замедлен ли сам твиттер, только другие домены с <code>t.co</code> в адресе. А то вот:</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="замедление-twitter-в-россии/d41b5b3cb431b8176b7a893bb69a0338f0b64ce8.png" data-download-href="https://ntc.party/uploads/default/d41b5b3cb431b8176b7a893bb69a0338f0b64ce8" title="изображение"><img src="замедление-twitter-в-россии/d41b5b3cb431b8176b7a893bb69a0338f0b64ce8_2_498x500.png" alt="изображение" data-base62-sha1="ugnPJYxomwcgZM7z5nnM1KE6QOI" width="498" height="500" srcset="замедление-twitter-в-россии/d41b5b3cb431b8176b7a893bb69a0338f0b64ce8_2_498x500.png, замедление-twitter-в-россии/d41b5b3cb431b8176b7a893bb69a0338f0b64ce8.png 1.5x, замедление-twitter-в-россии/d41b5b3cb431b8176b7a893bb69a0338f0b64ce8.png 2x" data-dominant-color="898989"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">591×593 62.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2021-03-11T12:37:19.566Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Полностью согласен. Там сейчас вот так: <div class="lightbox-wrapper"><a class="lightbox" href="замедление-twitter-в-россии/6029469019f901c279b2e8f11d16bbe9871f44f9.png" data-download-href="https://ntc.party/uploads/default/6029469019f901c279b2e8f11d16bbe9871f44f9" title="speed-gulag-link-the-last-screenshot 2021-03-11 13-55-57"><img src="замедление-twitter-в-россии/6029469019f901c279b2e8f11d16bbe9871f44f9_2_502x500.png" alt="speed-gulag-link-the-last-screenshot 2021-03-11 13-55-57" data-base62-sha1="dIGgJ8l3IWeagKgROs2UYmllxLH" width="502" height="500" srcset="замедление-twitter-в-россии/6029469019f901c279b2e8f11d16bbe9871f44f9_2_502x500.png, замедление-twitter-в-россии/6029469019f901c279b2e8f11d16bbe9871f44f9_2_753x750.png 1.5x, замедление-twitter-в-россии/6029469019f901c279b2e8f11d16bbe9871f44f9.png 2x" data-dominant-color="E8E8E8"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">speed-gulag-link-the-last-screenshot 2021-03-11 13-55-57</span><span class="informations">769×765 84 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>К сожалению, у меня вчера в ночи не хватило сил сделать “аккуратно” и “красиво” и на скриншоты уже растащили то, что растащили. Да, я сделал шаг вперёд относительно прибора Здольникова, т.к. с некоторых моих точек доступа <a href="https://rknsoset.com/">прибор Владислава</a> давал совершенно бессмысленные показания. Но по факту – не очень далеко ушёл-то <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2021-03-11T12:51:08.725Z</td></tr><tr><td>T1MOX4(Timofey)</td><td><p>Да, тут их кот наплакал к сожалению…<br>
+Найти бы где-то более полную текстовую базу доменов…</p></td><td>2021-03-11T12:51:25.055Z</td></tr><tr><td>libneko</td><td><p>Вечером после работы попробую сделать штуку, которая замеряет именно скорость твиттера</p></td><td>2021-03-11T13:09:46.324Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Так 15 гигабайт пожатого json’а от Rapid7 точно не хватает для поиска доменов? Ссылка же выше: <a href="https://ntc.party/t/twitter/907/38" class="inline-onebox">Замедление Twitter в России - #38 by darkk</a></p></td><td>2021-03-11T13:17:46.418Z</td></tr><tr><td>libneko</td><td><p>Собрал на коленке страничку, которая проверяет замедлен ли непосредственно твиттер: <a href="https://lynx.pink/is-my-twitter-slow-or-what/" class="inline-onebox" rel="noopener nofollow ugc">Is my Twitter slow or what?</a></p>
+<p>Ссылка на гитхаб там же</p></td><td>2021-03-11T15:03:17.454Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Предлагаю добавить тот же файл хотя бы с другого сервера по <code>https</code>. Ну чтоб отсечь клиентов из подвала. И хорошо бы ещё IP клиента (хотя бы с точностью до первых трёх октетов), чтоб по скриншотам было понятно, что за провайдер.</p>
+<p>И в идеале это замариновать в лог на сервер, чтоб было ясно, куда и насколько замедлялся выехала.</p></td><td>2021-03-11T15:08:58.515Z</td></tr><tr><td>libneko</td><td><p>С айпи проблема в том, что у странички нет бекенда. Файл с другого источника сейчас добавлю. По поводу лога - надо подумать где эти логи хранить (у странички все еще нет бекенда)</p></td><td>2021-03-11T15:10:36.791Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p><a class="mention" href="/u/libneko">@libneko</a>, посмотри как я беру IP с RIPEstat в первых строчках <a href="https://speed.gulag.link/taco.js">https://speed.gulag.link/taco.js</a></p>
+<p>Лог – можно лить просто в однопиксельную страничку с данными в query string. Это, конечно, можно вайпнуть, но это всё ещё лучше, чем совсем терять данные. Пусть даже в <code>https://darkk.net.ru/garbage/is-my-twitter-slow-or-what/?ip=1.1.1.1&amp;test=xxx&amp;control=yyy&amp;and=so&amp;on=and&amp;so=forth</code></p></td><td>2021-03-11T15:30:22.671Z</td></tr><tr><td>Pasha_ZZZ</td><td><p>Ростелеком. GoodbyeDPI с опцией --wrong-chksum ускоряет твитор…</p></td><td>2021-03-11T15:49:44.379Z</td></tr><tr><td>libneko</td><td><p>Добавил две контрольные картинки (одна просто с другого сервера, вторая с того же другого сервера, но в домене есть <code>t.co</code>, на всякий случай). С логгированием сейчас что-нибудь придумаю</p></td><td>2021-03-11T16:01:09.502Z</td></tr><tr><td>libneko</td><td><p>Добавил логгирование, кому нужны данные - пишите в телеграм (логин такой же как и ник на форуме) кто вы и зачем они вам.</p></td><td>2021-03-11T16:33:45.793Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="darkk" data-post="85" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/darkk/48/470_2.png" class="avatar"> darkk:</div>
+<blockquote>
+<p>Да. В околопровайдерском чате пишут, что около 11 утра по Москве перестала тормозилка тормозить ковровыми бомбардировками по <code>*t.co*</code> и осталась только на твиттере.</p>
+</blockquote>
+</aside>
+<p><a href="https://arstechnica.com/gadgets/2021/03/a-russian-isp-confirms-roskomnadzors-twitter-blocking-blooper/">Ars Technica confirms the approximate time of unthrottling</a> via an anonymous source at a Russian ISP:</p>
+<blockquote>
+<p>According to our source, the mistaken block string was finally corrected with proper match limiting at around 4 am Eastern time today—Twitter’s <code>t.co</code> is still affected as intended, but Microsoft, Russia Today, and other “collateral damage” sites can once again be browsed at full speed.</p>
+</blockquote>
+<p>04:00 EST = 09:00 UTC = 12:00 MSK.</p>
+<p>They also give some information about the hardware:</p>
+<blockquote>
+<p>Our source tells us that Roskomnadzor distributes to all Russian ISPs a hardware package that must be connected just behind that ISP’s BGP core router. At their small ISP, Roskomnadzor’s package includes an <a href="https://teleser.ru/products/ecofilter4080">EcoFilter 4080</a> deep package inspection system, a pair of Russian-made 10Gbps aggregation switches, and two Huawei servers. According to our source, this hardware is “massive overkill” for its necessary function and their experienced traffic level—possibly because “at some point in time, government planned to capture all the traffic there is.”</p>
+<p>Currently, the Roskomnadzor package does basic filtration for the list of banned resources—and, as of this week, has begun on-the-fly modifications of DNS requests as well. The DNS mangling also caused problems when first enabled—according to our source, YouTube DNS requests were broken for most of a day. Roskomnadzor eventually plans to require all Russian ISPs to replace the real root DNS servers with <a href="https://en.wikipedia.org/wiki/Alternative_DNS_root#Russian_National_Domain_Name_System">its own</a>, but that project has met with resistance and difficulties.</p>
+</blockquote>
+<p>I hadn’t heard about this “on-the-fly modification of DNS queries” before.</p></td><td>2021-03-11T17:30:22.288Z</td></tr><tr><td>libneko</td><td><p>Судя по логам, по ipv6 тоже шейпят</p></td><td>2021-03-11T18:24:38.706Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="tango" data-post="101" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"> tango:</div>
+<blockquote>
+<p>and, as of this week, has begun on-the-fly modifications of DNS requests as well</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="tango" data-post="101" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"> tango:</div>
+<blockquote>
+<p>I hadn’t heard about this “on-the-fly modification of DNS queries” before.</p>
+</blockquote>
+</aside>
+<p>I didn’t perform any DNS tests recently, but nobody told me ISPs have done anything new last days. DNS hijacking is enabled on some ISPs, but not that many.</p></td><td>2021-03-11T20:36:56.211Z</td></tr><tr><td>Lensws(Lens Wile Scan)</td><td><p><a href="https://lynx.pink/is-my-twitter-slow-or-what/" class="onebox" target="_blank" rel="noopener nofollow ugc">https://lynx.pink/is-my-twitter-slow-or-what/</a><br>
+≈ 89.16 kbps, 34 секунд(-а)<br>
+Скорее всего, твиттер у вас: замедлен<br>
+Контроль 1 (эта же картинка с другого сервера): 4854.37 kbps, 1 секунд(-а)<br>
+Контроль 2 (эта же картинка с другого сервера, в адресе которого есть <a href="http://t.co" rel="noopener nofollow ugc">t.co</a>): 3942.18 kbps, 1 секунд(-а)<br>
+Ростелеком, Мос.обл.</p></td><td>2021-03-11T22:06:44.875Z</td></tr><tr><td>iamoverit(Илья)</td><td><p>Есть проблема - если браузер по таймауту бросил грузить картинку то результаты не отображаются вовсе, и возможно не фиксируются в логе.</p></td><td>2021-03-11T22:45:42.062Z</td></tr><tr><td>iamoverit(Илья)</td><td><p>на ТТК данная опция тоже помогает, без нее замедляемые загружаются на столько долго что таймаутятся браузером</p></td><td>2021-03-11T22:48:31.329Z</td></tr><tr><td>iamoverit(Илья)</td><td><blockquote>
+<p>iamoverit@DESKTOP:~$ curl <a href="https://abs.twimg.com/sticky/illustrations/lohp_1302x955.png?nocache=0.6617158852009757" rel="noopener nofollow ugc">https://abs.twimg.com/sticky/illustrations/lohp_1302x955.png?nocache=0.6617158852009757</a> --output out.file<br>
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current<br>
+Dload  Upload   Total   Spent    Left  Speed<br>
+8  373k    8 32768    0     0    448      0  0:14:14  0:01:13  0:13:01     0<br>
+curl: (56) OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 104</p>
+</blockquote>
+<p>оператор ТТК, я правильно понимаю что скорость порезана до 0?</p></td><td>2021-03-11T22:53:23.514Z</td></tr><tr><td>Pasha_ZZZ</td><td><p>А у кого-нибудь есть хотя бы неполных список замедляемых хостов? Чтобы добавить их к domains-export.txt с антизапрета.</p></td><td>2021-03-12T03:28:52.486Z</td></tr><tr><td>KuZia495(Anya Drobott)</td><td><p>Нет проблем через IPv6.<br>
+Ростелеком-Москва.</p></td><td>2021-03-12T05:33:57.090Z</td></tr><tr><td>libneko</td><td><p>Yota, судя по всему, положила на всё это и ничего не шейпит. Как минимум на 3 устройствах проверено из разных регионов. Но при этом есть сообщения и об обратном, что… интересно</p></td><td>2021-03-12T05:55:59.058Z</td></tr><tr><td>herenickname(Sergey)</td><td><p>Yota LTE Москва, только что:</p>
+<h3>≈ 110.64 kbps, 27 секунд(-а)</h3>
+<p>Скорее всего, твиттер у вас: <strong><strong>замедлен</strong></strong></p></td><td>2021-03-12T07:16:49.139Z</td></tr><tr><td>ValdikSS</td><td><p>Сделал первое сообщение темы вики-постом, дополняйте, если есть чем.</p></td><td>2021-03-12T11:38:50.409Z</td></tr><tr><td>ursamajoris</td><td><p>Я правильно понимаю, что замедление можно обойти используя браузер с поддержкой eSNI (Firefox) для доменов у которых включена поддержка eSNI?</p></td><td>2021-03-12T12:54:07.151Z</td></tr><tr><td>libneko</td><td><aside class="quote no-group" data-username="ursamajoris" data-post="113" data-topic="907" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/8baadc/48.png" class="avatar"> ursamajoris:</div>
+<blockquote>
+<p>Я правильно понимаю, что замедление можно обойти используя браузер с поддержкой eSNI (Firefox) для доменов у которых включена поддержка eSNI?</p>
+</blockquote>
+</aside>
+<ol>
+<li>eSNI теперь ECH</li>
+<li>Мне не известен ни один домен твиттера, у которого оно настроено</li>
+</ol></td><td>2021-03-12T12:55:16.981Z</td></tr><tr><td>Pasha_ZZZ</td><td><p>–wrong-chksum уже не ускоряет, видимо поправили…</p></td><td>2021-03-12T16:04:29.844Z</td></tr><tr><td>GabbyFreez</td><td><p>Софтина от Сколково для провайдеров не умеет в регулярки, видимо и у ркн тоже самое было<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="замедление-twitter-в-россии/1bb0b961bcfeb93a22a618f9dfb85980fe4af004.jpeg" data-download-href="https://ntc.party/uploads/default/1bb0b961bcfeb93a22a618f9dfb85980fe4af004" title="Screenshot_20210312-230908"><img src="замедление-twitter-в-россии/1bb0b961bcfeb93a22a618f9dfb85980fe4af004_2_281x500.jpeg" alt="Screenshot_20210312-230908" data-base62-sha1="3WXwkqgKZgH17gzoRLbFWD8auSE" width="281" height="500" srcset="замедление-twitter-в-россии/1bb0b961bcfeb93a22a618f9dfb85980fe4af004_2_281x500.jpeg, замедление-twitter-в-россии/1bb0b961bcfeb93a22a618f9dfb85980fe4af004_2_421x750.jpeg 1.5x, замедление-twitter-в-россии/1bb0b961bcfeb93a22a618f9dfb85980fe4af004_2_562x1000.jpeg 2x" data-dominant-color="E2E4E4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20210312-230908</span><span class="informations">1080×1920 477 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div> <div class="lightbox-wrapper"><a class="lightbox" href="замедление-twitter-в-россии/2a2e5993ef1b9a0bc709066030ef670e740ecb32.jpeg" data-download-href="https://ntc.party/uploads/default/2a2e5993ef1b9a0bc709066030ef670e740ecb32" title="Screenshot_20210312-230933"><img src="замедление-twitter-в-россии/2a2e5993ef1b9a0bc709066030ef670e740ecb32_2_281x500.jpeg" alt="Screenshot_20210312-230933" data-base62-sha1="619mc7c0zYh5ubyh2wIuVJWWYQW" width="281" height="500" srcset="замедление-twitter-в-россии/2a2e5993ef1b9a0bc709066030ef670e740ecb32_2_281x500.jpeg, замедление-twitter-в-россии/2a2e5993ef1b9a0bc709066030ef670e740ecb32_2_421x750.jpeg 1.5x, замедление-twitter-в-россии/2a2e5993ef1b9a0bc709066030ef670e740ecb32_2_562x1000.jpeg 2x" data-dominant-color="A2C1CE"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20210312-230933</span><span class="informations">1080×1920 136 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p><aside class="onebox pdf" data-onebox-src="https://rdp.ru/wp-content/uploads/ENAT_UserGuide.pdf">
+  <header class="source">
+
+      <a href="https://rdp.ru/wp-content/uploads/ENAT_UserGuide.pdf" target="_blank" rel="noopener nofollow ugc">rdp.ru</a>
+  </header>
+
+  <article class="onebox-body">
+    <a href="https://rdp.ru/wp-content/uploads/ENAT_UserGuide.pdf" target="_blank" rel="noopener nofollow ugc"><span class="pdf-onebox-logo"></span></a>
+
+<h3><a href="https://rdp.ru/wp-content/uploads/ENAT_UserGuide.pdf" target="_blank" rel="noopener nofollow ugc">ENAT_UserGuide.pdf</a></h3>
+
+  <p class="filesize">2.15 MB</p>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-03-12T20:13:39.441Z</td></tr><tr><td>Dredd</td><td><p>Тут подумалось (по поводу nfqws/gdpi), а будут ли попадать замедленные сайты в чёрный список и если будут (пока в блеклисте GDPI их особо не видно), то разумно ли их дополнительно прогонять по тем же алгоритмам, что и сайты, блокируемые DPI ? Ведь по факту для подобных случаев нужно будет использовать иные приёмы и их взаимодействия с блокировочными приёмами теоретически может вызвать конфликт или неадекватную реакцию сервера например. Может стоит использовать отдельный список ? Типа slow-list ?  Плюс неясно, на основе чего он будет строиться, если будет происходить так,  как при замедления твиттера (я про *<a href="http://t.co" rel="noopener nofollow ugc">t.co</a>*).т.к. в таком случае любой блеклист теряет смысл.</p></td><td>2021-03-14T03:42:15.639Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="Pasha_ZZZ" data-post="115" data-topic="907" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/p/dbc845/48.png" class="avatar"> Pasha_ZZZ:</div>
+<blockquote>
+<p>–wrong-chksum уже не ускоряет, видимо поправили…</p>
+</blockquote>
+</aside>
+<p>wrong checksum не пропускается роутерами с большинством прошивок. openwrt пропускает</p></td><td>2021-03-16T16:44:17.001Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="Dredd" data-post="117" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dredd/48/518_2.png" class="avatar"> Dredd:</div>
+<blockquote>
+<p>Тут подумалось (по поводу nfqws/gdpi), а будут ли попадать замедленные сайты в чёрный список и если будут (пока в блеклисте GDPI их особо не видно),</p>
+</blockquote>
+</aside>
+<p>Замедленные сайты не попадут ни в какой лист, потому что замедление выполняется не провайдерами, а через ТСПУ. Будет все непрозрачно. Списки придется руками делать.<br>
+Пока для slow нужен всего лишь split. Он обычно не конфликтует с другими стратегиями обхода, в nfqws возможно сочетание с fake через комбо<br>
+Я пока что вношу в юзер лист, и оно автоматически добавляется в ipset<br>
+Если вдруг будет конфликт, значит надо запускать отдельную стратегию и копию nfqws или tpws.<br>
+С моими скриптами это делается через custom</p></td><td>2021-03-16T16:46:23.267Z</td></tr><tr><td>ValdikSS</td><td><p>У меня фейковые пакеты не помогают обойти замедление, а фрагментация ClientHello уменьшением Window Size работает.</p></td><td>2021-03-16T16:50:27.848Z</td></tr><tr><td>Pasha_ZZZ</td><td><p>Тогда странно про “большинство”. У меня ддврт тоже пропускает</p></td><td>2021-03-16T16:55:21.935Z</td></tr><tr><td>bolvan</td><td><p>Имелось в виду, что linux по умолчанию не пропускает<br>
+Чтобы пропускал надо сделать так : sysctl -w net.netfilter.nf_conntrack_checksum=0<br>
+Во многих заводских это не сделано</p></td><td>2021-03-16T17:06:18.322Z</td></tr><tr><td>JIPCOROD</td><td><p>в городе Владивосток, не на мегафоне (3|2 секунды), ни на билайне (2|1) не замедленно. Вау! На проводном и подавно меньше секунды, 3 382.19 kbps. А вот пинг естественно зверские 127 мс</p></td><td>2021-03-17T01:59:51.905Z</td></tr><tr><td>gvitalik(Vitaliy)</td><td><p>Заметил, что иногда включают замедление для отдельных поддоменов, так, например, загрузка с адреса<br>
+<a href="https://abs.twimg.com/sticky/illustrations/lohp_1302x955.png?nocache=" rel="noopener nofollow ugc">https://abs.twimg.com/sticky/illustrations/lohp_1302x955.png?nocache=</a>… (используется в <a href="https://lynx.pink/is-my-twitter-slow-or-what/" class="inline-onebox" rel="noopener nofollow ugc">Is my Twitter slow or what?</a>) работает быстро.<br>
+При этом загрузка с <a href="http://pbs.twimg.com" rel="noopener nofollow ugc">pbs.twimg.com</a> в том же браузере тормозит. Например, вот такая ссылка вчера тормозила<br>
+<a href="https://pbs.twimg.com/media/EwiDDG5XAAsvqyT?format=jpg&amp;name=medium" rel="noopener nofollow ugc">https://pbs.twimg.com/media/EwiDDG5XAAsvqyT?format=jpg&amp;name=medium</a><br>
+сегодня все с ней нормально.</p></td><td>2021-03-17T07:11:38.711Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Сегодня в 17:40 наблюдал на МТС в Питере отсутствие замедления по <code>abs.twimg.com</code>. В 19:00 всё ещё не было. Переподключил устройство – замедление вернулось. Видимо, на мобильных “брасах” тоже не на 100% замедлялка замедляет %)</p></td><td>2021-03-17T16:08:29.713Z</td></tr><tr><td>Dredd</td><td><aside class="quote no-group" data-username="bolvan" data-post="119" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Замедленные сайты не попадут ни в какой лист, потому что замедление выполняется не провайдерами, а через ТСПУ. Будет все непрозрачно.</p>
+</blockquote>
+</aside>
+<p>Это плохо. Особенно в случае GDPI. Там без блеклиста ломается/лагает много сайтов, а чтобы самому составить доп.блеклист по инфраструктуре твиттера надо быть докой в этом деле. А я увы не таков. А если замедлят что-то ещё помимо таиттера, так вообще можно сушить вёсла.</p>
+<aside class="quote no-group" data-username="bolvan" data-post="119" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Пока для slow нужен всего лишь split. Он обычно не конфликтует с другими стратегиями обхода, в nfqws возможно сочетание с fake через комбо</p>
+</blockquote>
+</aside>
+<p>вроде добавка опции</p>
+<pre><code class="lang-auto">--dpi-desync=split2 </code></pre>
+<p>к текущему набору</p>
+<pre><code class="lang-auto">--dpi-desync=fake,split --dpi-desync-ttl=4 --hostspell=hoSt</code></pre>
+<p>проблем на заблокированных сайтах не вызвала, но нужен блеклист &gt;_&lt; дабы не было проблем на НЕ блокированных.</p>
+<aside class="quote no-group" data-username="bolvan" data-post="119" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Я пока что вношу в юзер лист, и оно автоматически добавляется в ipset</p>
+</blockquote>
+</aside>
+<p>Он где-нибудь выложен публично ? Просто тогда докину его в свой скрипт обновления блеклиста.</p></td><td>2021-03-17T20:16:35.201Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="Dredd" data-post="126" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dredd/48/518_2.png" class="avatar"> Dredd:</div>
+<blockquote>
+<p>вроде добавка опции</p>
+<pre><code class="lang-auto">--dpi-desync=split2 
+</code></pre>
+<p>к текущему набору</p>
+<pre><code class="lang-auto">--dpi-desync=fake,split --dpi-desync-ttl=4 --hostspell=hoSt
+</code></pre>
+</blockquote>
+</aside>
+<p>Это не нужно и не будет иметь эффекта. fake, split  достаточно<br>
+Против замедления скорости отдельных ресурсов работает сплит запроса на 2 части любым способом : nfqws/dvtws --dpi-desync=split2 или tpws --split-pos<br>
+При использовании fake для обхода блокировок fake заменяем на fake,split2<br>
+split, disorder, disorder2 тоже работает, но это overkill само по себе. если в вашей стратегии они уже есть, то ограничения скорости тоже снимутся</p>
+<aside class="quote no-group" data-username="Dredd" data-post="126" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dredd/48/518_2.png" class="avatar"> Dredd:</div>
+<blockquote>
+<p>Он где-нибудь выложен публично ?</p>
+</blockquote>
+</aside>
+<pre><code>twitter.com
+t.co
+abs.twimg.com
+pbs.twimg.com
+api.twitter.com
+</code></pre>
+<p>Берем fox или chromium, жмем F12, загружаем ресурс, смотрим к каким доменам идет обращение</p></td><td>2021-03-18T06:18:31.492Z</td></tr><tr><td>ValdikSS</td><td><p>У меня сегодня весь день твиттер работает без замедлений на проводном канале.</p></td><td>2021-03-19T20:20:56.516Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Тут <a class="mention" href="/u/libneko">@libneko</a> справедливо отметил, что тормозит не только <code>twitter.com</code>, но весь <code>*twitter.com</code>. Я по такому поводу сделал ещё один тест с <code>kakbytwitter.com</code>. Результаты в замедленном твиттере: <a href="https://twitter.com/mathemonkey/status/1376596348557004807" class="inline-onebox">x.com</a></p>
+<p><a href="https://kakbytwitter.com/" class="onebox" target="_blank" rel="noopener">https://kakbytwitter.com/</a></p></td><td>2021-03-29T18:11:55.190Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Сделал из логов выборку по IP адресам из RU:</p>
+<ul>
+<li>в 24% из 8 000 экспериментов на <code>speed.gulag.link</code> ошибочно тротлили <code>*t.co*</code> (по времени отсечка &lt; 11:30 11 марта)</li>
+<li>в 30% из 72 000 экспериментов на <code>lynx.pink</code> тротлили <code>abs.twimg.com</code>
+</li>
+</ul>
+<p>В 1 600 экспериментах на <code>kakbytwitter.com</code> цифры того же порядка (без поправки на RU) – ошибочно замедлялось где-то около 25% подключений.</p></td><td>2021-03-30T15:31:17.872Z</td></tr><tr><td>ApprO</td><td><p>Интересный  момент  с  торможением  Twitter,  тормозится  в  браузере  Maxthon 6  с  VPN-расширением  и  без  расширения, если  не  ранние  беты  с  настройками  нутра  на  английском. Нутро  на  английском  и  VPN-расширение  не  нужно, никакого  торможения. На  Maxthon 5 и 4  тоже  ничего  не  тормозит  без  VPN - прокси.<br>
+<a href="https://www.youtube.com/watch?v=BoFTJEtbu-o" rel="noopener nofollow ugc">https://www.youtube.com/watch?v=BoFTJEtbu-o</a></p></td><td>2021-03-30T20:04:32.095Z</td></tr><tr><td>ValdikSS</td><td><p>Дамп трафика даст гораздо больше, чем видеозапись.</p><aside class="onebox githubfolder">
+  <header class="source">
+      <img src="https://github.githubassets.com/favicons/favicon.svg" class="site-icon" width="32" height="32">
+      <a href="https://github.com/ValdikSS/GoodbyeDPI/wiki/%D0%9A%D0%B0%D0%BA-%D1%81%D0%B4%D0%B5%D0%BB%D0%B0%D1%82%D1%8C-%D0%B4%D0%B0%D0%BC%D0%BF-%D1%82%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0-%D0%B2-Wireshark" target="_blank" rel="noopener">github.com</a>
+  </header>
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:400/400;"><img src="https://avatars.githubusercontent.com/u/3054729?s=400&amp;amp;v=4" class="thumbnail" width="400" height="400"></div>
+
+<h3><a href="https://github.com/ValdikSS/GoodbyeDPI/wiki/%D0%9A%D0%B0%D0%BA-%D1%81%D0%B4%D0%B5%D0%BB%D0%B0%D1%82%D1%8C-%D0%B4%D0%B0%D0%BC%D0%BF-%D1%82%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0-%D0%B2-Wireshark" target="_blank" rel="noopener">ValdikSS/GoodbyeDPI</a></h3>
+
+<p><a href="https://github.com/ValdikSS/GoodbyeDPI/wiki/%D0%9A%D0%B0%D0%BA-%D1%81%D0%B4%D0%B5%D0%BB%D0%B0%D1%82%D1%8C-%D0%B4%D0%B0%D0%BC%D0%BF-%D1%82%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0-%D0%B2-Wireshark" target="_blank" rel="noopener">%D0%9A%D0%B0%D0%BA-%D1%81%D0%B4%D0%B5%D0%BB%D0%B0%D1%82%D1%8C-%D0%B4%D0%B0%D0%BC%D0%BF-%D1%82%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0-%D0%B2-Wireshark</a></p>
+
+  <p><span class="label1">GoodbyeDPI—Passive Deep Packet Inspection blocker and Active DPI circumvention utility (for Windows)</span></p>
+
+  </article>
+  <div class="onebox-metadata">
+    
+    
+  </div>
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-03-31T22:56:13.465Z</td></tr><tr><td>libneko</td><td><p>Вот уже несколько дней наблюдаю забавное: троттлится у меня 50/50, в половине случаев замедление есть, в половине нет. Проверяю курлом, провайдер Дом.ру, Красноярск</p></td><td>2021-04-01T09:18:30.683Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>7 суток ареста дали четвёрке, которая вышла протестовать против замедления твиттера с факелами и старыми флагами “Роскомнадзора” времён “первой телеграмной войны”:</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://zona.media/news/2021/04/01/twitter">
+  <header class="source">
+      <img src="замедление-twitter-в-россии/d9bd4a4ae4714861476558f75732b7f30cc1d81c.png" class="site-icon" data-dominant-color="363636" width="16" height="16">
+
+      <a href="https://zona.media/news/2021/04/01/twitter" target="_blank" rel="noopener">Медиазона</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="замедление-twitter-в-россии/ec5b4c22a867e63d557d72526458d4ff271c624f_2_690x362.jpeg" class="thumbnail" data-dominant-color="303030" width="690" height="362"></div>
+
+<h3><a href="https://zona.media/news/2021/04/01/twitter" target="_blank" rel="noopener">В Петербурге арестовали четверых участников шествия против замедления твиттера</a></h3>
+
+  <p>Красногвардейский районный суд Петербурга арестовал четверых участников акции против замедления твиттера по требованию Р...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-04-01T20:29:07.500Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="darkk" data-post="129" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/darkk/48/470_2.png" class="avatar"> darkk:</div>
+<blockquote>
+<p>тормозит не только <code>twitter.com</code>, но весь <code>*twitter.com</code></p>
+</blockquote>
+</aside>
+<p>Исправили.</p></td><td>2021-04-02T16:59:53.987Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>Да, последнее “замедленное” измерение на <code>kakbytwitter.com</code> датировано 2 апреля, 7:32 утра по Москве, оно было с Московской Yota (94.25.175.0/24).</p></td><td>2021-04-03T11:59:44.237Z</td></tr><tr><td>ApprO</td><td><p>Отправил  Вам  дампы  на  почту  <a href="mailto:iam@valdikss.org.ru">iam@valdikss.org.ru</a></p></td><td>2021-04-03T20:27:40.804Z</td></tr><tr><td>libneko</td><td><p>Детальный отчет по замедлению твиттера:</p>
+<p><a href="https://throttletwitter.com/" class="onebox" target="_blank" rel="noopener">https://throttletwitter.com/</a></p></td><td>2021-04-07T02:25:10.122Z</td></tr><tr><td>57ar7up(Dmitry Streltsov)</td><td><p>Непонятно, есть ли сейчас на Ростелекоме на Windows 10 рабочий способ обхода с GoodbyeDPI или другими прогами? wrong-chksum уже не работает</p></td><td>2021-04-09T13:32:50.990Z</td></tr><tr><td>ValdikSS</td><td><p>Режим <code>-1</code> по умолчанию обходит замедление.</p></td><td>2021-04-09T13:38:57.611Z</td></tr><tr><td>koderr</td><td><p>Случайно заметил сегодня, что троттлится img.itch.zone (превьюшки игр с <a href="http://itch.io" rel="noopener nofollow ugc">itch.io</a>)<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="замедление-twitter-в-россии/3c23453b5e91f63bdbd6850724670215248eb8b1.png" data-download-href="https://ntc.party/uploads/default/3c23453b5e91f63bdbd6850724670215248eb8b1" title="1234"><img src="замедление-twitter-в-россии/3c23453b5e91f63bdbd6850724670215248eb8b1_2_690x381.png" alt="1234" data-base62-sha1="8A0djEtN0cbtY2NMaK5Gd5Ye4Qp" width="690" height="381" srcset="замедление-twitter-в-россии/3c23453b5e91f63bdbd6850724670215248eb8b1_2_690x381.png, замедление-twitter-в-россии/3c23453b5e91f63bdbd6850724670215248eb8b1_2_1035x571.png 1.5x, замедление-twitter-в-россии/3c23453b5e91f63bdbd6850724670215248eb8b1_2_1380x762.png 2x" data-dominant-color="CBCBD0"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">1234</span><span class="informations">1579×873 67.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="замедление-twitter-в-россии/b07e4b98459661e59f2e03e857783f6783b5dab6.png" data-download-href="https://ntc.party/uploads/default/b07e4b98459661e59f2e03e857783f6783b5dab6" title="1235"><img src="замедление-twitter-в-россии/b07e4b98459661e59f2e03e857783f6783b5dab6.png" alt="1235" data-base62-sha1="pbkCvWRk6CkgUnL3hUlLr2Oosg6" width="690" height="153" data-dominant-color="0A0B0B"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">1235</span><span class="informations">1246×278 17.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Если тот же прокси включить в браузере, то картинки грузятся моментально, конечно же.</p>
+<p>Edit: на следующий день всё нормализовалось.</p></td><td>2021-05-09T18:15:44.645Z</td></tr><tr><td>libneko</td><td><p>Датасет измерений со странички доступен вот тут: <a href="http://github.com/4ndv/russia-twitter-throttle" rel="noopener nofollow ugc">github.com/4ndv/russia-twitter-throttle</a></p></td><td>2021-05-24T13:54:48.122Z</td></tr><tr><td>ValdikSS</td><td><p><a href="http://rkn.gov.ru/news/rsoc/news73632.htm" class="onebox" target="_blank" rel="noopener">http://rkn.gov.ru/news/rsoc/news73632.htm</a></p>
+<blockquote>
+<p>По итогам проверки, с учётом предпринятых администрацией соцсети усилий, принято решение не блокировать сервис Twitter, снять ограничения доступа в фиксированных сетях (соответственно, связанных с ними сетях Wi-Fi), сохранив замедление трафика Twitter на мобильных устройствах.<br>
+Время публикации: 17.05.2021 17:00</p>
+</blockquote></td><td>2021-05-24T19:34:51.700Z</td></tr><tr><td>tango</td><td><blockquote>
+<p>По итогам проверки, с учётом предпринятых администрацией соцсети усилий, принято решение не блокировать сервис Twitter, снять ограничения доступа в фиксированных сетях (соответственно, связанных с ними сетях Wi-Fi), сохранив замедление трафика Twitter на мобильных устройствах.</p>
+</blockquote>
+<blockquote>
+<p><em>Based on the results of this inspection and taking into account the efforts made by the administration of the social network, it was decided not to block the Twitter service and to remove access restrictions on fixed networks and associated Wi-Fi networks while maintaining the slowdown of Twitter traffic on mobile devices.</em></p>
+</blockquote>
+<p>I don’t fully understand this. Does it indicate a slight relaxing of restrictions, removing throttling on fixed and wi-fi networks, but continuing to throttle mobile networks; or is it mostly a continuation of the current situation, because not all fixed and wi-fi networks were throttled anyway? The news article <a href="https://www.themoscowtimes.com/2021/05/17/twitter-a73926">Russia Says Won’t Block Twitter, Will Keep Throttling Speeds</a> calls it a “partial rollback,” so I guess it is the former case. The fixed/mobile split just seems like a weird policy to enforce, seems more like a cover for technical/logistical limitations on RKN’s side.</p>
+<p>Has the <a href="https://censoredplanet.org/throttling">Censored Planet project</a> continued to do measurements since 2021-05-17? Is a cessation of throttling on fixed lines visible in the data?</p></td><td>2021-05-27T16:19:22.246Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="tango" data-post="144" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"> tango:</div>
+<blockquote>
+<p>I don’t fully understand this. Does it indicate a slight relaxing of restrictions, removing throttling on fixed and wi-fi networks, but continuing to throttle mobile networks; or is it mostly a continuation of the current situation, because not all fixed and wi-fi networks were throttled anyway?</p>
+</blockquote>
+</aside>
+<p>I don’t fully get it as well, but from what it says, it means that all Twitter restrictions are now lifted on wired networks, but are still applied to mobile.<br>
+Why? No idea.</p></td><td>2021-06-02T07:27:56.391Z</td></tr><tr><td>Dredd</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="145" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>I don’t fully get it as well, but from what it says, it means that all Twitter restrictions are now lifted on wired networks, but are still applied to mobile.<br>
+Why? No idea.</p>
+</blockquote>
+</aside>
+<p>А мне блокировка в мобильных  сетей показалась вполне очевидной. Сделав послабления для фиксированных и wi-fi сетей власти как-бы показали, что раз твиттер идёт им на встречу, то они тоже идут на встречу твиттеру, слегка откручивая гайки. А дабы тот был более расторопен и сговорчив относительно их требований, они оставляют под замедлением мобильный интернет, через который в сторону соцсети идёт куда бОльший траффик, нежели с десктопов. Как жирный - жирный  намёк на то, что с ними ещё “не закончили” и к ним ещё есть притензии.</p></td><td>2021-06-02T13:32:40.270Z</td></tr><tr><td>ApprO</td><td><p>Только  вчера (03.06.21)  попробовал  поставить  последний  официальный  релиз  Maxthon 6  V6.1.2.1000 (Build 0508)  и  также идёт  замедление, попробовал  поставить оригинальный  Chrome и  идёт  такое  же  торможение. Пошёл  шляться  в  mx://flags/ ,  нашёл  -  Hardware-accelerated video decode,  отключил, торможение  прошло.  То  же  попробовал  в  Chrome  и  опять  тормоза  прошли. Интернет  по  проводам.</p></td><td>2021-06-04T18:47:59.464Z</td></tr><tr><td>Vitas96</td><td><p>В антизапрет не будет добавляться? Не понятно, как избавиться от замедления, если этот самый антизапрет активирован на мобильнике</p></td><td>2021-08-02T10:04:27.624Z</td></tr><tr><td>ValdikSS</td><td><p>Не будет. На каком операторе присутствует замедление?</p></td><td>2021-08-02T10:43:36.341Z</td></tr><tr><td>Vitas96</td><td><p>Мтс, хмао, нижневартовск</p></td><td>2021-08-02T11:28:54.933Z</td></tr><tr><td>0ka(0ka)</td><td><p>Мобильный мегафон северо-запад, сейчас захожу на твиттер, и он грузится быстро! Неделю назад точно был замедлен.</p></td><td>2021-10-05T23:01:47.469Z</td></tr><tr><td>0ka(0ka)</td><td><p>сейчас опять замедлен</p></td><td>2021-10-10T00:50:12.116Z</td></tr><tr><td>kstrmv</td><td><p>Какие перспективы замедления интернета в России в целом, ограничения скорости к сайтам вне ру-сегмента? Это ведь возможно? (<br>
+С этим ничего не сделаешь, обойти нельзя будет?</p></td><td>2022-01-16T16:44:29.138Z</td></tr><tr><td>libneko</td><td><p>Зависит от аггресивности мер, но не думаю, что большинству российского бизнеса это будет легко прожевать. Многие так или иначе пользуются зарубежными облаками и сервисами, в одну минуту их не заменить</p></td><td>2022-01-16T18:19:57.855Z</td></tr><tr><td>hxss</td><td><p>Подскажите, уже есть сколько нибудь высокоуровневое решение для обхода замедления твиттера на линуксе? Чтобы поставил пакет, активировал сервис и тормоза ушли?</p></td><td>2022-01-16T23:38:49.247Z</td></tr><tr><td>ValdikSS</td><td><p>Вы используете мобильный интернет, или где-то на проводном всё ещё замедляется?<br>
+Можете попробовать <a href="https://ntc.party/c/community-software/zapret-antidpi/20">zapret</a>, но для неподготовленного пользователя у него высокий порог входа.</p></td><td>2022-01-16T23:45:44.946Z</td></tr><tr><td>hxss</td><td><p>Домашний интернет таттелком(Казань). nfqws поставил из аура, запустил со split2, а потом понял что на него как то надо перенаправлять пакеты, а как это делать с моим нетворк манагером не представляю. Плюс надо же иметь список доменов которые потенциально замедляются?</p></td><td>2022-01-16T23:59:18.581Z</td></tr><tr><td>hxss</td><td><p>Теле2 на мобильнике кстати тоже замедляет</p></td><td>2022-01-17T00:01:27.598Z</td></tr><tr><td>zinoid</td><td><p><a class="mention" href="/u/hxss">@hxss</a> В FoxyProxy можно вписать быстрые прокси для серверов твиттера.<br>
+Для void linux норм решение.</p></td><td>2022-01-17T00:14:17.283Z</td></tr><tr><td>ValdikSS</td><td><pre><code class="lang-auto">iptables -t mangle -I POSTROUTING -o &lt;внешний_интерфейс&gt; -p tcp -m multiport --dports 80,443 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:4 -m mark ! --mark 0x40000000/0x40000000 -j NFQUEUE --queue-num 200 --queue-bypass
+
+echo twitter.com &gt; blacklist-twitter.txt
+echo twimg.com &gt;&gt; blacklist-twitter.txt
+
+./nfqws --qnum=200 --dpi-desync=fake,disorder2 --hostlist=blacklist-twitter.txt
+</code></pre></td><td>2022-01-17T08:29:44.206Z</td></tr><tr><td>hxss</td><td><p>это работает, спасибо. Теперь бы разобраться что значат все эти флаги и обернуть в сервис.<br>
+А список доменов которым рашка режет скорость где то публикуется/кем то ведется?</p></td><td>2022-01-18T23:31:26.280Z</td></tr><tr><td>hxss</td><td><p>нашел фильтр <code>-d</code> в котором можно через запятую перечислить хосты для правила, но <code>iptables</code> их разрешает перед добавлением правила, а не сравнивает с целью пакета, так что для twimg и других потенциальных хостов не подойдет. Может есть другой способ ограничить это правило на подготовленный список?</p>
+<p>И где этот список хостов с порезанной скоростью можно спарсить?</p></td><td>2022-01-24T22:29:09.508Z</td></tr><tr><td>ValdikSS</td><td><p>Такого списка нет в публичном доступе.<br>
+Обратитесь к вашему провайдеру или в Роскомнадзор с вопросом, по какой причине они замедляют твиттер, если вы уверены, что это замедление. В данный момент я ни на одном провайдере с ТСПУ не наблюдаю подобного.</p></td><td>2022-01-24T22:37:39.562Z</td></tr><tr><td>hxss</td><td><p>это определенно замедление(и на домашнем таттелекоме и на мобильном теле2), у меня с трудом загружается текст, а вместо картинок просто серые прямоугольники, про видео молчу. Когда запускаю split2, сайт оживает.</p>
+<p>Завтра прозвоню им конечно, сейчас нашел, что в мае должны были снять ограничение.</p></td><td>2022-01-24T22:58:48.372Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="hxss" data-post="161" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/h/9fc29f/48.png" class="avatar"> hxss:</div>
+<blockquote>
+<p>Теперь бы разобраться что значат все эти флаги и обернуть в сервис.</p>
+</blockquote>
+</aside>
+<p>Там все есть для этого<br>
+echo <a href="http://twitter.com">twitter.com</a> &gt;/opt/zapret/ipset/zapret-hosts-user.txt<br>
+echo <a href="http://twimg.com">twimg.com</a> &gt;&gt;/opt/zapret/ipset/zapret-hosts-user.txt<br>
+/opt/zapret/install_easy.sh<br>
+Выбрать режим nfqws.<br>
+NFQWS_OPT_DESYNC=“–dpi-desync=split2”<br>
+Режим фильтрации hostlist<br>
+Отказаться от скачивания листа</p></td><td>2022-01-25T08:10:41.663Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="160" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p><code>./nfqws --qnum=200 --dpi-desync=fake,disorder2 --hostlist=blacklist-twitter.txt</code></p>
+</blockquote>
+</aside>
+<p>Так не будет работать. Не задан ttl, не задан fooling. fake будет доходить до сервера<br>
+Когда твиттер замедлялся, у меня работало fake,split2 для обхода и блокировок, и замедления. Но нужно еще указать ограничитель ttl или fooling</p></td><td>2022-01-25T08:12:45.977Z</td></tr><tr><td>hxss</td><td><p>А вы наверно из МСК? Позвонил своему провайдеру, говорят это не они, пишите в роспотребнадзор. Поспрашивал еще - в Казани минимум 5 провайдеров режут скорость.</p></td><td>2022-01-25T18:11:27.572Z</td></tr><tr><td>hxss</td><td><p>я использую просто split2</p></td><td>2022-01-25T18:12:16.327Z</td></tr><tr><td>hxss</td><td><p><a class="mention" href="/u/bolvan">@bolvan</a> <a class="mention" href="/u/valdikss">@ValdikSS</a> <a href="https://gist.github.com/hxss/fd1c885999204430473607e2135b04b6" rel="noopener nofollow ugc">настроил</a> себе сервис, твиттер наконец работает, спасибо за помощь и саму утилиту)<br>
+Скажите, есть какие то решения для обхода дпи на андройде без рута?</p></td><td>2022-01-26T21:57:08.558Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="hxss" data-post="169" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/h/9fc29f/48.png" class="avatar"> hxss:</div>
+<blockquote>
+<p>есть какие то решения для обхода дпи на андройде без рута?</p>
+</blockquote>
+</aside>
+<p>Есть, но они ограничены.<br>
+Что касается дурения DPI, можно сделать примерно столько же, сколько умеет tpws<br>
+split2 там есть</p>
+<p>можно использовать сам tpws, но только в режиме socks.<br>
+если нужны удобства и простота - см в сторону DPITunnel</p>
+<p>задурить <a href="http://rdp.ru">rdp.ru</a> получится только для http (не-https) и не для всех сайтов. --methodeol.<br>
+лучше сразу делать VPN</p></td><td>2022-01-27T06:20:37.155Z</td></tr><tr><td>ValdikSS</td><td><p>Попробуйте <a href="https://getintra.org/">https://getintra.org/</a> и <a href="https://play.google.com/store/apps/details?id=com.celzero.bravedns">https://play.google.com/store/apps/details?id=com.celzero.bravedns</a><br>
+Несмотря на то, что это программы для смены DNS, фрагментирование (сплиттинг) запросов — их недокументированная фича/баг.</p></td><td>2022-01-27T06:46:28.267Z</td></tr><tr><td>hxss</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a> чет ни 1 прога не сработала(<br>
+<a class="mention" href="/u/bolvan">@bolvan</a> без рута же не установить iptables правила. Как прогонять трафик через tpws?</p></td><td>2022-01-30T22:15:28.197Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="hxss" data-post="172" data-topic="907">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/h/9fc29f/48.png" class="avatar"> hxss:</div>
+<blockquote>
+<p>без рута же не установить iptables правила. Как прогонять трафик через tpws?</p>
+</blockquote>
+</aside>
+<p>–socks.  Еще можно поискать оборачиватели socks в VPN</p></td><td>2022-01-31T06:55:47.968Z</td></tr><tr><td>zhenyolka</td><td><p>Ни одна прога не сработает, т.к. без рута возможно реализовать только фрагментирование и изменение sni (причем последнее только на старых андроидах). Эти методы работают далеко не всегда. Выход один - ставить рут, ну или vpn/socks/прочие туннели.</p></td><td>2022-01-31T07:19:29.604Z</td></tr><tr><td>anonymous18(anonymous18)</td><td><blockquote>
+<p><a href="http://ajax.aspnetcdn.com" rel="noopener nofollow ugc">ajax.aspnetcdn.com</a></p>
+</blockquote>
+<p>Тоже под замедлением?</p></td><td>2022-02-01T10:26:29.774Z</td></tr><tr><td>ValdikSS</td><td><p>Блокировка/замедление 26.02.2022 переезжает сюда: <a href="https://ntc.party/t/twitter-26-02-2022/1724" class="inline-onebox">Блокировка/замедление Twitter (26.02.2022)</a></p></td><td>2022-02-26T11:14:49.491Z</td></tr>
+    </table>
+      </body>
+    </html>

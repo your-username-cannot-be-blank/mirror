@@ -1,0 +1,115 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>конфликт-nekoray-и-adguard</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>rewhat</td><td><p>При одновременном использовании NekoRay (режим TUN, VLESS), и AdGuard начинает страдать процессор. Вот они слева направо:</p>
+<p><img src="конфликт-nekoray-и-adguard/a7cee0083846c0cfda8b31da06e4ebe29bceda41.png" alt="123" data-base62-sha1="nWuXRidzoFxMzoFLZpFZb6IyHXr" width="425" height="131"></p>
+<p>Один из процессов может начать жрать и 20%. Если отключить AdGuard или NekoBox, то потребление снижается до 0-1%.</p>
+<p>Для фикса пробовал такое:</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="конфликт-nekoray-и-adguard/5d48d2bab2609ff50fec6cc0c1b9732e9e48a8a6.png" data-download-href="https://ntc.party/uploads/default/5d48d2bab2609ff50fec6cc0c1b9732e9e48a8a6" title="1234"><img src="конфликт-nekoray-и-adguard/5d48d2bab2609ff50fec6cc0c1b9732e9e48a8a6.png" alt="1234" data-base62-sha1="djeqvUd1hCmAReTyc7bjoY2HzCu" width="476" height="500" data-dominant-color="2C2C2C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">1234</span><span class="informations">601×631 12.7 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>И такое:</p>
+<p><img src="конфликт-nekoray-и-adguard/a02b52a92c17b19e4452f74d0bd5cbf65e58a004.png" alt="12345" data-base62-sha1="mQVdhatQzpm7Yn8ViWXFVFtQIv2" width="164" height="77"></p>
+<p>Не помогает.</p>
+<p>NekoRay еще в логи спамит, и ему вообще пофиг, есть правила для роутинга процесса AdGuard, или нет:</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><code>INFO[0019] [543243331 11ms] router: found process path: C:\Program Files\AdGuard\AdguardSvc.exe INFO[0019] [543243331 11ms] outbound/direct[direct]: outbound packet connection INFO[0019] [4189587400 13ms] router: found process path: C:\Program Files\AdGuard\AdguardSvc.exe INFO[0019] [4189587400 13ms] outbound/direct[direct]: outbound packet connection INFO[0019] [1717965780 12ms] router: found process path: C:\Program Files\AdGuard\AdguardSvc.exe INFO[0019] [1717965780 12ms] outbound/direct[direct]: outbound packet connection INFO[0019] [3806706700 12ms] router: found process path: C:\Program Files\AdGuard\AdguardSvc.exe INFO[0019] [3806706700 12ms] outbound/direct[direct]: outbound packet connection</code></p>
+</details>
+<p>Как можно это исправить? Чтоб одновременно работали, и не жрали столько ресурсов.</p>
+<p>upd: при разворачивании “сетевая служба” в диспетчере, показывает “DNS клиент”. Наверное DNS не могут поделить, или типа того. Отключил DNS-защиту в AdGuard, вроде пока нормальное потребление. Но хотелось бы использовать dns защиту в Адгуарде <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20">.</p>
+<p>upd2: дело точно в dns, настройках роутинга, и подобном. Попереключал разные настройки, все вроде стало работать. Решил понять, что конкретно нужно было переключить, начал снова перебирать настройки роутинга, и в итоге нагрузка на ЦП вообще идет под 100%, всё виснет, я хз вообще.</p></td><td>2024-10-15T21:54:08.072Z</td></tr><tr><td>sunlighthell(The Ministry of Love)</td><td><p>А вы по дефолту получается пускаете весь трафик через TUN и только Адгард не хотите?<br>
+Например при настройках как у вас (проксируется весь трафик, кроме 2х экзешников и того что в simple route) тот же включенный торрент будет нагружать проц так же<br>
+Пробовали наоборот настроить в Preferences&gt;routing settings&gt;default outbound bypass, а в настройках тун включить вайтлист?</p></td><td>2024-10-16T06:01:58.156Z</td></tr><tr><td>rewhat</td><td><blockquote>
+<p>А вы по дефолту получается пускаете весь трафик через TUN и только Адгард не хотите?</p>
+</blockquote>
+<p>Все через ВПН, кроме российских сайтов и торрентов. Ну еще кроме WSL, VS Code, Docker, Steam, и подобное, но это уже как получится. При этом должен работать AdGuard с их DNS. В такой конфигурации все очень быстро работает в плане скорости интернета (не считая жрущего процессора).</p>
+<p>В общем, сегодня удалил nekoray на всякий, скачал nekoray beta-4, отключил dns routing (хотя разницы между включением/отключением dns routing вроде и нет), выбрал сервер, включил tun. Работает нормально, ресурсы не жрет. Но если в simple route добавить хоть какие-то элементарные правила типа:</p>
+<pre><code class="lang-auto">{
+    "rules": [
+        {
+            "domain_suffix": [
+                ".ru",
+                ".su",
+                ".xn--p1ai"
+            ],
+            "outbound": "direct"
+        },
+        {
+            "geoip": [
+                "private",
+                "ru"
+            ],
+            "outbound": "direct"
+        }
+    ]
+}
+</code></pre>
+<p>то начинается сущий кошмар, процессор грузит, в логи спамит</p>
+<pre><code class="lang-auto">INFO[0008] [3517323876 0ms] inbound/tun[tun-in]: inbound packet connection from 172.19.0.1:60621
+INFO[0008] [3517323876 0ms] inbound/tun[tun-in]: inbound packet connection to 172.19.0.2:53
+INFO[0008] [3517323876 0ms] outbound/direct[direct]: outbound packet connection
+INFO[0008] [4261053470 0ms] inbound/tun[tun-in]: inbound packet connection from 172.19.0.1:60626
+INFO[0008] [4261053470 0ms] inbound/tun[tun-in]: inbound packet connection to 172.19.0.2:53
+INFO[0008] [4261053470 0ms] outbound/direct[direct]: outbound packet connection
+INFO[0008] [1091316985 0ms] inbound/tun[tun-in]: inbound packet connection from 172.19.0.1:60629
+INFO[0008] [1091316985 0ms] inbound/tun[tun-in]: inbound packet connection to 172.19.0.2:53
+INFO[0008] [1091316985 0ms] outbound/direct[direct]: outbound packet connection
+INFO[0008] [3722262886 0ms] inbound/tun[tun-in]: inbound packet connection from 172.19.0.1:60633
+INFO[0008] [3722262886 0ms] inbound/tun[tun-in]: inbound packet connection to 172.19.0.2:53
+</code></pre>
+<p>Видимо правила роутинга вообще не переваривает.</p>
+<p>Ну в логах это видимо локальный айпишник, может Докера, или еще чего. Не знаю что добавить в исключения, а то щас как добавлю, и опять весь пк зависать начнет.</p></td><td>2024-10-16T10:56:26.243Z</td></tr><tr><td>rewhat</td><td><p>Вместо nekoray можно использовать v2rayN с правилами:</p>
+<p>Domain (direct)</p>
+<pre><code class="lang-auto">regexp:\.ru$,
+regexp:\.su$,
+regexp:\.xn--p1ai$
+</code></pre>
+<p>IP (direct)</p>
+<pre><code class="lang-auto">geoip:ru
+</code></pre></td><td>2024-10-16T16:43:55.807Z</td></tr><tr><td>Pony</td><td><aside class="quote no-group" data-username="rewhat" data-post="3" data-topic="11903">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/rewhat/48/13085_2.png" class="avatar"> rewhat:</div>
+<blockquote>
+<p>Видимо правила роутинга вообще не переваривает.</p>
+</blockquote>
+</aside>
+<p>Роутинг тут всё переваривает, это IP вашего TUN, INFO в заголовке явно говорит, что это не ошибка <img src="https://ntc.party/images/emoji/twitter/wink.png?v=12" title=":wink:" class="emoji" alt=":wink:" loading="lazy" width="20" height="20"></p>
+<p>Нагрузка процесса, вероятна вызвана зацикливанием DNS Запросов, отключите в AdGuard “DNS Защита”</p></td><td>2024-10-25T15:01:42.482Z</td></tr><tr><td>rewhat</td><td><p>Спасибо. Ну я уже просто sing-box использую, как-то настроил, и работает.</p></td><td>2024-10-25T15:08:20.900Z</td></tr><tr><td>sboc</td><td><p>можете попробовать использовать <a href="https://github.com/Mahdi-zarei/nekoray/releases" rel="noopener nofollow ugc">форк</a> nekoray, работает наиболее стабильнее</p></td><td>2024-11-20T07:03:57.857Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,64 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>мгтс-московская-область-нету-рабочих-стратегий-по-http3-для-дискорда-11593</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>antieksi(Antieksi)</td><td><pre><code class="lang-auto">* SUMMARY
+ipv4 discord.com curl_test_http : working without bypass
+ipv4 discord.com curl_test_https_tls12 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata
+ipv4 discord.com curl_test_http3 : winws not working
+</code></pre>
+<p>Уже второй раз запускаю скрипт <code>blockcheck</code> с таким результатом. Выставляю себе вот такие аргументы запуска с консоли:</p>
+<pre><code class="lang-auto">start "zapret: http,https,quic" /min "%~dp0winws.exe" ^
+--wf-l3=ipv4 --wf-tcp=443-65535 --wf-udp=443-65535 ^
+--filter-tcp=443 --hostlist="%~dp0list-discord.txt" --dpi-desync=syndata --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls="%~dp0tls_clienthello_www_google_com.bin" ^
+--filter-udp=443 --hostlist="%~dp0list-discord.txt" --dpi-desync=syndata --dpi-desync-udplen-increment=10 --dpi-desync-repeats=6 --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic="%~dp0quic_initial_www_google_com.bin" --new ^
+--filter-udp=50000-65535 --dpi-desync=syndata --dpi-desync-any-protocol --dpi-desync-fake-quic="%~dp0quic_initial_www_google_com.bin" --new
+</code></pre>
+<p>Конечно, единожды получается зайти на заглавную страницу Дискорда, но не в сами чаты (подозреваю, что как раз из-за <code>winws not working</code>), после чего и заглавная страница отваливается. Это проблема конфигурации или провайдер уж слишком умный?</p></td><td>2024-10-11T11:42:51.141Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><aside class="quote no-group" data-username="antieksi" data-post="1" data-topic="11593">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/antieksi/48/10569_2.png" class="avatar"> antieksi:</div>
+<blockquote>
+<p><code>--dpi-desync=syndata</code></p>
+</blockquote>
+</aside>
+<p>Вместо очень странного решения используйте</p>
+<pre><code class="lang-auto">--filter-udp=443 --hostlist="%~dp0list-discord.txt" --dpi-desync=fake,split2 --dpi-desync-udplen-increment=10 --dpi-desync-repeats=6 --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic="%~dp0quic_initial_www_google_com.bin" --new ^
+</code></pre></td><td>2024-10-11T11:48:16.975Z</td></tr><tr><td>antieksi(Antieksi)</td><td><p>«Странное решение» для меня банально оказалось самым рабочим относительно множества других, поэтому у меня и стоит <code>syndata</code> вместо <code>fake,split2</code>, и последний вариант я уже пробовал — то ли по чьей-то наводке отсюда, то ли они стояли как стандартные значения. Поэтому <code>blockcheck</code> и запускал.</p></td><td>2024-10-11T11:52:22.060Z</td></tr><tr><td>wigeance(Wigeance)</td><td><p>Это что за франкенштейн? Зачем тут udplen? Зачем тут split2?</p></td><td>2024-10-11T12:02:10.372Z</td></tr><tr><td>jestxfot(YoutubeNotWork)</td><td><p>Взято из официального гитхаба запрета.</p></td><td>2024-10-11T12:54:29.574Z</td></tr><tr><td>wigeance(Wigeance)</td><td><p>Ну вы используете параметр udplen increment и pattern хотя в dpi-desync=udplen не используется, split2 тоже бесполезен на udp<br>
+По факту из рабочего там только fake</p></td><td>2024-10-11T13:03:40.759Z</td></tr>
+    </table>
+      </body>
+    </html>

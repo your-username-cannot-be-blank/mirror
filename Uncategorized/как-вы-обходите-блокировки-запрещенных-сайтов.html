@@ -1,0 +1,167 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>как-вы-обходите-блокировки-запрещенных-сайтов</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>anon94384997</td><td><p>Поделитесь своей историей и опытом. Какие ваши основные способы обхода?<br>
+Очень давно как и все я ставил расширение Frigate.<br>
+Пытался использовать Antizapret PAC, но с Opera Presto были глюки, а может и с Firefox, иногда отваливалось.</p>
+<p>Пошел по более хитрому пути: расширение FoxyProxy (или без него) и Tor демон. Тогда он еще не блокировался. Кажется так.<br>
+Когда я заподозрил, что провайдер в сговоре с <code>mail.ru</code> (после посещения PayPal стали приходить фишинг письма) я решил принципиально весь трафик пускать через VPN.<br>
+Раньше я пользовался только PPTP. Но тогда я уже перешел на Linux, а там он соединялся без шифрования.<br>
+Так что перешел на OpenVPN из командной строки (с Network Manager были проблемы). Сталкивался и с недобросовестными владельцами VPN, мониторящими HTTP трафик. Иногда пускал торренты через Tor.<br>
+Потом открыл для себя Wireguard. Он показался лучше, так как хорошо держит шлюз. Немного shadowsocks использовал поверх.</p>
+<p>Вкрадце так. Я не указываю поставщиков по понятным причинам.<br>
+Экспериментировал со многими утилитами в последнее время, но это основные.<br>
+UPD: Надо бы еще отметить, что несколько лет пользовался dnscrypt.<br>
+Наверное мой use case  нетипичный. Обычно люди не пускают весь трафик через VPN, особенно при наличии быстрого интернета с внешним IP.</p></td><td>2023-09-09T08:24:37.287Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>vpn (как сокс прокси для “нужных” сайтов) пока еще не совсем заблочили. причем больше из за простоты выбора страны. многие сайты даже зарубежные выдают заглушки для “неправильных” стран (столкнулся с баном вроде NL на xhamster;)<br>
+а так privoxy с настройками direct / squid / VPN / TOR/etc со своими списками сайтов<br>
+через ТОР только некритичное и только HTTPS<br>
+анноят всякие “улучшатели”. CDN / DNS load balance. ибо немало сайтов тупо ломаются если сам сайт идет через ВНП например а видео тянется напрямую</p>
+<p>p.s. еще такая фича прикручена к привокси чтобы не следить самому за новыми банами. хотя и не так удобно как антизапрет .PAC</p>
+<pre><code class="lang-auto">curl --proxy socks5://127.0.0.1:9050 --output nxdomain.txt https://raw.githubusercontent.com/zapret-info/z-i/master/nxdomain.txt
+copy /A /V /Y nxdomain.CONF+nxdomain.txt nxdomain.LST
+
+&gt; cat nxdomain.CONF
+{+forward-override{forward-socks5 127.0.0.1:9090 .}}
+
+&gt; privoxy config.txt
+actionsfile nxdomain.LST
+</code></pre>
+<p>а так на выбор ручками если чтото глючит <a href="https://i.imgur.com/TR00TXU.png" rel="noopener nofollow ugc">https://i.imgur.com/TR00TXU.png</a><br>
+и да <a href="https://github.com/instantsc/SimpleDnsCrypt/releases" class="inline-onebox" rel="noopener nofollow ugc">Releases · instantsc/SimpleDnsCrypt · GitHub</a> тоже стоит. хотя можно и ручками поставить при умении</p></td><td>2023-09-09T10:32:35.540Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="LeonMskRu" data-post="2" data-topic="5615">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/leonmskru/48/2810_2.png" class="avatar"> LeonMskRu:</div>
+<blockquote>
+<p>немало сайтов тупо ломаются если сам сайт идет через ВНП</p>
+</blockquote>
+</aside>
+<p>Да, сейчас блоки с обеих сторон. Разруливаю в консольном shadowsocks (ru/en) и расширении FoxyProxy. И всё это поверх Wireguard.</p>
+<p>У брата ситуация проще. Пользовался Opera со встроенным VPN. Когда Opera отключила его для русских, я ему настроил standalone версию.</p></td><td>2023-09-09T10:55:28.829Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>ну да. или FoxyProxy или SwitchyOmega сейчас самые удобные и простые<br>
+просто лично мне проще в 1 месте (привокси) все настроить чем в разных браузерах и на разных ПК/нотебуках/етк заморачиваться каждый раз</p>
+<pre><code class="lang-auto">actionsfile WWW\_1my_5vpn.action
+actionsfile WWW\_1my_6tor.action
+actionsfile WWW\_1my_6tcp.action
+actionsfile WWW\_1my_3direct.action
+actionsfile WWW\_1my_2block.action
+actionsfile WWW\_1my_1unblock_fragile.action
+
+forward-socks5t	.onion		127.0.0.1:9050 .
+</code></pre>
+<p>про все через ВНП/етк могут вылезти проблемы с РФ ресурсами. как с блокировкой “буржуев” так и просто маршрутами через пол земли с огромным пингом и никакой скоростью<br>
+поэтому есть такой костыль еще. пока РТ дает доступ клиентам к своему squid</p>
+<pre><code class="lang-auto">{+forward-override{forward proxy.kaluga.ru:8080}}
+mail.ru:443
+.mail.ru:443
+.imgsmail.ru:443
+vk.com:443
+.vk.com:443
+.vkuservideo.net:443
+.userapi.com:443
+.mycdn.me:443
+yandex.ru:443
+.yandex.ru:443
+ya.ru:443
+.ya.ru:443
+yandex.net:443
+.yandex.net:443
+yastatic.net:443
+.yastatic.net:443
+yandex.st:443
+.yandex.st:443
+yandex.com:443
+.yandex.com:443
+naydex.net:443
+.naydex.net:443
+</code></pre></td><td>2023-09-09T11:00:44.368Z</td></tr><tr><td>bolvan</td><td><p>Довольно давно уже начал пользоваться VPS.<br>
+Тогда делал на нем прокси, и в FF через foxyproxy добавлял сайты, которые надо пускать через прокси.</p>
+<p>Потом где-то прочитал, что можно обманывать DPI.<br>
+Роутеры всегда использовал только openwrt, потому что все остальное - несерьезно. Для домохозяек.<br>
+С тех пор начал делать zapret. Где-то нашел код transparent proxy. Глючный и бажный, пришлось его доводить до ума. Сделал обманывалку http. Так родился tpws, а я перешел на полностью прозрачный обман. https в то время приходилось перенаправлять на proxy. Пришлось изучить policy routing, redsocks, потом openvpn.<br>
+Попутно начала складываться система получения листов из разных источников. Так родился фолдер ipset.<br>
+Однажды узнал о wireguard, и он сильно зашел, потому что давал 50 мбпс на стареньком роутере вместо 10 от openvpn. Намучался с падениями роутера, потом нашел баг в wireguard, который обсудил с jason-ом. Что-то jason поправил сам,  что-то отправили разработчикам mips платформы linux. Связано с переполнением стека ядра. Вообщем добились стабильности wireguard на mips.</p>
+<p>Далее научился обманывать и https. Так постепенно появился nfqws.<br>
+Сейчас у меня стратегия - все делать прозрачно на роутере. Что надо куда надо заворачиваю в какие угодно прокси/протоколы или обманываю DPI</p>
+<p>Паралелльно стал думать что будет когда начнут банить протоколы. И года 3 назад за пару деньков наклепал ipobfs. Сейчас он легко обманывает DPI, уродуя протокол wireguard до неузнаваемости на обоих концах (альтернатива патчингу кода wireguard).  openwrt-vps связка идет по изуродованному варианту с применением нецензурных ip протоколов и пейлоадов. Когда начался бан, я его даже не заметил.</p>
+<p>На пожарный случай держу champa, dnstt.<br>
+Недавно настроил еще xray, чтобы если начнут сечь непонятное, то он сработал.<br>
+Всегда желательно быть на несколько шагов впереди паровоза</p></td><td>2023-09-09T12:55:05.296Z</td></tr><tr><td>Elevator</td><td><aside class="quote no-group" data-username="bolvan" data-post="5" data-topic="5615">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Роутеры всегда использовал только openwrt, потому что все остальное - несерьезно</p>
+</blockquote>
+</aside>
+<p>Рекомендую вместо openwrt использовать полноценный ПК. Есть готовые мини-ПК с пассивным охлаждением под эти цели. Выглядит примерно <a href="https://aliexpress.ru/item/1005004336924039.html?sku_id=12000028809935427" rel="noopener nofollow ugc">так</a><br>
+Стоит дороже чем обычный роутер, но цена окупается полностью. Снимаются все ограничения по железу и софту.</p>
+<p>Сам перешел на такую штуку после микротика т.к его стало не хватать<br>
+В качестве ОС выбрал OPNSense</p>
+<p>Для обхода блокировок использую xray и wireguard без обфускации. На компе в браузере плагин foxyproxy и клиент xray. Часть трафика перенаправляется на роутере по AS в wireguard тоннель.</p></td><td>2023-09-09T14:52:27.833Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="Elevator" data-post="6" data-topic="5615">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/e/ee59a6/48.png" class="avatar"> Elevator:</div>
+<blockquote>
+<p>Рекомендую вместо openwrt использовать полноценный ПК</p>
+</blockquote>
+</aside>
+<p>На одной локации так и есть. Китайский миниписюк. Но там и система видеонаблюдения с motion, которую не потянет soho.<br>
+в остальных случаях еще 10 раз подумаешь, прежде чем выкидывать 20-30к</p>
+<p>openwrt лучше тем, что там все готово для роутинга. не надо городить огород с iptables и прочее.<br>
+собираю систему сам, поэтому там .so стрипнуты без экстремальщины, как на дефолте, к ним возможна линковка<br>
+хедеры переписаны, gcc, make, automake и прочее есть, так что можно собирать спокойно как на обычной системе любой софт<br>
+чем-то напоминает alpine linux. там тоже musl. EXEшники практически совместимы</p></td><td>2023-09-09T15:38:32.021Z</td></tr><tr><td>kstrmv</td><td><p>Я использую на VPS Xray-VLESS-TCP-Reality</p></td><td>2023-09-09T15:43:04.611Z</td></tr><tr><td>Xunlei</td><td><p>Начал интересоваться проксификацией и туннелированием до блокировок, поэтому не видел даже ни разу заглушку провайдера. Где-то в 2013 полностью перешел на tor и dnscrypt с релеями и кэшем на bind9 с OpenNIC зонами. Сейчас кэш работает на Technitium DNS Server с блоклистами. Для маршрутизации использую SwitchyOmega для браузера и Proxifier для программ. 90% веб траффика идёт через tor, остальное через бесплатные XTLS+VLESS, SS, ssh. Менеджер туннелей GOST. Работает всё на файлопомоечной торрент качалке, на mini ITX под виндовс, т.к. ядро стабильное, разрабатывать и отлаживать утилитки проще. Сейчас бы взял ATX плату, т.к. уже хочется 2.5-10 гигабитные карточки вставить. Роутер пытался найти выдающий гигабит на LAN-WAN, нашёл какой-то дешманский за $160 на asus wrt, выдал 850 Мбит/с. Работает только в качестве PPPoE клиента, свитча и точки доступа 802.11ax.</p></td><td>2023-09-09T16:29:32.261Z</td></tr><tr><td>tlgrmku(tlgrmku)</td><td><p>Xray VLESS-Reality на VDS. Но иногда wireguard когда его не блочат.</p></td><td>2023-09-10T17:49:23.828Z</td></tr><tr><td>sergejdobryj170(sergejdobryj170)</td><td><aside class="quote no-group" data-username="Xunlei" data-post="9" data-topic="5615">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>Server</p>
+</blockquote>
+</aside>
+<p>Помогите пожалуйста<br>
+Как лучше установить v2ray +DNscrypt proxy 2 на openwrt?</p></td><td>2024-02-08T19:57:05.176Z</td></tr><tr><td>sergejdobryj170(sergejdobryj170)</td><td><aside class="quote no-group" data-username="tlgrmku" data-post="10" data-topic="5615">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/tlgrmku/48/2624_2.png" class="avatar"> tlgrmku:</div>
+<blockquote>
+<p>Xray</p>
+</blockquote>
+</aside>
+<p>Или вы</p></td><td>2024-02-08T19:57:39.460Z</td></tr><tr><td>Xunlei</td><td><p>Приветствую. Я не умею разрабатывать и патчить openwrt. Думаю, вам будет проще собрать сетевой комбайн на платформе x86-64 c Windows/Linux.</p></td><td>2024-02-08T20:46:17.239Z</td></tr><tr><td>0ka(0ka)</td><td><p><a href="https://habr.com/ru/articles/757694/" class="onebox" target="_blank" rel="noopener">https://habr.com/ru/articles/757694/</a></p></td><td>2024-02-08T23:50:48.617Z</td></tr><tr><td>gfqwdgecewgcdw</td><td><p>RPI5 DNS server (redirector), SITE PROXY (nginx, Acrylic DNS server, Amnezia AWG)<br>
+VDS (Amnezia AWG server)</p></td><td>2024-02-11T20:22:58.177Z</td></tr><tr><td>Abyss023</td><td><p>Xray/XTLS Reality/Xkeen</p></td><td>2024-02-21T17:31:04.989Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,95 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>заблокирован-dnscrypt-резолвер-adguard</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Dredd</td><td><p>Резолвер adguard’a (единственный из всего списка резолверов) отваливается dnscrypt по таймауту с ошибками</p>
+<pre><code class="lang-auto">[2023-10-19 06:20:55] [WARNING] [adguard-dns-unfiltered] uses a non-standard provider name ('2.dnscrypt.unfiltered.ns1.adguard.com.' doesn't start with '2.dnscrypt-cert.')
+[2023-10-19 06:21:00] [NOTICE] [adguard-dns-unfiltered] TIMEOUT</code></pre>
+<p>Саппорт говорит, что мол такие проблемы из-за блокировок. Пробовал пускать dnscrypt с force_tcp=true через прокси/тор (мосты), но результат был тем же. Где затык ?</p>
+<p>Существуют ли способы/инструменты проверки доступности dnscrypt-резолверов ?</p></td><td>2023-10-19T21:00:25.828Z</td></tr><tr><td>fdsadf4345</td><td><p>Та уже давно его отключили, он же предоставляет vpn, вот его и вырубили ))<br>
+Замени в адресе <a href="https://dns.adguard.com/dns-query" rel="noopener nofollow ugc">https://dns.adguard.com/dns-query</a> на .<br>
+<a href="https://94.140.14.14/dns-query" rel="noopener nofollow ugc">https://94.140.14.14/dns-query</a> и должно работать или на этот адрес 94.140.15.15<br>
+у меня работала, хотя я им не пользуюсь</p></td><td>2023-10-20T08:34:26.227Z</td></tr><tr><td>Dredd</td><td><p><a class="mention" href="/u/fdsadf4345">@fdsadf4345</a>, так это простой DoH. Как мне его впихнуть в конфиг dnscrypt ? См. <a href="https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v2/public-resolvers.md" rel="noopener nofollow ugc">https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v2/public-resolvers.md</a><br>
+Оно в конфиг прописывается или так</p>
+<pre><code class="lang-auto">[sources.'relays']
+urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v2/relays.md', 'https://download.dnscrypt.info/resolvers-list/v2/relays.md']
+cache_file = '/var/cache/dnscrypt-proxy/relays.md'
+minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+refresh_delay = 72
+prefix = ''</code></pre>
+<p>или так</p>
+<pre><code class="lang-auto">[sources.quad9-resolvers]
+urls = ['https://www.quad9.net/quad9-resolvers.md']
+minisign_key = 'RWQBphd2+f6eiAqBsvDZEBXBGHQBJfeG6G+wJPPKxCZMoEQYpmoysKUN'
+cache_file = '/var/cache/dnscrypt-proxy/quad9-resolvers.md'
+prefix = 'quad9-'</code></pre>
+<p>или я чего-то не понимаю ?</p></td><td>2023-10-20T14:11:52.138Z</td></tr><tr><td>anon94384997</td><td><p>Эти ссылки вам помогут<br>
+<a href="https://github.com/DNSCrypt/dnscrypt-proxy/issues/1301" rel="noopener nofollow ugc">https://github.com/DNSCrypt/dnscrypt-proxy/issues/1301</a></p>
+<p><a href="https://www.reddit.com/r/dnscrypt/comments/uoeaao/how_to_setup_a_custom_dns_over_https_on_dnscrypt/" rel="noopener nofollow ugc">https://www.reddit.com/r/dnscrypt/comments/uoeaao/how_to_setup_a_custom_dns_over_https_on_dnscrypt/</a></p>
+<p>Хотя, вот чел на руборде рулит серверами напрямую в командной строке:<br>
+<code>dnsproxy -u quic://94.140.14.140 -u quic://94.140.14.141 --all-servers --edns --dns64</code></p></td><td>2023-10-20T15:47:46.181Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>из настроек<br>
+ipv4_servers = true<br>
+ipv6_servers = false<br>
+dnscrypt_servers = true<br>
+doh_servers = true<br>
+require_dnssec = true<br>
+require_nolog = false<br>
+require_nofilter = true<br>
+это задает списки доступные в самом днскрипте<br>
+можно и руками добавлять (не уверен в работоспособности именно этого примера)</p>
+<pre><code class="lang-auto">[static]
+
+[static.Comss-IPv6]
+stamp = "sdns://AQMAAAAAAAAAHFsyYTAyOjdiNDA6NWViMDplOTVkOjoxXTo0NDMgFWnIA4ZtJKvnIs9g6yZT4WIyPb-rQEB27paIxM_OkxMdMi5kbnNjcnlwdC1jZXJ0LmRucy5jb21zcy5vbmU"
+
+[static.Comss-IPv4]
+stamp = "sdns://AQMAAAAAAAAAETk0LjE3Ni4yMzMuOTM6NDQzIBVpyAOGbSSr5yLPYOsmU-FiMj2_q0BAdu6WiMTPzpMTHTIuZG5zY3J5cHQtY2VydC5kbnMuY29tc3Mub25l"
+</code></pre></td><td>2023-10-20T18:10:38.206Z</td></tr><tr><td>fdsadf4345</td><td><aside class="quote no-group" data-username="Dredd" data-post="1" data-topic="6025">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dredd/48/518_2.png" class="avatar"> Dredd:</div>
+<blockquote>
+<p><code>adguard</code></p>
+</blockquote>
+</aside>
+<p>Вы не понимаете. adguard заблокирован в рф и работал по способу которому я описал, придумал не я, где то прочитал</p></td><td>2023-10-22T09:51:15.971Z</td></tr><tr><td>Dredd</td><td><p>Намедни взялся за разбор вопроса. Основной затык был в том, что тут собственно тестировать и где взять адрес/сервер для проверки на предмет блокировки. Выше предлагали плясать от dnscrypt - штампов. Ну я поплясал <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> В результате был найден онлайн - “калькулятор”, который позволяет перекодировать/разложить строку sdns на составляющие, где в частности и содержится ip-адрес сервера. Т.к. в sdns - строке без особых ухищрений в кодировке base64 зашит ip и порт, их легко можно декодировать подручными средствами не используя онлайн - “калькулятор”. Тем же base64 например. В случае adguard-dns-unfiltered это 94.140.14.140:5443. В списках блокировки он не значится (по крайней мере тг-бот RKN Dump Check на его счёт молчал), значит лочится через ТСПУ</p>
+<p>Проверял доступность банально - пингом. Как от себя, так и <a href="https://ping-admin.com/free_ping/result/1697961672kt680gmc33w3n4lcppy100.html" data-bbcode="true" rel="noopener nofollow ugc">через внешний сервис</a>. Что интересно, блокировка крайне неоднородная. В ряде случаев ответ есть, в ряде - нет. Из Европ <a href="https://ping-admin.com/free_ping/result/16979620993odpdr110i38i88lt4k3z9.html" data-bbcode="true" rel="noopener nofollow ugc">пинги ровные</a> (ну разве что кроме Нидерландов, но это на уровне погрешности).</p></td><td>2023-10-22T20:10:04.065Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>не знаю про ИП там бан был на уровне *<a href="http://adguard.com">adguard.com</a><br>
+попали под раздачу adguard vpn / dns / антиреклама<br>
+<a href="https://t.me/adguardru/615" class="inline-onebox">Telegram: Contact @adguardru</a><br>
+<a href="https://vk.com/wall-53764934_15868" class="inline-onebox">⁉ Сайт adguard.com, кажется, снова заблокирован.. | Официальная страница AdGuard | VK</a></p></td><td>2023-10-23T14:29:09.138Z</td></tr>
+    </table>
+      </body>
+    </html>

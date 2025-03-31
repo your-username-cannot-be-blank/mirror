@@ -1,0 +1,82 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-однобуквенных-доменов-на-тспу</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>На оборудовании ТСПУ блокируются однобуквенные домены <code>a, d, i, m, s, t, w</code> в TLS SNI, а также домен <code>www.t</code>.</p>
+<pre><code class="lang-bash">$ for i in {a..z}; do curl https://${i} --connect-to ::webdav.yandex.ru:443 -k --max-time 2 -s -o /dev/null || echo ${i} error; done
+
+a error
+d error
+i error
+m error
+s error
+t error
+w error
+</code></pre>
+<p>Формировать такие запросы могут некорректно написанные программы, которые, например, передают wide (UTF-16) строку в библиотеку шифрования, когда библиотека ожидает обычную C-строку, из-за чего используется только первая буква домена.</p>
+<p>Фильтр был включён 26 января, обнаружен как раз из-за сломавшейся неправильно написанной программы.</p></td><td>2023-03-03T11:58:05.569Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="1" data-topic="3923">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>некорректно написанные программы, которые, например, передают wide (UTF-16) строку в библиотеку шифрования</p>
+</blockquote>
+</aside>
+<p>Wow, great observation. So supposedly someone wanted to block (random example) <code>mozilla.org</code>, but what they submitted to the unified register was actually the UTF-16-LE string <code>m\x00o\x00z\x00i\x00l\x00l\x00a\x00.\x00o\x00r\x00g\x00</code>, which, when interpreted as a null-terminated C string, becomes just <code>m</code>.</p></td><td>2023-03-03T20:17:45.632Z</td></tr><tr><td>ValdikSS</td><td><p>I’m not sure whether these are manual or automatic blocks. I’d guess that some kind of anomaly detection algorithm has shown the requests with these SNI, based on the real network traffic, to the operator and the operator confirmed it’s block.<br>
+These are out-of-registry blocks on TSPU hardware.</p></td><td>2023-03-03T20:43:46.236Z</td></tr><tr><td>cypherpunks(cypherpunks:writecodes)</td><td><p>Буквы размножаются:</p>
+<pre><code class="lang-auto">a error
+b error
+c error
+d error
+g error
+i error
+k error
+l error
+m error
+n error
+o error
+p error
+r error
+t error
+w error
+x error
+y error
+z error
+</code></pre>
+<p>Есть двухбуквенные сочетания. Все не проверял, но как пример: <code>ua</code>, <code>us</code> (с доменами 1 уровня связи нет)</p></td><td>2023-12-13T14:54:41.237Z</td></tr>
+    </table>
+      </body>
+    </html>

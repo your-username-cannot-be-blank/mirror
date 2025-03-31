@@ -1,0 +1,79 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>частичная-https-блокировка-сервисов-syncthing</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Ratio</td><td><ul>
+<li>Тип настройки: VPN</li>
+<li>Тип проблемы: не работает конкретный сайт</li>
+<li>Что с сайтом: сайт открывается бесконечно долго</li>
+<li>Используемый браузер: curl, firefox</li>
+</ul>
+<p>Раньше уже были блокировки, через некоторое время снова заработало, и вот последнюю неделю опять начались проблемы.</p>
+<p>Я тут прошерстил в исходниках используемые адреса:</p>
+<pre><code class="lang-auto">// blocked
+https://discovery-v4.syncthing.net/v2/
+https://apt.syncthing.net/
+https://relays.syncthing.net/endpoint
+https://crash.syncthing.net/report/
+https://upgrades.syncthing.net/meta.json
+// blocked only ipv4
+https://discovery.syncthing.net/v2/ 
+// ipv6 only not blocked
+https://discovery-v6.syncthing.net/v2/
+// not blocked
+https://syncthing.net
+https://docs.syncthing.net
+https://data.syncthing.net/newdata
+</code></pre>
+<pre><code class="lang-auto">$ for i in https://discovery-v4.syncthing.net/v2/ https://discovery-v6.syncthing.net/v2/ https://discovery.syncthing.net/v2/ https://apt.syncthing.net/ https://relays.syncthing.net/endpoint https://crash.syncthing.net/report/ https://upgrades.syncthing.net/meta.json; do echo -e "\t$i"; curl -4 --connect-timeout 5 $i; done
+	https://discovery-v4.syncthing.net/v2/
+curl: (7) Failed to connect to discovery-v4.syncthing.net port 443: Connection timed out
+	https://discovery-v6.syncthing.net/v2/
+curl: (6) Could not resolve host: discovery-v6.syncthing.net
+	https://discovery.syncthing.net/v2/
+curl: (7) Failed to connect to discovery.syncthing.net port 443: Connection timed out
+	https://apt.syncthing.net/
+curl: (28) Connection timed out after 5001 milliseconds
+	https://relays.syncthing.net/endpoint
+curl: (28) Connection timed out after 5001 milliseconds
+	https://crash.syncthing.net/report/
+curl: (28) Connection timed out after 5001 milliseconds
+	https://upgrades.syncthing.net/meta.json
+curl: (28) Connection timed out after 5000 milliseconds
+</code></pre></td><td>2022-11-04T22:05:38.048Z</td></tr><tr><td>ValdikSS</td><td><p>Перенес в другую категорию.</p></td><td>2022-12-15T23:51:23.017Z</td></tr><tr><td>ValdikSS</td><td><p>На текущий момент указанные адреса не заблокированы.</p></td><td>2022-12-15T23:52:33.303Z</td></tr>
+    </table>
+      </body>
+    </html>

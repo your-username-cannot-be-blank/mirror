@@ -1,0 +1,76 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>базы-antizapret-в-клиенте-android-7259</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Verve</td><td><p>Есть <a href="https://habr.com/ru/articles/770400/" data-bbcode="true" rel="noopener nofollow ugc">статья</a> с описанием способа подключения баз antizapret к прокси xray в виде geoip.dat:</p>
+<p>[quote]Качаете geoip.db и geosite.db вот отсюда: <a href="https://github.com/L11R/antizapret-sing-box-geo" class="inline-onebox" rel="noopener nofollow ugc">GitHub - L11R/antizapret-sing-box-geo</a><br>
+И подсовываете их в ваш клиент. После этого настраиваете маршрутизацию как обычно, например, в качестве дефолтного маршрута выбираете bypass (direct), а через прокси пускаете IP-адреса по тегу geoip:antizapret и домены по тегуgeosites:antizapret[/quote]</p>
+<p>Мне нужно для android, клиент v2rayNG. Сделал у него в настройках такое:</p>
+<p>Settings → Custom rules → Proxy URL or IP:<br>
+“geoip:antizapret”,“geosite:antizapret”</p>
+<p>Settings → Predefined rules:<br>
+Global direct</p>
+<p>Но не работает. Соединение идёт напрямую, заблокированные сайты не открываются.<br>
+Пробовал наоборот, т.е. Global proxy и потом Direct URL or IP: “geoip:!antizapret”,“geosite:!antizapret” (не уверен, что это по формату, но хз). То же самое наоборот - всё идёт через VPN.</p>
+<p>Кто-нибудь сталкивался? Как правильно тут сделать?</p></td><td>2024-02-27T09:59:16.317Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Verve" data-post="1" data-topic="7259">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/v/8c91f0/48.png" class="avatar"> Verve:</div>
+<blockquote>
+<p>Мне нужно для android</p>
+</blockquote>
+</aside>
+<p>Вероятно, нужно включить sniffing на input’е, т.к. клиент получает только IP-адрес для соединения, но не домен, из-за использования псевдо-VPN.</p></td><td>2024-02-29T09:21:08.701Z</td></tr><tr><td>Verve</td><td><p>Это об опции Sniff domain в клиенте? Если нет, можно подробнее? Sniff domain не помог, к сожалению.</p>
+<p>В целом на текущий момент пробовал разные варианты. Могу сказать, что работает всякое типа geoip:ru, работает domain (с включённым sniff). Но с geoip:antizapret в таком виде даже не создаёт подключение, какая-то ошибка. Принимает только вариант в кавычках, но и тогда нужного эффекта нет.</p></td><td>2024-03-01T11:00:26.050Z</td></tr><tr><td>ValdikSS</td><td><p>А саму базу вы скачали? В приложении вообще есть такая возможность?</p></td><td>2024-03-01T11:49:57.147Z</td></tr><tr><td>Verve</td><td><p>Да, есть. Вставил туда ссылки с github, обе базы скачались.</p></td><td>2024-03-01T15:52:40.268Z</td></tr><tr><td>legiz</td><td><p>Качаете sing-box <a href="https://sing-box.sagernet.org/clients/android/" rel="noopener nofollow ugc">sing-box for Android - sing-box (sagernet.org)</a><br>
+Сразу лучше отключайте ограничение по памяти</p>
+<p>Вот файл конфигурации, туда надо будет поставить свои данные требуемого протокола<br>
+<a class="attachment" href="базы-antizapret-в-клиенте-android-7259/nNiSCkBmPPZxnlVPC2TCSG4X5rz.json">L11Rantizapret.json</a> (5,4 КБ)</p>
+<p>Файл собирал на основе пункта 3 данной статьи: <a href="https://habr.com/ru/articles/756178/" rel="noopener nofollow ugc">Обход блокировок на OpenWRT с помощью Sing-box (vless, vmess, trojan, ss2022) и баз GeoIP, Geosite / Хабр (habr.com)</a></p></td><td>2024-03-09T20:48:05.371Z</td></tr><tr><td>lord(Savely Krasovsky)</td><td><p>Сегодня сделал базу в формате <a href="https://sing-box.sagernet.org/configuration/rule-set/" rel="noopener nofollow ugc">Rule Set</a>, на который предлагают мигрировать новые версии sing-box: <a href="https://github.com/L11R/antizapret-sing-geosite/releases/latest/download/antizapret.srs" rel="noopener nofollow ugc">https://github.com/L11R/antizapret-sing-geosite/releases/latest/download/antizapret.srs</a></p>
+<p>Там сразу и IP, и domain, и domain_suffix. Размер базы уменьшился до 3.5 мегабайт.</p></td><td>2024-03-31T20:40:05.904Z</td></tr><tr><td>lord(Savely Krasovsky)</td><td><p><a class="mention" href="/u/verve">@Verve</a> рекомендую использовать <a href="https://sing-box.sagernet.org/clients" rel="noopener nofollow ugc">официальный клиент sing-box</a>. Пример конфигурации есть в моём репо, можете под свои хотелки поменять outbound-ы.</p></td><td>2024-03-31T20:41:08.470Z</td></tr><tr><td>legiz</td><td><p>Открыл для себя утилиту <a href="https://github.com/KaringX/karing/blob/main/README_ru.md" rel="noopener nofollow ugc">Karing</a> которая работает поверх ядра sing-box<br>
+Оно позволяет настраивать правило трафик по умолчанию - прямой (провайдерский), а остальное правилами настроить.</p>
+<p>Ниже скриншоты настроек в приложении с роутингом списка antizapret</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="базы-antizapret-в-клиенте-android-7259/3d298200372087c30438cee293026e785a5f2863.jpeg" data-download-href="https://ntc.party/uploads/default/3d298200372087c30438cee293026e785a5f2863" title="karing_antizapret_dns"><img src="базы-antizapret-в-клиенте-android-7259/3d298200372087c30438cee293026e785a5f2863_2_230x500.jpeg" alt="karing_antizapret_dns" data-base62-sha1="8J43sqy1RaNosAmPb3rgDDWGSKT" width="230" height="500" srcset="базы-antizapret-в-клиенте-android-7259/3d298200372087c30438cee293026e785a5f2863_2_230x500.jpeg, базы-antizapret-в-клиенте-android-7259/3d298200372087c30438cee293026e785a5f2863_2_345x750.jpeg 1.5x, базы-antizapret-в-клиенте-android-7259/3d298200372087c30438cee293026e785a5f2863_2_460x1000.jpeg 2x" data-dominant-color="F4F5F6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">karing_antizapret_dns</span><span class="informations">1080×2340 155 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="базы-antizapret-в-клиенте-android-7259/31a0cd9f827de09d21843e6b85cf4fa129720855.jpeg" data-download-href="https://ntc.party/uploads/default/31a0cd9f827de09d21843e6b85cf4fa129720855" title="karing_antizapret_checkRU1"><img src="базы-antizapret-в-клиенте-android-7259/31a0cd9f827de09d21843e6b85cf4fa129720855_2_230x500.jpeg" alt="karing_antizapret_checkRU1" data-base62-sha1="751UKBUXxwAO5vehcCwSHZSZW3r" width="230" height="500" srcset="базы-antizapret-в-клиенте-android-7259/31a0cd9f827de09d21843e6b85cf4fa129720855_2_230x500.jpeg, базы-antizapret-в-клиенте-android-7259/31a0cd9f827de09d21843e6b85cf4fa129720855_2_345x750.jpeg 1.5x, базы-antizapret-в-клиенте-android-7259/31a0cd9f827de09d21843e6b85cf4fa129720855_2_460x1000.jpeg 2x" data-dominant-color="EDEEF4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">karing_antizapret_checkRU1</span><span class="informations">1080×2340 104 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="базы-antizapret-в-клиенте-android-7259/1fd6e8e80d6a7ba01f5d488a4ceaa606e88ee215.jpeg" data-download-href="https://ntc.party/uploads/default/1fd6e8e80d6a7ba01f5d488a4ceaa606e88ee215" title="karing_antizapret_checkNTCparty1"><img src="базы-antizapret-в-клиенте-android-7259/1fd6e8e80d6a7ba01f5d488a4ceaa606e88ee215_2_230x500.jpeg" alt="karing_antizapret_checkNTCparty1" data-base62-sha1="4xFf6JuMk3BPTqnGfQTFHl8NDg1" width="230" height="500" srcset="базы-antizapret-в-клиенте-android-7259/1fd6e8e80d6a7ba01f5d488a4ceaa606e88ee215_2_230x500.jpeg, базы-antizapret-в-клиенте-android-7259/1fd6e8e80d6a7ba01f5d488a4ceaa606e88ee215_2_345x750.jpeg 1.5x, базы-antizapret-в-клиенте-android-7259/1fd6e8e80d6a7ba01f5d488a4ceaa606e88ee215_2_460x1000.jpeg 2x" data-dominant-color="ECEDF4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">karing_antizapret_checkNTCparty1</span><span class="informations">1080×2340 128 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="базы-antizapret-в-клиенте-android-7259/963393cf767afdbdc02c809a476acac7f0cb2045.jpeg" data-download-href="https://ntc.party/uploads/default/963393cf767afdbdc02c809a476acac7f0cb2045" title="karing_antizapret_addrule"><img src="базы-antizapret-в-клиенте-android-7259/963393cf767afdbdc02c809a476acac7f0cb2045_2_230x500.jpeg" alt="karing_antizapret_addrule" data-base62-sha1="lqK7IYyXDRQnxfmAIyG62i1aoAJ" width="230" height="500" srcset="базы-antizapret-в-клиенте-android-7259/963393cf767afdbdc02c809a476acac7f0cb2045_2_230x500.jpeg, базы-antizapret-в-клиенте-android-7259/963393cf767afdbdc02c809a476acac7f0cb2045_2_345x750.jpeg 1.5x, базы-antizapret-в-клиенте-android-7259/963393cf767afdbdc02c809a476acac7f0cb2045_2_460x1000.jpeg 2x" data-dominant-color="F4F4F5"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">karing_antizapret_addrule</span><span class="informations">1080×2340 162 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="базы-antizapret-в-клиенте-android-7259/26df2c8cd1adf082e1d5c1ae91844aee1ec723f2.jpeg" data-download-href="https://ntc.party/uploads/default/26df2c8cd1adf082e1d5c1ae91844aee1ec723f2" title="karing_antizapret_rules"><img src="базы-antizapret-в-клиенте-android-7259/26df2c8cd1adf082e1d5c1ae91844aee1ec723f2_2_230x500.jpeg" alt="karing_antizapret_rules" data-base62-sha1="5xSi6vZKn04XTpufgTVtkDB0YgO" width="230" height="500" srcset="базы-antizapret-в-клиенте-android-7259/26df2c8cd1adf082e1d5c1ae91844aee1ec723f2_2_230x500.jpeg, базы-antizapret-в-клиенте-android-7259/26df2c8cd1adf082e1d5c1ae91844aee1ec723f2_2_345x750.jpeg 1.5x, базы-antizapret-в-клиенте-android-7259/26df2c8cd1adf082e1d5c1ae91844aee1ec723f2_2_460x1000.jpeg 2x" data-dominant-color="F0EFF4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">karing_antizapret_rules</span><span class="informations">1080×2340 87.6 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+</details></td><td>2024-05-02T12:18:38.647Z</td></tr>
+    </table>
+      </body>
+    </html>

@@ -1,0 +1,146 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>K14M.ua(Константин)</td><td><p>Антизапрет не позволяет добавлять свои адреса, по этому сейчас разговор не о нем. Я уже настроил обход блокировки на своем роутере в этом обсуждении.</p>
+<aside class="quote" data-post="1" data-topic="3557">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/k14m.ua/48/2001_2.png" class="avatar">
+    <a href="https://ntc.party/t/openwrt/3557">Установка на роутер с OpenWrt</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/5"><span data-category-id="5" style="--category-badge-color: #8C6238; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Proxy and VPN service for Russian censorship circumvention, discussion and official support forum. Обсуждение работы сервиса обхода блокировок России АнтиЗапрет. Новости, уведомления о проблемах и помощь в настройке."><span class="badge-category__name">antizapret.prostovpn.org</span></span></a>
+  </div>
+  <blockquote>
+    Добрый день, недавно руки дошли до OpenWrt. Это прошивка на роутер с возможностью установки прокси и вроде даже VPN. В связи с этим вопрос. А есть подробная инструкция для установки антизапрета на роутер? Я находил инструкцию с настройкой VPN Monster через файл настроек *.ovpn и утилиту OpenVPN которую можно поставить на OpenWrt. Но инструкция 2018 года и довольно запутанная под конец. Не уверен что она актуальна и подойдет для антизапрета.
+  </blockquote>
+</aside>
+
+<p>Но в моем регионе, помимо блокировок РКН есть и местная блокировка для адресов google.con и <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a></p>
+<p>На ПК и на смартфоне у меня установлен WireGuard с файлом настроек который прекрасно работает. Я вроде бы нагуглил инструкции как сделать тоже самое для роутера. Хоть пока и не тестировал. Но одно дело смартфон, там я только для ютуба его использую. А на ПК только иногда когда нужно быстро сменить IP или скачать файл с заблокированного ресурса. Для роутера желательно использовать WireGuard ТОЛЬКО для указанных адресов. Более того, что б он не конфликтовал с уже установленным антизапретом на OpenVPN. Но конкретно об этом в другой раз.</p>
+<p>Насколько мне рассказали на другом форуме, для разблокировки ютуба и гугла недостаточно знать только их адрес. По факту это почти бесполезно. Нужно знать именно IP адреса сайтов, а сайт их может менять произвольно по этому желательно проксировать все возможные. И мне подсказали ресурсы где можно узнать их адреса по крайней мере для США.</p>
+<p><a href="https://asnlookup.com/organization/google/" class="onebox" target="_blank" rel="noopener nofollow ugc">https://asnlookup.com/organization/google/</a><br>
+<a href="https://asnlookup.com/organization/youtube/" class="onebox" target="_blank" rel="noopener nofollow ugc">https://asnlookup.com/organization/youtube/</a></p>
+<p>Но что делать с этими адреса, как именно добавить их в белый список - тишина.</p>
+<p>Спрашиваю у вас. Может кто-то знает решение этой проблемы? Я находил в гугле инструкцию, но она по первых полностью через командную строку выполнена. Во вторых там не ручной ввод адресов в белый список, а срипт для автообновления адресов заблокированных в России РКН что немного не то.</p></td><td>2022-12-18T19:44:45.494Z</td></tr><tr><td>K14M.ua(Константин)</td><td><p>Прошло время, мне так и не ответили. Пытаюсь разобраться сам…</p>
+<p>В конфиге я обратил внимание на строчки</p>
+<pre><code class="lang-auto">AllowedIPs = 0.0.0.0/0
+AllowedIPs = ::/0
+</code></pre>
+<p>“Разрешенные IP-адреса”, это и есть мой белый список? Неужели так просто? Что бы проверить, вписываю в конфиг все найденные адреса. Получается примерно так:</p>
+<pre><code class="lang-auto">[Interface]
+PrivateKey = ██████████████████████████████████████h3G3I=
+# PublicKey = ██████████████████████████████████████OA2zg=
+Address = 172.16.0.2
+Address = 2606:4700:110:8322:1254:4535:9298:6886
+DNS = 1.1.1.1
+
+[Peer]
+PublicKey = ██████████████████████████████████████Pfgyo=
+Endpoint = engage.cloudflareclient.com:2408
+# Endpoint = 162.159.192.9:0
+# Endpoint = [2606:4700:d0::a29f:c009]:0
+AllowedIPs = 64.15.112.0/24,64.15.115.0/24,64.15.118.0/23,64.15.123.0/24,64.15.126.0/24,70.32.133.0/24,103.111.147.0/24,104.237.164.0/24,104.237.167.0/24,104.237.168.0/22,104.237.172.0/24,104.237.190.0/24,136.22.130.0/23,136.22.132.0/23,156.38.33.0/24,156.38.34.0/23,156.38.37.0/24,156.38.39.0/24,176.29.0.0/24,176.29.203.0/24,176.29.205.0/24,176.29.209.0/24,176.29.210.0/24,176.29.215.0/24,176.29.216.0/21,176.29.224.0/21,176.29.253.0/24,176.29.255.0/24,176.126.58.0/24,185.192.249.0/24,185.225.248.0/24,197.230.59.0/24,197.230.70.0/24,208.117.234.0/24,208.117.236.0/24,208.117.238.0/24,208.117.240.0/24,208.117.250.0/24,208.117.252.0/24,208.117.254.0/24
+AllowedIPs = 2001:fb0:109f:12::/64,2001:fb0:109f:14::/64,2001:fb0:109f:18::/63,2001:fb0:109f:8007::/64,2001:fb0:109f:8009::/64,2001:fb0:109f:8010::/64,2001:fb0:109f:8013::/64,2001:fb0:109f:8014::/64,2001:4430:f:104::/64,2001:4430:f:106::/63,2001:4430:f:108::/63,2001:4430:f:10a::/64,2001:4430:f:112::/64,2001:4430:f:114::/64,2001:4430:f:116::/63,2001:4430:f:118::/64,2400:9800:1b:1b::/64,2407:0:0:3d::/64,2620:11a:a000::/48,2620:11a:a011::/48,2620:11a:a01c::/48,2620:11a:a01f::/48,2620:11a:a024::/47,2620:11a:a029::/48,2620:11a:a02a::/48,2620:11a:a02d::/48,2620:11a:a02e::/48,2620:11a:a031::/48,2620:11a:a033::/48,2620:11a:a034::/48,2620:11a:a036::/47,2620:11a:a038::/46,2620:11a:a03c::/48,2620:11a:a0f1::/48,2a00:1588:d801::/48,2a00:1588:d802::/48,2a0f:f4c1:2::/48
+</code></pre>
+<p>Дальше нужно установить “wireguard-tools” ну и “luci-i18n-wireguard-ru” не помешает. Делается это как я помню в Система → Software c подключенным к интернету роутером. Перед поиском нужно нажать “Update lists…” иначе поиск не сработает.</p>
+<p>Казалось бы я установили всего 2 пакета, но во вкладке Installed отображается 5. Все необходимые пакеты устанавливаются вместе (<ins>wireguard</ins>-tools, kmod-<ins>wireguard</ins>, luci-app-<ins>wireguard</ins>, luci-i18n-<ins>wireguard</ins>-ru, luci-proto-<ins>wireguard</ins>)</p>
+<p>Перезагружаю роутер и на всякий случай делаю бэкап. Теперь во вкладке Состояние в самом низу появился пункт WireGuard в котором написано <em>No WireGuard interfaces configured.</em></p>
+<p>По аналогии с OpenVPN делаю все похожим образом.</p>
+<p>Сеть → Интерфейсы → Добавить новый интерфейс…<br>
+Название пишу WARP<br>
+Протокол<br>
+WireGuard VPN<br>
+Создать интерфейс</p>
+<p>Далее на помощь приходит Импорт конфигурации с кнопкой “Загрузка конфигурации…”</p>
+<p>Перетаскиваю туда файл и вижу что все (?) настройки успешно применились?</p>
+<p>Проверяю…</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/f65b113102bcdcd03ccbea99268bf01d6ef8f2db.png" data-download-href="https://ntc.party/uploads/default/f65b113102bcdcd03ccbea99268bf01d6ef8f2db" title="image"><img src="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/f65b113102bcdcd03ccbea99268bf01d6ef8f2db.png" alt="image" data-base62-sha1="z9mzebWmuGvnvkA3BNsv2mUNBp1" width="581" height="500" data-dominant-color="292828"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">888×763 38.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p><strong>Приватный ключ</strong> вставился из строчки "[Interface] PrivateKey = "<br>
+<strong>Публичный ключ</strong> из "[Interface]# PublicKey = "<br>
+<strong>Порт для входящих соединений</strong> пустой, но и в конфиге его вроде нет<br>
+<strong>IP-адреса</strong> вставился из “[Interface] Address = 2606:4700:110:8322:1254:4535:9298:6886”, то есть только v6? Не знаю обязательно ли это, но вручную и v4 добавлю “Address = 172.16.0.2”</p>
+<p><img src="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/87c4d45b633cb4d08c7403c21b5c2f4727c50312.png" alt="image" data-base62-sha1="jn4a9GNcM7s3Jw1Pk7nuDKaWKmS" width="432" height="117"></p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/8a14cc4918bba105e1b9344651f1905c661bfe16.png" data-download-href="https://ntc.party/uploads/default/8a14cc4918bba105e1b9344651f1905c661bfe16" title="image"><img src="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/8a14cc4918bba105e1b9344651f1905c661bfe16_2_356x499.png" alt="image" data-base62-sha1="jHwrVnvDNjExoPFR4fsxbtIjMDs" width="356" height="499" srcset="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/8a14cc4918bba105e1b9344651f1905c661bfe16_2_356x499.png, белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/8a14cc4918bba105e1b9344651f1905c661bfe16_2_534x748.png 1.5x, белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/8a14cc4918bba105e1b9344651f1905c661bfe16.png 2x" data-dominant-color="292929"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">661×926 45.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Во вкладке Дополнительные настройки<br>
+<strong>Использовать собственные DNS сервера</strong> вставился из “[Interface] DNS = 1.1.1.1”<br>
+И тут вроде все</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/c94fd1faa5e5c978fa80700fc36c79ba2fc937de.png" data-download-href="https://ntc.party/uploads/default/c94fd1faa5e5c978fa80700fc36c79ba2fc937de" title="image"><img src="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/c94fd1faa5e5c978fa80700fc36c79ba2fc937de.png" alt="image" data-base62-sha1="sISZ6HUTYyYktKgh9rYb2fvicSq" width="690" height="371" data-dominant-color="292A2A"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">885×476 32.2 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Во вкладке Узлы (peers)<br>
+Добавилась новая настройка, жму “Изменить” что глянуть что внутри:<br>
+<strong>Описание</strong> warp.conf, это название того файлика что я загружал<br>
+<strong>Публичный ключ</strong> вставился из “[Peer] PublicKey =”<br>
+<strong>Разрешенные IP-адреса</strong>, сюда вставилось все то что я в "[Peer] AllowedIPs = " прописывал. Но опять же, только v6<br>
+<strong>Конечный узел</strong> вставился из “[Peer] Endpoint = <a href="http://engage.cloudflareclient.com:2408" rel="noopener nofollow ugc">engage.cloudflareclient.com:2408</a>” но только до двоеточия<br>
+<strong>Порт конечного узла</strong> вставился из “[Peer] Endpoint = <a href="http://engage.cloudflareclient.com:2408" rel="noopener nofollow ugc">engage.cloudflareclient.com:2408</a>” но только то что после двоеточия</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/127cf8d391482c1d628861b4a74f86e0cdcad938.png" data-download-href="https://ntc.party/uploads/default/127cf8d391482c1d628861b4a74f86e0cdcad938" title="image"><img src="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/127cf8d391482c1d628861b4a74f86e0cdcad938_2_425x500.png" alt="image" data-base62-sha1="2DylqRbYofnxI44eAMpGOMGGrFe" width="425" height="500" srcset="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/127cf8d391482c1d628861b4a74f86e0cdcad938_2_425x500.png, белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/127cf8d391482c1d628861b4a74f86e0cdcad938_2_637x750.png 1.5x, белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/127cf8d391482c1d628861b4a74f86e0cdcad938_2_850x1000.png 2x" data-dominant-color="2C2C2C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">891×1048 57.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>И больше изменений не заметил.</p>
+<p>Назрел вопрос. Программа случайно или намеренно игнорирует IP v4 адреса? Стоит ли мне их вручную добавить или нет? И если стоит, вставить их в этот же файл или создать новый?</p>
+<p>Пожалуй добавлю их, в этот же файл.</p>
+<p>Применяю все настройки.</p>
+<p>В инструкции что я нашел написано так же остановить интерфейс WAN6. У меня эта кнопка не активна. Возможно инструкция только для конфига с IPv4 а у меня есть и v6, по этому то и не работает. Хз…</p>
+<p>Теперь Сеть → Межсетевой экран → Добавить<br>
+<strong>Название</strong> ну например WG0<br>
+<strong>Input</strong> reject<br>
+<strong>Output</strong> accept<br>
+<strong>Forward</strong> reject<br>
+<strong>Masquerading</strong> галочка<br>
+<strong>MSS clamping</strong> галочка<br>
+<strong>Covered networks</strong> тот самый интерфейс WARP который я создал на прошлом шаге<br>
+<strong>Allow forward from <em>source zones</em> :</strong> lan</p>
+<p>После сохранения вышло так</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/73bb9eba5113398b72e3672083e30b2d1f546870.png" data-download-href="https://ntc.party/uploads/default/73bb9eba5113398b72e3672083e30b2d1f546870" title="image"><img src="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/73bb9eba5113398b72e3672083e30b2d1f546870_2_690x164.png" alt="image" data-base62-sha1="gvOSKStIbLB0lXoCI8xO4fefjHO" width="690" height="164" srcset="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/73bb9eba5113398b72e3672083e30b2d1f546870_2_690x164.png, белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/73bb9eba5113398b72e3672083e30b2d1f546870.png 1.5x, белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/73bb9eba5113398b72e3672083e30b2d1f546870.png 2x" data-dominant-color="2B2C2C"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">955×228 18.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Снова применяю настройки</p>
+<p>Возвращаюсь в интерфейсы<br>
+Сеть → Интерфейсы → WAN → Изменить<br>
+Во вкладке Дополнительные настройки убираю галочку <strong>Использовать объявляемые узлом DNS сервера</strong> и вписываю свой из конфига. Хз зачем. В интерфейсе <strong>WARP</strong> вроде бы тоже самое прописано, может не стоит еще раз это делать?</p>
+<p><img src="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/5df68e4e1958158754544ffd607b5525c7c146d5.png" alt="image" data-base62-sha1="dpeEc0Scx9JF9p6r6mGH6ibUcgl" width="654" height="135"></p>
+<p>В инструкции WAN6 отключали, у меня же он работает. Так что наверно и там это пропишу…</p>
+<p>Снова применяю настройки</p>
+<p>Дальше в инструкции есть пункт <strong>Добавить Kill Switch (Опционально)</strong>, но так как он не обязателен то и не буду делать. Да и не ясно че это и зачем…</p>
+<p>Перезагружаю роутер…<br>
+̶И̶ ̶у̶ ̶м̶е̶н̶я̶ ̶у̶с̶п̶е̶ш̶н̶о̶ ̶п̶р̶о̶п̶а̶л̶ ̶и̶н̶т̶е̶р̶н̶е̶т̶!̶<br>
+Спустя какое то время интернет появился. Похоже настройки долго применяются.</p>
+<p>Теперь во вкладке Состояние → WireGuard Status<br>
+Какой то узел отображается. Но как проверить что все работает? Пытаюсь зайти на ютуб без всяких VPN и прокси…</p>
+<p>Ничего не выходит.<br>
+В одном браузере пишет</p>
+<p><img src="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/105b4d0f2bd3c1ea5dba2dfccd2e93f8a0cb7d41.png" alt="image" data-base62-sha1="2kHfz10SSrTJhvyEhCfLfIZneSt" width="540" height="254"></p>
+<p>В другом пишет другое</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/a7704b9f6a50a18dbf76f33cec14142278188679.png" data-download-href="https://ntc.party/uploads/default/a7704b9f6a50a18dbf76f33cec14142278188679" title="image"><img src="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/a7704b9f6a50a18dbf76f33cec14142278188679_2_690x436.png" alt="image" data-base62-sha1="nTekq1VMeUbUl5jjRjyGj2rXICZ" width="690" height="436" srcset="белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/a7704b9f6a50a18dbf76f33cec14142278188679_2_690x436.png, белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/a7704b9f6a50a18dbf76f33cec14142278188679.png 1.5x, белый-список-или-выборочный-обход-блокировки-с-wireguard-на-роутере-в-open-wrt-3632/a7704b9f6a50a18dbf76f33cec14142278188679.png 2x" data-dominant-color="201F22"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">809×512 18.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Вывод. Или я чет не так настроил, что вполне вероятно. Или я указал не те, или не все IP адреса ютуба.</p>
+<p>В любом случае надеюсь на помощь…</p></td><td>2022-12-24T14:11:30.469Z</td></tr>
+    </table>
+      </body>
+    </html>

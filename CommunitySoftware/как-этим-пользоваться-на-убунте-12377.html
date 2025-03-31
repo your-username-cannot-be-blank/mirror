@@ -1,0 +1,153 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>как-этим-пользоваться-на-убунте-12377</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>xavier_edgardo_hruby(Xavier Edgardo Hrubý)</td><td><p>Есть нужда запускать эквивалент GDPI на линуксовой машине, но непонятно что делать при запуске бинарника. Стандартный запуск из терминала не пишет никаких сообщений, так что неясно вообще работает или нет. Дискорд не открывается.<br>
+Почитал обсуждение и понял, что он стартует НОСКОВОЙ сервер на порте 1080 (и схожий пункт в настройках прокси фурикфокса обрел некий смысл, а не просто очередной баззворд сетевого стэка).<br>
+Запилил <code>.desktop</code> файл такого вида, чтобы не прокидывать аргументы ручками :</p>
+<pre><code class="lang-auto">#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.5
+Type=Application
+Name=ByeDPI
+Comment=Bypass DPI
+Terminal=true
+Exec=&lt;path_to_binary&gt; --hosts ./hosts.txt --auto=none --disorder 3
+Path=&lt;path_to_binary_dirname&gt;
+</code></pre>
+<p><code>hosts.txt</code>:</p>
+<pre><code class="lang-auto">protonvpn.com
+repo.protonvpn.com
+signal.org
+updates.signal.org
+cdn.discordapp.com
+discord.com
+discord.gg
+discordapp.io
+discordapp.net
+discord.media
+discordcdn.com
+discordstatus.com
+discord-attachments-uploads-prd.storage.googleapis.com
+</code></pre>
+<p>Запустил программу и добавил адрес прокси в фуррифоксе. Дискорд всё равно не работает.<br>
+Также попытался запустить <code>apt</code>, которому нужно стучаться в протоновскую и сигналовскую репу:</p>
+<pre data-code-wrap="sh"><code class="lang-sh">export http_proxy="socks5h://127.0.0.1:1080" https_proxy="socks5h://127.0.0.1:1080"
+sudo apt update
+</code></pre>
+<p>И тоже без успеха.<br>
+ЧЯДНТ?</p></td><td>2024-10-28T18:35:28.880Z</td></tr><tr><td>us3r</td><td><p>Скорее всего в вашем вопросе стоит учесть следующие моменты:</p>
+<ul>
+<li>Необходимо подобрать параметры, при которых будет доступ к необходимым сайтам (т.е. не факт что <code>--disorder 3 </code> достаточно для списка сайтов из вашего файла <code>hosts.txt</code> для вашего провайдера).</li>
+<li>Если правильно понимаю, <code>–auto=none</code> позволяет применить разные стратегии к разным спискам сайтов (к разным <code>hosts.txt</code>).</li>
+</ul>
+<p>Т.е. все что до <code>–auto=none</code> применяется для одного списка сайтов, а все что после (или до следующего <code>–auto=none</code> ) для другого списка сайтов.<br>
+В вашем примере  <code>Exec=&lt;path_to_binary&gt; --hosts ./hosts.txt --auto=none --disorder 3</code>  для <code>hosts.txt </code> не применяются ни какие параметры кроме дефолтных (скорее всего только ip и port), а  <code>--disorder 3 </code> применяется к остальным сайтам.</p></td><td>2024-10-29T04:05:24.626Z</td></tr><tr><td>spv82</td><td><aside class="quote no-group" data-username="xavier_edgardo_hruby" data-post="1" data-topic="12377">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/71e660/48.png" class="avatar"> xavier_edgardo_hruby:</div>
+<blockquote>
+<p>Запилил <code>.desktop</code> файл такого вида, чтобы не прокидывать аргументы ручками :</p>
+</blockquote>
+</aside>
+<p>Можно просто на systemd повесить <a href="https://github.com/hufrea/byedpi/tree/main/dist/linux" class="inline-onebox" rel="noopener nofollow ugc">byedpi/dist/linux at main · hufrea/byedpi · GitHub</a></p>
+<aside class="quote no-group" data-username="xavier_edgardo_hruby" data-post="1" data-topic="12377">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/71e660/48.png" class="avatar"> xavier_edgardo_hruby:</div>
+<blockquote>
+<p>Также попытался запустить <code>apt</code>, которому нужно стучаться в протоновскую и сигналовскую репу:</p>
+</blockquote>
+</aside>
+<p>Для этого есть <code>/etc/apt/apt.conf.d</code></p></td><td>2024-10-29T05:53:40.484Z</td></tr><tr><td>sakontwist</td><td><p>Элементарный юнит можно запилить</p>
+<pre><code class="lang-auto">[Unit]
+Description=Oneshot service for ciaDPI
+After=network.target
+Before=xray.service
+
+[Service]
+Type=exec
+RemainAfterExit=yes
+ExecStart=/opt/byedpi/ciadpi-x86_64 -p 1100 --proto=http,tls --hosts /opt/byedpi/do.txt -d +s --auto=torst -a1 -d1 -s4 --auto=none
+ExecStop=/bin/true
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p>Только нужно учитывать, что byedpi под linux может далеко не все, что может GDPI, потому что byedpi не оперирует очередями пакетов. Если сравнивать с zapret, то это только tpws (без nfq).</p></td><td>2024-10-29T08:26:21.774Z</td></tr><tr><td>denium</td><td><p>Чтобы использовать прокси в apt, создайте файл<br>
+<code>sudo nano /etc/apt/apt.conf.d/10proxy</code><br>
+10 означает приоритет, чем ниже цифра, тем выше приоритет.<br>
+С содержимым</p>
+<pre><code class="lang-auto">Acquire::http::Proxy "http://127.0.0.1:8888/";
+Acquire::https::Proxy "http://127.0.0.1:8888/";
+</code></pre>
+<p>http::Proxy и https::Proxy значит протоколы URL адреса репозитория, а адрес прокси всегда http, потому что локально соединение с прокси устанавливается нешифрованным.<br>
+Это http прокси, насчет <a href="https://askubuntu.com/questions/35223/syntax-for-socks-proxy-in-apt-conf" rel="noopener nofollow ugc">socks</a> не знаю. И поддерживает ли его apt.</p></td><td>2024-10-29T08:45:58.532Z</td></tr><tr><td>xavier_edgardo_hruby(Xavier Edgardo Hrubý)</td><td><blockquote>
+<p>В вашем примере <code>Exec=&lt;path_to_binary&gt; --hosts ./hosts.txt --auto=none --disorder 3</code> для <code>hosts.txt </code> не применяются ни какие параметры кроме дефолтных (скорее всего только ip и port), а <code>--disorder 3 </code> применяется к остальным сайтам.</p>
+</blockquote>
+<p>Таки да, без <code>--auto=none</code> работает нормально.</p></td><td>2024-11-10T10:41:30.635Z</td></tr><tr><td>xavier_edgardo_hruby(Xavier Edgardo Hrubý)</td><td><blockquote>
+<p>Можно просто на systemd повесить</p>
+</blockquote>
+<p>Мне наоборот надо, чтобы консолька вызывалась одной кнопкой и при её закрытии программа закрывалась, а не сервис какой-то там вспоминать потом как включать/выключать. Плюс для его запуска нужны админские привилегии, что как-то не сильно сходится с программой, которая без них работает.</p></td><td>2024-11-10T10:46:17.017Z</td></tr><tr><td>vehametra(Vehametra)</td><td><p>Я запускаю tmux  сессию через .desktop  файл в  .config/autostart. Но можно сессию  tmux  запустить и как сервис  systemd.</p>
+<p><em>~/.config/autostart/session_start_and_show.desktop</em></p>
+<pre><code class="lang-auto">[Desktop Entry]
+Version=1.0
+Type=Application
+Name=session_start_and_show
+Comment=
+Exec=~/.local/mon_session_start.sh
+Icon=go-up
+Path=~
+Terminal=false
+StartupNotify=false
+</code></pre>
+<ul>
+<li>~/.local/mon_session_start.sh*</li>
+</ul>
+<pre><code class="lang-auto">#!/bin/bash
+# xfce session start tewrminal
+tmux new-session -d -s 000 
+tmux send-keys -t 000:0 'mtr test.OPERATOR.ru' C-m
+tmux send-keys -t 000:0 "DD" C-m
+tmux split-window -v -t 000:0
+tmux resize-pane -y 11 -t 000:0
+#tmux send-keys -t 000:0 '~/go/bin/spoof-dpi -addr "0.0.0.0" -no-banner  -window-size 2 -timeout 3333 -debug' C-m
+tmux send-keys -t 000:0  'cd ~/exp/spf-dpi-run/; grc -ec color.grc ./ciadpi  -F -S  -H hosts.txt  -s1:3:1 -q22 -r+hm  -Ats  --tls-sni www.google.com -T5 -d1:3:1+h  -f-1 -r1+sm -Ast -o1 -o25+s -r1+s -f-2 -r0+hm --tls-sni www.google.com   -An -s1:3:1 -q2 -r+hm  -As -f-1 -s:1:2:3 -x1' C-m
+
+xfce4-terminal --command="tmux attach-session -t 000"
+</code></pre></td><td>2024-11-18T18:07:01.826Z</td></tr><tr><td>anon9001(anon)</td><td><p>У меня я помню тимакс не хотел работать если я его после DE запускал, а потом если ты убьешь DE или драйвер скрашится, то сессия тимакса почему то тоже ложится. В WM этого уже не было и сессии нормально сохранялись.</p></td><td>2024-11-18T18:27:01.401Z</td></tr>
+    </table>
+      </body>
+    </html>

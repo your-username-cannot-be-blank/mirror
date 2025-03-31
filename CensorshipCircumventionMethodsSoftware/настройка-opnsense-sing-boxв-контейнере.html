@@ -1,0 +1,165 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>настройка-opnsense-sing-boxв-контейнере</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>metabidlo</td><td><p>Стоит два тонких клиента.</p>
+<ol>
+<li>opnsense (192.168.51.1)</li>
+<li>proxmox</li>
+</ol>
+<p>в контейнере proxmox развернул alpine + sing-box(192.168.51.41)<br>
+добавил правила NAT в opnsense<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="настройка-opnsense-sing-boxв-контейнере/fb6937f31e76dea6c30fc6ec0ce971dd343d273a.jpeg" data-download-href="https://ntc.party/uploads/default/fb6937f31e76dea6c30fc6ec0ce971dd343d273a" title="sgfdsgsdgs"><img src="настройка-opnsense-sing-boxв-контейнере/fb6937f31e76dea6c30fc6ec0ce971dd343d273a_2_690x175.jpeg" alt="sgfdsgsdgs" data-base62-sha1="zS5h2j3GNGudpzXuYlEPIfSLFt8" width="690" height="175" srcset="настройка-opnsense-sing-boxв-контейнере/fb6937f31e76dea6c30fc6ec0ce971dd343d273a_2_690x175.jpeg, настройка-opnsense-sing-boxв-контейнере/fb6937f31e76dea6c30fc6ec0ce971dd343d273a_2_1035x262.jpeg 1.5x, настройка-opnsense-sing-boxв-контейнере/fb6937f31e76dea6c30fc6ec0ce971dd343d273a_2_1380x350.jpeg 2x" data-dominant-color="F7F7F6"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">sgfdsgsdgs</span><span class="informations">1408×358 81.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>подкинул конфиг в sing-box</p>
+<pre><code class="lang-auto">{
+    "log": {
+        "level": "info",
+        "timestamp": true
+    },
+    "dns": {
+        "servers": [
+            {
+                "tag": "local-dns",
+                "address": "local",
+                "detour": "direct-out"
+            },
+            {
+                "tag": "cloudflare-dns",
+                "address": "https://1.1.1.1/dns-query",
+                "address_resolver": "local-dns",
+                "detour": "vless-out"
+            }
+        ],
+        "rules": [
+            {
+                "domain": "your.server.example.com",
+                "server": "local-dns"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "type": "direct",
+            "tag": "direct-in",
+            "listen": "192.168.51.41",
+            "listen_port": 8080
+        }
+    ],
+    "outbounds": [
+        {
+            "type": "direct",
+            "tag": "direct-out"
+        },
+        {
+            "type": "vless",
+            "tag": "vless-out",
+            "server": "111.111.234.82",
+            "server_port": 443,
+            "uuid": "uuid",
+            "flow": "xtls-rprx-vision",
+            "tls": {
+                "enabled": true,
+                "server_name": "yahoo.com",
+                "utls": {
+                    "enabled": true
+                },
+                "reality": {
+                    "enabled": true,
+                    "public_key": "public_key",
+                    "short_id": "short_id"
+                }
+            }
+        },
+        {
+            "type": "dns",
+            "tag": "dns-out"
+        }
+    ],
+    "route": {
+        "rules": [
+            {
+                "outbound": "vless-out"
+            }
+        ]
+    }
+}
+
+
+</code></pre>
+<p>идея в том что я хочу заблоченный трафик http/https отправлять в контейнер с sing-box, что бы он дальше уже проксировал его через vless и тд<br>
+итог, правила вроде правильно перенаправляют запросы, а вот sing-box бесконечно спамит запросами(я так понимаю это петля)<br>
+я не особо в этом шарю, но может кто то подскажет в чем косяк? заранее всем спасибо</p></td><td>2024-11-12T05:10:46.283Z</td></tr><tr><td>MasterYoba</td><td><p>Боюсь без полной информации об интерфейсах и маршрутах обоих устройств сложно что-то сказать.</p>
+<p>И еще, я не уверен, что механизм добавления доменов ютуба в правило ната работает так как вы хотите. Домены надо фильтровать на синг боксе а не на фаерволе</p></td><td>2024-11-12T08:34:22.356Z</td></tr><tr><td>metabidlo</td><td><aside class="quote no-group" data-username="MasterYoba" data-post="2" data-topic="13018">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/masteryoba/48/6182_2.png" class="avatar"> MasterYoba:</div>
+<blockquote>
+<p>тах обоих устройс</p>
+</blockquote>
+</aside>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="настройка-opnsense-sing-boxв-контейнере/549521d11617c7f0934212f58decee608c77717d.jpeg" data-download-href="https://ntc.party/uploads/default/549521d11617c7f0934212f58decee608c77717d" title="Без имени"><img src="настройка-opnsense-sing-boxв-контейнере/549521d11617c7f0934212f58decee608c77717d_2_690x257.jpeg" alt="Без имени" data-base62-sha1="c4fCxhrp2UAhCj0dGUh0budtQUR" width="690" height="257" srcset="настройка-opnsense-sing-boxв-контейнере/549521d11617c7f0934212f58decee608c77717d_2_690x257.jpeg, настройка-opnsense-sing-boxв-контейнере/549521d11617c7f0934212f58decee608c77717d_2_1035x385.jpeg 1.5x, настройка-opnsense-sing-boxв-контейнере/549521d11617c7f0934212f58decee608c77717d_2_1380x514.jpeg 2x" data-dominant-color="FAFAFA"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Без имени</span><span class="informations">1530×572 76 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+пробовал добавлять домены в NAT с перенаправлением в пустоту и вроде работало, пока правило включено ютуб не открывается, как таколько отключаю правило трафик идет, но потом уходит в петлю.<br>
+трафик до sing-box доходит, тк бесконечные запросы вижу в логах sing-box</p></td><td>2024-11-12T14:45:42.526Z</td></tr><tr><td>MasterYoba</td><td><p>Мне кажется вам вместо инбаунда direct надо использовать tproxy с тем же самым listen_port<br>
+В случае с direct он не может знать, какой там был исходный порт (443)</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://sing-box.sagernet.org/configuration/inbound/tproxy/">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/1/19db269fb603eecca718a1d5ac9653f35daf0151.svg" class="site-icon" data-dominant-color="" width="463" height="500">
+
+      <a href="https://sing-box.sagernet.org/configuration/inbound/tproxy/" target="_blank" rel="noopener nofollow ugc">sing-box.sagernet.org</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://sing-box.sagernet.org/configuration/inbound/tproxy/" target="_blank" rel="noopener nofollow ugc">TProxy - sing-box</a></h3>
+
+  <p>The universal proxy platform.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Это что касается текущей схемы. А так я бы советовал отказаться от натирования вообще, это какой-то странный подход. Вместо правила nat в opnsense настраивается PBR правило фаервола, где dst можно так же указать ваши youtubeDomains, а шлюзом будет синг бокс (потребуется отдельно создать новый шлюз). А на сингбоксе сделать инбаунд tun.</p></td><td>2024-11-12T18:15:05.366Z</td></tr>
+    </table>
+      </body>
+    </html>

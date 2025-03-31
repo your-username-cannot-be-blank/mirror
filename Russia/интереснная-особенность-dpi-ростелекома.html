@@ -1,0 +1,61 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>интереснная-особенность-dpi-ростелекома</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>У системы блокировки сайтов <strong>Ростелекома</strong> есть интересная деталь: соединения на заблокированные <strong>IP-адреса</strong> успешно устанавливаются, если размер пакета TCP SYN меньше 62 байт. При этом соединение идет через DPI (видно по дополнительному хопу в TTL), разрывается через 10 секунд неактивности, и пакеты TCP RST всё равно присылаются клиенту (их нужно блокировать, чтобы способ сработал). SYN-пакеты размером более 62 байта отбрасываются, ACK на них не приходит. Предполагаю, это какая-то дополнительная система обнаружения трафика, которая перенаправляет соединение через другой маршрут, т.к. до этого у Ростелекома был только «пассивный» (out-of-band) DPI, а это похоже на «активный» (in-band).<br>
+Как бы то ни было, одновременной блокировкой TCP RST от DPI (см. правила ниже) и уменьшением размера TCP SYN можно обойти <em>сетевые</em> блокировки TCP на Ростелекоме, независимо от порта и протокола.</p>
+<p>Чтобы уменьшить TCP SYN до 62 байт <strong>в Linux</strong>, достаточно отключить две TCP-опции: TCP Timestamps и TCP SACK:<br>
+Создать /etc/sysctl.d/anticensorship.conf с текстом:</p>
+<pre><code class="lang-auto"># Rostelecom anti-censorship
+net.ipv4.tcp_timestamps=0
+net.ipv4.tcp_sack=0
+</code></pre>
+<p>И применить:</p>
+<pre><code class="lang-auto"># sysctl --system
+</code></pre>
+<p>Это будет работать только непосредственно на компьютере, с которого устанавливается TCP-соединение. Если добавить эти параметры на маршрутизатор, и попытаться загрузить заблокированный сайт на компьютере, например, с Windows, то ничего не поменяется — сайт не откроется.<br>
+Чтобы настроить всё только на маршрутизаторе, нужно, вероятно, использовать TCP-прокси, чтобы сам маршрутизатор открывал TCP-соединения. Я серьезных проектов TCP-прокси не знаю, но tpws из <a href="https://github.com/bol-van/zapret/tree/master/tpws" rel="nofollow noopener">zapret</a> должен подойти.</p>
+<p>Правила iptables для Linux, для блокировки TCP RST:</p>
+<pre><code class="lang-auto">iptables -t mangle -I FORWARD -p tcp -m tcp --sport 80 -m u32 --u32 "0x1e&amp;0xffff=0x5010&amp;&amp;0x73=0x7761726e&amp;&amp;0x77=0x696e672e&amp;&amp;0x7B=0x72742e72" -m comment --comment "Rostelecom HTTP FORWARD" -j DROP
+iptables -t mangle -I FORWARD -p tcp -m connbytes --connbytes 2: --connbytes-mode packets --connbytes-dir reply -m u32 --u32 "0x4=0x10000 &amp;&amp; 0x1E&amp;0xffff=0x5004" -m comment --comment "Rostelecom non-HTTP FORWARD" -j DROP
+
+iptables -t mangle -I INPUT -p tcp -m tcp --sport 80 -m u32 --u32 "0x1e&amp;0xffff=0x5010&amp;&amp;0x73=0x7761726e&amp;&amp;0x77=0x696e672e&amp;&amp;0x7B=0x72742e72" -m comment --comment "Rostelecom HTTP OUTPUT" -j DROP
+iptables -t mangle -I INPUT -p tcp -m connbytes --connbytes 2: --connbytes-mode packets --connbytes-dir reply -m u32 --u32 "0x4=0x10000 &amp;&amp; 0x1E&amp;0xffff=0x5004" -m comment --comment "Rostelecom non-HTTP OUTPUT" -j DROP
+</code></pre>
+<p><strong>Windows 7</strong>, после неудачных попыток установки соединения с большим SYN-пакетом, отправляет пакет без TCP SACK, из-за чего он получается равен 62 байтам, и соединение со включенным GoodbyeDPI устанавливается в течение нескольких десятков секунд. <strong>Windows 10</strong> не обладает такой особенностью, и соединение не будет установлено.</p></td><td>2019-09-20T11:06:46.974Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><p>У РТК есть и другая странная деталь: TCP порты 1-9 у некоторых из заблокированных IP доступны без каких-либо ухищрений.</p></td><td>2019-09-24T21:29:49.066Z</td></tr>
+    </table>
+      </body>
+    </html>

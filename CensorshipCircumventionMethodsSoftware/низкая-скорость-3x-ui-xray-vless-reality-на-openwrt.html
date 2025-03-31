@@ -1,0 +1,105 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>низкая-скорость-3x-ui-xray-vless-reality-на-openwrt</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Vobla</td><td><p>Всем привет. Имею роутер ASUS RT-AX53U, mtk7621, OpenWrt 23.05.4, скорость 300 Мбит/с.</p>
+<p>Поднял 3x-ui Xray VLESS Reality у одного европейского хостера, для подключения с ПК и 2 телефонов использую Hiddify. По проводу получаю около 120мб, по wifi 6 около 60мб.</p>
+<p>Захотел развернуть sing-box, чтобы выборочно роутить трафик, руководствовался этой статьей <a href="https://habr.com/ru/articles/756178/" rel="noopener nofollow ugc">Обход блокировок на OpenWRT с помощью Sing-box (vless, vmess, trojan, ss2022) и баз GeoIP, Geosite / Хабр (habr.com)</a>, получил скорость по проводу около 15-20мб и около 10-15 по wifi.</p>
+<p>Подумал, что виноват sing-box (тестировался как интерфейсе singtun) и решил поднять голый xray-core в режиме сокс прокси. Набросал простой конфиг и тестировал всё через curl <a href="http://212.183.159.230/1GB.zip" rel="noopener nofollow ugc">http://212.183.159.230/1GB.zip</a> -o /dev/null --socks5 127.0.0.1:1080, получил 2323k, когда как с windows с подключенным Hiddify я получаю через curl 30M.</p>
+<p>Мой xray-core конфиг</p>
+<pre><code class="lang-auto">{
+  "log": {
+    "loglevel": "info"
+  },
+  "inbounds": [
+    {
+      "port": 1080,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth",
+        "udp": false,
+        "ip": "127.0.0.1"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "",
+            "port": ,
+            "users": [
+              {
+                "id": "",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "publicKey": "",
+          "shortId": "",
+          "serverName": "",
+          "fingerprint": ""
+        },
+        "tlsSettings": {
+          "serverName": "",
+          "utls": {
+            "enabled": true,
+            "fingerprint": ""
+          }
+        }
+      }
+    }
+  ]
+}
+</code></pre>
+<p>Я где-то очень ошибся с настройкой Openwrt или сам роутер не в состоянии выдать хотя бы 50мб по vless? Если нужны какие-то конфиги, то только скажите.</p></td><td>2024-10-16T11:45:50.839Z</td></tr><tr><td>kn1xtoqtxj</td><td><p><a href="https://habr.com/ru/articles/842210/" rel="noopener nofollow ugc">Тут</a> можно посмотреть инфу по mt7621.</p>
+<blockquote>
+<p>Главный минус - это то, что для проксей типа Shadowsocks, VLESS и подобных <a href="https://youtu.be/p58bu-refXM" rel="noopener nofollow ugc">даёт 20-30 Mb/s</a>. Максимум, который я смог из него выжать при tun, был 40 Mb/s. Но в режиме tproxy c VLESS+XTLS для сайтов с TLS 1.3 выдаёт 100Mb/s.</p>
+</blockquote></td><td>2024-10-16T12:14:00.191Z</td></tr><tr><td>Vobla</td><td><p>Спасибо, ответ исчерпывающий . Видимо всё же ошибся в выборе роутера. У меня не так много опыта в работе с vless, поэтому лучше спрошу.</p>
+<p>В 3x-ui при выборе flow как xtls-rprx-vision мне нужно нажимать чекбокс Transparent Proxy и что-то там настраивать или вся настройка будет происходить в конфиге sing-box/xray-core?</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="низкая-скорость-3x-ui-xray-vless-reality-на-openwrt/f3caea17626f31a492fdca044a2296e5e97c2572.png" data-download-href="https://ntc.party/uploads/default/f3caea17626f31a492fdca044a2296e5e97c2572" title="image"><img src="низкая-скорость-3x-ui-xray-vless-reality-на-openwrt/f3caea17626f31a492fdca044a2296e5e97c2572.png" alt="image" data-base62-sha1="yMGLA6BUVY3bxuFqPpve5FVNRHc" width="431" height="500" data-dominant-color="1C1E1F"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">451×523 9.03 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-10-16T18:00:13.686Z</td></tr>
+    </table>
+      </body>
+    </html>

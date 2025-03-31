@@ -1,0 +1,111 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>a-practical-guide-to-defend-against-the-gfws-latest-active-probing</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>gfw.report(gfw.report)</td><td><p><strong>Authors</strong>: Anonymous, Anonymous, Anonymous, David Fifield, Amir Houmansadr</p>
+<p>Date: Tuesday, January 26, 2021</p>
+<p><a href="https://gfw.report/blog/ss_advise/zh/" rel="noopener nofollow ugc">中文版: 防御GFW主动探测的实用指南</a></p>
+<p>This report appeared first on <a href="https://gfw.report" rel="noopener nofollow ugc">GFW Report</a>. We also maintain an up-to-date copy of the report on APNIC blog, net4people and ntc.party.</p>
+<hr>
+<p>In our recent IMC’20 work (<a href="https://gfw.report/publications/imc20/data/paper/shadowsocks.pdf" rel="noopener nofollow ugc">paper</a>, <a href="https://gfw.report/talks/imc20/en/" rel="noopener nofollow ugc">talk</a>), we provided insight into the combination of <em>traffic analysis</em> and <em>active probing</em> techniques that the Great Firewall uses to detect and block Shadowsocks servers.</p>
+<p>In this short post, we provide practical suggestions for non-technical users and circumvention tool developers to prevent their circumvention servers from being detected and blocked. We also introduce the mitigation to <a href="https://www.usenix.org/system/files/sec21summer_len.pdf#page=13" rel="noopener nofollow ugc">partitioning oracle attacks</a> newly demonstrated by Len et al… If your Shadowsocks servers still get blocked, even when you follow the instructions below, please <a href="https://gfw.report/" rel="noopener nofollow ugc">report the block to GFW Report</a> and/or the corresponding developers.</p>
+<h2>For users</h2>
+<p>According to our own testing, and reports from developers, with proper configurations, there are at least two Shadowsocks implementations whose latest releases are resistant to the GFW’s active probes: <em>Shadowsocks-libev</em> and <em>OutlineVPN</em>.</p>
+<h3>Advice on using Shadowsocks-libev</h3>
+<p>If you decide to use Shadowsocks-libev, we strongly encourage you to follow this <a href="https://gfw.report/blog/ss_tutorial/en/" rel="noopener nofollow ugc">tutorial on how to install, configure and maintain a Shadowsocks-libev server</a>. We commit to make that tutorial up-to-date and provide latest best practices to defend against emerging attacks against Shadowsocks.</p>
+<p>If you already have a Shadowsocks-libev server installed, check the rules below to see if your servers have been properly configured.</p>
+<p>As of January 2021, to prevent your <em>Shadowsocks-libev</em> server from being blocked, you have to:</p>
+<ol>
+<li>Ensure your server version is <code>v3.3.1</code> or above. You can check the server version with the command <code>ss-server -h</code>.</li>
+<li>Use <a href="https://shadowsocks.org/en/spec/AEAD-Ciphers.html" rel="noopener nofollow ugc"><em>AEAD ciphers</em></a>, <strong>not</strong> <em>stream ciphers</em>. In other words, choose one of the following encryption methods: <code>chacha20-ietf-poly1305</code> (recommended), <code>aes-256-gcm</code>, <code>aes-192-gcm</code> or <code>aes-128-gcm</code>.</li>
+</ol>
+<p>To mitigate the <a href="https://www.usenix.org/system/files/sec21summer_len.pdf#page=13" rel="noopener nofollow ugc">partitioning oracle attacks against Shadowsocks servers</a>, you need to:</p>
+<ol>
+<li>use a long random password, which can be generated from terminal using: <code>openssl rand -base64 16</code>;</li>
+<li>and disable UDP mode.</li>
+</ol>
+<p>Note: there is no special requirement for the client. Any client compatible with the server is okay.</p>
+<h3>Advice on using OutlineVPN</h3>
+<p>To prevent your <a href="https://getoutline.org" rel="noopener nofollow ugc">OutlineVPN</a> server from being blocked, you have to:</p>
+<ol>
+<li>Use the latest client from its <a href="https://getoutline.org/" rel="noopener nofollow ugc">official website</a>.</li>
+<li>Use the latest server from its <a href="https://getoutline.org/" rel="noopener nofollow ugc">official website</a>.</li>
+</ol>
+<p>Note that:</p>
+<ol>
+<li>The Outline already generates a long, random secret for you, so you don’t have to do it manually like what you have to do for a Shadowsocks-libev server.</li>
+<li>The Outline server can automatically update itself, so you don’t have to manually upgrade it.</li>
+<li>The Outline exclusively uses <code>chacha20-ietf-poly1305</code> (an AEAD cipher) as the encryption method, so you don’t have to select encryption methods manually.</li>
+</ol>
+<h2>For circumvention tool developers</h2>
+<p>Below, we introduce our findings on the latest capabilities of the GFW; along with our suggestions for making circumvention tools more resistant to censorship. These suggestions are useful not only for Shadowsocks, but for other circumvention tools. We encourage you to participate in this discussion and we welcome any thoughts, comments, questions or concerns.</p>
+<h3>Proper authentication</h3>
+<p>First of all, we strongly encourage circumvention tool developers to <strong>completely</strong> deprecate unauthenticated cryptographic constructions. Confidentiality alone is not enough.</p>
+<ul>
+<li>For newly developed circumvention tools, unauthenticated cryptographic constructions are unacceptable.</li>
+<li>For existing circumvention tools, developers should bravely <strong>remove</strong> all code related to unauthenticated cryptographic constructions, even at the cost of incompatibility.</li>
+</ul>
+<p>Our seemingly bold suggestion comes for a good reason. As introduced in <a href="https://gfw.report/publications/imc20/data/paper/shadowsocks.pdf#page=7" rel="noopener nofollow ugc">our paper</a>, certain types of the GFW’s probes exploit the ciphertext malleability of Shadowsocks’s stream ciphers. This is not the first vulnerability caused by unauthenticated cryptographic constructions. In fact, the lack of proper authentication has been the root cause of many vulnerabilities in Shadowsocks and other circumvention tools.</p>
+<p>In August 2015, BreakWa11 <a href="https://web.archive.org/web/20160829052958/https://github.com/breakwa11/shadowsocks-rss/issues/38" rel="noopener nofollow ugc">discovered</a> an active probing vulnerability in Shadowsocks stream ciphers, resulting from their lack of integrity protection (see <a href="https://groups.google.com/d/msg/traffic-obf/CWO0peBJLGc/Py-clLSTBwAJ" rel="noopener nofollow ugc">English summary</a>). In 2020, similar vulnerabilities has also been <a href="https://github.com/v2ray/v2ray-core/issues/2523" rel="noopener nofollow ugc">discovered</a> in other circumvention tools like V2Ray (see the <a href="https://gfw.report/blog/v2ray_weaknesses/en/" rel="noopener nofollow ugc">summary</a>). Shadowsocks developers <a href="https://github.com/shadowsocks/shadowsocks-libev/compare/v2.5.4...v2.5.5" rel="noopener nofollow ugc">mitigated</a> the vulnerability by having the server not immediately terminate a connection when a target specification contains an unknown address type.</p>
+<p>Shadowsocks developers attempted to further mitigate the problem by introducing a <code>one time auth</code> mode, in which each chunk of data would carry its own authenticator. But a lack of integrity protection in chunk length prefixes led to another active probing <a href="https://web.archive.org/web/20191002190325/https://printempw.github.io/why-do-shadowsocks-deprecate-ota/" rel="noopener nofollow ugc">vulnerability</a> (see <a href="https://groups.google.com/d/msg/traffic-obf/CWO0peBJLGc/Py-clLSTBwAJ" rel="noopener nofollow ugc">English summary</a>).</p>
+<p>In February 2020, Zhejiang Peng <a href="https://github.com/edwardz246003/shadowsocks" rel="noopener nofollow ugc">disclosed</a> a devastating vulnerability in Shadowsocks stream ciphers (see <a href="https://github.com/net4people/bbs/issues/24" rel="noopener nofollow ugc">English summary</a>). Using the Shadowsocks server as a decryption oracle, an attacker, without knowledge of the shared master password, can get full decryption of recorded Shadowsocks connections.</p>
+<p>As early as February 2017, AEAD ciphers had became part of the Shadowsocks protocol specification. While the authentication problem should have been fixed by that time, many servers are still using the vulnerable and deprecated unauthenticated stream ciphers in 2021. This phenomenon indicates that, in practice, many users cannot properly choose the right ciphers to use, possibly misguided by out-dated tutorials. We therefore encourage developers to help users make the right choice by completely removing stream ciphers from Shadowsocks.</p>
+<h3>Replay filtering based on both nonces and timing</h3>
+<p>We suggest that circumvention tool developers deploy a replay filter that takes into account both nonces and timing. Since a timing-based replay filter may require a fundamental changes to existing protocols, developers should at least deploy a nonce-based replay filter and:</p>
+<ol>
+<li>Either advise users to change passwords after each replay filter initialization; or</li>
+<li>Develop a mechanism to let the replay filter remember nonces even after a restart.</li>
+</ol>
+<p>These suggestions are based on the following research findings and rationale. As introduced in <a href="https://gfw.report/publications/imc20/data/paper/shadowsocks.pdf#page=5" rel="noopener nofollow ugc">section 3.5 of the paper</a>, the GFW can replay a legitimate connection immediately; or it may remember a legitimate connection but not replay it until three weeks later. Therefore, a realistic adversary model of active probing should permit the censor to perform replay attacks after an arbitrarily long delay.</p>
+<p>Such a model reveals an asymmetry between attack and defense for purely nonce-based replay defense mechanisms. While it does not cost much in terms of resources for the GFW to record <strong>a few</strong> legitimate payloads and replay them after a fairly long delay, it is costly and complicated for Shadowsocks servers to remember the nonces of <strong>all</strong> authenticated connections forever, or until the master password is changed. The Shadowsocks server must remember those nonces even after being restarted; otherwise, the replay filter will be ineffective against replays that span a restart.</p>
+<p>Fortunately, this unfair game can be inverted by the addition of a timing-based defense mechanism: the server only responds to authenticated connections that are not replays and whose timestamp is within an expiration time, similar to <a href="https://gfw.report/blog/v2ray_weaknesses/en/" rel="noopener nofollow ugc">what VMess servers do</a>. This way, the server does not need to remember nonces forever, but only for a limited time.</p>
+<p>We also want to emphasize that a replay filter is required even in circumvention tools that use a random emphermeral open port per session. This is because the GFW may send a replay immediately after seeing the first data packet of a legitimate connection, before the session and the port are closed.</p>
+<h3>Being consistent in servers’ reactions</h3>
+<p>We suggest that developers make sure their circumvention tools react consistently not only in normal operation, but also when an error occurs. Ideally, as suggested by <a href="https://censorbib.nymity.ch/pdf/Frolov2020a.pdf#page=12" rel="noopener nofollow ugc">Frolov et al.</a>, a server should “read forever” on error. The reason for these suggestions is that censors may intentionally trigger protocol edge cases in an attempt to fingerprint servers.</p>
+<p>In addition to the inconsistencies we found in Shadowsocks-libev and OutlineVPN, <a href="https://censorbib.nymity.ch/pdf/Frolov2020a.pdf#page=11" rel="noopener nofollow ugc">Frolov et al.</a> demonstrated that various proxy servers, including Shadowsocks-python and OutlineVPN, can be identified using TCP flags and timing metadata after the servers close a connection. studentmain <a href="https://github.com/net4people/bbs/issues/22#issuecomment-744704701" rel="noopener nofollow ugc">reported</a> that, as of December 2020, various Shadowsocks implementations still have similar problems.</p>
+<p>Frolov et al. suggest that proxy servers should read forever when errors occur, rather than terminating the connection. Doing so not only avoids revealing a specific timeout value, but also lets the server close the connection with consistent TCP flags in the non-error case.</p>
+<p>Furthermore, reading forever will not make fingerprints of your circumvention tools more unique, as Frolov et al. found that <a href="https://censorbib.nymity.ch/pdf/Frolov2020a.pdf#page=12" rel="noopener nofollow ugc">a large number of endpoints exhibits such “infinite timeout” behavior</a>. As <a href="https://github.com/net4people/bbs/issues/26#issuecomment-599712288" rel="noopener nofollow ugc">surveyed</a> by David Fifield, various popular circumvention tools have employed the “read forever” strategies, including OSSH, obfs4, Outline and Lampshade.</p>
+<h3>Enforce using strong passwords</h3>
+<p>In 2020, Len et al. demonstrated <a href="https://www.usenix.org/system/files/sec21summer_len.pdf#page=13" rel="noopener nofollow ugc">partitioning oracle attacks against Shadowsocks servers</a>. Exploiting the non-committing AEAD schemes used in Shadowsocks, an attacker can recover the password of Shadowsocks servers in a more efficient manner. We thus encourage the developers to enforce users to use strong passwords, possibly by setting entropy requirements for users’ passwords.</p>
+<h3>Probe your implementations</h3>
+<p>If you are a developer or contributor of a Shadowsocks implementation other than Shadowsocks-libev or Outline, we encourage you to check if similar vulnerabilities exist in your implementation of Shadowsocks. We have open-sourced the <a href="https://gfw.report/publications/imc20/data/code/prober_simulator/" rel="noopener nofollow ugc">prober simulator</a> we used in <a href="https://gfw.report/publications/imc20/data/paper/shadowsocks.pdf#page=8" rel="noopener nofollow ugc">Section 5.1 of the paper</a>.</p>
+<h2>Acknowledgement</h2>
+<p>We want to thank Vinicius Fortuna at Jigsaw, Robert Mitchell and Dan Fidler at APNIC, as well as DuckSoft and Student Main at Qv2ray for offering feedback to a draft of this post.</p>
+<h2>Contacts</h2>
+<p>We encourage you to share your comments publicly or privately. Our private contact information can be found at the footer of <a href="https://gfw.report/" rel="noopener nofollow ugc">GFW Report</a>.</p></td><td>2021-01-27T04:03:05.785Z</td></tr>
+    </table>
+      </body>
+    </html>

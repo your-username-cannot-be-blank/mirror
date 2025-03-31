@@ -1,0 +1,84 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>goodbyedpi-без-libssp-10451</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Kolobok</td><td><p><strong>Ошибка</strong>:</p>
+<pre><code class="lang-auto">x86_64-w64-mingw32-gcc  blackwhitelist.o  dnsredir.o  fakepackets.o  goodbyedpi.o  service.o  ttltrack.o  utils/getline.o  utils/repl_str.o goodbyedpi-rc.o -fstack-protector -Wl,-O1,-pie,--dynamicbase,--nxcompat,--sort-common,--as-needed -Wl,--disable-auto-image-base -Wl,--high-entropy-va -Wl,--pic-executable,-e,mainCRTStartup -L../WinDivert-2.2.0-D/x64 -lWinDivert -lws2_32 -l:libssp.a -s -o goodbyedpi.exe
+/usr/lib/mingw64-toolchain/lib/gcc/x86_64-w64-mingw32/14/../../../../x86_64-w64-mingw32/bin/ld: cannot find -l:libssp.a: No such file or directory
+collect2: error: ld returned 1 exit status
+make: *** [Makefile:56: goodbyedpi.exe] Error 1
+</code></pre>
+<p><strong>Контекст ошибки</strong>:<br>
+Настроила я себе походный телефончик для беспроводного доступа: интернет принимает по вайфаю, блютузу через туннель, и 5G от йоты. Публичные сети игнорирует, скрытые SSID находит, простые пароли сам подбирает, а сложные - слушает эфир и, если повезёт, отправляет серверу с P100 на анализы. Пакеты пересылает, обфусцирует, себя как хоп не выдаёт, под ситуацию подстраивается - всё работает стабильно, без нареканий.<br>
+Места на карте памяти ещё предостаточно, веб-сервер наполняю нужными в современном быту файлами. Захотелось добавить и GoodbyeDPI на крайний случай, если придётся с маздайного устройства в сеть мирную выходить, потеряв телефон.<br>
+Релизы готовые скачивать не хочу и не буду: не то чтобы авторов не уважала, просто софт - дело пикантное, тем более такой как тут. Скачанный блоб не лучше неизвестного исполнимого файла.<br>
+Формирование релизов не автоматизировано, единственный способ проверки - сравнение с артефактами от <code>build.yml</code>, что неудобно. У меня свои списки хостов и скрипты, так что достаточно лишь собрать исполняемый <code>goodbyedpi.exe</code> под x86_64 (можно и под x86, чем чёрт не шутит), и дело сделано.<br>
+Но вот незадача, при компиляции вылетает ошибка вышеуказанная, и ничего не работает.</p>
+<p>На телефоне стоит Gentoo свежая <code>~arm64</code> на 23.0 профиле без <code>musl</code>, со всех сторон обновлённая, <code>ssp</code> USE-флаг поднят. С ним и <code>sys-devel/gcc</code>, и <code>sys-libs/glibc</code> собраны. Компилирую с использованием <code>dev-util/mingw64-toolchain</code>, у которого внутри gcc v14.1.0. Ядро разве что старовато, но оно от Андройда, и не влияет здесь ни на что.</p>
+<p><strong>Что было сделано</strong>:<br>
+Смена на <code>-lssp</code> тоже не помогает: разница лишь в том, что компилятор <code>cannot find -lssp</code> молвит.<br>
+Проблема чинится убиранием libssp с корнем из Makefile, то бишь примерно вот так:</p>
+<pre data-code-wrap="diff"><code class="lang-diff">diff --git a/src/Makefile b/src/Makefile
+index 015490e..2038e86 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -7,9 +7,7 @@ WINDIVERTLIBS = ../../binary
+ MINGWLIB = /usr/x86_64-w64-mingw32/lib/
+
+ TARGET = goodbyedpi.exe
+-# Linking SSP does not work for some reason, the executable doesn't start.
+-#LIBS = -L$(WINDIVERTLIBS) -Wl,-Bstatic -lssp -Wl,-Bdynamic -lWinDivert -lws2_32
+-LIBS = -L$(WINDIVERTLIBS) -lWinDivert -lws2_32 -l:libssp.a
++LIBS = -L$(WINDIVERTLIBS) -lWinDivert -lws2_32
+ CC = $(CPREFIX)gcc
+
+ CCWINDRES = $(CPREFIX)windres
+@@ -25,7 +23,7 @@ CFLAGS = -std=c99 -pie -fPIE -pipe -I$(WINDIVERTHEADERS) -L$(WINDIVERTLIBS) \
+          -Wstringop-overflow=4 \
+          -Wformat-signedness -Wstrict-overflow=2 -Wcast-align=strict \
+          -Wfloat-equal -Wcast-align -Wsign-conversion \
+-         #-fstack-protector-strong
++         -fstack-protector-strong
+ LDFLAGS = -fstack-protector -Wl,-O1,-pie,--dynamicbase,--nxcompat,--sort-common,--as-needed \
+ -Wl,--disable-auto-image-base
+</code></pre>
+<p>После такой заплатки программка собирается как надо и работает исправно, без сучка и задоринки. Применять её при каждой пересборке проблемы не составляет, но хочется ведь по стариковской привычке разобраться, в чём же здесь закавыка и как её решить раз и навсегда.<br>
+Применить такой финт ушами по умолчанию, как я поняла из комментария в этом самом Makefile, вариантом не является: скомпилироваться-то программка скомпилируется, но опосля запуститься откажется по причине отсутствия внешней libssp, которой по умолчанию, как и всего остального уважаемым людям необходимого, в маздае нет.<br>
+Думаю я, что можно как-то определять наличие libssp перед компиляцией, например, по наличию отсутствия <code>--disable-libssp</code> флага сборки компилятора, но нет никакой уверенности, что будет такое решение надёжным, или правильным самым.</p>
+<p>Поэтому и спрашиваю здесь, может, кто разбирается лучше: нужен ли тут вообще <code>stack-protector</code>, и можно ли как-то грамотно проблему эту обойти? Заранее спасибо!</p></td><td>2024-09-20T18:04:33.422Z</td></tr><tr><td>denium</td><td><p>Попробуйте скомпилировать в <a href="https://packages.debian.org/bookworm/amd64/gcc-mingw-w64-x86-64-win32-runtime/filelist" rel="noopener nofollow ugc">mingw</a> из Debian.</p></td><td>2024-09-20T19:45:03.197Z</td></tr>
+    </table>
+      </body>
+    </html>

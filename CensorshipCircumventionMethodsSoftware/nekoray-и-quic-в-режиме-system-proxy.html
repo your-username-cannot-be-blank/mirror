@@ -1,0 +1,56 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>nekoray-и-quic-в-режиме-system-proxy</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>blanche.hermine(blanche.hermine)</td><td><p>Добрый день.</p>
+<p>Программа на Windows Nekoray работает в режиме System Proxy (127.0.0.1:2080). Даже если пускать все пакеты напрямую (direct или bypass), минуя удаленный сервер, то не работает QUIC. Как только отключаешь System Proxy или выходишь из программы, QUIC начинает работать. В чем может быть причина?</p></td><td>2024-08-12T16:01:40.450Z</td></tr><tr><td>0ka(0ka)</td><td><p>Браузеры не поддерживают quic через socks proxy, включайте TUN mode</p></td><td>2024-08-12T16:14:59.146Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Понятно, спасибо.</p>
+<p>Не хочется пускать весь трафик компьютера через Nekoray. К тому же TUN режим требует запуска от администратора и не включается автоматически при старте.</p></td><td>2024-08-12T16:22:38.852Z</td></tr><tr><td>Xunlei</td><td><p>Поддержка SOCKS5 UDP релея есть в <a href="https://github.com/wiresock/proxifyre" rel="noopener nofollow ugc">socksify / proxifyre</a>, можно пустить браузер через него (не проверял).</p></td><td>2024-08-12T16:25:23.093Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Спасибо, но это слишком сложно. Думал, может, в Nekoray настройка какая-нибудь есть.</p></td><td>2024-08-12T16:34:12.419Z</td></tr><tr><td>0ka(0ka)</td><td><p>в настройках tun можно прописать имя процессов для работы через него (chrome.exe), остальные процессы не будут затронуты. а вообще смысл в quic при работе через прокси?</p></td><td>2024-08-12T16:48:15.544Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>Так не все через прокси идет. Тот же гугл напрямую (карты, почта), а он поддерживает QUIC.</p></td><td>2024-08-12T17:28:38.364Z</td></tr><tr><td>mastezont</td><td><p>Интересно, а как же у меня сабж работает по протоколу Hysteria2 (на базе QUIC) с лисой?</p></td><td>2024-08-12T22:11:58.838Z</td></tr><tr><td>artenox</td><td><p>Так Hysteria QUIC это на стороне провайдера. А на стороне браузера локальный прокси. И зачем туда (в локальный прокси) пускать так тяжело проксируемый браузерный QUIC, если его можно в браузерах отключить?<br>
+Поскольку, QUIC это UDP, вопрос в скорости:<br>
+UDP over UDP или<br>
+TCP over UDP<br>
+Не факт, что первый вариант будет быстрее, несмотря на то, что так может показаться сначала.</p></td><td>2024-08-13T04:36:34.682Z</td></tr><tr><td>mastezont</td><td><aside class="quote no-group" data-username="artenox" data-post="9" data-topic="9245">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>И зачем туда (в локальный прокси) пускать так тяжело проксируемый браузерный QUIC, если его можно в браузерах отключить?</p>
+</blockquote>
+</aside>
+<p>Затем, что скорость наиболее быстрая из всех остальных методов обхода.Таки QUIC уже превратился из непроксируемого в тяжело проксируемый?<br>
+Никакой тяжести не замечаю, летает как Мазерати.</p></td><td>2024-08-13T08:41:50.187Z</td></tr><tr><td>0ka(0ka)</td><td><p>Прочитайте ответ еще раз, вы уже во втором посте смешиваете вместе локальный и удаленный прокси. Браузер работает по локальному SOCKS прокси и понятия не имеет о вашей hysteria</p></td><td>2024-08-13T09:18:48.862Z</td></tr><tr><td>mastezont</td><td><p>Браузер поддерживает соединение через локальный socks proxy, который поддерживает соединение с сервером по протоколу QUIC. Что не так? Браузер естественно не умеет работать без прокладки ни с Hysteria, ни c SS, ни с VLESS, VMESS и т.п., т.е. практически ни с чем, отличающемся от обычных протоколов.</p></td><td>2024-08-13T10:01:55.435Z</td></tr><tr><td>artenox</td><td><p>Вы хотите, чтобы браузерный QUIC шел через локальный прокси, а затем через Hysteria QUIC? Тут проблема в том, что браузер не будет использовать QUIC, если явно настроен работать через прокси.</p></td><td>2024-08-13T10:47:05.429Z</td></tr>
+    </table>
+      </body>
+    </html>

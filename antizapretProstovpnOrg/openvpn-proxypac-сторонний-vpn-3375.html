@@ -1,0 +1,81 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>openvpn-proxypac-сторонний-vpn-3375</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>activio(Denis)</td><td><p>Добрый день.<br>
+Подскажите, использую Ubuntu, купил VPN, встроенный клиент в убунту OpenVPN успешно работает. Но как сделать так, чтобы он работал только по определенным сайтам, которые указаны в Proxy.pac. Как их скрестить?</p></td><td>2022-10-15T11:12:20.899Z</td></tr><tr><td>szq4</td><td><p>Не совсем ваш случай, но если бы VPN был по протоколу wireguard, то можно было бы использовать wireproxy как клиент, а в pac-файле записать локальный SOCKS-адрес wireproxy.</p>
+<p>Возможно есть аналог wireproxy для openVPN.</p></td><td>2022-10-16T10:38:46.340Z</td></tr><tr><td>ValdikSS</td><td><p>Маршрутизация, в общем случае, работает на уровне IP-адресов и подсетей, а не на уровне отдельных программ или доменов.<br>
+Сделать доступ через VPN только к отдельным подсетям можно, добавив следующие строки в конфигурационный файл ovpn:</p>
+<p><code>route-nopull</code></p>
+<p>Далее добавлять отдельные IP-адреса или диапазоны командой route:</p>
+<p><code>route network/IP [netmask]</code></p>
+<p>Пример:</p>
+<pre><code class="lang-auto">route-nopull
+route 8.8.8.8 255.255.255.255
+</code></pre>
+<p>Также можно исключить отдельные диапазоны адресов, чтобы они работали не через VPN.<br>
+Пример:</p>
+<p><code>route 8.8.8.8 255.255.255.255 net_gateway</code></p>
+<p>В этом случае добавлять route-nopull не нужно.</p>
+<p>Узнать IP-адреса отдельных доменов можно консольной командой nslookup. Пример:</p>
+<pre><code class="lang-auto">$ nslookup ya.ru
+Server:         192.168.101.1
+Address:        192.168.101.1#53
+
+Non-authoritative answer:
+Name:   YA.RU
+Address: 87.250.250.242
+Name:   ya.ru
+Address: 2a02:6b8::2:242
+</code></pre>
+<p>IPv4-адрес <a href="http://ya.ru">ya.ru</a> — 87.250.250.242.</p>
+<p>Если хочется сделать более гибкую систему, для Linux есть <a href="https://github.com/dboyd13/DSVR" class="inline-onebox">GitHub - dboyd13/DSVR: Domain-Specific-VPN-Router</a> и <a href="https://github.com/mrahmadt/SmartGW" class="inline-onebox">GitHub - mrahmadt/SmartGW: Domain based VPN Gateway/Proxy for all devices</a>, не знаю, насколько они работоспособны.<br>
+Также можно локально установить контайнер антизапрета и подключить в нём VPN, как вариант.</p></td><td>2022-10-18T13:59:17.685Z</td></tr><tr><td>activio(Denis)</td><td><p>В случае с антизапретом, если пишу сайт, или захожу в соцсеть закрытую, он автоматом понимает, что нужно пробрасывать через ВПН. Точно так же торенты, заходишь на сайт, выбираешь раздачу, но остальной трафик бежит без ВПН. Но в конфиге то не указаны вручную сайты. Какой то список то в любом случае есть, я бы хотел этот список как то подружить со сторонним ВПН.</p></td><td>2022-10-24T14:41:06.662Z</td></tr><tr><td>activio(Denis)</td><td><p>Я понял, в моем случае нужен vps + antizapret vpn container</p></td><td>2022-10-24T15:03:55.474Z</td></tr><tr><td>FilipFry</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="3" data-topic="3375">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Сделать доступ через VPN только к отдельным подсетям можно, добавив следующие строки в конфигурационный файл ovpn:</p>
+</blockquote>
+</aside>
+<p>А этот конфигурационный файл, имеется ввиду /etc/openvpn/server/server.conf ?</p></td><td>2024-12-31T15:37:38.469Z</td></tr><tr><td>Xunlei</td><td><p>Нет, клиентский.</p>
+<p>Проще SOCKS5 прокси для этих целей использовать:<br>
+<a href="https://ntc.party/t/convert-tuntap-to-socks5http-proxy-openvpn-as-proxy/106">Convert TUN/TAP to Socks5/HTTP proxy (OpenVPN as proxy)</a><br>
+<a href="https://ntc.party/t/openvpn-proxy/6247/1">Openvpn → proxy</a><br>
+<a href="https://ntc.party/t/openvpn-cannot-connect-with-pull-filter-ignore-redirect-gateway/14202">OpenVPN: Cannot connect with –pull-filter ignore redirect-gateway</a></p></td><td>2024-12-31T16:22:55.474Z</td></tr>
+    </table>
+      </body>
+    </html>

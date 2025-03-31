@@ -1,0 +1,53 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>нужна-помощь-в-настройке-1137</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0ka(0ka)</td><td><p>Здравствуйте, <a class="mention" href="/u/bolvan">@bolvan</a>. Не могу разобраться с zapret nfqws. На данный момент помогает tpws с --methodeol, но только для http сайтов. GoodbyeDPI работает с http и https с -2 --set-ttl 3. Какие параметры нужны для nfqws? Пробовал различные параметры, но ничего не помогает. Ещё не могу понять, проходит ли трафик через nfqws, параметр debug=2 не меняет ничего в логе systemd.<br>
+Спасибо.</p></td><td>2021-07-05T15:51:42.552Z</td></tr><tr><td>bolvan</td><td><p>всю диагностику следует выполнять в ручном режиме. без инсталятора и скриптов.<br>
+аналог set ttl  --dpi-desync=fake,split2 --dpi-desync-ttl=3<br>
+опция -2 сложная, см описание обоих систем<br>
+ответы от пассивных dpi nfqws не блокирует. это делается через iptables</p></td><td>2021-07-05T16:48:54.783Z</td></tr><tr><td>0ka(0ka)</td><td><p>Спасибо, эти параметры помогли для https! Выяснил, что для http в gdpi нужны только -f 2 -k 2 --set-ttl 3, какие параметры нужно использовать в nfqws?</p></td><td>2021-07-05T19:12:12.621Z</td></tr><tr><td>bolvan</td><td><p>-k  сам факт фрагментации http keepalive не управляется параметрами nfqws. это управляется наличием фильтра connbytes в iptables<br>
+отдельные значения позиции фрагменации для keepalive и не keepalive задать нельзя<br>
+позиция фрагментации по умолчанию 3, но можно задать через --dpi-desync-split-pos=2<br>
+не стоит забывать, что параметры для http и htts могут быть разными. 2 очереди nfqueue и 2процесса nfqws</p></td><td>2021-07-06T05:28:03.427Z</td></tr><tr><td>Keksimus(Tony)</td><td><p>Приветствую, такой вопрос:<br>
+Проверил блокчеком <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a>, выдало:<br>
+ipv4 <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a> curl_test_http : working without bypass<br>
+ipv4 <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a> curl_test_https_tls12 : --dpi-desync=fake --dpi-desync-ttl=4<br>
+ipv4 <a href="http://youtube.com" rel="noopener nofollow ugc">youtube.com</a> curl_test_https_tls13 : --dpi-desync=disorder2</p>
+<p>Куда вписать стратегию для tls1.2 и для tls1.3? Ведь в конфиге есть только одна общая строка для https NFQWS_OPT_DESYNC_HTTPS ?</p></td><td>2024-09-09T21:13:29.007Z</td></tr><tr><td>0ka(0ka)</td><td><p>используйте параметры из tls1.2</p></td><td>2024-09-09T21:24:40.950Z</td></tr>
+    </table>
+      </body>
+    </html>

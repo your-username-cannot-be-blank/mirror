@@ -1,0 +1,159 @@
+* checking system
+CYGWIN detected
+firewall type is windivert
+* checking prerequisites
+* checking DNS
+system DNS is working
+comparing system resolver to public DNS : 8.8.8.8
+pornhub.com : OK
+ntc.party : OK
+rutracker.org : OK
+www.torproject.org : OK
+bbc.com : OK
+checking resolved IP uniqueness for : pornhub.com ntc.party rutracker.org www.torproject.org bbc.com
+censor's DNS can return equal result for multiple blocked domains.
+all resolved IPs are unique
+-- DNS looks good
+-- NOTE this check is Russia targeted. In your country other domains may be blocked.
+* checking virtualization
+cannot detect
+
+NOTE ! this test should be run with zapret or any other bypass software disabled, without VPN
+
+specify domain(s) to test. multiple domains are space separated.
+domain(s) (default: rutracker.org) : ip protocol version(s) - 4, 6 or 46 for both (default: 4) : 
+check http (default : Y) (Y/N) ? 
+check https tls 1.2 (default : Y) (Y/N) ? 
+TLS 1.3 uses encrypted ServerHello. DPI cannot check domain name in server response.
+This can allow more bypass strategies to work.
+What works for TLS 1.2 will also work for TLS 1.3 but not vice versa.
+Most sites nowadays support TLS 1.3 but not all. If you can't find a strategy for TLS 1.2 use this test.
+TLS 1.3 only strategy is better than nothing.
+check https tls 1.3 (default : N) (Y/N) ? 
+make sure target domain(s) support QUIC or result will be negative in any case
+check http3 QUIC (default : Y) (Y/N) ? 
+on limited systems like openwrt CA certificates might not be installed to preserve space
+in such a case curl cannot verify server certificate and you should either install ca-bundle or disable verification
+however disabling verification will break https check if ISP does MitM attack and substitutes server certificate
+do not verify server certificate (default : N) (Y/N) ? 
+sometimes ISPs use multiple DPIs or load balancing. bypass strategies may work unstable.
+how many times to repeat each test (default: 1) : 
+quick - scan as fast as possible to reveal any working strategy
+standard - do investigation what works on your DPI
+force - scan maximum despite of result
+1 : quick
+2 : standard
+3 : force
+your choice (default : standard) : selected : standard
+
+
+* port block tests ipv4 ntc.party:80
+nc -z -w 2 130.255.77.28 80
+130.255.77.28 does not connect. netcat code 1
+
+* curl_test_http ipv4 ntc.party
+- checking without DPI bypass
+
+- IP block tests (requires manual interpretation)
+> testing iana.org on it's original ip
+iana.org is not available. skipping this test.
+
+preparing winws redirection
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-fooling=badsum --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-fooling=datanoack --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=fake --dpi-desync-ttl=1 --dpi-desync-autottl=1 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=syndata --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=syndata --dpi-desync-fake-syndata=/cygdrive/d/My Documents/Программы/Интернет/anon/AntiDPI/Zapret/zapret4/blockcheck/zapret/files/fake/http_iana_org.bin --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=syndata,split2 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=80 --dpi-desync=syndata,disorder2 --dpi-desync-fake-syndata=/cygdrive/d/My Documents/Программы/Интернет/anon/AntiDPI/Zapret/zapret4/blockcheck/zapret/files/fake/http_iana_org.bin --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+
+!!!!! curl_test_http: working strategy found for ipv4 ntc.party : winws --hostcase !!!!!
+
+clearing winws redirection
+
+* port block tests ipv4 ntc.party:443
+nc -z -w 2 130.255.77.28 443
+Connection to 130.255.77.28 443 port [tcp/https] succeeded!
+130.255.77.28 connects
+
+* curl_test_https_tls12 ipv4 ntc.party
+- checking without DPI bypass
+
+- IP block tests (requires manual interpretation)
+> testing iana.org on it's original ip
+iana.org is not available. skipping this test.
+
+preparing winws redirection
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake --dpi-desync-fooling=badsum --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=336 --dpi-desync-split-seqovl-pattern=/cygdrive/d/My Documents/Программы/Интернет/anon/AntiDPI/Zapret/zapret4/blockcheck/zapret/files/fake/tls_clienthello_iana_org.bin --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --wssize 1:6 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+
+!!!!! curl_test_https_tls12: working strategy found for ipv4 ntc.party : winws --dpi-desync=split2 !!!!!
+
+clearing winws redirection
+
+* curl_test_https_tls13 ipv4 ntc.party
+- checking without DPI bypass
+
+- IP block tests (requires manual interpretation)
+> testing iana.org on it's original ip
+iana.org is not available. skipping this test.
+
+preparing winws redirection
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=2 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=disorder2 --dpi-desync-split-seqovl=49 --dpi-desync-split-pos=50 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+!!!!! AVAILABLE !!!!! winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=syndata,disorder2 --dpi-desync-fake-tls=tls_clienthello_www_google_com.bin --dpi-desync-fake-quic=quic_initial_google_com.bin
+
+!!!!! curl_test_https_tls13: working strategy found for ipv4 ntc.party : winws --dpi-desync=split2 !!!!!
+
+clearing winws redirection
+
+* curl_test_http3 ipv4 ntc.party
+- checking without DPI bypass
+
+preparing winws redirection
+
+!!!!! curl_test_http3: working strategy found for ipv4 ntc.party : winws --dpi-desync=fake !!!!!
+
+clearing winws redirection
+
+* port block tests ipv6 ntc.party:80
+ipv6 ntc.party does not resolve
+
+* curl_test_http ipv6 ntc.party
+- checking without DPI bypass
+
+* port block tests ipv6 ntc.party:443
+ipv6 ntc.party does not resolve
+
+* curl_test_https_tls12 ipv6 ntc.party
+- checking without DPI bypass
+
+* curl_test_https_tls13 ipv6 ntc.party
+- checking without DPI bypass
+
+* curl_test_http3 ipv6 ntc.party
+- checking without DPI bypass
+
+* SUMMARY
+ipv4 ntc.party curl_test_http : winws --wf-l3=ipv4 --wf-tcp=80 --hostcase
+ipv4 ntc.party curl_test_https_tls12 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2
+ipv4 ntc.party curl_test_https_tls13 : winws --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2
+ipv4 ntc.party curl_test_http3 : winws --wf-l3=ipv4 --wf-udp=443 --dpi-desync=fake
+ipv6 ntc.party curl_test_http : test aborted, no reason to continue. curl code 6: could not resolve host
+ipv6 ntc.party curl_test_https_tls12 : test aborted, no reason to continue. curl code 6: could not resolve host
+ipv6 ntc.party curl_test_https_tls13 : test aborted, no reason to continue. curl code 6: could not resolve host
+ipv6 ntc.party curl_test_http3 : test aborted, no reason to continue. curl code 6: could not resolve host
+
+Please note this SUMMARY does not guarantee a magic pill for you to copy/paste and be happy.
+Understanding how strategies work is very desirable.
+This knowledge allows to understand better which strategies to prefer and which to avoid if possible, how to combine strategies.
+Blockcheck does it's best to prioritize good strategies but it's not bullet-proof.
+It was designed not as magic pill maker but as a DPI bypass test tool.
+
+press enter to continue

@@ -1,0 +1,254 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>вопрос-о-dns</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>electrifying</td><td><p>Собственно просто хотелось бы узнать а вы dnsнами какого поставщика пользуетесь, как быстро у вас странички грузит нет ли каких-то проблем? Вот я quad9 использую бывает что иногда они как-то оч долго отвечают</p></td><td>2024-11-20T15:51:56.139Z</td></tr><tr><td>rewhat</td><td><p>Cloudflare или AdGuard. Проблем не было. Так и не понял что быстрее и лучше, поэтому сделал вывод что наверное Cloudflare, ибо у них большая инфраструктура <img src="https://ntc.party/images/emoji/twitter/man_shrugging.png?v=12" title=":man_shrugging:" class="emoji" alt=":man_shrugging:" loading="lazy" width="20" height="20">. Иногда кажется что с АдГуардовским ДНС быстрее видосы грузятся, но так и не понял, сам себе это внушаю, или так и есть.</p></td><td>2024-11-20T15:54:38.695Z</td></tr><tr><td>denium</td><td><p>У крупняка есть большой Anycast. Но quad9 глючноват.<br>
+Однако quad9 может прятать, что вы из России.</p></td><td>2024-11-20T16:31:04.541Z</td></tr><tr><td>electrifying</td><td><aside class="quote no-group" data-username="denium" data-post="3" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>Однако quad9 может прятать, что вы из России</p>
+</blockquote>
+</aside>
+<p>У adguard dns тоже серверов в РФ нет, там постоянно либо Германию отдает, либо Амстердам</p>
+<p>А вот cloudflare по dnsleaktest показывает сервер из РФ</p></td><td>2024-11-20T16:32:15.075Z</td></tr><tr><td>Xunlei</td><td><aside class="quote quote-modified" data-post="27" data-topic="7656">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-dns-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80%D0%B5/7656/27">Проблемы с DNS на роутере</a> 
+  </div>
+  <blockquote>
+    Если подбираете для ПК под Windows рекомендую <a href="https://github.com/TechnitiumSoftware/DnsServer" rel="noopener nofollow ugc">Technitium DNS Server</a> в качестве stub резолвера с настроенными форвардами DNSCrypt: 
+
+Находите штук 6 стабильных DNSCrypt серверов и релеев для вашей ASN
+Конфигурируете 6 инстансов dnscrypt-proxy для использования одного из них:
+<details><summary>Часть примера конфигурации dnscrypt-proxy</summary>server_names = ['resolver-name']
+
+listen_addresses = ['[::1]:1153']
+
+cache = false
+
+[anonymized_dns]
+routes = [
+    { server_name='resolver-name', via=['rel…</details>
+  </blockquote>
+</aside>
+</td><td>2024-11-20T16:37:40.321Z</td></tr><tr><td>electrifying</td><td><p>Не, речь про роутер поддерживает doh/dot если что.Просто мне кажется что-то в последние время quad9 как-то плохо работает, хотелось бы узнать у всех ли так мож на форуме кто-то тоже ими пользуется</p></td><td>2024-11-20T16:50:13.191Z</td></tr><tr><td>denium</td><td><p>Тут хитрее. Это EDNS <a href="https://docs.quad9.net/FAQs/" rel="noopener nofollow ugc">https://docs.quad9.net/FAQs/</a></p>
+<h2><a name="p-68207-edns-ecs-1" class="anchor" href="#p-68207-edns-ecs-1"></a>Что такое клиентская подсеть EDNS (ECS)?</h2>
+<p>Quad9 <code>9.9.9.11</code> сервис поддерживает ECS.</p>
+<p>Клиентская подсеть EDNS (ECS) позволяет Quad9 отправлять часть вашего IP-адреса авторитетным серверам имен, что помогает крупным поставщикам контента (CDN), таким как Google, Microsoft и т. д., точно определять ваше геолокацию.</p>
+<p>ECS не влияет на то, в какое местоположение Quad9 отправляются ваши запросы, он просто влияет на то, какую информацию Quad9 пересылает на авторитетный сервер имен, и может влиять на то, какой IP-адрес они возвращают. Quad9 использует произвольную адресацию, чтобы гарантировать, что вы будете перенаправлены в ближайшее доступное вам местоположение Quad9 независимо от того, используете ли вы нашу службу ECS или нет.</p>
+<p>Поскольку ECS не играет никакой роли в определении того, куда отправляются ваши запросы, он не оказывает никакого положительного или отрицательного влияния на время прохождения туда и обратно (пинг) до Quad9.</p>
+<p>ECS можно рассматривать как компромисс между конфиденциальностью и получением геоспецифического контента. Один из вариантов для пользователей, ориентированных на конфиденциальность, — оставить его отключенным и включать его только в том случае, если вы заметили, что определенный домен не доставляет вам правильный контент или не загружается вообще.</p>
+<p>(т.е. он по умолчанию включен, но можно отключить и некоторые виды геоблока/санкций пропадут.<br>
+или скорее на некоторых IP quad9 он включен, а на некоторых отключен. в то время, как у cloudflare и google ECS неотключаемый)</p>
+<blockquote>
+<p>У adguard dns тоже серверов в РФ нет, там постоянно либо Германию отдает, либо Амстердам<br>
+А вот cloudflare по dnsleaktest показывает сервер из РФ</p>
+</blockquote>
+<p>Да, и страна днс резолвера это тоже утечка, его можно вычислить по уникальным URL, встроенным на странице. Но не все сайты делают такие тесты, это ведь по сути хакинг.</p></td><td>2024-11-20T17:49:45.461Z</td></tr><tr><td>electrifying</td><td><aside class="quote no-group" data-username="denium" data-post="7" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>Тут хитрее. Это EDNS</p>
+</blockquote>
+</aside>
+<p>Я без использую, у них же разные наборы в стандарт где 9.9.9.9 EDNS не включен</p></td><td>2024-11-20T17:57:58.698Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Задам вопрос тут, что бы не создавать новую тему - А есть ли разница между CloudFlare DNS и 1.1.1.1 DNS? И какой лучше использовать? Читал на реддите, что первый больше подходит сайтам, серверам и инфраструктуре в целом, а второй уже будет лучше для конечных пользователей, или всё-же разницы никакой нет? Благодарю.</p></td><td>2024-11-20T19:05:24.635Z</td></tr><tr><td>Xunlei</td><td><p><a href="https://ntc.party/t/%D1%80%D0%B0%D0%B7%D0%BD%D0%B8%D1%86%D0%B0-%D0%BC%D0%B5%D0%B6%D0%B4%D1%83-https1111dns-query-%D0%B8-httpsoneoneoneonedns-query/8697">Это</a>?</p></td><td>2024-11-20T19:08:23.884Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Благодарю. Насколько я понял, разницы толком нет, т.к. это одно и тоже. Только в случае с <a href="https://cloudflare-dns.com/dns-query" rel="noopener nofollow ugc">https://cloudflare-dns.com/dns-query</a> запросы будут перенаправлятся на <a href="https://1.1.1.1/dns-query" rel="noopener nofollow ugc">https://1.1.1.1/dns-query</a> (хотя могу ошибаться)</p></td><td>2024-11-20T19:29:54.398Z</td></tr><tr><td>Tyman</td><td><p>У Cloudflare нет поддержки ECS</p></td><td>2024-11-21T04:34:54.801Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Использую 4 DNS: два российских* (Yandex, MSK-IX) и два зарубежных (Google, Quad9).</p>
+<p>Использовать одного провайдера рискованно - он может уйти в аут.</p>
+<p>По поводу скорости: на глаз разницы вы не заметите, к тому же, обычно запросы отправляются сразу всем доступны DNS и используется ответ от того, кто первым ответил, поэтому, если кто-то и медленнее прочих, он не будет тормозить работу.</p>
+<ul>
+<li>российские публичные DNS осуществляют цензуру (не резолвят домены, заблокированные Роскомнадзором), это нужно учитывать.</li>
+</ul></td><td>2024-11-21T07:14:36.098Z</td></tr><tr><td>Tyman</td><td><p>Яндекс вроде без цензуры, путем проб и ошибок яндекс использую для резолвинга незаблокированных ресурсов в своей версии антизапрета - с хостингов в Европе он лучше резолвит для России разные локальные и CDN адреса</p>
+<p>А НСДИ и MSK-IX могут чето левое отдать, одно время использовал совместно с Яндекс и НСДИ - но с ним были проблемы, не резолвил сайт кинетика, MSK-IX не пробовал</p></td><td>2024-11-21T07:34:19.065Z</td></tr><tr><td>electrifying</td><td><aside class="quote no-group" data-username="dartraiden" data-post="13" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>Использовать одного провайдера рискованно - он может уйти в аут.</p>
+</blockquote>
+</aside>
+<p>Почему? Они же все у себя на сайтах заявляют что у них аптайм 99.99%</p></td><td>2024-11-21T07:42:57.781Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Заявлять можно что угодно, но никто не застрахован от того, что какой-то бендурасский провайдер проанонсит через BGP то, что ему не принадлежит, или в России ваш провайдер не решит заблокировать условный 8.8.8.8</p></td><td>2024-11-21T07:46:53.789Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="Tyman" data-post="14" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/tyman/48/6894_2.png" class="avatar"> Tyman:</div>
+<blockquote>
+<p>НСДИ и MSK-IX могут чето левое отдать</p>
+</blockquote>
+</aside>
+<p>И об этом у меня есть сноска. Как fallback при падении туннеля АнтиЗапрета вполне годятся (в этом случае неважно, резолвят они заблокированные ресурсы или нет - один хрен обход блокировок перестал работать).</p></td><td>2024-11-21T07:47:38.669Z</td></tr><tr><td>electrifying</td><td><aside class="quote no-group" data-username="dartraiden" data-post="16" data-topic="13262" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>Заявлять можно что угодно, но никто не застрахован от того, что какой-то бендурасский провайдер проанонсит через BGP то, что ему не принадлежит, или в России ваш провайдер не решит заблокировать условный 8.8.8.8</p>
+</blockquote>
+</aside>
+<p>То есть, я на роутере могу спокойно прописать bootstrap и dot/doh dns разных провайдеров и они будут работать вместе, просто в отличии от того кто быстрей отдаст ответ тот и будет использоваться? Просто я думал что днс предпочтительно использовать только от какого-то одного поставщика</p></td><td>2024-11-21T08:08:36.281Z</td></tr><tr><td>abc555</td><td><p>Я не использую ни один из тут перечисленных, у меня их три doh )) А вообще их очень много, есть с фильтрацией, есть без, есть с логированием, а есть без. К примеру гугл логирует все ваши запросы, лично меня это не устраивает, я добро на это не давал, так же ваш пров логирует ваши запросы, ну чтоб потом вас нагрузить в случаи чего, ну а так по тихой воде, просто реклама лично для вас, что от прова, что от гугла )<br>
+quad9 это англия, они защищают от вредоносного по, но логируют и сотрудничают с анб<br>
+если кто то использует яндекс днс, то я думаю вы знаете с кем они сотрудничают )<br>
+ну а если у вас яндекс браузер, то тут уже не важно какой у вас днс )</p></td><td>2024-11-21T11:52:28.879Z</td></tr><tr><td>abc555</td><td><p>Если вы на роуторе пропишете разные днс dot/doh, то всегда будет отвечать первым тот, у которого меньше пинг, тестировать их надо по отдельности, бывает что может не открыть какой то сайт и если их несколько, то нужно совместить, но всегда будет отвечать первый тот у которого меньше пинг, второй днс с пингом выше, можно сказать почти работать не будет, второй с большим пингом больше как резервный, на случай если первый перестал работать.<br>
+Можно отдельно прописать, какой домен будет открывать днс, то есть конкретный домен под днс который укажешь в ручную, но только на wrt, на обычном роуторе такое не сделать</p></td><td>2024-11-21T12:12:35.339Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="abc555" data-post="20" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/abc555/48/9998_2.png" class="avatar"> abc555:</div>
+<blockquote>
+<p>Если вы на роуторе пропишете разные днс dot/doh, то всегда будет отвечать первым тот, у которого меньше пинг</p>
+</blockquote>
+</aside>
+<p>Если вы имеете ввиду, что результатом разрешения имени stub resolver’ом будет ответ от форфарда с наименьшим пингом, то это не обязательно и зависит от програмной реализации этого резолвера. Например, возможен вариант агрегации ответов от конкурентных запросов, отдача предподчения ответа с RRSIG, или помещение в кэш ответа содержащий записи, даже если ответ пришёл по исчерпанию ожидания Serve Stale Max Wait Time. Поэтому использование квантора всеобщности <em>всегда</em> ошибочно.</p></td><td>2024-11-21T13:14:47.533Z</td></tr><tr><td>easyone11</td><td><aside class="quote no-group" data-username="electrifying" data-post="18" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/electrifying/48/5915_2.png" class="avatar"> electrifying:</div>
+<blockquote>
+<p>могу спокойно</p>
+</blockquote>
+</aside>
+<p>из коробки нет поддержки doh\dot, надо ставить прилу<br>
+не все прилы умеют в проверку скорости doh\dot<br>
+dns из коробки так же не умеет в проверку скорости</p></td><td>2024-11-21T13:22:32.510Z</td></tr><tr><td>rader</td><td><aside class="quote no-group" data-username="Tyman" data-post="14" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/tyman/48/6894_2.png" class="avatar"> Tyman:</div>
+<blockquote>
+<p>А НСДИ и MSK-IX могут чето левое отдать</p>
+</blockquote>
+</aside>
+<p>Скорее ничего не отдадут.</p>
+<p>C:\Users\User&gt;nslookup <a href="http://rutracker.ru" rel="noopener nofollow ugc">rutracker.ru</a> 8.8.8.8<br>
+╤хЁтхЁ:  dns.google<br>
+Address:  8.8.8.8</p>
+<p>Не заслуживающий доверия ответ:<br>
+╚ь :     <a href="http://rutracker.ru" rel="noopener nofollow ugc">rutracker.ru</a><br>
+Address:  185.81.128.108</p>
+<p>C:\Users\User&gt;nslookup <a href="http://rutracker.ru" rel="noopener nofollow ugc">rutracker.ru</a> 195.208.4.1<br>
+╤хЁтхЁ:  <a href="http://a.res-nsdi.ru" rel="noopener nofollow ugc">a.res-nsdi.ru</a><br>
+Address:  195.208.4.1</p>
+<p>*** <a href="http://a.res-nsdi.ru" rel="noopener nofollow ugc">a.res-nsdi.ru</a> не удалось найти <a href="http://rutracker.ru" rel="noopener nofollow ugc">rutracker.ru</a>: Non-existent domain</p></td><td>2024-11-21T13:34:39.212Z</td></tr><tr><td>rewhat</td><td><aside class="quote no-group" data-username="Tyman" data-post="14" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/tyman/48/6894_2.png" class="avatar"> Tyman:</div>
+<blockquote>
+<p>А НСДИ и MSK-IX могут чето левое отдать</p>
+</blockquote>
+</aside>
+<aside class="quote no-group" data-username="rader" data-post="23" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/r/dfb087/48.png" class="avatar"> rader:</div>
+<blockquote>
+<p>Скорее ничего не отдадут.</p>
+</blockquote>
+</aside>
+<p>да, у них же на сайте написано</p>
+<aside class="quote no-group">
+<blockquote>
+<p>Фильтрация доменных имен осуществляется согласно Федеральному закону №139-ФЗ от 28 июля 2012 года в соответствии с данными «Единого реестра интернет-ресурсов с информацией, запрещенной к распространению в РФ».</p>
+</blockquote>
+</aside>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://kb.msk-ix.ru/public/dns-server/">
+  <header class="source">
+      <img src="вопрос-о-dns/8c02d06187a7bb19fc4301d29f4f88e4a8b4b863.png" class="site-icon" data-dominant-color="BCCAE8" width="16" height="16">
+
+      <a href="https://kb.msk-ix.ru/public/dns-server/" target="_blank" rel="noopener">Мультисервисные платформы MSK-IX</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:200/100;"><img src="вопрос-о-dns/208700ae6e63515d9d3efe3169a8dde3b0da06a6.png" class="thumbnail" data-dominant-color="312F8E" width="200" height="100"></div>
+
+<h3><a href="https://kb.msk-ix.ru/public/dns-server/" target="_blank" rel="noopener">DNS server</a></h3>
+
+  <p>MSK-IX помогает компаниям развивать сети и сервисы в интернете быстрее и с меньшими затратами, предоставляя доступ к Internet eXchange, сервисным платформам и дата-центрам.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-11-21T13:40:30.470Z</td></tr><tr><td>electrifying</td><td><aside class="quote no-group" data-username="easyone11" data-post="22" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/easyone11/48/6759_2.png" class="avatar"> easyone11:</div>
+<blockquote>
+<p>из коробки нет поддержки doh\dot</p>
+</blockquote>
+</aside>
+<p>Вы про что? Я про роутер в keeneticos есть поддержка doh/dot из коробки</p></td><td>2024-11-21T14:40:15.513Z</td></tr><tr><td>easyone11</td><td><aside class="quote no-group" data-username="electrifying" data-post="25" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/electrifying/48/5915_2.png" class="avatar"> electrifying:</div>
+<blockquote>
+<p>Я про роутер в keeneticos</p>
+</blockquote>
+</aside>
+<p>аа, ок, забываю про них)</p></td><td>2024-11-21T14:42:46.921Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="electrifying" data-post="18" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/electrifying/48/5915_2.png" class="avatar"> electrifying:</div>
+<blockquote>
+<p>кто быстрей отдаст ответ тот и будет использоваться?</p>
+</blockquote>
+</aside>
+<p>Зависит от настроек DNS-сервера на роутере. Обычно по умолчанию запросы одновременно отсылаются всем апстримам.</p>
+<p>dnsmasq, который чаще всего используется на роутерах, имеет настройку “строгий порядок опроса DNS”, если её включить, тогда ждём, пока ответит первый сервер, если таймаут вышел, а ответа нет, запрос отправляется второму серверу в списке и так далее.</p>
+<aside class="quote no-group" data-username="electrifying" data-post="18" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/electrifying/48/5915_2.png" class="avatar"> electrifying:</div>
+<blockquote>
+<p>Просто я думал что днс предпочтительно использовать только от какого-то одного поставщика</p>
+</blockquote>
+</aside>
+<p>Зависит от конкретного сетапа.<br>
+В моём случае важна отказоустойчивость. Иначе, когда, например, провайдер возьмёт и заблокирует доступ к условному 8.8.8.8, через 5 минут меня начнут будить вопросами “а чойта у меня интернет не работает?” в мессенджер, а если я не отвечу, то начнут даже названивать.</p></td><td>2024-11-22T17:07:49.816Z</td></tr><tr><td>Keksimus(Tony)</td><td><p>Подскажите с инстой, пробую разблочить, нахожу и прописываю в host на роутере незаблокированный ип, с роутера пингуется нормально, а с пк пытается пинговать старый.<br>
+Как сделать не прописывая в host на пк чтобы открывалась инста?</p></td><td>2024-11-30T02:33:08.552Z</td></tr><tr><td>easyone11</td><td><p>ipconfig /flushdns</p></td><td>2024-11-30T05:56:51.002Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="Keksimus" data-post="28" data-topic="13262">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/6bbea6/48.png" class="avatar"> Keksimus:</div>
+<blockquote>
+<p>Как сделать не прописывая в host на пк чтобы открывалась инста?</p>
+</blockquote>
+</aside>
+<p>Например, добавить зону в DNS сервер с A записью. Файл hosts влияет только на локальное разрешение имени системным вызовом.</p></td><td>2024-11-30T11:43:17.680Z</td></tr>
+    </table>
+      </body>
+    </html>

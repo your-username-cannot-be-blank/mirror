@@ -1,0 +1,104 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>стратегия-не-работает-в-cmd-файле-если-применён-параметр-hostlist-12915</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>BlackRain(BlackRain)</td><td><p>Здравствуйте. Хочу сделать свой <code>CMD</code>-файл (по аналогии со стандартным <code>preset_russia.cmd</code>).<br>
+Я написал следующее:</p>
+<pre><code class="lang-auto">chcp 1251
+set path=H:\Кодинг\src\zapret-win-bundle\zapret-winws
+start "zapret" "%path%\winws.exe" ^
+--wf-tcp=80,443 ^
+--filter-tcp=443 --hostlist="%~dp0lists\youtube.txt" --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --new ^
+--filter-tcp=443 --hostlist="%~dp0lists\youtube-GV.txt" --dpi-desync=split --dpi-desync-split-pos=1 --dpi-desync-fooling=badseq --dpi-desync-repeats=10 --dpi-desync-autottl --new ^
+--filter-tcp=443 --hostlist="%~dp0lists\other.txt" --dpi-desync=fake,split2 --dpi-desync-ttl=7 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1 --hostspell=hoSt --new ^</code></pre>
+<p>То есть, сама программа у меня лежит в одной папке, а списки доменов и батник - в другой. Параметры запрета я не особо понимаю, но всё прекрасно работает.<br>
+Теперь рутрекер. У меня он открывается вот с такими параметрами:<br>
+<code>winws.exe --hostlist=rutracker.txt --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4</code><br>
+Но когда я добавляю в <code>CMD</code>-файл строчку<br>
+<code>--filter-tcp=443 --hostlist="%~dp0lists\rutracker.txt" --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4 --new ^</code><br>
+рутрекер не работает <img src="https://ntc.party/images/emoji/twitter/man_shrugging.png?v=12" title=":man_shrugging:" class="emoji" alt=":man_shrugging:" loading="lazy" width="20" height="20"> А если убрать параметр <code>--hostlist</code> - начинает работать <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"><br>
+Но данную стратегию надо применить только к списку <code>rutracker.txt</code>. Как это сделать?</p></td><td>2024-11-09T07:13:21.267Z</td></tr><tr><td>Ori</td><td><p><code>cloudflare-ech.com</code> в хостлист добавьте. На рутрекере ech, и если он у вас задействован в браузере, то сайт вы нормально не откроете.</p></td><td>2024-11-09T07:18:59.802Z</td></tr><tr><td>North</td><td><p>может так надо?:<br>
+–filter-tcp=443 --hostlist=“%~dp0lists\rutracker.txt”  --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4</p></td><td>2024-11-09T07:33:39.991Z</td></tr><tr><td>BlackRain(BlackRain)</td><td><aside class="quote no-group" data-username="Ori" data-post="2" data-topic="12915">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p><code>cloudflare-ech.com</code> в хостлист добавьте</p>
+</blockquote>
+</aside>
+<p>Во, точно! Заработало! Спасибо!<br>
+Но при запуске из консоли <code>winws.exe --hostlist=rutracker.txt --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4</code> оно работает даже если этого домена нет в списке. Почему так? <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"><br>
+А на ноутбуке работает и через <code>CMD</code>-файл. Правда, там подключение к роутеру через Wi-Fi. Разве есть разница?</p></td><td>2024-11-09T07:33:40.590Z</td></tr><tr><td>Ori</td><td><p>У меня с таким <code>winws.exe --hostlist=rutracker.txt --wf-l3=ipv4 --wf-tcp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=1 --dpi-desync-autottl=4</code> рутрекер не открывается. Перезапускали браузер во время тестов? Мб там просто осталась висеть закэшированная dns-запись. Хз.</p>
+<p>Плюс, тут всё зависит от того, работает ли ech. А он зависит от doh в браузере + какой именно браузер + doh в системе + версия винды/линукса.<br>
+Например, на актуальных линуксах и вин11, судя по всему, ech работает даже с обычными dns, типа 8.8.8.8:53. А на вин10 нужен doh. В файрфоксе есть авто-фолбэк до plain (но надо ждать минуту), а в хроме нет. Короче, без бутылки не поймешь…</p>
+<p>Почитайте тему про cloudflare ech тут по соседству, если интересно.</p></td><td>2024-11-09T07:44:25.236Z</td></tr><tr><td>KDS</td><td><p>Особенно меня тут насмешило “по аналогии со <strong>стандартным</strong> preset_russia.cmd” ) Интересно, в какой версии Запрета появился хостлист чисто под видео ютуба и рядом стратегия с 10-ю репитами, уж сильно как-то знакомая?</p>
+<p>И смысл использовать хостспелл для https, если он только на http работает, а сейчас (возможно) вообще нигде не работает.</p></td><td>2024-11-09T08:01:58.244Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>ech в Хроме не отключал, сайты с ech открываются, но раз в день DNS от comss перестает открывать оные сайты с ech и тогда переключаюсь на DoH в утилите dnscrypt-proxy. Все сайты снова открываются. Через время в браузере снова добавляю comss, так как только он без ВПНа преодолевает геолокацию и открывает сайты с ИИ типа Гемини или ЖПТ.</p></td><td>2024-11-09T08:06:50.232Z</td></tr><tr><td>KDS</td><td><p>Комсс что-то хандрит в последнее время по-черному. Как 1-й домен, так и через контролди. Я уже приучился при проблемах в первую очередь лезть его отключать и перезапускать браузер. Вчера друг позвонил, типа инет не работает, выяснилось, что у него комсс стоял. Выключил пока, потом через время опять включил, вроде больше не падал он.</p></td><td>2024-11-09T08:40:57.824Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>У меня он начал хандрить во второй половине октября, до этого всё прекрасно работало целый год.<br>
+Полагаю, что владельцы comss не рассчитывали на такой ажиотаж, когда зимой предложили своим читателям сервер на controlD. Видимо, думали, что подключатся самый максимум пару сотен человек, но в итоге с зимы подключились тысячи. Даже здесь у каждого второго их ДНС. Comss часто упоминался за год здесь, на Рутрекере, в ТГ-каналах, специалисты РКН не могли не заметить такие упоминания и активность. А мы отлично знаем, что РКН блокирует в первую очередь самые популярные в народе ВПНы и сервисы.<br>
+Гудбай и Запрет до лета сего года РКН не трогал, противодействие началось только после того, как эти утилиты в народе стали самыми популярными из-за своей эффективности и бесплатности.<br>
+Значит, и comss ожидает та же участь. Нужно искать неизвестные или малоизвестные серверы с DoH в Рунете. РКНу они будут до фонаря, пока они не популярны.</p></td><td>2024-11-09T08:59:58.509Z</td></tr><tr><td>BlackRain(BlackRain)</td><td><aside class="quote no-group" data-username="KDS" data-post="6" data-topic="12915">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kds/48/12723_2.png" class="avatar"> KDS:</div>
+<blockquote>
+<p>Особенно меня тут насмешило “по аналогии со <strong>стандартным</strong> preset_russia.cmd” ) Интересно, в какой версии Запрета появился хостлист чисто под видео ютуба</p>
+</blockquote>
+</aside>
+<p>Я вас не понимаю. Что конкретно насмешило, можно узнать? <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"><br>
+Выполняем <code>git clone https://github.com/bol-van/zapret-win-bundle.git</code> и в директории <code>zapret-winws</code> имеем два пресета - <code>preset_russia.cmd</code> и <code>preset_russia_autohostlist.cmd</code>. Разве это не <strong>стандартные</strong> пресеты, если сам автор программы их туда положил? <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"> Какие тогда? Или <code>git</code> их из какого-то видео с ютуба тянет?</p></td><td>2024-11-09T09:48:30.492Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>Ой вей…</p>
+<p>Стандартные пресеты, что на гите, это просто решение с минимальной поломкой сайта.  (аля пример)<br>
+Но не всегда стандартные пресеты пригодны для провайдера. Дальше уже проблема тебя и провайдера</p></td><td>2024-11-09T09:50:02.368Z</td></tr><tr><td>BlackRain(BlackRain)</td><td><aside class="quote no-group" data-username="Hentay" data-post="11" data-topic="12915">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/hentay/48/12172_2.png" class="avatar"> Hentay:</div>
+<blockquote>
+<p>Стандартные пресеты, что на гите, это просто решение с минимальной поломкой сайта. (аля пример)</p>
+</blockquote>
+</aside>
+<p>И чо? <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"> Я же про это и говорю. Взял их как пример и написал свой.</p></td><td>2024-11-09T09:52:51.609Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>Включаем голову, а не бьемся об стены.<br>
+Если не работает одна стратегия, то ищем другую.<br>
+Информация о поисках стратегии упирается только в желание решить проблемы…<br>
+Все</p></td><td>2024-11-09T09:53:51.126Z</td></tr><tr><td>BlackRain(BlackRain)</td><td><aside class="quote no-group" data-username="Hentay" data-post="13" data-topic="12915">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/hentay/48/12172_2.png" class="avatar"> Hentay:</div>
+<blockquote>
+<p>Включаем голову, а не бьемся об стены.</p>
+</blockquote>
+</aside>
+<p>Ок, включаем голову и перечитываем по слогам то, что было написано <img src="https://ntc.party/images/emoji/twitter/man_shrugging.png?v=12" title=":man_shrugging:" class="emoji" alt=":man_shrugging:" loading="lazy" width="20" height="20"> Никто ж не против.</p></td><td>2024-11-09T09:58:49.363Z</td></tr>
+    </table>
+      </body>
+    </html>

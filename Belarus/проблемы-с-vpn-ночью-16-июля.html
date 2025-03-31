@@ -1,0 +1,87 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проблемы-с-vpn-ночью-16-июля</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>dpc3341(dpc3341)</td><td><p>Добрый день,<br>
+ночью 16 июля в Беларуси возможно тестировали блокировку VPN и прочих сервисов. В начале августа должны пройти выборы и проблемы с сетью могут быть связаны с гайками, которые нужно будет закрутить.</p>
+<p>Судя по комментариям очевидцев, проблема наблюдалась около часа:</p>
+<blockquote>
+<p>Чекнул логи на Keenetic’е с поднятым IPSec’ом зарубеж. Подключение отвалилось ровно в 01:15:00 и поднялось только в 02:00:42<br>
+P.S. Провайдер - beltelecom, сервер на немецком кластере AWS’а.</p>
+</blockquote>
+<p>К сожалению, за час никто не разобрался с чем именно связана проблема, но некоторые люди немного поковырялись:</p>
+<blockquote>
+<p>Disclaimer: это не вымысел, а интерпретация причины неполадок вперемешку с фактами. Chip in если есть другие причины для отгнивания нескольких протоколов, обеспечивающих туннелирование трафика, на несвязанных друг с другом сервисах.</p>
+</blockquote>
+<blockquote>
+<p>Если мне ничего не приснилось, то сегодня ночью тестировали блокировку VPN. Что сломалось: IPSec и SSH, а также всё, что на него завязано. Например git (в гитхаб не тыкалось) и SFTP.</p>
+</blockquote>
+<blockquote>
+<p>Примечательно, что некоторые другие сервисы, использующие так или иначе SSH, работали. Тут можно думать разное. Автоматическая пометка remote host как VPN с занесением в блоклист?</p>
+</blockquote>
+<blockquote>
+<p>SSH блокировался не по dst port. Кидал его на другие порты, на 80, на 443 - бесполезно.</p>
+</blockquote>
+<blockquote>
+<p>Wireguard выстоял <img src="проблемы-с-vpn-ночью-16-июля/4ea3bc36966a1229e68a7cc329bf65ad8b65c254.png" alt="" data-base62-sha1="bdG2IdgPHz2DAuJpNa566IgIV3m" width="16" height="16" role="presentation"><img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"> OpenVPN не успел проверить. PPTP последний раз видел шесть лет назад. (Upd. подтверждают, что OpenVPN тоже отгнил.)</p>
+</blockquote>
+<blockquote>
+<p>TCP RST атака не используется. В зависимости от L7 протокола происходит первоначальный обмен одим-двумя информационными сообщениями, затем тишина в эфире. Дальше череда Retransmissions и один RST/ACK в пустоту. Точно так же тестировалась блокировка Telegram и Viber несколько недель назад.</p>
+</blockquote>
+<blockquote>
+<p>Всё длилось примерно час, с часу до двух ночи.</p>
+</blockquote>
+<blockquote>
+<p>Чем богат: две локальные машины, телефон с IPSec’ом, один удалённый сервер (ssh, ipsec, wireguard), два аплинка (МТС Ethernet, МТС 4G).</p>
+</blockquote>
+<blockquote>
+<p>P.S. Tor продолжал работать. В случае чего можно SSH завернуть через него, а поверх накатить socks proxy. <img src="https://ntc.party/images/emoji/twitter/joy.png?v=12" title=":joy:" class="emoji" alt=":joy:" loading="lazy" width="20" height="20"><br>
+P.P.S. С мест сообщают, что прямо сейчас начал отгнивать Telegram. Ну ладно.</p>
+</blockquote>
+<p>На некоторых ресурсах писали что проблема была «у одного из российских апстримов НЦОТа»<br>
+<a href="https://dev.by/news/v-belarusi-mogli-testirovat-blokirovanie-vpn" class="onebox" target="_blank" rel="noopener nofollow ugc">https://dev.by/news/v-belarusi-mogli-testirovat-blokirovanie-vpn</a></p>
+<p>Спасибо</p></td><td>2020-07-20T18:25:29.468Z</td></tr><tr><td>ValdikSS</td><td><p>Рекомендую сделать «ядерный чемоданчик» на случай блокирования сайтов и протоколов, в виде VPS-сервера с настроенными сервисами:</p>
+<ul>
+<li>
+<a href="https://github.com/cbeuw/Cloak">Cloak</a>, с маскировкой под правительственные сайты .by или служебные, вроде <code>connectivitycheck.gstatic.com</code>, <code>www.msftncsi.com</code>.</li>
+<li>ICMP-туннель, с помощью <a href="http://code.gerade.org/hans/">Hans</a> и аналогичных программ</li>
+<li>DNS-туннель, с помощью <a href="https://www.bamsoftware.com/software/dnstt/">dnstt</a>.</li>
+</ul>
+<p>Всё перечисленное нужно настроить заранее, до блокировки. Для DNS-туннеля необходимо купить домен (или создать поддомен на уже существующем), указав IP-адрес в качестве NS-сервера (подробнее см. в документации). Для остального нужен только сам VPS.</p>
+<p>Могу сделать контейнер, для быстрой установки на сервер, и образ маршрутизатора виртуальной машины, для установки на десктоп и маршрутизации трафика разных (домашних) устройств через неё, в любой ОС. Нужно?</p></td><td>2020-07-21T19:43:44.830Z</td></tr><tr><td>dpc3341(dpc3341)</td><td><p>Да, с контейнером будет гораздо проще. Буду очень благодарен</p></td><td>2020-07-21T20:17:59.233Z</td></tr><tr><td>ValdikSS</td><td><p>A post was split to a new topic: <a href="/t/topic/599">Контейнер для возможного предстоящего отключения интернета в Беларуси</a></p></td><td>2020-07-26T14:02:37.098Z</td></tr>
+    </table>
+      </body>
+    </html>

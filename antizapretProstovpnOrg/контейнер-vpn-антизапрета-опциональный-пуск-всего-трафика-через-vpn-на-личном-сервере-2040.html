@@ -1,0 +1,70 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>контейнер-vpn-антизапрета-опциональный-пуск-всего-трафика-через-vpn-на-личном-сервере-2040</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ruddanil(Даниил)</td><td><p>На арендованном VDS запустил контейнер VPN АнтиЗапрета, все работает. Интересует возможность опционально переключаться на режим, когда весь трафик пускается через VPN с моими настройками. Я правильно понимаю, что для реализации данной задачи в любом случае потребуется запустить второй OpenVPN сервер? Или есть какой-то менее ресурсоемкий способ переключения режима работы? В идеале хотелось бы иметь два клиентских конфига.</p>
+<p>Была идея поднять еще один контейнер с дополнительно настроенным OpenVPN, но конфигурации сервера для этого не хватит (5 гб + 512мб).</p></td><td>2022-03-21T18:03:26.158Z</td></tr><tr><td>ValdikSS</td><td><ol>
+<li>Зайдите в контейнер (LXD: <code>lxc shell antizapret-vpn</code>, machined: <code>machinectl shell antizapret-vpn</code>)</li>
+<li>
+<code>nano /etc/ferm/ferm.conf</code>, закомментируйте строку:<br>
+<code>interface vpn+ mod connmark mark 1 REJECT;</code>
+</li>
+<li>Перезагрузите контейнер</li>
+<li>В клиентский конфигурационный файл, который собираетесь использовать в качестве обычного VPN, добавьте:<br>
+<code>redirect-gateway def1 bypass-dhcp</code>
+</li>
+</ol>
+<p>Не проверял, но должно сработать.</p></td><td>2022-03-21T20:10:24.612Z</td></tr><tr><td>Nologin(Кирилл)</td><td><p>Проверил, работает. Возник связанный вопрос, а как сделать список белых доменов, которые ходят через провайдера, а все остальное через ВПН? Такие сайты как ВК - список доступной музыки сильно урезает, видя что я пришел не из РФ.</p></td><td>2022-07-07T08:12:29.753Z</td></tr><tr><td>ValdikSS</td><td><p>Наиболее простой способ: добавить все IP-диапазоны VK в список маршрутизируемых напрямую, в конфигурационный файл клиента.<br>
+<a href="https://bgp.he.net/AS47541#_prefixes" class="onebox" target="_blank" rel="noopener">https://bgp.he.net/AS47541#_prefixes</a></p>
+<pre><code class="lang-auto">route 79.137.139.0 255.255.255.0 net_gateway
+route 79.137.164.0 255.255.255.0 net_gateway
+route 79.137.180.0 255.255.255.0 net_gateway
+route 79.137.183.0 255.255.255.0 net_gateway
+route 87.240.128.0 255.255.192.0 net_gateway
+route 87.240.166.0 255.255.255.0 net_gateway
+route 87.240.167.0 255.255.255.0 net_gateway
+route 93.186.224.0 255.255.248.0 net_gateway
+route 93.186.232.0 255.255.248.0 net_gateway
+route 95.142.192.0 255.255.240.0 net_gateway
+route 95.142.192.0 255.255.248.0 net_gateway
+route 95.213.0.0 255.255.192.0 net_gateway
+route 95.213.44.0 255.255.255.0 net_gateway
+route 95.213.45.0 255.255.255.0 net_gateway
+route 185.32.248.0 255.255.252.0 net_gateway
+</code></pre></td><td>2022-07-07T09:39:00.247Z</td></tr>
+    </table>
+      </body>
+    </html>

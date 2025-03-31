@@ -1,0 +1,1121 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>контейнер-с-vpn-для-mikrotik-претендующий-на-универсальность</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>s.v.d(00svd00)</td><td><p>Собирал для себя, но выглядит так, что получилось достаточно хорошо для публикации.<br>
+Основан на <a href="https://github.com/XTLS/Xray-core" rel="noopener nofollow ugc">Xray-core</a>, туда же добавлены бинарники <a href="https://github.com/artem-russkikh/wireproxy-awg" rel="noopener nofollow ugc">wireproxy awg</a> и <a href="https://github.com/hufrea/byedpi" rel="noopener nofollow ugc">byedpi</a>.<br>
+Также geoip.dat и geosite.dat были заменены на варианты, <a href="https://github.com/runetfreedom" rel="noopener nofollow ugc">адаптированные для РФ</a><br>
+Конкретно geosite.dat был взят в варианте <code>geosite:ru-blocked</code>, т.е. заблокированные домены + домены, доступные только из РФ.<br>
+Есть возможность собрать обрезанный geoip.dat, содержащий только списки для РФ(об этом ниже). Также оставлена возможность прямого подключения к wireproxy awg и byedpi, например через браузерный плагин(foxy proxy или аналоги) - оба бинарника биндятся на ip контейнера(по умолчанию byedpi на порт 9999, а wireproxy на 9998)</p>
+<details>
+<summary>
+Для кого это нужно?</summary>
+<p>Для тех, кому нужен только byedpi или только амнезия, весь этот велосипед затаскивать нет никакого смысла. Проще воспользоваться  <a href="https://ntc.party/t/mikrotik-vless-reality/8708/49">решениями от тов. wiktorbgu</a><br>
+А вот если нужен Vless, shadowsocks и тому подобные инструменты, которые умеет xray - тогда да, тогда вам сюда</p>
+</details>
+<details>
+<summary>
+Почему был использован xray-core, а не sing-box?</summary>
+<p>Потому что именно xray-core поддерживает wireguard-inbound в качестве точек входа, что очень удобно для маршрутизации траффика. Фактически, внутри контейнера нет вообще никаких настроек маршрутизации, просто наружу торчат wireguard интерфейсы. Настройка роутера так же в связи с этим становится достаточно тривиальной и сводится к обычной конфигурации wireguard подключения. Сам контейнер при этом вообще не обязан размещаться на роутере, его вполне можно выселить на малинку, если роутеру не хватает ресурсов. Алярма! Attention! Achtung! В последней версии xray-core сломали маршрутизацию по тегам для wireguard инбаундов. <a href="https://github.com/XTLS/Xray-core/commit/3e7002d24c4ede6158fd4267914553bb98348c61" rel="noopener nofollow ugc">Уже как будто чинят обратно</a>, но пока самая рабочая версия - v24.10.31(которая и была использована)</p>
+</details>
+<details>
+<summary>
+Почему был использован wireproxy awg, а не нормальный amnesia wireguard в tun режиме?</summary>
+<p>Потому что лично у меня обычная сборка amnesia-wg работала криво, непредсказуемо отваливалась и по логам было совершенно непонятно, что именно с ней происходит. Wireproxy в свою очередь продемонстрировал высокую стабильность, простоту, а логов там даже слишком много. Из дополнительных плюсов - можно настроить ливнес пробы, можно вывесить наружу веб ручку с текущим статусом подключения и состоянием пробы, всё это при необходимости можно собирать wireproxy экспортером, собирать прометеем и выводить в графане. Т.е. весьма широкие возможности по настройке автоматизаций и мониторинга. В рамках данного контейнера не реализовано, кому такое надо - легко сами справятся с докой, но сам факт очень греет. Конфигурация так же проста как три рубля. Лично мне решение очень понравилось, единственный его минус - прожорливость до ОЗУ.</p>
+</details>
+<details>
+<summary>
+Зачем нужно было запихивать всё в один контейнер?</summary>
+<p>В целом - особо незачем. Обе прокси(что wireproxy, что ciadpi) спокойно могут жить в отдельных контейнерах, просто вывесив порт наружу. Работать будет точно так же. Но при запихивании в один контейнер добавление общего бизибокса стоит очень дешёво, зато предоставлят более-менее адекватный шелл для отладки и позволяет сделать человеческий вывод логов и хоть какую-то автоматизацию в генерации конфигов. Опять же, решение под ключ - это удобно.</p>
+</details>
+<p>Как это настраивать.<br>
+Для начала стоит учесть, что контейнеру для нормальной работы требуется хотя бы 80-100мб свободной оперативной памяти, а по настоящему хорошо он начинает чувствовать себя при 200-250Мб. Соотв hap AC2 - в пролёте, не нужно мучить зверушку, лучше докупить к нему малинку в помощь. Пробовать запихивать на сам роутер можно начиная с hap AC3, а лучше всего на hap AX2 или AX3. Вроде бы в тестовой ветке RouterOS прикрутили возможность добавить своп, но как именно это работает - лично я не проверял. Если кто хочет проэксперементировать - велком.<br>
+Также инструкция предполагает, что на текущий момент, читателем уже прочитаны материалы по контейнерам на ROS, <a href="https://habr.com/ru/companies/selectel/articles/694436/" rel="noopener nofollow ugc">например статья на хабре</a> или <a href="https://help.mikrotik.com/docs/spaces/ROS/pages/84901929/Container" rel="noopener nofollow ugc">офф. дока</a>, а также есть понимание, как конфигурить wireguard интерфейсы на микротах(например можно <a href="https://mikrotik-training.ru/kb/wireguard-v-mikrotik/" rel="noopener nofollow ugc">ознакомиться со статьёй</a> про соединение двух микротов через WG), т.е. не возникает слишком удивляющих вопросов на тему “чем это таким мы тут будем заниматься?”</p>
+<details>
+<summary>
+Подготовка роутера</summary>
+<p>На микроте ставим пакет с контейнерами, ребутаемся, включаем контейнеры<br>
+<code>/system/device-mode/update container=yes</code><br>
+На железке после этого нужно будет нажать кнопку mode за ограниченное время, удалённо включить контейнеры не выйдет, т.к. потанцевальная дыра в безопасности. Дальше создаём VETH для нашего контейнера, создаём отдельный бридж для контейнеров, навешиваем туда ip адреса(я тут добавляю и ipv6 и ipv4 адрес. На самом деле для схемы с роутингом через WG интерфейс достаточно только v4, но у меня все контейнеры настроены единообразно, так что для общего понимания оставлю)</p>
+<pre><code class="lang-auto">/interface/veth/add address=172.20.0.2/24,fd08:172:20::2/64 gateway=172.20.0.1 gateway6=fd08:172:20::1 name=xray_eth
+/interface/bridge/add name=containers
+/interface/bridge/port/add bridge=containers interface=xray_eth
+/ip/address/add address=172.20.0.1/24 interface=containers
+/ip/firewall/nat/
+add action=masquerade chain=srcnat comment="from containers masq" out-interface=containers src-address=192.168.88.0/24
+add action=masquerade chain=srcnat comment="from containers masq" out-interface-list=WAN src-address=172.20.0.0/24
+/ipv6/address/add address=fd08:172:20::1 interface=containers
+/ipv6/firewall/nat/
+add action=masquerade chain=srcnat comment="from containers masq" out-interface-list=WAN src-address=fd08:172:20::/64
+add action=masquerade chain=srcnat comment="to containers masq" out-interface=containers
+/ipv6/firewall/filter/add action=accept chain=forward comment="Allow Containers" out-interface-list=WAN src-address=fd08:172:20::/64
+</code></pre>
+<p>Опять же, конкретно в варианте с wireguard инбаундами никакой дополнительный маскарадинг для ipv4 не нужен, с головой хватит тех, что мы потом добавим отдельно, а также дефолтного правила маскарадинга всего выходного траффика. Но для единообразия пусть будут.<br>
+Дальше втыкаем в микрот флешку и из интерфейса форматируем её в EXT4(Обязательно! Если будет FAT или exFAT - при распаковке контейнера порушатся разрешения фалов и ничего не взлетит)<br>
+Также включаем на роутере ftp(если выключен) - пригодится для подкидывания конфигов и имеджей<br>
+<code>/ip/service/set ftp disabled=no port=21</code></p>
+</details>
+<details>
+<summary>
+Закатываем контейнер</summary>
+<p>Конфигурим местный докер.<br>
+<code>/container/config/set ram-high=384.0MiB tmpdir=usb1/pull</code><br>
+Аттеншн! Тут ram-high=384.0MiB - это конфиг для AX3 с гигом оперативы. У AС3 её всего 256Мб и с пустым конфигом и установленным пакетом wifi-qcom доступно примерно 145Мб(а с подробным конфигом и под нагрузкой - что-то около 70Мб).<br>
+При превышении лимита ram-high процессы в контейнере начнут нещадно троттлиться, т.е. работать будет, но с дикими тормозами. А вот если память у роутера закончится - скорее всего он тупо крашнется. Не доводим и не включаем старт контейнера при загрузке пока не отладим всё.<br>
+В данном случае я не выкладывал образ на докерхаб, поэтому подкидываем его локально. Для этого подключаемся по ftp на микрот и подкладываем xray_full_mikro.tar в корень диска usb1. Можно воспользоваться <a href="https://winscp.net/eng/download.php" rel="noopener nofollow ugc">WinSCP</a>, очень удобно. Ну или драг-н-дроп-ом через winbox, но там удобство уже так себе.<br>
+Также создаём папочки по пути /usb1/xray_full/config (тоже через ftp или через winbox)<br>
+Создаём маунт для папочки с конфигами<br>
+<code>/container/mounts/add dst=/opt/config name=xray_full_config src=/usb1/xray_full/config</code><br>
+И закатываем контейнер<br>
+<code>/container/add comment="Xray-core PLUS" file=usb1/xray_full_mikro.tar interface=veth1 envlist=xray_full hostname=XrayPLUS interface=xray_eth logging=yes mounts=xray_full_config root-dir=/usb1/xray_full/store logging=yes start-on-boot=no</code></p>
+</details>
+<p>После этого контейнер создастся, но останется выключенным. Включать его пока рано - нужно сконфигурить Wireguard интерфейсы, которыми роутер будет смотреть в контейнер и добавить ключи в переменные контейнера</p>
+<details>
+<summary>
+Создаём WG интерфейсы и настраиваем маршрутизацию</summary>
+<pre><code class="lang-auto">/interface/wireguard/add listen-port=13234 mtu=1420 name=BDPI_WG
+/interface/wireguard/peers/add name=BDPI_WG_peer allowed-address=0.0.0.0/0,::/0 endpoint-address=172.20.0.2 endpoint-port=3124 interface=BDPI_WG 
+/interface/wireguard/add listen-port=13235 mtu=1420 name=AWG_WG
+/interface/wireguard/peers/add name=AWG_WG_peer allowed-address=0.0.0.0/0,::/0 endpoint-address=172.20.0.2 endpoint-port=3125 interface=AWG_WG 
+</code></pre>
+<p>Далее набираем<br>
+<code>/interface/wireguard/print</code><br>
+И видим примерно такую картинку</p>
+<pre><code class="lang-auto">Flags: X - disabled; R - running 
+ 0  R name="BDPI_WG" mtu=1420 listen-port=13234 private-key="wO1qi2jL68IkBEcwZ9IT9BaTH16dONd7Ntj+Lbft0kg=" public-key="NN0BnydbxXQMl9n/hOqow5z6SF/b8h6lMoaa5uBeYGE=" 
+
+ 1  R name="AWG_WG" mtu=1420 listen-port=13235 private-key="SHp5JzLo3YvvyswGDEudwukltBCEBmvs59epANgxeWE=" public-key="hbK38jNBghVeNB7/D+YDqUZLVqn5qSGcZvGogQ63JXQ=" 
+
+</code></pre>
+<p>Здесь нас интересуют <strong>публичные</strong> ключи. Заносим их в переменные контейнера</p>
+<pre><code class="lang-auto">/container/envs
+add key=WG_BDPIIN_PUBKEY name=xray_full value="NN0BnydbxXQMl9n/hOqow5z6SF/b8h6lMoaa5uBeYGE="
+add key=WG_WPIN_PUBKEY name=xray_full value="hbK38jNBghVeNB7/D+YDqUZLVqn5qSGcZvGogQ63JXQ="
+</code></pre>
+<p>Далее добываем ключи пиров</p>
+<pre><code class="lang-auto">/interface/wireguard/peers/export show-sensitive 
+# 2024-12-09 16:55:52 by RouterOS 7.16.1
+# software id = 22UI-VTRD
+#
+# model = C53UiG+5HPaxD2HPaxD
+# serial number = XXXXXXXXXXX
+/interface wireguard peers
+add allowed-address=0.0.0.0/0,::/0 endpoint-address=172.20.0.2 endpoint-port=3124 interface=BDPI_WG name=BDPI_WG_peer private-key="aPfr+HjXhgrzejN3YawS9SPddIyWidDgPYI3nHezlGw=" public-key=\
+    "I3GJ75Wz0BgfBw1KwiEkmNsCmg8CTHnyqDDKsStBdGw="
+add allowed-address=0.0.0.0/0,::/0 endpoint-address=172.20.0.2 endpoint-port=3125 interface=AWG_WG name=AWG_WG_peer private-key="OJrDUVmmM6LbSmEfMddKhx15LoKNh4l2P/XdlO8An1M=" public-key=\
+    "t4F3NASnN32rpY6OgbrXc8S2xHdrXsuIuyQHwCvDGXY="
+</code></pre>
+<p>Здесь нас интересуют <strong>приватные</strong> ключи. Аналогично добавляем их в переменные</p>
+<pre><code class="lang-auto">/container/envs
+add key=WG_BDPIIN_PRIVKEY name=xray_full value="aPfr+HjXhgrzejN3YawS9SPddIyWidDgPYI3nHezlGw="
+add key=WG_WPIN_PRIVKEY name=xray_full value="OJrDUVmmM6LbSmEfMddKhx15LoKNh4l2P/XdlO8An1M="
+</code></pre>
+<p>И наконец настраиваем правила и таблица маршрутизации</p>
+<pre><code class="lang-auto">/routing table 
+add disabled=no fib name=bdpi
+add disabled=no fib name=awg
+/routing rule
+add action=lookup disabled=no interface=BDPI_WG routing-mark=warp table=bdpi
+add action=lookup disabled=no interface=AWG_WG routing-mark=vless table=awg
+</code></pre>
+<p>Добавляем маскарадинг</p>
+<pre><code class="lang-auto">/ip firewall nat
+add action=masquerade chain=srcnat comment="BDPI_WG masq" out-interface=BDPI_WG 
+add action=masquerade chain=srcnat comment="AWG_WG masq" out-interface=AWG_WG
+/ipv6 firewall nat
+add action=masquerade chain=srcnat comment="BDPI_WG masq" out-interface=BDPI_WG
+add action=masquerade chain=srcnat comment="AWG_WG masq" out-interface=AWG_WG
+</code></pre>
+<p>Дальше нам нужно повесить на интерфейсы WG какие-нибудь IP адреса, любые, из приватного диапазона(по ним будет идти маршрутизация только до приложения в контейнере). Например так. Опять же, в целом можно без этого, т.к. маршрутизировать мы будет тупо по интерфейсу, но некрасиво.</p>
+<pre><code class="lang-auto">/ip address 
+add address=172.19.0.2 interface=BDPI_WG network=172.19.0.2
+add address=172.19.0.3 interface=AWG_WG network=172.19.0.3
+/ipv6 address
+add address=fd08:172:19::3/128 advertise=no interface=BDPI_WG no-dad=yes
+add address=fd08:172:19::2/128 advertise=no interface=AWG_WG no-dad=yes
+</code></pre>
+<p>И создаём маршруты в дикий интернет для наших новых таблиц маршрутизации</p>
+<pre><code class="lang-auto">/ip route
+add comment=BDPI disabled=no distance=1 dst-address=0.0.0.0/0 gateway=BDPI_WG routing-table=bdpi
+add comment=AWG disabled=no distance=1 dst-address=0.0.0.0/0 gateway=AWG_WG routing-table=awg
+/ipv6 route
+add comment=BDPI disabled=no distance=1 dst-address=2000::/3 gateway=BDPI_WG routing-table=bdpi
+add comment=AWG disabled=no distance=1 dst-address=2000::/3 gateway=AWG_WG routing-table=awg
+</code></pre>
+</details>
+<p>Уже на этом этапе контейнер можно поднять, он должен будет немного поругаться на то, что у него неправильный конфиг амнезии, а у byedpi не настроены никакие параметры. Но крашнуться не должен. В теории)</p>
+<details>
+<summary>
+Исправим это</summary>
+<p>Сначала добавим переменную, передающую параметры в byedpi. В неё нужно прописать ваши параметры, которые работают у вас<br>
+<code>/container/envs/add key=BDPI_ARGS name=xray_full value="--proto=http,tls --oob 2"</code><br>
+Дальше добавляем конфиг амнезии. Если амнезия нужна для подключения к WARP - можно воспользоваться <a href="https://github.com/ImMALWARE/bash-warp-generator" rel="noopener nofollow ugc">генератором</a><br>
+Получится файл вида</p>
+<pre><code class="lang-auto">[Interface]
+PrivateKey = СЕЕРКТНЫЙ_КЛЮЧ
+S1 = 0
+S2 = 0
+Jc = 50
+Jmin = 10
+Jmax = 120
+H1 = 1
+H2 = 2
+H3 = 3
+H4 = 4
+
+MTU = 1280
+Address = 172.16.0.2, IPV6_адрес
+
+[Peer]
+PublicKey = ПУБЛИЧНЫЙ_КЛЮЧ
+AllowedIPs = 0.0.0.0/0, ::/0
+PersistentKeepalive = 25
+Endpoint = engage.cloudflareclient.com:2408
+</code></pre>
+<p>В него, в раздел [Interface] по желанию можно добавить строки</p>
+<pre><code class="lang-auto">CheckAlive = 1.1.1.1, 8.8.8.8
+CheckAliveInterval = 10
+</code></pre>
+<p>Тогда раз в CheckAliveInterval  хосты, перечисленные в CheckAlive, будут пинговаться, и если не ответят - ливнес проба на <code>/readyz</code> вернёт 503. А если всё ОК - 200.<br>
+Также Endpoint можно задать через перменную окружения<br>
+<code>Endpoint = $AWG_ENDPOINT</code><br>
+И задать её через переменные контейнера<br>
+<code>/container/envs/add key=AWG_ENDPOINT name=xray_full value=162.159.192.1:2408</code><br>
+wireproxy так умеет и понимает.<br>
+Конфиг подкидываем по пути /usb1/xray_full/config/чтоугодно.conf<br>
+Напр. /usb1/xray_full/config/awg.conf<br>
+Если стартовали контейнер - рестартим</p>
+</details>
+<p>После этого контейнер с базовым конфигом почти готов к работе. Любой траффик, который пойдёт на интерфейс BDPI_WG, через правила маршрутизации, прописанном в конфие xray, зарулится на byedpi, а тот что пойдёт на AWG_WG  - попадёт в wireproxy. Остаётся настроить правила, которые будут заворачивать маршруты для интересных нам хостов.</p>
+<details>
+<summary>
+Настраиваем заворот траффика</summary>
+<p>Для начала добавляем правила, по которым траффик до хостов из соотв. аддресс-листа будет заворачиваться в соотв. таблицу маршрутизации</p>
+<pre><code class="lang-auto">/ip firewall mangle
+add action=mark-routing chain=prerouting comment=BDPI dst-address-list=bdpi new-routing-mark=bdpi passthrough=yes routing-mark=!bdpi src-address=!172.20.0.0/24
+add action=mark-routing chain=prerouting comment=AWG dst-address-list=awg new-routing-mark=awg passthrough=yes routing-mark=!awg src-address=!172.20.0.0/24
+/ipv6 firewall mangle
+add action=mark-routing chain=prerouting comment=BDPI dst-address-list=bdpi new-routing-mark=bdpi passthrough=yes routing-mark=!bdpi src-address=!fd08:172:20::/64
+add action=mark-routing chain=prerouting comment=AWG dst-address-list=awg new-routing-mark=awg passthrough=yes routing-mark=!awg src-address=!fd08:172:20::/64
+</code></pre>
+<p>Теперь эти списки нужно как-то наполнять. Проще всего - через статические DNS записи(клиенты должны использовать микротовски DNS сервер, иначе фокус не получится)<br>
+Предположим, мы хотим обойти блокировки для домена ntc.party. Предположим, мы хотим сделать это через byedpi.<br>
+Тогда добавляем статическую запись такого вида</p>
+<pre><code class="lang-auto">/ip/dns/static/add address-list=bdpi comment="DPI ntc.party" forward-to=localhost match-subdomain=yes name=ntc.party type=FWD
+</code></pre>
+<p>И настраиваем время жизни записи в листе на подольше(я себе ставлю сутки, нужно чтоб она жила дольше, чем DNS кеш у клиентов<br>
+<code>/ip/dns/set address-list-extra-time=1d</code><br>
+После этого, когда клиент попытается сходит на ntc.party, он стукнется на микротиковский DNS, чтобы разрезолвить хост. Микротиковский DNS найдёт у себя статическую FWD запись, форварднёт себе же, добавит в лист bdpi и потом разрезолвит об вышестоящий DNS сервер и вернёт клиенту ip. И на тот момент, когда клиент попытается установить соединение с этм ip - он уже находится в листе bdpi, а значит траффик попадёт в таблицу маршрутизации bdpi и завернётся в интерфейс BDPI_WG. Т.о. можно гибко настраивает списки для разных хостов.</p>
+</details>
+<p>Касаемо логов контейнера. Сделано так, что для каждого из бинарников его сообщения имеют соотв. префикс в общем логфайле микротика.<br>
+Будет так - hostname_контейнера: Имя_приложения: сообщение. Если хостнейм контейнера не настроен - вместо него будет выведен его ip адрес. Также есть возможность отфильтровать сообщения от wireproxy, т.к. он генерит их ну прям очень много. Делается через задание энвы контейнера LOGFILTER<br>
+Например как-то так:<br>
+<code>add key=LOGFILTER name=xray_full value="Transport packet|Sending keepalive|Sending handshake|Received handshake"</code></p>
+<p>После этого контейнер базово работает и заворачивает траффик в амнезию или byedpi. Но ведь он умеет не только это) Начинается самое вкусное.<br>
+С некоторых пор xray-proxy поддерживает многофайловые конфиги, т.е. больше нет никакой необходимости ковыряться в километровой жсонине, можно порубить её на жсоны помельче и точечно добавлять или менять куски конфигурации.<br>
+Полная дока <a href="https://xtls.github.io/en/config/features/multiple.html" rel="noopener nofollow ugc">доступна здесь</a>, но если вкратце - суть такая.<br>
+В конфиге xray есть примерно такой набор блоков:</p>
+<pre><code class="lang-auto">{
+  "log": {},
+  "api": {},
+  "dns": {},
+  "stats": {},
+  "policy": {},
+  "transport": {},
+  "routing": {},
+  "inbounds": [],
+  "outbounds": []
+}
+</code></pre>
+<p>Для всех них валидно следующее правило - каждый следующий конфиг заменяет собой те блоки в предыдущем конфиге, которые он содержит. Т.е. если следующим конфигом добавить json с содержимым вида<br>
+{<br>
+“log”: {<br>
+Что-то<br>
+}<br>
+}<br>
+То весь блок log в конфиге заменится на новый и общий конфиг примет вид</p>
+<pre><code class="lang-auto">{
+  "log": {
+     Что-то
+   },
+  "api": {},
+  "dns": {},
+  "stats": {},
+  "policy": {},
+  "transport": {},
+  "routing": {},
+  "inbounds": [],
+  "outbounds": []
+}
+</code></pre>
+<p>Правило валидно для всех блоков, <strong>кроме inbounds и outbounds</strong>, для них всё хитрее. Если в следующем конфиге прописано два или больше инбаунда или аутбаунда - то всё тоже самое, заменяется весь блок. А вот если их там только по одной штучке - то инбаунды из следующего конфига <strong>допишутся</strong> в начало общего. Аналогично и аутбаунды, только для них есть ещё одно правило - если в имени конфига есть слово <code>tail</code>, то аутбаунды допишутся в конец.<br>
+Конфиги намапливаются друг на друга в алфавитном порядке, т.е. сначала применится конфиг 00-что-то.json, потом 01-что-то.json и т.п. Все расширения кроме json также игнорируются, т.о. если изменить расширение файла - ненужный кусок конфига можно просто выключить. Удобно например для временного включения расширенного логирования.<br>
+Т.о. можно без особых усилий добавлять к базовой конфиге xray в контейнере свои собственные конфигурации для VPN</p>
+<details>
+<summary>
+Базовый конфиг</summary>
+<p>Лежит в контейнере по пути<br>
+/usb1/xray_full/store/opt/xray-core/00_base.json<br>
+И имеет такой вид:</p>
+<pre><code class="lang-auto">{
+  "log": 
+  {
+    "access": "none",
+    "dnsLog": false,
+    "loglevel": "warning"
+  },
+  "routing": 
+  {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "ip": [
+          "geoip:private",
+          "192.168.88.0/24"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": "geosite:ru-available-only-inside",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "protocol": "bittorrent",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": "geoip:ru",
+        "outboundTag": "bdpi"
+      },
+      {
+        "type": "field",
+        "inboundTag": "inbound-wg-bdpi:3124",
+        "outboundTag": "bdpi"
+      },
+      {
+        "type": "field",
+        "inboundTag": "inbound-wg-awg:3125",
+        "outboundTag": "awg"
+      }
+    ]
+  },
+  "inbounds": 
+  [
+    {
+      "listen": "$MYIP",
+      "port": 3124,
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1420,
+        "secretKey": "$WG_BDPIIN_PRIVKEY",
+        "peers": [
+          {
+            "publicKey": "$WG_BDPIIN_PUBKEY",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "keepAlive": 0
+          }
+        ],
+        "noKernelTun": true
+      },
+      "streamSettings": null,
+      "tag": "inbound-wg-bdpi:3124",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": "fakedns+others",
+        "metadataOnly": false
+      }
+    },
+    {
+      "listen": "$MYIP",
+      "port": 3125,
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1420,
+        "secretKey": "$WG_WPIN_PRIVKEY",
+        "peers": [
+          {
+            "publicKey": "$WG_WPIN_PUBKEY",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "keepAlive": 0
+          }
+        ],
+        "noKernelTun": true
+      },
+      "streamSettings": null,
+      "tag": "inbound-wg-awg:3125",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": "fakedns+others",
+        "metadataOnly": false
+      }
+    }
+  ],
+  "outbounds": 
+  [
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "AsIs"
+      }
+    },
+    {
+      "tag": "blocked",
+      "protocol": "blackhole",
+      "settings": {}
+    },
+    {
+      "tag": "awg",
+      "protocol": "socks",
+      "settings": {
+        "servers": [
+          {
+            "address": "$MYIP",
+            "port": $WP_PORT
+          }
+        ]
+      }
+    },
+    {
+      "tag": "bdpi",
+      "protocol": "socks",
+      "settings": {
+        "servers": [
+          {
+            "address": "$MYIP",
+            "port": $BDPI_PORT
+          }
+        ]
+      }
+    }
+  ]
+}
+</code></pre>
+<p>Это фактически шаблон, в котором при старте контейнера переменные подменяются на их значения, после чего содержимое перенаправляется через named pipe по пути<br>
+/usb1/xray_full/store/opt/config/00_base_dyn.json<br>
+Т.е. после старта контейнера в маунте с конфигурациями появляется пустой файл с таким именем. Его можно удалить, он пересоздастся после старта, а вот пробовать открывать его не надо, это на самом деле не файл, а ссылка на пайп, другой конец которого в этот момент уже оторвана. Не откроется.<br>
+Также в нём изначально прописан ряд правил маршрутизации.</p>
+<ol>
+<li>Для адресов из приватного диапазона аутбаунд всегда direct</li>
+<li>Для хостов, доступных только из РФ аутбаунд тоже директ(правило работает только в том случае, если xray используется как прокси. Если используется wireguard inbound - xray ничего не знает о доменном имени и база geosite для него бесполезна. Блок оставлен по сути на всякий случай</li>
+<li>Для битторент траффика аутбаунд всегда direct. На случай случайно залетевшего маршрута.</li>
+<li>Для российских ip адресов аутбаунд по умолчанию byedpi. Опять же, оставлено скорее как страховка, чтоб не палить свои VPS-ки</li>
+<li>Для входящего интерфейса с тегом inbound-wg-bdpi аутбаунд - byedpi</li>
+<li>Для входящего интерфейса с тегом inbound-wg-awg аутбаунд - awg<br>
+В общем случае, правила работают так. Любому соединению нужно соотвествовать всем условиям, описанным в правиле. Если хоть одно не соответствует - мимо. Если соответсвуют несколько - применится то, которое выше в списке. Если не соотвествует ни одно - траффик выйдет через самый последний аутбаунд в списке(поэтому в списке последним прописан тот же byedpi - чтоб случайно не спалить свою VPSку)</li>
+</ol>
+</details>
+<p>Ну и дальше, представим себе что нам хочется добавить свой собственный VPN в качестве ещё одного в списке вариантов обхода. Допустим, это VLess протокол<br>
+Подкидываем по пути /usb1/xray_full/store/opt/config/ конфиг 01_vless_out.json вида</p>
+<details>
+<summary>
+01_vless_out.json</summary>
+<pre><code class="lang-auto">{
+  "inbounds": 
+  [
+    {
+      "listen": "172.20.0.2",
+      "port": 3126,
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1420,
+        "secretKey": "ПРИВАТНЫЙ_КЛЮЧ",
+        "peers": [
+          {
+            "publicKey": "ПУБЛИЧНЫЙ_КЛЮЧ",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "keepAlive": 0
+          }
+        ],
+        "noKernelTun": true
+      },
+      "streamSettings": null,
+      "tag": "inbound-wg-vless:3126",
+      "sniffing": {
+        "enabled": false,
+        "metadataOnly": false,
+        "routeOnly": false
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "vless_out",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "АДРЕС",
+            "port": 443,
+            "users": [
+              {
+                "id": "АЙДИ",
+                "flow": "xtls-rprx-vision",
+                "encryption": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "publicKey": "ПУБЛИЧНЫЙ_КЛЮЧ_VLESS",
+          "fingerprint": "chrome",
+          "serverName": "что-то.com",
+          "shortId": "айди",
+          "spiderX": "/"
+        },
+        "tcpSettings": {
+          "header": {
+            "type": "none"
+          }
+        }
+      }
+    }
+  ]
+}
+</code></pre>
+</details>
+<p>Т.к. в этом конфиге только один инбаунд и только один аутбаунд - они допишутся к общему, а не заменят список целиком. Если нужно больше инбаундов(напр. мы хотим добавить dokodemo-door, который будет проксировать траффик в наш vless-out, то нужно класть его в ещё один конфиг, следующий в списке)<br>
+Подкидываем туда же 02_routing.json, в который копируем правила из дефолтного+новое</p>
+<details>
+<summary>
+02_routing.json</summary>
+<pre><code class="lang-auto">{
+"routing": 
+  {
+    "domainStrategy": "AsIs",
+    "rules": 
+    [
+      {
+        "type": "field",
+        "ip": [
+          "geoip:private",
+          "192.168.88.0/24"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": "geosite:ru-available-only-inside",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": "geoip:ru",
+        "outboundTag": "bdpi"
+      },
+      {
+        "type": "field",
+        "protocol": "bittorrent",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "inboundTag": "inbound-wg-vless:3126",
+        "outboundTag": "vless_out"
+      }
+      {
+        "type": "field",
+        "inboundTag": "inbound-wg-awg:3125",
+        "outboundTag": "awg"
+      },
+      {
+        "type": "field",
+        "inboundTag": "inbound-wg-bdpi:3124",
+        "outboundTag": "bdpi"
+      }
+    ]
+  }
+}
+</code></pre>
+</details>
+<p>Настраиваем ещё один Wireguard интерфейс на роутере по аналогии, рестартим контейнер и вуаля - новый впн настроен. Можно прицеливать нужные хосты туда.</p>
+<details>
+<summary>
+Про обрезку geoip.dat</summary>
+<p>Можно убрать ненужные списки из geoip.dat, например оставив только списки ru, private и ru-blocked<br>
+Для этого качаем <a href="https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/release/geoip.dat" rel="noopener nofollow ugc">полный, с добавленными для РФ списками</a><br>
+Клонируем себе куда-нибудь гит с интсрументарием, заходим и собираем (нужен golang-go)</p>
+<pre><code class="lang-auto">git clone https://github.com/v2fly/geoip.git
+cd geoip
+go build
+</code></pre>
+<p>После этого правим config.json, оставляя от него что-то такое</p>
+<pre><code class="lang-auto">{
+  "input": [
+    {
+      "type": "v2rayGeoIPDat",
+      "action": "add",
+      "args": {
+        "uri": "../geoip.dat",
+        "wantedList": ["ru", "ru-blocked"]
+      }
+    },
+    {
+      "type": "private",
+      "action": "add"
+    }
+  ],
+  "output": [
+    {
+      "type": "v2rayGeoIPDat",
+      "action": "output",
+      "args": {
+        "outputDir": "./output",
+        "outputName": "geoip-ru.dat"
+      }
+    }
+  ]
+}
+</code></pre>
+<p>где …/geoip.dat - путь до ранее скаченного geoip.dat<br>
+Всё, сохраняем, запускаем бинарь geoip, и он выплюнет в ./output geoip-ru.dat, содержащий интересующие нас списки. Подкидывать по пути /usb1/xray_full/store/opt/xray-core/data/geoip.dat<br>
+Зачем нужно? В теории можно повысить производительность, если используется сравнение только с русскими списками - зачем таскать все остальные? На практике если честно особой разницы не заметил, но кому-то возможно может помочь съэкономить несколько мегабайт памяти</p>
+</details>
+<p>Собранный контейнер(для arm64) выложил <a href="https://disk.yandex.ru/d/AMmLNIR7_8voEA" rel="noopener nofollow ugc">на ядиск</a>, также в следующем сообщении(в это не помещается) выкладываю скрипт для самостоятельной сборки(потому что не надо доверять вещам, собранным рандомным челом из интернета). Ну и ещё можно подрихтовать под себя базовый конфиг, убрать, если не нужны, бинарники wireproxy и ciadpi, обновить контейнер когда выйдут свежие версии и т.п.</p></td><td>2024-12-09T18:13:10.164Z</td></tr><tr><td>s.v.d(00svd00)</td><td><details>
+<summary>
+build.sh</summary>
+<pre><code class="lang-auto">#!/bin/bash
+DISTR_XRAY="https://github.com/XTLS/Xray-core/releases/download/v24.10.31/Xray-linux-arm64-v8a.zip"
+DISTR_BDPI="https://github.com/hufrea/byedpi/releases/download/v0.15/byedpi-15-aarch64.tar.gz"
+DISTR_WIREPROXY_AWG="https://github.com/artem-russkikh/wireproxy-awg/releases/latest/download/wireproxy_linux_arm64.tar.gz"
+GEOSITE_RU_BLOCKED="https://github.com/runetfreedom/russia-blocked-geosite/releases/latest/download/geosite-ru-only.dat"
+GEOIP_RU="https://raw.githubusercontent.com/runetfreedom/russia-v2ray-rules-dat/release/geoip.dat"
+#-------------------------------------------------
+download() {
+	if [ $download_enabled -eq 1 ]; then
+		rm -rf temp/*
+		wget ${1} -O temp/${2}
+		case `echo ${2} | awk -F. '{print $NF}'` in 
+			"zip")
+				unzip temp/${2} -d temp/ ;;
+			*)
+				tar -xf temp/${2} -C temp/ ;;
+		esac
+	fi
+}
+precheck() {
+	echo "1. Checking installation..."
+	if [ ! `which docker` ]; then
+		echo "Install docker first"
+		exit 0;
+	fi
+	if [ ! `which wget` ]; then
+		echo "Install wget first"
+		exit 0;
+	fi
+	if [ ! `which unzip` ]; then
+		echo "Install unzip first"
+		exit 0;
+	fi
+	
+	rm -rf temp prepare
+	mkdir -p temp
+	mkdir -p prepare/opt/xray-core/data
+	mkdir -p prepare/opt/config/
+	mkdir -p prepare/usr/share
+	echo "Installation OK"
+	download_enabled=1
+}
+#--------------------
+xray_baseconf_gen() {
+cat &gt; prepare/opt/xray-core/00_base.json &lt;&lt; EOF
+{
+  "log": 
+  {
+    "access": "none",
+    "dnsLog": false,
+    "loglevel": "warning"
+  },
+  "routing": 
+  {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "ip": [
+          "geoip:private",
+          "192.168.88.0/24"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": "geosite:ru-available-only-inside",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "protocol": "bittorrent",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": "geoip:ru",
+        "outboundTag": "bdpi"
+      },
+      {
+        "type": "field",
+        "inboundTag": "inbound-wg-bdpi:3124",
+        "outboundTag": "bdpi"
+      },
+      {
+        "type": "field",
+        "inboundTag": "inbound-wg-awg:3125",
+        "outboundTag": "awg"
+      }
+    ]
+  },
+  "inbounds": 
+  [
+    {
+      "listen": "\$MYIP",
+      "port": 3124,
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1420,
+        "secretKey": "\$WG_BDPIIN_PRIVKEY",
+        "peers": [
+          {
+            "publicKey": "\$WG_BDPIIN_PUBKEY",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "keepAlive": 0
+          }
+        ],
+        "noKernelTun": true
+      },
+      "streamSettings": null,
+      "tag": "inbound-wg-bdpi:3124",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": "fakedns+others",
+        "metadataOnly": false
+      }
+    },
+    {
+      "listen": "\$MYIP",
+      "port": 3125,
+      "protocol": "wireguard",
+      "settings": {
+        "mtu": 1420,
+        "secretKey": "\$WG_WPIN_PRIVKEY",
+        "peers": [
+          {
+            "publicKey": "\$WG_WPIN_PUBKEY",
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "keepAlive": 0
+          }
+        ],
+        "noKernelTun": true
+      },
+      "streamSettings": null,
+      "tag": "inbound-wg-awg:3125",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": "fakedns+others",
+        "metadataOnly": false
+      }
+    }
+  ],
+  "outbounds": 
+  [
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "AsIs"
+      }
+    },
+    {
+      "tag": "blocked",
+      "protocol": "blackhole",
+      "settings": {}
+    },
+    {
+      "tag": "awg",
+      "protocol": "socks",
+      "settings": {
+        "servers": [
+          {
+            "address": "\$MYIP",
+            "port": \$WP_PORT
+          }
+        ]
+      }
+    },
+    {
+      "tag": "bdpi",
+      "protocol": "socks",
+      "settings": {
+        "servers": [
+          {
+            "address": "\$MYIP",
+            "port": \$BDPI_PORT
+          }
+        ]
+      }
+    }
+  ]
+}
+EOF
+}
+xray_prepare() {
+	echo "2. Preparing xray-core"
+	download $DISTR_XRAY xray.zip
+	mv temp/xray prepare/opt/xray-core/
+	chmod +x prepare/opt/xray-core/xray
+	wget $GEOSITE_RU_BLOCKED -O prepare/opt/xray-core/data/geosite.dat
+	wget $GEOIP_RU -O prepare/opt/xray-core/data/geoip.dat
+	
+	wget 
+	ln -s /opt/xray-core/data prepare/usr/share/xray
+	if [ -e prepare/opt/xray-core/xray ]; then
+		echo "xray-core OK"
+	else
+		echo "Unable to prepare xray-core. Exiting"
+		exit 0
+	fi
+}
+#--------------------
+bdpi_prepare(){
+	echo "3. Preparing byedpi"
+	download $DISTR_BDPI bdpi.tar.gz
+	tar -xf temp/bdpi.tar.gz -C temp/
+	mv temp/ciadpi-aarch64 prepare/opt/ciadpi
+	chmod +x prepare/opt/ciadpi
+	if [ -e prepare/opt/ciadpi ]; then
+		echo "byedpi OK"
+	else
+		echo "Unable to prepare byedpi. Exiting"
+		exit 0
+	fi
+}
+#--------------------
+awg_prepare(){
+	echo "4. Preparing AWG"
+	download $DISTR_WIREPROXY_AWG awg.tar.gz
+	mv temp/wireproxy prepare/opt/
+	chmod +x prepare/opt/wireproxy
+	if [ -e prepare/opt/wireproxy ]; then
+		echo "AWG OK"
+	else
+		echo "Unable to prepare AWG. Exiting"
+		exit 0
+	fi
+}
+#--------------------
+entrypoint_gen() {
+cat &gt; prepare/opt/entrypoint.sh &lt;&lt; EOF2
+#!/bin/busybox sh
+#setting envs
+export MYIP=\$(ip -4 addr show dev eth0 | grep inet | awk -F' ' '{split(\$2, a, "/");print a[1]}') #because busybox needs some hacks
+if hostname | grep -iq mikrotik; then MYHOST=\$MYIP; else MYHOST=\$(hostname); fi #if container hostname is not set, it will be router name
+if [ ! "\$WP_PORT" ]; then export WP_PORT=9998; fi #setting wireproxy port
+if [ ! "\$BDPI_PORT" ]; then export BDPI_PORT=9999; fi #setting byedpi port
+if [ ! "\$WG_WPIN_PRIVKEY" ]; then echo "\$MYHOST: WG_WPIN_PRIVKEY is not set. Exiting"; exit 0 ; fi
+if [ ! "\$WG_WPIN_PUBKEY" ]; then echo "\$MYHOST: WG_WPIN_PUBKEY is not set. Exiting"; exit 0 ; fi
+if [ ! "\$WG_BDPIIN_PRIVKEY" ]; then echo "\$MYHOST: WG_BDPIIN_PRIVKEY is not set. Exiting"; exit 0 ; fi
+if [ ! "\$WG_BDPIIN_PUBKEY" ]; then echo "\$MYHOST: WG_BDPIIN_PUBKEY is not set. Exiting"; exit 0 ; fi
+
+#generating xray base conf from template
+mkfifo /opt/config/00_base_dyn.json
+eval "cat &lt;&lt;EOF
+\$(cat /opt/xray-core/00_base.json)
+EOF
+" &gt; /opt/config/00_base_dyn.json &amp;
+#generating config for wireproxy with socks block
+mkfifo /opt/awg.conf
+eval "cat &lt;&lt;EOF
+\$(find /opt/config/ -maxdepth 1 -type f -name "*.conf" -exec cat {} \; -quit)
+[Socks5]
+BindAddress = \$MYIP:\$WP_PORT
+EOF
+" &gt; /opt/awg.conf &amp;
+#starting all processes
+log() { while read line; do echo "\$MYHOST: \${1}: \${line}"; done; }
+if [ ! "\$LOGFILTER" ]; then #wireproxy produce too much logs. We can filter them
+	echo "Filеring logs for wireproxy disabled"
+	/opt/wireproxy -c /opt/awg.conf 2&gt;&amp;1 | log "WireproxyAWG" &amp;
+else
+	/opt/wireproxy -c /opt/awg.conf 2&gt;&amp;1 | grep -Eiv "\$LOGFILTER" | log "WireproxyAWG" &amp;
+fi
+/opt/ciadpi --ip \$MYIP --port \$BDPI_PORT \$BDPI_ARGS 2&gt;&amp;1 | log "ByeDpi" &amp;
+/opt/xray-core/xray run -confdir /opt/config 2&gt;&amp;1 | log "Xray-core"
+EOF2
+}
+dockerbuild () {
+	echo "5. Building docker image"
+	echo 'FROM --platform=linux/arm64 busybox:stable
+WORKDIR /opt/xray-core/data
+COPY ./prepare/ /
+ENTRYPOINT ["/opt/entrypoint.sh"]
+' &gt; Dockerfile
+	chmod +x prepare/opt/entrypoint.sh
+	docker build --rm -t xray_full_mikro .
+	docker save xray_full_mikro:latest -o xray_full_mikro.tar
+	docker image rm xray_full_mikro:latest
+}
+precheck
+xray_prepare
+xray_baseconf_gen
+bdpi_prepare
+awg_prepare
+entrypoint_gen
+dockerbuild
+</code></pre>
+</details></td><td>2024-12-09T18:13:21.553Z</td></tr><tr><td>meeeeeh</td><td><p>PSA:</p>
+<ol>
+<li>копия исходных двух постов на <a href="https://web.archive.org/web/20241210054311/https://ntc.party/t/%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%B9%D0%BD%D0%B5%D1%80-%D1%81-vpn-%D0%B4%D0%BB%D1%8F-mikrotik-%D0%BF%D1%80%D0%B5%D1%82%D0%B5%D0%BD%D0%B4%D1%83%D1%8E%D1%89%D0%B8%D0%B9-%D0%BD%D0%B0-%D1%83%D0%BD%D0%B8%D0%B2%D0%B5%D1%80%D1%81%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D1%81%D1%82%D1%8C/13694" rel="noopener nofollow ugc">webarchive</a></li>
+<li>копия архива с контейнером на <a href="https://web.archive.org/save/https://s1124sas.storage.yandex.net/rdisk/d98e65f25da6a879f38143db4e01320b4e1a1681ad003f4954e844bb34b67187/67581521/Ocsi00WMP5iQj3mcIXJu9AWdAGy3gLs0MyGZw0grywTxGHycpxsCTT2VlSBSHt2e_Xg4lVb0tRnd5rwjWEvuzw==?uid=0&amp;filename=xray_full_mikro.tar&amp;disposition=attachment&amp;hash=Oru68eS0aEd/cwVqHKQB%2BPMqy7S2qqu7grUjJmYmNhXajD276nWcRYafEVKKyvZRq/J6bpmRyOJonT3VoXnDag%3D%3D&amp;limit=0&amp;content_type=application%2Fx-tar&amp;owner_uid=54217094&amp;fsize=59025920&amp;hid=61fa1fec54d6d3bffb7983f6bcfb2f63&amp;media_type=compressed&amp;tknv=v2&amp;ts=628e7c866ca40&amp;s=04e59803476eeca28903214e0ba144281149aac1b6fd9d5dd38c0870058721bd&amp;pb=U2FsdGVkX18uvPunww_8scxlF3xzdQR29t3V8etP-8VKOclDuQwcozB8uv7e6PufHQlAhIvws-QSRUmYiFT5ck1LLqx6XkYDdtg0WcmOoeA" rel="noopener nofollow ugc">webarchive</a> и <a href="https://pixeldrain.com/u/9ejt6ciG" rel="noopener nofollow ugc">pixeldrain</a></li>
+</ol>
+<p>SHA512: 7f02fa6fe6949441d5e52267453809b5704e6394824d09dc59ee45e5874477cd22569b5bab41272b77edec618f887240a8827deaea8f207ea849ddd55137e1bf, сверяйте с оригиналом самостоятельно.</p></td><td>2024-12-10T06:25:52.589Z</td></tr><tr><td>MasterYoba</td><td><aside class="quote no-group" data-username="s.v.d" data-post="1" data-topic="13694">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/s.v.d/48/6091_2.png" class="avatar"> s.v.d:</div>
+<blockquote>
+<p>Конкретно geosite.dat был взят в варианте <code>geosite:ru-blocked</code>, т.е. заблокированные домены + домены, доступные только из РФ</p>
+</blockquote>
+</aside>
+<p>Из моего опыта тестов данный файл слишком урезан, встретились заблокированные сайты, которые там отсутствуют. <code>geosite:ru-blocked-all</code> в этом плане лучше, там я не обнаружил упущений.</p></td><td>2024-12-12T07:15:34.168Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Ну, тут уже по желанию. Нужную версию можно подкинуть по FTP по пути /usb1/xray_full/store/opt/xray-core/data<br>
+Я просто geosite вообще не использую, у меня маршрутизация на третьем слое, в таком варианте xray ни про какие хосты не знает(по крайней мере у меня это не работает, видимо sni сниффать он не умеет)</p></td><td>2024-12-12T09:20:19.377Z</td></tr><tr><td>Azshov</td><td><p>Здравствуйте, а не планируете сделать инструкцию как делать всё это добро с малинкой и hap ac2?</p></td><td>2025-01-04T20:04:38.819Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Там практически 1в1, просто вместо ip контейнера будет ip малинки. Т.к. мы работаем на прикладном уровне ( с конкретными сервисами на конкретных портах) - контейнеру абсолютно пофиг, где жить. Единстаенное - в докере придётся прокинуть соотв. порты и потом через iptables наладить трансляцию с внешнего интерфейса, но это чисто маны по докеру помогут</p></td><td>2025-01-04T20:49:04.999Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>В последней сборке xray-core поправили багу с wireguard маршрутизацией, так что теперь для сборки контейнера можно юзать latest<br>
+Соотв. в сборочном скрипте просто поправить</p>
+<pre><code class="lang-auto">DISTR_XRAY="https://github.com/XTLS/Xray-core/releases/download/v24.10.31/Xray-linux-arm64-v8a.zip"
+</code></pre>
+<p>на</p>
+<pre><code class="lang-auto">DISTR_XRAY="https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-arm64-v8a.zip"
+</code></pre>
+<p>Отредактировать сообщение уже не могу</p></td><td>2025-01-16T07:29:45.970Z</td></tr><tr><td>shiro-kun</td><td><p>По инструкции собрал себе под arm32 (RB3011UiAS) контейнер и радуюсь что работает.</p>
+<aside class="quote no-group" data-username="s.v.d" data-post="8" data-topic="13694">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/s.v.d/48/6091_2.png" class="avatar"> s.v.d:</div>
+<blockquote>
+<p>В последней сборке xray-core поправили багу с wireguard маршрутизацией, так что теперь для сборки контейнера можно юзать latest</p>
+</blockquote>
+</aside>
+<p>Собирал xray из последней сборки (v24.12.31) и понял что исправив один баг, добавили новый - контейнер крашится спустя некоторое время работы. Так что вернулся на v24.10.31.</p>
+<p>Вот только что через bdpi, что через awg не ходит websocket у discord - кто может знает как это лечить?</p></td><td>2025-01-17T21:03:46.662Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>У меня и 24.10.31 через несколько дней мог начать странно себя вести. Добавил ежедневный авторестарт в 5 утра)</p>
+<pre><code class="lang-auto">/container stop  [/container/find comment="Xray-core"];
+:while ([/container/find comment="Xray-core" status=stopping]) do={
+	:delay 500ms
+}
+/container start  [/container/find comment="Xray-core"];
+</code></pre>
+<p>И в шеддулер.</p>
+<aside class="quote no-group" data-username="shiro-kun" data-post="9" data-topic="13694">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/shiro-kun/48/15057_2.png" class="avatar"> shiro-kun:</div>
+<blockquote>
+<p>websocket у discord</p>
+</blockquote>
+</aside>
+<p>Вроде коннектится судя по логу в консоли. Может не все хосты завёрнуты? У меня пишет что подключается на wss://gateway.discord.gg</p></td><td>2025-01-17T22:07:08.898Z</td></tr><tr><td>shiro-kun</td><td><aside class="quote no-group" data-username="s.v.d" data-post="10" data-topic="13694">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/s.v.d/48/6091_2.png" class="avatar"> s.v.d:</div>
+<blockquote>
+<p>Может не все хосты завёрнуты?</p>
+</blockquote>
+</aside>
+<p>Я заворачивал хосты через Address Lists и через DNS Static FWD записи и указал вроде все.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="контейнер-с-vpn-для-mikrotik-претендующий-на-универсальность/fa78fcf72a4f62a770cdaab7157edb5dde710ed2.png" data-download-href="https://ntc.party/uploads/default/fa78fcf72a4f62a770cdaab7157edb5dde710ed2" title="image"><img src="контейнер-с-vpn-для-mikrotik-претендующий-на-универсальность/fa78fcf72a4f62a770cdaab7157edb5dde710ed2_2_690x298.png" alt="image" data-base62-sha1="zJMAb3hlWEDYLc7YklDtfcP1Eu6" width="690" height="298" srcset="контейнер-с-vpn-для-mikrotik-претендующий-на-универсальность/fa78fcf72a4f62a770cdaab7157edb5dde710ed2_2_690x298.png, контейнер-с-vpn-для-mikrotik-претендующий-на-универсальность/fa78fcf72a4f62a770cdaab7157edb5dde710ed2.png 1.5x, контейнер-с-vpn-для-mikrotik-претендующий-на-универсальность/fa78fcf72a4f62a770cdaab7157edb5dde710ed2.png 2x" data-dominant-color="F0F3F4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">757×328 46.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Но эффекта для WebRTC не даёт - что через bdpi, что через awg. (возможно я что-то недонастроил и пакеты утекают на ТСПУ провайдера)<br>
+Через какой лог вы наблюдаете куда подключаются клиенты xray и как его вывести на микроте?</p>
+<p>У меня как то странно ведёт себя добавление IPv4-адресов через dns в address lists (на версии 7.16) - добавляется и через некоторое время исчезает, хотя я кэш dns не очищаю.</p></td><td>2025-01-18T09:26:42.126Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Статистику подключений можно смотреть, начтроив метрики, будут доступны на соотв. порту</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://xtls.github.io/en/config/metrics.html">
+  <header class="source">
+      <img src="контейнер-с-vpn-для-mikrotik-претендующий-на-универсальность/d9bcf147606ea7c8d4f3a06afd01c42c4a3672c1_2_690x215.png" class="site-icon" data-dominant-color="754544" width="690" height="215">
+
+      <a href="https://xtls.github.io/en/config/metrics.html" target="_blank" rel="noopener nofollow ugc">xtls.github.io</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://xtls.github.io/en/config/metrics.html" target="_blank" rel="noopener nofollow ugc">Metrics | Project X</a></h3>
+
+  <p>Official document of Xray</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+А зачем вы используете регулярки в вашем конфиге? Там же есть галка match subdomain, её должно быть достаточно из того что я вижу.<br>
+Ну и форваод лично у меня на локалхост, таким макаром оно совместимо с DOH.<br>
+В листы записи добавляются с определённым времением жизни, ЕМНИП по умолчанию 10 минут. Его можно расширить, сетится через терминал. Однако следует помнить, что если потом эту запись ручками дропгуть, то потом на время заданного времени жизни для того же листа заново она уже не создастся</p></td><td>2025-01-18T10:20:10.055Z</td></tr><tr><td>kermitthefrog</td><td><p>Крутая инструкция, спасибо большое, по wg inbound как-то совсем мало инфы, даже ссылка на пример в репе xray-core мертва.<br>
+Подскажи, на какой версии routeros мануал проверен? Не сталкивался ли ты с ошибкой в логе xray <code>Received packet with invalid mac1</code>?</p>
+<p>Я пытался настраивать похожую схему на простом контейнере с xray-core, но не вышло установить wg соединение, ros 7.17:</p>
+<details>
+<summary>
+Конфиги и логи</summary>
+<p>ros:</p>
+<pre><code class="lang-auto">/interface wireguard
+add listen-port=31266 mtu=1420 name=wg-xray-in private-key="$PRIVATE_KEY"
+/interface wireguard peers
+add allowed-address=0.0.0.0/0,::/0 endpoint-address=10.6.0.3 endpoint-port=3126 interface=wg-xray-in name=wg-xray-in-peer public-key="$PUBLIC_KEY"
+... ip addr, firewall, всё на месте, коннект присутствует
+</code></pre>
+<p>xray inbound:</p>
+<pre><code class="lang-auto">"inbounds": [{
+    "port": 3126,
+    "protocol": "wireguard",
+    "settings": {
+        "mtu": 1420,
+        "secretKey": "$PRIVATE_KEY",
+        "peers": [{
+        "publicKey": "PUBLIC_KEY",
+            "allowedIPs": ["0.0.0.0/0","::/0"],
+            "keepAlive": 0
+        }],
+        "noKernelTun": true,
+        "tag": "inbound-wg-3126",
+        "streamSettings": null,
+        "sniffing": {
+            "enabled": false,
+            "metadataOnly": false,
+            "routeOnly": false
+        }
+    }
+}]
+</code></pre>
+<p>Лог xray (пробовал разные версии):</p>
+<pre><code class="lang-auto">[Debug] peer(AFTUE280A6xFWE) - UAPI: Created
+[Debug] peer(AFTUE280A6xFWE) - UAPI: Adding allowedip
+[Debug] peer(AFTUE280A6xFWE) - UAPI: Adding allowedip
+[Debug] peer(AFTUE280A6xFWE) - Starting
+[Debug] peer(AFTUE280A6xFWE) - Routine: sequential sender - started
+[Debug] peer(AFTUE280A6xFWE) - Routine: sequential receiver - started
+[Debug] Interface state was Down, requested Up, now Up
+[Info] transport/internet/udp: listening UDP on 10.6.0.3:3126
+[Warning] core: Xray 25.1.1 started
+</code></pre>
+<p>и далее при попытке установки соединения повторяется ошибка:</p>
+<pre><code class="lang-auto">[Debug] Received packet with invalid mac1
+</code></pre>
+<p>В гугле кроме кода на гитхабе особо ничего нет, похоже на неправильную настройку клиента. Но где я там ошибся?</p>
+</details></td><td>2025-01-19T13:52:11.106Z</td></tr><tr><td>s.v.d(00svd00)</td><td><aside class="quote no-group" data-username="kermitthefrog" data-post="13" data-topic="13694">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/4bbf92/48.png" class="avatar"> kermitthefrog:</div>
+<blockquote>
+<p>по wg inbound как-то совсем мало инфы</p>
+</blockquote>
+</aside>
+<p>Они на моей памяти его уже второй раз ломают. Точнее маршрутизацию для него. Веротяно, связано с этим)</p>
+<aside class="quote no-group" data-username="kermitthefrog" data-post="13" data-topic="13694">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/4bbf92/48.png" class="avatar"> kermitthefrog:</div>
+<blockquote>
+<p>даже ссылка на пример в репе xray-core мертва</p>
+</blockquote>
+</aside>
+<p>Ну, в их вике пример есть</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://xtls.github.io/en/config/inbounds/wireguard.html">
+  <header class="source">
+      <img src="контейнер-с-vpn-для-mikrotik-претендующий-на-универсальность/d9bcf147606ea7c8d4f3a06afd01c42c4a3672c1_2_690x215.png" class="site-icon" data-dominant-color="754544" width="690" height="215">
+
+      <a href="https://xtls.github.io/en/config/inbounds/wireguard.html" target="_blank" rel="noopener nofollow ugc">xtls.github.io</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://xtls.github.io/en/config/inbounds/wireguard.html" target="_blank" rel="noopener nofollow ugc">Wireguard | Project X</a></h3>
+
+  <p>Official document of Xray</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Правда он с ошибкой, kernel_mode=true в настоящий момент этот параметр вроде бы вообще выпилили и заменили на “noKernelTun”, который по дефолту true(врочем, лучше перепроверить, я не все их ченджлоги читаю)</p>
+<aside class="quote no-group" data-username="kermitthefrog" data-post="13" data-topic="13694">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/4bbf92/48.png" class="avatar"> kermitthefrog:</div>
+<blockquote>
+<p>ros 7.17:</p>
+</blockquote>
+</aside>
+<p>Я всё проверял и настраивал на ros 7.16(текущая стабильная)</p>
+<pre><code class="lang-auto">Received packet with invalid mac1
+</code></pre>
+<p>Не встречал такой ошибки, а ещё вижу что текущая релизная - это 24.12.31. 25.1.1 - это пререлиз и я аааще не исключаю что они там снова что-то заломали</p></td><td>2025-01-19T14:30:27.338Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>Я не пойму в конфиг можно напрямую пробрасывать env переменные или нет?<br>
+это я по примеру этого</p>
+<pre><code class="lang-auto">"secretKey": "$WG_WPIN_PRIVKEY",
+</code></pre>
+<p>пробовал что-то подставить у себя в конфиг vless и не пошло, в документации такого тоже не нашел</p></td><td>2025-01-21T17:03:15.122Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Нет, xray это не понимает. Поэтому я в entrypoint.sh перечитываю конфигу и eval-ю, заменяя переменные на их значения, после чего скармливаю xray-ю через named pipe. Гляньте сборочный скрипт, там ближе к концу нужный кусок</p></td><td>2025-01-21T17:19:25.818Z</td></tr><tr><td>wiktorbgu(wiktorbgu)</td><td><p>аа, я так и думал, вчера конфиг сборки смотрел да думаю а вдруг) хотя практика сразу показала что нет))<br>
+просто не понял что это entrypoint.sh уже в контейнере заменяет что-то, а не при сборке</p></td><td>2025-01-21T17:28:01.836Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>А толку? При сборке не интересно - эдак для любых ченджей придётся контейнер пересобирать. Если бы некротики имели автоматом пулить образ из реджистри - тогда оправдано и может даже предпочтительно. Собрал трубу и деплой не открывая винбокса)<br>
+Но пока имеем что имеем</p></td><td>2025-01-21T17:31:02.260Z</td></tr>
+    </table>
+      </body>
+    </html>

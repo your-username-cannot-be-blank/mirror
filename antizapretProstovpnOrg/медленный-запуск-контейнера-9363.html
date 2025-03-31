@@ -1,0 +1,73 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>медленный-запуск-контейнера-9363</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>kirill</td><td><p>openvpn-подключение в keenetic крайне долго перезапускается (рестарт сервера, пропадание связи и проч.), у меня чуть ли не больше минуты, это долго.<br>
+какой командой в конфиге это пофиксить, либо на сервере (у меня свой)</p></td><td>2024-08-15T15:38:48.378Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Контейнер на сервере перезапускается медленно. Можно использовать не LXD-, а <a href="https://github.com/xtrime-ru/antizapret-vpn-docker/">Docker-версию</a>, там запуск ускорен</p>
+<blockquote>
+<p>Container start times reduced from minutes to seconds.</p>
+</blockquote></td><td>2024-08-15T17:32:35.371Z</td></tr><tr><td>kirill</td><td><p>как минимум в моём случае, полагаю, дело не совсем в этом</p>
+<p>на моём сервере перезапуск сервера вместе с контейнером занимает менее минуты,<br>
+определил опытным путём: если принудительно перезапустить сервер, потом через некоторое время вручную отключить/включить VPN-подключение в Других подключениях, – меньше минуты</p>
+<p>если же просто перезапустить сервер, то VPN-подключение в Других подключениях keenetic’а остаётся какбэ “активным”, а по факту сервер недоступен, и ничего не резолвится, в т.ч. по обычным dns, т.к. vpn-соединение держится? и такое поведение, сегодня специально замерил, 2+ минут,<br>
+причём если я говорил выше вручную переподключиться можно менее чем за минуту, то автоматическом режиме соединение зависает и блокируется более чем на две, даже если сам сервер восстановится ранее</p>
+<p>надо как-то принудить роутер переподключаться ранее,<br>
+по пингам там, по таймауту<br>
+или даже не то чтобы переподколючаться, а не зависать так надолго, блокируя резолвинг с резервных серверов</p></td><td>2024-08-15T18:20:45.812Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="kirill" data-post="3" data-topic="9363">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/a9a28c/48.png" class="avatar"> kirill:</div>
+<blockquote>
+<p>по пингам там</p>
+</blockquote>
+</aside>
+<p><a href="https://superuser.com/questions/625721/how-to-keep-alive-the-vpn-connection" class="onebox" target="_blank" rel="noopener">https://superuser.com/questions/625721/how-to-keep-alive-the-vpn-connection</a></p>
+<blockquote>
+<p>The keepalive directive causes ping-like<br>
+messages to be sent back and forth over<br>
+the link so that each side knows when<br>
+the other side has gone down.<br>
+Ping every 10 seconds, assume that remote<br>
+peer is down if no ping received during<br>
+a 120 second time period.</p>
+<p>keepalive 10 120</p>
+</blockquote>
+<p>Экспериментально подберите комфортные значения и добавьте директиву в конфиг клиента. Например, указанный выше скрипт создаёт конфиг с <code>keepalive 2 10</code> (пинг каждые 2 секунды, если в течение 10 секунд сервер не ответил, считаем, что он сдох).</p>
+<p>В конфиге сервера, вроде, тоже нужно это указать.</p></td><td>2024-08-15T21:02:13.582Z</td></tr><tr><td>kirill</td><td><p>благодарю <img src="https://ntc.party/images/emoji/twitter/handshake.png?v=12" title=":handshake:" class="emoji" alt=":handshake:" loading="lazy" width="20" height="20"></p>
+<p>совсем забыл, что это правится на сервере</p></td><td>2024-08-16T16:59:39.323Z</td></tr>
+    </table>
+      </body>
+    </html>

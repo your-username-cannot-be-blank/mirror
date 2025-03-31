@@ -1,0 +1,110 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>a-new-snowflake-blocking-rule-offset-of-supportedgroups-in-dtls-client-hello</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>There’s a report by a user that Snowflake is being detected by certain byte patterns in DTLS packets:</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/censorship-analysis/-/issues/40030">
+  <header class="source">
+      <img src="a-new-snowflake-blocking-rule-offset-of-supportedgroups-in-dtls-client-hello/1632e7a209f8d8ebef1f79e4c8008d0e72472bb6.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/censorship-analysis/-/issues/40030" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="a-new-snowflake-blocking-rule-offset-of-supportedgroups-in-dtls-client-hello/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/censorship-analysis/-/issues/40030" target="_blank" rel="noopener">IRC Tip about Signature used to block Snowflake in Russia, 2022-May-16...</a></h3>
+
+  <p>[2:46:20 pm]  Signature used by ru to block snowflake: \x16\xFE[\xFD\xFF] offset:0 \x00\x1D\x00\x17\x00\x18 offset:0x6e</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<blockquote>
+<p>Signature used by ru to block snowflake: <code>\x16\xFE[\xFD\xFF]</code> offset:0 <code>\x00\x1D\x00\x17\x00\x18</code> offset:0x6e</p>
+</blockquote>
+<p>At a first glance, this seems to be the same fingerprint as was discovered in December 2021, the <a href="https://ntc.party/t/ooni-reports-of-tor-blocking-in-certain-isps-since-2021-12-01/1477/37">presence of the supported_groups extension in Server Hello</a> (which was a bug in the DTLS implementation):</p>
+<blockquote>
+<p>Russian DPI check supported_groups extension in ServerHello payload (byte 0x5a in udp packet).<br>
+It looks for DTLS packet header “magic” “16 FE FD” and then looks for “1D 00 17 00 18” at 0x5a offset.</p>
+</blockquote>
+<p>But in this case, the offset of the byte pattern appears to be targeting the Snowflake <em>Client Hello</em>, not the Server Hello. Presence of supported_groups in Client Hello is not a bug, but the offset of the extension is still a fingerprinting feature.</p>
+<p>At this point there is no information about which ISPs may be affected (whether it’s one ISP, all TSPU, etc.).</p></td><td>2022-05-16T17:11:50.090Z</td></tr><tr><td>ValdikSS</td><td><p>The filter is applied for both DTLS v1.0 in record (16 fe ff), which is used by both Chrome and Firefox in ClientHello, and DTLS v1.2 in record (16 fe fd), which is used at least by Jitsi Meet, all at offset 0. Then, <code>1D 00 17 00 18</code> at <strong>0x6f</strong> offset is checked. This is indeed different than the previous offset 0x5a (which is also blocked).<br>
+I have tested filtering only by sending the packets from Russia, not to Russia.</p>
+<p>So, in the end, as for 19 May 2022, the filter is applied to:</p>
+<p>Old pattern and old offset 0x5a, but with additional check for DTLS version:<br>
+<code>16 FE [FD or FF] 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 1D 00 17 00 18 00</code></p>
+<p>Old pattern and new offset 0x6f (used in the first ClientHello DTLS packet in Snowflake, the one without Cookie and with message sequence = 0), with additional check for DTLS version:<br>
+<code>16 FE [FD or FF] 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 1D 00 17 00 18 00</code></p>
+<p>There’s no explicit check for ClientHello/ServerHello, but I assume these two different offsets are needed for this exactly. Will check later.</p>
+<p>Snowflake works fine, as it used to.</p></td><td>2022-05-19T13:57:38.840Z</td></tr><tr><td>tango</td><td><p>Thank you, that is interesting. I asked the Tor anti-censorship team to find out the offset to supported_groups produced by current versions of snowflake-client and the standalone proxy.</p>
+<p>In February/March 2022 there was a report here about WebRTC in Chrome not working; it could be related?</p>
+<aside class="quote" data-post="140" data-topic="1477">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wendor/48/948_2.png" class="avatar">
+    <a href="https://ntc.party/t/ooni-reports-of-tor-blocking-in-certain-isps-since-2021-12-01/1477/140">OONI reports of Tor blocking in certain ISPs since 2021-12-01</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Уже 3-й день как бьюсь над проблемой с неработающим webrtc (стрим с камеры на сервак) через хромоподобные браузеры. 
+Недолетает DTLS пакет с ClientHello. Однако в Firefox проблемы не наблюдается. Судя по Wireshark’у пакеты у хрома и лисы немного отличаются. Толи специально блочат, толи случайно.
+  </blockquote>
+</aside>
+</td><td>2022-05-19T16:16:08.770Z</td></tr><tr><td>ValdikSS</td><td><p>There’s another dedicated topic for filtering WebRTC. Nobody so far had provided me an access/a link/whatsoever to reproduce the issue. All the services with WebRTC which I use work fine.</p>
+<aside class="quote quote-modified" data-post="1" data-topic="2174">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/disquse/48/1189_2.png" class="avatar">
+    <a href="https://ntc.party/t/webrtc/2174/">Проблемы в работе ПО использующего WebRTC</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Доброго времени суток. 
+В работе наших некоммерческих проектов мы используем голосовую систему, написанную на основе открытого медиа-сервера <a href="https://mediasoup.org" rel="noopener nofollow ugc">mediasoup</a>, использующее в свою очередь WebRTC и SFU-подход к подключению пиров, используем только для голосового чата. Как и положено, имеем self-hosted TURN сервера (используем <a href="https://coturn.net" rel="noopener nofollow ugc">coturn</a>) для перенаправления траффика в случае проблем с прямым подключением. 
+Данное решение мы используем с 2018 года и все работало более, чем отлично. Массовые тревожные звонки о…
+  </blockquote>
+</aside>
+</td><td>2022-05-19T16:47:35.907Z</td></tr>
+    </table>
+      </body>
+    </html>

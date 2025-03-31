@@ -1,0 +1,122 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>периодическая-недоступность-части-адресов-на-проводном-мтс-глючит-dpiтспу</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>m0xfff</td><td><p>Заметил, что периодически становятся недоступны часть адресов, которые идут через фильтр у проводного МТС. Трейс выглядит вот так:</p>
+<pre><code class="lang-auto">traceroute -T -p 443 199.232.212.194
+traceroute to 199.232.212.194 (199.232.212.194), 30 hops max, 60 byte packets
+ 1  * * *
+ 2  92.39.64.149 (92.39.64.149)  1.050 ms  0.982 ms  1.174 ms
+ 3  10.40.248.122 (10.40.248.122)  0.853 ms  1.162 ms  1.127 ms
+ 4  kar-cr02-be5.4024.kir.mts-internet.net (195.34.36.16)  1.559 ms  1.624 ms  1.561 ms
+ 5  dze-cr01-ae1.18.izh.mts-internet.net (212.188.55.214)  15.646 ms  15.662 ms  48.945 ms
+ 6  dze-cr02-ae5.18.izh.mts-internet.net (212.188.42.90)  15.355 ms  15.278 ms  15.306 ms
+ 7  lnn-cr01-be3.59.perm.mts-internet.net (212.188.2.246)  16.160 ms  16.331 ms  16.173 ms
+ 8  lnn-cr02-be1.59.perm.mts-internet.net (212.188.56.130)  15.936 ms  16.739 ms  16.577 ms
+ 9  zoo-cr03-be6.66.ekt.mts-internet.net (212.188.29.161)  15.550 ms  15.608 ms  15.409 ms
+10  zoo-cr01-be3.66.ekt.mts-internet.net (195.34.53.30)  15.421 ms  15.706 ms  15.697 ms
+11  zoo-cr02-ae0.16.ekt.mts-internet.net (195.34.50.222)  42.795 ms  42.629 ms  42.459 ms
+12  * * *
+13  * * *
+14  * * *
+15  * * *
+16  * * *
+17  * * *
+18  * * *
+19  * * *
+20  * * *
+21  * * *
+22  * * *
+23  * * *
+24  * * *
+25  * * *
+26  * * *
+27  * * *
+28  * * *
+29  * * *
+30  * * *
+</code></pre>
+<p>Пинги тоже не доходят.  Через несколько минут всё исправляется:</p>
+<pre><code class="lang-auto">traceroute -T -p 443 199.232.212.194
+traceroute to 199.232.212.194 (199.232.212.194), 30 hops max, 60 byte packets
+ 1  * * *
+ 2  92.39.64.149 (92.39.64.149)  1.019 ms  1.473 ms  1.408 ms
+ 3  10.40.248.122 (10.40.248.122)  1.045 ms  1.100 ms  0.913 ms
+ 4  kar-cr02-be5.4024.kir.mts-internet.net (195.34.36.16)  1.509 ms  1.551 ms  1.583 ms
+ 5  dze-cr01-ae1.18.izh.mts-internet.net (212.188.55.214)  20.774 ms  20.809 ms  20.875 ms
+ 6  dze-cr02-ae5.18.izh.mts-internet.net (212.188.42.90)  16.338 ms  17.409 ms  15.816 ms
+ 7  lnn-cr01-be3.59.perm.mts-internet.net (212.188.2.246)  15.903 ms  16.123 ms  16.136 ms
+ 8  lnn-cr02-be1.59.perm.mts-internet.net (212.188.56.130)  15.956 ms  16.001 ms  15.985 ms
+ 9  zoo-cr03-be6.66.ekt.mts-internet.net (212.188.29.161)  15.463 ms  15.576 ms  16.443 ms
+10  zoo-cr01-be3.66.ekt.mts-internet.net (195.34.53.30)  15.407 ms  15.443 ms  15.371 ms
+11  zoo-cr02-ae0.16.ekt.mts-internet.net (195.34.50.222)  15.187 ms  15.179 ms  15.071 ms
+12  zoo-cr02-ae13.0.ekt.mts-internet.net (195.34.50.238)  15.263 ms zoo-cr02-ae11.0.ekt.mts-internet.net (195.34.50.206)  15.064 ms  15.218 ms
+13  zoo-cr01-be18.10.ekt.mts-internet.net (195.34.50.226)  15.801 ms  15.621 ms  15.928 ms
+14  zoo-cr03-be3.66.ekt.mts-internet.net (195.34.53.29)  15.433 ms  15.692 ms  15.390 ms
+15  psshag-cr01-ae13.74.chel.mts-internet.net (195.34.50.89)  79.863 ms  79.336 ms  79.020 ms
+16  che-cr02-ae10.63.sam.mts-internet.net (212.188.42.129)  67.733 ms  66.937 ms  67.417 ms
+17  * * *
+18  anc-cr03-ae3.77.ff.mts-internet.net (195.34.59.50)  65.509 ms  66.204 ms  66.234 ms
+19  as54113.asbr.router (212.188.33.215)  69.731 ms  70.354 ms  69.651 ms
+20  199.232.212.194 (199.232.212.194)  66.692 ms  65.461 ms  67.192 ms
+</code></pre>
+<p>При этом траффик до соседнего адреса идёт не через эти узлы “zoo” и без проблем доходит:</p>
+<pre><code class="lang-auto">traceroute -T -p 443 199.232.212.195
+traceroute to 199.232.212.195 (199.232.212.195), 30 hops max, 60 byte packets
+ 1  * * 92.39.64.150 (92.39.64.150)  4.827 ms
+ 2  92.39.64.149 (92.39.64.149)  0.947 ms  0.897 ms  0.909 ms
+ 3  10.40.248.122 (10.40.248.122)  1.484 ms  1.423 ms  1.000 ms
+ 4  kar-cr02-be5.4024.kir.mts-internet.net (195.34.36.16)  1.567 ms  1.247 ms  1.446 ms
+ 5  kar-cr01-ae2.43.kir.mts-internet.net (212.188.42.205)  47.863 ms  48.041 ms  48.065 ms
+ 6  bek-cr01-be1.43.nnov.mts-internet.net (212.188.54.237)  48.364 ms  48.373 ms  48.144 ms
+ 7  mag9-cr02-be3.52.msk.mts-internet.net (212.188.28.169)  15.842 ms * *
+ 8  * * *
+ 9  anc-cr03-ae3.77.ff.mts-internet.net (195.34.59.50)  49.725 ms  50.237 ms  49.747 ms
+10  as54113.asbr.router (212.188.33.215)  59.323 ms  59.248 ms  59.125 ms
+11  199.232.212.195 (199.232.212.195)  50.510 ms  51.289 ms  49.643 ms
+</code></pre>
+<p>В момент, когда “zoo” начинает глючить, недоступны не все адреса, маршрутизированные туда.</p></td><td>2023-11-25T11:54:00.241Z</td></tr><tr><td>anon57137390</td><td><aside class="quote no-group" data-username="m0xfff" data-post="1" data-topic="6340">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/m0xfff/48/2696_2.png" class="avatar"> m0xfff:</div>
+<blockquote>
+<p>идут через фильтр</p>
+</blockquote>
+</aside>
+<p>Через ТСПУ идут все. А это похоже на рудимент того зоопарка, который провайдеры собирали для реестровых блокировок. При наличии ТСПУ, которых 100%, операторам блокировать самим уже ничего не нужно. Возможно некому принять решение разобрать, оператор слишком большой.</p></td><td>2023-11-25T12:49:34.217Z</td></tr>
+    </table>
+      </body>
+    </html>

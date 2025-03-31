@@ -1,0 +1,289 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>аномалии-ns-серверов-в-россии</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>bolvan</td><td><p>В последнее время с начала известных событий стал замечать, что некоторые сайты перестают работать. Не ресолвится DNS.<br>
+Сегодня это случилось с Петро Электро Сбытом.  <a href="http://ikus.pesc.ru">ikus.pesc.ru</a><br>
+У меня используется DNS с VPSки, расположенной в Финляндии.<br>
+При запросах на 1.1.1.1 из России - ресолвится, извне России - не ресолвится.</p>
+<p>Проверяем из FI</p>
+<pre><code class="lang-auto">dig ns pesc.ru @a.dns.ripn.net
+PESC.RU.                345600  IN      NS      ns2.pes.spb.RU.
+PESC.RU.                345600  IN      NS      ns1.pes.spb.RU.
+
+dig ns spb.ru
+spb.ru.                 439     IN      NS      ns8-geo.nic.ru.
+spb.ru.                 439     IN      NS      ns4-geo.nic.ru.
+spb.ru.                 439     IN      NS      ns3-geo.nic.ru.
+
+dig ns pes.spb.ru @ns8-geo.nic.ru
+pes.spb.ru.             345600  IN      NS      ns2.pes.spb.ru.
+pes.spb.ru.             345600  IN      NS      ns1.pes.spb.ru.
+ns1.pes.spb.ru.         345600  IN      A       91.231.141.143
+ns2.pes.spb.ru.         345600  IN      A       91.231.141.149
+
+dig a ikus.pesc.ru @91.231.141.149
+;; connection timed out; no servers could be reached
+</code></pre>
+<p>Из России :</p>
+<pre><code class="lang-auto">dig A ikus.pesc.ru @91.231.141.149
+
+ikus.pesc.ru.           600     IN      A       91.231.141.157
+pesc.ru.                600     IN      NS      ns2.pes.spb.ru.
+pesc.ru.                600     IN      NS      ns3.pes.spb.ru.
+pesc.ru.                600     IN      NS      ns1.pes.spb.ru.
+ns1.pes.spb.ru.         14400   IN      A       91.231.141.143
+ns2.pes.spb.ru.         14400   IN      A       91.231.141.149
+ns3.pes.spb.ru.         14400   IN      A       91.231.141.143
+</code></pre>
+<p>Трейс из Финки к 91.231.141.143</p>
+<pre><code class="lang-auto">traceroute to 91.231.141.143 (91.231.141.143), 30 hops max, 60 byte packets
+......
+ 4  87.245.252.93  20.725 ms  20.699 ms  20.637 ms
+ 5  77.244.25.250  22.488 ms  24.178 ms  24.115 ms
+ 6  91.231.141.234  22.788 ms  22.774 ms  22.778 ms
+ 7  * * *
+ 8  * * *
+ 9  * * *
+10  * * *
+</code></pre>
+<p>Трейс из Польши к 91.231.141.143</p>
+<pre><code class="lang-auto">traceroute to 91.231.141.143 (91.231.141.143), 30 hops max, 60 byte packets
+.................
+ 4  10.17.224.62  0.876 ms 10.17.224.60  0.717 ms  1.183 ms
+ 5  10.73.24.54  0.446 ms 10.73.24.18  0.683 ms 10.73.24.22  0.368 ms
+ 6  10.73.248.194  1.087 ms  0.778 ms *
+ 7  91.121.131.150  3.005 ms 213.186.32.202  2.969 ms  2.957 ms
+ 8  10.200.0.79  30.218 ms 10.200.0.83  30.199 ms 10.200.0.79  30.192 ms
+ 9  195.208.209.37  49.004 ms  48.991 ms  49.448 ms
+10  77.244.25.250  48.486 ms  48.468 ms  48.457 ms
+11  91.231.141.234  38.287 ms  38.256 ms  38.351 ms
+12  * * *
+13  * * *
+14  * * *
+</code></pre>
+<p>Трейс из России к 91.231.141.143 :</p>
+<pre><code class="lang-auto">traceroute to 91.231.141.143 (91.231.141.143), 30 hops max, 60 byte packets
+..........
+ 5  95.161.0.3  0.767 ms  0.746 ms  0.806 ms
+ 6  * * *
+ 7  * * *
+ 8  10.148.0.1  0.962 ms  1.050 ms  1.027 ms
+ 9  10.148.0.2  1.615 ms  1.642 ms  2.135 ms
+10  10.148.0.6  1.948 ms  1.847 ms  2.030 ms
+11  109.239.129.138  2.967 ms  2.778 ms  2.702 ms
+12  109.239.131.42  2.823 ms  2.772 ms  2.766 ms
+13  188.234.131.113  5.346 ms  5.206 ms  5.142 ms
+14  188.234.131.114  2.935 ms  3.407 ms  3.278 ms
+15  77.244.25.250  3.360 ms  3.145 ms  3.006 ms
+16  91.231.141.234  3.223 ms  3.426 ms  2.932 ms
+17  * * *
+18  91.231.141.143  3.717 ms  3.570 ms  3.991 ms
+</code></pre>
+<p>Видно, что запросы режутся после 91.231.141.234</p>
+<pre><code class="lang-auto">inetnum:        91.231.141.0 - 91.231.141.255
+netname:        PESSPB-NET
+country:        RU
+origin:         AS198074
+</code></pre>
+<p>Вывод : ПетроЭлектроСбыт, видимо задолбанный постоянными атаками, решил, что клиенты из-за бугра ему не особо интересны и тупо забанил доступ к своим подсетям из-за бугра. Как к веб сайту, так и к NS серверам</p></td><td>2022-03-27T08:33:53.447Z</td></tr><tr><td>ValdikSS</td><td><p>Таких сайтов десятки. Даже не все адреса самих NS <a href="http://nic.ru">nic.ru</a> не везде доступны.</p></td><td>2022-03-27T20:59:38.712Z</td></tr><tr><td>bolvan</td><td><p>Еще одна аномалия.<br>
+Хост <a href="http://kommersant.ru">kommersant.ru</a> ресолвится с 1.1.1.1, 8.8.8.8, провайдерского dns, но не ресолвится через собственный bind recursive resolver с конфигурацией по умолчанию.<br>
+От geo не зависит</p>
+<p>Разбираемся.</p>
+<pre><code class="lang-auto">dig ns kommersant.ru @f.dns.ripn.net
+
+KOMMERSANT.RU.          345600  IN      NS      ns5.kommersant.RU.
+KOMMERSANT.RU.          345600  IN      NS      ns.kommersant.RU.
+ns.kommersant.RU.       345600  IN      A       62.64.7.155
+ns5.kommersant.RU.      345600  IN      A       185.147.37.131
+
+
+nslookup kommersant.ru 62.64.7.155
+Server:         62.64.7.155
+Address:        62.64.7.155:53
+
+Name:   kommersant.ru
+Address: 178.248.238.19
+
+
+dig kommersant.ru @62.64.7.155
+
+; &lt;&lt;&gt;&gt; DiG 9.18.1 &lt;&lt;&gt;&gt; kommersant.ru @62.64.7.155
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: FORMERR, id: 19358
+;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 171350e6def1cc04 (echoed)
+;; QUESTION SECTION:
+;kommersant.ru.                 IN      A
+
+dig +nocookie kommersant.ru @62.64.7.155
+
+; &lt;&lt;&gt;&gt; DiG 9.18.1 &lt;&lt;&gt;&gt; +nocookie kommersant.ru @62.64.7.155
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 13456
+;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4000
+;; QUESTION SECTION:
+;kommersant.ru.                 IN      A
+
+;; ANSWER SECTION:
+kommersant.ru.          3600    IN      A       178.248.238.19
+</code></pre>
+<p>Зачем они отключили поддержку cookies ? Попытка защититься от DNS атак ?<br>
+Получается придется в bind-е отключать cookies</p>
+<blockquote>
+<p>DNS servers that are properly compliant with regards to EDNS options (<a href="https://tools.ietf.org/html/rfc6891">RFC6891</a>), even if they don’t support DNS Cookies, should simply ignore it. The use of DNS Cookies is established by negotiation between the client and the server; if the negotiation does not take place then DNS Cookies will not be used and DNS queries and query responses will be sent and received as they would be before DNS Cookies were available.</p>
+</blockquote>
+<p>Но вместо этого возвращается ошибка format error</p></td><td>2022-03-29T06:45:46.206Z</td></tr><tr><td>bolvan</td><td><p>А теперь гвоздь программы. Сбербанк. Куда же нам без сбербанка ?</p>
+<p>Проблема :</p>
+<pre><code class="lang-auto">ping online.sberbank.ru
+ping: online.sberbank.ru: Try again
+</code></pre>
+<p>И так раза с 4-го через секунд 10-15 все-таки рожает. В броузере невозможно подключиться к сайту. Жмем долго F5. В итоге все-таки проходит. То же самое повторяется на технических доменах сбербанка, которых много.<br>
+От geo не зависит.</p>
+<p>Проверяем</p>
+<pre><code class="lang-auto">dig ns sberbank.ru @f.dns.ripn.net
+
+;; AUTHORITY SECTION:
+sberbank.ru.            345600  IN      NS      ns4.sberbank.ru.
+sberbank.ru.            345600  IN      NS      ns2.gldn.net.
+sberbank.ru.            345600  IN      NS      nsq.sberbank.ru.
+sberbank.ru.            345600  IN      NS      tmp2.sberbank.ru.
+sberbank.ru.            345600  IN      NS      tmp1.sberbank.ru.
+sberbank.ru.            345600  IN      NS      ns1.sberbank.RU.
+sberbank.ru.            345600  IN      NS      ns3.gldn.net.
+
+;; ADDITIONAL SECTION:
+ns1.sberbank.RU.        345600  IN      A       194.54.14.186
+ns4.SBERBANK.ru.        345600  IN      A       84.252.147.119
+nsq.sberbank.ru.        345600  IN      A       178.248.238.46
+tmp1.sberbank.ru.       345600  IN      A       84.252.147.128
+tmp2.sberbank.ru.       3600    IN      A       84.252.147.129
+
+
+dig online.sberbank.ru @ns2.gldn.net
+
+;; ANSWER SECTION:
+online.sberbank.ru.     3600    IN      A       194.54.14.131
+
+dig online.sberbank.ru @ns3.gldn.net
+
+;; ANSWER SECTION:
+online.sberbank.ru.     3600    IN      A       194.54.14.131
+
+dig online.sberbank.ru @178.248.238.46
+
+;; ANSWER SECTION:
+online.sberbank.ru.     3600    IN      A       194.54.14.131
+
+
+dig online.sberbank.ru @194.54.14.186
+
+;; AUTHORITY SECTION:
+online.sberbank.ru.     10      IN      NS      f1ad9518.sberbank.ru.
+f1ad9518.sberbank.ru.   10      IN      NS      d7d0a951.sberbank.ru.
+
+;; ADDITIONAL SECTION:
+d7d0a951.sberbank.ru.   10      IN      A       194.54.14.186
+
+
+dig online.sberbank.ru @84.252.147.119
+
+;; AUTHORITY SECTION:
+online.sberbank.ru.     10      IN      NS      46e83b2e.sberbank.ru.
+46e83b2e.sberbank.ru.   10      IN      NS      62950767.sberbank.ru.
+
+;; ADDITIONAL SECTION:
+62950767.sberbank.ru.   10      IN      A       84.252.147.119
+
+
+dig online.sberbank.ru @84.252.147.129
+
+;; AUTHORITY SECTION:
+online.sberbank.ru.     10      IN      NS      9e5e014d.sberbank.ru.
+9e5e014d.sberbank.ru.   10      IN      NS      ba233d04.sberbank.ru.
+
+;; ADDITIONAL SECTION:
+ba233d04.sberbank.ru.   10      IN      A       84.252.147.129
+
+
+dig online.sberbank.ru @84.252.147.128
+
+;; AUTHORITY SECTION:
+online.sberbank.ru.     10      IN      NS      288effda.sberbank.ru.
+288effda.sberbank.ru.   10      IN      NS      10f3c393.sberbank.ru.
+
+;; ADDITIONAL SECTION:
+10f3c393.sberbank.ru.   10      IN      A       84.252.147.128
+</code></pre>
+<p>У сбера 7 NS серверов.  3 из них все делают хорошо.<br>
+Но на 4-х происходит какая-то дичь.</p>
+<p>На запрос A <a href="http://online.sberbank.ru">online.sberbank.ru</a> нам возвращают указатель на NS сервер следующего уровня через 2 случайных промежуточных домена. И все бы хорошо, но A запись NS сервера указывает на тот же самый сервер, к которому мы только что обращались.</p>
+<p>Этим и обьясняются глюки. Срабатывает только тогда, когда происходит ресолвинг через 3 нормальных сервера.</p>
+<p>Могу снова догадаться, что это попытка защиты от DNS атак. Что здесь имелось в виду ?</p>
+<p>Лог named :</p>
+<pre><code class="lang-auto">Thu Mar 31 09:19:05 2022 daemon.notice named[602]: DNS format error from 84.252.147.119#53 resolving ns1.sberbank.ru/AAAA for &lt;unknown&gt;: unrelated NS b0fdfbad.sberbank.ru in ns1.sberbank.ru authority section
+Thu Mar 31 09:19:05 2022 daemon.notice named[602]: DNS format error from 84.252.147.119#53 resolving nsq.sberbank.ru/AAAA for &lt;unknown&gt;: unrelated NS b0fdfbad.sberbank.ru in nsq.sberbank.ru authority section
+Thu Mar 31 09:19:05 2022 daemon.notice named[602]: DNS format error from 84.252.147.129#53 resolving b0fdfbad.sberbank.ru/A for &lt;unknown&gt;: unrelated NS c5b3e29e.sberbank.ru in b0fdfbad.sberbank.ru authority section
+Thu Mar 31 09:19:05 2022 daemon.notice named[602]: DNS format error from 84.252.147.129#53 resolving b0fdfbad.sberbank.ru/AAAA for &lt;unknown&gt;: unrelated NS c5b3e29e.sberbank.ru in b0fdfbad.sberbank.ru authority section
+Thu Mar 31 09:19:05 2022 daemon.notice named[602]: DNS format error from 84.252.147.128#53 resolving c5b3e29e.sberbank.ru/A for &lt;unknown&gt;: unrelated NS 38f87baf.sberbank.ru in c5b3e29e.sberbank.ru authority section
+Thu Mar 31 09:19:05 2022 daemon.notice named[602]: DNS format error from 84.252.147.128#53 resolving c5b3e29e.sberbank.ru/AAAA for &lt;unknown&gt;: unrelated NS 38f87baf.sberbank.ru in c5b3e29e.sberbank.ru authority section
+Thu Mar 31 09:19:05 2022 daemon.notice named[602]: DNS format error from 194.54.14.186#53 resolving 38f87baf.sberbank.ru/A for &lt;unknown&gt;: unrelated NS ae783040.sberbank.ru in 38f87baf.sberbank.ru authority section
+Thu Mar 31 09:19:05 2022 daemon.notice named[602]: DNS format error from 194.54.14.186#53 resolving 38f87baf.sberbank.ru/AAAA for &lt;unknown&gt;: unrelated NS ae783040.sberbank.ru in 38f87baf.sberbank.ru authority section
+Thu Mar 31 09:19:05 2022 daemon.notice named[602]: DNS format error from 84.252.147.128#53 resolving ae783040.sberbank.ru/A for &lt;unknown&gt;: unrelated NS 38f87baf.sberbank.ru in ae783040.sberbank.ru authority section
+Thu Mar 31 09:19:05 2022 daemon.notice named[602]: DNS format error from 84.252.147.128#53 resolving ae783040.sberbank.ru/AAAA for &lt;unknown&gt;: unrelated NS 38f87baf.sberbank.ru in ae783040.sberbank.ru authority section
+Thu Mar 31 09:19:07 2022 daemon.notice named[602]: DNS format error from 84.252.147.119#53 resolving online.sberbank.ru/AAAA for 127.0.0.1#45840: unrelated NS b0fdfbad.sberbank.ru in online.sberbank.ru authority section
+Thu Mar 31 09:19:17 2022 daemon.info named[602]: shut down hung fetch while resolving 'ns1.sberbank.ru/AAAA'
+Thu Mar 31 09:19:17 2022 daemon.info named[602]: shut down hung fetch while resolving 'nsq.sberbank.ru/AAAA'
+Thu Mar 31 09:19:17 2022 daemon.info named[602]: shut down hung fetch while resolving 'b0fdfbad.sberbank.ru/AAAA'
+Thu Mar 31 09:19:17 2022 daemon.info named[602]: shut down hung fetch while resolving 'b0fdfbad.sberbank.ru/A'
+Thu Mar 31 09:19:17 2022 daemon.info named[602]: shut down hung fetch while resolving 'c5b3e29e.sberbank.ru/A'
+Thu Mar 31 09:19:17 2022 daemon.info named[602]: shut down hung fetch while resolving 'c5b3e29e.sberbank.ru/AAAA'
+Thu Mar 31 09:19:17 2022 daemon.info named[602]: shut down hung fetch while resolving '38f87baf.sberbank.ru/AAAA'
+Thu Mar 31 09:19:17 2022 daemon.info named[602]: shut down hung fetch while resolving '38f87baf.sberbank.ru/A'
+</code></pre></td><td>2022-03-29T07:25:58.835Z</td></tr>
+    </table>
+      </body>
+    </html>

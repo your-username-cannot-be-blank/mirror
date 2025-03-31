@@ -1,0 +1,122 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>работа-xray-core-с-http-80-port</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>icove</td><td><p>Одна из задачь VLESS это прикидываться настоящим, но при этом чужим web сайтом, он умеет это делать на 443 порту под https. Однако большинство сайтов всегда имеют поддержку http и https, на 80 и 443 порту соответсвенно. Обычно сервер настроен так, что бы производить переадресацию, или если вам угодно редирект c http на https, чтобы всегда обсуживать клиента с шифрованием. Надо, чтобы xray-core тоже умел это делать, это возможно? Закрытый 80 порт на таком прокси, уже может вызвать подозрение, а если таким способом будут по быстрому “пробивать” подозрительные ip?</p></td><td>2025-01-12T00:25:40.154Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p><strong>Я решил эту проблему перенаправлением портов на маскировочный IP:</strong></p>
+<ol start="0">
+<li>В коммандах ниже заменить эти переменные на свои:</li>
+</ol>
+<pre><code class="lang-auto">222.222.222.222 - чужой IP, который мы используем для маскировки с помощью Reality
+
+111.111.111.111 - IP нашего сервера
+
+ens3 - интерфейс, через который наш сервер выходит в интернет
+</code></pre>
+<ol>
+<li>Установим файервол в лице iptables и модуля для сохранения правил после перезагрузки (если ещё не установлены):</li>
+</ol>
+<pre><code class="lang-auto">apt update
+apt install iptables iptables-persistent
+</code></pre>
+<ol start="2">
+<li>Перенаправим траффик с нашего 80 порта (стандартный для http) на чужой IP, который используем для Reality:</li>
+</ol>
+<pre><code class="lang-auto">iptables -t nat -A PREROUTING -i ens3 --dport 80 -j DNAT --to-destination 222.222.222.222:80
+iptables -t nat -A POSTROUTING -o ens3 -d 222.222.222.222 --dport 80 -j SNAT --to-source 111.111.111.111
+</code></pre>
+<ol start="3">
+<li>При необходимости (если чужой IP так же слушает на UDP 443) перенаправяем и его:</li>
+</ol>
+<pre><code class="lang-auto">iptables -t nat -A PREROUTING -i ens3 -p udp --dport 443 -j DNAT --to-destination 222.222.222.222:443
+iptables -t nat -A POSTROUTING -o ens3 -p udp -d 222.222.222.222 --dport 443 -j SNAT --to-source 111.111.111.111
+</code></pre>
+<ol start="4">
+<li>Сохраняем правила, что бы они не сбрасывались после перезагрузки сервера:</li>
+</ol>
+<pre><code class="lang-auto">iptables-save &gt; /etc/iptables/rules.v4
+</code></pre>
+<ol start="5">
+<li>Отредактируем sysctl.conf для разрешения перенаправления:</li>
+</ol>
+<pre><code class="lang-auto">nano /etc/sysctl.conf
+</code></pre>
+<p>Ищем параметр</p>
+<pre><code class="lang-auto">#net.ipv4.ip_forward=0
+</code></pre>
+<p>И приводим его к следующему виду (декомментируем и активируем)</p>
+<pre><code class="lang-auto">net.ipv4.ip_forward=1
+</code></pre>
+<p>Нажимаем Ctrl+X, Y, Enter</p>
+<ol start="6">
+<li>Сохраняем настройки и перезапускакм сервер:</li>
+</ol>
+<pre><code class="lang-auto">sysctl -p &amp;&amp; reboot
+</code></pre>
+<ol start="7">
+<li>В браузере переходим по <a href="http://111.111.111.111">http://111.111.111.111</a> если открывается сайт, под который мы маскируемся, то всё отлично и перенаправление портов настроено правильно.</li>
+</ol></td><td>2025-01-12T01:15:15.555Z</td></tr><tr><td>icove</td><td><aside class="quote no-group" data-username="xX_RUP3R7_P4UL50N_Xx" data-post="2" data-topic="14521">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/xx_rup3r7_p4ul50n_xx/48/13752_2.png" class="avatar"> xX_RUP3R7_P4UL50N_Xx:</div>
+<blockquote>
+<p>При необходимости (если чужой IP так же слушает на UDP 443) перенаправяем и его:</p>
+</blockquote>
+</aside>
+<p>В клиенте в flow есть возможность переключать режимы xtls-rprx-vision и xtls-rprx-vision-udp443 судя по названию можно предположить, что xray может гонять трафик и по UDP, а если это так, то может не стоит вмешиваться в маршрутизацию и перенаправлять UDP, который может надобиться xray?</p>
+<p>Данные настройки можно выполнить с помощью firewall-cmd?</p></td><td>2025-01-12T01:34:52.564Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Работает только в том случае, если на сервере настроена работа по UDP вместо TCP, без этого коннекта не будет. Да и смысла кмк в этом нет, ибо теряется преимущество маскировки под обыкновенный HTTPS сайт.</p>
+<p>Для UDP трафика есть настройка XUDP (включена в XRAY по умолчанию, в клиентах на Sing-Box зачастую приходится включать вручную), которая позволяет гонять UDP трафик поверх TCP. Не так эффективно, как голый UDP, зато позволяет работать UDP-only приложениям (вроде той же голосовой связи в Discord).</p>
+<p>Если на 443 / UDP ничего не настроено, то вреда как такового не будет, но и пользы, в случае если маскировочный IP не слушает на 443 / UDP.</p>
+<p>Насчёт firewall-cmd не подскажу, но уверен что настроить можно и алгоритм действий будет похожим, нужно только видоизменить команды.</p></td><td>2025-01-12T01:45:39.193Z</td></tr><tr><td>0ka(0ka)</td><td><p>Для работы нужен включенный ip forward</p></td><td>2025-01-12T07:57:23.899Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="icove" data-post="3" data-topic="14521">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/i/f19dbf/48.png" class="avatar"> icove:</div>
+<blockquote>
+<p>В клиенте в flow есть возможность переключать режимы xtls-rprx-vision и xtls-rprx-vision-udp443 судя по названию можно предположить, что xray может гонять трафик и по UDP</p>
+</blockquote>
+</aside>
+<p>Нет, прочитайте доки xray. Vision по умолчанию блокирует udp на 443 port для блокировки quic (для ускорения работы и возможно приватности), vision-udp443 разрешает quic, но идти он будет все равно поверх tcp</p></td><td>2025-01-12T07:59:52.468Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Кстати да, забыл упомянуть, благодарю. Поправлю пост.</p></td><td>2025-01-12T08:09:27.237Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><aside class="quote no-group" data-username="0ka" data-post="6" data-topic="14521">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>vision-udp443 разрешает quic, но идти он будет все равно поверх tcp</p>
+</blockquote>
+</aside>
+<p>Хм, интересно… А чем это тогда отличается от XUDP? Разная реализация одного и того же?</p></td><td>2025-01-12T08:19:26.123Z</td></tr><tr><td>0ka(0ka)</td><td><p>packetaddr/xudp не связаны с vision, они нужны для fullcone nat, udp трафик будет проходить и без них</p></td><td>2025-01-12T09:02:53.114Z</td></tr><tr><td>icove</td><td><p>А возможно ли реализовать тоже самое ресурсами самого xray-core или может быть кто то знает наверняка, что на текущий момент это технически нереализуемо? Это могло бы быть немного проще, маскировка ради xray-core  через его же config. Разумеется в ОС разблокировать 80 порт, если фаерволом он закрыт.</p></td><td>2025-01-12T10:10:03.518Z</td></tr><tr><td>soulvvv</td><td><p>приделайте снизу nginx c redirect, это проще всего. <a href="https://github.com/chika0801/Xray-examples/tree/main/VLESS-Vision-REALITY/steal_oneself" rel="noopener nofollow ugc">тут</a> не плохо пример хоть и усложнённый.</p></td><td>2025-01-12T13:38:24.830Z</td></tr><tr><td>icove</td><td><p>Да ставить веб сервер из за такой мелочи, как то слишком “громозко”, тем более если можно обойтись без него, если действительно можно…<br>
+Но всё равно спасибо и за эту инфу, и за предыдущие которые были представлены другими участниками - тоже.</p></td><td>2025-01-12T14:27:07.697Z</td></tr>
+    </table>
+      </body>
+    </html>

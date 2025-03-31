@@ -1,0 +1,34 @@
+diff --git a/src/feature/nodelist/nodelist.c b/src/feature/nodelist/nodelist.c
+index b895a2c..36015f3 100644
+--- a/src/feature/nodelist/nodelist.c
++++ b/src/feature/nodelist/nodelist.c
+@@ -2211,6 +2211,13 @@ nodes_in_same_family(const node_t *node1, const node_t *node2)
+       return 1;
+   }
+ 
++  /* Are they in the same family because of their country? */
++  if (0) { // options->EnforceDistinctCountries
++      if (node1->country > 0 && node2->country > 0 &&
++          node1->country == node2->country)
++      return 1;
++  }
++
+   /* Are they in the same family because the agree they are? */
+   if (node_family_contains(node1, node2) &&
+       node_family_contains(node2, node1)) {
+@@ -2271,6 +2278,15 @@ nodelist_add_node_and_family(smartlist_t *sl, const node_t *node)
+     } SMARTLIST_FOREACH_END(node2);
+   }
+ 
++  /* Second, add any nodes with the same country */
++  if (0) { // options->EnforceDistinctCountries
++    SMARTLIST_FOREACH_BEGIN(all_nodes, const node_t *, node2) {
++      if (node->country > 0 && node2->country > 0 &&
++          node->country == node2->country)
++        smartlist_add(sl, (void*)node2);
++    } SMARTLIST_FOREACH_END(node2);
++  }
++
+   /* Now, add all nodes in the declared family of this node, if they
+    * also declare this node to be in their family. */
+   if (node_has_declared_family(node)) {

@@ -1,0 +1,138 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проблемы-с-настройкой-zapret-на-openwrt-21023-2832</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>titan</td><td><p>Использую GDPI для доступа к ютубу с помощью фрагментации HTTPS пакетов. Полет нормальный. решил поставить на роутер чтоб все устройства имели доступ к ресурсу. Не работает как с nfqws</p>
+<p>/opt/zapret/nfq/nfqws --qnum=201 --user=daemon --dpi-desync-fwmark=0x40000000 --wssize=1:6 --dpi-desync=split --dpi-desync-ttl=0 --dpi-desync-fooling=badsum</p>
+<p>так и с tpws:</p>
+<p>/opt/zapret/tpws/tpws --user=daemon --bind-addr=127.0.0.127 --port=988 --split-any-protocol --split-pos=1 --split-http-req=method</p>
+<p>при этом нет никаких ошибок, служба запущена, но функцию свою не выполняет.</p>
+<p>Заранее благодарю.</p></td><td>2022-07-18T04:34:22.281Z</td></tr><tr><td>ValdikSS</td><td><p>Как вы запускаете GoodbyeDPI?<br>
+Вы делали дамп трафика, смотрели, что конкретно делает nfqws/tpws? Быть может, в вашем случае только фрагментации недостаточно?</p>
+<aside class="quote no-group quote-modified" data-username="titan" data-post="1" data-topic="2832">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/7ba0ec/48.png" class="avatar"> titan:</div>
+<blockquote>
+<p>–wssize=1:6 --dpi-desync=split --dpi-desync-ttl=0 --dpi-desync-fooling=badsum</p>
+</blockquote>
+</aside>
+<p>Опция <code>wssize</code> нужна для сервера, а не для клиента (для того, чтобы nfqws устанавливать на заблокированный сервер). Вам нужна опция <code>wsize</code> для фрагментации (но фрагментация изменением Window Size — устаревший и нерекомендуемый метод).<br>
+<code>dpi-desync-ttl=0</code> отключает отправку поддельного пакета, которая и так не активирована по умолчанию.</p></td><td>2022-07-19T21:05:33.631Z</td></tr><tr><td>titan</td><td><p>Теперь я совсем запутался.</p>
+<p>Какой метод лучше использовать? tpws или nfqws</p>
+<p>Вы можете мне дать готовую команду при которой будет только фрагментация пакетов по https со значением 1 и все. Так как на ПК GDPI именно так и работает с ключом  -e 1 и все открывается.</p></td><td>2022-07-20T04:11:04.969Z</td></tr><tr><td>ValdikSS</td><td><p><code>nfqws</code> более функциональный, чем <code>tpws</code>.<br>
+<code>nfqws --wsize 1</code> является полным аналогом <code>goodbyedpi.exe -e 1</code>.</p></td><td>2022-07-20T09:32:53.843Z</td></tr><tr><td>titan</td><td><p>Подредачил конфиг при установке:</p>
+<p>NFQWS_OPT_DESYNC=“”<br>
+NFQWS_OPT_DESYNC_HTTP=“”<br>
+NFQWS_OPT_DESYNC_HTTPS=“–wssize=1”<br>
+NFQWS_OPT_DESYNC_HTTP6=“”<br>
+NFQWS_OPT_DESYNC_HTTPS6=“”</p>
+<p>При запуске службы выдает сразу 2:</p>
+<p>Starting daemon 1: /opt/zapret/nfq/nfqws --qnum=200 --user=daemon --dpi-desync-fwmark=0x40000000<br>
+Starting daemon 2: /opt/zapret/nfq/nfqws --qnum=201 --user=daemon --dpi-desync-fwmark=0x40000000 --wssize=1</p>
+<p>не работает.</p>
+<p>Также использую hosts где прописаны большинство серверов ютуба, может ли это быть проблемой?</p></td><td>2022-07-21T05:39:53.174Z</td></tr><tr><td>titan</td><td><p>Борьба продолжается.<br>
+Запустил отдельно с ключом как и подсказали.</p>
+<p>./nfqws --wsize 1</p>
+<p>получаем:<br>
+opening library handle<br>
+unbinding existing nf_queue handler for AF_INET (if any)<br>
+binding nfnetlink_queue as nf_queue handler for AF_INET<br>
+binding this socket to queue ‘0’<br>
+setting copy_packet mode<br>
+initializing raw sockets bind-fix4=0 bind-fix6=0<br>
+Running as UID=2147483647 GID=2147483647</p>
+<p>всё должно работать, но нет.</p>
+<p>так же как писал выше что использую свой хост файл как дополнительный и прописал его настройках роутера как дополнительный и всеравно тщетно.</p>
+<p>Может подскажите в какую сторону двигаться, а то кроме вашего форума и почитать больше негде.<br>
+ПС. На компе все работает на УРА (с заменой хост файла на свой)</p></td><td>2022-10-14T11:04:32.620Z</td></tr><tr><td>bolvan</td><td><p>Забудьте про --wsize. Это устаревший параметр. Для его использования нужно пенеправлять 1 пакет SYN,ACK из входящего трафика, а не исходящего.<br>
+Тот же эффект и без побочных эффектов достигается при использовании параметра dpi-desync=split2.</p>
+<p>Чтобы не гадать, для того и придумал blockcheck.sh . Прогоните его и не мучайтесь</p>
+<p>–wssize нужен, чтобы заставить сервер разбить на части TLS ServerHello. Эта опция снижает скорость, использовать как последнее средство</p></td><td>2022-10-14T16:49:34.810Z</td></tr><tr><td>titan</td><td><p>Я бы с удовольствием прогнал blockcheck.sh еще в самом начале, но он постоянно жалуется на разные проблемы и не хочет запускаться вовсе. На данный момент жалуется на NFQUEUE:</p>
+<p><strong>NFQUEUE iptables or ip6tables target is missing. pls install modules.</strong></p>
+<p>Хотя все уже установлено и службы работают стабильно.</p></td><td>2022-10-19T05:25:52.674Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="titan" data-post="8" data-topic="2832">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/7ba0ec/48.png" class="avatar"> titan:</div>
+<blockquote>
+<p><strong>NFQUEUE iptables or ip6tables target is missing. pls install modules.</strong></p>
+<p>Хотя все уже установлено и службы работают стабильно.</p>
+</blockquote>
+</aside>
+<pre><code class="lang-auto">iptables -t mangle -I PREROUTING -j NFQUEUE --queue-num 3 --queue-bypass
+ip6tables -t mangle -I PREROUTING -j NFQUEUE --queue-num 3 --queue-bypass
+</code></pre>
+<p>Что выдает вот это ?<br>
+Иногда ошибку нужно смотреть еще и в dmesg</p></td><td>2022-10-19T15:32:19.732Z</td></tr><tr><td>titan</td><td><p>Система съедает команду <strong>iptables</strong>, и на этом все. Никаких изменений.<br>
+С <strong>ip6tables</strong> иначе, он не может принять ее так как полностью отсутствует поддержка ipv6.</p></td><td>2022-10-20T12:16:43.221Z</td></tr><tr><td>titan</td><td><p>Итак, на данный момент всё работает благодаря параметру <strong>dpi-desync=split2.</strong> За что огромная вам благодарность!</p>
+<p>Однако, не сразу заметил так как работает ТОЛЬКО через браузер. Например, если зайти на сайт ютуба, то все будет работать безупречно, но если зайти в тюб через приложение (iOS, Android) то снова ничего работать не будет.</p>
+<p>Возможно ли что приложение принудительно резолвится через гугловый днс? Так как гугловый днс в моем регионе забанен, то попахивает жареным.</p>
+<p>Так как blockcheck.sh все еще не запускается посоветуйте еще возможные команды для пробы.</p>
+<p>Заранее благодарен</p></td><td>2022-10-20T12:30:07.415Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="titan" data-post="10" data-topic="2832" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/7ba0ec/48.png" class="avatar"> titan:</div>
+<blockquote>
+<p>Система съедает команду <strong>iptables</strong>, и на этом все. Никаких изменений.<br>
+С <strong>ip6tables</strong> иначе, он не может принять ее так как полностью отсутствует поддержка ipv6.</p>
+</blockquote>
+</aside>
+<p>Я так и предполагал. Но что тогда это за система ? openwrt , если это не какой-то кастомный билд, включает поддержку ipv6.</p>
+<p>UPD. Убрал из blockcheck проверку на ipv6 nfqueue. Должно работать, если не соглашаться с проверкой ipv6</p></td><td>2022-10-20T13:13:47.023Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="titan" data-post="11" data-topic="2832">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/7ba0ec/48.png" class="avatar"> titan:</div>
+<blockquote>
+<p>Возможно ли что приложение принудительно резолвится через гугловый днс? Так как гугловый днс в моем регионе забанен, то попахивает жареным.</p>
+</blockquote>
+</aside>
+<p>Точно можно ответить только посмотрев трафик через wireshark</p></td><td>2022-10-20T13:21:37.322Z</td></tr><tr><td>titan</td><td><p>Спасибо, помогло. Результаты теста следующие:</p>
+<p>ipv4 <a href="http://youtube.com/" rel="noopener nofollow ugc">youtube.com</a> curl_test_http : tpws --split-http-req=method<br>
+ipv4 <a href="http://youtube.com/" rel="noopener nofollow ugc">youtube.com</a> curl_test_http : nfqws --dpi-desync=split2<br>
+ipv4 <a href="http://youtube.com/" rel="noopener nofollow ugc">youtube.com</a> curl_test_https_tls12 : tpws --split-pos=1<br>
+ipv4 <a href="http://youtube.com/" rel="noopener nofollow ugc">youtube.com</a> curl_test_https_tls12 : nfqws --dpi-desync=split2</p>
+<p>Все остальное напрочь закрыто. Тут видно что и tpws работает, но на деле не так. Работает только nfqws, но мы это знали и до этого.</p>
+<p>На данный момент проблема такая что не работают приложения (iOS, Android). Не принципиально, но хочется уже довести до ума.</p></td><td>2022-10-23T14:44:05.177Z</td></tr><tr><td>bolvan</td><td><p>tpws --split-pos и nfqws --split2 выполняют одно и то же действие<br>
+blockcheck тестирует доступность ресурса, запуская tpws и nfqws, а не каким-то третьим методом<br>
+если не работает, значит что-то сделано не так</p>
+<p>на счет ios, простых решений не ждите, придется вам делать дамп трафика и выкладывать или анализировать самому</p>
+<p>приложение лезет к google api, а не корневому веб сайту <a href="http://youtube.com">youtube.com</a><br>
+я попробовал установить на android, но это не получилось всилу требования google apps, которые выпилены на всех моих устройствах. тем не менее до падения приложение успевает залезть на <a href="http://youtube.googleapis.com">youtube.googleapis.com</a>.<br>
+вообщем, можно ожидать использования несколько других доменов, чем в веб версии<br>
+цель - сдампать трафик и выделить эти домены из TLS Client Hello (с quic initial или с обычного tls), проверить их доступность</p></td><td>2022-10-23T15:39:06.222Z</td></tr>
+    </table>
+      </body>
+    </html>

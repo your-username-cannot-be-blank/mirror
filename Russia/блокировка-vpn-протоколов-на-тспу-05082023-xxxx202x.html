@@ -1,0 +1,1092 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ladykolotushkina</td><td><aside class="quote quote-modified" data-post="7" data-topic="5124">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/topic/5124/7">Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.202x)</a> <a class="badge-category__wrapper " href="/c/internet-censorship-all-around-the-world/russia/12"><span data-category-id="12" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #0088CC;" data-parent-category-id="10" data-drop-close="true" class="badge-category --has-parent" title="Информация и обсуждение блокировок ресурсов в Российской Федерации"><span class="badge-category__name">Russia</span></span></a>
+  </div>
+  <blockquote>
+    Блокируют, по-видимому, все популярные стандартизированные (корпоративные) VPN-протоколы на части провайдеров и в особенности мобильных операторов, возможно, <a href="https://ntc.party/t/05-08-2023-08-08-2023/5124/32">по географической принадлежности AS</a>: если диапазон закреплён не за Россией, то соединение подвергается фильтрации. VPN из-за рубежа внутрь России продолжает работать. Для тестов установил свежую VPS у Ramnode, но проверял не только на ней. 
+Для всех VPN-протоколов, кроме L2TP, сначала выполняется обнаружение протокола, затем «проверка» прот…
+  </blockquote>
+</aside>
+</td><td>2023-08-07T10:51:08.859Z</td></tr><tr><td>ValdikSS</td><td><p>17 posts were split to a new topic: <a href="/t/topic/5239">Обсуждение: Блокировка протоколов для хостеров на части операторов</a></p></td><td>2023-08-09T14:12:17.746Z</td></tr><tr><td>avsl8(Ryazhskih Roman)</td><td><p>До дата-центра FRA-01 , Франкфурт-на-Майне, Германия тоже есть проблемы с WireGuard</p></td><td>2023-08-07T12:39:50.961Z</td></tr><tr><td>myrrc(Mike Kot)</td><td><p>Подтверждаю, проблемы с wireguard с доступом до hel1-dc2  (Hetzner, Хельсинки).</p></td><td>2023-08-07T16:00:48.526Z</td></tr><tr><td>ValdikSS</td><td><p>Блокируют, по-видимому, все популярные стандартизированные (корпоративные) VPN-протоколы на части провайдеров и в особенности мобильных операторов, возможно, <a href="https://ntc.party/t/05-08-2023-08-08-2023/5124/32">по географической принадлежности AS</a>: если диапазон закреплён не за Россией, то соединение подвергается фильтрации. VPN из-за рубежа внутрь России продолжает работать. Для тестов установил свежую VPS у Ramnode, но проверял не только на ней.</p>
+<p>Для всех VPN-протоколов, кроме L2TP, сначала выполняется обнаружение протокола, затем «проверка» протокола (проверка ответа или мониторинг нескольких пакетов в TCP/UDP-сессии), затем происходит разрыв сессии (TCP) или блокировка прохождения трафика по связке srcip-srcport-dstip-dstport (UDP).</p>
+<p>Мобильный Теле2 Санкт-Петербург:</p>
+<ul>
+<li><strong>L2TP</strong> (UDP 1701, без IPsec): пакеты L2TP Control Message (самые первые пакеты сессии) не доходят до сервера на порт 1701</li>
+<li><strong>IPsec</strong> (UDP 500/4500): блокируется прохождение UDP-пакетов после нескольких переданных пакетов во время установления сессии</li>
+<li><strong>PPTP</strong> (TCP 1723): разрывается TCP-соединение после отправки сервером ответа Start-Control-Connection-Reply на первый пакет в сессии Start-Control-Connection-Request, до установки GRE-туннеля не доходит</li>
+<li><strong>OpenVPN UDP</strong>: блокируется прохождение UDP-пакетов после нескольких переданных пакетов DATA после установки сессии</li>
+<li><strong>OpenVPN TCP</strong>: разрывается TCP-соединение после нескольких переданных пакетов DATA после установки сессии</li>
+<li><strong>WireGuard</strong>: блокируется прохождение UDP-пакетов после 5 принятых пакетов данных (Transport Data) с сервера</li>
+</ul>
+<p>Проводной МТС Кузбасс:</p>
+<ul>
+<li>Блокируется только <strong>OpenVPN UDP/TCP, L2TP, WireGuard</strong>, но не <strong>PPTP</strong> и <strong>IPsec</strong></li>
+<li><strong>L2TP</strong>, в отличие от Теле2, доставляет пакеты на сервер, но ответы сервера блокируются</li>
+<li><strong>WireGuard</strong>: блокируется прохождение UDP-пакетов после <em>первого</em> пакета данных (Transport Data) с сервера</li>
+</ul>
+<p>Блокировки отличаются от тех, какие применяют для коммерческих VPN-сервисов (вроде ProtonVPN, Windscribe): их фильтруют с самого первого пакета, не позволяя сессии установиться.</p>
+<p>Также возможно, на мобильном Ростелекоме правила блокировки иные. Напишите ЛС, кто сможет предоставить канал через компьютер.</p>
+<p><a class="attachment" href="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/jU3bz81HadGtNH6kB7nuqzgqZCm.zip">08.08.2023-vpn-censorship-test-russia.zip</a> (33.2 KB)</p>
+<p>Обойти блокировку сравнительно просто, достаточно нарушить начальное определение протокола, пример для WireGuard: <a href="https://ntc.party/t/wireguard/4968/6">1</a>, <a href="https://ntc.party/t/05-08-2023-08-08-2023/5124/13">2</a>.</p></td><td>2023-08-07T19:01:53.781Z</td></tr><tr><td>VasilyGrigoriev378(Василий Григорьев)</td><td><p>Без каких-либо официальных заявлений провайдеры блокируют весь проходящий через OpenVPN и WireGuard трафик. Пользователи в РФ в течении всего дня сообщают о разрывах соединений у МТС, Мегафона, Билайна, Таттелекома и Дом.ру. У кого-то пока еще работает SSH.<br>
+OpenVPN подключает, но блокируется первым P_DATA пакетом, после успешного хэндшейка. WireGuard блокируется для исходящего запроса (message_type = 1).</p></td><td>2023-08-07T19:22:43.756Z</td></tr><tr><td>atz</td><td><p>Правильно ли понимаю, что блокируются только исходящие из РФ соединения? То есть переворотом соединения (сервер Европа → сервер в РФ) можно пока обойти проблему?</p></td><td>2023-08-08T02:38:29.738Z</td></tr><tr><td>ValdikSS</td><td><p>Да, верно.</p></td><td>2023-08-08T03:24:11.412Z</td></tr><tr><td>bolvan</td><td><p>Мобильный Теле2 Санкт-Петербург:</p>
+<p>блокируется wireguard в финку, внутри RU не блокируется<br>
+обходится nfqws --dpi-desync=fake --dpi-desync-cutoff=d2 --dpi-desync-any-protocol<br>
+блокировка идет после нескольких пакетов (первый пинг проходит)</p>
+<p>openvpn по udp на тот же финский сервак блокируется после нескольких пингов.<br>
+обходится nfqws --dpi-desync=fake --dpi-desync-cutoff=d2 --dpi-desync-any-protocol --dpi-desync-repeats=10   (минимум 6)</p>
+<p>IKEv2 с windows 7 на strongswan на том же финском серваке работает без обхода. Используется udp инкапсуляция</p></td><td>2023-08-08T06:42:58.615Z</td></tr><tr><td>lwx</td><td><p>Мегафон Татарстан - блокирует OpenVPN и WG до собственного сервера на Scaleway полностью, даже первый пакет не доходит. Порт нестандартный.</p>
+<p>Есть идеи на что сигнатура первого пакета завязана и что можно подкрутить в OpenVPN чтобы её не триггерило?</p>
+<p>UPD: просто udp пакеты на тот же сервер и порт не режутся, так что это не полный бан udp за рубеж (иначе много чего сломают, те же DNS, игры и телефонию)</p></td><td>2023-08-08T06:45:24.514Z</td></tr><tr><td>mastezont</td><td><p>Ростелеком Центр (не мобильный). Работает OpenVPN по TCP. Локация серверов NL, IT.<br>
+Еле 2 Центр мобильный. WG локация сервера SW - работает.</p></td><td>2023-08-08T08:56:05.210Z</td></tr><tr><td>Cheshir74(Dmitry)</td><td><p>WG и openVPN на Hetzner в чистом виде из нескольких городов России по мобильному интернету от разных операторов не достучаться, блокируется. По проводу, пока ок.</p>
+<p>За ночь поднял xray. По VLESS подключается и даже летает хорошо. Стабильнее WG пока оказалось, смотрю дальше.</p>
+<ul>
+<li>есть клиенты под разные платформы и довольно легко поднимается, настраивается на клиентах</li>
+</ul>
+<ul>
+<li>как понимаю, все могут подключаться по одному QR и отследить пользователей не очень получится, кто законнектился. Может не дочитал документацию до конца</li>
+</ul></td><td>2023-08-08T09:45:27.089Z</td></tr><tr><td>ValdikSS</td><td><p>Сняли блокировки, похоже.</p></td><td>2023-08-08T17:45:47.662Z</td></tr><tr><td>ladykolotushkina</td><td><p>На OVH/Scaleway осталось?</p></td><td>2023-08-08T18:03:57.892Z</td></tr><tr><td>ValdikSS</td><td><p>Хм, действительно. Спасибо за наводку.<br>
+WireGuard в сторону OVH/Scaleway не доходит, OpenVPN также блокируется после нескольких первых пакетов с данными. Остальные площадки, вроде бы, разблокировали.</p></td><td>2023-08-08T18:07:30.792Z</td></tr><tr><td>0ka(0ka)</td><td><p>wg/openvpn на oracle sweden все еще не работает (я тут походу один им пользуюсь, и проблем с ним больше всего…)</p></td><td>2023-08-08T18:47:07.236Z</td></tr><tr><td>LiberBear(Mikhail)</td><td><p>Мтс мобильный и домашний, Москва.<br>
+Юзаю outline на арендованной виртуалке в Нидерландах, все отлично</p></td><td>2023-08-08T19:00:17.499Z</td></tr><tr><td>Limtech</td><td><p>VPS с wireguard, наблюдалась выборочность блокировки пользователя, конкретный случай:<br>
+Я со своим товарищем, один и тот же свой vpn, оба с android(12 и 9 у него), в обоих случаях 4g билайн, но: у меня работает, у него нет(Send handshake в логах). При подключении к проводной сети через wifi, у него всё начинало работать. Он активно пользуется wg(каждый день, медиа), я нечасто(просто web, 1-3 раза в неделю). Создаётся впечатление чего-то наподобие галочки “vpn-пользователь” у оператора, либо связки пользователь – сервис.</p></td><td>2023-08-09T05:40:01.206Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="7" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>возможно, по географической принадлежности AS: если диапазон закреплён не за Россией, то соединение подвергается фильтрации.</p>
+</blockquote>
+</aside>
+<p>Нашел подтверждение фильтрации по информации в AS, а не диапазоне.<br>
+Сеть <a href="https://bgp.he.net/net/185.255.134.0/24#_whois">185.255.134.0/24</a> помечена как российская (и действительно находится в России):</p>
+<pre><code class="lang-auto">inetnum:        185.255.134.0 - 185.255.134.255
+org:            ORG-FA790-RIPE
+netname:        FirstByte
+country:        RU
+</code></pre>
+<p>А <a href="https://bgp.he.net/AS204997#_whois">AS</a> как британская:</p>
+<pre><code class="lang-auto">organisation:   ORG-FSL27-RIPE
+org-name:       FIRST SERVER LIMITED
+country:        GB
+</code></pre>
+<p>VPN в этом диапазоне блокировался, несмотря на трафик россия-россия.</p></td><td>2023-08-10T03:42:25.572Z</td></tr><tr><td>mod94(don_ep1fani0)</td><td><p>Ростелеком домашний нужен еще?</p></td><td>2023-08-10T16:05:12.813Z</td></tr><tr><td>darkk(Leonid Evdokimov)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="25" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>WireGuard в сторону OVH/Scaleway не доходит, OpenVPN также блокируется</p>
+</blockquote>
+</aside>
+<p>Добавлю пять копеек про свою виртуалку на Scaleway и доступ с Yota, СПб:</p>
+<ul>
+<li>Wireguard блокируется до сих пор</li>
+<li>но <em>иногда</em> работает, например, 11 августа в какой-то момент работал, 12-го – не работает</li>
+<li>в момент, когда не работает Wireguard – работает IPsec IKEv2 развёрнутый через <a href="https://github.com/trailofbits/algo/">Algo</a></li>
+</ul></td><td>2023-08-12T10:55:47.268Z</td></tr><tr><td>cmexonaT</td><td><p>На Таттелеком проводном похоже сломали исходящий ssh. До сервера в Kimsufi/OVH не подключиться. Нестандартный порт пробовал - без разницы. Через их же мобильный 4G Летай пока ходит. Заметил 12 августа, пока так же.<br>
+О, почта на 993 порт тоже отвалилась. Похоже, хостинг Kimsufi/OVH заблочен.</p></td><td>2023-08-15T11:27:24.485Z</td></tr><tr><td>ValdikSS</td><td><p>Блокировки VPN-протоколов опять активизировались. МТС Кузбасс (провод), глобальные блокировки OpenVPN UDP (но только UDP) начались примерно 4 часа назад.</p></td><td>2023-08-16T03:35:22.255Z</td></tr><tr><td>nobody</td><td><p>Трясет судя по всему не только на Кузбассе, заметил что мой сервер с WireGuard перестал резолвить с 6 утра, сам сервер доступен без каких либо проблем. МТС / Билайн Краснодарский край /Республика Адыгея.<br>
+Могу ли я как-то проверить что действительно давится протокол WireGuard, а не какие-то другому проблемы?</p></td><td>2023-08-16T06:04:29.128Z</td></tr><tr><td>jbl95637(jbl95637)</td><td><p>Проводной оператор ПчеЛайн, Уральский регион, глушится связь по wireguard.<br>
+серверы из Германии совершенно не доступны, и даже не пинингуются.</p></td><td>2023-08-16T07:10:31.531Z</td></tr><tr><td>0xhrh(Sergei)</td><td><p>YOTA Москва давится WireGuard и OpenVPN (UDP и TCP), на сервер ходит.<br>
+Кабель старлинк Москва полет нормальный.</p></td><td>2023-08-16T07:41:52.209Z</td></tr><tr><td>Konstantin</td><td><p>Теле2 Воронеж давит Wireguard</p></td><td>2023-08-16T07:50:28.445Z</td></tr><tr><td>User_96c9e3c964bf</td><td><p>Подтверждаю, МТС кубань (мобильный) давит wg</p></td><td>2023-08-16T08:01:02.677Z</td></tr><tr><td>ladykolotushkina</td><td><p>Пиздец</p></td><td>2023-08-16T08:04:43.341Z</td></tr><tr><td>tlgrmku(tlgrmku)</td><td><p>Теле2 Свердловская область. wireguard блочат. vless робит <img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"></p></td><td>2023-08-16T08:40:49.817Z</td></tr><tr><td>Bendd112(Bendd112)</td><td><p>Мобильные МТС, Билайн, Ростелеком(Теле2), wireguard инит-хендшейк есть, данные не идут. Вологодская область</p></td><td>2023-08-16T08:42:55.391Z</td></tr><tr><td>ikev2(ikev2)</td><td><p>Мобильные операторы. Частично блокирован IPsec ikev2. У кого-то работает, у кого-то нет. Москва</p></td><td>2023-08-16T08:46:17.393Z</td></tr><tr><td>mrB4el(Oleg L)</td><td><p>Вышли на режим позапрошлой недели</p></td><td>2023-08-16T09:12:20.201Z</td></tr><tr><td>kovzoleg39(kovzoleg39)</td><td><p>Калининград. ДЦ Франкфурт, Firstbyte<br>
+IKEv2 проходит первый пакет аутентификации и уходит в бесконечную переотправку<br>
+L2TP/IPSec обрыв на первой фазе с мобильных. С домашнего роутер цепляется нормально<br>
+Операторы: домашний и мобильный билайн, теле2, мегафон. От остальных пока нет вестей<br>
+SSTP и VLESS живет</p></td><td>2023-08-16T09:20:45.868Z</td></tr><tr><td>keyser1971(kkeyser)</td><td><p>Владимирская область, МТС, Билайн (мобильные), ipsec/ikev2 - ой всё (</p></td><td>2023-08-16T09:39:48.174Z</td></tr><tr><td>0x99(Jabas)</td><td><p>МТС Кубань, Разные устройства в пределах одного района<br>
+Телефон подключается по Wireguard - работает., OpenVPN соединяется, проходит первые несколько пакетов и коннект умирает, при этом симкарта вставленная в роутер в другом конце района спокойно держит соединение к тому же серверу OVPN.<br>
+С проводного РТК проблем нет, ovpn и wg успешно работают</p>
+<p>Outline работает, по другим регионам пока сообщений нет</p></td><td>2023-08-16T10:07:18.983Z</td></tr><tr><td>User69</td><td><p>А кто-нибудь использует корпоративные симки?<br>
+Как на таких тарифах обстоят дела?</p></td><td>2023-08-16T12:17:52.084Z</td></tr><tr><td>keyser1971(kkeyser)</td><td><p>У меня корпоративная билайн. Заблокировано.</p></td><td>2023-08-16T12:23:13.070Z</td></tr><tr><td>Bendd112(Bendd112)</td><td><p><a href="https://ntc.party/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%B4%D0%BB%D1%8F-%D1%85%D0%BE%D1%81%D1%82%D0%B5%D1%80%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%87%D0%B0%D1%81%D1%82%D0%B8-%D0%BE%D0%BF%D0%B5%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%BE%D0%B2-05082023-08082023/5124/44">Билайн корпоративный</a></p></td><td>2023-08-16T12:33:12.574Z</td></tr><tr><td>ladykolotushkina</td><td><p><em>Провода пошли</em><br>
+Красноярск, Ростелеком: OpenVPN (28 data pkts), WG (4 data pkts)<br>
+Казань, Таттелеком: OpenVPN (14 data pkts), WG (2 data pkts)</p></td><td>2023-08-16T13:58:48.889Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="ladykolotushkina" data-post="53" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ladykolotushkina/48/2954_2.png" class="avatar"> ladykolotushkina:</div>
+<blockquote>
+<p>Красноярск, Ростелеком: OpenVPN (28 data pkts), WG (4 data pkts)<br>
+Казань, Таттелеком: OpenVPN (14 data pkts), WG (2 data pkts)</p>
+</blockquote>
+</aside>
+<p>На моём канале фильтр срабатывает на Wireguard Handshake, а непосредственно следующие пакеты не анализируются — считается только их количество. Можно отправить Handshake и несколько пакетов с мусором — сессия также заблокируется.</p></td><td>2023-08-16T14:21:55.937Z</td></tr><tr><td>ladykolotushkina</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="54" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>следующие пакеты не анализируются — считается только их количество</p>
+</blockquote>
+</aside>
+<p>Это логично, IKEv2 тоже ловят по 1 нужному пакету, а потом просто счетчик.<br>
+Значит для WG все цифры выше в попугаях, но они разные.</p></td><td>2023-08-16T14:48:21.293Z</td></tr><tr><td>ValdikSS</td><td><p>На моих каналах блокировки отключили, в т.ч. в сторону OVH/Scaleway.</p></td><td>2023-08-16T16:28:00.603Z</td></tr><tr><td>User_96c9e3c964bf</td><td><p>МТС Кубань (мобильный) заработало</p></td><td>2023-08-16T16:35:28.286Z</td></tr><tr><td>tlgrmku(tlgrmku)</td><td><p>Теле2 Свердловская обл. тоже разблочили</p></td><td>2023-08-16T16:43:58.085Z</td></tr><tr><td>zhopa.slona</td><td><p>Москва, сотовый Билайн, включили обратно WG, L2TP, IKEv2, PPTP. OpenVPN не проверял</p></td><td>2023-08-16T19:11:40.916Z</td></tr><tr><td>nobody</td><td><p>Вчера вечером около 6-7 часов отпустило</p></td><td>2023-08-17T08:34:04.048Z</td></tr><tr><td>ridervka(ridervka)</td><td><p>Ёту СПб не отпустило IPSEC/IKEv2</p></td><td>2023-08-18T13:18:35.444Z</td></tr><tr><td>Patrick</td><td><p>Похоже, спецы из китая уже обжились и плотно консультируют наших</p></td><td>2023-08-20T18:54:14.565Z</td></tr><tr><td>tlgrmku(tlgrmku)</td><td><p>ии снова Теле2 Свердловская обл. wireguard блочат.</p></td><td>2023-08-24T03:49:30.371Z</td></tr><tr><td>ValdikSS</td><td><p>Подтверждаю, МТС Кузбасс, блокируется OpenVPN.</p></td><td>2023-08-24T04:16:23.997Z</td></tr><tr><td>ikev2(ikev2)</td><td><p>ikev2, Москва - блок на всех мобильных операторах</p></td><td>2023-08-24T07:58:46.990Z</td></tr><tr><td>Sven</td><td><p>Питер МТС, Мегафон не  работает openvpn, wireguard часть серверов, началось с утра</p></td><td>2023-08-24T08:19:58.436Z</td></tr><tr><td>nobody</td><td><p>И снова Краснодар / Адыгея МТС wireguard с утра</p></td><td>2023-08-24T09:38:59.161Z</td></tr><tr><td>Sudo</td><td><p>Wireguard с утра тоже, теле2 ~Армавир, краснодарский край</p>
+<p>Такое чувство что v2ray тоже попал под раздачу</p></td><td>2023-08-24T10:38:40.790Z</td></tr><tr><td>profiton</td><td><p>На Урале полная блокировка OpenVPN протокола (TCP, UDP) как <strong>внутри РФ</strong>, так и вне РФ.<br>
+Невозможно подключиться по TCP, UDP с мобильных операторов <strong>к домашнему OpenVPN внутри одного города</strong>. Проверено на мобильном Мегафон, МТС.</p>
+<p>Также невозможно подключиться к OpenVPN в Европе (TCP, UDP). Если раньше блочили только OVH, сейчас же блокируются все OpenVPN подключения, независимо от хостинга VPN.</p>
+<p>Началось примерно с 10.00 по МСК.<br>
+Если после множества попыток подключения, соединение с VPN установилось. То оно работает.</p>
+<p>SS пока работает.</p></td><td>2023-08-24T11:14:44.106Z</td></tr><tr><td>q4a</td><td><p>Москва, мобильный интернет Билайн - обрубает соединение OpenVPN. МТС вроде работает.</p></td><td>2023-08-24T11:42:36.929Z</td></tr><tr><td>mastezont</td><td><p>Ростелеком Центр, провод.<br>
+Сдохли все соединения по OpenVPN, в разных локациях Европы.<br>
+Не работает так же локальный прокси.pac от антизапрета, хотя он сам скачивается.<br>
+Если вставить <a href="https://antizapret.prostovpn.org:8443/proxy.pac" rel="noopener nofollow ugc">https://antizapret.prostovpn.org:8443/proxy.pac</a> в настройки лисы, то же никуда не подключается.<br>
+Замуровали, демоны!</p></td><td>2023-08-24T12:06:04.794Z</td></tr><tr><td>ILYA_ZX(Илья)</td><td><p>Челябинская область. Нет подключения к домашнему wireguard серверу через мобильных операторов. Через проводной интернет работает.</p></td><td>2023-08-24T12:12:53.090Z</td></tr><tr><td>ladykolotushkina</td><td><p>Похоже задело входящие OpenVPN, поэтому исходящие белые списки не помогают для РФ-РФ. Гениально.</p></td><td>2023-08-24T13:00:27.965Z</td></tr><tr><td>ity(ity)</td><td><p>Татарстан, МТС. Блокировка openvpn и wg до серверов в европе (до серверов в рф работает). Чистый shadowsocks без плагинов не блокируется. Прводной провайдер Эртелеком (Дом.ру) ничего не блокирует.</p></td><td>2023-08-24T13:15:28.813Z</td></tr><tr><td>SpecteR</td><td><p>не подтверждаю, wg в рт на мобильном мтс работает.</p></td><td>2023-08-24T13:42:46.029Z</td></tr><tr><td>wolfxr</td><td><p>Удалено</p></td><td>2023-08-24T14:54:50.376Z</td></tr><tr><td>mastezont</td><td><p>OpenVPN, локация сервера - NL<br>
+часть лога.<br>
+<a class="attachment" href="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/p6jc9kE2DHtV3V3ZvOXRAgEQV5X.7z">NL.log.7z</a> (534 байта)</p></td><td>2023-08-24T15:59:44.183Z</td></tr><tr><td>bolvan</td><td><p>телега и мегафон спб все еще помогает.<br>
+говорят это рубанули только к некоторым публичным впн. со своим впс работает</p></td><td>2023-08-24T16:16:01.764Z</td></tr><tr><td>3-50</td><td><p>Екатеринбург, все проводные кроме Мегафона, подключение к серверам в этом же городе.</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th></th>
+<th>IKEv1/IPsec</th>
+<th>IKEv2/IPsec</th>
+<th>L2TP/IPsec</th>
+<th>OpenVPN</th>
+<th>PPTP</th>
+<th>SSTP</th>
+<th>WireGuard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>билайн</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Инсис</td>
+<td>-</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr>
+<td>Интерра</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>-</td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr>
+<td>МТС</td>
+<td>-</td>
+<td>+</td>
+<td>-</td>
+<td></td>
+<td>+</td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr>
+<td>Мегафон</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>-</td>
+</tr>
+<tr>
+<td>Дом.ру</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>+</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2023-08-24T16:18:38.837Z</td></tr><tr><td>jimmytoy(jimmy)</td><td><p>У меня работает на yota, но скорость режется люто просто</p></td><td>2023-08-24T17:36:33.506Z</td></tr><tr><td>wolfxr</td><td><p>Удалено</p></td><td>2023-08-25T05:24:02.848Z</td></tr><tr><td>ejoe</td><td><p>Краснодар Билайн мобильный присел на Wireguarg, IKEv2, L2TP. OpenVPN соединяется, но рвёт сессию через несколько секунд.</p></td><td>2023-08-25T05:41:18.502Z</td></tr><tr><td>Hetvel6947</td><td><p>Архангельск, Ростелеком. На мобильной сети второй день работают ограничения OpenVPN.</p></td><td>2023-08-25T06:09:17.812Z</td></tr><tr><td>izippuff(Izi)</td><td><p>урал, домашний билайн и дом.ру openvpn не работает</p></td><td>2023-08-25T06:50:28.250Z</td></tr><tr><td>Kebu</td><td><p>Начали и проводные(((</p></td><td>2023-08-25T07:01:12.633Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>WG + билайн мобильный интернет и OpenVPN (TCP/UDP) + T2 мобильный интернет в Томской области в блокировке</p></td><td>2023-08-25T08:00:09.586Z</td></tr><tr><td>Boris(Борис)</td><td><p>Тюменская область не работает OPENVPN на теле2, МТС</p></td><td>2023-08-25T08:05:57.668Z</td></tr><tr><td>Sanches(Sasha)</td><td><p>Билайн (проводной интернет) не работал OPENVPN с утра до 12-00. Сейчас заработал сам…</p></td><td>2023-08-25T09:56:25.557Z</td></tr><tr><td>wolfxr</td><td><p>Удалено</p></td><td>2023-08-25T10:37:28.247Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="wolfxr" data-post="76" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/w/df705f/48.png" class="avatar"> wolfxr:</div>
+<blockquote>
+<p>c wg сегодня не помогает к сожалению</p>
+</blockquote>
+</aside>
+<p>Как минимум на одном провайдере вижу фильтр только ответов WireGuard, словно ТСПУ анализирует только входящий к клиенту трафик (даже сессия блокируется только в одну сторону, трафик от клиента к серверу продолжает доходить, но клиент не получает ответов), поэтому со стороны клиента обходы на таких провайдерах не помогают, нужно делать подобное еще и на стороне сервера.</p></td><td>2023-08-25T12:12:02.430Z</td></tr><tr><td>ValdikSS</td><td><p>A post was merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/31">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-08-25T14:08:42.039Z</td></tr><tr><td>Alexey104(Alexey)</td><td><p>У меня пока ничего не блокируется, проверить не могу, поэтому спрошу для интереса - если обернуть OpenVPN в какой-нибудь Cloak с перенаправлением на сайт-заглушку, поможет ли?</p></td><td>2023-08-25T12:55:03.670Z</td></tr><tr><td>ity(ity)</td><td><p>Да. У меня заблокирован openvpn и wg на мобильном мтс. При этом shadowsocks не блокируется. Openvpn завернутый в cloak работает и shadowsocks через cloak разумеется тоже. Хотелось бы иметь инструмент для обфускации wg, но я таких не знаю.</p></td><td>2023-08-25T13:48:53.088Z</td></tr><tr><td>Alexey104(Alexey)</td><td><p>Благодарю за информацию.</p></td><td>2023-08-25T13:59:54.230Z</td></tr><tr><td>CRACKen(panic!("this is a terrible mistake!");)</td><td><p>Вот неплохие инструменты для обфускации WireGuard:</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/erebe/wstunnel">
+  <header class="source">
+
+      <a href="https://github.com/erebe/wstunnel" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/53b1a9a8373d1977e3a3acc0b7256785c08b86c1_2_690x344.png" class="thumbnail" data-dominant-color="EDEBEA">
+
+  <h3><a href="https://github.com/erebe/wstunnel" target="_blank" rel="noopener">GitHub - erebe/wstunnel: Tunnel all your traffic over Websocket or HTTP2 -...</a></h3>
+
+    <p><span class="github-repo-description">Tunnel all your traffic over Websocket or HTTP2 - Bypass firewalls/DPI - Static binary available </span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/wangyu-/udp2raw">
+  <header class="source">
+
+      <a href="https://github.com/wangyu-/udp2raw" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/f8d85e18c5d4f7bdf5f69248a83cd46c58a1ea77_2_690x344.png" class="thumbnail" data-dominant-color="F2F0F1">
+
+  <h3><a href="https://github.com/wangyu-/udp2raw" target="_blank" rel="noopener">GitHub - wangyu-/udp2raw: A Tunnel which Turns UDP Traffic into Encrypted...</a></h3>
+
+    <p><span class="github-repo-description">A Tunnel which Turns UDP Traffic into Encrypted UDP/FakeTCP/ICMP Traffic by using Raw Socket,helps you Bypass UDP FireWalls(or Unstable UDP Environment)</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2023-08-25T14:00:59.899Z</td></tr><tr><td>atomlab(Atomlab)</td><td><p>СПБ. Tinkoff Mobile и MTS блокируют openVPN и WG. У openVPN стабильно проходят 4-5 icmp пакетов с момента подключения, затем канал перестает работать. WG просто не подключается. <a href="https://ntc.party/t/wireguard/4968/6">nping</a> перед подключением WG не помогает, хотя сам UDP пакет на сервер долетает.</p>
+<p>Пробовал протокол Trojan. Клиент в режиме tunnel. Серверная часть <a href="https://github.com/MHSanaei/3x-ui" rel="noopener nofollow ugc">3x-ui</a>.  Пока работает.</p>
+<p>Но остановился пока на полумере - <a href="https://github.com/sshuttle/sshuttle" rel="noopener nofollow ugc">sshuttle</a>. Гоняю openVPN TCP через SSH. Также завернул весь трафик через SSH. Только для личного пользования удобен. Не умеет UDP, скорость маленькая, но для работы норм.</p></td><td>2023-08-25T14:03:50.382Z</td></tr><tr><td>3-50</td><td><p>Екатеринбург, проводной билайн, WireGuard и OpenVPN заработали.<br>
+Если что, есть возможность тестировать:</p>
+<ul>
+<li>Проводной интернет МТС, билайн, Инсис, Интера (вроде Дом.ру их купил);</li>
+<li>Мобильный интернет билайн и Мегафон.</li>
+</ul></td><td>2023-08-25T14:24:18.377Z</td></tr><tr><td>ejoe</td><td><p>Краснодар мобильный Билайн перестал блокировать.</p></td><td>2023-08-25T14:43:55.739Z</td></tr><tr><td>Hetvel6947</td><td><p>Архангельск. Ростелеком и билайн на мобильной сети отключили блок OpenVPN. wireguard и ikev2 очень давно блокнуты.</p></td><td>2023-08-25T14:57:40.766Z</td></tr><tr><td>Xirurg</td><td><p>Вчера утром перестал работать антизапрет на vps в Нидерландах и  wireguard  , Москва  мегафон . Перевозил vps, настраивал заново антизапрет на своем сервере , соединение есть , но блок. сайты  не открывает .Работает  только shadowsocks и как ни странно бесплатный(общий)антизапрет.</p></td><td>2023-08-25T17:21:45.485Z</td></tr><tr><td>ValdikSS</td><td><p>2 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/35">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-08-28T13:50:17.045Z</td></tr><tr><td>ity(ity)</td><td><p>Мобильный МТС в РТ перестал блокировать. Очередной эксперимент завершен похоже.</p></td><td>2023-08-28T05:13:19.121Z</td></tr><tr><td>diemetro(Diemetro)</td><td><p>также и Yota (Мегафон) в Москве, блокировку openvpn сняли, в пятницу еще была</p></td><td>2023-08-28T12:00:32.794Z</td></tr><tr><td>MAINER4IK(Степан)</td><td><p>Перестал работать openvpn,  wireguard провайдер Мотив город Екатеринбург</p></td><td>2023-08-31T02:10:03.716Z</td></tr><tr><td>kathrat_m</td><td><p>Tele2 Новосибирск, блочит openvpn, протоколы TCP/UDP</p></td><td>2023-08-31T03:31:20.838Z</td></tr><tr><td>TheDarkKRONOS(TheDarkKRONOS)</td><td><p>Моск. область, билайн, wireguard отвалился Ru-NotRu</p></td><td>2023-08-31T05:50:03.983Z</td></tr><tr><td>Hetvel6947</td><td><p>Архангельск. Ростелеком на мобильной сети включили блокировки OpenVPN и wireguard.</p></td><td>2023-08-31T06:01:53.603Z</td></tr><tr><td>x0r</td><td><p>Москва. Билайн мобильный. OpenVPN подключается, но через пару секунд пакеты перестают ходить.<br>
+Москва. Билайн проводной. Ситуация аналогичная.</p>
+<p>Vless и Vmess пока работают.</p>
+<p>Коннект до OVH, по ощущениям, стал хуже.</p></td><td>2023-08-31T07:02:34.693Z</td></tr><tr><td>wolfxr</td><td><p>Удалено</p></td><td>2023-08-31T08:57:03.748Z</td></tr><tr><td>mrplap</td><td><p>Мегафон. РФ-РФ wireguard работает.<br>
+РФ-НЕ_РФ не работает.</p></td><td>2023-08-31T09:02:00.616Z</td></tr><tr><td>x0r</td><td><p>Коннект в сторону ЕС (Франция OVH, Швеция, Германия)</p></td><td>2023-08-31T09:10:09.559Z</td></tr><tr><td>ejoe</td><td><p>Краснодар, мобильный Билайн снова отключил международный Wireguard, IKEv2, L2TP и рвёт OpenVPN соединение. Внутри России могу проверить только L2TP - работает стабильно.</p></td><td>2023-08-31T16:12:05.646Z</td></tr><tr><td>0x99(Jabas)</td><td><p>МТС и Мегафон Кубань, заглохли OpenVPN и Wireguard. SSTP и Anyconnect работают. Проводной Ростелеком работает всё</p></td><td>2023-08-31T16:37:25.009Z</td></tr><tr><td>Santelley(Santelley)</td><td><p>Ростовская область. IPSec РФ - Нидерланды не работает с утра на МТС, Билайн. На ДомРу запускается без проблем.</p></td><td>2023-08-31T19:40:25.867Z</td></tr><tr><td>profiton</td><td><p>Опять на Урале начали блокировать VPN (TCP, UDP) РФ-РФ.<br>
+Началось примерно 1.09.2023 00:00 по МСК. Проверено на мобильных Мегафон и МТС.<br>
+Невозможно подключиться с мобильного интернета к домашнему VPN в одном городе.</p>
+<p>Днем 31.08 блокировали только международный VPN, РФ-РФ работало.</p>
+<p>Завернутый VPN в SS пока работает.</p></td><td>2023-08-31T23:18:23.437Z</td></tr><tr><td>DearVessel</td><td><p>Wireguard РФ - Швеция, блокировка после полуночи. Проверял с МТС и Yota СПБ. Сервер ASN Россия, подсеть Швеция (до сегодняшнего дня под блокировки не попадал). Работает метод с nping</p></td><td>2023-09-01T02:15:24.864Z</td></tr><tr><td>wolfxr</td><td><p>Удалено</p></td><td>2023-09-01T03:28:48.525Z</td></tr><tr><td>zero-null(zero Null)</td><td><p>Челябинская область, Троицк. С клиента на билайне цикличный разрыв подключения l2tp с ipsec и openvpn</p></td><td>2023-09-01T04:52:00.134Z</td></tr><tr><td>dead(dead)</td><td><p>А может тспу залазить внутрь туннеля и слать fin внутрь тсп сессии?</p></td><td>2023-09-01T05:45:30.317Z</td></tr><tr><td>fruktoff(fruktoff)</td><td><p>Привет. Как так может быть? 3 клиента на сервере (vdsina Нидерланды),</p>
+<ol>
+<li>Мегафон (Android) - не работает (подключение и сразу connect reset by peer)</li>
+<li>Мегафон (iPhone) - работает</li>
+<li>Мегафон (Android) - работает.</li>
+</ol>
+<p>Как такое может быть, не могу понять?</p></td><td>2023-09-01T07:23:58.576Z</td></tr><tr><td>Sven</td><td><p>Петербург мтс не работает впн wireguard openvpn внутри рф и наружу тоже. Мегафон Петербург работает все, очень странно!</p></td><td>2023-09-01T07:37:23.902Z</td></tr><tr><td>welazsc</td><td><p>Блокирует не провайдер, а ТСПУ. Их может быть несколько, а блокировать будет один. Возможно попали на переходный процесс, когда блокировки откатили, но где-то зависло. Попытаться сменить можно через изменение режима сети 3G/4G, включение авиарежима на 3-4 секунды, перезагрузку.</p></td><td>2023-09-01T07:59:47.249Z</td></tr><tr><td>fruktoff(fruktoff)</td><td><p>Спасибо, вы были правы. Действительно не откатилось, авиарежим помог.</p></td><td>2023-09-01T08:03:11.156Z</td></tr><tr><td>ValdikSS</td><td><p>9 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/55">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-09-05T03:12:09.623Z</td></tr><tr><td>flowwolf</td><td><p>Поволжье, Пенза, Wireguard внутри РФ не работает у Yota. Мегафон, Ростелеком - работают.</p></td><td>2023-09-01T08:32:02.034Z</td></tr><tr><td>wolfxr</td><td><p>Удалено</p></td><td>2023-09-01T08:52:13.864Z</td></tr><tr><td>ejoe</td><td><p>Краснодар, мобильный Билайн, доступны международные IKEv2, L2TP, OpenVPN без разрывов. Wireguard стал доступен чуть позже.</p></td><td>2023-09-01T09:11:15.054Z</td></tr><tr><td>zimokake(Zimokake)</td><td><p>в самарской обл<br>
+рф-рф мегафон/билайн не работало ипсек/вг/овпн с 00, до 14<br>
+рф-нерф мегафон/билайн так же<br>
+сстп работал<br>
+икев2 мегафон-мегафон работали<br>
+мтс мобильный работал ок</p>
+<p>проводные итернеты ок</p></td><td>2023-09-01T19:38:42.427Z</td></tr><tr><td>Garykom(Garykom)</td><td><p>Архангельск, проводной Ростелеком + мобильные Мегафон/Билайн.<br>
+VPN юзаю много разных, и внутри РФ и вне.<br>
+Как ни странно пока не сталкивался с блокировками VPN лично.</p>
+<p>Может чтобы попадать на блокировки надо DNS провайдера пользовать?<br>
+Я то их сразу отрубаю в пользу гугловых.</p></td><td>2023-09-04T23:14:09.267Z</td></tr><tr><td>wolfxr</td><td><p>Удалено</p></td><td>2023-09-05T05:33:08.504Z</td></tr><tr><td>TheDarkKRONOS(TheDarkKRONOS)</td><td><p>Моск. область, билайн, доступ wireguard Ru-NotRu восстановился.</p></td><td>2023-09-05T07:39:28.951Z</td></tr><tr><td>Hetvel6947</td><td><p>Архангельск. Ростелеком блокируют подключение OpenVPN UDP и на мобильных и на проводных сетях.<br>
+OpenVPN TCP не блокируется.<br>
+wireguard некоторые ip блокнуты, некоторые нет.</p></td><td>2023-09-05T16:03:46.917Z</td></tr><tr><td>righthippie(Righteous Hippie)</td><td><p>Томская область, Ростелеком блокируют подключение OpenVPN UDP и на мобильных и на проводных сетях. OpenVPN TCP на 443 порту не замаскированный в HTTPS не блокируется</p></td><td>2023-09-06T04:37:56.565Z</td></tr><tr><td>eblet(Iv)</td><td><p>Блокировка Wireguard соединений в офис (корпоративный)</p>
+<p>Проблемные провайдеры<br>
+— Ростелеком <em>(подключения нет совсем)</em><br>
+— Дом.ру <em>(нет подключения у части пользователей, у части есть)</em><br>
+— Билайн <em>(подключения через раз)</em></p>
+<p>Зачем блокировать WG внутри страны?<br>
+Окей, объяснимы <em>(но не простительны)</em> блокировки зарубежных VPN сервисов<br>
+Но корпоративные сети же также используют OVPN и WG протоколы</p></td><td>2023-09-06T18:34:40.933Z</td></tr><tr><td>ValdikSS</td><td><p>9 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/64">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-09-08T05:21:17.273Z</td></tr><tr><td>ejoe</td><td><p>Краснодар, Билайн мобильный. Блокируются международные Wireguard на разных портах, IKEv2, L2TP. OpenVPN соединяется, но трафика нет. Установленные до блокировки соединения L2TP не рвутся. Российский L2TP не блокируется.</p></td><td>2023-09-06T23:32:59.817Z</td></tr><tr><td>Hetvel6947</td><td><p>Архангельск. Ростелеком на мобильной сети блокируют подключение OpenVPN и TCP и UDP.<br>
+wireguard так же блокнут.</p></td><td>2023-09-07T09:42:01.438Z</td></tr><tr><td>3-50</td><td><p>г. Екатеринбург, проводной билайн, минут на 50-60 переставало работать подключение Wireguard до зарубежных серверов, до российских работало.</p></td><td>2023-09-07T10:00:47.157Z</td></tr><tr><td>ChronosX88</td><td><p>Москва, тоже самое, коннекты на зарубежный сервер не работали Wireguard пару часов.<br>
+Мобильный Tele2</p></td><td>2023-09-07T11:37:41.484Z</td></tr><tr><td>egomozg(Egomozg)</td><td><p>Московский мобильный МТС. Западный OVPN TCP и UDP и российский (домашний) WG не работают.</p></td><td>2023-09-07T16:26:48.760Z</td></tr><tr><td>welazsc</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://t.me/ordercomru/4704">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/6/60a0dd1195aa91677b6f00e7a4eb29555e45506b.svg" class="site-icon" data-dominant-color="" width="16" height="16">
+
+      <a href="https://t.me/ordercomru/4704" target="_blank" rel="noopener nofollow ugc">Telegram</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="320" height="320" src="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/44154065b1f75b379ebe5c104abd005329104f90.jpeg" class="thumbnail onebox-avatar" data-dominant-color="865051">
+
+<h3><a href="https://t.me/ordercomru/4704" target="_blank" rel="noopener nofollow ugc">Канал ОрдерКом</a></h3>
+
+  <p>ТСПУ,  Шо, Опять?
+ с 16:00 07.09.2023 по 11.09.2023 МСК планируется проведение мероприятий на трансграничных площадках оборудования ТСПУ..
+Чтобы  VPN работали  - сообщите ЦМУ ССОП в Таблицах ( см. ниже):</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2023-09-07T16:39:28.859Z</td></tr><tr><td>xijewe4896(xijewe4896)</td><td><p>Билайн, Ульяновск. Surfshark коннектит через OpenVPN, но при заходе на любой сайт — ERR_NAME_NOT_RESOLVED</p></td><td>2023-09-07T16:57:21.115Z</td></tr><tr><td>P4H</td><td><p>SurfShark платный, пользуюсь через OVPN, Windows и iOS. Второй день работают только TCP соединения, UDP включается, но ничего не коннектит. Москва. Ростелеком дома, МТС мобильный</p></td><td>2023-09-07T22:16:00.437Z</td></tr><tr><td>ejoe</td><td><p>Билайн мобильный, Краснодар. Перестали блокировать на всех протоколах.</p></td><td>2023-09-08T03:32:37.747Z</td></tr><tr><td>Hetvel6947</td><td><p>Архангельск. Ростелеком на мобильных и проводных блочит OpenVPN UDP. Подключение устанавливается, но далее всё блокируется.<br>
+OpenVPN TCP не блокируется.<br>
+wireguard масово не блокируется, но некоторые ip блокнуты.</p></td><td>2023-09-08T06:43:41.013Z</td></tr><tr><td>DmitrysMedia(Dmitry's Media)</td><td><p>Балаково, Саратовская область. Со вчерашнего дня проводной Ростелеком начал вечером всильную блокировать AdGuard VPN. Около до 9-10 вечера по местному времени (8-9 вечера по МСК) всё работало нормально, но сейчас браузерное расширение перестало определять, какие сервера доступны, и с каким пингом. Мобильный клиент определяет, но никак не соединяет с ними, как и в браузерной Firefox версии.<br>
+О последствиях на мобильной сети Tele2 и проводном Билайн сообщу позднее.</p></td><td>2023-09-08T08:21:16.544Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>adguard vpn к сожалению не показатель<br>
+у них и до этого у меня (РТ/РФ) постоянно стало подвисать соединение. пишет “подключен” но ничего через внп не работает. подключаешься к новому серверу и на какое то время появляются соединения к интернету</p></td><td>2023-09-08T08:27:53.559Z</td></tr><tr><td>DmitrysMedia(Dmitry's Media)</td><td><p>У меня до этого получалось подключаться к этому VPN и соединяться до тех сайтов, где без VPN ничего не хотелось грузить (у них на сайтах стоит блокировка на российские IP-адреса), и он мне служил верой и правдой до нормальной замены, который исправно должен работать с моими провайдерами (даже с включёнными GoodbyeDPI как компьютере и DPI Tunnel на телефоне).</p></td><td>2023-09-08T08:31:49.206Z</td></tr><tr><td>Lisenok425(Lisenok425)</td><td><p>В Питере у билайн перестал подключатся к WG но зависит от района.</p></td><td>2023-09-08T08:50:38.679Z</td></tr><tr><td>ValdikSS</td><td><p>5 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/91">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-09-20T06:26:10.835Z</td></tr><tr><td>JJbet</td><td><p>МО, провайдер Ловит (ПИКовский который). Со вчерашнего вечера OPEN VPN чистый помер.</p></td><td>2023-09-08T09:14:09.887Z</td></tr><tr><td>Wider(Doomer)</td><td><p>Пермь, ссаный проводной билайн с 7 сентября начал блокириовать вообще все. Проверил на двух VPN, на NordVPN и SurfsharkVPN. Протоколы Wireguard, OpenVPN UDP, TCP. До этого тоже были блокировки, но все же многие сервера работали через сами программы. Пришлось запустить клиента OpenVPN GUI и через него юзать конфиги, но и они не все работают и не всегда.<br>
+Если так пойдет и VPN вообще не будет работать, придется этим уродам терять клиентов или же брать у них самый дешманский тариф, чтобы только почту юзать. Никак не успокоятся, все хотят запретить! Зло уже зашкаливает.</p></td><td>2023-09-08T10:18:11.782Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="Wider" data-post="176" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/w/9f8e36/48.png" class="avatar"> Wider:</div>
+<blockquote>
+<p>брать у них самый дешманский тариф</p>
+</blockquote>
+</aside>
+<p>Разве сейчас есть такие? У нас все проводные предлагают минимум сотку, за большие деньги. Времена 25, 50, 75 мбит/с ушли в прошлое. Сейчас низкие скорости по небольшой цене можно взять разве что у Йота при использовании 4G роутера для дома, как ни странно. Правда и 100 ГБ в месяц теперь.</p>
+<aside class="quote no-group" data-username="Wider" data-post="176" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/w/9f8e36/48.png" class="avatar"> Wider:</div>
+<blockquote>
+<p>Пришлось запустить клиента OpenVPN GUI и через него юзать конфиги, но и они не все работают и не всегда</p>
+</blockquote>
+</aside>
+<p>Так это уже неплохо.</p></td><td>2023-09-08T11:46:44.210Z</td></tr><tr><td>Hetvel6947</td><td><p>Архангельск. Ростелеком на мобильных сетях весь день блочат OpenVPN и UDP и TCP. UDP соединение устанавливается, но далее блок. TCP бесконечное переподключение.<br>
+wireguard полностью блокнут.</p>
+<p>Ростелеком сегодня на проводных начали блочить OpenVPN UDP. Соединение устанавливается, но далее блок. OpenVPN TCP соединение устанавливается и не разрывается, но скорость меньше значительно или зависит от сервера.<br>
+wireguard некоторые сервера работают.</p></td><td>2023-09-09T15:19:12.985Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="Hetvel6947" data-post="178" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/h/ecd19e/48.png" class="avatar"> Hetvel6947:</div>
+<blockquote>
+<p>скорость меньше значительно или зависит от сервера</p>
+</blockquote>
+</aside>
+<p>Решили повторить подвиг замедления имени твиттера? Жаль OpenVPN-TCP не популярен в корпоративных сетях.</p></td><td>2023-09-09T16:45:08.680Z</td></tr><tr><td>irt</td><td><p>Челябинск. Проводной Билайн бизнес и Йота 4G. Блочат Openvpn UDP в сторону иностранных диапазонов. Handshake проходит, дальше 3 пакета с данными, потом обрыв, через некоторое время процесс повторяется. В прошлы раз такое  было 25ого августа, в этот раз тоже под викенд. Сценарий такой же - те туннели, которые переподключаются ночью, больше не могут подключится; те, которые стоят без переподключений - продолжают работать.<br>
+Что интересно, похоже, что DPI распознает именно handshake openvpn-а и дальнейший трафик определяет по этому признаку. Потому что все работает, пока не переподключишься, т.е. payload отдельно он не распознает.<br>
+Техподдержка Билайна ничего не отвечала в прошлый раз, позже ночью заработало и одновременно у Йоты и Билайна. Они прислали какое-то мутное письмо о том, что типа была авария и просят подтвердить, что теперь все заработало. На мои расспросы о деталях аварии мне ответили что она очень крупная и очень далеко…<br>
+Мои предположения таковы, что после этих августовских тестов, когда дума выйдет из спячки осенью, они задвинут какой-то большой закон или серию актов о полном запрете впнов и добавят какой-нибудь ыцых с гвоздями за обходы. Тем, кому нужен иностранный впн попроят “обратится в собес”.</p></td><td>2023-09-09T20:39:03.565Z</td></tr><tr><td>anon94384997</td><td><p>Йота, Сибирь. Сегодня проверил, Wireguard не работает. OpenVPN UDP коннектится, но трафик нет идет. OpenVPN TCP не коннектится.</p></td><td>2023-09-10T15:27:03.515Z</td></tr><tr><td>xijewe4896(xijewe4896)</td><td><p>Билайн, Ульяновск. Surfshark заработал через OpenVPN, нужно было поменять протокол с udp на tcp и порт с 1194 на 1443.</p></td><td>2023-09-10T18:51:27.451Z</td></tr><tr><td>welazsc</td><td><p>У вас OpenVPN-TCP не блокируют, порты для общей блокировки не важны. Но возможно режут скорость?</p>
+<p>Блокировка сервиса происходит независимо, там могут учитывать порты.</p></td><td>2023-09-10T19:31:27.858Z</td></tr><tr><td>shtrek</td><td><p>Выборы окончены, значит VPN можно больше не блокировать. Мегафон и Пчёлайн снова пускают до OpenVPN, правда только по TCP, WireGuard тоже ожил.</p></td><td>2023-09-10T23:16:37.846Z</td></tr><tr><td>shsv88(Сергей)</td><td><p>Люди добрые дайте совет, что использовать в компании для внутреннего VPN между офисами. Сейчас WireGuard. или можно не “ссать” и думать что местный vpn трафик резать не будут?</p></td><td>2023-09-11T07:23:35.699Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>3 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/75">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-09-11T10:45:24.461Z</td></tr><tr><td>kuraga</td><td><p>А есть понимание, на каком сетевом уровне пакеты разбираются?<br>
+И список протоколов белый или чёрный?</p>
+<p>Я не сетевик, но. Если, скажем “испортить” (опустим, как) Ethernet-пакет, т.е. в нём будет шум - то пропустит или заблокирует? А если на уровнях выше? Wireguard, вроде, layer 3. А если его пакеты “испортить”?</p>
+<p>Т.е., условно, на каком-то уровне завести “свой” протокол. Но не HTTPS/etc., а именно несуществующий.</p>
+<p>Спасибо.</p></td><td>2023-09-11T09:06:16.745Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>6 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/75">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-09-11T10:40:21.057Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="kuraga" data-post="191" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kuraga/48/3127_2.png" class="avatar"> kuraga:</div>
+<blockquote>
+<p>А есть понимание, на каком сетевом уровне пакеты разбираются?</p>
+</blockquote>
+</aside>
+<p>Разбирают на <a href="https://en.wikipedia.org/wiki/Transport_layer" rel="noopener nofollow ugc">транспортном</a>. Но блокировать могут на <a href="https://en.wikipedia.org/wiki/Internet_layer" rel="noopener nofollow ugc">сетевом</a>.</p></td><td>2023-09-11T09:15:32.445Z</td></tr><tr><td>anonimnyj17(anonimnyj17)</td><td><p>Лучше не думать, а иметь запасной вариант.<br>
+Писали уже тут не однократно, самый простой вариант завернуть wg во что нибудь, например udp2raw, dtls. Можно поднять yggdrasil, а внутри него сделать тоннель ipip6</p></td><td>2023-09-11T10:20:32.481Z</td></tr><tr><td>anonimnyj17(anonimnyj17)</td><td><aside class="quote no-group" data-username="kuraga" data-post="191" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kuraga/48/3127_2.png" class="avatar"> kuraga:</div>
+<blockquote>
+<p>Я не сетевик, но. Если, скажем “испортить” (опустим, как) Ethernet-пакет, т.е. в нём будет шум - то пропустит или заблокирует?</p>
+</blockquote>
+</aside>
+<p>Незнаю что ты подразумеваешь под “испортить”, но если ты попытаешься отправить Ethernet кадр (Ethernet пакетов не бывает), то этот кадр дропнется на первом же хопе, который в 99% будет твоим домашним роутером. Либо вообще может не пройти даже через коммутатор.</p></td><td>2023-09-11T10:25:43.733Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Напоминаю, что также имеется топик <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239" class="inline-onebox">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a>. Но даже там есть заявленная тема, которой лучше придерживаться.</p></td><td>2023-09-11T10:29:45.365Z</td></tr><tr><td>Hetvel6947</td><td><p>Архангельск. Ростелеком на мобильных сетях блокируют OpenVPN UDP и TCP и wireguard полностью. Как и ранее UDP соединение устанавливается, но далее блок. TCP бесконечное переподключение. wireguard рукопожатие отправляет, но не получает.<br>
+Текущее успешно установленное соединение не разрывает пока что.<br>
+Пока использую “костыль”: сначала запускаю shadowsocks соединение, а после запускаю wireguard.</p>
+<p>Ростелеком на проводных сетях блокируют OpenVPN UDP. Ситуация аналогична как на мобильных. OpenVPN TCP соединение устанавливается и не блокируется, но скорость мала. Вероятнее всего зависит от сервера.<br>
+wireguard лишь некоторые серверы работают как и ранее.<br>
+Пора покупать VPS и настраивать серв shadowsocks.</p></td><td>2023-09-11T10:31:23.455Z</td></tr><tr><td>kuraga</td><td><p>XOR-нуть часть кадра, где инкапсулированы данные (высших уровней). Заголовок изменить соответствующим образом, там же хеш-сумма какая-то?</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/faicker/ipt_xor">
+  <header class="source">
+
+      <a href="https://github.com/faicker/ipt_xor" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/484b71252d62fe35c486276bb4af1c2691b75cb7_2_690x344.png" class="thumbnail" data-dominant-color="F2F3F4">
+
+  <h3><a href="https://github.com/faicker/ipt_xor" target="_blank" rel="noopener nofollow ugc">GitHub - faicker/ipt_xor: iptables xor module</a></h3>
+
+    <p><span class="github-repo-description">iptables xor module</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2023-09-11T10:36:36.094Z</td></tr><tr><td>anonimnyj17(anonimnyj17)</td><td><p>Ну то есть ты предлагаешь зашифровать pay load? И чем это отличается от того же vpn или ss?</p></td><td>2023-09-11T10:39:29.680Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>A post was merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/84">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-09-11T10:57:31.760Z</td></tr><tr><td>kuraga</td><td><p>Да.</p>
+<p>Так вот я и спрашиваю - список белый или чёрный? Если список белый, то ничем. Если список чёрный, то тем, что для оператора это будет неизвестный “протокол”, которого нет в его чёрном списке.</p>
+<p>А глобально отличается чем, что я понять хочу <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2023-09-11T10:46:52.031Z</td></tr><tr><td>anonimnyj17(anonimnyj17)</td><td><aside class="quote no-group" data-username="kuraga" data-post="206" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kuraga/48/3127_2.png" class="avatar"> kuraga:</div>
+<blockquote>
+<p>список белый или чёрный?</p>
+</blockquote>
+</aside>
+<p>Тащ майор не докладывает нам конфиги black box’ов.</p>
+<aside class="quote no-group" data-username="kuraga" data-post="206" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kuraga/48/3127_2.png" class="avatar"> kuraga:</div>
+<blockquote>
+<p>то тем, что для оператора это будет неизвестный “протокол”</p>
+</blockquote>
+</aside>
+<p>Ну так это уже все давно придумано, SS с плагинами, и еще тонна других хитрых протоколов которые мало того что не банятся по сигнатуре, так еще и могут маскироваться под валидный https трафик.</p></td><td>2023-09-11T10:51:52.823Z</td></tr><tr><td>anonimnyj17(anonimnyj17)</td><td><aside class="quote no-group" data-username="kuraga" data-post="206" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kuraga/48/3127_2.png" class="avatar"> kuraga:</div>
+<blockquote>
+<p>А глобально отличается чем, что я понять хочу</p>
+</blockquote>
+</aside>
+<p>Вот для этого нужно подучить “матчасть” как не банально это звучало бы.<br>
+Почитай Таненбаума для начала, 6-е издание на текущий момент есть на русском</p></td><td>2023-09-11T10:53:13.685Z</td></tr><tr><td>kuraga</td><td><p>Вот это я и хочу понять. Нужно ли, <em>на данный момент</em>, тонна всех этих разных видов маскировки, или достаточно подсунуть что-то неизвестное.</p>
+<p>То есть, понять хочу, что/как блокируют. А что касается матчасти. Ну извините, да, действительно, пакет и кадр - это принципиально разные вещи. Что касается payload, то, как раз, решил не использовать термин, чтобы снова не ошибиться.</p>
+<p>Спасибо!</p></td><td>2023-09-11T10:53:52.036Z</td></tr><tr><td>anon94384997</td><td><aside class="quote no-group" data-username="kuraga" data-post="209" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kuraga/48/3127_2.png" class="avatar"> kuraga:</div>
+<blockquote>
+<p>достаточно подсунуть что-то неизвестное</p>
+</blockquote>
+</aside>
+<p>Попробуйте что-нибудь непопулярное. Например, tox vpn (linux only).</p></td><td>2023-09-11T11:13:21.849Z</td></tr><tr><td>xijewe4896(xijewe4896)</td><td><p>Да, кстати, скорость где-то 30-50% от максимальной стала, раньше была выше…</p></td><td>2023-09-11T12:05:05.819Z</td></tr><tr><td>anon94384997</td><td><p>Йота, Сибирь. OpenVPN TCP и UDP работают.</p></td><td>2023-09-11T13:47:33.238Z</td></tr><tr><td>karavan</td><td><p>Приветствую присутствующих.</p>
+<p>Возможно я ошибаюсь, но вроде бы где-то в этой ветке я видел разъяснения куда следует обращаться для добавления/регистрации адресов корпоративного VPN в исключения блокировки VPN-протоколов.<br>
+Или может быть кто-то знает и подскажет.</p>
+<p>Извиняюсь, если вопрос не по теме ветки.</p></td><td>2023-09-12T12:49:22.077Z</td></tr><tr><td>xijewe4896(xijewe4896)</td><td><p>Билайн, Ульяновск, openvpn tcp (proton / surfshark), скорость режут жёстко. Сразу после подключения — 50мбит\с, через минуту уже 2-3мбит\с.</p></td><td>2023-09-12T12:54:11.773Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p><a href="https://t.me/ordercomru/4704" rel="noopener nofollow ugc">Это?</a></p></td><td>2023-09-12T13:49:43.045Z</td></tr><tr><td>irt</td><td><p>Челябинск. Кабельный Билайн и Йота, чистый OpenVPN UDP - работает.</p></td><td>2023-09-12T15:07:44.253Z</td></tr><tr><td>karavan</td><td><p>Спасибо! Оно</p></td><td>2023-09-12T15:21:40.599Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="xijewe4896" data-post="214" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/85f322/48.png" class="avatar"> xijewe4896:</div>
+<blockquote>
+<p>Сразу после подключения — 50мбит\с, через минуту уже 2-3мбит\с.</p>
+</blockquote>
+</aside>
+<p>Не похоже на резку блокировщиком. Возможно сам провайдер шейпит для долгоиграющих TCP сессий.</p></td><td>2023-09-12T16:44:39.178Z</td></tr><tr><td>jobey</td><td><p>Архангельск. Ростелеком / Теле2: OpenVPN UDP. Сессия устанавливается, но трафик не проходит сквозь, спустя минуту сессия слетает, реконнект успешный, но аналогично трафик не проходит<br>
+Архангельск. Билайн: Всё ОК</p></td><td>2023-09-12T16:59:08.636Z</td></tr><tr><td>P4H</td><td><p>Москва, SurfShark платный, пользуюсь через OVPN, Windows и iOS<br>
+Ростелеком проводной, МТС мобильный - TCP сразу обрывает при любом подключении, UDP включается, но ничего не коннектит.</p></td><td>2023-09-12T17:22:35.878Z</td></tr><tr><td>marat(marat)</td><td><p>Сочи. Проводной билайн. ТСP рвёт сессии. UDP до таймаута, переподключается клиент.<br>
+Мегафон мобильный аналогичное поведение. openvpn внутри страны! Черти что творят.</p></td><td>2023-09-12T17:34:14.039Z</td></tr><tr><td>TopoR</td><td><p>Москва, мобильный Tele2. Впервые зацепило мой WireGuard до домашнего сервера (также Москва).</p>
+<p>Причем пока ехал домой иногда работал туннель. От сот что ли зависит.</p></td><td>2023-09-12T18:58:40.680Z</td></tr><tr><td>kuplinov(nikolay)</td><td><p>domru тула UPD И ТСP в openvpn перестали работать, днем работали вечером накрылись (впс сервер использовал для впн)</p></td><td>2023-09-12T19:53:32.408Z</td></tr><tr><td>favicon</td><td><p>ДОМ РУ СПБ:</p>
+<p>PIA сейчас работает только в режиме Shadowsocks-OpenVPN(TCP)</p>
+<p>(до этого не работал весь Wireguard (всмысле PIA-серверы), и OpenVPN на порту по умолчанию, и швейцарские серверы, сегодня отвалился весь OpenVPN (TCP/UDP на любых портах любые серверы).</p></td><td>2023-09-12T21:42:19.635Z</td></tr><tr><td>P4H</td><td><p>Никто не подскажет, а можно ли как то остаться на SurfShark через OVPN при текущих блокировках ТСP и UDP? Я чайник если что, просто может какую еще прогу поставить, что бы все работало, а то год у Сёрфа оплачен и качество связи полностью устраивает с их серверами</p></td><td>2023-09-12T22:53:51.309Z</td></tr><tr><td>0ka(0ka)</td><td><p>goodbyedpi (windows) с обходом блока ovpn где-то тут на форуме обсуждали.</p></td><td>2023-09-12T23:47:56.630Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><aside class="quote quote-modified" data-post="1" data-topic="2857">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/goodbyedpi-%D1%81-%D0%BE%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5%D0%BC-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%B0-openvpn/2857">GoodbyeDPI с определением протокола OpenVPN</a> <a class="badge-category__wrapper " href="/c/community-software/goodbyedpi/8"><span data-category-id="8" style="--category-badge-color: #BF1E2E; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #BF1E2E;" data-parent-category-id="27" data-drop-close="true" class="badge-category --has-parent" title="GoodbyeDPI Deep Packet Inspection (DPI) circumvention software discussion and official support forum"><span class="badge-category__name">GoodbyeDPI</span></span></a>
+  </div>
+  <blockquote>
+    Временная «грязная» версия, определяющая протокол OpenVPN. Выполняет фрагментацию и отправку поддельного пакета для этого VPN-протокола. 
+Позволяет подключиться к заблокированным VPN-сервисам по протоколу OpenVPN TCP, таким как ProtonVPN. 
+Для скачивания файла необходима учётная запись Github. 
+Включение определения задаётся параметром --openvpn. По умолчанию определение выполняется только на порту 443, добавить дополнительные порты можно опцией --port 1234, где 1234 — номер порта. 
+Рекомендуемы…
+  </blockquote>
+</aside>
+</td><td>2023-09-12T23:57:55.766Z</td></tr><tr><td>marat(marat)</td><td><p>Похоже что пока грязные игры свои прекратили. tcp udp работает.</p></td><td>2023-09-13T08:02:14.816Z</td></tr><tr><td>lllDez</td><td><p>Переключились похоже на другие регионы, с утра OpenVPN не работает, северо-запад</p></td><td>2023-09-13T08:05:10.362Z</td></tr><tr><td>P4H</td><td><p>Москва. TCP/UDP через OVPN работает</p></td><td>2023-09-13T08:23:39.116Z</td></tr><tr><td>loskiq</td><td><p>у кого-нибудь сейчас блочится чистый shadowsocks?</p></td><td>2023-09-14T08:51:40.662Z</td></tr><tr><td>anonimnyj17(anonimnyj17)</td><td><p>Нет. Прецедентов я даже не видел. Наверное криво настроил что-то)</p></td><td>2023-09-14T09:07:33.148Z</td></tr><tr><td>welazsc</td><td><p>Можно попасть под чужую блокировку (адрес, подсеть, AS) и принять за блокировку протокола. Зависит от правила и ТСПУ. Например могут блокировать не любой пакет, а только сегмент с данными.</p>
+<p>Более вероятен поиск сервера, чем определение протокола. <a href="https://gfw.report/blog/ss_advise/en/" rel="noopener nofollow ugc">Общие рекомендации</a> как уберечься.</p></td><td>2023-09-14T09:40:40.734Z</td></tr><tr><td>Dhohbr</td><td><p>Владивосток. Мобильный Билайн. С сегодняшнего дня блокируется Openvpn на Нидерландский и российский ip. TCP\UDP, разные порты.</p></td><td>2023-09-15T07:23:45.950Z</td></tr><tr><td>ejoe</td><td><p>Краснодар, Билайн мобильный. Блокируются международные Wireguard, OpenVPN, L2TP. Открытый до блокировки Wireguard не рвали. Российский L2TP не блокируется.</p></td><td>2023-09-15T09:45:32.034Z</td></tr><tr><td>RS999999999</td><td><p>У меня не подключалось на Билайн Мск. Все разом и SS / VLESS / VMESS… Но увы проблема оказалась в блоке VPS от Inferno Solutions((( Жаль конечно. Переехал в другое место и все ожило.</p></td><td>2023-09-15T09:52:43.472Z</td></tr><tr><td>Dhohbr</td><td><p>Заработало. Похоже тренируются.</p></td><td>2023-09-15T10:13:42.861Z</td></tr><tr><td>DmitrysMedia(Dmitry's Media)</td><td><p>Ростелеком, Саратовская область, проводной. С 14 сентября начали блокировать v2ray на моём арендованном VPS, там он всё ещё работает, как сказали мне там в поддержке.<br>
+Полагаю, что они (РТК) начали заниматься после устранения проблем с моими камерами видеонаблюдения (13-14 сентября).</p></td><td>2023-09-15T11:08:53.022Z</td></tr><tr><td>KatouMegumi-osu</td><td><p>Уфанет/йота, Башкортостан, проблем с SS through Cloak не наблюдаю.</p></td><td>2023-09-15T12:06:57.363Z</td></tr><tr><td>ejoe</td><td><p>Краснодар, мобильный Билайн перестал блокировать.</p></td><td>2023-09-15T14:38:59.632Z</td></tr><tr><td>DmitrysMedia(Dmitry's Media)</td><td><p>Только что заметил проблему и на проводном Билайне, та же самая участь: блокировка v2ray.<br>
+Полагаю, что больше подводит сам сервер, на котором был развёрнут этот VPN.</p></td><td>2023-09-15T15:03:52.177Z</td></tr><tr><td>0ka(0ka)</td><td><p>V2ray он блин настолько разный у каждого в конфигурации, а в вашем посте никаких подсказок какой у вас конфиг, да и вообще непонятно ничего. Проанализируйте ситуацию полностью и напишите пост только после этого</p></td><td>2023-09-15T21:52:57.855Z</td></tr><tr><td>DmitrysMedia(Dmitry's Media)</td><td><p>А что именно “проанализировать”? Вы это поясните, мне непонятно.<br>
+Как мне сказали в поддержке хостинга, тот виртуальный сервер всё ещё работает, как ни в чём не бывало.<br>
+Я проделал все операции, отключал DPI Tunnel, использовал запасные устройства, в которых не имеются root-прав. Но даже в таком случае, никакие страницы не грузят со включённым v2ray.</p></td><td>2023-09-16T04:23:46.757Z</td></tr><tr><td>0ka(0ka)</td><td><p>То что ваш виртуальный компьютер работает не говорит ничего о запущенном на нем софте. Никто еще не жаловался на блокировку v2ray. Ищите проблему у себя на сервере или для простоты переустановите ос и v2ray, желательно уже другим скриптом</p></td><td>2023-09-16T09:07:31.236Z</td></tr><tr><td>DmitrysMedia(Dmitry's Media)</td><td><p>Отбой. Проблема решилась простой перезагрузкой VPS.<br>
+Всё снова заработало теперь на проводном Билайне. Извините, если я кого-то ввёл в заблуждение. Настройки в v2rayNG были те же до падения. но вот именно просто перезагрузка в dashboard’е виртуального сервера, поборола эту проблему.</p></td><td>2023-09-16T09:31:37.191Z</td></tr><tr><td>xijewe4896(xijewe4896)</td><td><p>Билайн, Ульяновск. Surfshark и ProtonVPN заработали с UDP через OpenVPN. С TCP скорость тоже перестали резать, но она меньше, чем с UDP. Также заработал и торрентовый DHT.</p></td><td>2023-09-17T21:18:59.943Z</td></tr><tr><td>Nologin(Кирилл)</td><td><p>Доброго всем дня! Тут есть жители зоны СВО? Бердянск. На город один канал с Крыма. Три проводных провайдера (Онет, Юпитер и МирТелеком - новый провайдер основанный на остатках Киевстара и Укртелекома, 1 админ с не очень прямыми руками), 1 мобильный - монополист (7 телеком) и немного ДНРовского Феникса (покрытие есть, офиса и пополняшек не продается, сразу были - потом выгнали). В бане по классике с РФ, но добавлен Google и Youtube с Вайбером (региональные ограничения), на большой земле я так понимаю это все работает. С 16-18е сентября у нас банился OpenVPN протокол на провайдере Онет. Сегодня ожил, параллельно с мобильным, который начал блокироваться еще в начале сентября. Если б не Ютуб и гугл (яндекс не всегда ищет что надо), от вайбера уже отвыкли давно. Имею 2 vps в Молдове и Польше, какие протоколы развернуть с небольшим прицелом на будущее? Есть человек 10 которые юзают опенвпн на микротах, остальные все в телефонах и ТВ боксах. Пробовал Оутлайн, проработал дня 4 и сдох, да и толку от него смотрю много не будет без обуфускации. В общем - ищу колег из Зоны СВО для оптимизации собранных сведений и совместного решения проблем которых по идее и существовать то не должно =)</p></td><td>2023-09-19T13:08:30.625Z</td></tr><tr><td>usnevst</td><td><aside class="quote no-group" data-username="Nologin" data-post="247" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/ee7513/48.png" class="avatar"> Nologin:</div>
+<blockquote>
+<p>Пробовал Оутлайн, проработал дня 4 и сдох</p>
+</blockquote>
+</aside>
+<p>Вот тут, если можно, подробнее. На своих впсках? Симптомы? Если на тех же портах что-то другое запустить, работает? Что? Дампы есть?</p></td><td>2023-09-19T13:30:52.190Z</td></tr><tr><td>0ka(0ka)</td><td><p>может просто впску перезагрузить или переустановить? сомневаюсь что оутлайн сдох по внешним причинам. Выше в постах писали что v2ray заблокировали, но даже не разобрались что проблема была в vps</p></td><td>2023-09-19T14:23:13.237Z</td></tr><tr><td>P4H</td><td><p>Москва. SurfShark через OPVN<br>
+Ростелеком дома только TCP работает, UDP коннектит но ничего не грузит<br>
+МТС мобильный - работает TCP/UDP</p></td><td>2023-09-19T14:30:16.427Z</td></tr><tr><td>usnevst</td><td><aside class="quote no-group" data-username="P4H" data-post="250" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/p4h/48/3054_2.png" class="avatar"> P4H:</div>
+<blockquote>
+<p>SurfShark через OPVN</p>
+</blockquote>
+</aside>
+<p>Один и тот же ip адрес сервера проверяете на разных провайдерах? У SurfShark можно подключиться к разным серверам по одному конфигу.</p></td><td>2023-09-19T14:39:09.795Z</td></tr><tr><td>usnevst</td><td><p>Outline зафорсили как “Революционный, непреодолимый, непокалебимый”. Даром, что <em>React и Node.js</em>.</p></td><td>2023-09-19T14:43:05.236Z</td></tr><tr><td>P4H</td><td><p>в OVPN есть только тумблерок на каждом профиле страны(Дания например), либо UDP профиль тумблер, либо TCP профиль тумблер. Профили подтягиваешь из оф аккаунта своего кабинета SurfShark. Один раз поставил профиль и все, пользуйся. Офф приложение не работает по понятным причинам, поэтому через OVPN все идет и включается</p></td><td>2023-09-19T15:17:41.459Z</td></tr><tr><td>xijewe4896(xijewe4896)</td><td><p>Билайн, Ульяновск. Surfshark по udp снова заблокировали, ProtonVPN по udp работает. Surfshark по tcp работает, но снова режут скорость. Всё это с профилями через OpenVPN.</p></td><td>2023-09-19T15:29:46.224Z</td></tr><tr><td>usnevst</td><td><p>У них раньше в конфиге было доменное имя, например <code>dk-cph.prod.surfshark.com</code>. Резолвится в 2 разных адреса за один запрос, и на каждый запрос могут вернуть новые пары. У конфига и приложения адреса пересекаются, но блокировали по адресу и порту, который не пересекался. Но все меняется, поэтому сейчас может быть все что угодно. Вы проверяли, что сейчас? Блокировку протокола проще тестировать на частных серверах, чем пытаться выяснять это на уже блокируемом сервисе. Даже если вы угадали в этот раз.</p>
+<aside class="quote no-group" data-username="xijewe4896" data-post="254" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/85f322/48.png" class="avatar"> xijewe4896:</div>
+<blockquote>
+<p>но снова режут скорость.</p>
+</blockquote>
+</aside>
+<p>3 мбита?</p></td><td>2023-09-19T16:03:59.368Z</td></tr><tr><td>P4H</td><td><p>UDP никак не робит к сожалению на Ростелекоме, только TCP, МТС мобильный работает и то и то</p></td><td>2023-09-19T16:14:57.547Z</td></tr><tr><td>PadowYT2</td><td><p>Москва, TELE2. Сегодня перестало работать, раньше работало где то неделю примерно, проходит подключение, но интернета нет. Пробывал только на одном провайдере в данный момент - Contabo. Скоро попробую на нового провайдера с домашним IP</p></td><td>2023-09-20T08:30:42.793Z</td></tr><tr><td>0ka(0ka)</td><td><p>перестало работать что?</p></td><td>2023-09-20T14:23:24.256Z</td></tr><tr><td>PadowYT2</td><td><p>“проходит подключение, но интернета нет”. На МГТС все работает</p></td><td>2023-09-20T15:50:46.492Z</td></tr><tr><td>NimuraF(Balbes)</td><td><p>Билайн, Москва, проводной, wireguard 5 пакетов ловит и падает.</p></td><td>2023-09-20T16:27:19.419Z</td></tr><tr><td>0ka(0ka)</td><td><p>понятнее о чём вы не стало. у меня тоже не едет, а что не едет я вам не скажу… телега или машина сами гадайте.</p></td><td>2023-09-20T16:36:46.388Z</td></tr><tr><td>PadowYT2</td><td><p>Проблема точно такая же которая была у всех. Проходит подключение и первые пакеты, но и все, TCP/UDP не работали, в плане все пакеты были заблокированы. На данный момент всё хорошо работает</p></td><td>2023-09-21T06:26:17.303Z</td></tr><tr><td>anon94384997</td><td><p>0ka хотел уточнить wireguard или openvpn или может еще какой протокол. Но поскольку вы упоминаете TCP/UDP видимо речь идет о openvpn.</p></td><td>2023-09-21T11:25:39.571Z</td></tr><tr><td>PadowYT2</td><td><p>К сожелению не понял в начале, но да, использовал OpenVPN</p></td><td>2023-09-21T19:11:43.018Z</td></tr><tr><td>kosnag</td><td><p>Проблемы с WireGuard начались на днях.<br>
+Несколько минут (около 5 минут) траффик через WG ок, потом режется в ноль.<br>
+Провайдеры, у которых это замечено:<br>
+Скайнет, Санкт-Петербург<br>
+Проксима, Москва<br>
+Орион Телеком, Красноярск</p>
+<p>Теле2 в Санкт-Петербург спокойно работает с WG, соединение не пропадает, скорость в ноль не падает.<br>
+Так же нормально работает в Мурманске, Ростелеком</p></td><td>2023-09-24T13:50:44.588Z</td></tr><tr><td>welazsc</td><td><aside class="quote no-group" data-username="kosnag" data-post="265" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kosnag/48/3700_2.png" class="avatar"> kosnag:</div>
+<blockquote>
+<p>Несколько минут (около 5 минут) траффик через WG ок, потом режется в ноль.</p>
+</blockquote>
+</aside>
+<p>службе “жарова” удалось добиться «деградации» <s>телеграм на 30%</s> WG за 5 минут</p>
+<p>Похоже на таймауты. Никто 5 минут сессию держать для анализа не будет. Вероятно ищут/нашли новый способ покашмарить без последствий для себя, на любом уровне ответственности.</p></td><td>2023-09-24T21:44:05.633Z</td></tr><tr><td>anon94384997</td><td><p>Похоже на запоздалый блок. Wireguard локальный шлюз не разрывает при проблемах (продолжает слать пакеты), поэтому кажется, что интернета нет или скорость ноль.</p></td><td>2023-09-24T22:21:11.783Z</td></tr><tr><td>Sven</td><td><p>Сегодня с утра в Санкт-Петербурге отключили openvpn и wireguard на мегафон и мтс.</p></td><td>2023-09-25T04:58:12.703Z</td></tr><tr><td>iao</td><td><p>подтверждаю пробемы с WG в СПб, отвалислось на МТС. МФ, Йота. При этом блокировались и локальные соединения, т.е. WG туннель до РФ адреса.<br>
+Сегодня WG в прибалтику заработал, а на РФ еще нет.</p></td><td>2023-09-26T13:23:43.260Z</td></tr><tr><td>ejoe</td><td><p>Краснодар, мобильный Билайн. Международные направления блокируются с того же времени, что и в Санкт-Петербурге.</p>
+<p>Мне вот что интересно. Блокируются по анализу первых пакетов. Значит, мысля логически, их надо как-то их уберечь. Мне удалось запустить Wireguard на телефоне через имеющийся шифрованный туннель на роутере, потом отсоединиться и через собственное мобильное соединение остаться с поднятым Wireguard. Но хотелось бы какое-то более изящное решение.</p></td><td>2023-09-27T03:24:12.524Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ejoe" data-post="270" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/e/f6c823/48.png" class="avatar"> ejoe:</div>
+<blockquote>
+<p>Блокируются по анализу первых пакетов. Значит, мысля логически, их надо как-то их уберечь</p>
+</blockquote>
+</aside>
+<p>Если есть рут - nfqws от zapret</p></td><td>2023-09-27T06:25:45.163Z</td></tr><tr><td>Fleymorx</td><td><p>МСК<br>
+МТС, Мегафон, Теле2 - с телефона блочится WG на своем VPS.</p>
+<p>Однако, на роутере Keenetic + модем Huawei B525  (с мод прошивкой в режиме моста), WG работает как ни в чем не бывало. И отключал соединение, и перезагружал роутер - без проблем идет коннект.<br>
+Что за приколы?) На роутере что с МТС, что с Мегафоном - все работает.</p></td><td>2023-09-27T08:12:38.013Z</td></tr><tr><td>0ka(0ka)</td><td><p>а если поменять симки местами или попереключать режим полёта?</p></td><td>2023-09-27T08:15:26.777Z</td></tr><tr><td>welazsc</td><td><p>Пока есть питание на модеме и нет команды для модема на сброс, сохраняется привязка к точке терминации мобильного трафика. Перезагрузка роутера не гарантирует сброса модема. А сброс не гарантирует обнуление нужных данных. Для гарантии обнуления ID, лучше обесточить. Но выбор новой точки возможно (не) случаен, могут выбрать прежнюю.</p>
+<p>Тесты с симками могут быть полезны. Возможно будет наблюдаться достоверная воспроизводимость (N тестов с обесточиванием) для симок вне связи с точкой терминации. Это было бы интересно.</p></td><td>2023-09-27T08:36:18.933Z</td></tr><tr><td>ValdikSS</td><td><p>10 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/98">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-09-28T21:01:04.365Z</td></tr><tr><td>P4H</td><td><p>MTS Москва, TCP/UDP через OVPN не робит</p></td><td>2023-09-27T12:53:04.023Z</td></tr><tr><td>AwesomeRomchik</td><td><p>+1, Москва, МТС, VPN от Surfshark, TCP/UDP через OpenVPN не работают</p></td><td>2023-09-27T14:44:57.419Z</td></tr><tr><td>GeNnna(Get Nna)</td><td><p>Мобильные МТС и Теле2 на текущий момент блокируют протоколы WG и IKEv2 уже внутри РФ. Дропы пакетов после установки соединения, чтобы создавалось впечатление, что отвалился интернет. Забавно то, что эти опсосы блокируют сервера, с которых кроме как во внутреннюю сеть предприятия, никуда попасть невозможно.</p></td><td>2023-09-28T00:01:34.182Z</td></tr><tr><td>bitas0709(Виталий)</td><td><p>К сожалению, могу лишь подтвердить, что Теле2 сегодня начал блокировать WG и L2TP внутри РФ. Сервера с VPN находятся на территории Белгородской области (в этой же области и происходит попытка подключения).<br>
+У WG рукопожатие происходит и успевают пройти несколько пакетов с пингом, а дальше тишина.<br>
+L2TP соединение вовсе не устанавливает.<br>
+По телефону техподдержки, конечно же, ничего внятного сказать не смогли.<br>
+Через Ростелеком подключение к VPN работает без проблем.</p></td><td>2023-09-28T07:16:00.315Z</td></tr><tr><td>irt</td><td><p>Может кто-то сталкивался с намеренными блокировками ssh\rdp со стороны РКН и прочих росментов? Я не встречал, но интересно стоит ли подобное ожидать.</p></td><td>2023-09-29T10:59:45.989Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>Выделенный сервер у Selectel, датацентр в СПб. На нём Wireguard с пятью пирами - три в России, один в Нидерландах, один в Турции. И к нему же подключаются по OpenVPN (UDP) пользователи из России и Турции.<br>
+До позавчера всё работало без единого сбоя, сейчас стал отваливаться Wireguard в Турцию. При этом с Нидерландами работает без сбоев (видимо, ненадолго), OpenVPN из той же Турции к этому серверу тоже работает. Внутри России всё работает (и хотелось бы надеяться, что продолжит).</p></td><td>2023-10-01T10:33:25.257Z</td></tr><tr><td>yifif(yifif)</td><td><p>Опять adguard перестал работать…<br>
+Пришло репли от позоровцев… с 4 октября v2 ray и им же подобные на всех ТСПУ, ss на трансграничных ТСПУ. Видимо нашли способ. На ss видимо много ресурсов надо, поэтому только на наружних.<br>
+Также был намек на полную блокировку всех средств туннелирования внутри РФ.</p></td><td>2023-10-01T11:17:30.065Z</td></tr><tr><td>ValdikSS</td><td><p>27 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/127">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-10-11T14:14:01.242Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="bitas0709" data-post="285" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/bitas0709/48/3721_2.png" class="avatar"> bitas0709:</div>
+<blockquote>
+<p>К сожалению, могу лишь подтвердить, что Теле2 сегодня начал блокировать WG и L2TP внутри РФ</p>
+</blockquote>
+</aside>
+<p>Сегодня проверял tele2 спб. Нет блока wireguard. Соединение из ленобласти к проводному провайдеру в СПБ работает</p></td><td>2023-10-01T12:25:16.613Z</td></tr><tr><td>bauzer</td><td><p>Видимо до меня тоже дошли современные технологии чебурнета (или ВПН-провайдера нашли).<br>
+Blancvpn по в европу нет соединения, в Казахстан что-то пытается. Протоколы. Wireguard, OpenVPN - SamaraLan</p></td><td>2023-10-02T21:07:02.988Z</td></tr><tr><td>P4H</td><td><p>Ростелеком Москва, домашний инет, UDP лежит, TCP работает, все через OVPN</p></td><td>2023-10-03T10:21:03.787Z</td></tr><tr><td>epsi</td><td><p>подмосковье: билайн, йота, мтс. wg и ovpn опять лежат.</p></td><td>2023-10-03T10:34:51.290Z</td></tr><tr><td>anaxios</td><td><p>Подтверждаю, нет WG через МТС в Москве.<br>
+А поднятый в выходные из подмосковья через билайн WG линк по-прежнему UP.</p>
+<p>Проверяя, впервые столкнулся с невозможностью подключиться (через мобильный Ростелеком) к консоли сервера через вебинтерфейс зарубежного ВПС провайдера. Только с четвертого-пятого раза соединение установилось. Раньше такого не было…  :(((</p></td><td>2023-10-03T11:06:41.760Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Чистый ss на tele2 соединяется с vds забугром</p></td><td>2023-10-03T11:26:08.534Z</td></tr><tr><td>Meibisu(Meibisu)</td><td><p>Beeline Тула, что-то отвалились и openvpn и outline сегодня вечером, намертво. Пару пакетов первых проходит, а потом отображается, что сети на компьютере нет 0_о. Сервера впн нидерландские собственные</p></td><td>2023-10-03T16:09:22.631Z</td></tr><tr><td>welazsc</td><td><p>Вы уверены, что на outline такое же поведение, что и на openvpn? Может просто не подключается? Сколько у вас пользователей на сервере? Десятки, сотни? Из других городов есть?</p></td><td>2023-10-03T17:52:43.976Z</td></tr><tr><td>Meibisu(Meibisu)</td><td><p>Действительно, это с outline проблема какая-то локальная на компьютере, он не может установить последнюю версию. С телефона с wi-fi все норм. Но openvpn (очень малая нагрузка, человек пять), мертв со всех устройств с beeline. В целом первый раз вижу, чтобы при включении openvpn у меня просто обрубался интернет.</p></td><td>2023-10-03T18:03:32.129Z</td></tr><tr><td>DolceVita</td><td><p>04.09 крутился приватный openvpn сервер на домашнем роутере в ЕС для друзей/семьи из РФ. С 3.10 люди не могут больше использовать протокол. Подключаться подключаются - трафик тупо не идет.</p></td><td>2023-10-03T22:58:40.659Z</td></tr><tr><td>Quqas(Quqas)</td><td><p>последние 24 часа вовсю корёжат топологию. уже минимум 3 раза замечал.</p>
+<p>то с 6 до 8 ttl пришлось повышать в gbd, то назад откатывать.</p>
+<p>а щас вот сломали маршрут из эрэфии и стали <a href="https://invent.kde.org/" rel="noopener nofollow ugc">https://invent.kde.org/</a>  и <a href="https://www.instagram.com/" rel="noopener nofollow ugc">https://www.instagram.com/</a> открываться\пинговаться хоть были по ip заблочены</p>
+<p>ПАКТ СПб</p></td><td>2023-10-04T02:41:28.969Z</td></tr><tr><td>ejoe</td><td><p>Билайн мобильный, Краснодар. Блокируются международные направления VPN.</p></td><td>2023-10-04T04:20:51.941Z</td></tr><tr><td>0x99(Jabas)</td><td><p>Вставлю свои 5 копеек. Сегодня заметил странное, возможно совсем не связанное с блокировками.<br>
+На ПК установлено 2 системы, 10 и 11 windows. Потребовалось загрузится в 10ку, и там зайти на заблокированный рутрекер, и каково было мое удивление, что скачанный конфиг WG с 11 винды сначала заработал, но скорость была 40-45 кб/с (скачивал драйвер), а после совсем перестал подключатся. OVPN при этом подключался, но трафик не пробивался.</p>
+<p>При этом загрузившись в 11 и WG и OVPN прекрасно работали. Впрочем, как и с телефона в той же сети. Провайдер Ростелеком Краснодар</p></td><td>2023-10-04T15:00:22.663Z</td></tr><tr><td>chupnik(chupnik)</td><td><p>Аналогичная ситуация - брал сервер ПиКьюХост в Финке. Коннект есть, IP получаю - трафик не идет.</p></td><td>2023-10-04T16:32:40.438Z</td></tr><tr><td>tlgrmku(tlgrmku)</td><td><p>Опять wg блочат. Теле2. Домашний норм. Как по графику.</p></td><td>2023-10-04T18:13:48.683Z</td></tr><tr><td>profiton</td><td><p>Начали блокировать OpenVPN внутри РФ (TCP, UDP) с 4 октября около 21:00 МСК.<br>
+До этого в последние дни OpenVPN блокировали только заграницу.</p>
+<p>Проверено на мобильных Мегафон и МТС. Урал.</p>
+<p>UPD: Как раз на 4pda пишут, что примерно с этого времени перестала работать умная техника Xiaomi. Нет соединения с серверами из Китая.</p></td><td>2023-10-04T21:08:12.462Z</td></tr><tr><td>Kucheryavy(Kucheryavy)</td><td><p>Подтверждаю, внутри РФ OpenVPN udp сегодня не соединяется (Проводной интернет, Татарстан)</p></td><td>2023-10-05T04:32:15.766Z</td></tr><tr><td>bunkerfox(bunkerfox)</td><td><p>Таттелеком и билайн режут ovpn с wireguard. Sstp работает только после ребута роутера, l2tp ни в какую.</p></td><td>2023-10-05T04:38:32.950Z</td></tr><tr><td>pukoid(Pukoid)</td><td><p>Новосибирск Мегафон  - утром удалённые точки с Микротиком Openvpn tcp работали как по писаному - подключается и через несколько секунд/пакетов рвётся.<br>
+Ровно в 11:00 НСК облава прекратилась.</p></td><td>2023-10-05T05:18:40.864Z</td></tr><tr><td>nwhisper(NWhisper)</td><td><p>Москва, Билайн. Openvpn, wireguard, ipsec ikev1/ikev2 работают без каких-либо проблем как через мобильный интернет, так и через стационарный</p></td><td>2023-10-05T05:56:16.272Z</td></tr><tr><td>iMacSeem</td><td><p>Ростелеком/Теле2 - Кузбасс. Блокировки L2TP/IPSec, IKEv2 и IKEv1 внутри страны и самого провайдера. Забугор личный тоже заблокирован.</p></td><td>2023-10-05T07:05:38.323Z</td></tr><tr><td>zzr</td><td><p>вчера вечером медленно загружались заблокированые сайты,  у мен развёрнут контейнер антизапрета на vdsке у inferno solutions в Эстонии, я подумал ну ок с ним с етим openvpnом, там же у мен развёрнуты и vless+reality, dumbproxy, psiphon и прочие телодвижения всё было бесполезно сначала норм потом тормозит потом ваще тухнет потом опять норм, я так подозреваю в чём прикол типа етих всех маскировок когда dpi можно насроить на блокировку шифрованых тунелей (даже если их нельзя однозначно идентифицировать протокол) на ружу походу так и было</p>
+<p>кто нибудь знает как можно самолично проверить режут на тпсу или в других местах потому что у меня уже крыша едет, а ведь ето ещё даже не 24 год</p>
+<p>ps<br>
+на другой впске от российского хостера которая якобы в Нигерландах (а на самом деле где-то Воронеже)) всё было норм, может просто режут ip-адреса когда видят что туда идёт щифрованый тунель?</p></td><td>2023-10-05T07:06:00.414Z</td></tr><tr><td>NeUveren(Не Уверен)</td><td><p>МТС Кузбасс блокируют трафик OVPN (UDP) на “Сибирские Сети”. Внутри “Сиб. Сетей” всё пока бегает.<br>
+Поправка: заработало. Не знаю, на чьей стороне было ограничение, но после переписки с обоими провайдерами (и, разумеется, “это не мы, у нас всё разрешено”) доступ по OVPN в сеть сервера и клиентов появился.</p></td><td>2023-10-05T07:11:15.767Z</td></tr><tr><td>LinuxUser00</td><td><p>Вчера просто ради эксперимента отключил warp,скачал с сайтов <a href="http://www.vpngate.net" rel="noopener nofollow ugc">www.vpngate.net</a> и <a href="http://www.vpnjantit.com" rel="noopener nofollow ugc">www.vpnjantit.com</a>  файлы ovpn.Ничего не работало,соединения разрывалось.Сегодня скачал с тех же сайтов vpn файлы.Всё работает нормально.Похоже мой провайдер вчера блокировал протокол openvpn.<br>
+Провайдер Таттелеком проводной интернет.</p></td><td>2023-10-05T07:14:35.268Z</td></tr><tr><td>CompaqArmada(CompaqArmada)</td><td><p>Воронеж и  воронежская область, Теле2, Билайн, МТС блокировка OpenVPN  с утра. В 10:46 разблокировали.<br>
+В Курской области Мегафон при этом работал.</p></td><td>2023-10-05T08:03:11.416Z</td></tr><tr><td>ejoe</td><td><p>Краснодар, мобильный Билайн перестал блокировать VPN.</p></td><td>2023-10-05T16:26:02.962Z</td></tr><tr><td>anon94384997</td><td><p>У меня wireguard как работал, так и работает. Правда, он не совсем обычный.</p></td><td>2023-10-05T17:00:00.094Z</td></tr><tr><td>Fleymorx</td><td><p>WG MSK MTS заработал</p></td><td>2023-10-05T21:50:40.776Z</td></tr><tr><td>nordonsimf</td><td><p>У нас сервере в Нидерландах, тоже по wireguard данные в некоторых регионах не проходят.<br>
+Например в Крыму и в Дагестане.<br>
+А если купить простой VPS в России, что ASN был RU.<br>
+На него поставить wireguard сервер, а далее уже трафик напрямую слать в Нидерланды ?<br>
+Это поможет ?<br>
+Я так понимаю простого решения, чтоб просто установил и забыл на данный момент нет ?</p></td><td>2023-10-06T10:30:22.777Z</td></tr><tr><td>Lingihn(Михаил)</td><td><p>Тоже заметил изменения на IS, тоже в Эстонии. Только пользуюсь Outline (ShadowSocks). Несколько дней приходится переподключаться, иначе не грузит ничего. Особенно часто замечаю на телеге, но вряд ли это связано.</p></td><td>2023-10-07T10:01:32.938Z</td></tr><tr><td>0ka(0ka)</td><td><p>сеть диагностировали?</p></td><td>2023-10-07T10:52:23.513Z</td></tr><tr><td>Praising7137</td><td><p>Не знаю как сейчас, но у меня в августе во время блокировок нормально работало соединение WG до сервера в Европе с российским ASN. В остальных случаях блокировки были как у всех. По-моему, они все таки по ASN блокируют.</p></td><td>2023-10-07T14:20:44.247Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>У меня и в августе, и в сентябре, и до сих пор без единого перебоя работает соединение WG с сервера в России до сервера в Нидерландах (с нидерландским же ASN). А вот с того же самого сервера в России до роутера в Турции - уже были перебои в последнюю волну блокировок. Хотя с этого же роутера в Турции до двух других роутеров в России (у меня там mesh на WG) - тоже без проблем.</p>
+<p>Так что если что-то до сих пор работает - это может означать, что просто не добрались ещё, блокировки пока далеки от ковровых. На всякий случай готовлюсь к тому, что блокировать будут всё, включая “из России в Россию” (поскольку такие отчёты есть, можно надеяться, что это побочный эффект неправильной настройки оборудования, но лучше “подстелить соломки”).</p></td><td>2023-10-07T14:55:22.308Z</td></tr><tr><td>irt</td><td><aside class="quote no-group" data-username="Praising7137" data-post="345" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/p/c57346/48.png" class="avatar"> Praising7137:</div>
+<blockquote>
+<p>По-моему, они все таки по ASN блокируют.</p>
+</blockquote>
+</aside>
+<p>У меня тоже работало, я даже не знал о каких-то блокировках впн протоколов со стороны ркн, прочитал только уже на форумах в конце августа, правда у меня туннели из РФ в сторону импортных ASN. Проблемы начались в конце августа. Но на деле - кто ж знает как там они это организуют… Мы тут просто пока догадываетмся.</p></td><td>2023-10-09T10:17:15.168Z</td></tr><tr><td>Lingihn(Михаил)</td><td><p>Извиняюсь, не так часто на форуме тут сижу.<br>
+С сеткой все было хорошо.<br>
+Написал в ТП (07.10), с запросом, были ли перебои за последнюю неделю, ответ дословно:</p>
+<p>Здравствуйте.<br>
+График нагрузок без провалов в 0, головной сервер не перезагружался <a href="http://joxi.ru/YmEy7xjCLVypDm" class="inline-onebox" rel="noopener nofollow ugc">1696678853106.png (222 kb) закачан 7 октября 2023 г. Joxi</a><br>
+Перебои с сетью в Эстонии кратковременные были, но они из-за аварий у магистральных провайдеров. Была частичная потеря связности, не глобальная. Возможно, была и недоступность &lt;IP моего сервера&gt; из некоторых мест.<br>
+Пока Outline, как протокол VPN, не определяется и не блокируется. Если с ним будут проблемы, можем попробовать установить иранскую версию hiddify - я им пользуюсь, проблем нет.</p></td><td>2023-10-14T11:36:19.587Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>5 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-jabberxmpp-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/5984">Обсуждение: Блокировка Jabber/XMPP в России</a></p></td><td>2023-10-15T13:46:42.911Z</td></tr><tr><td>zslsz(zslsz)</td><td><p>Wireguard до серверов PrivateInternetAccess начали блокировать, МТС+Мегафон. Подключаться - подключаются, трафик не идёт</p></td><td>2023-10-21T12:13:54.486Z</td></tr><tr><td>ValdikSS</td><td><p>Вчера утром начали замедлять трафик до моего личного сервера по IPv6 на YourServer, OpenVPN UDP. Примерно до 128 кбит/с с burst’ами до 256 кбит/с, или около того. Policier с огромным временным интервалом, не shaper, поэтому работает всё отвратительно: несколько пакетов передаются долю секунды, оставшуюся секунду никакие пакеты не идут.</p>
+<p>У него один пользователь (я) и одно устройство (мой ноутбук) на одном подключении (дом).</p></td><td>2023-10-22T16:56:00.492Z</td></tr><tr><td>irt</td><td><p>3 дня были проблемы с Сбербанковским ВПНом, тем который для банк-клиента. Судя по беглому анализу - не работают TLS сессии, они прерываются после первых нескольких пакетов. Проблема была у проводного Билайна на Урале и некоторых сотовых опреторах (точно Теле2, Йота). При этом, на других сетях работало. Сегодня заработало и на билайне. Может конечно это в СБ проблемы…</p>
+<p>Что интересно, СБ впн частично использует Akamai сервисы. По крайней мере, вначале устанавивает соединения с ними, потом пробует несколько других адресов, всегда рэндамно.</p></td><td>2023-10-25T11:42:27.461Z</td></tr><tr><td>navion</td><td><p>Примерно с 19 октября через одного провайдера замедляют IKEv2, а через второго периодически блокируют порт с Shadowsocks.</p>
+<p>Причем явно делают на основе статистики использования “запрещённых” протоколов и только для связки src_ip &gt; dst_ip:dst_port. С соседних IP-адресов в тех же сетях подключения к тому же серверу проходят нормально.</p>
+<p>Видел что-то похожее у китайцев, но там автоматика блокировала порты на несколько минут сразу после подключения.</p></td><td>2023-10-25T21:02:57.682Z</td></tr><tr><td>ValdikSS</td><td><p>По какому протоколу работает этот VPN?</p></td><td>2023-10-26T17:37:14.325Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>Там что-то своеобычное - <a href="https://amicon.ru/page.php?link=ip-client" rel="noopener nofollow ugc">вот это</a>:</p>
+<blockquote>
+<p>Алгоритм шифрования: ГОСТ 28147-89<br>
+VPN-протокол / избыточность протокола: Собственный (на базе UDP-протокола) / не более 30 байт на пакет</p>
+</blockquote></td><td>2023-10-26T22:48:40.660Z</td></tr><tr><td>irt</td><td><p>Да, это оно.<br>
+Детали, сессии, к сожалению не сохранил. Сейчас все работает, но сессию могу посмотреть на неделе.</p></td><td>2023-10-27T16:43:17.221Z</td></tr><tr><td>ValdikSS</td><td><p>10 posts were split to a new topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142">Обсуждение: неработоспособность ShadowSocks (30.10.2023 +)</a></p></td><td>2023-10-30T18:53:14.749Z</td></tr><tr><td>ValdikSS</td><td><p>A post was merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D0%BE%D0%B1%D0%BD%D0%BE%D1%81%D1%82%D1%8C-shadowsocks-30102023/6142/11">Обсуждение: неработоспособность ShadowSocks (30.10.2023 +)</a></p></td><td>2023-10-30T19:50:30.709Z</td></tr><tr><td>ValdikSS</td><td><p>A post was merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/161">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-11-08T23:48:53.704Z</td></tr><tr><td>Hetvel6947</td><td><p>снова начали блочить. Архангельск мобильный ростелеком.OpenVPN UDP сразу разрывается. OpenVPN TCP соединение устанавливается, не разрывается, но передача трафика полностью блокируется.</p></td><td>2023-12-06T07:17:21.345Z</td></tr><tr><td>anon57137390</td><td><p>del</p></td><td>2023-12-06T08:34:09.142Z</td></tr><tr><td>Hetvel6947</td><td><p>ничего не работает, т.к включен native kill switch, телефон андроид. Без включенного vpn все соединения блочатся. Сейчас абсолютно тоже самое как и в августе и сентябре.</p></td><td>2023-12-06T12:32:14.441Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>2 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/167">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-12-06T15:17:15.053Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Мoбильный Рoстeлекoм: OpenVPN завернутый в SS - ограничение по скорости до ~ 10 КБ/с, по аналогии с ограничением BitTorrent. По факту не возможно практически загрузить полноценно какой-либо сайт.<br>
+MTProxy с параметром dd - ограничение по скорости аналогичное.<br>
+Чистый SS ограничений по скорости нет.<br>
+Детектируют “обёрточное” шифрование?</p></td><td>2023-12-18T08:11:42.110Z</td></tr><tr><td>0ka(0ka)</td><td><p>регион?</p></td><td>2023-12-18T08:50:39.218Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Западная Сибирь</p></td><td>2023-12-18T08:54:48.549Z</td></tr><tr><td>ralawo(Радмир)</td><td><p>2 часа дня, Казань, провайдер Уфанет, сбрасывает подключения через антизапретовский протокол, через goodbye dpi трафик проходит</p></td><td>2023-12-18T10:54:25.645Z</td></tr><tr><td>PANDORUM_666</td><td><p>Ростовская область, Ростелеком. Тоже самое.</p>
+<p>Хотя нет. GoodByeDPI также не работает.</p></td><td>2023-12-18T11:34:23.787Z</td></tr><tr><td>ValdikSS</td><td><p>11 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/171">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2023-12-20T13:37:51.512Z</td></tr><tr><td>Sven</td><td><p>Сегодня в СПб Мегафон и МТС не подключится через openvpn до иностранных серверов</p></td><td>2024-01-15T08:46:29.292Z</td></tr><tr><td>PadowYT2</td><td><p>Подключение есть, но лимит opevpn 4 байта/с вход и ~800 байтов/с выход, тоесть в интернет зайти невозможно. Интернет ростелеком, ВПН в Польше и Германии (пробывал 2). Проходит несколько пакетов и все прекращается</p>
+<details>
+<summary>
+ping -c 24 1.1.1.1 (с ВПН)</summary>
+<pre><code class="lang-auto">PING 1.1.1.1 (1.1.1.1) 56(84) bytes of data.
+64 bytes from 1.1.1.1: icmp_seq=1 ttl=59 time=67.4 ms
+64 bytes from 1.1.1.1: icmp_seq=2 ttl=59 time=67.7 ms
+64 bytes from 1.1.1.1: icmp_seq=3 ttl=59 time=66.5 ms
+64 bytes from 1.1.1.1: icmp_seq=4 ttl=59 time=68.7 ms
+64 bytes from 1.1.1.1: icmp_seq=5 ttl=59 time=65.6 ms
+64 bytes from 1.1.1.1: icmp_seq=6 ttl=59 time=65.3 ms
+64 bytes from 1.1.1.1: icmp_seq=7 ttl=59 time=62.7 ms
+64 bytes from 1.1.1.1: icmp_seq=8 ttl=59 time=70.3 ms
+64 bytes from 1.1.1.1: icmp_seq=9 ttl=59 time=65.6 ms
+64 bytes from 1.1.1.1: icmp_seq=10 ttl=59 time=66.7 ms
+64 bytes from 1.1.1.1: icmp_seq=11 ttl=59 time=66.2 ms
+64 bytes from 1.1.1.1: icmp_seq=12 ttl=59 time=66.7 ms
+64 bytes from 1.1.1.1: icmp_seq=13 ttl=59 time=68.5 ms
+
+--- 1.1.1.1 ping statistics ---
+24 packets transmitted, 13 received, 45.8333% packet loss, time 23261ms
+rtt min/avg/max/mdev = 62.708/66.759/70.297/1.801 ms
+</code></pre>
+</details></td><td>2024-01-15T08:58:45.750Z</td></tr><tr><td>profiton</td><td><p>На Урале тоже самое. Началось сегодня. Проверено на мобильном МТС.<br>
+Невозможно подключиться по TCP/UDP до иностранных серверов.<br>
+Подключение до своего VPN в РФ работает.</p></td><td>2024-01-15T09:07:00.953Z</td></tr><tr><td>0ka(0ka)</td><td><p>рт сз, wireguard блочится через 0.15 - 5 секунд после подключения.</p></td><td>2024-01-15T09:16:03.520Z</td></tr><tr><td>mastezont</td><td><p>РТ Центр. OpenVPN TCP на сервере в NL работает.</p></td><td>2024-01-15T10:01:34.552Z</td></tr><tr><td>ity(ity)</td><td><p>Татарстан, провайдер Эртелеком (бизнес) – блокируется WG до европы (не сразу, после первых n байт). OpenVPN, SS, Cloak – работают. WG внутри сети провайдера не блокируется.</p></td><td>2024-01-15T10:21:12.687Z</td></tr><tr><td>P4H</td><td><p>Домашний инет, Ростелеком.Москва<br>
+UDP лежит, TCP работает<br>
+OpenVPN</p></td><td>2024-01-15T10:37:55.552Z</td></tr><tr><td>bauzer</td><td><p>Не только бизнес. Домашний тоже.  Дом.ру Самара. WG до европы после первых байт, в КЗ можно пробиться.<br>
+Но на заблокированные сайты войти не получается. Ошибка сертификата. Ругается именно на Эртелкомовский. (походу Хрому что-то не понравилось)</p></td><td>2024-01-15T13:32:18.486Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>WireGuard со вчерашнего дня блокирую в Билайн, Tele2. На вход пропускают 92 Байта и на этом всё.</p>
+<pre><code class="lang-auto">[TUN] [wg] Startup complete
+[TUN] [wg] Receiving handshake response from peer 1 (ip:port)
+[TUN] [wg] Keypair 1 created for peer 1
+[TUN] [wg] Retrying handshake with peer 1 (ip:port) because we stopped hearing back after 15 seconds
+[TUN] [wg] Sending handshake initiation to peer 1 (ip:port)
+[TUN] [wg] Handshake for peer 1 (ip:port) did not complete after 5 seconds, retrying (try 2)
+</code></pre></td><td>2024-01-16T01:35:05.845Z</td></tr><tr><td>13GwKd33(13GwKd33)</td><td><p>Не работает WG на Билайне к серверу в США.</p>
+<p>vless на том же сервере продолжает работать.</p></td><td>2024-01-16T08:06:17.569Z</td></tr><tr><td>ity(ity)</td><td><p>Да, второй день Эртелеком блокирует WG, но только новые подключения. У меня две сессии WG были активны до начала блокировки на серверах и они продолжают работать до сих пор.</p></td><td>2024-01-16T08:16:11.873Z</td></tr><tr><td>0x99(Jabas)</td><td><p>WG Калининград в отлупе, аутлайн пока работает. Краснодарский Край wg работает (ростелеком и местный провайдер)</p></td><td>2024-01-16T08:42:30.177Z</td></tr><tr><td>User_96c9e3c964bf</td><td><p>Краснодарский край wg на мтс (мобильный и домашний) не работает.</p></td><td>2024-01-16T09:35:59.767Z</td></tr><tr><td>Sven</td><td><p>Ростелеком в СПб домашний и корпоративный не работает openvpn до Европы, сегодня еще разные мелкие проводные провайдеры подключились к блокировкам.</p></td><td>2024-01-16T09:48:19.337Z</td></tr><tr><td>kovzoleg39(kovzoleg39)</td><td><p>Калининград отвалился L2TP/IPSec, IKEv2 на билайне + мобильные МТС, Билайн,т2, мегафон<br>
+Vless живет</p></td><td>2024-01-16T10:51:49.436Z</td></tr><tr><td>kezamBlock(kezamBlock)</td><td><p>Мой отчет за сегодня:<br>
+Сегодня у сотрудников появились проблемы с подключением L2TP ipsec до Эстонии.<br>
+Проводные Пакт (СПб), Сампо (Карелия), мобильный Теле2(СПб) с ошибкой согласования.</p>
+<p>Однако, старые L2TP ipsec соединения не рвались: проводной Skynet в СПб (7d up), модемный Yota в СПб (3d и 20d uptime)</p></td><td>2024-01-16T16:06:26.319Z</td></tr><tr><td>anonimnyj21(anonimnyj21)</td><td><p>СПб</p>
+<ol>
+<li>Со вчерашнего дня мобильный Мегафон блокирует OpenVPN и wireguard.</li>
+<li>На домашнем Билайн вчера оба протокола работали, сегодня блокируются.<br>
+На обоих провайдерах wireguard работает, если перед началом сессии отправить несколько (использовал 5) мусорных пакетов через клиент AmneziaVPN.</li>
+<li>Провайдер NewLink не блокирует OpenVPN, но блокирует wireguard. Лишние пакеты не помогают обойти блокировку.</li>
+</ol></td><td>2024-01-16T16:17:42.939Z</td></tr><tr><td>Dhohbr</td><td><p>Владивосток. Мобильный Билайн.<br>
+OpenVPN UDP подключается до Нидерландов, но трафика нет.<br>
+ss2022(вроде), на тот же сервер работает.<br>
+OpenVPN UDP в пределах россии работает.</p></td><td>2024-01-16T23:05:08.370Z</td></tr><tr><td>Travesty6726</td><td><p>Москва. Домашний Билайн.<br>
+Wireguard до немецкого сервера не работает, пару байт отсылает и умирает. Shadowsocks с v2ray работает.</p></td><td>2024-01-17T00:48:01.106Z</td></tr><tr><td>Krusty-the-Clown(Krusty The Clown)</td><td><p>SSTP живой?</p></td><td>2024-01-17T14:32:06.099Z</td></tr><tr><td>Dimon.Smotrit.TUT(Dimon)</td><td><p>Санкт-Петербург SkyNet<br>
+Wireguard до сервера в Финляндии - не работает. Траффик блокируется провайдером. Из панели видно первые килобайты подключения, а дальше разрыв сессии.<br>
+L2TP до сервера в Финляндии - не работает. Траффик сразу блокируется провайдером.</p>
+<p>VLESS с XTLS-Reality Работает.</p></td><td>2024-01-17T14:38:45.878Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>4 точки в России (Москва проводной Билайн, Подмосковье местечковый провайдер, Питер местечковый провайдер, Питер дата-центр Селектел), 2 точки за границей (Амстердам, Стамул). Wireguard-туннели от всех к всем, все работают, хотя во время прошлых “учений” частично отваливались. OpenVPN UDP из России в Россию работает (впрочем, сейчас нет никого в Калининграде, раньше оттуда были с ним постоянные проблемы) Продолжаю наблюдения, резервные туннели настроены, но пока простаивают…</p></td><td>2024-01-17T14:54:49.322Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Проводной Ростелеком - так же начался отвал wg до зарубежных хостов.</p></td><td>2024-01-17T15:14:50.682Z</td></tr><tr><td>Kucheryavy(Kucheryavy)</td><td><p>OpenVPN UDP (Татарстан проводной) внутренние соединения без обрывов.</p></td><td>2024-01-17T15:56:34.145Z</td></tr><tr><td>kjhkbDVCLisuhvc</td><td><p>WG до Голландии умерло на:<br>
+Корбина (Подмосковье); мобильных Мегафоне, Теле2, МТС.<br>
+Причём вчера соединение рвал только Мегафон.</p></td><td>2024-01-17T18:15:11.988Z</td></tr><tr><td>Norkoz</td><td><p>Wg до сша и до Европы не работает. Теле2. С домашнего рт все гуд</p></td><td>2024-01-17T19:05:56.529Z</td></tr><tr><td>myrrc(Mike Kot)</td><td><p>Москва (РТК), Самара (провайдера не знаю). wg и outline до Хецнера (Финляндия) сдох</p></td><td>2024-01-17T21:17:43.010Z</td></tr><tr><td>G7ZmNT(G7ZmNT)</td><td><p>AS49301 (Хабаровский край, ТТК домашний) блокировка чистого Wireguard до европейских и азиатских серверов. Протоколы с обфускацией работают<br>
+AS34584 (Хабаровский край, Ростелеком домашний) на том же ртк новых блокировок Wireguard до европейских серверов не замечено, подключается к VPN без проблем.</p></td><td>2024-01-17T23:51:37.064Z</td></tr><tr><td>Dhohbr</td><td><aside class="quote no-group" data-username="Dhohbr" data-post="387" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/8797f3/48.png" class="avatar"> Dhohbr:</div>
+<blockquote>
+<p>Владивосток. Мобильный Билайн.<br>
+OpenVPN UDP подключается до Нидерландов, но трафика нет.<br>
+ss2022(вроде), на тот же сервер работает.<br>
+OpenVPN UDP в пределах россии работает.</p>
+</blockquote>
+</aside>
+<p>Добавлю. Проводной Подряд.<br>
+OpenVPN TCP работает<br>
+OpenVPN UDP не работает<br>
+Wireguard чистый не работает<br>
+Wireguard обфусцированный работает<br>
+ss2022 работает</p></td><td>2024-01-18T10:46:10.722Z</td></tr><tr><td>choosesomething(Choosesomething)</td><td><p>мск, openvpn udp до Нидерландов.<br>
+Теле2 и проводной ростелеком работают. Билайн - нет.</p></td><td>2024-01-18T20:05:48.854Z</td></tr><tr><td>ity(ity)</td><td><p>Татарстан, Эртелеком. Сегодня с утра блокировку WG и OpenVPN сняли. На этот раз 4 дня продержалось. С каждым разом всё дольше и дольше. Такое чувство, что это всё тестирование с охватом всё большего количества сетей. Вероятно подготовка к выборам?</p></td><td>2024-01-19T07:21:40.874Z</td></tr><tr><td>08684(08684)</td><td><p>Москва. МГТС(МТС)<br>
+Перестал работать канадский OVH на Wireguard</p></td><td>2024-01-19T09:20:27.784Z</td></tr><tr><td>Hekzory</td><td><p>Сегодня умер немецкий wg, Hetzner, nbg1-dc3</p></td><td>2024-01-19T10:07:48.770Z</td></tr><tr><td>wolfxr</td><td><p>Удалено</p></td><td>2024-01-19T11:33:03.908Z</td></tr><tr><td>akumanokuma</td><td><p>Подтверждаю блокировку Wireguard на Ростелекоме (СЗФО) к трём локациям, что пробовал (VPS OVH в Польше, VPS Frantech в США и фактически все локации VPN от Netbouncer AB). udp2raw в режимах udp и faketcp работает как и прежде.</p></td><td>2024-01-19T14:40:35.668Z</td></tr><tr><td>kkk(K)</td><td><p>Заметил еще одну интересную штуку касательно блокировок. Отпало несколько Signal proxy серверов, а другие при этом работают. Никто с таким не сталкивался? Хочется понять, это взялись за протокол, или просто что-то пошло не так?<br>
+К примеру вот этот:  <code>https://signal.tube/#sgnl-02.cyberpath.tech/</code><br>
+Внешне это обычный https.</p></td><td>2024-01-22T15:12:45.482Z</td></tr><tr><td>P4H</td><td><p>МТС Москва, TCP/UDP лежит под OVPN</p></td><td>2024-01-24T07:13:20.386Z</td></tr><tr><td>Hetvel6947</td><td><p>Значит сейчас ТЗ такое поставлено, что не блочить. С августа 2023 были блокировки и tcp: соединение устанавливалось и сразу же разрывалось.</p></td><td>2024-01-27T07:29:46.184Z</td></tr><tr><td>User69</td><td><p>Заголовок топика пора менять на xx.xx.202x</p></td><td>2024-01-27T15:17:18.408Z</td></tr><tr><td>ValdikSS</td><td><p>4 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/189">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2024-02-01T17:20:02.456Z</td></tr><tr><td>P4H</td><td><p>МТС Москва, по прежнему TCP/UDP лежит под OVPN</p></td><td>2024-02-02T07:12:56.291Z</td></tr><tr><td>RandomRND</td><td><p>Есть/были внутри компании pptp, l2tp(ipsec), openvpn. Пару месяцев назад перед НГ прямо наглухо отвалились все попытки подключения, из РФ в РФ (Краснодар - несколько серверов по ЮФО, Краснодар - Москва). AS в РФ приземлена, ip диапазон - тоже ру, даже в РАНР (это такой православный вариант гео ip) был внесён как ру. Все впн умерли почти единомоментно в пару дней. openvpn на всех вариантах tcp/udp.</p>
+<p>Заработало только когда безопасник из компании связался с РКН, объяснил ситуацию. После этого заработало всё. Вроде как объяснили, что добавили наши адреса в специальный список. Вайтлист же получается, по сути.</p>
+<p>Не работало через стационарные РТ, Домру и пару местных мелкопровайдеров, через мобильные МТС, Билайн и Тинькофф.</p>
+<p>Также перестал подключаться (проводные домру и РТ, мобильный билайн) наглухо через private internet access через любые вариации параметров и на openvpn, и на wireguard, если не использовать shadowsocks. До начала января стабильно подключалось в Швецию без всяких мани пуляций. Похоже, что адрес был в каком-то вайтлисте по недосмотру или умышленно. Это состояние продолжается беспрерывно с начала января 2024 (проверяю ежедневно).</p></td><td>2024-02-18T11:28:56.448Z</td></tr><tr><td>zzr</td><td><p>кто нить вкурсе какие вобще остались рабочие вариканты? яимею ввиду протоколы для организациии впна, столкнулся с ниобходимостью объеденинить свое девайсы в одну виртуальную сеть с шифрованием поверх интернета (внезапно для чего и был придуман впн)), скакчал кликент на ондроед виригуард аоно тока успевает хендшейкнуца с сервером (внутри рф) на мегафоне потом затык, при етом на стационарном ростелекоми норм всё работает, собсно подозреваю что на опенвпне тоже самое буит, лень в хололстую поднимать сервисы просто так вот поетому и ришил поиндирисоватся здесь</p></td><td>2024-04-16T11:32:07.879Z</td></tr><tr><td>mrplap</td><td><aside class="quote no-group" data-username="zzr" data-post="412" data-topic="5124">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/zzr/48/14949_2.png" class="avatar"> zzr:</div>
+<blockquote>
+<p>(внутри рф) на мегафоне</p>
+</blockquote>
+</aside>
+<p>Очень странно. Для таких же целей использую WireGuard. Сервер и все клиенты в РФ. Из провайдеров Мегафон, Ростелеком, МТС - всё работает.</p></td><td>2024-04-16T12:15:06.631Z</td></tr><tr><td>gfqwdgecewgcdw</td><td><p>Amnezia WG</p></td><td>2024-04-16T12:56:05.388Z</td></tr><tr><td>gfqwdgecewgcdw</td><td><p>Не знаю я его даже на арме собирал</p></td><td>2024-04-16T13:09:58.327Z</td></tr><tr><td>ShiroiBara(Shiroi Bara)</td><td><p>Ростелеком Москва, инет проводной домашний, заблочили, видимо опять же на ТСПУ, OpenVPN протокол для подключения к серверам из списка <a href="http://vpngate.net" rel="noopener nofollow ugc">vpngate.net</a>. Заблочили в догонку и виндовый MS-SSTP тоже. Блокировки как udp так и tcp, порт значения не имеет. Удивительно, но работает подключение по OpenVPN с использование конфигурационного фвйла с сайта <a href="http://antizapret.prostovpn.org" rel="noopener nofollow ugc">antizapret.prostovpn.org</a>. Сам сайт, кстати, тоже заблочен наглухо. С месяц назад еще все работало, но теперь звереют с каждым днем. Пока удается подключатся через softether vpn клиент, благо есть версия и для openwrt с инструкцией по настройке. Сколько это проживет не знаю. Возможно блокировки как-то можно будет пробить zapret’om, если конечно не глухой бан на ТСПУ, но я не настолько спец чтобы настраивать zapret на работу с каждым отдельным сервером да еще и выборочно с OpenVPN протоколом. Вообщем, чебурнет наступает <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p></td><td>2024-05-29T22:34:35.559Z</td></tr><tr><td>Anyuta1166</td><td><p>Внутри РФ тоже бывают блокировки. Обнаружено такое поведение. Если ТСПУ замечает с IP адреса активность по подключению за рубеж, то адрес попадает в черный список, и с этого адреса начинают рубить и подключения внутри РФ. Время блокировки прогрессивное, т.е. начиная с нескольких минут и дальше увеличивается.<br>
+Проверяла лично. Подключаюсь к РФ серверу → все ок. Делаю подключение к зарубежному VPN → оно блокируется ТСПУ. После этого какое-то время (несколько минут, часов) не могу подключиться к РФ серверу. Проходит время, и подключения к РФ серверу снова начинают работать. Ровно до момента очередной попытки коннекта за рубеж.</p></td><td>2024-06-01T20:59:11.148Z</td></tr><tr><td>ValdikSS</td><td><p>2 posts were merged into an existing topic: <a href="/t/%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-vpn-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%BE%D0%B2-%D0%BD%D0%B0-%D1%82%D1%81%D0%BF%D1%83-05082023-xxxx2023/5239/251">Обсуждение: Блокировка VPN-протоколов на ТСПУ (05.08.2023 - xx.xx.2023)</a></p></td><td>2024-06-03T13:45:36.115Z</td></tr><tr><td>quantalFox</td><td><blockquote>
+<p>На территории Дагестана у некоторых провайдеров появились трудности с работой мессенджеров. Как передает корреспондент «Ъ», без включения VPN не работает ни один мессенджер или соцсеть. Однако и при включенном VPN его приходится каждые 10 минут переподключать для стабильной работы.</p>
+<p>Как сообщает <a href="https://tass.ru/obschestvo/21302555">ТАСС</a> со ссылкой на источник, профильные ведомства в республике начали глушить WhatsApp (принадлежит признанной экстремистской и запрещенной в РФ Meta). По словам собеседника агентства, в мессенджере распространяются призывы к участию в экстремистских акциях. Власти республики направляли администрации мессенджера запросы с требованием пресечь распространение таких сообщений, но администрация эти требования проигнорировала.</p>
+</blockquote>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://www.kommersant.ru/doc/6820119">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/b/b49363f512f27aeca7519afc919a650d3fc620c3.svg" class="site-icon" data-dominant-color="" width="500" height="500">
+
+      <a href="https://www.kommersant.ru/doc/6820119" target="_blank" rel="noopener" title="11:45AM - 08 July 2024">Коммерсантъ – 8 Jul 24</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/387;"><img src="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/a623312fc343e92584d7c9d90838618c73ae8000_2_690x387.jpeg" class="thumbnail" data-dominant-color="10232E" width="690" height="387"></div>
+
+<h3><a href="https://www.kommersant.ru/doc/6820119" target="_blank" rel="noopener">В Дагестане мессенджеры работают со сбоями</a></h3>
+
+  <p>Подробнее на сайте</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-07-08T12:42:33.069Z</td></tr><tr><td>fo511(Fo511)</td><td><p>внезапно снова заработал OpenVPN. зато отвалился outline к тому же самому серверу.</p>
+<p>Заметил еще странность, сломался IKEv2/IPsec к домашнему роутеру, но только с телефона. С мобильных операторов коннект устанавливается, траффик не идет. С гостевого wifi то же самое. Но в том же самом гостевом wi-fi с обычного компа все работает.</p></td><td>2024-08-06T07:14:34.401Z</td></tr><tr><td>P4H</td><td><p>AmneziaWG на iOS с профилями SurfShark не коннектит по мобильному интернету (МТС МСК), еще на той неделе все было норм. Домашний Ростелеком работает без проблем и на компе и на тел по вафле.</p>
+<p>Может снова надо что то подкрутить как было описано в статье?<br>
+<a href="https://habr.com/ru/companies/amnezia/articles/807539/" rel="noopener nofollow ugc">Мы добрались до ядра, или новые возможности AmneziaWG / Хабр</a></p>
+<p>UPD: в Амнезия группе ТГ народ говорит, что на МТС не работает, может у всех так, проверьте кто на Амнезии или WG сидит</p>
+<p>UPD2: Сработал метод из поста <a href="https://t.me/amnezia_vpn/1/199401" class="inline-onebox" rel="noopener nofollow ugc">Telegram: Contact @amnezia_vpn</a></p>
+<p><em>у кого не работает AWG</em></p>
+<p><em>Jc ставим от 3 до 5</em><br>
+<em>Jmin=40</em><br>
+<em>Jmax=70</em><br>
+<em>Этого должно быть достаточно, и даже не поломает совестимость с уже выданными конфигами. (Выяснилось что при изменении Jc Jmin Jmax пропадают все юзеры из панели управления конфигами, мы чиним это)</em></p>
+<p><em>Если всё равно не коннектит, можно ещё это:</em><br>
+<em>S1 и S2 ставим от 2 до 10</em></p>
+<p>Мне хватило изменить только первые три параметра</p></td><td>2024-08-07T09:59:32.671Z</td></tr><tr><td>Zerogoki(Zero Goki)</td><td><p>Подтверждаю, на МТС в Москве не работает AmneziaWG. XTLS-REALITY до того же сервера работает</p></td><td>2024-08-09T19:00:47.996Z</td></tr><tr><td>msvxdlss(Димка)</td><td><p>Крымский Миранда медиа, локального провайдера не называю, при двух-трех неудачных попытках подключится за рубеж через опенвпн протокол рубят инет на 20 минут</p>
+<p>апд после двух попыток уже не отрубает и даже подключение заработало)</p></td><td>2024-08-11T14:39:36.665Z</td></tr><tr><td>kelly(Kelly)</td><td><p>Ростелек развлекается (500 км от Москвы на юг).<br>
+На основном VPN отвалились wg, wg+vmess/quic, wg+vmess/tcp.<br>
+Пока работают ovpn, ovpn obfs3, ovpn obfs4 (IAT0/1/2).<br>
+В прошлый раз живы были только чистые ovpn и wg. Прям вторник патчей как у майкрософт (╥﹏╥)</p>
+<p>Та же локация, но с Амнезией и двумя арендованными серверами (NL и BE), работают awg, xray, ovpn over cloak. В отрубе как и ожидалось ovpn, wg, ss.</p></td><td>2024-08-27T20:39:53.186Z</td></tr><tr><td>ValdikSS</td><td><p>С утра и до текущего момента начались новые блокировки протокола OpenVPN на части провайдеров. Они похоже на старые, но с улучшенными фильтрами: модификация протокола, какая применена на АнтиЗапрете, уже не срабатывает.<br>
+В сравнении с прошлым фильтром, в текущем реализована «заморозка» TCP-сессии (а не её разрыв) путём отброса пакетов от клиента к серверу (но от сервера к клиенту доходят).<br>
+Сессия замораживается после 15-го data-пакета OpenVPN.</p>
+<p>Фильтр работает по таймеру. Если в течение 7-8-9 секунд клиент не отправлял никаких пакетов, то фильтр отключается, VPN работает. Если в течение 1-3 секунд клиент отправил хоть один пакет, таймер сбрасывается (не могу засечь точное количество, возможно, оно каждый раз разное), счёт пакетов продолжается, соединение заморозится после 15 пакета.</p>
+<p>Обходится просто: <code>route-delay 11</code> (не уверен, что нужно именно 11 секунд, но это работает).</p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>isp</th>
+<th>asn</th>
+<th>city</th>
+<th>OpenVPN TCP result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ru-001</td>
+<td>ТТК</td>
+<td>AS8427</td>
+<td>Magnitogorsk</td>
+<td>FAIL</td>
+</tr>
+<tr>
+<td>ru-030</td>
+<td>ER-Telecom Holding</td>
+<td>AS34533</td>
+<td>Syzran’</td>
+<td>FAIL</td>
+</tr>
+<tr>
+<td>ru-035</td>
+<td>UBS (ubsnet.ru)</td>
+<td>AS50042</td>
+<td>Sevastopol</td>
+<td>FAIL</td>
+</tr>
+</tbody>
+</table>
+</div><p>Также сообщали о подобных блокировках на <a href="https://www.kmv.ru/">POST LTD</a> и <a href="https://taganrog.pg19.ru/">ПЖ19</a>.</p>
+<p><a class="attachment" href="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/4VExhYc7hKwdi16NlKlbH23uKM0.pcapng">lv6.pvpn.pw-tcp-cap-from-client.pcapng</a> (63.0 KB)<br>
+<a class="attachment" href="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/p6UmzbYICBJMriRysZbKNFwx6XP.pcapng">lv6.pvpn.pw-tcp-cap-from-server.pcapng</a> (50 KB)</p></td><td>2024-09-11T20:27:10.134Z</td></tr><tr><td>artenox</td><td><p>Спасибо за инфу. Обход блокировки openvpn протокола пока работает у меня на линуксе с помощью zapret даже с непатченным сервером. Посмотрим, может тоже отвалится.</p></td><td>2024-09-12T02:02:53.654Z</td></tr><tr><td>0ka(0ka)</td><td><p><span class="discourse-local-date" data-date="2024-09-12" data-email-preview="2024-09-11T21:00:00Z UTC" data-timezone="Europe/Moscow">2024-09-11T21:00:00Z</span> на рт сз стал блочиться AmneziaWG после хендшейка (до этого работал с 1 авг, хендшейки несколько раз в день), мусорных пакетов нет, блок из-за параметра S1: с значениями 10, 29, 30, 50 (рандом выбрал, не все) блок есть, с значениями 60, 100 (тоже рандом выбрал, не все) блока нет, остальные параметры не имеют значения для блока, добавление мусорных пакетов почти всегда снимает блок даже с S1=10,29,30,50</p>
+<p><span class="discourse-local-date" data-date="2024-09-16" data-email-preview="2024-09-15T21:00:00Z UTC" data-timezone="Europe/Moscow">2024-09-15T21:00:00Z</span> заметил тоже самое на моб мегафоне сз</p></td><td>2024-09-12T19:12:08.046Z</td></tr><tr><td>User69</td><td><p>del</p></td><td>2024-10-15T22:22:05.155Z</td></tr><tr><td>vladserg</td><td><p>В приморском крае (ростелеком) набдюдается уже три дня подяд, что снята блокировка по протоколу исходящих openvpn за пределы РФ.</p></td><td>2024-10-16T08:46:19.778Z</td></tr><tr><td>Beck(\V/)</td><td><p>PlanetVPN снова перестал работать. Вчера работал нормально.</p></td><td>2024-10-16T20:19:48.263Z</td></tr><tr><td>Olejka</td><td><p>Почему del? Таки стоит людям знать что РКН способен блокировать WmneziaWG.</p>
+<p>Для тех, кто был не в курсе: 16.10 после полуночи по всей стране отвалилась амнезия. Заработало спустя два часа</p></td><td>2024-10-16T21:10:47.229Z</td></tr><tr><td>Damien</td><td><p>Столкнулся с проблемой блокировки OpenVPN даже с <code>route-delay 12</code>. Трафик тупо встает после установки соединения. Судя по всему блочится из за настроек пинга который шлет сервер <code>Timers: ping 5, ping-restart 30</code>. Есть локальные варианты решения или надо писать провайдеру VPN и просить изменить настройки пинга? Логи прикладываю:</p>
+<pre><code class="lang-auto">2024-11-19 12:41:01.283186 *Tunnelblick: Attempting connection with italy using shadow copy; Set nameserver = 0x00000301; monitoring connection
+2024-11-19 12:41:01.285377 *Tunnelblick: openvpnstart start italy.tblk 54189 0x00000301 0 1 0 0x0210c130 -ptADGNWradsgnw 2.6.12-openssl-3.0.14 &lt;password&gt;
+2024-11-19 12:41:01.321360 *Tunnelblick: openvpnstart starting OpenVPN
+2024-11-19 12:41:01.702225 OpenVPN 2.6.12 x86_64-apple-darwin [SSL (OpenSSL)] [LZO] [LZ4] [MH/RECVDA] [AEAD]
+2024-11-19 12:41:01.702694 library versions: OpenSSL 3.0.14 4 Jun 2024, LZO 2.10
+2024-11-19 12:41:01.703949 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:54189
+2024-11-19 12:41:01.703967 Need hold release from management interface, waiting...
+2024-11-19 12:41:01.911699 *Tunnelblick: openvpnstart log:
+     OpenVPN started successfully.
+     Command used to start OpenVPN (one argument per displayed line):
+          /Applications/Tunnelblick.app/Contents/Resources/openvpn/openvpn-2.6.12-openssl-3.0.14/openvpn
+          --daemon
+          --log-append /Library/Application Support/Tunnelblick/Logs/-SUsers-Smacosuser-SLibrary-SApplication Support-STunnelblick-SConfigurations-Sitaly.tblk-SContents-SResources-Sconfig.ovpn.769_0_1_0_34652464.54189.openvpn.log
+          --cd /Library/Application Support/Tunnelblick/Users/macosuser/italy.tblk/Contents/Resources
+          --machine-readable-output
+          --setenv IV_GUI_VER "net.tunnelblick.tunnelblick 6130 6.0beta09 (build 6130)"
+          --verb 3
+          --config /Library/Application Support/Tunnelblick/Users/macosuser/italy.tblk/Contents/Resources/config.ovpn
+          --setenv TUNNELBLICK_CONFIG_FOLDER /Library/Application Support/Tunnelblick/Users/macosuser/italy.tblk/Contents/Resources
+          --verb 3
+          --cd /Library/Application Support/Tunnelblick/Users/macosuser/italy.tblk/Contents/Resources
+          --management 127.0.0.1 54189 /Library/Application Support/Tunnelblick/Mips/italy.tblk.mip
+          --setenv IV_SSO webauth
+          --management-query-passwords
+          --management-hold
+          --script-security 2
+          --route-up /Applications/Tunnelblick.app/Contents/Resources/client.up.tunnelblick.sh -9 -d -f -m -w -ptADGNWradsgnw
+          --down /Applications/Tunnelblick.app/Contents/Resources/client.down.tunnelblick.sh -9 -d -f -m -w -ptADGNWradsgnw
+2024-11-19 12:41:01.930077 MANAGEMENT: Client connected from [AF_INET]127.0.0.1:57986
+2024-11-19 12:41:01.969014 MANAGEMENT: CMD 'pid'
+2024-11-19 12:41:01.969223 MANAGEMENT: CMD 'auth-retry interact'
+2024-11-19 12:41:01.969276 MANAGEMENT: CMD 'state on'
+2024-11-19 12:41:01.969324 MANAGEMENT: CMD 'state'
+2024-11-19 12:41:01.969405 MANAGEMENT: CMD 'bytecount 1'
+2024-11-19 12:41:01.970282 *Tunnelblick: Established communication with OpenVPN
+2024-11-19 12:41:01.991164 *Tunnelblick: &gt;INFO:OpenVPN Management Interface Version 5 -- type 'help' for more info
+2024-11-19 12:41:01.993127 MANAGEMENT: CMD 'hold release'
+2024-11-19 12:41:10.425415 MANAGEMENT: CMD 'username "Auth" "vpnuser56789"'
+2024-11-19 12:41:10.425639 MANAGEMENT: CMD 'password [...]'
+2024-11-19 12:41:10.425870 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2024-11-19 12:41:10.440071 TCP/UDP: Preserving recently used remote address: [AF_INET]45.138.100.100:443
+2024-11-19 12:41:10.440451 Socket Buffers: R=[131072-&gt;131072] S=[131072-&gt;131072]
+2024-11-19 12:41:10.440517 Attempting to establish TCP connection with [AF_INET]45.138.100.100:443
+2024-11-19 12:41:10.440556 MANAGEMENT: &gt;STATE:1732009270,TCP_CONNECT,,,,,,
+2024-11-19 12:41:10.519372 TCP connection established with [AF_INET]45.138.100.100:443
+2024-11-19 12:41:10.519647 TCPv4_CLIENT link local: (not bound)
+2024-11-19 12:41:10.519673 TCPv4_CLIENT link remote: [AF_INET]45.138.100.100:443
+2024-11-19 12:41:10.519811 MANAGEMENT: &gt;STATE:1732009270,WAIT,,,,,,
+2024-11-19 12:41:10.591661 MANAGEMENT: &gt;STATE:1732009270,AUTH,,,,,,
+2024-11-19 12:41:10.591892 TLS: Initial packet from [AF_INET]45.138.100.100:443, sid=ae791bd8 d7b528ca
+2024-11-19 12:41:10.592014 WARNING: this configuration may cache passwords in memory -- use the auth-nocache option to prevent this
+2024-11-19 12:41:10.760195 VERIFY OK: depth=1, CN=TG-VPN-CA
+2024-11-19 12:41:10.761519 VERIFY KU OK
+2024-11-19 12:41:10.761546 Validating certificate extended key usage
+2024-11-19 12:41:10.761561 ++ Certificate has EKU (str) TLS Web Server Authentication, expects TLS Web Server Authentication
+2024-11-19 12:41:10.761575 VERIFY EKU OK
+2024-11-19 12:41:10.761587 VERIFY OK: depth=0, CN=server
+2024-11-19 12:41:11.049546 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bits RSA, signature: RSA-SHA256, peer temporary key: 384 bits ECsecp384r1
+2024-11-19 12:41:11.049790 [server] Peer Connection Initiated with [AF_INET]45.138.100.100:443
+2024-11-19 12:41:11.049818 TLS: move_session: dest=TM_ACTIVE src=TM_INITIAL reinit_src=1
+2024-11-19 12:41:11.049947 TLS: tls_multi_process: initial untrusted session promoted to trusted
+2024-11-19 12:41:12.126864 MANAGEMENT: &gt;STATE:1732009272,GET_CONFIG,,,,,,
+2024-11-19 12:41:12.127187 SENT CONTROL [server]: 'PUSH_REQUEST' (status=1)
+2024-11-19 12:41:12.196412 PUSH: Received control message: 'PUSH_REPLY,redirect-gateway def1,dhcp-option DNS 10.9.0.1,dhcp-option DNS 10.8.0.1,sndbuf 524288,rcvbuf 524288,route 10.8.0.1,topology net30,ping 5,ping-restart 30,socket-flags TCP_NODELAY,compress,ifconfig 10.8.0.93 10.8.0.94,peer-id 0,cipher AES-128-GCM'
+2024-11-19 12:41:12.196848 OPTIONS IMPORT: --sndbuf/--rcvbuf options modified
+2024-11-19 12:41:12.196919 Socket Buffers: R=[131072-&gt;524288] S=[131600-&gt;524288]
+2024-11-19 12:41:12.196945 OPTIONS IMPORT: --socket-flags option modified
+2024-11-19 12:41:12.196966 OPTIONS IMPORT: --ifconfig/up options modified
+2024-11-19 12:41:12.196982 OPTIONS IMPORT: route options modified
+2024-11-19 12:41:12.197003 OPTIONS IMPORT: --ip-win32 and/or --dhcp-option options modified
+2024-11-19 12:41:12.198439 Opened utun device utun4
+2024-11-19 12:41:12.198492 MANAGEMENT: &gt;STATE:1732009272,ASSIGN_IP,,10.8.0.93,,,,
+2024-11-19 12:41:12.198528 /sbin/ifconfig utun4 delete
+                           ifconfig: ioctl (SIOCDIFADDR): Can't assign requested address
+2024-11-19 12:41:12.260203 NOTE: Tried to delete pre-existing tun/tap instance -- No Problem if failure
+2024-11-19 12:41:12.260279 /sbin/ifconfig utun4 10.8.0.93 10.8.0.94 mtu 1500 netmask 255.255.255.255 up
+2024-11-19 12:41:12.276855 Data Channel: cipher 'AES-128-GCM', peer-id: 0, compression: 'stub'
+2024-11-19 12:41:12.276914 Timers: ping 5, ping-restart 30
+2024-11-19 12:41:24.868181 /sbin/route add -net 45.138.100.100 192.168.1.1 255.255.255.255
+                           add net 45.138.100.100: gateway 192.168.1.1
+2024-11-19 12:41:24.891847 /sbin/route add -net 0.0.0.0 10.8.0.94 128.0.0.0
+                           add net 0.0.0.0: gateway 10.8.0.94
+2024-11-19 12:41:24.904281 /sbin/route add -net 128.0.0.0 10.8.0.94 128.0.0.0
+                           add net 128.0.0.0: gateway 10.8.0.94
+2024-11-19 12:41:24.911746 MANAGEMENT: &gt;STATE:1732009284,ADD_ROUTES,,,,,,
+2024-11-19 12:41:24.911778 /sbin/route add -net 10.8.0.1 10.8.0.94 255.255.255.255
+                           add net 10.8.0.1: gateway 10.8.0.94
+                           12:41:24 *Tunnelblick:  **********************************************
+                           12:41:24 *Tunnelblick:  Start of output from client.up.tunnelblick.sh
+                           12:41:25 *Tunnelblick:  Primary network service: Wi-Fi
+                           12:41:27 *Tunnelblick:  Disabled IPv6 for 'USB 10/100/1000 LAN'
+                           12:41:27 *Tunnelblick:  Disabled IPv6 for 'AX88179A'
+                           12:41:27 *Tunnelblick:  Disabled IPv6 for 'Wi-Fi'
+                           12:41:27 *Tunnelblick:  Disabled IPv6 for 'Thunderbolt Bridge'
+                           12:41:27 *Tunnelblick:  Retrieved from OpenVPN: name server(s) [ 10.9.0.1 10.8.0.1 ], search domain(s) [ ] and SMB server(s) [ ] and using default domain name [ openvpn ]
+                           12:41:27 *Tunnelblick:  WARNING: Ignoring ServerAddresses '10.9.0.1 10.8.0.1' because ServerAddresses was set manually and '-allowChangesToManuallySetNetworkSettings' was not specified
+                           12:41:27 *Tunnelblick:  Setting search domains to 'openvpn' because the search domains were not set manually (or are allowed to be changed) and 'Prepend domain name to search domains' was not selected
+                           12:41:29 *Tunnelblick:  Saved the DNS and SMB configurations so they can be restored
+                           12:41:29 *Tunnelblick:  Did not change DNS ServerAddresses setting of '1.1.1.1 1.0.0.1' (but re-set it)
+                           12:41:29 *Tunnelblick:  Changed DNS SearchDomains setting from '' to 'openvpn'
+                           12:41:29 *Tunnelblick:  Changed DNS DomainName setting from '' to 'openvpn'
+                           12:41:29 *Tunnelblick:  Did not change SMB NetBIOSName setting of ''
+                           12:41:29 *Tunnelblick:  Did not change SMB Workgroup setting of ''
+                           12:41:29 *Tunnelblick:  Did not change SMB WINSAddresses setting of ''
+                           12:41:29 *Tunnelblick:  DNS servers '1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001' were set manually
+                           12:41:29 *Tunnelblick:  WARNING: that setting is being ignored; '1.1.1.1 1.0.0.1' is being used.
+                           12:41:29 *Tunnelblick:  DNS servers '1.1.1.1 1.0.0.1' will be used for DNS queries when the VPN is active
+                           12:41:29 *Tunnelblick:  The DNS servers include only free public DNS servers known to Tunnelblick.
+                           12:41:29 *Tunnelblick:  Flushed the DNS cache via dscacheutil
+                           12:41:29 *Tunnelblick:  /usr/sbin/discoveryutil not present. Not flushing the DNS cache via discoveryutil
+                           12:41:29 *Tunnelblick:  Notified mDNSResponder that the DNS cache was flushed
+                           12:41:29 *Tunnelblick:  Not notifying mDNSResponderHelper that the DNS cache was flushed because it is not running
+                           12:41:29 *Tunnelblick:  Setting up to monitor system configuration with process-network-changes
+                           12:41:29 *Tunnelblick:  End of output from client.up.tunnelblick.sh
+                           12:41:29 *Tunnelblick:  **********************************************
+2024-11-19 12:41:29.426426 Initialization Sequence Completed
+2024-11-19 12:41:29.426449 MANAGEMENT: &gt;STATE:1732009289,CONNECTED,SUCCESS,10.8.0.93,45.138.100.100,443,192.168.1.79,57988
+2024-11-19 12:41:30.669791 *Tunnelblick: DNS address 1.0.0.1 is being routed through the VPN
+2024-11-19 12:41:30.778764 *Tunnelblick: DNS address 1.1.1.1 is being routed through the VPN
+&gt;
+&gt;
+&gt; Здесь происходит реконект
+&gt;
+&gt;
+2024-11-19 12:41:59.212410 [server] Inactivity timeout (--ping-restart), restarting
+2024-11-19 12:41:59.213087 /sbin/route delete -net 10.8.0.1 10.8.0.94 255.255.255.255
+                           delete net 10.8.0.1: gateway 10.8.0.94
+2024-11-19 12:41:59.231192 /sbin/route delete -net 45.138.100.100 192.168.1.1 255.255.255.255
+                           delete net 45.138.100.100: gateway 192.168.1.1
+2024-11-19 12:41:59.244815 /sbin/route delete -net 0.0.0.0 10.8.0.94 128.0.0.0
+                           delete net 0.0.0.0: gateway 10.8.0.94
+2024-11-19 12:41:59.252258 /sbin/route delete -net 128.0.0.0 10.8.0.94 128.0.0.0
+                           delete net 128.0.0.0: gateway 10.8.0.94
+2024-11-19 12:41:59.258520 Closing TUN/TAP interface
+2024-11-19 12:41:59.258910 /Applications/Tunnelblick.app/Contents/Resources/client.down.tunnelblick.sh -9 -d -f -m -w -ptADGNWradsgnw utun4 1500 0 10.8.0.93 10.8.0.94 init
+                           12:41:59 *Tunnelblick:  **********************************************
+                           12:41:59 *Tunnelblick:  Start of output from client.down.tunnelblick.sh
+                           12:41:59 *Tunnelblick:  Cancelled monitoring system configuration changes
+                           12:41:59 *Tunnelblick:  Restored State:DNS
+                           12:41:59 *Tunnelblick:  Restored Setup:DNS
+                           12:41:59 *Tunnelblick:  Restored DNS and SMB settings
+                           12:41:59 *Tunnelblick:  Re-enabled IPv6 (automatic) for "USB 10/100/1000 LAN"
+                           12:41:59 *Tunnelblick:  Re-enabled IPv6 (automatic) for "AX88179A"
+                           12:41:59 *Tunnelblick:  Re-enabled IPv6 (automatic) for "Wi-Fi"
+                           12:41:59 *Tunnelblick:  Re-enabled IPv6 (automatic) for "Thunderbolt Bridge"
+                           12:41:59 *Tunnelblick:  Flushed the DNS cache with dscacheutil -flushcache
+                           12:41:59 *Tunnelblick:  Notified mDNSResponder that the DNS cache was flushed
+                           12:41:59 *Tunnelblick:  Up to six 'No such key' messages may appear next and may be ignored.
+                           12:41:59 *Tunnelblick:  End of output from client.down.tunnelblick.sh
+                           12:41:59 *Tunnelblick:  **********************************************
+2024-11-19 12:41:59.996261 SIGUSR1[soft,ping-restart] received, process restarting
+2024-11-19 12:41:59.996271 MANAGEMENT: &gt;STATE:1732009319,RECONNECTING,ping-restart,,,,,
+2024-11-19 12:42:00.310652 *Tunnelblick: Delaying HOLD release for 1.000 seconds
+2024-11-19 12:42:01.313499 MANAGEMENT: CMD 'hold release'
+2024-11-19 12:42:01.313665 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2024-11-19 12:42:01.319302 TCP/UDP: Preserving recently used remote address: [AF_INET]45.138.100.100:443
+2024-11-19 12:42:01.319734 Socket Buffers: R=[131072-&gt;524288] S=[131072-&gt;524288]
+2024-11-19 12:42:01.319754 Attempting to establish TCP connection with [AF_INET]45.138.100.100:443
+2024-11-19 12:42:01.319819 MANAGEMENT: &gt;STATE:1732009321,TCP_CONNECT,,,,,,
+2024-11-19 12:42:01.394129 TCP connection established with [AF_INET]45.138.100.100:443
+2024-11-19 12:42:01.394258 TCPv4_CLIENT link local: (not bound)
+2024-11-19 12:42:01.394287 TCPv4_CLIENT link remote: [AF_INET]45.138.100.100:443
+2024-11-19 12:42:01.394387 MANAGEMENT: &gt;STATE:1732009321,WAIT,,,,,,
+2024-11-19 12:42:01.459754 MANAGEMENT: &gt;STATE:1732009321,AUTH,,,,,,
+2024-11-19 12:42:01.459874 TLS: Initial packet from [AF_INET]45.138.100.100:443, sid=8bb5d809 e4d2246f
+2024-11-19 12:42:01.623702 VERIFY OK: depth=1, CN=TG-VPN-CA
+2024-11-19 12:42:01.624272 VERIFY KU OK
+2024-11-19 12:42:01.624293 Validating certificate extended key usage
+2024-11-19 12:42:01.624305 ++ Certificate has EKU (str) TLS Web Server Authentication, expects TLS Web Server Authentication
+2024-11-19 12:42:01.624314 VERIFY EKU OK
+2024-11-19 12:42:01.624323 VERIFY OK: depth=0, CN=server
+2024-11-19 12:42:01.807156 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bits RSA, signature: RSA-SHA256, peer temporary key: 384 bits ECsecp384r1
+2024-11-19 12:42:01.807312 [server] Peer Connection Initiated with [AF_INET]45.138.100.100:443
+2024-11-19 12:42:01.807339 TLS: move_session: dest=TM_ACTIVE src=TM_INITIAL reinit_src=1
+2024-11-19 12:42:01.807495 TLS: tls_multi_process: initial untrusted session promoted to trusted
+2024-11-19 12:42:03.120961 MANAGEMENT: &gt;STATE:1732009323,GET_CONFIG,,,,,,
+2024-11-19 12:42:03.121794 SENT CONTROL [server]: 'PUSH_REQUEST' (status=1)
+2024-11-19 12:42:03.206532 PUSH: Received control message: 'PUSH_REPLY,redirect-gateway def1,dhcp-option DNS 10.9.0.1,dhcp-option DNS 10.8.0.1,sndbuf 524288,rcvbuf 524288,route 10.8.0.1,topology net30,ping 5,ping-restart 30,socket-flags TCP_NODELAY,compress,ifconfig 10.8.0.93 10.8.0.94,peer-id 0,cipher AES-128-GCM'
+2024-11-19 12:42:03.206951 OPTIONS IMPORT: --sndbuf/--rcvbuf options modified
+2024-11-19 12:42:03.207169 Socket Buffers: R=[524288-&gt;524288] S=[525000-&gt;524288]
+2024-11-19 12:42:03.207195 OPTIONS IMPORT: --socket-flags option modified
+2024-11-19 12:42:03.207218 OPTIONS IMPORT: --ifconfig/up options modified
+2024-11-19 12:42:03.207237 OPTIONS IMPORT: route options modified
+2024-11-19 12:42:03.209474 OPTIONS IMPORT: --ip-win32 and/or --dhcp-option options modified
+2024-11-19 12:42:03.235259 Opened utun device utun4
+2024-11-19 12:42:03.235427 MANAGEMENT: &gt;STATE:1732009323,ASSIGN_IP,,10.8.0.93,,,,
+2024-11-19 12:42:03.235454 /sbin/ifconfig utun4 delete
+                           ifconfig: ioctl (SIOCDIFADDR): Can't assign requested address
+2024-11-19 12:42:03.265758 NOTE: Tried to delete pre-existing tun/tap instance -- No Problem if failure
+2024-11-19 12:42:03.265823 /sbin/ifconfig utun4 10.8.0.93 10.8.0.94 mtu 1500 netmask 255.255.255.255 up
+2024-11-19 12:42:03.275021 Data Channel: cipher 'AES-128-GCM', peer-id: 0, compression: 'stub'
+2024-11-19 12:42:03.275051 Timers: ping 5, ping-restart 30
+2024-11-19 12:42:15.881057 /sbin/route add -net 45.138.100.100 192.168.1.1 255.255.255.255
+                           add net 45.138.100.100: gateway 192.168.1.1
+2024-11-19 12:42:15.891947 /sbin/route add -net 0.0.0.0 10.8.0.94 128.0.0.0
+                           add net 0.0.0.0: gateway 10.8.0.94
+2024-11-19 12:42:15.903077 /sbin/route add -net 128.0.0.0 10.8.0.94 128.0.0.0
+                           add net 128.0.0.0: gateway 10.8.0.94
+2024-11-19 12:42:15.908516 MANAGEMENT: &gt;STATE:1732009335,ADD_ROUTES,,,,,,
+2024-11-19 12:42:15.908541 /sbin/route add -net 10.8.0.1 10.8.0.94 255.255.255.255
+                           add net 10.8.0.1: gateway 10.8.0.94
+                           12:42:15 *Tunnelblick:  **********************************************
+                           12:42:15 *Tunnelblick:  Start of output from client.up.tunnelblick.sh
+                           12:42:16 *Tunnelblick:  Primary network service: Wi-Fi
+                           12:42:18 *Tunnelblick:  Disabled IPv6 for 'USB 10/100/1000 LAN'
+                           12:42:18 *Tunnelblick:  Disabled IPv6 for 'AX88179A'
+                           12:42:18 *Tunnelblick:  Disabled IPv6 for 'Wi-Fi'
+                           12:42:18 *Tunnelblick:  Disabled IPv6 for 'Thunderbolt Bridge'
+                           12:42:18 *Tunnelblick:  Retrieved from OpenVPN: name server(s) [ 10.9.0.1 10.8.0.1 ], search domain(s) [ ] and SMB server(s) [ ] and using default domain name [ openvpn ]
+                           12:42:18 *Tunnelblick:  WARNING: Ignoring ServerAddresses '10.9.0.1 10.8.0.1' because ServerAddresses was set manually and '-allowChangesToManuallySetNetworkSettings' was not specified
+                           12:42:18 *Tunnelblick:  Setting search domains to 'openvpn' because the search domains were not set manually (or are allowed to be changed) and 'Prepend domain name to search domains' was not selected
+                           12:42:20 *Tunnelblick:  Saved the DNS and SMB configurations so they can be restored
+                           12:42:20 *Tunnelblick:  Did not change DNS ServerAddresses setting of '1.1.1.1 1.0.0.1' (but re-set it)
+                           12:42:20 *Tunnelblick:  Changed DNS SearchDomains setting from '' to 'openvpn'
+                           12:42:20 *Tunnelblick:  Changed DNS DomainName setting from '' to 'openvpn'
+                           12:42:20 *Tunnelblick:  Did not change SMB NetBIOSName setting of ''
+                           12:42:20 *Tunnelblick:  Did not change SMB Workgroup setting of ''
+                           12:42:20 *Tunnelblick:  Did not change SMB WINSAddresses setting of ''
+                           12:42:20 *Tunnelblick:  DNS servers '1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001' were set manually
+                           12:42:20 *Tunnelblick:  WARNING: that setting is being ignored; '1.1.1.1 1.0.0.1' is being used.
+                           12:42:20 *Tunnelblick:  DNS servers '1.1.1.1 1.0.0.1' will be used for DNS queries when the VPN is active
+                           12:42:20 *Tunnelblick:  The DNS servers include only free public DNS servers known to Tunnelblick.
+                           12:42:20 *Tunnelblick:  Flushed the DNS cache via dscacheutil
+                           12:42:20 *Tunnelblick:  /usr/sbin/discoveryutil not present. Not flushing the DNS cache via discoveryutil
+                           12:42:20 *Tunnelblick:  Notified mDNSResponder that the DNS cache was flushed
+                           12:42:20 *Tunnelblick:  Not notifying mDNSResponderHelper that the DNS cache was flushed because it is not running
+                           12:42:20 *Tunnelblick:  Setting up to monitor system configuration with process-network-changes
+                           12:42:20 *Tunnelblick:  End of output from client.up.tunnelblick.sh
+                           12:42:20 *Tunnelblick:  **********************************************
+2024-11-19 12:42:20.340170 Initialization Sequence Completed
+2024-11-19 12:42:20.340196 MANAGEMENT: &gt;STATE:1732009340,CONNECTED,SUCCESS,10.8.0.93,45.138.100.100,443,192.168.1.79,58043
+2024-11-19 12:42:21.564051 *Tunnelblick: DNS address 1.0.0.1 is being routed through the VPN
+2024-11-19 12:42:21.672283 *Tunnelblick: DNS address 1.1.1.1 is being routed through the VPN
+</code></pre>
+<p>Файл конфига</p>
+<pre><code class="lang-auto">client
+dev tun
+proto tcp
+remote 45.138.100.100 443
+remote-cert-tls server
+route-delay 12
+keepalive 11 30
+auth SHA1
+resolv-retry infinite
+nobind
+tls-version-min 1.2
+cipher AES-128-GCM
+auth-user-pass
+
+tun-mtu-extra 32
+&lt;ca&gt;
+[... redacted ...]
+&lt;/ca&gt;
+</code></pre></td><td>2024-11-19T10:09:38.986Z</td></tr><tr><td>NightM</td><td><p>Может стоит перейти на нормальный протокол?</p></td><td>2024-11-19T11:31:47.218Z</td></tr><tr><td>0ka(0ka)</td><td><p>И что же вы можете предложить лучше openvpn? (Весь тот же функционал, доступность, или больше)</p></td><td>2024-11-19T12:30:14.603Z</td></tr><tr><td>Altuskhins</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/0da128015663cae272713bc726def3988095da25.jpeg" data-download-href="https://ntc.party/uploads/default/0da128015663cae272713bc726def3988095da25" title="изображение"><img src="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/0da128015663cae272713bc726def3988095da25_2_690x415.jpeg" alt="изображение" data-base62-sha1="1WztW0zzrHYiRZrNlu8pjy8FrqR" width="690" height="415" srcset="блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/0da128015663cae272713bc726def3988095da25_2_690x415.jpeg, блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/0da128015663cae272713bc726def3988095da25_2_1035x622.jpeg 1.5x, блокировка-vpn-протоколов-на-тспу-05082023-xxxx202x/0da128015663cae272713bc726def3988095da25.jpeg 2x" data-dominant-color="3B201E"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1354×815 123 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+по данным dpidetector shadowsocks заблокирован практически везде в РФ</p></td><td>2024-11-19T12:40:38.896Z</td></tr><tr><td>NightM</td><td><p>влесс?</p></td><td>2024-11-19T12:41:49.330Z</td></tr><tr><td>BBS</td><td><p>Заверните трафик через zapret например: <a href="https://github.com/bol-van/zapret/issues/153" class="inline-onebox">Обход блокировки OpenVPN UDP. · Issue #153 · bol-van/zapret · GitHub</a></p></td><td>2024-11-19T13:59:05.907Z</td></tr><tr><td>idev</td><td><p>Влесс, реалити и т. п. – это НЕ впн, это прокси. Не путайте тёплое с мягким. Реализовать нормальную двустороннюю связность посредством проксей – может и получится, но будет жуткий велосипед. Прокси решает другие задачи, хоть для обывателя это и похоже.</p></td><td>2024-11-19T16:00:37.759Z</td></tr>
+    </table>
+      </body>
+    </html>

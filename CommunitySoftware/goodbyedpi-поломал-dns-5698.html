@@ -1,0 +1,70 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>goodbyedpi-поломал-dns-5698</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>sre-data-engineer(Sre Data Engineer)</td><td><p>Несколько дней назад поломались NS-ы</p>
+<p>Симптомы - не резолвятся никакие IP.</p>
+<p>Некоторые резолвятся частично, например, прилетает только IP6 (AAAA).</p>
+<p>Но чаще всего таймаут (даже к роутеру в локальной сети).</p>
+<p>Запускался как-то так (виндовая служба):<br>
+<code>goodbyedpi.exe" -5 --dns-addr 77.88.8.8 --dns-port 1253 --dnsv6-addr 2a02:6b8::feed:0ff --dnsv6-port 1253 --blacklist russia-blacklist.txt</code></p>
+<p>помогло отключение сервиса - всё заработало (блокировки - тоже).</p>
+<p>Кто виноват и что делать?</p>
+<p>Диагностику могу собрать, но неспешно.</p>
+<p>Провайдер мегафон, Win10 с предпоследними обновами, по кабелю ретранслируется соседский Wi-Fi</p></td><td>2023-09-17T17:40:51.413Z</td></tr><tr><td>RecursiveLife(Slava)</td><td><p>тоже у себя такое наблюдал, где-то с 8 числа, при запуске с логированием приложуха писала что не может распознать ответ от днс провайдера.<br>
+Сейчас заметил, что работает. Наверное, виновато обновление винды 10ки, это могли быть:<br>
+KB4023057 от 08.09.23 которое поломало и<br>
+KB5030211 от 15.09.23 починило</p></td><td>2023-09-18T01:47:46.307Z</td></tr><tr><td>sre-data-engineer(Sre Data Engineer)</td><td><aside class="quote no-group" data-username="RecursiveLife" data-post="2" data-topic="5698">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/recursivelife/48/3672_2.png" class="avatar"> RecursiveLife:</div>
+<blockquote>
+<p>KB4023057 от 08.09.23 которое поломало и</p>
+</blockquote>
+</aside>
+<p>Номер не перепутал?</p>
+<p>27.05.2021 - это дата последнего обновления для KB4023057<br>
+<a href="https://www.catalog.update.microsoft.com/Search.aspx?q=KB4023057+" class="onebox" target="_blank" rel="noopener nofollow ugc">https://www.catalog.update.microsoft.com/Search.aspx?q=KB4023057+</a></p></td><td>2023-09-18T12:51:46.969Z</td></tr><tr><td>RecursiveLife(Slava)</td><td><p>нет,<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="goodbyedpi-поломал-dns-5698/5dcc0ce99d2bf4550f79897613d0244e57642c4b.png" data-download-href="https://ntc.party/uploads/default/5dcc0ce99d2bf4550f79897613d0244e57642c4b" title="image"><img src="goodbyedpi-поломал-dns-5698/5dcc0ce99d2bf4550f79897613d0244e57642c4b.png" alt="image" data-base62-sha1="dnLA0Bv4bTlH9755mTVvWXUIKjV" width="690" height="287" data-dominant-color="040608"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">903×376 13.9 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2023-09-18T13:18:01.455Z</td></tr><tr><td>RangerRU</td><td><p>Аналогично<br>
+Два дня назад на РТК поломало на Win11 22H2<br>
+Был включен 7 шаблон и блокировка пассивных DPI</p>
+<p>Помогло отключение перенаправление DNS запросов<br>
+Причем выяснилось когда уже поставил сверху ОС<br>
+только потом решил отключить GoodbyeDPI для проверки <img src="https://ntc.party/images/emoji/twitter/rofl.png?v=12" title=":rofl:" class="emoji" alt=":rofl:" loading="lazy" width="20" height="20"></p></td><td>2023-09-20T12:36:12.503Z</td></tr><tr><td>RecursiveLife(Slava)</td><td><p>вчера опять началось, с обновлением винды корреляции нет в этот раз<br>
+причем работало нормально пока я вручную не выключил чтобы включить впн на короткое время, после включения службы она уже не работала</p></td><td>2023-09-22T09:04:45.442Z</td></tr><tr><td>welazsc</td><td><p><a href="https://github.com/ValdikSS/GoodbyeDPI/issues/313" rel="noopener nofollow ugc">Отключайте offloading options</a>. Ответы идут мимо GoodbyeDPI, ваш резолвер считает их чужими, игнорирует.</p></td><td>2023-09-23T19:52:26.591Z</td></tr>
+    </table>
+      </body>
+    </html>

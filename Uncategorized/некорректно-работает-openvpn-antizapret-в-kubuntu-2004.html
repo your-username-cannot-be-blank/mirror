@@ -1,0 +1,59 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>некорректно-работает-openvpn-antizapret-в-kubuntu-2004</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>iluxa1188</td><td><p>Добрый день! Установил Openvpn Antizapret в Kubuntu. заблокированные сайты все открываются, а вот все остальные не работают. Перепробовал уже кучу методов описанных в сети связанных с настройкой dns. читал эту ветку <a href="https://ntc.party/t/antizapret-linux/177/2" class="inline-onebox">Как настроить antizapret в Linux? - #2 by ValdikSS</a>. Ничего не помогает. Прошу помощи.<br>
+<img src="некорректно-работает-openvpn-antizapret-в-kubuntu-2004/2830dc6848e30f6763a9c294a2cfcfc4780b2b38.png" alt="Снимок экрана от 2022-02-12 13-05-43" data-base62-sha1="5JxMxGbF1tFrtjIcsiEIxQ3fG0o" width="649" height="464"> - ping yandex</p></td><td>2022-02-12T06:07:37.253Z</td></tr><tr><td>ValdikSS</td><td><p>В маршрутах IPv4 установили галочку “use only for resources on this connection”?</p></td><td>2022-02-14T19:18:40.904Z</td></tr><tr><td>iluxa1188</td><td><p>Здравствуйте! Да выставлял. Не помогает.</p></td><td>2022-02-14T19:27:03.021Z</td></tr><tr><td>ValdikSS</td><td><p>Проверьте все трижды. Именно эта опция отвечает за маршрут по умолчанию, которого быть не должно, а у вас, судя по скриншоту, он однозначно установлен.</p>
+<p>Если в <code>ip r</code> вы видите что-то вроде:<br>
+<code>default via 192.168.104.1 dev tun0</code><br>
+То маршрут по умолчанию установлен через VPN, а такого быть не должно.</p></td><td>2022-02-14T19:36:49.265Z</td></tr><tr><td>iluxa1188</td><td><p>Спасибо! Победил все таки. Подробно сейчас постараюсь расписать, думаю многим пригодится.<br>
+В параметрах вновь созданного VPN соединения<br>
+выбираем вкладку IPv4 - ставим галочку напротив “для этого соединения требуется IPv4”<br>
+Далее на этой же вкладке жмем кнопку “маршруты” - ставим галочку напротив “использовать только для ресурсов этого соединения”<br>
+Не подключаемся.<br>
+Редактируем /etc/NetworkManager/NetworkManager.conf<br>
+Добавляем строчку сразу поcле [main] - dns=default</p>
+<p>Вводим поочередно следующие команды в терминале:<br>
+nmcli -p connection modify antizapret-tcp ipv4.never-default no<br>
+nmcli -p connection modify antizapret-tcp ipv4.ignore-auto-dns no<br>
+nmcli -p connection modify antizapret-tcp ipv4.dns-priority -42<br>
+nmcli connection modify antizapret-tcp ipv4.dns-search ‘~.’</p>
+<p>Перезагружаем Network-manager с помощью команды<br>
+sudo systemctl restart network-manager</p>
+<p>Теперь можно подключаться и все будет работать как надо!!</p></td><td>2022-02-15T14:21:20.917Z</td></tr>
+    </table>
+      </body>
+    </html>

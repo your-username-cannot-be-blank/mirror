@@ -1,0 +1,233 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>wwwldoceonlinecom</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>yatolkosprosit</td><td><p>Заметил, что онлайн-словарь Longman <a href="http://www.ldoceonline.com" rel="noopener nofollow ugc">www.ldoceonline.com</a> стал недоступен при использовании DNS 1.1.1.1 по крайней мере со вчерашнего дня. Прописал IP адрес в hosts.</p></td><td>2022-04-04T17:14:41.868Z</td></tr><tr><td>tango</td><td><p>I do not find <a href="http://ldoceonline.com">ldoceonline.com</a> in the registry: <a href="https://reestr.rublacklist.net/search/?q=ldoceonline.com">https://reestr.rublacklist.net/search/?q=ldoceonline.com</a>. When I query 1.1.1.1, I get a working IP address:</p>
+<pre><code class="lang-nohighlight">$ dig @1.1.1.1 www.ldoceonline.com
+
+; &lt;&lt;&gt;&gt; DiG 9.11.5-P4-5.1+deb10u6-Debian &lt;&lt;&gt;&gt; @1.1.1.1 www.ldoceonline.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 8918
+;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;www.ldoceonline.com.		IN	A
+
+;; ANSWER SECTION:
+www.ldoceonline.com.	814	IN	CNAME	ldoceo.ldoce.pitchleads.com.
+ldoceo.ldoce.pitchleads.com. 26	IN	A	52.45.11.161
+
+;; Query time: 46 msec
+;; SERVER: 1.1.1.1#53(1.1.1.1)
+;; WHEN: Tue Apr 05 05:56:58 UTC 2022
+;; MSG SIZE  rcvd: 102
+</code></pre>
+<p>Do you mind sharing what ISP you are on? What happens when you resolve the name from the command line, do you also get the IP address 52.45.11.161? On Windows you can run <code>nslookup www.ldoceonline.com 1.1.1.1</code>, and on Linux/Mac you can run <code>dig @1.1.1.1 www.ldoceonline.com</code>.</p></td><td>2022-04-05T06:00:30.329Z</td></tr><tr><td>BigBro</td><td><p>У меня тоже проблема с этим ресурсом. Но дело явно не в DNS-резолверах, т. к. при попытке доступа напрямую браузер все равно не может подключиться к серверу. Через прокси доступ появляется, а через ISP «Ростелеком» (макрорегиональный филиал «Юг») пакеты не проходят.</p>
+<pre><code class="lang-auto">traceroute to 52.45.11.161 (52.45.11.161), 30 hops maximum, 84 byte packets.
+1 100.76.0.1 (100.76.0.1) 1.115 ms 0.710 ms 0.689 ms
+2 178.34.132.40 (178.34.132.40) 1.103 ms 3.674 ms 5.190 ms
+3 87.226.133.75 (87.226.133.75) 62.911 ms 43.933 ms 43.946 ms
+4 ae15-xcr1.skt.cw.net (195.89.96.189) 42.913 ms 42.596 ms 42.639 ms
+5 ae32-xcr1.att.cw.net (195.2.8.206) 59.832 ms 59.837 ms 59.768 ms
+6 ae20-xcr2.nyk.cw.net (195.2.8.89) 135.900 ms 139.452 ms 135.806 ms
+7 99.83.64.206 (99.83.64.206) 136.900 ms 136.936 ms 137.108 ms
+8 * * *
+9 * * *
+10 * * *
+11 * * *
+12 * * *
+13 * * *
+14 * * *
+15 52.93.29.94 (52.93.29.94) 135.581 ms 135.219 ms 136.026 ms
+16 * * *
+17 * * *
+18 * * *
+19 * * *
+20 * * *
+21 * * *
+22 * * *
+23 * * *
+24 * * *
+25 * * *
+26 * * *
+27 * * *
+28 * * *
+29 * * *
+30 * * *
+</code></pre></td><td>2022-04-05T08:08:31.415Z</td></tr><tr><td>ValdikSS</td><td><p>Ростелеком/ОБИТ — адрес доступен.</p></td><td>2022-04-05T08:15:29.105Z</td></tr><tr><td>BigBro</td><td><p>Кстати, сейчас отключил службу GoodbyeDPI и сайт стал доступен. Я уже замечал недоступность некоторых сайтов с GoodbyeDPI, но это единичные случаи. Может с TTL поиграться? Сейчас у меня такие настройки:</p>
+<blockquote>
+<p>-5 --dns-addr 77.88.8.8 --dns-port 1253 --dnsv6-addr 2a02:6b8::feed:0ff --dnsv6-port 1253 --set-ttl 4 --wrong-chksum --blacklist</p>
+</blockquote></td><td>2022-04-05T08:20:39.713Z</td></tr><tr><td>ValdikSS</td><td><p>Домен не резолвится через Яндекс DNS 77.88.8.8.</p></td><td>2022-04-05T08:30:11.202Z</td></tr><tr><td>BigBro</td><td><p>О, спасибо! Отключу редирект.</p></td><td>2022-04-05T08:35:29.269Z</td></tr><tr><td>ilyaigpetrov(ilyaigpetrov)</td><td><p>Ростелеком</p>
+<pre><code class="lang-auto">$dig @1.1.1.1 www.ldoceonline.com A
+
+; &lt;&lt;&gt;&gt; DiG 9.16.1-Ubuntu &lt;&lt;&gt;&gt; @1.1.1.1 www.ldoceonline.com A
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: SERVFAIL, id: 11314
+;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; OPT=15: 00 16 61 74 20 64 65 6c 65 67 61 74 69 6f 6e 20 6c 64 6f 63 65 6f 6e 6c 69 6e 65 2e 63 6f 6d 2e ("..at delegation ldoceonline.com.")
+;; QUESTION SECTION:
+;www.ldoceonline.com.           IN      A
+
+;; Query time: 4244 msec
+;; SERVER: 1.1.1.1#53(1.1.1.1)
+;; WHEN: Вт апр 05 19:47:03 +05 2022
+;; MSG SIZE  rcvd: 84
+
+$ dig @8.8.8.8 www.ldoceonline.com A              
+                                                                                
+; &lt;&lt;&gt;&gt; DiG 9.16.1-Ubuntu &lt;&lt;&gt;&gt; @8.8.8.8 www.ldoceonline.com A
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 11428
+;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512 
+;; QUESTION SECTION:                                                            
+;www.ldoceonline.com.           IN      A                     
+                                        
+;; ANSWER SECTION:                                                              
+www.ldoceonline.com.    357     IN      CNAME   ldoceo.ldoce.pitchleads.com.    
+ldoceo.ldoce.pitchleads.com. 30 IN      A       52.45.11.161                    
+                                        
+;; Query time: 60 msec              
+;; SERVER: 8.8.8.8#53(8.8.8.8)
+;; WHEN: Вт апр 05 19:48:10 +05 2022    
+;; MSG SIZE  rcvd: 102                 
+</code></pre>
+<h3>
+<a name="h-1" class="anchor" href="#h-1"></a>Решение</h3>
+<p>Прописал 8.8.8.8 в /etc/resolv.conf по <a href="https://geekflare.com/change-dns-server/">этой инструкции</a>:</p>
+<pre><code class="lang-auto">nameserver 8.8.8.8
+nameserver 8.8.4.4
+</code></pre>
+<p>Возможно, в борьбе с CF Warp они на всякий случай заблочили все связанные адреса.</p></td><td>2022-04-05T14:54:09.693Z</td></tr><tr><td>ValdikSS</td><td><p>DNS сайта не отвечает резолверу Cloudflare, только и всего. Сам <code>1.1.1.1</code> доступен.</p></td><td>2022-04-05T15:01:43.008Z</td></tr><tr><td>tango</td><td><p>I think <a class="mention" href="/u/valdikss">@ValdikSS</a> is right, this is just some communication error between the 1.1.1.1 recursive resolver and the authoritative resolver for the domain. dig actually shows the error, but doesn’t know how to display it properly. It is this part:</p>
+<pre><code class="lang-plaintext">; OPT=15:
+00 16 61 74 20 64 65 6c 65 67 61 74 69 6f 6e 20
+6c 64 6f 63 65 6f 6e 6c 69 6e 65 2e 63 6f 6d 2e
+("..at delegation ldoceonline.com.")
+</code></pre>
+<p><code>OPT=15</code> is the <a href="https://www.rfc-editor.org/rfc/rfc8914.html#section-2">Extended DNS Error (EDE) option</a> from RFC 8914. <code>00 16</code> is the INFO-CODE; it is 22 which means <a href="https://www.rfc-editor.org/rfc/rfc8914.html#section-4.23">“No Reachable Authority”</a>. The EXTRA-TEXT is the string <code>"at delegation ldoceonline.com."</code>.</p>
+<p>I found a related thread from 5 days ago, for the domain <code>delivery03-bld.dhe.ibm.com</code>:<br>
+<a href="https://community.cloudflare.com/t/servfail-for-ibm-software-downloads/373557" class="onebox" target="_blank" rel="noopener">https://community.cloudflare.com/t/servfail-for-ibm-software-downloads/373557</a></p>
+<p>In another thread, the post <a href="https://community.cloudflare.com/t/hdfc-net-banking-not-loading-with-cloudflare-dns/353843/12">https://community.cloudflare.com/t/hdfc-net-banking-not-loading-with-cloudflare-dns/353843/12</a> shows that a newer version of dig (9.16.15) knows how to format the EDE:</p>
+<pre><code class="lang-plaintext">; EDE: 22 (No Reachable Authority): (at delegation netbanking.hdfcbank.com.)
+</code></pre></td><td>2022-04-05T15:32:59.224Z</td></tr><tr><td>yatolkosprosit</td><td><p>Я заменил DNS от моего ISP на 1.1.1.1 некоторое время назад, потому что были некоторые проблемы. И пару дней назад не смог зайти на web-сайт. DNS от Cloudflare не резолвят этот адрес. А вот 8.8.8.8 или 9.9.9.9 - резолвят. Я не стал менять DNS, просто прописал IP адрес в hosts.</p>
+<pre><code class="lang-auto">dig @1.1.1.1 www.ldoceonline.com
+
+; &lt;&lt;&gt;&gt; DiG 9.16.25 &lt;&lt;&gt;&gt; @1.1.1.1 www.ldoceonline.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: SERVFAIL, id: 60652
+;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; EDE: 22 (No Reachable Authority): (at delegation ldoceonline.com.)
+;; QUESTION SECTION:
+;www.ldoceonline.com.           IN      A
+
+;; Query time: 4071 msec
+;; SERVER: 1.1.1.1#53(1.1.1.1)
+;; WHEN: Tue Apr 05 18:50:32 MSK 2022
+;; MSG SIZE  rcvd: 84
+
+</code></pre>
+<pre><code class="lang-auto">dig @8.8.8.8 www.ldoceonline.com
+
+; &lt;&lt;&gt;&gt; DiG 9.16.25 &lt;&lt;&gt;&gt; @8.8.8.8 www.ldoceonline.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 52046
+;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512
+;; QUESTION SECTION:
+;www.ldoceonline.com.           IN      A
+
+;; ANSWER SECTION:
+www.ldoceonline.com.    356     IN      CNAME   ldoceo.ldoce.pitchleads.com.
+ldoceo.ldoce.pitchleads.com. 30 IN      A       52.45.11.161
+
+;; Query time: 39 msec
+;; SERVER: 8.8.8.8#53(8.8.8.8)
+;; WHEN: Tue Apr 05 18:50:58 MSK 2022
+;; MSG SIZE  rcvd: 102
+
+</code></pre></td><td>2022-04-05T16:00:41.784Z</td></tr><tr><td>yatolkosprosit</td><td><p>Поменял DNS от Cloudflare на DNS от Яндекса, но они тоже не резолвят <a href="http://www.ldoceonline.com" rel="noopener nofollow ugc">www.ldoceonline.com</a></p></td><td>2022-04-07T11:39:17.069Z</td></tr><tr><td>vdlftrvuknyrukmztb</td><td><p>The root cause of the problem is the <code>ns</code> servers for <code>ldoceonline.com.</code> are blocked by ip address.<br>
+Thus, all recursors located inside the country have no ability to contact them.</p>
+<ol>
+<li>Q: <code>drill ns com.</code><br>
+A:<pre><code class="lang-auto">com.	172800	IN	NS	a.gtld-servers.net.
+com.	172800	IN	NS	b.gtld-servers.net.
+com.	172800	IN	NS	c.gtld-servers.net.
+com.	172800	IN	NS	d.gtld-servers.net.
+com.	172800	IN	NS	e.gtld-servers.net.
+com.	172800	IN	NS	f.gtld-servers.net.
+com.	172800	IN	NS	g.gtld-servers.net.
+com.	172800	IN	NS	h.gtld-servers.net.
+com.	172800	IN	NS	i.gtld-servers.net.
+com.	172800	IN	NS	j.gtld-servers.net.
+com.	172800	IN	NS	k.gtld-servers.net.
+com.	172800	IN	NS	l.gtld-servers.net.
+com.	172800	IN	NS	m.gtld-servers.net.
+</code></pre>
+</li>
+<li>Q: <code>drill ns ldoceonline.com. @a.gtld-servers.net.</code><br>
+A:<pre><code class="lang-auto">ns01.pearson.com.	172800	IN	A	159.182.72.15
+ns02.pearson.com.	172800	IN	A	159.182.60.15
+ns03.pearson.com.	172800	IN	A	168.146.72.15
+ns04.pearson.com.	172800	IN	A	159.182.64.15
+</code></pre>
+</li>
+</ol>
+<p>All ip addresses from this list are banned, as I said above.</p></td><td>2022-04-08T11:09:39.761Z</td></tr>
+    </table>
+      </body>
+    </html>

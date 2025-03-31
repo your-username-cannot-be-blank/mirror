@@ -1,0 +1,143 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>openwrt-19-настройка-zapret-8780</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>3334(3333)</td><td><p>Помогите! После установки zapret ютуб работает не корректно, а другие заблокированные сайты работают либо с перебоями либо не открываются вообще (instagram, twitter и тд).<br>
+При использовании goodbyedpi на пк (Который подключен к роутеру), все открывается и работает куда стабильней.<br>
+Устанавливал Zapret на Openwrt так:</p>
+<pre><code class="lang-auto">wget -O "/tmp/zapret-master.zip" https://github.com/bol-van/zapret/archive/refs/heads/master.zip
+
+cd /tmp
+
+unzip zapret-master.zip
+
+cd /tmp/zapret-master/
+
+./install_easy.sh
+</code></pre>
+<p>Из конфигурации, я сделал выбор все по дефолту nfqws и в итоге получил это:</p>
+<pre><code class="lang-auto">root@OpenWrt:/opt/zapret# /etc/init.d/zapret restart
+Starting daemon 1: /opt/zapret/nfq/nfqws --qnum=200 --user=daemon --dpi-desync-fwmark=0x40000000 --dpi-desync=syndata,split2 --dpi-desync-fooling=md5sig --hostlist=/opt/zapret/ipset/zapret-hosts-user.txt --hostlist-exclude=/opt/zapret/ipset/zapret-hosts-user-exclude.txt --hostlist-auto=/opt/zapret/ipset/zapret-hosts-auto.txt --hostlist-auto-fail-threshold=3 --hostlist-auto-fail-time=60 --hostlist-auto-retrans-threshold=3
+
+</code></pre>
+<p>В хост листе прописал домены ютуба, но в итоге все работает с лагами и подзагрузками, хотя и все тамбнейлы показывает.<br>
+Dnscrypt не настраивал, хотя возможно нужно было. Все настройки сети заводские как есть.</p></td><td>2024-08-05T18:32:26.540Z</td></tr><tr><td>litev</td><td><p>Тоже мучался с запретом.<br>
+Сначала снеси полностью запрет, скриптом на удаление<br>
+Потом запусти blockcheck.sh, как в инструкции(она в папке docs, зовется quick_start)<br>
+Прогони блокчеком несколько сайтов, блокчек запускай с параметром /blockcheck.sh | tee /tmp/blockcheck.txt<br>
+В папке tmp будет файл с логом<br>
+Внимательно читай указания блокчека, может потребоваться установка дополнительных пакетов<br>
+На этапе ввода сайта, закинь сразу несколько заблокированных, количество попыток поставь 5<br>
+режим лучше force<br>
+Работать будет долго, так что удобнее потом текстовик с логом изучить<br>
+Когда закончит, начни ставить сам запрет и при установке введи параметры, которые предложит блокчек<br>
+Если в начале проверки будет ругаться на DNS, ставь dnscrypt</p>
+<p>Ну и вообще, быстрый старт описан в quick_start.txt, но один хрен придется изучать readme.txt, оно тоже в папке docs.<br>
+Прога сложная и установка тоже, удачи.</p></td><td>2024-08-05T19:27:00.947Z</td></tr><tr><td>3334(3333)</td><td><pre><code class="lang-auto">NFQWS_OPT_DESYNC="--dpi-desync=split2,disorder2 --dpi-desync-ttl=3 --dpi-desync-split-pos=2 --hostcase"
+
+NFQWS_OPT_DESYNC_HTTP="--dpi-desync=syndata,disorder2 --dpi-desync-fake-syndata=/opt/zapret/files/fake/http_ian&gt;
+
+NFQWS_OPT_DESYNC_HTTPS="--dpi-desync=syndata,disorder2 --dpi-desync-fake-syndata=/opt/zapret/files/fake/http_ia&gt;
+
+NFQWS_OPT_DESYNC_HTTP6=""
+
+NFQWS_OPT_DESYNC_HTTPS6=""
+
+NFQWS_OPT_DESYNC_QUIC="--dpi-desync=fake --dpi-desync-repeats=6"
+</code></pre>
+<p>Собрал такой конфиг исходя из<br>
+ipv4 .com curl_test_http : test aborted, no reason to continue. curl code 6: could not resolve host<br>
+ipv4 .com curl_test_https_tls12 : test aborted, no reason to continue. curl code 6: could not resolve host<br>
+ipv4 <a href="http://i.ytimg.com" rel="noopener nofollow ugc">i.ytimg.com</a> curl_test_http : working without bypass<br>
+ipv4 <a href="http://i.ytimg.com" rel="noopener nofollow ugc">i.ytimg.com</a> curl_test_http : tpws --hostcase<br>
+ipv4 <a href="http://i.ytimg.com" rel="noopener nofollow ugc">i.ytimg.com</a> curl_test_http : nfqws --hostcase<br>
+ipv4 <a href="http://i.ytimg.com" rel="noopener nofollow ugc">i.ytimg.com</a> curl_test_https_tls12 : working without bypass<br>
+ipv4 <a href="http://i.ytimg.com" rel="noopener nofollow ugc">i.ytimg.com</a> curl_test_https_tls12 : tpws --split-tls=sni<br>
+ipv4 <a href="http://i.ytimg.com" rel="noopener nofollow ugc">i.ytimg.com</a> curl_test_https_tls12 : nfqws --dpi-desync=split2<br>
+ipv4 <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> curl_test_http : working without bypass<br>
+ipv4 <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> curl_test_http : tpws --hostcase<br>
+ipv4 <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> curl_test_http : nfqws --hostcase<br>
+ipv4 <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> curl_test_https_tls12 : tpws not working<br>
+ipv4 <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> curl_test_https_tls12 : nfqws not working<br>
+ipv4 <a href="http://x.com" rel="noopener nofollow ugc">x.com</a> curl_test_http : working without bypass<br>
+ipv4 <a href="http://x.com" rel="noopener nofollow ugc">x.com</a> curl_test_http : tpws --hostcase<br>
+ipv4 <a href="http://x.com" rel="noopener nofollow ugc">x.com</a> curl_test_http : nfqws --hostcase<br>
+ipv4 <a href="http://x.com" rel="noopener nofollow ugc">x.com</a> curl_test_https_tls12 : tpws --split-tls=sni<br>
+ipv4 <a href="http://x.com" rel="noopener nofollow ugc">x.com</a> curl_test_https_tls12 : nfqws --dpi-desync=split2 --dpi-desync-split-tls=sni<br>
+ipv4 <a href="http://soundcloud.com" rel="noopener nofollow ugc">soundcloud.com</a> curl_test_http : working without bypass<br>
+ipv4 <a href="http://soundcloud.com" rel="noopener nofollow ugc">soundcloud.com</a> curl_test_http : tpws --hostcase<br>
+ipv4 <a href="http://soundcloud.com" rel="noopener nofollow ugc">soundcloud.com</a> curl_test_http : nfqws --hostcase<br>
+ipv4 <a href="http://soundcloud.com" rel="noopener nofollow ugc">soundcloud.com</a> curl_test_https_tls12 : tpws not working<br>
+ipv4 <a href="http://soundcloud.com" rel="noopener nofollow ugc">soundcloud.com</a> curl_test_https_tls12 : nfqws not working<br>
+Ну и другие комманды взял из AVIABLE. Заблокированные сайты КРОМЕ ютуб работают хорошо.</p>
+<p>В итоге не работает адекватно ютуб, при том что GoodbyeDPI спокойно все обходит на моей машине.<br>
+GoodbyeDPI изначально хорошо работал, никакой настройки я не делал просто запускал service_install_russia_blacklist_dnsredir.cmd и все</p></td><td>2024-08-07T17:49:27.424Z</td></tr><tr><td>3334(3333)</td><td><p>Хочу отметить что у меня такая схема подключения!<br>
+Основной роутер &gt; Роутер клиент (Опенврт 19 и запрет на нем) &gt; Основная машина (На ней я запускал GoodbyeDPI)</p></td><td>2024-08-07T17:52:24.832Z</td></tr><tr><td>wigeance(Wigeance)</td><td><aside class="quote no-group" data-username="3334" data-post="3" data-topic="8780">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/3334/48/5310_2.png" class="avatar"> 3334:</div>
+<blockquote>
+<p><code>--dpi-desync=split2,disorder2</code></p>
+</blockquote>
+</aside>
+<p>split и disorder режимы 2-й фазы, они не могут работать одновременно.</p>
+<p>Зачем Вы потом переопределяете стратегию в <strong>NFQWS_OPT_DESYNC_HTTP</strong> и <strong>NFQWS_OPT_DESYNC_HTTPS</strong>. Вы можете записать эти параметры в <strong>NFQWS_OPT_DESYNC</strong> и не дублировать их.</p>
+<aside class="quote no-group" data-username="3334" data-post="4" data-topic="8780">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/3334/48/5310_2.png" class="avatar"> 3334:</div>
+<blockquote>
+<p>Основной роутер &gt; Роутер клиент (Опенврт 19 и запрет на нем) &gt; Основная машина</p>
+</blockquote>
+</aside>
+<p>В этой схеме лучше запускать zapret на основном роутере, чтобы исключить возможность того, что некоторые фейки могут не пройти через NAT. Такой схемой Вы сейчас себе сами блокируете кучу потенциальных стратегий обхода.</p></td><td>2024-08-07T17:56:04.764Z</td></tr><tr><td>lsblk</td><td><aside class="quote no-group" data-username="wigeance" data-post="5" data-topic="8780">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wigeance/48/3861_2.png" class="avatar"> wigeance:</div>
+<blockquote>
+<p>некоторые фейки могут не пройти через NAT.</p>
+</blockquote>
+</aside>
+<p>Некоторые - это какие? Многие сидят за провайдерским натом, я лично вообще не знаю провайдеров, которые в 2024 дают белую динамику v4</p></td><td>2024-10-15T23:52:11.257Z</td></tr><tr><td>wigeance(Wigeance)</td><td><p>В <a href="https://github.com/bol-van/zapret/blob/master/docs/readme.txt">ридми</a> все написано, как пример:</p>
+<blockquote>
+<p>badsum не сработает, если ваше устройство за NAT, который не пропускает пакеты с инвалидной суммой.</p>
+</blockquote>
+<blockquote>
+<p>datanoack высылает фейки со снятым tcp флагом ACK. … Экспериментально выяснено, что многие провайдерские NAT не отбрасывают эти пакеты, потому работает даже с внутренним провайдерским IP. Но linux NAT оно не пройдет, так что за домашним роутером эта техника не сработает, но может сработать с него.</p>
+</blockquote></td><td>2024-10-16T00:07:22.074Z</td></tr>
+    </table>
+      </body>
+    </html>

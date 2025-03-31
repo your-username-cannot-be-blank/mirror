@@ -1,0 +1,310 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>помогите-объединить-два-конфига-в-один-12908</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Tarasus</td><td><p>Здравствуйте!</p>
+<p>Друзья подкинули конфиг для zapret, с которым работает голос в дискорде:</p>
+<details>
+<summary>
+Рабочий дискорд</summary>
+<blockquote>
+<p>set BIN=%~dp0bin\</p>
+<p>start “zapret: discord” /min “%BIN%winws.exe” ^<br>
+–wf-tcp=443 --wf-udp=443,50000-65535 ^<br>
+–filter-udp=443 --hostlist=“%~dp0list-discord.txt” --dpi-desync=fake --dpi-desync-udplen-increment=10 --dpi-desync-repeats=6 ^ --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic=“%BIN%quic_initial_www_google_com.bin” --new ^<br>
+–filter-udp=50000-65535 --dpi-desync=fake,tamper --dpi-desync-any-protocol --dpi-desync-fake-quic=“%BIN%quic_initial_www_google_com.bin” --new ^<br>
+–filter-tcp=443 --hostlist=“%~dp0list-discord.txt” --dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=“%BIN%tls_clienthello_www_google_com.bin” :</p>
+</blockquote>
+</details>
+<p>Через GoodCheckGo я нашёл работающую стратегию которая с моим провайдером позволяет смотреть ютуб:</p>
+<details>
+<summary>
+Рабочий ютуб</summary>
+<blockquote>
+<p>start “zapret: yt” /min “%BIN%winws.exe” ^<br>
+–wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --wssize 1:6</p>
+</blockquote>
+</details>
+<p>Оба скрипта, по отдельности, работают.<br>
+Пожалуйста, помогите объединить эти два скрипта в один, чтобы не приходилось жонглировать батниками. Я пробовал просто добавить стратегию из goodCheck через “–new”, но всё равно работает либо то либо другое.</p></td><td>2024-11-09T00:57:12.830Z</td></tr><tr><td>Ori</td><td><p>Вот эту штуку <code>wssize 1:6</code>, по возможности, лучше не использовать. У вас не нашлось стратегии без неё?</p>
+<p>Если просто объединить, то попробуйте так:</p>
+<pre><code class="lang-auto">start "zapret" /min "%BIN%winws.exe" ^
+--wf-tcp=443 --wf-udp=443,50000-50099 ^
+--filter-udp=443 --hostlist="%~dp0list-discord.txt" --dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-fake-quic="%BIN%quic_initial_www_google_com.bin" --new ^
+--filter-tcp=443 --hostlist="%~dp0list-discord.txt" --dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls="%BIN%tls_clienthello_www_google_com.bin" ^
+--filter-udp=50000-50099 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d4 --new ^
+--filter-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --wssize 1:6
+</code></pre></td><td>2024-11-09T01:17:58.917Z</td></tr><tr><td>KDS</td><td><p>И давно порты дискорда достигли почти 60к? <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"></p>
+<p>increment и pattern не работают без <code>--dpi-desync=fake,udplen</code></p></td><td>2024-11-09T03:57:58.173Z</td></tr><tr><td>Ori</td><td><p><code>udplen</code> проглядел, т.к. просто скопипастил строку. Порты для дискорда умышленно поставил так, т.к. тут кто-то недавно на форуме писал, что у него голос по порту 50600 идет. Так что хз.</p></td><td>2024-11-09T04:02:07.087Z</td></tr><tr><td>uwu(uwu)</td><td><aside class="quote no-group" data-username="Ori" data-post="2" data-topic="12908">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p><code>–filter-udp=443 </code></p>
+</blockquote>
+</aside>
+<p>я дико извиняюсь, а если убрать <code>–filter-udp=443</code> , то дис перестает работать?<br>
+я впринципе без нее обхожусь…</p></td><td>2024-11-09T04:06:22.840Z</td></tr><tr><td>KDS</td><td><p>Да тут много чего пишут )</p>
+<p>Проще было просто конфиг Flowseal для диса скопировать, он вроде еще работает. А, хотя это он и есть.<br>
+Тогда последнюю строчку лучше так:<br>
+<code>--filter-tcp=443 --hostlist="%~dp0list-general.txt" --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni --wssize 1:6</code></p>
+<p>И проверь двойные тире в конфиге своем, их форум в 1 превратил, походу</p>
+<p><a class="mention" href="/u/uwu">@uwu</a> Кому-то можно и без нее, а у кого-то все намного хуже</p></td><td>2024-11-09T04:10:15.118Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="KDS" data-post="6" data-topic="12908">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kds/48/12723_2.png" class="avatar"> KDS:</div>
+<blockquote>
+<p>двойные тире</p>
+</blockquote>
+</aside>
+<p>Точно. Там и кавычки были сломаны, а вот тире я проглядел. Автор не удосужился нормально текст вставить.</p></td><td>2024-11-09T04:14:48.038Z</td></tr><tr><td>Zanoni(Zanoni)</td><td><p>Автор Запрета уже не раз писал, что</p>
+<blockquote>
+<p>wssize 1:6</p>
+</blockquote>
+<p>лучше не использовать. И вообще мой совет: никогда не ориентируйтесь в Блокчеке на SUMMARY (РЕЗУЛЬТАТ). Никогда! Он шляпу часто выдает с тем же wssize.<br>
+Мотайте и смотрите сам процесс Блокчека и копируйте ВСЕ значения с пробиванием - надписью <em>!!! AVAILABLE !!!</em> (ДОСТУПНО/ПРОБИВАЕТ).<br>
+Выпишите все стратегии с такой надписью - и затем просто подставляйте по очереди с проверкой в браузере заблокированных сайтов.</p></td><td>2024-11-09T05:23:43.022Z</td></tr><tr><td>Tarasus</td><td><blockquote>
+<p>Мотайте и смотрите сам процесс Блокчека и копируйте ВСЕ значения с пробиванием - надписью <em>!!! AVAILABLE !!!</em> (ДОСТУПНО/ПРОБИВАЕТ).</p>
+</blockquote>
+<p>Поиск по логу GoodCheckGo не нашёл ни одного такого. Стратегии без wssize сейчас ищу.</p></td><td>2024-11-09T13:40:54.287Z</td></tr><tr><td>Tarasus</td><td><p>Спасибо за быстрый ответ!<br>
+С Вашим конфигом работает ютуб, но дискорд не может подключиться к RTC.</p>
+<p>Стратегии без wssize сейчас ищу.<br>
+Объясните, пожалуйста, несведущему, что делает этот wssize, и чем он плох?</p></td><td>2024-11-09T13:42:40.985Z</td></tr><tr><td>uwu(uwu)</td><td><aside class="quote no-group" data-username="Tarasus" data-post="10" data-topic="12908">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/a183cd/48.png" class="avatar"> Tarasus:</div>
+<blockquote>
+<p>дискорд не может подключиться к RTC.</p>
+</blockquote>
+</aside>
+<p>ко всем серверам или только определенным? речь идет о стране в наименовании сервера</p>
+<aside class="quote no-group" data-username="Tarasus" data-post="10" data-topic="12908">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/a183cd/48.png" class="avatar"> Tarasus:</div>
+<blockquote>
+<p>несведущему, что делает этот wssize, и чем он плох?</p>
+</blockquote>
+</aside>
+<p>уменьшит скорость скачивания примерно в 10 раз, помимо этого еще и твич поломает</p></td><td>2024-11-09T13:51:01.315Z</td></tr><tr><td>Ori</td><td><p>Попробуйту поменять</p>
+<pre><code class="lang-auto">--filter-udp=50000-50099 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d4 --new ^
+</code></pre>
+<p>на</p>
+<pre><code class="lang-auto">--filter-udp=50000-50099 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d4 --dpi-desync-fake-unknown-udp=0x00 --new ^
+</code></pre>
+<p>или на</p>
+<pre><code class="lang-auto">--filter-udp=50000-50099 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=d4 --dpi-desync-fake-unknown-udp="%BIN%quic_initial_www_google_com.bin" --new ^
+</code></pre></td><td>2024-11-09T14:06:05.532Z</td></tr><tr><td>Tarasus</td><td><p>С обеими новыми вариантами работает ютуб, не подключает к голосовому в дискорде.<br>
+Булькает “Подключение к RTC” и потом сразу “Не установлен маршрут”, и снова пытается подключиться.</p>
+<p>GoodCheck нашёл стратегии без wssize</p>
+<details>
+<summary>
+Спойлер</summary>
+<blockquote>
+<p>Strategies with 18/41 successes:<br>
+[–wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=3 --dpi-desync-split-pos=4]</p>
+<p>Strategies with 21/41 successes:<br>
+[–wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sniext]</p>
+<p>Strategies with 23/41 successes:<br>
+[–wf-l3=ipv4 --wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni]</p>
+</blockquote>
+</details></td><td>2024-11-09T14:27:48.167Z</td></tr><tr><td>Tarasus</td><td><blockquote>
+<p>речь идет о стране в наименовании сервера</p>
+</blockquote>
+<p>Не пишет названия страны и имя сервера.</p>
+<blockquote>
+<p>уменьшит скорость скачивания примерно в 10 раз, помимо этого еще и твич поломает</p>
+</blockquote>
+<p>Падения скорости пока-что не заметил, возможно при больших загрузках будет заметно.<br>
+Наличие твича не критично, не пользуюсь.</p></td><td>2024-11-09T14:29:46.172Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>Надо проверять как можно больше сайтов и как можно больше стратегий…А то вижу что ты гуглвидео по HTTPS трогаешь. Его лучше по UDP прогнать</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><img src="помогите-объединить-два-конфига-в-один-12908/9863f40bd8780a7be90e3f8b31d7088035232203.png" alt="image" data-base62-sha1="lK6IUTr08x5Zou2PFmw4F7eArTB" width="383" height="63"></p>
+</details>
+<details>
+<summary>
+Спойлер</summary>
+<p><img src="помогите-объединить-два-конфига-в-один-12908/25b367f4a8d3f3edb814d6344fa4cfd9ab4c71e8.png" alt="image" data-base62-sha1="5nw2C2qkIkmP2aXZdRGKWVh6CNO" width="179" height="21"></p>
+</details></td><td>2024-11-09T14:34:25.918Z</td></tr><tr><td>Tarasus</td><td><p>Там внизу есть вариант с UDP, может его лучше?</p></td><td>2024-11-09T14:37:35.875Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>В большинстве своем это выработка стратегии на просмотр видео в QUIC/HTTPS3<br>
+Дискорд в удп пинать - бесполезно по 443 порту</p></td><td>2024-11-09T14:37:55.200Z</td></tr><tr><td>Tarasus</td><td><p>Сейчас поставлю прогоняться этот вариант, займёт несколько часов. Отпишусь когда будут результаты. Спасибо!</p></td><td>2024-11-09T14:39:41.838Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>Не забудь все офнуть из обходов и впн убрать</p></td><td>2024-11-09T14:40:18.039Z</td></tr><tr><td>Tarasus</td><td><p>Результат прогона по UDP</p>
+<p><a class="attachment" href="помогите-объединить-два-конфига-в-один-12908/5eripjPdoz3MZf7clkEGxqveWdV.log">logfile_GoodCheckGoGo_2024-11-09_17-35-51.log</a> (582,0 КБ)</p></td><td>2024-11-09T14:44:18.566Z</td></tr><tr><td>Hentay(Hentay)</td><td><pre><code class="lang-auto">--wf-udp=443 --dpi-desync=fake --dpi-desync-fake-quic=Payloads\default_udp.bin --dpi-desync-repeats=6
+</code></pre>
+<p>Переписать и пейлоад замеить… Будет стратегией для QUIC</p></td><td>2024-11-09T14:46:02.726Z</td></tr><tr><td>KDS</td><td><p>В принципе тот же конфиг Флоу получается, с 6 репитами )</p></td><td>2024-11-09T15:43:03.198Z</td></tr><tr><td>PirateSkull(unknown )</td><td><details>
+<summary>
+Спойлер</summary>
+<p>start “zapret: discord” /min “%BIN%winws.exe” ^<br>
+–wf-tcp=443 --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-tls=sni<br>
+–wf-udp=443,50000-65535 ^<br>
+–filter-udp=443 --hostlist=“%~dp0list-discord.txt” --dpi-desync=fake --dpi-desync-udplen-increment=10 --dpi-desync-repeats=6 ^ --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic=“%BIN%quic_initial_www_google_com.bin” --new ^<br>
+–filter-udp=50000-65535 --dpi-desync=fake,tamper --dpi-desync-any-protocol --dpi-desync-fake-quic=“%BIN%quic_initial_www_google_com.bin” --new ^<br>
+–filter-tcp=443 --hostlist=“%~dp0list-discord.txt” --dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=“%BIN%tls_clienthello_www_google_com.bin”</p>
+</details>
+<p>попробуй так.</p></td><td>2024-11-09T15:56:22.987Z</td></tr><tr><td>Tarasus</td><td><p>Форум побил кавычки и двойное тире. Пытаюсь поправить</p></td><td>2024-11-09T16:03:19.128Z</td></tr><tr><td>KDS</td><td><p>Да откуда вы это тащите то вечно? Уже из всех утюгов сказано, что происходит на портах 50к-65к при этой стратегии. Сам Болван писал. Но нет, упорно постят и постят.</p>
+<p><code>–filter-udp=50000-65535 --dpi-desync=fake,tamper --dpi-desync-any-protocol --dpi-desync-fake-quic=“%BIN%quic_initial_www_google_com.bin”</code><br>
+<strong>Не надо это использовать. Никогда.</strong></p></td><td>2024-11-09T16:10:58.048Z</td></tr><tr><td>uwu(uwu)</td><td><aside class="quote no-group" data-username="Tarasus" data-post="14" data-topic="12908">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/a183cd/48.png" class="avatar"> Tarasus:</div>
+<blockquote>
+<p>Не пишет названия страны и имя сервера.</p>
+</blockquote>
+</aside>
+<p>те, кто находятся в войсе могут посмотреть</p>
+<details>
+<summary>
+Спойлер</summary>
+<p><img src="помогите-объединить-два-конфига-в-один-12908/8fec5f30656db98793b119a86f427af5d58d5cdc.png" alt="изображение" data-base62-sha1="kxcHyKF9uZEiPLkKbjU0jg0EY1K" width="298" height="261"></p>
+</details></td><td>2024-11-09T16:11:56.712Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Так это Я его конфиг совместил. Как он просил, пусть сам уменьшит порт</p></td><td>2024-11-09T16:12:32.569Z</td></tr><tr><td>KDS</td><td><p>Да тут не в порте дело. Тампер тут не нужен, он не для этого. И нужен cutoff а то такая серь начнется на эти порты, что офигеет все, что туда попадет.</p></td><td>2024-11-09T16:13:45.928Z</td></tr><tr><td>Hentay(Hentay)</td><td><details>
+<summary>
+Супер конфиг для любой сети</summary>
+<div class="spoiler">
+<p><code>–filter-udp=1-65535 --dpi-desync=fake,tamper --dpi-desync-any-protocol --dpi-desync-fake-quic=“%BIN%quic_initial_www_google_com.bin  --dpi-desync-repeats=255</code></p>
+</div>
+</details>
+<p>Я думаю так быстрее</p></td><td>2024-11-09T16:15:50.218Z</td></tr><tr><td>PirateSkull(unknown )</td><td><p>Я вчера игрался взял болвановский конфиг. Его редактировал. Одну строку вообще удалил. И одну строку взял с гудчека ори. Тоже все открывает.</p></td><td>2024-11-09T16:16:15.586Z</td></tr><tr><td>uwu(uwu)</td><td><p>delete на всякий случай</p></td><td>2024-11-09T16:18:25.183Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>Как бы рад) помочь сети почувствовать всю её тленность</p></td><td>2024-11-09T16:18:57.494Z</td></tr><tr><td>KDS</td><td><p><code>--filter-udp=50000-50100 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-fake-quic="%BIN%quic_initial_www_google_com.bin" --dpi-desync-cutoff=n3</code><br>
+Вот так это должно выглядеть.<br>
+Либо так<br>
+<code>--filter-udp=50000-50100 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-fake-unknown-udp="%BIN%quic_initial_www_google_com.bin" --dpi-desync-cutoff=n3</code></p>
+<p>Можно репитов навалить дополнительно к обоим вариантам <code>--dpi-desync-repeats=2</code> и выше подбирать, пока не заработает.</p></td><td>2024-11-09T16:20:10.372Z</td></tr><tr><td>manwithbox(manwithbox)</td><td><p><img src="помогите-объединить-два-конфига-в-один-12908/605417d11ec76ba78d99a44aea485f6c24014811.jpeg" alt="" data-base62-sha1="dKa0lKGLdiZxfRsxQM4SNNJTkat" role="presentation" width="604" height="339"></p></td><td>2024-11-09T18:49:11.987Z</td></tr><tr><td>Tarasus</td><td><p>В итоге у меня мало чего получилось по советам, но удалось своими руками подобрать конфиг при котором будет работать и дискорд и ютуб. Разложил построчно для удобочитаемости.<br>
+Умудрился даже сделать без wssize.</p>
+<details>
+<summary>
+Конфиг Дискорд + ютуб</summary>
+<pre><code class="lang-auto">start "Zapret: Discord+Youtube" /min "%BIN%winws.exe" ^
+--wf-tcp=443 ^
+--wf-udp=443,50000-65535 ^
+--filter-udp=443 ^
+--hostlist="%~dp0list-discord.txt" ^
+--dpi-desync=fake ^
+--dpi-desync-udplen-increment=10 ^
+--dpi-desync-repeats=6 ^ ^
+--dpi-desync-udplen-pattern=0xDEADBEEF ^
+--dpi-desync-fake-quic="%BIN%quic_initial_www_google_com.bin" ^
+--new ^
+--filter-udp=50000-65535 ^
+--dpi-desync=fake,tamper ^
+--dpi-desync-any-protocol ^
+--dpi-desync-fake-quic="%BIN%quic_initial_www_google_com.bin" ^
+--new ^
+--filter-tcp=443 ^
+--hostlist="%~dp0list-discord.txt" ^
+--dpi-desync=fake,split2 ^
+--dpi-desync-autottl=2 ^
+--dpi-desync-fooling=md5sig ^
+--dpi-desync-fake-tls="%BIN%tls_clienthello_www_google_com.bin" ^
+--new ^
+--filter-udp=50000-50100 ^
+--dpi-desync=fake ^
+--dpi-desync-any-protocol ^
+--dpi-desync-fake-quic="%BIN%quic_initial_www_google_com.bin" ^
+--dpi-desync-cutoff=n3 ^
+--new ^
+--wf-l3=ipv4 ^
+--wf-tcp=443 ^
+--dpi-desync=split2 ^
+--dpi-desync-split-seqovl=1 ^
+--dpi-desync-split-tls=sni
+
+</code></pre>
+</details>
+<p>Всем спасибо за участие и помощь в покорении злое**чего дпи!</p></td><td>2024-11-09T19:32:13.971Z</td></tr><tr><td>Hentay(Hentay)</td><td><p>У тебя в выводе очень интересные пересечения стратегий.<br>
+Просто там одно поглощает другое и до … некоторых стратегий доходит, то что было отброшено другими</p></td><td>2024-11-09T19:40:00.803Z</td></tr><tr><td>KDS</td><td><p>Опять неправильно. Нужно вот так:</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">start "Zapret: Discord+Youtube" /min "%BIN%winws.exe" ^
+--wf-tcp=443 --wf-udp=443,50000-50100 ^
+--filter-udp=443 ^
+--hostlist="%~dp0list-discord.txt" ^
+--dpi-desync=fake ^
+--dpi-desync-repeats=6 ^
+--dpi-desync-fake-quic="%BIN%quic_initial_www_google_com.bin" ^
+--new ^
+--filter-tcp=443 ^
+--hostlist="%~dp0list-discord.txt" ^
+--dpi-desync=fake,split2 ^
+--dpi-desync-autottl=2 ^
+--dpi-desync-fooling=md5sig ^
+--dpi-desync-fake-tls="%BIN%tls_clienthello_www_google_com.bin" ^
+--new ^
+--filter-udp=50000-50100 ^
+--dpi-desync=fake ^
+--dpi-desync-any-protocol ^
+--dpi-desync-fake-quic="%BIN%quic_initial_www_google_com.bin" ^
+--dpi-desync-cutoff=n3 ^
+--new ^
+--filter-tcp=443 ^
+--dpi-desync=split2 ^
+--dpi-desync-split-seqovl=1 ^
+--dpi-desync-split-tls=sni
+</code></pre>
+</details>
+<p>По итогу имеем - соединения дискорда (tcp и udp) обрабатываются через хостлист, ютуб и остальное сваливается на последний фильтр <code>--filter-tcp=443 ^</code> Не лучшее решение сплитить и делалать sequence overlap каждому пакету HTTPS, ну уж хоть как-то ) QUIC на ютубе будет работать только если в <code>discord-list.txt</code> есть его домены, иначе фигу. Но, скорее всего, все домены ютуба засунуты в вышеупомянутый хостлист. Что тоже не лучшее решение. Забанят стратегию (ну а вдруг?) и рухнут сразу и ютуб и дискорд и сюда не зайдешь, совета спросить. Только через впн. Ну разве что спасет последняя стратегия.</p></td><td>2024-11-09T23:07:40.931Z</td></tr><tr><td>zzzombie1989(zzzombie1989)</td><td><aside class="quote no-group" data-username="Hentay" data-post="29" data-topic="12908">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/hentay/48/12172_2.png" class="avatar"> Hentay:</div>
+<blockquote>
+<p>Я думаю так быстрее</p>
+</blockquote>
+</aside>
+<p>Шикарный конфиг, кстати. И порты не срёт говной. Рекомендую!</p></td><td>2024-11-09T23:53:24.711Z</td></tr><tr><td>Tarasus</td><td><p>Проверил Ваш конфиг.<br>
+С ним работает ютуб но не работает дискорд, увы.<br>
+list-discord.txt не изменял, ютубовских доменов в нём нет.</p></td><td>2024-11-10T00:43:30.864Z</td></tr><tr><td>uwu(uwu)</td><td><p>с таким конфигом ютуб не может работать, разве что стартовую страницу прогрузит<br>
+выглядит как то что в системе есть работающий экземпляр либо запрета либо gdpi<br>
+надо смотреть все службы и выгружать виндиверт из драйверов</p></td><td>2024-11-10T00:56:08.340Z</td></tr><tr><td>KDS</td><td><aside class="quote no-group" data-username="Tarasus" data-post="39" data-topic="12908">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/a183cd/48.png" class="avatar"> Tarasus:</div>
+<blockquote>
+<p>но не работает дискорд</p>
+</blockquote>
+</aside>
+<p>Не работает дискорд - понятие растяжимое. Что именно не работает - не грузится вообще, голос не работает?</p></td><td>2024-11-10T01:27:29.025Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="Tarasus" data-post="1" data-topic="12908">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/a183cd/48.png" class="avatar"> Tarasus:</div>
+<blockquote>
+<p>–filter-udp=443 --hostlist=“%~dp0list-discord.txt” --dpi-desync=fake --dpi-desync-udplen-increment=10 --dpi-desync-repeats=6 ^ --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic=“%BIN%quic_initial_www_google_com.bin” --new ^<br>
+–filter-udp=50000-65535 --dpi-desync=fake,tamper --dpi-desync-any-protocol --dpi-desync-fake-quic=“%BIN%quic_initial_www_google_com.bin” --new ^</p>
+</blockquote>
+</aside>
+<p>ТРЭШ ФЛУД ДЕТЕКТЕД. Он неискореним, похоже.<br>
+ЭТУ ДРЯНЬ использовать  НЕЛЬЗЯ<br>
+Параметры udplen и tamper бесполезны</p></td><td>2024-11-10T08:25:33.617Z</td></tr>
+    </table>
+      </body>
+    </html>

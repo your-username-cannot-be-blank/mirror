@@ -1,0 +1,69 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>great-software-1084</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>0ka(0ka)</td><td><p>I really like this software, and would like to see in the new versions the use of two dns servers at the same time, is it possible? mtu for my local dns is only 512, and the speed is very low (0.02mbit/sec), and the provider gives two dns addresses</p></td><td>2021-06-05T02:14:18.669Z</td></tr><tr><td>tango</td><td><p>That’s an interesting idea. It’s conceptually possible, because the Turbo Tunnel reliability layer should permit multiplexing over multiple network paths. One way to do it might be to have <a href="https://repo.or.cz/dnstt.git/blob/6c82a58bc09f266f1db475f5d609e49e06d14749:/dnstt-client/dns.go#l67" rel="noopener nofollow ugc"><code>NewDNSPacketConn</code></a> accept a list of <code>transport</code>+<code>addr</code> pairs, and start up a <code>recvLoop</code> and <code>sendLoop</code> for each.</p>
+<p>The user interface would need some thought. The Go <a href="https://golang.org/pkg/flag/" rel="noopener nofollow ugc">flag</a> package doesn’t make it easy to, for example, accept multiple <code>-udp</code> options with different values.</p>
+<p>I think it would require a non-trivial amount of effort to implement, and I’m not likely to do it myself. Let me suggest a test that may tell us whether there’s a performance improvement that makes it worth the effort. Install <a href="https://thekelleys.org.uk/dnsmasq/doc.html" rel="noopener nofollow ugc">dnsmasq</a> or another local DNS forwarding proxy that supports multiple upstream resolvers. Run dnsmasq with <code>--no-resolve</code> and a <code>--server</code> option for each of the upstream resolvers. Then run dnstt-client with <code>-udp</code> pointing to the local dnsmasq port. The diagram would look like this:</p>
+<pre><code class="lang-nohighlight">       localhost       |     Internet      |    server
+                       |                   |
+                       |  .--upstream1--.  |
+dnstt-client---dnsmasq---&lt;               &gt;---dnstt-server
+                       |  '--upstream2--'  |
+</code></pre>
+<p>This way, distributing queries over multiple resolvers is done by dnsmasq, rather than being a feature built into dnstt-client. If you try this, please let us know if it affects performance in your case.</p></td><td>2021-06-06T06:10:12.964Z</td></tr><tr><td>0ka(0ka)</td><td><p>“dnsmasq -p 8000 --no-resolv --server=10.153.3.196 --server=10.153.3.220”<br>
+sadly no change <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=9" title=":frowning:" class="emoji" alt=":frowning:"></p></td><td>2021-06-06T17:50:56.393Z</td></tr><tr><td>tango</td><td><p>Thanks for running the test <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=9" title=":slight_smile:" class="emoji" alt=":slight_smile:"> So either this multiplexing doesn’t help performance, or dnsmasq itself doesn’t distribute queries across its upstreams in a way that helps.</p>
+<p>If you want, you might try alternative local DNS forwarders, like <a href="https://github.com/jedisct1/doh-server" rel="noopener nofollow ugc">doh-proxy</a> (I’m not sure if doh-proxy can accept non-DoH connections) or <a href="https://cr.yp.to/djbdns/run-cache-home.html" rel="noopener nofollow ugc">dnscache</a>.</p></td><td>2021-06-07T20:48:06.028Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote" data-post="10" data-topic="1088">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/f04885/48.png" class="avatar">
+    <a href="https://ntc.party/t/vpn-dpi/1088/10">VPN обходит DPI, не могу понять как</a> 
+  </div>
+  <blockquote>
+    Посмотрите пожалуйста этот дамп, я то сделал или нет. Там подключение + проверка скорости+скачал файл
+  </blockquote>
+</aside>
+<p>
+could you analyze the operation of this dns tunnel? it runs very fast</p></td><td>2021-06-11T21:30:19.448Z</td></tr><tr><td>tango</td><td><p>No, I don’t have time to reverse engineer other VPNs.</p>
+<p>Are you sure it’s really a DNS tunnel? It may only resemble DNS; i.e., send UDP packets encoded as DNS message to UDP port 53. It may not actually work through a recursive resolver. If that’s the case, it can probably be blocked by blocking the IP addresses of the servers.</p>
+<p>If you just need a fast tunnel that uses UDP/53, you can try <a href="https://github.com/xtaci/kcptun" rel="noopener nofollow ugc">kcptun</a>. But you will have to install your own server.</p></td><td>2021-06-14T04:12:34.911Z</td></tr><tr><td>0ka(0ka)</td><td><p>Thx! I’ll try</p></td><td>2021-06-14T12:56:42.383Z</td></tr><tr><td>bolvan</td><td><p>I tested this tool on my ISP’s DNS and it worked great. 24/41 mbps throughput. This ISP did not have any ratelimit and that’s the key to sucess.</p>
+<p>Another ISP had some rate limit. It was possible to use ssh quite comfortly  but not proxying websites.</p>
+<p>Public DNS look very ugly. I tested ~10 public doh/dot servers and only 2 of them even gave me SSH banner from the tunnel’s end. Then connection died.<br>
+The only public doh that worked for me is <a href="http://he.net">he.net</a>.  It works fine and fast at the beginning but ratelimits very soon</p>
+<p>Also, I used ipv6 only server side to avoid buying ipv4 address with free UDP port 53, with ipv4 on the client side. It works if client’s DNS has access to ipv6 network</p></td><td>2022-01-07T11:16:52.532Z</td></tr><tr><td>tango</td><td><p>Thanks for testing. The most recent performance tests I did were on <a href="https://www.bamsoftware.com/software/dnstt/performance.html#download-20210802">2021-08-02</a>. As you noted, it can be quite variable. Cloudflare DoH/DoT was among the fastest, while Cloudflare UDP was among the slowest. I would have expected most public DoH/DoT to work well enough for SSH, but it is possible things have changed since I last tested it.</p></td><td>2022-01-08T18:34:10.178Z</td></tr>
+    </table>
+      </body>
+    </html>

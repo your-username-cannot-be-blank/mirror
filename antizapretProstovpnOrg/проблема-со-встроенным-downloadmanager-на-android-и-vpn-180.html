@@ -1,0 +1,71 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проблема-со-встроенным-downloadmanager-на-android-и-vpn-180</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>some0nebad</td><td><p>При использовании VPN от antizapret на Android невозможно скачать что-либо через встроенный менеждер загрузок. Загрузка только начинается и сразу завершается. Запускается только после отключения от VPN. Через любые другие сторонние менеджеры загрузок, например от Chrome, все прекрасно скачивается.</p>
+<p>Проверить можно в любом приложении, которое использует встроенный менеджер загрузок по умолчанию, например официальный клиент форума 4PDA. При использовании VPN от антизапрета, невозможно скачать какой-либо файл с форума (Примечательно, что форум распознаёт загрузку, увеличивается количество скачавших файл).</p>
+<p>Проблема проявляется только при использовании VPN антизапрета. При использовании pac прокси - все работает. Любой другой VPN, включая любую другую конфигурацию для OpenVPN - тоже без проблем скачивает. Проблема проявляется во всех приложениях для настройки OpenVPN на Android.</p>
+<p>Вывод logcat при попытке скачивания не многословен:</p>
+<p>[10-20 21:01:35.257 9605:1685 D/DownloadManager]<br>
+[177] Starting</p>
+<p>[10-20 21:01:35.290 9605:1685 W/DownloadManager]<br>
+[177] Stop requested with status HTTP_DATA_ERROR: Unable to resolve host “cs5-1.4pda.to”: No address associated with hostname</p>
+<p>[10-20 21:01:35.291 9605:1685 D/DownloadManager]<br>
+[177] Finished with status WAITING_TO_RETRY</p>
+<p>Наблюдаю такую проблему у себя на Redmi Note 3 Pro, как на AOSP Android 7, так и на Android 9.</p></td><td>2019-10-20T18:11:11.011Z</td></tr><tr><td>ValdikSS</td><td><p>Похоже, это проблема официального клиента OpenVPN Connect. На OpenVPN for Android работает корректно, и с ядром OpenVPN v2, и с OpenVPN v3.<br>
+Напишите о проблеме в <a href="https://openvpn.net/portal/login/#/modal-support" rel="nofollow noopener">https://openvpn.net/portal/login/#/modal-support</a></p>
+<p>Есть ли какая-то простая программа, которая использует этот способ загрузки?</p></td><td>2019-10-20T19:30:55.518Z</td></tr><tr><td>some0nebad</td><td><p>В OpenVPN for Android у меня тоже самое с любыми настройками.</p>
+<p>Я выбрал это приложение (OpenVPN for Android) для костыльного решения проблемы - направлять трафик через VPN только для необходимых приложений, чтобы избежать проблем с 4pda, например.</p>
+<p>Однако некоторые такие приложения также могут использовать встроенный менеджер. Одно из них Tachiyomi (<a href="https://github.com/inorichi/tachiyomi" rel="nofollow noopener">https://github.com/inorichi/tachiyomi</a>) - приложение для просмотра манги. Оно использует встроенный менеджер для скачивания дополнительных источников манги (ставятся как отдельные приложения). В меню приложения -&gt; Дополнения -&gt; //Установить что-либо//. (Для скачивания самой манги используется отдельный загрузчик, встроенный в приложение ¯_(ツ)_/¯)</p>
+<p>Только эта программа и клиент 4pda у меня используют встроенный DownloadManager. Все остальные приложения, а у меня их много, используют свои, и потому проблема не сильно выражена.</p></td><td>2019-10-20T19:58:19.918Z</td></tr><tr><td>ValdikSS</td><td><p>Установил Android 7 (LineageOS 14.1) вместо Android 9, и OpenVPN for Android перестал работать тоже. Видимо, это какая-то ошибка либо в компоненте VPNService, либо в DownloadManager. Вряд ли я могу что-то сделать на стороне антизапрета.</p></td><td>2019-10-20T20:15:00.666Z</td></tr><tr><td>ValdikSS</td><td><p>Можете написать пошагово, какие действия нужно сделать, чтобы воспроизвести проблему, например, с Tachiyomi? В этой программе не нужно аутентифицироваться для воспроизведения проблемы? Авторы OpenVPN-клиентов вряд ли будут регистрироваться на том же 4pda, с русской капчей, поэтому, если сообщать о проблеме авторам, нужно подробно написать, что и как делать.</p></td><td>2019-10-20T20:45:41.482Z</td></tr><tr><td>some0nebad</td><td><p>Я тут подумал немного и решил кое-что проверить. Есть такой простой браузер для Android - Via. Он тоже использует встроенный в систему менеджер для скачивания, и он также отказывается что-либо качать вместе с VPN от antizapret. Так что воспроизвести проблему просто. Вероятно многие базовые браузеры, которые встроены в прошивки по умолчанию, этому подвержены.</p>
+<p>*При этом не важно - заблокирован ресурс или нет.</p></td><td>2019-10-20T20:57:32.861Z</td></tr><tr><td>ValdikSS</td><td><p>Да, с Via тоже проблему повторил.</p></td><td>2019-10-21T04:38:38.481Z</td></tr><tr><td>ValdikSS</td><td><p>Провел эксперимент — проблема проявляется даже при самой простой конфигурации OpenVPN, даже без DNS.<br>
+Отправил сообщения разработчикам OpenVPN Connect и OpenVPN for Android.</p></td><td>2019-11-03T20:18:15.278Z</td></tr><tr><td>some0nebad</td><td><p>Я не сильно шарю в настройке OpenVPN, но я пробовал через EasyOvpn (<a href="https://play.google.com/store/apps/details?id=com.easyovpn.easyovpn&amp;hl=ru" rel="nofollow noopener">https://play.google.com/store/apps/details?id=com.easyovpn.easyovpn&amp;hl=ru</a>) подключаться к открытым VPN серверам. У тех серверов, к которым мне удалось подключиться, проблем со скачиванием нет.</p></td><td>2019-11-03T23:38:33.750Z</td></tr><tr><td>ValdikSS</td><td><p>Разработчики OpenVPN Connect поставили проблеме низкий приоритет. Разработчик OpenVPN for Android сначала отвечал мне, потом перестал. Попробую создать баг в багтрекере (до этого писал ему на почту).</p></td><td>2020-01-19T20:17:28.928Z</td></tr><tr><td>ValdikSS</td><td><p>Проблема в следующем: если DNS-сервер сообщает адрес DNS-сервера, но не перенаправляет весь трафик в туннель (не использует параметр redirect-gateway), то DownloadManager, по какой-то причине, не может зарезолвить домен.</p>
+<pre><code class="lang-auto">11-05 01:25:21.890  4670  4790 D DownloadManager: [70] Starting
+11-05 01:25:21.927  4670  4790 D NetworkSecurityConfig: Using Network Security Config from resource c debugBuild: false
+11-05 01:25:21.933  4670  4790 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-05 01:25:21.938  4670  4790 W DownloadManager: [70] Stop requested with status HTTP_DATA_ERROR: Unable to resolve host "speedtest.tele2.net": No address associated with hostname
+11-05 01:25:21.939  4670  4790 D DownloadManager: [70] Finished with status WAITING_TO_RETRY
+</code></pre>
+<p>Проблема воспроизводится следующим образом:</p>
+<pre><code class="lang-auto">* Download and import this config file https://antizapret.prostovpn.org/antizapret-tcp.ovpn
+* Download software which uses DownloadManager, for example, Via browser https://play.google.com/store/apps/details?id=mark.via.gp
+* Connect to the VPN, run Via browser and try to download any file. I usually use http://speedtest.tele2.net/1MB.zip for test.
+</code></pre></td><td>2020-01-19T20:54:13.317Z</td></tr><tr><td>ValdikSS</td><td><p>Проблема, судя по всему, в Android, а не в VPN: ошибка наблюдается также с IPsec IKEv2-клиентом strongSwan с аналогичными настройками.</p></td><td>2020-01-20T18:58:04.189Z</td></tr><tr><td>ValdikSS</td><td><p>Нашел 2 заведённых бага в трекере Android:<br>
+<a href="https://issuetracker.google.com/issues/111574523" class="onebox" target="_blank">https://issuetracker.google.com/issues/111574523</a><br>
+<a href="https://issuetracker.google.com/issues/113978828" class="onebox" target="_blank">https://issuetracker.google.com/issues/113978828</a></p></td><td>2020-01-20T19:07:19.413Z</td></tr>
+    </table>
+      </body>
+    </html>

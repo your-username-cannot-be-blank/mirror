@@ -1,0 +1,50 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>как-сделать-gateway-fallback</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>h7n14(H7n14je)</td><td><p>Есть три сервера в локалке работающие как gateway первом стоит sing-box в режиме tun в inbound, подключение через vless-xtls-reality, на втором простой openvpn клиент и на третьем wireguard. Немножко прошерстив интернет нашел что есть VRRP (Virtual Router Redundancy Protocol) почти прям то что нужно, но это как-то слишком мощно и сложно. Логика понятная, создаем псевдо-gateway который будет сам по какой-то логике переадресовывать на них.</p>
+<ol>
+<li>
+<p>Может есть готовые или более простые решения? Может кто уже делал такое?</p>
+</li>
+<li>
+<p>Понять что openvpn или wg живой и работает несложно, просто пинговать внутри тоннеля. А как быть с vless? Пинговать гугл будет достаточно?</p>
+</li>
+</ol></td><td>2024-09-23T16:27:59.384Z</td></tr><tr><td>0ka(0ka)</td><td><p>можно сделать все на синг-боксе, там есть outbound URLtest который будет выбирать рабочий outbound (любой встроенный или внешний если он создаёт tun интерфейс (wg и openvpn в их числе))</p>
+<p>но стабильность у sing-box не лучшая поэтому я бы не делал его центром прохода трафика, а сделал бы скрипт в котром был бы просто что-то типа <code>if ! curl -m 5 --interface openvpn_tun 1.1.1.1; then ifmetric openvpn_tun 100</code> и т.п. для остальных интерфейсов чтобы просто исключать их из маршрута если curl фейлит</p></td><td>2024-09-24T08:54:12.791Z</td></tr>
+    </table>
+      </body>
+    </html>

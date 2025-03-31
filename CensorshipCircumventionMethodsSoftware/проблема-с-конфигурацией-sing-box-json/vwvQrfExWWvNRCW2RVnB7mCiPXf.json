@@ -1,0 +1,128 @@
+{
+    "dns": {
+        "servers": [
+            {
+                "address": "94.140.14.14",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote"
+            },
+            {
+                "address": "94.140.15.15",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote-2"
+            },
+            {
+                "address": "77.88.8.8",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote-3"
+            },
+            {
+                "address": "77.88.8.1",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote-4"
+            },
+            {
+                "address": "1.1.1.1",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote-5"
+            },
+            {
+                "address": "1.0.0.1",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote-6"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "domain_strategy": "prefer_ipv4",
+            "listen": "0.0.0.0",
+            "listen_port": 443,
+            "sniff": true,
+            "sniff_override_destination": true,
+            "tag": "direct-proxy",
+            "type": "direct"
+        }
+    ],
+    "log": {
+        "level": "debug"
+    },
+    "outbounds": [
+        {
+            "tag": "direct",
+            "type": "direct"
+        },
+        {
+            "type": "vless",
+            "tag": "VPN for DNS",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "XX.XXX.XXX.XX",
+                        "port": 443,
+                        "users": [
+                            {
+                                "id": "XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                                "flow": "xtls-rprx-vision",
+                                "encryption": "none"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "reality",
+                "tlsSettings": {
+                    "serverName": "xxx.com",
+                    "utls": {
+                        "enabled": true,
+                        "fingerprint": "chrome"
+                    }
+                },
+                "realitySettings": {
+                    "show": false,
+                    "publicKey": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                    "shortId": "XXXXXXXX",
+                    "spiderX": "/"
+                }
+            }
+        },
+        {
+            "tag": "block",
+            "type": "block"
+        },
+        {
+            "tag": "dns-out",
+            "type": "dns"
+        }
+    ],
+    "route": {
+        "final": "block",
+        "rules": [
+            {
+                "outbound": "dns-out",
+                "protocol": "dns"
+            },
+            {
+                "domain": [
+                    "2ip.ru",
+                    "2ip.ua",
+                    "4pda.to",
+                    "canva.com",
+                    "habr.com",
+                    "megogo.net",
+                    "pornhub.com",
+                    "browserleaks.com"
+                ],
+                "outbound": "VPN for DNS"
+            }
+        ]
+    }
+}

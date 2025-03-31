@@ -1,0 +1,164 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>неработоспособность-протокола-шифрования-vless-23072024</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>whoknows(who knows)</td><td><p>Доброго времени суток. Кто либо помимо меня имеет проблемы с использованием VLESS TCP? Использую с ядром sing-box.</p>
+<p>Неполадки начались совсем недавно, изменений в конфигурации не было.</p>
+<p>При том VLESS - grpc работает исправно.</p></td><td>2024-07-23T15:01:35.521Z</td></tr><tr><td>whoknows(who knows)</td><td><p>Сделал некоторые изменения в конфигурации. Недолго проработало, после чего снова аут.</p>
+<pre><code class="lang-auto">2024/07/23 15:06:43 [Warning] [3220003913] app/proxyman/outbound: failed to process outbound traffic &gt; proxy/vless/outbound: failed to find an available destination &gt; common/retry: [remote error: tls: handshake failure] &gt; common/retry: all retry attempts failed
+
+2024/07/23 15:06:43 tcp:127.0.0.1:52298 accepted tcp:ntc.party:443 [socks-in -&gt; proxy]
+
+2024/07/23 15:06:44 [Warning] [1353320302] app/proxyman/outbound: failed to process outbound traffic &gt; proxy/vless/outbound: failed to find an available destination &gt; common/retry: [remote error: tls: handshake failure] &gt; common/retry: all retry attempts failed
+
+2024/07/23 15:06:44 tcp:127.0.0.1:52301 accepted tcp:ogs.google.com:443 [socks-in -&gt; proxy]
+
+2024/07/23 15:06:45 [Warning] [2698479803] app/proxyman/outbound: failed to process outbound traffic &gt; proxy/vless/outbound: failed to find an available destination &gt; common/retry: [remote error: tls: handshake failure] &gt; common/retry: all retry attempts failed
+
+2024/07/23 15:06:45 tcp:127.0.0.1:52308 accepted tcp:www.google.com:443 [socks-in -&gt; proxy]
+
+2024/07/23 15:06:46 [Warning] [170514995] app/proxyman/outbound: failed to process outbound traffic &gt; proxy/vless/outbound: failed to find an available destination &gt; common/retry: [remote error: tls: handshake failure] &gt; common/retry: all retry attempts failed
+
+2024/07/23 15:06:46 [Warning] [1829426288] app/proxyman/outbound: failed to process outbound traffic &gt; proxy/vless/outbound: failed to find an available destination &gt; common/retry: [remote error: tls: handshake failure] &gt; common/retry: all retry attempts faile
+</code></pre></td><td>2024-07-23T15:09:11.749Z</td></tr><tr><td>0ka(0ka)</td><td><p>так у вас не TCP, а TLS+TCP. сервер работает исправно? сделайте пинг на 10 минут, ping -c 600 server_ip</p></td><td>2024-07-23T15:10:01.060Z</td></tr><tr><td>whoknows(who knows)</td><td><p>Сервер работает исправно. Я ж говорю, VLESS запущен по 2 протоколам: TCP (+ TLS), и GRPC.</p>
+<p>GRPC работает исправно.</p>
+<p>Использую Marzban со стандартным конфигом.</p>
+<aside class="onebox githubblob" data-onebox-src="https://github.com/Gozargah/Marzban/blob/master/xray_config.json">
+  <header class="source">
+
+      <a href="https://github.com/Gozargah/Marzban/blob/master/xray_config.json" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://github.com/Gozargah/Marzban/blob/master/xray_config.json" target="_blank" rel="noopener nofollow ugc">Gozargah/Marzban/blob/master/xray_config.json</a></h4>
+
+
+      <pre><code class="lang-json">{
+    "log": {
+        "loglevel": "info"
+    },
+    "inbounds": [
+        {
+            "tag": "VMess TCP",
+            "listen": "0.0.0.0",
+            "port": 8081,
+            "protocol": "vmess",
+            "settings": {
+                "clients": []
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "tcpSettings": {
+                    "header": {
+                        "type": "http",
+                        "request": {
+                            "method": "GET",
+</code></pre>
+
+
+
+  This file has been truncated. <a href="https://github.com/Gozargah/Marzban/blob/master/xray_config.json" target="_blank" rel="noopener nofollow ugc">show original</a>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-07-23T15:12:42.256Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Судя по всему, проблема наблюдается только у вас.</p>
+<p>Reality используется? Если да, то какой домен, пробовали домен менять? 95% проблем с reality - затыки на вышестоящем сервере (домен которого используется для маскировки).</p>
+<p>Ещё интересно посмотреть на конфиг клиента (что стоит в качестве фингерпринта uTLS, помогает ли смена? какой alpn?) и логи со стороны сервера в момент попыток подключения.</p></td><td>2024-07-23T16:54:58.684Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="whoknows" data-post="1" data-topic="8176">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/w/e9c0ed/48.png" class="avatar"> whoknows:</div>
+<blockquote>
+<p>Неполадки начались совсем недавно, изменений в конфигурации не было.</p>
+</blockquote>
+</aside>
+<p>Запишите дамп трафика, только с ним можно сказать что-то конкретное.</p>
+<aside class="quote no-group" data-username="Uporoty" data-post="5" data-topic="8176">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/ed655f/48.png" class="avatar"> Uporoty:</div>
+<blockquote>
+<p>Судя по всему, проблема наблюдается только у вас.</p>
+</blockquote>
+</aside>
+<p>Мне один знакомый сообщал о проблеме с Outline сегодня. Какие-либо подробности сможет сообщить завтра.</p></td><td>2024-07-24T22:15:15.028Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Насколько я знаю, Outline не использует VLESS.</p></td><td>2024-07-25T07:34:15.376Z</td></tr><tr><td>lucretia(lucretia)</td><td><p>Не наблюдаю неполадок на билайне\спб. и ростелеком мобильный.</p>
+<p>Outline не использует Vless и всякие Reality.   В текущих реалиях Outline беполезен. ПРи фильтрации незнакомого трафика зарубится вместе со всем неопознанным насколько я знаю</p></td><td>2024-07-25T09:10:08.801Z</td></tr><tr><td>blanche.hermine(blanche.hermine)</td><td><p>С префиксами работал и во время блокировок. Например, <code>POST%20</code>.</p></td><td>2024-07-25T09:33:25.454Z</td></tr><tr><td>PermonentnoBanned(PermonentnoBanned)</td><td><p>Имеется пул клиентов (1.5к) на VLESS + Outline, общих жалоб нет. Проблема, скорее всего, только у вас.</p></td><td>2024-07-25T12:46:54.877Z</td></tr><tr><td>ValdikSS</td><td><aside class="onebox allowlistedgeneric" data-onebox-src="https://t.me/ru_tech_talk/535">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/6/60a0dd1195aa91677b6f00e7a4eb29555e45506b.svg" class="site-icon" data-dominant-color="" width="16" height="16">
+
+      <a href="https://t.me/ru_tech_talk/535" target="_blank" rel="noopener">Telegram</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="320" height="320" src="неработоспособность-протокола-шифрования-vless-23072024/4575b64005b896b29af7136953040ee118510d48.jpeg" class="thumbnail onebox-avatar" data-dominant-color="7034E4">
+
+<h3><a href="https://t.me/ru_tech_talk/535" target="_blank" rel="noopener">Tech Talk</a></h3>
+
+  <p>Сегодня с утра на мобильных операторах начали происходить блокировки приложения Outline VPN. Не на всех, но у многих такие проблемы наблюдаются.
+Было известно, что сам клиент Outline VPN подвержен active probing, вероятно так сейчас и происходит эта...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>У меня нигде не проявляется на ключах, с которыми сообщали о проблеме. Вероятно, индивидуальные блокировки по какому-то триггеру.</p>
+<blockquote>
+<p>Сегодня с утра на мобильных операторах начали происходить блокировки приложения Outline VPN. Не на всех, но у многих такие проблемы наблюдаются.<br>
+Было известно, что сам клиент Outline VPN подвержен active probing, вероятно так сейчас и происходит эта блокировка.</p>
+<p>Active probing в контексте блокировок VPN - это когда цензор видит подозрительный трафик в сети, видит ip-адрес, который потенциально может быть VPN-сервером, отправляет на этот адрес определенный запрос, на который последует ответ, специфичный для vpn-сервера.</p>
+<p>Что можно предложить в текущей ситуации тем, кто видит блокировку на своих серверах:</p>
+<ol>
+<li>Попробовать <a href="https://www.reddit.com/r/outlinevpn/wiki/index/prefixing/">https://www.reddit.com/r/outlinevpn/wiki/index/prefixing/</a></li>
+<li>Есть небольшая вероятность, что тот же конфиг shadowsocks будет работать с помощью другого клиента, если нет, придется переустанавливать vpn-сервер и менять айпи адреса, отказываться от outline.</li>
+</ol>
+<p>Ну и кажется, что вопрос нестабильности работы Outline VPN как происходит с ним в Китае, это вопрос времени для России.</p>
+</blockquote></td><td>2024-07-25T16:55:09.620Z</td></tr>
+    </table>
+      </body>
+    </html>

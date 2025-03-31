@@ -1,0 +1,95 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>openvpn-client-adguard-home-3097</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Joyz</td><td><p>На роутере поднят OpenVPN client antizapret и в локалке есть AdGuard Home.<br>
+Можно ли как по их подружить чтобы пользоваться этим одновременно или это заработает только если поднимать на удаленной VPS свой контейнер + AdGuard ?</p></td><td>2022-08-20T23:52:45.941Z</td></tr><tr><td>ValdikSS</td><td><p>Инструкция от <a class="mention" href="/u/dartraiden">@dartraiden</a></p><aside class="onebox allowlistedgeneric" data-onebox-src="https://dartraiden.github.io/AdGuard-Home-Keenetic/">
+  <header class="source">
+      <img src="openvpn-client-adguard-home-3097/ca168f6b7849e78cb6a28ba26d139146d17a7d4c.png" class="site-icon" data-dominant-color="563728" width="32" height="32">
+
+      <a href="https://dartraiden.github.io/AdGuard-Home-Keenetic/" target="_blank" rel="noopener" title="12:00AM - 13 December 2020">Alexander Gavrilov – 13 Dec 20</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="140" height="140" src="openvpn-client-adguard-home-3097/d9745616142fbf5bb84d4c592b6a85b5dee5e8fe.jpeg" class="thumbnail onebox-avatar" data-dominant-color="563727">
+
+<h3><a href="https://dartraiden.github.io/AdGuard-Home-Keenetic/" target="_blank" rel="noopener">Установка AdGuard Home на роутеры Keenetic</a></h3>
+
+  <p>Нужно понимать, что блокировка рекламы с помощью блокировки доменов никогда не будет столь же эффективным способом борьбы с рекламой, как AdblockPlus/uBlock в браузере. Бывают случаи, когда реклама загружается с того же домена, что и полезный...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2022-08-22T16:22:28.937Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Принцип ровно так же, как и со встроенным DNS-сервером роутера</p>
+<ul>
+<li>клиентам в качестве DNS прописывается адрес AGH (где он там поднят в локалке)</li>
+<li>в настройках AGH в качестве апстрима указываются некоторые публичные DNS (обычные а-ля 8.8.8.8, не DoH/DoT)</li>
+<li>в конфиге OpenVPN на роутере трафик до всех этих публичных DNS с прошлого шага заворачивается в туннель командами <strong>route x.x.x.x</strong>
+</li>
+<li>дальше уже на стороне сервера antizapret этот DNS-трафик автоматически перехватывается и вместо этих публичных DNS отвечает DNS-сервер antizapret, ответ поступает к AGH, а от него клиентам =&gt; profit</li>
+</ul></td><td>2022-08-22T19:14:10.891Z</td></tr><tr><td>nirvana008</td><td><p>Здравствуйте, столкнулся с той же проблемой, что и автор темы. Не могу подружить OpenVPN клиент с антизапретом на Asus Merlin и adguard home, установленный на мини-сервере в моей локалке. Adguard хочу использовать как локальный dns-сервер. Пробовал различные настроить по всем инструкциям выше, не хотят работать вместе, либо перестают открываться сайты, либо не работает локальный домен. В чем может быть проблема? Может быть из-за того, что у меня роутер asus, нужно еще что-то настроить в нем?</p></td><td>2025-01-26T16:29:49.716Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Вряд ли я что-то могу сказать про то, почему не работает локальный домен.</p></td><td>2025-01-26T19:57:34.847Z</td></tr><tr><td>nirvana008</td><td><p>Складывается впечатление, что они мешают друг, поэтому работает либо vpn, либо adguard. В файле конфигурации vpn прописывал route с ip подсети, с ip роутера, с ip adguard, добавлял строчку dhcp-option DNS, менял access DNS на exclusive, ничего не помогает. В adguard прописывал upstream серверы такие же, как и в конфигурации VPN и отличные от внешних DNS, тоже не помогает, как только указываю adguard в качестве dns сервера, даже тест upstream перестают проходить. Может быть стоит dnsmasq использовать для локального DNS сервера?</p></td><td>2025-01-26T20:09:25.363Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="nirvana008" data-post="6" data-topic="3097">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/839c29/48.png" class="avatar"> nirvana008:</div>
+<blockquote>
+<p>route с ip подсети, с ip роутера, с ip adguard</p>
+</blockquote>
+</aside>
+<p>Ну, это совсем бессмысленно, вы же понимаете.</p>
+<p>Что даёт route x.x.x.x? Это указание, что трафик к x.x.x.x нужно отправить в туннель. То есть, вы трафик, который предназначен локальному вашему AGH, зачем-то роутите в туннель. Типа “у меня в квартире в соседней комнате бабушка, так чтобы с ней пообщаться я буду писать в Германию”. Это даже в теории никак помочь не сможет.</p>
+<p>Схема маршрутизации DNS-трафика должна быть такая:<br>
+<code>клиент -&gt; роутер -&gt; AGH -&gt; публичный plain-text DNS</code></p>
+<p>Разделим задачу на две части</p>
+<h3><a name="p-81663-h-1-1" class="anchor" href="#p-81663-h-1-1"></a>Часть 1</h3>
+<p>Добейтесь сначала того, чтобы это работало. Без всякого АнтиЗапрета (лучше пока вообще подключение к АнтиЗапрету снести, чтобы не мешалось). Убедитесь на клиенте (клиентском устройве типа смартфона или ПК), что ему по DHCP в качестве DNS пришёл адрес роутера. Затем убедитесь, что роутер использует в качестве апстрим-DNS AGH (например, заблокируйте на AGH какой-то домен и убедитесь, что он стал недоступен на клиентах). В AGH соответственно в качестве апстрима укажите публичный DNS типа 8.8.8.8 (не шифрованный).</p>
+<h3><a name="p-81663-h-2-2" class="anchor" href="#p-81663-h-2-2"></a>Часть 2</h3>
+<p>Когда у вас всё будет работать именно таким образом, уже пытайтесь в эту схему встроить АнтиЗапрет. Обычно это делается путём помещения в конфиг OVPN директивы <code>route 8.8.8.8</code> (тот адрес, который в AGH используется как апстрим).</p>
+<p>Благодаря этому схема получится <code>клиент -&gt; роутер -&gt; AGH -&gt; АнтиЗапрет</code> (т.к. трафик до публичного plain-text DNS будет ловиться АнтиЗапретом).</p>
+<p>Где-то тут на форуме была тема про асусы, там был нюанс, что есть такая пакость, как VPN Director на асусах (в настройках) и что-то там в нём нужно было сделать. Но в любом случае это уже вторая часть уравнения.</p></td><td>2025-01-26T21:07:51.411Z</td></tr><tr><td>nirvana008</td><td><p>route использовал по одной из инструкций в интернете, решил попробовать, вдруг поможет, но не помогло. При отключении клиента vpn, adguard работает без проблем, как только включаю vpn, adguard перестает работать.<br>
+VPN director выключил, как было написано на этом форуме в одной из тем, так как он как я понял начинает весь трафик перенаправлять через vpn и прилетает бан от антизапрета.<br>
+Одинаковый публичный dns одинаковый указывал как в конфигурации OpenVPN, так и upstream сервер, не помогает.<br>
+Хочу еще попробовать указать ip dns сервера adguard как в конфигурации на сервере, так и на клиенте, может быть это поможет</p></td><td>2025-01-26T21:43:59.693Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Да можно же просто трассировку запустить до условного 8.8.8.8 с указанием 53 порта и посмотреть, по какому маршруту оно идёт. Например, nmap позволяет указать порт<br>
+<code>sudo nmap -Pn --traceroute -p 53 8.8.8.8</code></p></td><td>2025-01-26T21:46:46.455Z</td></tr>
+    </table>
+      </body>
+    </html>

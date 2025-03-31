@@ -1,0 +1,318 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>dns-vs-dnscrypt-proxy</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>LeonMskRu(Leon MskRu)</td><td><p>кто разбирается в dns И в dnscrypt-proxy</p>
+<p>C:\Squid\3_5_28\var\log\squid&gt;nslookup <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a><br>
+Server:         127.0.0.1<br>
+Address:        127.0.0.1#53</p>
+<p>*** Can’t find <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a>: No answer</p>
+<p>C:\Squid\3_5_28\var\log\squid&gt;nslookup <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a> 9.9.9.9<br>
+Server:         9.9.9.9<br>
+Address:        9.9.9.9#53</p>
+<p>Non-authoritative answer:<br>
+Name:   <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a><br>
+Address: 87.240.132.72<br>
+Name:   <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a><br>
+Address: 87.240.137.164<br>
+Name:   <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a><br>
+Address: 93.186.225.194<br>
+Name:   <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a><br>
+Address: 87.240.132.67<br>
+Name:   <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a><br>
+Address: 87.240.132.78<br>
+Name:   <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a><br>
+Address: 87.240.129.133</p>
+<p>причем на сам <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a> dnscrypt-proxy не ругается. в вот на поддомены уже да</p>
+<p>[2024-04-18 05:32:39]   127.0.0.1       <a href="http://st1-17.vk.com" rel="noopener nofollow ugc">st1-17.vk.com</a>   A       SERVFAIL        44ms    sth-dnscrypt-se-ipv6<br>
+[2024-04-18 05:32:39]   127.0.0.1       <a href="http://st1-17.vk.com" rel="noopener nofollow ugc">st1-17.vk.com</a>   AAAA    SERVFAIL        49ms    sth-dnscrypt-se<br>
+[2024-04-18 05:33:03]   127.0.0.1       <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a>  A       PASS    55ms    sth-dnscrypt-se-ipv6<br>
+[2024-04-18 05:33:03]   127.0.0.1       <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a>  AAAA    PASS    59ms    sth-dnscrypt-se</p></td><td>2024-04-18T02:45:42.622Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>127.0.0.1 dnscrypt-proxy, 127.0.2.1 tor dns resolver</p>
+<p>C:\Squid\3_5_28\var\log\squid&gt;nslookup <a href="http://variations.brave.com" rel="noopener nofollow ugc">variations.brave.com</a><br>
+Server:         127.0.0.1<br>
+Address:        127.0.0.1#53</p>
+<p>*** Can’t find <a href="http://variations.brave.com" rel="noopener nofollow ugc">variations.brave.com</a>: No answer</p>
+<p>C:\Squid\3_5_28\var\log\squid&gt;nslookup <a href="http://variations.brave.com" rel="noopener nofollow ugc">variations.brave.com</a> 127.0.2.1<br>
+Server:         127.0.2.1<br>
+Address:        127.0.2.1#53</p>
+<p>Non-authoritative answer:<br>
+Name:   <a href="http://variations.brave.com" rel="noopener nofollow ugc">variations.brave.com</a><br>
+Address: 3.164.230.42<br>
+Name:   <a href="http://variations.brave.com" rel="noopener nofollow ugc">variations.brave.com</a><br>
+Address: 2600:9000:272c:5c00:15:85fe:56c0:93a1</p>
+<p>===</p>
+<p>C:\Squid\3_5_28\var\log\squid&gt;nslookup <a href="http://i.stack.imgur.com" rel="noopener nofollow ugc">i.stack.imgur.com</a><br>
+Server:         127.0.0.1<br>
+Address:        127.0.0.1#53</p>
+<p>*** Can’t find <a href="http://i.stack.imgur.com" rel="noopener nofollow ugc">i.stack.imgur.com</a>: No answer</p>
+<p>C:\Squid\3_5_28\var\log\squid&gt;nslookup <a href="http://i.stack.imgur.com" rel="noopener nofollow ugc">i.stack.imgur.com</a> 127.0.2.1<br>
+Server:         127.0.2.1<br>
+Address:        127.0.2.1#53</p>
+<p>Non-authoritative answer:<br>
+Name:   <a href="http://i.stack.imgur.com" rel="noopener nofollow ugc">i.stack.imgur.com</a><br>
+Address: 151.101.84.193<br>
+** server can’t find <a href="http://i.stack.imgur.com" rel="noopener nofollow ugc">i.stack.imgur.com</a>: NXDOMAIN</p></td><td>2024-04-18T05:59:23.564Z</td></tr><tr><td>sakontwist</td><td><p>У меня например dnscrypt-proxy как раз слушает 127.0.2.1 через systemd socket. Какая конфигурация listen у dnscrypt? 127.0.0.1:53 точно слушается?</p></td><td>2024-04-18T09:19:25.540Z</td></tr><tr><td>sakontwist</td><td><p>Возможно конкретный сервер не хочет “дружить с vk”.<br>
+Проверил, dnscrypt корректно отдает с других серверов:</p>
+<pre><code class="lang-auto">[2024-04-18 12:39:20]   127.0.0.1       vk.com  A       PASS    35ms    nextdns
+[2024-04-18 12:39:20]   127.0.0.1       vk.com  AAAA    SYNTH   0ms     -
+[2024-04-18 12:39:20]   127.0.0.1       vk.com  MX      PASS    20ms    cs-finland
+[2024-04-18 12:39:23]   127.0.0.1       st1-17.vk.com   A       PASS    34ms    cs-finland
+[2024-04-18 12:39:23]   127.0.0.1       sun1-17.userapi.com     AAAA    SYNTH   0ms     -
+[2024-04-18 12:39:23]   127.0.0.1       sun1-17.userapi.com     MX      PASS    35ms    dct-ru
+
+</code></pre></td><td>2024-04-18T09:41:16.136Z</td></tr><tr><td>Datura_metel(Datura metel)</td><td><p><code>sudo ss -lp 'sport = :53'</code><br>
+This command can tell you who is listening on port 53.</p></td><td>2024-04-18T09:55:28.801Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>посмотрел на ubuntu<br>
+там другие сервера тоже ресолвят<br>
+убрал “бракованые” и все заработало<br>
+первый раз у меня такое. вот тебе и "авто"выбор серверов (у меня включены ipv4 + ipv6 + doh)</p>
+<p>[2024-04-18 13:06:56]   127.0.0.1       <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a>  A       PASS    281ms   uncensoreddns-dk-ipv4</p>
+<pre><code class="lang-auto"># dig @127.0.0.1 vk.com A +noall +answer
+vk.com.                 2394    IN      A       87.240.129.133
+vk.com.                 2394    IN      A       87.240.132.72
+vk.com.                 2394    IN      A       87.240.132.67
+vk.com.                 2394    IN      A       87.240.132.78
+vk.com.                 2394    IN      A       87.240.137.164
+vk.com.                 2394    IN      A       93.186.225.194
+</code></pre></td><td>2024-04-18T10:06:05.195Z</td></tr><tr><td>Xunlei</td><td><p>Поэтому тут</p><aside class="quote quote-modified" data-post="27" data-topic="7656">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D1%81-dns-%D0%BD%D0%B0-%D1%80%D0%BE%D1%83%D1%82%D0%B5%D1%80%D0%B5/7656/27">Проблемы с DNS на роутере</a> 
+  </div>
+  <blockquote>
+    Если подбираете для ПК под Windows рекомендую <a href="https://github.com/TechnitiumSoftware/DnsServer" rel="noopener nofollow ugc">Technitium DNS Server</a> в качестве stub резолвера с настроенными форвардами DNSCrypt: 
+
+Находите штук 6 стабильных DNSCrypt серверов и релеев для вашей ASN
+Конфигурируете 6 инстансов dnscrypt-proxy для использования одного из них:
+<details><summary>Часть примера конфигурации dnscrypt-proxy</summary>server_names = ['resolver-name']
+
+listen_addresses = ['[::1]:1153']
+
+cache = false
+
+[anonymized_dns]
+routes = [
+    { server_name='resolver-name', via=['rel…</details>
+  </blockquote>
+</aside>
+<p>
+я рекомендовал использовать другой stub resolver с настроенным <em>Forwarder Concurrency</em>. У меня sth-dnscrypt-se используется, но его ответ NXDOMAIN/SERVFAIL игнорируется.</p></td><td>2024-04-18T10:13:03.320Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>да есть TOR днс и чтото вроде unbound как резервные.<br>
+но привык к одному GUI <a href="https://github.com/instantsc/SimpleDnsCrypt" class="inline-onebox" rel="noopener nofollow ugc">GitHub - instantsc/SimpleDnsCrypt: A simple management tool for dnscrypt-proxy</a><br>
+если будут часто проблемы то придется смотреть на замену</p></td><td>2024-04-18T10:19:01.232Z</td></tr><tr><td>Xunlei</td><td><p>TOR днс медленный и рекомендую его использовать только как форвардер <em>Conditional Forwarder Zone</em> для <em>onion</em> зоны.</p></td><td>2024-04-18T10:26:12.736Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>поставил что рекомендовано<br>
+пока толком не настраивал только 9.9.9.9 через DNS-over-TLS<br>
+буду теперь внимательней  с логами<br>
+а то полночи мучал squid с  кучей правил (ip + domains) или напрямую или через VPN и не мог понять почему <a href="http://vk.com" rel="noopener nofollow ugc">vk.com</a> не работает<br>
+и только потом заметил что curl через squid выдает DNS errror<br>
+вот про подставу от dnscrypt даже не подумал. надеялся что оно или работает “как надо” или не работает. а оно …</p>
+<p>2024.04.18/13:14:09 908475 127.0.0.1 TCP_TUNNEL/200 2593449 CONNECT <a href="http://st1-17.vk.com:443" rel="noopener nofollow ugc">st1-17.vk.com:443</a> HIER_DIRECT/st1-17.vk.com\95.142.204.180 -<br>
+2024.04.18/13:38:38    254 127.0.0.1 TCP_TUNNEL/200 4048 CONNECT <a href="http://vk.com:443" rel="noopener nofollow ugc">vk.com:443</a> FIRSTUP_PARENT/kaluga\62.148.159.189 -<br>
+2024.04.18/13:38:53   1010 127.0.0.1 TCP_TUNNEL/200 3996 CONNECT <a href="http://m.vk.com:443" rel="noopener nofollow ugc">m.vk.com:443</a> FIRSTUP_PARENT/Privoxy\127.0.0.1 -</p>
+<p>privoxy стоит для http-&gt;socks5 VPN чтобы весь трафик через ВПН не гонять</p></td><td>2024-04-18T10:36:14.112Z</td></tr><tr><td>Xunlei</td><td><p>Можете добавить Block List URLs:</p>
+<pre><code class="lang-auto">https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+https://big.oisd.nl/
+</code></pre>
+<p>Но придётся вручную добавлять разрешённые домены, если что-то перестанет работать (например, <code>api.nuget.org</code>).</p></td><td>2024-04-18T10:49:14.355Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>не. у меня на каждом браузере свои  ublock + umatrix<br>
+сейчас основные brave (нравиться почему то больше chrome) + firefox ESR<br>
+c DNS еще в чем гимор у меня…</p>
+<ol>
+<li>adguard vpn настройки ДНС нужны. хотя можно и 127.0.0.1 прописать</li>
+<li>squid основной 127.0.0.1 + теперь вот и резервный DNS 127.0.3.1</li>
+<li>в каждом браузере оно по дефолту лезло на DoH == отключил чтобы видеть что хоть ресолвится и зачем<br>
+провайдеру РосТелеком в РФ как то совсем доверия нету в этом плане</li>
+</ol></td><td>2024-04-18T11:08:27.996Z</td></tr><tr><td>Xunlei</td><td><p>Помимо брузера есть другое спамящее/следящее ПО. Так, у меня 28% запросов блокируются. Ещё можно поставить плагин <em>NX Domain</em> с конфигом:</p>
+<details>
+<summary>
+Настройка bogon фильтра</summary>
+<pre><code class="lang-auto">{
+	"enableBlocking": true,
+	"allowTxtBlockingReport": false,
+	"blocked": [
+		"10.in-addr.arpa",
+
+		"64.100.in-addr.arpa",
+		"65.100.in-addr.arpa",
+		"66.100.in-addr.arpa",
+		"67.100.in-addr.arpa",
+		"68.100.in-addr.arpa",
+		"69.100.in-addr.arpa",
+		"70.100.in-addr.arpa",
+		"71.100.in-addr.arpa",
+		"72.100.in-addr.arpa",
+		"73.100.in-addr.arpa",
+		"74.100.in-addr.arpa",
+		"75.100.in-addr.arpa",
+		"76.100.in-addr.arpa",
+		"77.100.in-addr.arpa",
+		"78.100.in-addr.arpa",
+		"79.100.in-addr.arpa",
+		"80.100.in-addr.arpa",
+		"81.100.in-addr.arpa",
+		"82.100.in-addr.arpa",
+		"83.100.in-addr.arpa",
+		"84.100.in-addr.arpa",
+		"85.100.in-addr.arpa",
+		"86.100.in-addr.arpa",
+		"87.100.in-addr.arpa",
+		"88.100.in-addr.arpa",
+		"89.100.in-addr.arpa",
+		"90.100.in-addr.arpa",
+		"91.100.in-addr.arpa",
+		"92.100.in-addr.arpa",
+		"93.100.in-addr.arpa",
+		"94.100.in-addr.arpa",
+		"95.100.in-addr.arpa",
+		"96.100.in-addr.arpa",
+		"97.100.in-addr.arpa",
+		"98.100.in-addr.arpa",
+		"99.100.in-addr.arpa",
+		"100.100.in-addr.arpa",
+		"101.100.in-addr.arpa",
+		"102.100.in-addr.arpa",
+		"103.100.in-addr.arpa",
+		"104.100.in-addr.arpa",
+		"105.100.in-addr.arpa",
+		"106.100.in-addr.arpa",
+		"107.100.in-addr.arpa",
+		"108.100.in-addr.arpa",
+		"109.100.in-addr.arpa",
+		"110.100.in-addr.arpa",
+		"111.100.in-addr.arpa",
+		"112.100.in-addr.arpa",
+		"113.100.in-addr.arpa",
+		"114.100.in-addr.arpa",
+		"115.100.in-addr.arpa",
+		"116.100.in-addr.arpa",
+		"117.100.in-addr.arpa",
+		"118.100.in-addr.arpa",
+		"119.100.in-addr.arpa",
+		"120.100.in-addr.arpa",
+		"121.100.in-addr.arpa",
+		"122.100.in-addr.arpa",
+		"123.100.in-addr.arpa",
+		"124.100.in-addr.arpa",
+		"125.100.in-addr.arpa",
+		"126.100.in-addr.arpa",
+		"127.100.in-addr.arpa",
+
+		"254.169.in-addr.arpa",
+
+		"16.172.in-addr.arpa",
+		"17.172.in-addr.arpa",
+		"18.172.in-addr.arpa",
+		"19.172.in-addr.arpa",
+		"20.172.in-addr.arpa",
+		"21.172.in-addr.arpa",
+		"22.172.in-addr.arpa",
+		"23.172.in-addr.arpa",
+		"24.172.in-addr.arpa",
+		"25.172.in-addr.arpa",
+		"26.172.in-addr.arpa",
+		"27.172.in-addr.arpa",
+		"28.172.in-addr.arpa",
+		"29.172.in-addr.arpa",
+		"30.172.in-addr.arpa",
+		"31.172.in-addr.arpa",
+
+		"0.0.192.in-addr.arpa",
+
+		"2.0.192.in-addr.arpa",
+
+		"99.88.192.in-addr.arpa",
+
+		"168.192.in-addr.arpa",
+
+		"18.198.in-addr.arpa",
+		"19.198.in-addr.arpa",
+
+		"100.51.198.in-addr.arpa",
+
+		"113.0.203.in-addr.arpa",
+
+		"0.252.233.in-addr.arpa",
+
+		"240.in-addr.arpa",
+		"241.in-addr.arpa",
+		"242.in-addr.arpa",
+		"243.in-addr.arpa",
+		"244.in-addr.arpa",
+		"245.in-addr.arpa",
+		"246.in-addr.arpa",
+		"247.in-addr.arpa",
+		"248.in-addr.arpa",
+		"249.in-addr.arpa",
+		"250.in-addr.arpa",
+		"251.in-addr.arpa",
+		"252.in-addr.arpa",
+		"253.in-addr.arpa",
+		"254.in-addr.arpa",
+
+		"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa",
+
+		"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.b.9.f.f.4.6.0.0.ip6.arpa",
+
+		"1.0.0.0.b.9.f.f.4.6.0.0.ip6.arpa",
+
+		"f.f.f.f.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa",
+
+		"0.0.0.0.f.f.f.f.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa",
+
+		"0.0.0.0.0.0.0.0.0.0.0.0.0.0.1.0.ip6.arpa",
+
+		"1.0.0.2.ip6.arpa",
+
+		"2.0.0.2.ip6.arpa",
+
+		"c.f.ip6.arpa",
+		"d.f.ip6.arpa",
+
+		"8.e.f.ip6.arpa",
+		"9.e.f.ip6.arpa",
+		"a.e.f.ip6.arpa",
+		"b.e.f.ip6.arpa",
+	]
+}
+</code></pre>
+</details></td><td>2024-04-18T11:15:35.645Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>нашел в конфиге dnscrypt-proxy</p>
+<pre><code class="lang-auto"># p2 (randomly choose between the top 2 fastest servers)
+# ph (randomly choose between the top fastest half of all servers)
+lb_strategy = "ph"
+lb_estimator = true
+</code></pre>
+<p>и пришлось все 3и вносить в список<br>
+disabled_server_names = [“sth-doh-se”, “sth-dnscrypt-se-ipv6”, “sth-dnscrypt-se”]</p></td><td>2024-04-23T00:22:33.687Z</td></tr>
+    </table>
+      </body>
+    </html>

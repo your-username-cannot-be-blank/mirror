@@ -1,0 +1,142 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>dpi-защищается-от-обмана-себя</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>bolvan</td><td><p>Исследуя блокировки на одном из провайдеров , я обнаружил интересную штуку.<br>
+Большинство блокировок обходится zapret-ом как обычно на других провайдерах.<br>
+Однако, на cloudflare применен какой-то более строгий алгоритм, который сечет попытки обхода, по крайней мере split запроса точно, и в этом случае вне зависимости от домена дает RST.</p>
+<p>Вот так это выглядит :</p>
+<p>Если zapret убрать, то фильтрация идет нормально.</p>
+<pre><code class="lang-auto">$ sudo systemctl stop zapret
+$ curl -4k --resolve bred.com:443:172.67.159.231 https://bred.com
+curl: (35) OpenSSL/3.0.9: error:0A000410:SSL routines::sslv3 alert handshake failure
+(ЭТО ОШИБКА СО СТОРОНЫ CLOUDFLARE, НЕ БЛОКИРАТОР)
+$ curl -4k --resolve nhentai.net:443:172.67.159.231 https://nhentai.net
+curl: (35) Recv failure: Connection reset by peer
+$ curl -4k --resolve rutracker.org:443:172.67.159.231 https://rutracker.org
+curl: (35) Recv failure: Connection reset by peer
+
+</code></pre>
+<p>Однако, при любой фрагментации запроса идет сброс вне зависимости от домена :</p>
+<pre><code class="lang-auto">$ ps xau | grep nfqws
+tpws       21245  0.0  0.0   3028  2080 ?        S    12:07   0:00 /opt/zapret/nfq/nfqws --user=tpws --dpi-desync-fwmark=0x40000000 --qnum=200 --dpi-desync=split2
+
+$ curl -4k --resolve kremlin.ru:443:172.67.159.231 https://kremlin.ru
+curl: (35) Recv failure: Connection reset by peer
+
+$ curl -4k --resolve lenta.ru:443:172.67.159.231 https://lenta.ru
+curl: (35) Recv failure: Connection reset by peer
+
+</code></pre>
+<p>Отсюда можно сделать какой вывод.<br>
+У них есть особый более строгий фильтр для CDN типа cloudflare, который zapret пробить не в состоянии. По той причине, что он сечет попытки обхода (например, через split запроса) и полностью блокирует IP в этом случае.</p>
+<p>/etc/hosts<br>
+104.21.97.11 <a href="http://nhentai.net">nhentai.net</a><br>
+104.21.97.11 <a href="http://rutracker.org">rutracker.org</a></p>
+<p>помогает с zapret-ом обойти блокировку</p>
+<p>Как показывает опыт, не весь cloudflare так заблокирован. В нем есть ряд диапазонов, который заблокирован как описано выше, но если из него выехать, то там все стандартно</p>
+<p>Не исключаю, что там осталась какая-то старая отсебятина от провайдеров. Там стоит минимум 2 DPI, который дают редирект по http на разные URL, но возможно еще какое-то старье</p>
+<p>В спб на нескольких провайдерах ничего подобного (пока ?) нет.</p>
+<p>PS. Обнаружилась дырка в “строгости”. Если резать по 1 байту --dpi-desync-split-pos=1, то это пробивает фильтр</p></td><td>2024-02-08T09:45:32.712Z</td></tr><tr><td>m0xfff</td><td><p>У проводного мтс такая фигня уже давно. Уже года 3, если не больше. Тоже заметил, что там два dpi. Один поумнее, собирает сессию и ищет вначале tls запрос. Другой тупой и просто ищет tls запрос в каждом пакете без анализа сессий. И вот второй dpi находит начало tls запроса, но не находит sni, который переместился в следующий пакет. И срабатывает блокировка. Видимо так решили проблему encrypted sni.</p></td><td>2024-02-08T19:14:03.833Z</td></tr><tr><td>anon57137390</td><td><p>del</p></td><td>2024-02-08T23:07:52.741Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="m0xfff" data-post="2" data-topic="7091">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/m0xfff/48/2696_2.png" class="avatar"> m0xfff:</div>
+<blockquote>
+<p>И вот второй dpi находит начало tls запроса, но не находит sni, который переместился в следующий пакет</p>
+</blockquote>
+</aside>
+<p>Пробовал резать по 516:1 (всего 517). Та же история.<br>
+Причем, как уже написал, это работает только на части адресов cloudflare. Довольно большие дипазоны, типа x.x.0.0-x.x.96.255  , а с x.x.97.0 - норм<br>
+Это какое-то отдельное правило. Анализируя только 1-й пакет на 443 порту, допускать только TLS, проверяя при этом SNI. TLS считается как полная запись, кусок не считается. Иначе - RST</p></td><td>2024-02-09T06:44:53.985Z</td></tr><tr><td>hufrea</td><td><p>Обнаружил похожую блокировку с конца января:<br>
+1</p>
+<pre><code class="lang-auto">$ ./ciadpi -m split -s 3 &amp;
+
+$ curl -I --resolve rutracker.org:443:172.67.182.196 https://rutracker.org -x socks5://localhost:1080
+curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to rutracker.org:443
+(Блокировка)
+
+$ curl -I --resolve rutracker.org:443:172.67.159.231 https://rutracker.org -x socks5://localhost:1080
+curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to rutracker.org:443
+(Блокировка)
+
+$ curl -I --resolve bred.ru:443:172.67.159.231 https://bred.ru -x socks5://localhost:1080
+curl: (35) OpenSSL/3.0.9: error:0A000410:SSL routines::sslv3 alert handshake failure
+(Ошибка Cloudflare)
+</code></pre>
+<p>2</p>
+<pre><code class="lang-auto">$ ./ciadpi -m disorder -s 3 &amp;
+
+$ curl -I --resolve rutracker.org:443:172.67.182.196 https://rutracker.org -x socks5://localhost:1080
+HTTP/2 301...
+
+$ curl -I --resolve rutracker.org:443:172.67.159.231 https://rutracker.org -x socks5://localhost:1080
+curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to rutracker.org:443
+(Блокировка)
+
+$ curl -I --resolve bred.ru:443:172.67.159.231 https://bred.ru -x socks5://localhost:1080
+curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to bred.ru:443
+(Блокировка)
+</code></pre>
+<p>Да, на некоторые адреса действует особая блокировка - если первый пакет не является TLS записью с SNI, то соединение блокируется, независимо от домена.<br>
+Обойти можно, отправив фейковый TLS пакет:</p>
+<pre><code class="lang-auto">$ ./ciadpi -m fake -s 8 -H -t 7 &amp;
+
+$ curl -I --resolve rutracker.org:443:172.67.182.196 https://rutracker.org -x socks5://localhost:1080
+HTTP/2 301...
+
+$ curl -I --resolve rutracker.org:443:172.67.159.231 https://rutracker.org -x socks5://localhost:1080
+HTTP/2 301...
+
+$ curl -I --resolve bred.ru:443:172.67.159.231 https://bred.ru -x socks5://localhost:1080
+curl: (35) OpenSSL/3.0.9: error:0A000410:SSL routines::sslv3 alert handshake failure
+(Ошибка Cloudflare)
+</code></pre></td><td>2024-02-09T12:58:08.350Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="hufrea" data-post="5" data-topic="7091">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/h/8c91f0/48.png" class="avatar"> hufrea:</div>
+<blockquote>
+<p>Обойти можно, отправив фейковый TLS пакет:</p>
+</blockquote>
+</aside>
+<p>На том провайдере это не работало.<br>
+blockcheck от zapret не выдавал ни одной рабочей стратегии на https<br>
+и только разбиение на 1 байте дало результат.<br>
+Это должно быть или ошибка в знаках сравнения в алгоритме DPI, или реакция на первые 2 байта 16 03, точнее на их отсутствие в первом пакете<br>
+Но вопрос остается открытым с какой целью это было сделано, сделано ли это на ТСПУ, и если да, то почему не везде, почему только на cloudflare и только на части диапазонов.<br>
+Какие-то тестилки, которые забыли выключить, а правая рука забыла, что делала левая 2 года назад , так и потонув в бюрократическом омуте ?</p></td><td>2024-02-09T13:23:36.223Z</td></tr>
+    </table>
+      </body>
+    </html>

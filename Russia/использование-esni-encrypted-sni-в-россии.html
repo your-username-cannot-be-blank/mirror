@@ -1,0 +1,785 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>использование-esni-encrypted-sni-в-россии</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>На данный момент, использование ESNI у многих провайдеров, применяющих DPI, <strong>ухудшает</strong> доступность сайтов, вопреки ожиданиям.<br>
+Причина в отсутствии SNI.<br>
+DPI многих провайдеров настроены так, что когда они не могут определить, к какому домену производится доступ, они блокируют соединение, и фактически получается блокировка по IP.</p>
+<p>Реестр запрещенных сайтов состоит из следующих элементов:</p>
+<ul>
+<li>
+<strong>Тип блокировки</strong> : default (обычно используется для конкретных HTTP URI), domain, ip</li>
+<li><strong>Домен</strong></li>
+<li><strong>IP-адрес/адреса</strong></li>
+<li>Другая нетехническая информация, вроде судебного решения и органа, добавившего элемент в реестр</li>
+</ul>
+<p><strong>Пример:</strong><br>
+Есть в реестре заблокированный домен w1.mobgo1azino.site, с IP-адресами 104.28.26.13 | 104.28.27.13. Он заблокирован по доменному имени (реестр содержит IP-адреса даже для типа блокировки type=domain).<br>
+Вы хотите зайти на незаблокированный сайт <a href="http://bo0om.ru" rel="nofollow noopener">bo0om.ru</a>, у которого те же IP-адреса, потому что оба сайта находятся за Cloudflare.<br>
+Если вы используете браузер без ESNI, то DPI провайдера увидит, что вы пытаетесь зайти на <a href="http://bo0om.ru" rel="nofollow noopener">bo0om.ru</a> по этим IP-адресам, и разрешит соединение.<br>
+Если вы будете использовать ESNI, то в TLS ClientHello-пакете не будет поля SNI, и DPI <strong>заблокирует</strong> ваше соединение.</p></td><td>2019-09-17T02:59:05.859Z</td></tr><tr><td>ValdikSS</td><td><p>Ещё стоит отметить, что в России заблокирован стандартный DoH-резолвер, вписанный в Firefox, <strong><a href="http://mozilla.cloudflare-dns.com">mozilla.cloudflare-dns.com</a></strong>.<br>
+<a href="https://isitblockedinrussia.com/?host=mozilla.cloudflare-dns.com">https://isitblockedinrussia.com/?host=mozilla.cloudflare-dns.com</a></p>
+<p>Один адрес, 104.16.249.249, внесён в реестр для домена <a href="http://ineedusersmore.net">ineedusersmore.net</a> (многие провайдеры не будут блокировать другие сайты на этом IP-адресе, но не все).<br>
+Второй адрес, 104.16.248.249, внесён уже чисто по IP-адресу, на основании «суд;2-946/13», и доступ к нему должен блокироваться полностью.<br>
+Не удивляйтесь, если DoH в Firefox будет работать через раз или не работать вовсе.</p>
+<aside class="onebox whitelistedgeneric">
+  <header class="source">
+      <img src="https://bugzilla.mozilla.org/extensions/BMO/web/images/favicon.ico" class="site-icon" width="16" height="16">
+      <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1593176" target="_blank">bugzilla.mozilla.org</a>
+  </header>
+  <article class="onebox-body">
+    <img src="" class="thumbnail" width="" height="">
+
+<h3><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1593176" target="_blank">1593176 - Default DNS-over-HTTPS resolver mozilla.cloudflare-dns.com is...</a></h3>
+
+<p>UNCONFIRMED (nobody) in Core - Networking: DNS. Last updated 2020-01-16.</p>
+
+
+  </article>
+  <div class="onebox-metadata">
+    
+    
+  </div>
+  <div style="clear: both"></div>
+</aside>
+</td><td>2019-09-23T17:56:54.871Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="2" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Второй адрес, 104.16.248.249, внесён уже чисто по IP-адресу, на основании «суд;2-946/13», и доступ к нему должен блокироваться полностью.</p>
+</blockquote>
+</aside>
+<p>The date given for the blocking order of 104.16.248.249 is 2013-06-10, over six years ago. It could not have been a DoH server at that time. Perhaps the IP address was used for some other purpose in 2013, and the DoH server inherited the block?</p>
+<p><a href="https://isitblockedinrussia.com/?host=mozilla.cloudflare-dns.com">https://isitblockedinrussia.com/?host=mozilla.cloudflare-dns.com</a><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="использование-esni-encrypted-sni-в-россии/244191928c5f4fec8a6c5f33101584fc2d381251.png" data-download-href="https://ntc.party/uploads/default/244191928c5f4fec8a6c5f33101584fc2d381251" title="screenshot of https://isitblockedinrussia.com/?host=mozilla.cloudflare-dns.com"><img src="использование-esni-encrypted-sni-в-россии/244191928c5f4fec8a6c5f33101584fc2d381251_2_279x336.png" alt="screenshot of https://isitblockedinrussia.com/?host=mozilla.cloudflare-dns.com" data-base62-sha1="5aJFu2mGNWg4Hpvesrjrz6Zyg7v" width="279" height="336" srcset="использование-esni-encrypted-sni-в-россии/244191928c5f4fec8a6c5f33101584fc2d381251_2_279x336.png, использование-esni-encrypted-sni-в-россии/244191928c5f4fec8a6c5f33101584fc2d381251_2_418x504.png 1.5x, использование-esni-encrypted-sni-в-россии/244191928c5f4fec8a6c5f33101584fc2d381251_2_558x672.png 2x" data-dominant-color="FBF6F4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">screenshot of https://isitblockedinrussia.com/?host=mozilla.cloudflare-dns.com</span><span class="informations">558×672 33.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>1.1.1.1 is still reported as not blocked. (It’s not the default in Firefox, I believe it would have to be configured manually.)</p>
+<p><a href="https://isitblockedinrussia.com/?host=one.one.one.one">https://isitblockedinrussia.com/?host=one.one.one.one</a><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="использование-esni-encrypted-sni-в-россии/d54e1e13c164a0dd83850c4fa613338ce477e8c6.png" data-download-href="https://ntc.party/uploads/default/d54e1e13c164a0dd83850c4fa613338ce477e8c6" title="screenshot of https://isitblockedinrussia.com/?host=one.one.one.one"><img src="использование-esni-encrypted-sni-в-россии/d54e1e13c164a0dd83850c4fa613338ce477e8c6_2_279x336.png" alt="screenshot of https://isitblockedinrussia.com/?host=one.one.one.one" data-base62-sha1="uqZ4a8DwdVwL8yT2a1kxRYzOFds" width="279" height="336" srcset="использование-esni-encrypted-sni-в-россии/d54e1e13c164a0dd83850c4fa613338ce477e8c6_2_279x336.png, использование-esni-encrypted-sni-в-россии/d54e1e13c164a0dd83850c4fa613338ce477e8c6_2_418x504.png 1.5x, использование-esni-encrypted-sni-в-россии/d54e1e13c164a0dd83850c4fa613338ce477e8c6_2_558x672.png 2x" data-dominant-color="F8FBFA"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">screenshot of https://isitblockedinrussia.com/?host=one.one.one.one</span><span class="informations">558×672 19.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2019-09-23T18:27:03.601Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="tango" data-post="3" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"> tango:</div>
+<blockquote>
+<p>The date given for the blocking order of 104.16.248.249 is 2013-06-10, over six years ago. It could not have been a DoH server at that time. Perhaps the IP address was used for some other purpose in 2013, and the DoH server inherited the block?</p>
+</blockquote>
+</aside>
+<p>That’s the date of court decision, not the date of the record. The IP addresses were added to the registry in the end of 2016 [<a href="https://reestr.rublacklist.net/search/?q=104.16.248.249">1</a>,<a href="https://reestr.rublacklist.net/search/?q=104.16.249.249">2</a>].</p>
+<p>Oh, and you got inconsistent result from isitblockedinrussia. It’s fully blocked for me.<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="использование-esni-encrypted-sni-в-россии/89af3da8465b1bf153dacbe2ddfb9a64576ea964.png" data-download-href="https://ntc.party/uploads/default/89af3da8465b1bf153dacbe2ddfb9a64576ea964" title="Screenshot_20190923_214146-fs8"><img src="использование-esni-encrypted-sni-в-россии/89af3da8465b1bf153dacbe2ddfb9a64576ea964.png" alt="Screenshot_20190923_214146-fs8" data-base62-sha1="jE0RDYCJvsK4z3uAoqPWXcVpMeU" width="690" height="379" data-dominant-color="FCF6F7"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_20190923_214146-fs8</span><span class="informations">1116×614 23.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Please ping the author here: <a href="https://github.com/deNULL/isitblockedinrussia.com/issues/3" class="inline-onebox">Результаты меняются из раза к разу · Issue #3 · deNULL/isitblockedinrussia.com · GitHub</a></p></td><td>2019-09-23T18:46:57.691Z</td></tr><tr><td>Lmd123(Yuri)</td><td><p>eSNI это очень плохая идея. Во-первых, сессию очень легко на мидлбоксе свалить в fall back на TLS 1.2. Во-вторых, DoH легко режется по SNI сам по себе, потому что из-за доступности и обратной совместимости большинство провайдеров поддерживают fallback to SNI (мы проверяли в лаборатории). Ну и пробинг, собственно, ловит и позволяет пресечь. Доступность теряется. Требовалось либо обеспечить глобальный переход всех и сразу, и без fallback - что невозможно, либо не заморачиваться вообще.</p></td><td>2019-09-26T13:50:27.731Z</td></tr><tr><td>ValdikSS</td><td><p>Как я понимаю, ESNI прежде всего сделан для защиты приватности, чтобы провайдер пассивно не мог анализировать пользовательское поведение на основании DNS-запросов и SNI в TLS, а не для предотвращения цензурирования доступа.</p></td><td>2019-09-26T13:54:35.289Z</td></tr><tr><td>Lmd123(Yuri)</td><td><p>В общем и целом - да. Кроме того, всегда остается опасность подписывания сертификата мидлбокса у рутов, и незаметного подсматривания (peek или stare) доменного имени; ну и реверсивные прокси видят TLS полностью, о чем не стоит забывать.</p></td><td>2019-09-26T13:57:25.397Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Lmd123" data-post="7" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/lmd123/48/87_2.png" class="avatar"> Lmd123:</div>
+<blockquote>
+<p>всегда остается опасность подписывания сертификата мидлбокса у рутов</p>
+</blockquote>
+</aside>
+<p>Такое практически невозможно в современном мире PKI, где используется Certificate Transparency.</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://developer.mozilla.org/en-US/docs/Web/Security/Certificate_Transparency#Browser_Requirements">
+  <header class="source">
+      <img src="использование-esni-encrypted-sni-в-россии/75528fd0cfe7d407679c5c585848c69857f9571e.png" class="site-icon" data-dominant-color="3F3E43" width="48" height="48">
+
+      <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Certificate_Transparency#Browser_Requirements" target="_blank" rel="noopener">MDN Web Docs</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/387;"><img src="использование-esni-encrypted-sni-в-россии/f43c65b3b818a2ea578c6a20ce48f67e84ba4d29_2_690x388.png" class="thumbnail" data-dominant-color="060909" width="690" height="388"></div>
+
+<h3><a href="https://developer.mozilla.org/en-US/docs/Web/Security/Certificate_Transparency#Browser_Requirements" target="_blank" rel="noopener">Certificate Transparency - Security on the web | MDN</a></h3>
+
+  <p>Certificate Transparency is an open framework designed to protect against and monitor for certificate mis-issuances. It's defined in RFC 9162. With certificate transparency, newly-issued certificates are 'logged' to publicly-run, often independent CT...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<aside class="quote no-group" data-username="Lmd123" data-post="7" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/lmd123/48/87_2.png" class="avatar"> Lmd123:</div>
+<blockquote>
+<p>ну и реверсивные прокси видят TLS полностью, о чем не стоит забывать</p>
+</blockquote>
+</aside>
+<p>Не понял, о чем речь.</p></td><td>2019-09-26T14:04:17.447Z</td></tr><tr><td>Lmd123(Yuri)</td><td><p>Я бы насчет рутов не говорил “невозможно”. Вспомним Симантек и BlueCoat. Которые по сей день находятся в эксплуатации (есть доказательства).</p>
+<p>Реверсивные прокси для кэширования полностью расшифровывают HTTPS. Кэшировать без расшифровки HTTPS трафик невозможно. Это мало кто знает - это не афишируется - но это так. Об этом следует помнить.</p></td><td>2019-09-26T14:15:59.157Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Lmd123" data-post="9" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/lmd123/48/87_2.png" class="avatar"> Lmd123:</div>
+<blockquote>
+<p>Реверсивные прокси для кэширования полностью расшифровывают HTTPS. Кэшировать без расшифровки HTTPS трафик невозможно. Это мало кто знает - это не афишируется - но это так. Об этом следует помнить.</p>
+</blockquote>
+</aside>
+<p>Они не стоят у провайдера, а если и стоят, то только специализированные, вроде Google Global Cache, который сам управляет всем.<br>
+В любом случае, это уже не по теме.</p></td><td>2019-09-26T14:46:09.524Z</td></tr><tr><td>Lmd123(Yuri)</td><td><p>Они именно у провайдера и стоят. Cloudflare стоит прямо на провайдерах во многих случаях. GGC… я не могу это обсуждать, к сожалению. CDN это отдельная, очень нехорошая, тема, которую, к сожалению, считают к делу не относящейся. Просто я бы посоветовал не отмахиваться от этого, окей? Это все, что я могу сказать.</p></td><td>2019-09-26T16:16:47.719Z</td></tr><tr><td>ValdikSS</td><td><p>6 posts were merged into an existing topic: <a href="/t/cloudflare-blocked-ip-circumvention/212/2">Cloudflare blocked IP circumvention</a></p></td><td>2019-11-06T16:58:13.249Z</td></tr><tr><td>ValdikSS</td><td><p>Let’s discuss Cloudflare’s feature in <a href="https://ntc.party/t/cloudflare-blocked-ip-circumvention/212" class="inline-onebox">Cloudflare blocked IP circumvention</a></p></td><td>2019-11-06T16:57:36.028Z</td></tr><tr><td>ValdikSS</td><td><p>У домена <code>cloudflare-dns.com</code>, на котором расположен обычный DNS-over-HTTPS-резолвер от Cloudflare, такие же IP-адреса, что и у <code>mozilla.cloudflare-dns.com</code>, а значит, что он также не будет работать корректно в РФ через многих провайдеров.</p>
+<p>Мне пишут:</p>
+<blockquote>
+<p>[…] друг использует приложение Simple DNSCrypt с dns от cloudflare (DoH), периодически он просто падает.<br>
+[…]Падает не программа, а само соединение к <a href="https://cloudflare-dns.com/dns-query">https://cloudflare-dns.com/dns-query</a> и в такой момент только через впн работает.</p>
+</blockquote></td><td>2020-01-16T05:24:29.182Z</td></tr><tr><td>GabbyFreez</td><td><p>По каким причинам ESNI может не фунциклировать?<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="использование-esni-encrypted-sni-в-россии/96bdc1f0dab10c6e21ca7e138b489987c95818d9.jpeg" data-download-href="https://ntc.party/uploads/default/96bdc1f0dab10c6e21ca7e138b489987c95818d9" title="изображение"><img src="использование-esni-encrypted-sni-в-россии/96bdc1f0dab10c6e21ca7e138b489987c95818d9_2_690x232.jpeg" alt="изображение" data-base62-sha1="lvwaO34mAlA91CE1mxWBD1oR2Ax" width="690" height="232" srcset="использование-esni-encrypted-sni-в-россии/96bdc1f0dab10c6e21ca7e138b489987c95818d9_2_690x232.jpeg, использование-esni-encrypted-sni-в-россии/96bdc1f0dab10c6e21ca7e138b489987c95818d9_2_1035x348.jpeg 1.5x, использование-esni-encrypted-sni-в-россии/96bdc1f0dab10c6e21ca7e138b489987c95818d9.jpeg 2x" data-dominant-color="F6F6F4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1255×422 100 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<img src="использование-esni-encrypted-sni-в-россии/38e700fda7992e328db8480786419bb24c66e3ac.png" alt="изображение" data-base62-sha1="87nF2aACYfDTlRQGX9HZBiEJiwc" width="677" height="116"></p></td><td>2021-03-12T07:49:28.326Z</td></tr><tr><td>ValdikSS</td><td><p>Для работы esni необходимо также использовать dns-over-https.</p></td><td>2021-03-12T09:42:42.242Z</td></tr><tr><td>GabbyFreez</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="16" data-topic="68" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Для работы esni необходимо также использовать dns-over-https.</p>
+</blockquote>
+</aside>
+<p>Таки он включен, первая галка про это и говорит.</p></td><td>2021-03-13T09:22:03.138Z</td></tr><tr><td>ValdikSS</td><td><p>Поддержку ESNI убрали в Firefox 85.</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://blog.mozilla.org/security/2021/01/07/encrypted-client-hello-the-future-of-esni-in-firefox/">
+  <header class="source">
+      <img src="использование-esni-encrypted-sni-в-россии/5c0ddc84e1f1049063b9cfc1e28aca6bea61e8f6.png" class="site-icon" data-dominant-color="424242" width="128" height="128">
+
+      <a href="https://blog.mozilla.org/security/2021/01/07/encrypted-client-hello-the-future-of-esni-in-firefox/" target="_blank" rel="noopener">Mozilla Security Blog</a>
+  </header>
+
+  <article class="onebox-body">
+    
+
+<h3><a href="https://blog.mozilla.org/security/2021/01/07/encrypted-client-hello-the-future-of-esni-in-firefox/" target="_blank" rel="noopener">Encrypted Client Hello: the future of ESNI in Firefox – Mozilla Security Blog</a></h3>
+
+  <p>Background Two years ago, we announced experimental support for the privacy-protecting Encrypted Server Name Indication (ESNI) extension in Firefox Nightly. The Server Name Indication (SNI) TLS extension enables server and ...</p>
+
+  <p>
+    <span class="label1">Est. reading time: 3 minutes</span>
+  </p>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://www.ghacks.net/2021/02/24/the-case-of-the-missing-esni-support-in-firefox-85/">
+  <header class="source">
+
+      <a href="https://www.ghacks.net/2021/02/24/the-case-of-the-missing-esni-support-in-firefox-85/" target="_blank" rel="noopener" title="12:58PM - 24 February 2021">gHacks Technology News – 24 Feb 21</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/371;"><img src="использование-esni-encrypted-sni-в-россии/cfe2cf987e53b92ec0a423599820d0f0be6cb162.png" class="thumbnail" data-dominant-color="F1F3F5" width="690" height="371"></div>
+
+<h3><a href="https://www.ghacks.net/2021/02/24/the-case-of-the-missing-esni-support-in-firefox-85/" target="_blank" rel="noopener">The case of missing ESNI support in Firefox 85 - gHacks Tech News</a></h3>
+
+  <p>If you have upgraded your stable version of the Firefox web browser to version 85.0, released in January, you may have noticed that it no longer supports ESNI.Â&nbsp;</p>
+
+  <p>
+    <span class="label1">Est. reading time: 2 minutes</span>
+  </p>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2021-03-14T16:01:16.891Z</td></tr><tr><td>ValdikSS</td><td><p>Cloudflare включил поддержку ECH на некоторых доменах. Rutracker работает через ECH в Firefox 130.</p>
+<aside class="quote quote-modified" data-post="1" data-topic="10075">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/encrypted-clienthello-ech-is-now-enabled-on-cloudflare/10075">Encrypted ClientHello (ECH) is now enabled on Cloudflare</a> <a class="badge-category__wrapper " href="/c/censorship-circumvention-software/11"><span data-category-id="11" style="--category-badge-color: #92278F; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Discussions of censorship circumvention software of different kinds, for all operation systems and devices"><span class="badge-category__name">Censorship circumvention methods &amp; software</span></span></a>
+  </div>
+  <blockquote>
+    Just discovered that Rutracker opens without any circumvention methods on Edge and Firefox, and that turns out to be thanks to ECH, it’s hosted behind Cloudflare. 
+
+Note: most browsers require DNS-over-HTTPS to be configured to receive DNS HTTPS type record which contain ECH configuration, however in Firefox 130, it works even with the regular unprotected DNS. 
+
+As far as I could find, it haven’t been announced anywhere, except in their <a href="https://developers.cloudflare.com/ssl/edge-certificates/ech/">documentation</a>: 
+
+Caution 
+ECH is disabled globally, and can…
+  </blockquote>
+</aside>
+
+<p>Интересно посмотреть, как браузеры будут обрабатывать блокировку cloudflare-ech.com «заморозкой» соединения, как это сейчас реализовано в РФ. Полагаю, что не очень хорошо.</p></td><td>2024-09-12T23:13:13.594Z</td></tr><tr><td>artenox</td><td><p>Да, у меня под йотой rutracker стал открываться в Brave 1.59.117/Chromium 118.0.5993.70 (sni: <code>cloudflare-ech.com</code>) с включенным <span class="hashtag-raw">#encrypted-client-hello</span> (я слышал, что в новых версиях флаг исчез, значит что этот параметр стал по умолчанию и не отключить?)<br>
+Напомню, что у меня есть <a href="https://github.com/artenax/curl/releases">сборка curl</a> для линукса с поддержкой ECH (а также QUIC Quiche). Она тоже работает:<br>
+<code>curl --http3-only --ech hard --tlsv1.3 --doh-url https://cloudflare-dns.com/dns-query -v https://rutracker.org/</code><br>
+Что интересно, под warp vpn не хочет: weird server reply.</p></td><td>2024-09-13T00:39:45.320Z</td></tr><tr><td>User69</td><td><p><a href="https://community.cloudflare.com/t/encrypted-client-hello-ech-are-being-enabled-again/700863/3" class="onebox" target="_blank" rel="noopener">https://community.cloudflare.com/t/encrypted-client-hello-ech-are-being-enabled-again/700863/3</a><br>
+медленно выкатывают, у себя пока не решаются</p>
+<p>В Chrome 128 тоже работает, отключить нельзя</p></td><td>2024-09-13T00:58:53.448Z</td></tr><tr><td>wigeance(Wigeance)</td><td><p>В хроме начал рутрекер по quic открываться без обходов. Раньше не работал</p></td><td>2024-09-13T01:02:37.199Z</td></tr><tr><td>artenox</td><td><aside class="quote no-group quote-modified" data-username="wigeance" data-post="22" data-topic="68" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/wigeance/48/3861_2.png" class="avatar"> wigeance:</div>
+<blockquote>
+<p>В хроме начал рутрекер по quic открываться без обходов. Раньше не работал.</p>
+</blockquote>
+</aside>
+<p>У меня и без quic сейчас открывается, с ech.</p>
+<aside class="quote no-group" data-username="User69" data-post="21" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/user69/48/2306_2.png" class="avatar"> User69:</div>
+<blockquote>
+<p>у себя пока не решаются</p>
+</blockquote>
+</aside>
+<p>Да, если убрать флаг --http3-only, то ошибка становится<br>
+BoringSSL: error:1000013f:SSL routines:OPENSSL_internal:ECH_REJECTED<br>
+В браузере работает, но он отказывается от ECH в случае проблем.<br>
+Непонятно только как VPN (пусть даже от Cloudflare) может влиять на работоспособность ECH. Разве что там резолвятся какие-то другие IP сайта (который тоже за Cloudflare) без поддержки ECH.</p></td><td>2024-09-13T01:32:03.982Z</td></tr><tr><td>artenox</td><td><aside class="quote no-group" data-username="LeonMskRu">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/leonmskru/48/2810_2.png" class="avatar"> LeonMskRu:</div>
+<blockquote>
+<p>хотя у cloudflare остались сервера рядом с MSK-IX</p>
+</blockquote>
+</aside>
+<p>Очень трудно отследить куда идёт warp (из нск), как раз из-за гео оптимизации. Но я вроде докопался, изучал транзитные айпишники из traceroute, у всех одна AS, которая судя по всему в Спб, а дальше Швеция. Cloudflare осталась в РФ работать, да.</p></td><td>2024-09-13T10:19:20.306Z</td></tr><tr><td>TesterTi(TesterIt)</td><td><aside class="quote no-group" data-username="artenox" data-post="20" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a8b319/48.png" class="avatar"> artenox:</div>
+<blockquote>
+<p>Да, у меня под йотой rutracker стал открываться</p>
+</blockquote>
+</aside>
+<p>И не только rutracker, еще nnmclub и kinozal, они видимо тоже на CF</p></td><td>2024-09-13T17:22:24.196Z</td></tr><tr><td>anon9001(anon)</td><td><p>Похоже все адреса 104.* имеют вероятность тупо работать сейчас. Я уже обнаружил несколько сайтов которые тоже работают, причем так быстро что чувствуется как магия после годов использования проксей где медленная скорость уже привычна.</p></td><td>2024-09-14T08:29:12.115Z</td></tr><tr><td>yatolkosprosit</td><td><p>Непонятны три вещи:</p>
+<ol>
+<li>
+<p>откуда браузер знает, что вместо SNI <code>rutracker.org</code> нужно сначала отправить SNI <code>cloudflare-ech.com</code> и только потом <code>rutracker.org</code> ?</p>
+</li>
+<li>
+<p>Браузеры, которые этого не умеют, теперь не смогут ходить на сервера cloudflare или для них оставлена какая-то лазейка?</p>
+</li>
+<li>
+<p>Что будет, если <code>cloudflare-ech.com</code> заблокируют? Будет ли браузер посылять стандартное ClientHello, при невозможности подключиться с использованием ECH?</p>
+</li>
+</ol>
+<p>Я подозреваю, что некоторая лазейка будет оставлена ради совместимости со старыми или экзотическими браузерами. Следовательно блокировка <code>cloudflare-ech.com</code> будет незаметна для пользователей.</p>
+<p>Добавление.<br>
+Или что будет, если браузеру заблокировать возможность узнавать для какого домена использовать стандартный ClientHello, а для какого - ECH? Ведь наверняка он берет эту информацию где-нибудь в Интеренте.</p></td><td>2024-09-19T21:11:42.619Z</td></tr><tr><td>yatolkosprosit</td><td><p>Кстати, это все можно проверить, заблокировав <code>cloudflare-ech.com</code> локально, а потом попробовать зайти на сервер, который использует ECH. Проверьте кто-нибудь на досуге. Я сам не могу, у меня лапки.</p></td><td>2024-09-19T21:32:31.074Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>dig https <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a> <span class="mention">@one.one.one.one</span><br>
+https отвечает за http3/ech/etc</p>
+<p><a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>.  HTTPS   IN      163s    1 .<br>
+alpn=“h3,h2”<br>
+ipv4hint=“104.21.32.39,172.67.182.196”<br>
+ech=“AEX+DQBB8gAgACDCIaU3P6vz668J2oRRZtptSEwH+1IX8/3TOArEx0tRLAAEAAEAAQASY2xvdWRmbGFyZS1lY2guY29tAAA=”<br>
+ipv6hint=“2606:4700:3031::6815:2027,2606:4700:3034::ac43:b6c4”</p></td><td>2024-09-19T21:35:47.495Z</td></tr><tr><td>yatolkosprosit</td><td><p>И что эта абракадабра значит?</p></td><td>2024-09-19T21:39:35.355Z</td></tr><tr><td>meeeeeh</td><td><p>В двух словах:</p>
+<ol start="0">
+<li>DNS рассказывает браузеру о том, что сайт поддерживает ECH</li>
+<li>Предоставляет публичный ключ для шифрования SNI до эндпойнта и сообщает SNI для OuterClientHello</li>
+<li>Показывает на IP-адреса эндпойнта куда можно стучаться с зашифрованным публичным ключом SNI InnerClientHello</li>
+<li>Сообщает о поддерживаемых протоколах для итоговой передачи данных</li>
+</ol></td><td>2024-09-19T22:04:53.265Z</td></tr><tr><td>yatolkosprosit</td><td><aside class="quote no-group" data-username="meeeeeh" data-post="31" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/73ab20/48.png" class="avatar"> meeeeeh:</div>
+<blockquote>
+<p>Рассказывает браузеру о том, что сайт поддерживает ECH</p>
+</blockquote>
+</aside>
+<ol>
+<li>
+<p>кто  рассказывает? DNS Cloudflare? Google? А DNS российских провайдеров рассказывают? А если не расскажут?</p>
+</li>
+<li>
+<p>непонятно, почему браузер использует SNI <code>cloudflare-ech.com</code>, ведь ECH по идее может использовать не только Cloudflare.</p>
+</li>
+</ol>
+<p>Я совсем не разбираюсь в этих ваших компуктерах. Но предполагаю, что заблокируют этот ECH и никто этого даже и не заметит (кроме некоторых пользователей этого форума).</p></td><td>2024-09-19T22:30:44.166Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="yatolkosprosit" data-post="32" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/y/aca169/48.png" class="avatar"> yatolkosprosit:</div>
+<blockquote>
+<p>непонятно, почему браузер использует SNI <code>cloudflare-ech.com</code>, ведь ECH по идее может использовать не только Cloudflare.</p>
+</blockquote>
+</aside>
+<p>The <code>public_name</code> cloudflare-ech<a>.</a>com comes from DNS.</p>
+<pre><code class="lang-plaintext">$ echo AEX+DQBB8gAgACDCIaU3P6vz668J2oRRZtptSEwH+1IX8/3TOArEx0tRLAAEAAEAAQASY2xvdWRmbGFyZS1lY2guY29tAAA= | base64 -d | xxd
+00000000: 0045 fe0d 0041 f200 2000 20c2 21a5 373f  .E...A.. . .!.7?
+00000010: abf3 ebaf 09da 8451 66da 6d48 4c07 fb52  .......Qf.mHL..R
+00000020: 17f3 fdd3 380a c4c7 4b51 2c00 0400 0100  ....8...KQ,.....
+00000030: 0100 1263 6c6f 7564 666c 6172 652d 6563  ...cloudflare-ec
+00000040: 682e 636f 6d00 00                        h.com..
+</code></pre>
+<p><a href="https://www.ietf.org/archive/id/draft-ietf-tls-svcb-ech-05.html#section-3">https://www.ietf.org/archive/id/draft-ietf-tls-svcb-ech-05.html#section-3</a><br>
+<a href="https://www.ietf.org/archive/id/draft-ietf-tls-esni-22.html#section-4">https://www.ietf.org/archive/id/draft-ietf-tls-esni-22.html#section-4</a></p>
+<p>Different servers may use different <code>public_name</code>s. Cloudflare servers will use cloudflare-ech<a>.</a>com, other web hosts will use a different name. The information an observer can get from observing <code>public_name</code> should be roughly the same as what it can get from observing the destination IP address.</p>
+<aside class="quote no-group" data-username="yatolkosprosit" data-post="32" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/y/aca169/48.png" class="avatar"> yatolkosprosit:</div>
+<blockquote>
+<p>Но предполагаю, что заблокируют этот ECH и никто этого даже и не заметит (кроме некоторых пользователей этого форума).</p>
+</blockquote>
+</aside>
+<p>It may not be as easy as you think. I have not looked at how things are actually implemented, but TLS clients that support ECH are supposed to send an ECH TLS extension even when they are not using ECH. This is called ECH GREASE. It’s not quite like the <a href="https://ntc.party/t/exposing-and-circumventing-chinas-censorship-of-esni/611">situation with ESNI in 2020</a>, when only connections that used ESNI sent the ESNI TLS extension.</p>
+<blockquote>
+<h3><a href="https://www.ietf.org/archive/id/draft-ietf-tls-esni-22.html#section-6.2">6.2.</a><a href="https://www.ietf.org/archive/id/draft-ietf-tls-esni-22.html#name-grease-ech">GREASE ECH</a></h3>
+<p>If the client attempts to connect to a server and does not have an ECHConfig structure available for the server, it SHOULD send a GREASE [<a href="https://www.ietf.org/archive/id/draft-ietf-tls-esni-22.html#RFC8701">RFC8701</a>] “encrypted_client_hello” extension in the first ClientHello as follows:</p>
+</blockquote></td><td>2024-09-20T02:26:45.218Z</td></tr><tr><td>ani917(ani)</td><td><p>так каким способом можно проверить работу ECH в браузере?</p></td><td>2024-09-20T04:32:47.336Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p><a href="https://tls-ech.dev/" class="onebox" target="_blank" rel="noopener nofollow ugc">https://tls-ech.dev/</a><br>
+<a href="https://defo.ie/ech-check.php" class="onebox" target="_blank" rel="noopener nofollow ugc">https://defo.ie/ech-check.php</a></p>
+<p>не уверен насчет</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://www.cloudflare.com/ru-ru/ssl/encrypted-sni/">
+  <header class="source">
+      <img src="использование-esni-encrypted-sni-в-россии/6306931ef78f06dfd75847eb0b7e513657e7ec29.png" class="site-icon" data-dominant-color="F58827" width="96" height="96">
+
+      <a href="https://www.cloudflare.com/ru-ru/ssl/encrypted-sni/" target="_blank" rel="noopener nofollow ugc">cloudflare.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="использование-esni-encrypted-sni-в-россии/f01a86bc5825115bc31a3624c3a2bc41525aef5f_2_690x361.png" class="thumbnail" data-dominant-color="F9F2EC" width="690" height="361"></div>
+
+<h3><a href="https://www.cloudflare.com/ru-ru/ssl/encrypted-sni/" target="_blank" rel="noopener nofollow ugc">Средства Cloudflare для проверки браузера</a></h3>
+
+  <p>Безопасная передача данных DNS с помощью DoH (DNS через HTTPS) или DoT (DNS через TLS) и защита SNI посредством ECH.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-09-20T04:57:24.568Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="yatolkosprosit" data-post="32" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/y/aca169/48.png" class="avatar"> yatolkosprosit:</div>
+<blockquote>
+<p>кто рассказывает? DNS Cloudflare? Google? А DNS российских провайдеров рассказывают? А если не расскажут?</p>
+</blockquote>
+</aside>
+<p>Любой DNS, который возвращает корректные ответы на запросы HTTPS-записей. Есть эти записи или нет - это зависит от конкретно взятого сайта и его владельца (пользуются ли они ALPN, ECH, проксируются через Cloudflare или нет, etc).</p>
+<p>Большинство публичных DNS эту запись возвращают. В <a href="https://ntc.party/t/%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-esni-encrypted-sni-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/68/29">этом</a> сообщении показано, как именно пнуть dig, чтобы проверить наличие HTTPS-записи на DNS интересующего вас сайта.</p>
+<aside class="quote no-group" data-username="LeonMskRu" data-post="35" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/leonmskru/48/2810_2.png" class="avatar"> LeonMskRu:</div>
+<blockquote>
+<p>не уверен насчет</p>
+</blockquote>
+</aside>
+<p><a href="https://crypto.cloudflare.com/cdn-cgi/trace" class="onebox" target="_blank" rel="noopener nofollow ugc">https://crypto.cloudflare.com/cdn-cgi/trace</a><br>
+См. значение “sni” в выхлопе. Если ECH был использован при подключении - будет равен “encrypted”, если нет - “plaintext”</p>
+<aside class="quote no-group" data-username="yatolkosprosit" data-post="32" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/y/aca169/48.png" class="avatar"> yatolkosprosit:</div>
+<blockquote>
+<p>Я совсем не разбираюсь в этих ваших компуктерах. Но предполагаю, что заблокируют этот ECH и никто этого даже и не заметит (кроме некоторых пользователей этого форума).</p>
+</blockquote>
+</aside>
+<p>Если нынешний деплой ECH Cloudflare будет заблокирован по SNI <a href="http://cloudflare-ech.com" rel="noopener nofollow ugc">cloudflare-ech.com</a>, то есть весьма большая вероятность что станут недоступными сразу все сайты, которые пользуются их бесплатным тарифом (принудительный деплой произошёл именно у фри-юзеров, и отключить ECH там сейчас нельзя).</p>
+<p>В переводе: в этом сценарии отвалятся <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>, 2ch.hk, и даже <a href="http://midpass.ru" rel="noopener nofollow ugc">midpass.ru</a> - а <a href="http://vimeo.com" rel="noopener nofollow ugc">vimeo.com</a> останется работать, поскольку они пользуются платным тарифом на котором ECH не был включен принудительно.</p></td><td>2024-09-20T05:23:47.257Z</td></tr><tr><td>ani917(ani)</td><td><p>как я говорил показывает что не включено<br>
+ртрекер открывает, этот сайт, твиттер и т.п. нет<br>
+а сам esni тогда теперь по другому называется, но по сути эта тема тоже самое</p><aside class="quote quote-modified" data-post="12" data-topic="10075">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/73ab20/48.png" class="avatar">
+    <a href="https://ntc.party/t/encrypted-clienthello-ech-is-now-enabled-on-cloudflare/10075/12">Encrypted ClientHello (ECH) is now enabled on Cloudflare</a> <a class="badge-category__wrapper " href="/c/censorship-circumvention-software/11"><span data-category-id="11" style="--category-badge-color: #92278F; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Discussions of censorship circumvention software of different kinds, for all operation systems and devices"><span class="badge-category__name">Censorship circumvention methods &amp; software</span></span></a>
+  </div>
+  <blockquote>
+    Для ECH DoH в случае с Firefox необязателен - см. первый пост в нитке. Персонально я так и пользуюсь им, кстати - у меня есть полностью доверенный DNS в моём интранете, ходящий в DoH\DoT апстримы не принадлежащие Google, Cloudflare и другим бигтехам. 
+У хромого всё немного хуже, но судя по багтрекеру того же Cromite (форк умершего пару лет Bromite, который был Android-only; Cromite доступен на почти всех платформах) там тоже думают о том чтоб доверять резолвам локального plaintext DNS, если он с…
+  </blockquote>
+</aside>
+</td><td>2024-09-20T05:28:59.484Z</td></tr><tr><td>yatolkosprosit</td><td><p>Firefox 129 - работает<br>
+Chrome 129 - нет<br>
+Chromium 128 - работает</p>
+<p>Открываются Рутрекер, Кинозал, что-то еще.</p></td><td>2024-09-20T05:36:52.979Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="ani917" data-post="37" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ani917/48/2978_2.png" class="avatar"> ani917:</div>
+<blockquote>
+<p>а сам esni тогда теперь по другому называется, но по сути эта тема тоже самое</p>
+</blockquote>
+</aside>
+<p>Есть существенная разница.</p>
+<p>В eSNI в принципе не было разделения на InnerClientHello и OuterClientHello - и доступного чистым текстом SNI не было вообще, он всегда был зашифрован. Собственно, об этом говорится даже в самом первом посте этого треда.</p>
+<p>Из-за этого провайдерам было проще дропать подобный TLS-трафик, поскольку его пункт назначения было невозможно распознать.</p>
+<p>В ECH в свою очередь есть OuterClientHello, в котором есть поле SNI в открытом виде - и провайдер таким образом на своём DPI сможет понять, что трафик идёт скажем куда-то там на Cloudflare.</p></td><td>2024-09-20T06:00:56.852Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>ну вот не знаю чего ему (cloudflare) у меня не нравится<br>
+два других сайта норм. если в about:config что надо включено то пишут “работает”<br>
+<code>https://www.cloudflare.com/ru-ru/ssl/encrypted-sni/</code> ну “через раз”</p>
+<p><a href="https://crypto.cloudflare.com/cdn-cgi/trace" class="onebox" target="_blank" rel="noopener nofollow ugc">https://crypto.cloudflare.com/cdn-cgi/trace</a></p>
+<p>115ESR win10, 130 ubuntu</p>
+<p>http=http/3 (иногда http/2 при этом .ico всегда по http/3)<br>
+tls=TLSv1.3<br>
+sni=plaintext<br>
+kex=X25519</p></td><td>2024-09-20T07:58:46.772Z</td></tr><tr><td>meeeeeh</td><td><p>Этот тест не всегда корректно работает. Я бы рекомендовал опираться на результаты tls-ech.dev</p>
+<p>Напомните, у вас флаг <code>network.dns.native_https_query</code> в конфиге файерфокса установлен в <code>true</code> или нет? См. <a href="https://groups.google.com/a/mozilla.org/g/dev-platform/c/oh_Tk0iLT9A" rel="noopener nofollow ugc">https://groups.google.com/a/mozilla.org/g/dev-platform/c/oh_Tk0iLT9A</a> и <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1890999" class="inline-onebox" rel="noopener nofollow ugc">1890999 - Let network.dns.native_https_query ride the trains</a> для контекста.</p></td><td>2024-09-20T08:00:26.472Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="meeeeeh" data-post="36" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/m/73ab20/48.png" class="avatar"> meeeeeh:</div>
+<blockquote>
+<p>Если нынешний деплой ECH Cloudflare будет заблокирован по SNI <a href="http://cloudflare-ech.com">cloudflare-ech.com</a>, то есть весьма большая вероятность что станут недоступными сразу все сайты</p>
+</blockquote>
+</aside>
+<p>проверил в chrome и firefox: так и есть, после блокировки sni <a href="http://cloudflare-ech.com">cloudflare-ech.com</a> перестают открываться все сайты на cloudflare с вкл. ECH, fallback на подключение без ECH нету (и надеюсь не добавят)</p>
+<p>в firefox <code>network.dns.native_https_query</code> по дефолту и так true, но HTTPS запросов по UDP DNS нету, есть еще флаг <code>network.dns.native_https_query_win10</code> который включает HTTPS запросы по UDP DNS (A и AAAA запросы после этого пропадают), но ECH при этом всё равно не работает, приходится включать DoH чтобы ECH заработал</p></td><td>2024-09-20T09:48:49.027Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="LeonMskRu" data-post="40" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/leonmskru/48/2810_2.png" class="avatar"> LeonMskRu:</div>
+<blockquote>
+<p>ну вот не знаю чего ему (cloudflare) у меня не нравится</p>
+</blockquote>
+</aside>
+<p>ECH не работает, если VPN от Cloudflare и сайт от Cloudflare. Видимо, друг от друга им нечего скрывать. Можно также посмотреть в Wireshark заголовок SNI (он запрятан глубоко), но в новых версиях можно включить отображение домена не только на основе DNS, но и SNI.</p></td><td>2024-09-20T10:08:56.873Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>115esr нет такого</p>
+<p>130<br>
+network.dns.native_https_query true<br>
+network.dns.native_https_query_win10 false</p>
+<p>p.s. оно просто “выключено” в ДНС<br>
+one.one.one.one.        83323   IN      HTTPS   1 . alpn=“h3,h2” ipv4hint=1.1.1.1,1.0.0.1 ipv6hint=2606:4700:4700::1111,2606:4700:4700::1001</p>
+<pre><code class="lang-auto">https://one.one.one.one/cdn-cgi/trace
+https://crypto.cloudflare.com/cdn-cgi/trace
+sni=plaintext
+
+https://rutracker.org/cdn-cgi/trace
+sni=encrypted
+</code></pre></td><td>2024-09-20T10:17:39.293Z</td></tr><tr><td>meeeeeh</td><td><aside class="quote no-group" data-username="LeonMskRu" data-post="44" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/leonmskru/48/2810_2.png" class="avatar"> LeonMskRu:</div>
+<blockquote>
+<p>115esr нет такого</p>
+</blockquote>
+</aside>
+<p>Всё правильно, этот флаг появился два месяца назад в 128-129 версии.</p></td><td>2024-09-20T10:23:52.345Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>а вот как проверка <a href="https://www.cloudflare.com/ru-ru/ssl/encrypted-sni/" rel="noopener nofollow ugc">https://www.cloudflare.com/ru-ru/ssl/encrypted-sni/</a><br>
+“находит” SNI я уже не понимаю</p>
+<p><a href="http://www.cloudflare.com" rel="noopener nofollow ugc">www.cloudflare.com</a>.     209     IN      HTTPS   1 . alpn=“h3,h2” ipv4hint=104.16.123.96,104.16.124.96 ipv6hint=2606:4700::6810:7b60,2606:4700::6810:7c60</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="использование-esni-encrypted-sni-в-россии/a23074a56b5890308e1495fb8bf6336f3ef3c42e.png" data-download-href="https://ntc.party/uploads/default/a23074a56b5890308e1495fb8bf6336f3ef3c42e" title="image"><img src="использование-esni-encrypted-sni-в-россии/a23074a56b5890308e1495fb8bf6336f3ef3c42e.png" alt="image" data-base62-sha1="n8NahXqrLffxwPW6mFSNjySsji6" width="690" height="72" data-dominant-color="EEF1F1"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1084×114 6.22 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-20T10:26:13.957Z</td></tr><tr><td>anon9001(anon)</td><td><p>У меня кстати под первым пунктом Secure DNS стоит вопросик типо мы не могли определить это, во всех остальных галочка. Значит ли это что мой запрос даже кф не мог вычислить, хорошо это или плохо?</p></td><td>2024-09-20T10:35:56.915Z</td></tr><tr><td>Dhowti(Eugene)</td><td><p>CF не может вычислить чужие DoH, только свой в первом пункте показывает как успех.</p></td><td>2024-09-20T10:46:02.266Z</td></tr><tr><td>LeonMskRu(Leon MskRu)</td><td><p>настройки в браузерах<br>
+DoH == cloudflare<br>
+в firefox это <a href="https://mozilla.cloudflare-dns.com/dns-query" rel="noopener nofollow ugc">https://mozilla.cloudflare-dns.com/dns-query</a></p></td><td>2024-09-20T10:57:56.808Z</td></tr><tr><td>ani917(ani)</td><td><p>свой он тоже не смог вычислить<br>
+<img src="использование-esni-encrypted-sni-в-россии/c0632d93bfab8fbfb9ce3b14ccbe1793ee862ecd.png" alt="image" data-base62-sha1="rrWa3PIq4LpxMSFcq9yWlnrl6dD" width="396" height="122"></p></td><td>2024-09-20T14:25:27.721Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="LeonMskRu" data-post="46" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/leonmskru/48/2810_2.png" class="avatar"> LeonMskRu:</div>
+<blockquote>
+<p>а вот как проверка <a href="https://www.cloudflare.com/ru-ru/ssl/encrypted-sni/">https://www.cloudflare.com/ru-ru/ssl/encrypted-sni/ </a><br>
+“находит” SNI я уже не понимаю</p>
+</blockquote>
+</aside>
+<p>Просто.<br>
+После нажатия на кнопку, страница в том числе пытается загрузить <a href="https://encryptedsni.com/cdn-cgi/trace">https://encryptedsni.com/cdn-cgi/trace</a></p></td><td>2024-09-20T14:53:20.031Z</td></tr><tr><td>User69</td><td><p><a href="http://meduza.io">meduza.io</a> добавили ECH<br>
+<a href="https://meduza.io/feature/2024/10/18/poyavilsya-novyy-ochen-udobnyy-sposob-chitat-meduzu-bez-vpn-vse-neobhodimoe-uzhe-est-v-vashem-brauzere" class="inline-onebox">Появился новый — очень удобный! — способ читать «Медузу» без VPN. Все необходимое уже есть в вашем браузере Простая инструкция, которая может помочь обмануть Роскомнадзор — Meduza</a></p></td><td>2024-10-18T16:56:11.509Z</td></tr><tr><td>denium</td><td><p>ValdikSS рассказал им. Ждём блокировку DoH.</p></td><td>2024-10-18T18:22:36.596Z</td></tr><tr><td>Dhowti(Eugene)</td><td><p>Что-то здесь <a href="https://test.defo.ie/domainechprobe.php" rel="noopener nofollow ugc">DEfO ECH Domain Name Check</a> ничего не проверяет, страница обновляется, и на ней всё то же.</p>
+<p>Ну, через запись в DNS можно посмотреть. И, кстати, посмотрел свой сайт, он на бесплатном тарифе CF, ECH включён, значит, включили для всех клиентов, хотя в настройках нет.</p>
+<p>И это также значит, что если начнут блокировать фронт-домен, отвалится треть интернета.</p></td><td>2024-10-18T23:29:35.585Z</td></tr><tr><td>Ori</td><td><p>Сделал скрипт для проверки наличия ECH у сайта. Делает запрос к гугл-днс через курл и парсит ответ.</p>
+<p><a class="attachment" href="использование-esni-encrypted-sni-в-россии/gOckYYcLWHsg34hcVZTXj1BbxDs.cmd">ECH_Support_Tester.cmd</a> (1,5 КБ)</p>
+<p>upd: оптимизация</p>
+<p>Сайты с поддержкой из тех что я успел почекать:</p>
+<pre><code class="lang-auto">kinozal.tv
+hdkinoteatr.com
+gelbooru.com
+konachan.com
+readmanga.live
+checkvpn.net
+novayagazeta.ru
+annas-archive.org
+xhamster2.com
+hentaiera.com
+10minutemail.net
+libgen.li
+</code></pre>
+<p>Сейчас попробую докрутить скрипт и может быть весь russia-blacklist через него прогоню.</p></td><td>2024-10-19T00:57:59.394Z</td></tr><tr><td>denium</td><td><p>Да, не проверяет. Кстати, можно проверить в Wireshark. В фильтр вводите <code>frame contains "forum.ru-board"</code>. Если таких пакетов не будет, а сайт открывается, значит ECH и DoH работают. Может появиться какой-нибудь домен Cloudflare, если вы посещаете Cloudflare. Но в таком случае посмотрите на тело пакета или на заголовок Server Name Indication (далеко запрятан). Это наверняка будет фейковый публичный адрес, просто он совпадёт с фильтром, т.к. от одной конторы. А новые версии Wireshark SNI автоматически показывают, если включить в настройках.</p></td><td>2024-10-19T01:42:16.088Z</td></tr><tr><td>Ori</td><td><p>Так, я написал прогу которая проверяет все сайты в листе на наличие ECH и выводит результаты в 2 листа (с поддержкой ECH и без). Таким образом, по идее, можно сильно сократить блэклист, т.к. сайты с ECH открываются без обхода. Кто хочет сам попробовать - просто перетаскиваете лист в формате txt на экзешник. Убедитесь что у экзешника есть доступ к сети.</p>
+<p><a class="attachment" href="использование-esni-encrypted-sni-в-россии/yBhk7Xp8vwA6XFRI3bQxJWypK2w.zip">ech_tester.zip</a> (4,2 МБ)</p>
+<p>Сейчас я попробую прогнать фул проверку по <a href="https://ntc.party/t/habr-%D0%B0%D0%BB%D1%8C%D1%82%D0%B5%D1%80%D0%BD%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D1%8B%D0%B9-%D1%81%D0%BF%D0%B8%D1%81%D0%BE%D0%BA-%D0%B7%D0%B0%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%BD%D1%8B%D1%85-%D0%B2-%D1%80%D1%84-%D1%80%D0%B5%D1%81%D1%83%D1%80%D1%81%D0%BE%D0%B2-refilter/11810">вот этому</a> списку.</p>
+<p>Боюсь ГуглДНС меня возненавидит за 40к запросов.</p>
+<p>upd: походу я там накосячил с keep-alive, он очень много соединений оставляет за собой. Щас попробую что-нибудь придумать</p>
+<p>upd2: вроде исправил?</p></td><td>2024-10-19T05:20:51.030Z</td></tr><tr><td>Ori</td><td><p>И-и-и… готово! На основе <a href="https://github.com/1andrevich/Re-filter-lists" rel="noopener nofollow ugc">вот этого листа</a> (42686 адресов на момент тестирования), я сформировал 2 списка:</p>
+<ul>
+<li>
+<p>с ECH (20336 адресов):<br>
+<a class="attachment" href="использование-esni-encrypted-sni-в-россии/XgAySkodUgMugQ2DefIfAVkNhA.txt">domains_all_withECH.txt</a> (346,1 КБ)</p>
+</li>
+<li>
+<p>Без ECH (22350 адресов):<br>
+<a class="attachment" href="использование-esni-encrypted-sni-в-россии/yANcKPyh59tjV6AILQSOP7WSQXi.txt">domains_all_withoutECH.txt</a> (400,3 КБ)</p>
+</li>
+</ul>
+<p>Иными словами, 47,6% всех сайтов из данного блеклиста открываются без всяких обходов, на современных браузерах. Это НАМНОГО больше, чем я ожидал. И это число будет только расти. Что РКН собираются с этим делать я хз.</p></td><td>2024-10-19T07:31:36.489Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="Ori" data-post="58" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>РКН собираются с этим делать я хз.</p>
+</blockquote>
+</aside>
+<p>Заставят всех операторов форвардить DNS-запросы со своих рекурсоров на рекурсоры НСДИ. На самих рекурсорах порежут отдачу HTTPS-записи. Так хотя бы по-умолчанию открываться заблоченные сайты не будут. Пользователю нужно будет вручную прописывать какой-нибудь 8.8.8.8, DoH или DoT. Следующим этапом заблочат их.</p></td><td>2024-10-19T09:28:42.313Z</td></tr><tr><td>Ori</td><td><p>Ну, будем резолвить через тор, что тут сказать <img src="https://ntc.party/images/emoji/twitter/slightly_smiling_face.png?v=12" title=":slightly_smiling_face:" class="emoji" alt=":slightly_smiling_face:" loading="lazy" width="20" height="20"></p></td><td>2024-10-19T09:39:07.277Z</td></tr><tr><td>anon60595749</td><td><p>Да без проблем. Мы же говорим про то, чтобы работало без телодвижений со стороны пользователя.</p></td><td>2024-10-19T09:40:02.890Z</td></tr><tr><td>Ori</td><td><p>Без телодвижений со стороны пользователя есть всякие штуки типа ODoH, в лисе уже сейчас поддержка есть. В Waterfox так вообще прям из коробки доступно и работает, на основе мостов fastly. Да и cloudflare заявляли, что они движутся в сторону полностью зашифрованных ДНС запросов. В итоге провайдер даже понять не сможет что это ДНС запрос, т.к. он направлен хз куда и содержимое его хз какое.</p></td><td>2024-10-19T09:41:31.801Z</td></tr><tr><td>anon60595749</td><td><p>Oblivious DNS over HTTPS это для другого. Это чтобы оператор DNS-сервера (например Google со своим 8.8.8.8) не мог установить связку: IP-адреса клиента - какие адреса он резольвит. Что-то вроде этого -  <a href="https://support.apple.com/en-us/102602" class="inline-onebox">About iCloud Private Relay - Apple Support</a> - но только для DoH. Дополнительный уровень приватности. В случае обычного DoH ISP и так уже имен не видит.</p></td><td>2024-10-19T09:48:12.082Z</td></tr><tr><td>Ori</td><td><p>Да я читал. Но суть всё равно такова, что запрос то идет не к айпи резолвера, а к айпи oblivious-прокси. Что создает дополнительные сложности для фильтрации трафика. И при этом “без дополнительных телодвижений” со стороны пользователя.</p>
+<p>Вон они блокируют-блокируют, а в итоге, всё равно, все кто хотели - доступ имеют. Пока до белых списков дело не дойдет, ничего они не добьются.</p></td><td>2024-10-19T09:52:38.868Z</td></tr><tr><td>Akiyamov(Akiyamov)</td><td><p>Сделал со второго списка себе rule-set для sing-box. Думаю, что можно поставить cicd где-нибудь и пусть каждый день запускает тест + сборку с теста. Можете, пожалуйста, оставить гитхаб чтоб на вас ссылка была, а то я почти ничего не сделал и чтоб была ссылка на вас<br>
+UPD: Использование оперативки сократилось с 45 до 8-10 на sing-box. Прям хорошо идет</p></td><td>2024-10-19T10:02:47.367Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p>Для <a href="https://ntc.party/">https://ntc.party/</a> ECH будет включён?</p></td><td>2024-10-19T10:34:53.713Z</td></tr><tr><td>anon9001(anon)</td><td><aside class="quote no-group" data-username="Ori" data-post="58" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>РКН собираются с этим делать я хз.</p>
+</blockquote>
+</aside>
+<p>Я больше хочу посмотреть на рожу ркн после того как они профукали 100млд или сколько там на “улучшение” оборудования для теперь устаревшей технологии sni</p></td><td>2024-10-19T10:49:54.049Z</td></tr><tr><td>Obfs</td><td><p>в китае же как-то забанили ECH, так в чем проблема им тут также сделать? их мне кажется не волнует проблема работы разрешенных сайтов, их цель - сломать и уничтожить</p></td><td>2024-10-19T10:52:34.759Z</td></tr><tr><td>Ori</td><td><p>В Китае заблокирован tls 1.3. Поэтому там и не работает ech. Могут ли у нас рискнуть такое сделать? Ну хз-хз…</p></td><td>2024-10-19T10:59:18.145Z</td></tr><tr><td>anon9001(anon)</td><td><blockquote>
+<p>And just like China, Russia is cracking down on these new technologies. According to the proposed law amendment, any company or website that uses technology to hide its website identifier in encrypted traffic will be banned inside Russia after a one-day warning.</p>
+</blockquote>
+<p>Вот что случится если допустим они захотят оставить сам протокол. Ркн пришлет свою пацанскую предъяву клаудфер, типа за вашим доменом хостятся иноагенты, убирете их с ваших аддресов или мы заблокируем весь аддресс рендж.</p></td><td>2024-10-19T11:38:10.931Z</td></tr><tr><td>355</td><td><p>Я походу неправильно понял сообщение, но как там может быть заблокирован tls 1.3 когда весь vless reality основан на tls 1.3?</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://github.com/XTLS/Xray-core/discussions/1832#discussioncomment-5369200">
+  <header class="source">
+      <img src="https://ntc.party/uploads/default/original/2X/b/bad3e5f9ad67c1ddf145107ce7032ac1d7b22563.svg" class="site-icon" data-dominant-color="" width="32" height="32">
+
+      <a href="https://github.com/XTLS/Xray-core/discussions/1832#discussioncomment-5369200" target="_blank" rel="noopener nofollow ugc">GitHub</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/344;"><img src="использование-esni-encrypted-sni-в-россии/dada6b0ded115c4e2f2a3ab85eb568dbc6718245_2_690x345.png" class="thumbnail" data-dominant-color="EFF3F5" width="690" height="345"></div>
+
+<h3><a href="https://github.com/XTLS/Xray-core/discussions/1832#discussioncomment-5369200" target="_blank" rel="noopener nofollow ugc">How exactly Reality works? · XTLS/Xray-core · Discussion #1832</a></h3>
+
+  <p>hello there. I tried understanding the config examples of Reality which are provided. But it seems confusing to me. So we use a trusted certficated by GFW and then try to connect to the server with...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<blockquote>
+<p>Basically，<strong>REALITY 只是改了认证方式的 TLSv1.3</strong>，所以，它传输载荷的方式与 TLSv1.3 完全相同，毕竟，REALITY 就是 TLSv1.3<br>
+Basically, <strong>REALITY is just TLSv1.3 with authentication changed</strong>, so it transmits loads in exactly the same way as TLSv1.3 - after all, REALITY is TLSv1.3!</p>
+</blockquote></td><td>2024-10-19T15:01:03.654Z</td></tr><tr><td>SagePtr(Sage Pointer)</td><td><p>Как вариант, могут блокнуть по SNI адрес “<a href="http://cloudflare-ech.com">cloudflare-ech.com</a>”, который фигурирует в SNI в запросах, использующих ECH</p></td><td>2024-10-19T15:24:43.218Z</td></tr><tr><td>355</td><td><p>даже лучше, блокать все подключения у которых заявлена поддержка ESNI, как делают в Китае (<a href="https://gfw.report/blog/gfw_esni_blocking/en/#our-main-findings" class="inline-onebox" rel="noopener nofollow ugc">Exposing and Circumventing China's Censorship of ESNI</a>)</p>
+<blockquote>
+<ul>
+<li>The <code>0xffce</code> extension is necessary to trigger the blocking.</li>
+<li>The blocking can happen on all ports from 1 to 65535.</li>
+<li>Once the GFW blocks a connection, it will continue blocking all traffic associated with the 3-tuples of (srcIP, dstIP, dstPort) for 120 or 180 seconds.</li>
+</ul>
+</blockquote>
+<p>Так как это статья от 2020 года, то ECH тогда ещё был новым и блокировался только ESNI, сейчас возможно уже и его блокирует.</p></td><td>2024-10-19T15:37:31.271Z</td></tr><tr><td>denium</td><td><p>Так ведь тогда большинство сайтов за Cloudflare перестанет работать. И обидных и безобидных. На данный момент те, кто на бесплатном тарифе и те, кто на платном, но включил ECH сам. Разве что им попробовать блокнуть так, чтобы браузер фаллбакнулся в non-ECH, но не уверен, что это возможно. Конструктивно это предусмотрели. Разве что заставить весь народ сидеть на старых браузерах (двух годовой давности), которые ещё не слышали о ECH или Pale Moon.</p>
+<p>Насчёт Китая, интересно как там. Но думаю, Cloudflare просто сотрудничает (отключила ECH сама). Ведь они представлены в Китае.</p></td><td>2024-10-19T15:47:17.182Z</td></tr><tr><td>wigeance(Wigeance)</td><td><blockquote>
+<p>The next strategy we discover can also be used from client or server. In this strategy, the client sends the ESNI request across two TCP segments, such that the first TCP segment is less than or equal to 4 bytes long.</p>
+</blockquote>
+<p>Это обходилось просто сплитом на 4 позиции из самого простого</p></td><td>2024-10-19T15:47:26.266Z</td></tr><tr><td>SagePtr(Sage Pointer)</td><td><aside class="quote no-group" data-username="denium" data-post="74" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>Так ведь тогда большинство сайтов за Cloudflare перестанет работать. И обидных и безобидных.</p>
+</blockquote>
+</aside>
+<p>Перестанет, но только у тех, кто включал DOH в настройках браузера (по умолчанию он вроде отключён), потому одним выстрелом убьют двух зайцев.</p></td><td>2024-10-19T16:24:47.383Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="SagePtr" data-post="76" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/sageptr/48/5272_2.png" class="avatar"> SagePtr:</div>
+<blockquote>
+<p>Перестанет, но только у тех, кто включал DOH в настройках браузера</p>
+</blockquote>
+</aside>
+<p>Искусственная зависимость ECH от наличия DoH/DoT только в Firefox. В Chrome работает независимо от того, каким образом получена HTTPS-запись из DNS. И кстати да, по RFC fallback не предусмотрен.</p>
+<blockquote>
+<p>Unless ECH is disabled as a result of successfully establishing a connection to the public name, the client MUST NOT fall back to using unencrypted ClientHellos, as this allows a network attacker to disclose the contents of this ClientHello, including the SNI.</p>
+</blockquote></td><td>2024-10-19T18:18:36.353Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="denium" data-post="74" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>Так ведь тогда большинство сайтов за Cloudflare перестанет работать.</p>
+</blockquote>
+</aside>
+<p>Все верно, перестанет.</p></td><td>2024-10-19T18:19:39.205Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="anon60595749" data-post="77" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="/letter_avatar_proxy/v4/letter/a/85e7bf/48.png" class="avatar"> anon60595749:</div>
+<blockquote>
+<p>Искусственная зависимость ECH от наличия DoH/DoT только в Firefox</p>
+</blockquote>
+</aside>
+<p>Только на Windows 10? Не 11, не Linux.</p></td><td>2024-10-19T18:25:51.888Z</td></tr><tr><td>Elevator</td><td><blockquote>
+<p>Искусственная зависимость ECH от наличия DoH/DoT только в Firefox</p>
+</blockquote>
+<p>Разве?<br>
+У меня в Firefox полностью отключен DoH, используется дефолтный системный резолвер, но при этом ECH работает</p></td><td>2024-10-19T18:32:37.888Z</td></tr><tr><td>anon60595749</td><td><aside class="quote no-group" data-username="denium" data-post="79" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/7c8e57/48.png" class="avatar"> denium:</div>
+<blockquote>
+<p>Только на Windows 10? Не 11, не Linux.</p>
+</blockquote>
+</aside>
+<p>По поводу Firefox я похоже отстал от жизни. Вот, из changelog:</p>
+<blockquote>
+<p>HTTPS DNS records can now be resolved with the operating system’s DNS resolver on specific platforms (Windows 11, Linux, Android 10+). Previously this required <a href="https://support.mozilla.org/kb/firefox-dns-over-https">DNS over HTTPS</a> to be enabled. This capability allows the use of HTTP/3 without needing to use the <a href="https://developer.mozilla.org/docs/Web/HTTP/Headers/Alt-Svc">Alt-Svc</a> header, upgrades requests to HTTPS when the DNS record is present, and enables wider use of <a href="https://support.mozilla.org/kb/faq-encrypted-client-hello">ECH</a>.</p>
+</blockquote>
+<p>Почему в списке ОС нет Win10 - не понятно.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://www.mozilla.org/en-US/firefox/129.0/releasenotes/">
+  <header class="source">
+      <img src="использование-esni-encrypted-sni-в-россии/8daf0eb5833154557561c419b5e44bbc6dcc70ee.png" class="site-icon" data-dominant-color="DF7262" width="196" height="196">
+
+      <a href="https://www.mozilla.org/en-US/firefox/129.0/releasenotes/" target="_blank" rel="noopener">Mozilla</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/362;"><img src="использование-esni-encrypted-sni-в-россии/486f36bc54246849e056a92a3934ef442e782531_2_690x362.png" class="thumbnail" data-dominant-color="3E1D4E" width="690" height="362"></div>
+
+<h3><a href="https://www.mozilla.org/en-US/firefox/129.0/releasenotes/" target="_blank" rel="noopener">Firefox  129.0, See All New Features, Updates and Fixes</a></h3>
+
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-10-19T18:33:54.910Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="anon60595749" data-post="81" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="/letter_avatar_proxy/v4/letter/a/85e7bf/48.png" class="avatar"> anon60595749:</div>
+<blockquote>
+<p>Почему в списке ОС нет Win10 - не понятно</p>
+</blockquote>
+</aside>
+<p>Там какой-то баг детекта системного DoH.</p></td><td>2024-10-19T20:30:32.961Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="355" data-post="71" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/3/90db22/48.png" class="avatar"> 355:</div>
+<blockquote>
+<p>Я походу неправильно понял сообщение, но как там может быть заблокирован tls 1.3 когда весь vless reality основан на tls 1.3?</p>
+</blockquote>
+</aside>
+<p>Я хз. Про то, что в Китае заблочен tls 1.3 читал на реддите. Где здесь правда, где выдумка - утверждать не возьмусь, разбираться тоже лень. Хотя, в Китае же, вроде, используют VMESS, а не VLESS. Первый сам шифрует, второй полагается на шифрование tls. <em>Если я не ошибаюсь</em>. Возможно тут есть связь. Хз.</p>
+<aside class="quote no-group" data-username="anon60595749" data-post="81" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="/letter_avatar_proxy/v4/letter/a/85e7bf/48.png" class="avatar"> anon60595749:</div>
+<blockquote>
+<p>Почему в списке ОС нет Win10 - не понятно.</p>
+</blockquote>
+</aside>
+<p>Блин, только не говорите, что придется на вин11 пересаживаться в скором времени <img src="https://ntc.party/images/emoji/twitter/face_exhaling.png?v=12" title=":face_exhaling:" class="emoji" alt=":face_exhaling:" loading="lazy" width="20" height="20"></p></td><td>2024-10-19T21:31:20.771Z</td></tr><tr><td>MasterYoba</td><td><p>Win 10 ожидает EOS в 2025 году, так что да - придётся.</p></td><td>2024-10-21T07:44:01.353Z</td></tr><tr><td>Ori</td><td><p>У меня ltsc, она до 2027.</p></td><td>2024-10-21T07:51:52.217Z</td></tr><tr><td>SanSerg(Сергей)</td><td><aside class="quote no-group" data-username="Ori" data-post="58" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>Без ECH (22350 адресов):</p>
+</blockquote>
+</aside>
+<p>т.е.  грубо говоря вместо russian-blacklist можно  этот файлик domains_all_withoutECH.txt со списком использовать?<br>
+И кстати почему в domains_all_withECH.txt есть домены 3-го уровня с www (например <a href="http://www.rutracker.org" rel="noopener nofollow ugc">www.rutracker.org</a> когда уже есть <a href="http://rutracker.org" rel="noopener nofollow ugc">rutracker.org</a>) или это просто особенность проверки была при формировании списка?</p></td><td>2024-10-21T08:00:54.385Z</td></tr><tr><td>Ori</td><td><p>Ну так изначальный список же не мой. Я просто взял его с репозитория re-filter и прогнал по нему проверку наличия ECH. Почему там домены 3-го уровня - спрашивайте у них.</p>
+<p>В теории да, можно использовать этот список вместо russia-blacklist. В крайнем случае, всегда можно легко вернуться к прежнему списку.</p></td><td>2024-10-21T08:04:23.798Z</td></tr><tr><td>SanSerg(Сергей)</td><td><p>в запрете еще есть фильтр tcp port 80. Вот там по логике лучше исходный фильтра оставить? там то вообще нет SNI. Ну сайтов на чистом http конечно мало, тем более заблоченных, там только перенаправление обычно на https.  Но по логике там тспу проверяют на поле Host заголовка?</p>
+<aside class="quote no-group" data-username="Ori" data-post="87" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>В крайнем случае, всегда можно легко вернуться к прежнему списку.</p>
+</blockquote>
+</aside>
+<p>это ясно. у меня вообще несколько батников не в режиме службы, так что проверяется легко.</p>
+<p>Смотрю с чудо скриптами на batch покаончено и теперь go. Плюс скриптов был в том что в них можно было “подсмотреть” механизм проверки, тем более если это был вызов curl  <img src="https://ntc.party/images/emoji/twitter/slight_smile.png?v=12" title=":slight_smile:" class="emoji" alt=":slight_smile:" loading="lazy" width="20" height="20"></p></td><td>2024-10-21T08:07:57.650Z</td></tr><tr><td>minecrafter(Minecrafter)</td><td><aside class="quote no-group" data-username="SanSerg" data-post="88" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/sanserg/48/9882_2.png" class="avatar"> SanSerg:</div>
+<blockquote>
+<p>Плюс скриптов был в том что в них можно было “подсмотреть” механизм проверки, тем более если это был вызов curl</p>
+</blockquote>
+</aside>
+<p>Я сам продолжаю сидеть на batch версии, мне ее хватает более чем. На версию go переходить не собираюсь даже.</p></td><td>2024-10-21T08:12:04.779Z</td></tr><tr><td>Ori</td><td><p><a href="https://ntc.party/t/%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-esni-encrypted-sni-%D0%B2-%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B8/68/55">Несколькими постами выше</a> лежит batch скрипт для проверки наличия ech у сайта. Там можете подсмотреть.</p>
+<p>Ech, насколько мне известно, работает только с https, так что для 80 порта, конечно, этот список будет не особо полезен.</p>
+<p>Впрочем, сайты без поддержки https - это вообще реликт прошлого. Я себе в браузере поставил режим принудительного https и хуже мне от этого не стало.</p>
+<p>Вообще, можно поставить фильтрацию на 80 порт без хост листа. Не думаю, что это особо навредит, учитывая редкость чистого http.</p></td><td>2024-10-21T08:15:49.387Z</td></tr><tr><td>KDS</td><td><aside class="quote no-group" data-username="Ori" data-post="90" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>и хуже мне от этого не стало</p>
+</blockquote>
+</aside>
+<p>А какому-нибудь рутор.инфо - стало. Просто пример, сам не понимаю, начерта это еще кому-то надо.</p></td><td>2024-10-21T09:19:13.142Z</td></tr><tr><td>SanSerg(Сергей)</td><td><p>Увидел спасибо.<br>
+Грубо говоря запрос типа записи HTTPS и парсинг что в ответе есть поле ECH?</p></td><td>2024-10-21T09:30:37.922Z</td></tr><tr><td>Dhowti(Eugene)</td><td><aside class="quote no-group" data-username="KDS" data-post="91" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kds/48/12723_2.png" class="avatar"> KDS:</div>
+<blockquote>
+<p>рутор.инфо</p>
+</blockquote>
+</aside>
+<p>У них уже есть https.</p></td><td>2024-10-21T09:33:36.449Z</td></tr><tr><td>KDS</td><td><p>Где он есть? Послать билеберду в ответ на запрос браузера - это не есть https ) Отбой, обходилка чертова ломает сервер хелло, через прокси все норм (</p></td><td>2024-10-21T09:35:30.910Z</td></tr><tr><td>Ori</td><td><p>Обновление на основе вчерашнего листа от re-filter (22463 домена без ECH).<br>
+<a class="attachment" href="использование-esni-encrypted-sni-в-россии/oeqp2y8UC4gCUwWkEVtiiXUus6O.txt">domains_all_2024_10_24_withECH.txt</a> (344,7 КБ)<br>
+<a class="attachment" href="использование-esni-encrypted-sni-в-россии/xJPqbZS3Of7ux5DYiYwMEmUC1J0.txt">domains_all_2024_10_24_withoutECH.txt</a> (402,2 КБ)</p></td><td>2024-10-24T09:34:43.872Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="Ori" data-post="83" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>только не говорите, что придется на вин11 пересаживаться в скором времени</p>
+</blockquote>
+</aside>
+<p>Можно просто DoH в браузере включить. Речь же шла об использовании DNS преобразователей системы.</p></td><td>2024-10-24T10:03:16.801Z</td></tr><tr><td>Ori</td><td><p>Я, кстати, погуглил, и там есть какой-то лайфхак с реестром, чтобы включить системный doh в вин 10. Но у меня не заработало, увы.</p></td><td>2024-10-24T10:19:50.011Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="Ori" data-post="69" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ori/48/7551_2.png" class="avatar"> Ori:</div>
+<blockquote>
+<p>В Китае заблокирован tls 1.3.</p>
+</blockquote>
+</aside>
+<p>Please permit me to correct you. TLS 1.3 has never been blocked in China. In reality, what was blocked in China in 2020 was not TLS 1.3, but only TLS connections using ESNI. See: <a href="https://gfw.report/blog/gfw_esni_blocking/en/" class="inline-onebox">Exposing and Circumventing China's Censorship of ESNI</a>. Because ESNI required TLS 1.3, some news outlets published articles that unfortunately gave the impression that <em>all</em> TLS 1.3 was blocked in China, and the misconception persists to today.</p>
+<p>There’s another important difference between ESNI in 2020 and ECH today. ESNI was never seriously deployed. Cloudflare had server support, but it was not enabled by default in any browsers. Nobody was actually using ESNI. That is why, when ESNI was blocked in China, it was <a href="https://mailarchive.ietf.org/arch/msg/tls/YzT5LjLJ_6WWhdnU2wVsKNKR6_I/">only noticed by a specialist</a> who was experimenting with some custom software. It was quite unlike <a href="https://ntc.party/t/12732">the blocking of ECH in Russia in 2024</a>, which was immediately noticed by thousands of ordinary users.</p>
+<p>TLS 1.3 still works fine in China. As far as I know, there is no evidence of ECH being blocked in China. (Except for the DNS and DoH/DoT censorship that already happens there, which could have an effect on ECH.)</p></td><td>2024-11-08T19:48:25.798Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>В Windows 10 использование системного резолвера включается настройкой <code>network.dns.native_https_query_win10</code></p>
+<p>Оно отключено по умолчанию, поскольку в Windows 10 вызов DnsQuery_A <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1873461">возвращает некорректное значение</a>.</p>
+<p>До тех пор, пока Microsoft не исправит ошибку, в Windows 10 следует использовать встроенную в Firefox реализацию DoH.</p></td><td>2024-11-08T22:41:38.958Z</td></tr><tr><td>Ori</td><td><aside class="quote no-group" data-username="tango" data-post="98" data-topic="68">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"> tango:</div>
+<blockquote>
+<p>Please permit me to correct you. TLS 1.3 has never been blocked in China</p>
+</blockquote>
+</aside>
+<p>Yeah, I’ve already found it out. It’s just that I’d seen it mentioned everywhere on reddit, so I simply took it as a proven fact. What can I say? A classic case of a lie being repeated too often… <img src="https://ntc.party/images/emoji/twitter/face_exhaling.png?v=12" title=":face_exhaling:" class="emoji" alt=":face_exhaling:" loading="lazy" width="20" height="20"><br>
+Kinda reminded me of a Kurzgesagt’ video I watched a week ago, about something widely accepted, but ultimately untruthful. Though it’s unrelated, uh.</p>
+<p>Anyway, thank you for the further clarification! <img src="https://ntc.party/images/emoji/twitter/+1.png?v=12" title=":+1:" class="emoji" alt=":+1:" loading="lazy" width="20" height="20"></p></td><td>2024-11-09T00:49:11.614Z</td></tr><tr><td>easyone11</td><td><p>там curl вышел 8.11, есть какая то фишка с ECH, вдруг тебе полезно будет для скриптов\прог<br>
+<a href="https://www.opennet.ru/opennews/art.shtml?num=62222" class="onebox" target="_blank" rel="noopener">https://www.opennet.ru/opennews/art.shtml?num=62222</a></p>
+<details>
+<summary>
+Спойлер</summary>
+<p>Добавлена поддержка динамического включения поддержки TLS-расширения [ECH] (Encrypted Client Hello), предназначенного для шифрования информации о параметрах TLS-сеансов, таких как запрошенное доменное имя.</p>
+</details></td><td>2024-11-12T20:17:29.684Z</td></tr><tr><td>l8l</td><td><p>В dnscrypt-proxy есть встроенный DoH сервер, я запускал, браузер ругается что незащищённое соединение или сертификат. Ума не хватило решить с этими сертификатами, не пойму что ему нужно.</p></td><td>2024-11-12T21:24:47.322Z</td></tr>
+    </table>
+      </body>
+    </html>

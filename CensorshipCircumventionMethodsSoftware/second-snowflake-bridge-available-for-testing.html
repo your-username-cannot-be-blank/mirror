@@ -1,0 +1,330 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>second-snowflake-bridge-available-for-testing</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>The Snowflake team has done <a href="https://lists.torproject.org/pipermail/anti-censorship-team/2022-October/000270.html">a lot of work</a> on “vertical” scaling of the <a href="https://metrics.torproject.org/rs.html#details/5481936581E23D2D178105D44DB6915AB06BFB7F">snowflake-01 bridge</a>, making the host capable of handling more concurrent users. They are also now doing “horizontal” scaling, by setting up a new <a href="https://metrics.torproject.org/rs.html#details/91DA221A149007D0FD9E5515F5786C3DD07E4BB0">snowflake-02 bridge</a> to share the load. The second bridge is <a href="https://gitlab.torproject.org/tpo/applications/tor-browser-build/-/merge_requests/571">scheduled to be enabled</a> in the next Tor Browser alpha release, 12.0a5, but you can test it yourself now, by entering a bridge line manually.</p>
+<p>Short instructions: take any working Snowflake bridge line, and change the fingerprint <code>2B280B23E1107BB62ABFC40DDCC8824814F80A72</code> to <code>8838024498816A039FCBBAB14E6F40A0843051FA</code>. There are <em>two</em> places where you need to change the fingerprint.</p>
+<p><a href="https://tb-manual.torproject.org/bridges/">Longer instructions</a>:</p>
+<ul>
+<li>In Tor Browser for desktop, go to <strong>≡</strong> (hamburger menu) → <strong>Settings</strong> → <strong>Connection</strong> → <strong>Bridges</strong>, then click the <strong>Add a Bridge Manually…</strong> button.</li>
+<li>In Tor Browser for Android, go to <strong><img src="https://ntc.party/images/emoji/twitter/gear.png?v=12" title=":gear:" class="emoji only-emoji" alt=":gear:" loading="lazy" width="20" height="20"></strong> (settings) → <strong>Config Bridge</strong>. Toggle <strong>Use a Bridge</strong> to “on” and tap <strong>Provide a Bridge I know</strong>.</li>
+<li>Paste in the bridge line<br>
+<code>snowflake 192.0.2.4:80 8838024498816A039FCBBAB14E6F40A0843051FA fingerprint=8838024498816A039FCBBAB14E6F40A0843051FA url=https://snowflake-broker.torproject.net.global.prod.fastly.net/ front=cdn.sstatic.net ice=stun:stun.l.google.com:19302,stun:stun.altar.com.pl:3478,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.com:3478,stun:stun.sonetel.net:3478,stun:stun.stunprotocol.org:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478 utls-imitate=hellorandomizedalpn</code></li>
+</ul>
+<p>To check if it’s working, you can check the Tor log for a <code>new bridge descriptor</code> line. <code>flakeyN</code> is the snowflake-01 bridge; <code>crustyN</code> is the snowflake-02 bridge.</p>
+<pre><code class="lang-plaintext">[NOTICE] new bridge descriptor 'crusty3' (fresh): $8838024498816A039FCBBAB14E6F40A0843051FA~crusty3 [tO9nYvNCAdAh9lPoEEv2pZ9BJq+YzmPAMY6pxoFrLuk] at 192.0.2.4
+</code></pre>
+<p>The purpose of the second bridge is to increase capacity. It will <em>not</em> have any effect on blocking resistance. It does not change anything about broker interaction or the way the Snowflake client interacts with proxies.</p>
+<p>We will likely need to restart the snowflake-02 bridge multiple times over the coming days for upgrades and configuration changes, so be aware there may be some disruption in availability.</p></td><td>2022-11-03T17:43:08.972Z</td></tr><tr><td>tango</td><td><p>The second Snowflake bridge is now part of the stable release 12.0.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://blog.torproject.org/new-release-tor-browser-120/">
+  <header class="source">
+      <img src="second-snowflake-bridge-available-for-testing/855b2e0f9044b75340dd8ecf8aa0191b25991d86.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://blog.torproject.org/new-release-tor-browser-120/" target="_blank" rel="noopener">blog.torproject.org</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/388;"><img src="second-snowflake-bridge-available-for-testing/f5ec285e1b1ecb3d5c1c023fc458cbb1a340d175_2_690x388.png" class="thumbnail" data-dominant-color="410B82" width="690" height="388"></div>
+
+<h3><a href="https://blog.torproject.org/new-release-tor-browser-120/" target="_blank" rel="noopener">New Release: Tor Browser 12.0 | Tor Project</a></h3>
+
+  <p>Tor Browser 12.0 is now available. This new release updates Tor Browser to Firefox Extended Support Release 102.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>To use it, you just have to <a href="https://tb-manual.torproject.org/circumvention/">select Snowflake from the Built-in Bridges menu</a>. How it works is: both the snowflake-01 and snowflake-02 bridges will be activated when you choose Snowflake under “Select a Built-In Bridge…”. You can tell which bridge is being used for a circuit (in the URL bar). If the IP address is 192.0.2.3, it is the snowflake-01 bridge. If the IP address is 192.0.2.4, it is the snowflake-02 bridge. The IP addresses are just placeholder labels (the browser is not really connecting to those IP addresses).</p></td><td>2022-12-08T14:25:15.736Z</td></tr><tr><td>anon94384997</td><td><p>Не работает на моем мобильном провайдере (и уже давно), у которого есть ТСПУ и DPI. Ждал 10 минут.</p>
+<p>Я пробовал такие параметры:</p>
+<blockquote>
+<p>ClientTransportPlugin snowflake exec snowflake-client -log snowflake-client.log -log-to-state-dir -unsafe-logging<br>
+Bridge snowflake 192.0.2.5:80 8838024498816A039FCBBAB14E6F40A0843051FA fingerprint=8838024498816A039FCBBAB14E6F40A0843051FA url=<a href="https://snowflake-broker.torproject.net.global.prod.fastly.net/" rel="noopener nofollow ugc">https://snowflake-broker.torproject.net.global.prod.fastly.net/</a> <a href="http://front=cdn.sstatic.net" rel="noopener nofollow ugc">front=cdn.sstatic.net</a> ice=stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.stunprotocol.org:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478,stun:stun.l.google.com:19302 utls-imitate=hellorandomizedalpn</p>
+</blockquote>
+<p>И такие:</p>
+<blockquote>
+<p>ClientTransportPlugin snowflake exec snowflake-client -log snowflake-client.log -log-to-state-dir -unsafe-logging<br>
+Bridge snowflake 192.0.2.6:80 8838024498816A039FCBBAB14E6F40A0843051FA fingerprint=8838024498816A039FCBBAB14E6F40A0843051FA url=<a href="https://snowflake-broker.torproject.net/" rel="noopener nofollow ugc">https://snowflake-broker.torproject.net/</a> ampcache=<a href="https://cdn.ampproject.org/" rel="noopener nofollow ugc">https://cdn.ampproject.org/</a> <a href="http://front=www.google.com" rel="noopener nofollow ugc">front=www.google.com</a> ice=stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.stunprotocol.org:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478,stun:stun.l.google.com:19302 utls-imitate=hellorandomizedalpn</p>
+</blockquote>
+<p>В логе тора много таких строк:</p>
+<blockquote>
+<p>offer created<br>
+broker rendezvous peer received<br>
+timeout waiting for DataChannel.OnOpen</p>
+</blockquote>
+<p>Один раз:</p>
+<blockquote>
+<p>[warn] Problem bootstrapping. Stuck at 10% (conn_done): Connected to a relay. (DONE; DONE; count 1; recommendation warn; host 8838024498816A039FCBBAB14E6F40A0843051FA at 192.0.2.5:80)<br>
+[warn] 1 connections have failed:<br>
+[warn] 1 connections died in state handshaking (TLS) with SSL state SSLv3/TLS write client hello in HANDSHAKE</p>
+</blockquote>
+<p>В Wireshark много <code>Binding request user</code></p>
+<p>Лог snowflake-client.log <a href="https://pastebin.com/raw/CsW94rTr" rel="noopener nofollow ugc">https://pastebin.com/raw/CsW94rTr</a> (где amp cache)</p>
+<p>Под VPN всё это работает.</p>
+<p>Почему не работает на моем провайдере? Блочится handshake, проблемы с NAT? Специалисты, подскажите. В snowflake-client.log должен же быть ответ.</p>
+<p>Поскольку я указывал utls-imitate=hellorandomizedalpn, то может быть дело не в детекте отпечатков TLS, а проблема с NAT?<br>
+Но несколько месяцев назад на этом же провайдере snowflake работал.</p>
+<p>UPD: Версия бинарников последняя, из Tor Browser 12.0. Система Linux.</p></td><td>2022-12-18T23:13:18.647Z</td></tr><tr><td>tango</td><td><p>Lately there has been some discussion that Snowflake may be partially blocked in Russia. But I have not really looked into it yet.</p>
+<ul>
+<li><a href="https://lists.torproject.org/pipermail/tor-project/2022-December/003521.html" class="inline-onebox">[tor-project] Anti-censorship team meeting notes, 2022-12-15</a></li>
+<li>
+<a href="http://meetbot.debian.net/tor-meeting/2022/tor-meeting.2022-12-15-15.59.log.html#l-44" class="inline-onebox">#tor-meeting log</a><details><summary>IRC log</summary>
+<pre>16:08:46 &lt;ggus&gt; meskio: shelikhoo: do you know what's the status of snowflake test on logcollector? hackerncoder was checking and it seems there was some issue in the russian vantage point?
+16:08:47 &lt;shelikhoo&gt; oh no... iran vps's connection to cloudflare is not working i/o timeout
+16:09:13 &lt;cece[m]&gt; meskio: same here
+16:09:14 &lt;shelikhoo&gt; I think it is the iran one that is having issue
+16:09:18 &lt;meskio&gt; shelikhoo: maybe cloudflare is censored in Iran :P
+16:09:38 &lt;shelikhoo&gt; and snowflake in russia is down as well
+16:09:41 &lt;shelikhoo&gt; oooo
+16:10:14 &lt;shelikhoo&gt; https://gitlab.torproject.org/tpo/anti-censorship/connectivity-measurement/bridgestatus/-/blob/dcd157e608be92294a1bc3dd51c9bdbf444edb0f/recentResult_russia
+16:11:12 &lt;meskio&gt; I was looking at metrics.tpo and there doesn't seem to be much users of snowflake in russia
+16:11:18 &lt;meskio&gt; or maybe 0
+16:11:38 &lt;meskio&gt; but the number of tor users haven't gone down at all
+16:11:59 &lt;meskio&gt; so everybody have their own way to find bridges
+16:12:29 &lt;meskio&gt; circumvention settings is recommending snowflake in russia, I wonder if we should change that
+16:12:47 &lt;shelikhoo&gt; yes, but we should try to find a way to fix this in the near future
+16:12:59 &lt;shelikhoo&gt; before they find a way to block obfs4...
+16:13:07 &lt;ggus&gt; i think that during the protests in iran, many users in russia migrated from snowflake to obsf4, because the bridge was too overloaded/slow
+16:13:35 &lt;ggus&gt; meskio: +1
+16:14:05 &lt;meskio&gt; cool, I'll make the change
+16:14:18 &lt;itchyonion&gt; What does the second column (number) represent in the bridgestatus lines? Success rate?
+16:14:30 &lt;meskio&gt; yes, we should investigate if snowflake is blocked in russia, but not sure if we can realistically do that before january
+16:14:33 &lt;shelikhoo&gt; it is bootstrap percentage
+16:14:42 &lt;itchyonion&gt; ah ok
+16:14:46 &lt;shelikhoo&gt; should be 100 when tor works
+16:16:38 &lt;meskio&gt; BTW, there are still more than double of users connecting to Tor directly than over a bridge
+16:16:50 &lt;meskio&gt; ~100k direct connections, ~40k bridges, ...
+16:16:56 &lt;meskio&gt; I mean in russia
+16:18:05 &lt;shelikhoo&gt; yes. I think one of the reason for that they only block tor on residential network
+16:18:14 &lt;shelikhoo&gt; not on IDC network
+16:18:18 &lt;meskio&gt; yep
+16:18:23 &lt;ggus&gt; it depends on where they deployed tspu
+16:19:36 &lt;ggus&gt; fyi: today the tor project lost the appeal to 'unblock tor' in russia. rks lawyers will appeal again: https://roskomsvoboda.org/post/tor-ne-proshel-apelliatsiyu/ (in RU)
+16:21:05 &lt;meskio&gt; does unblock tor mean the website?
+16:21:22 &lt;meskio&gt; or are did we manage to ask legally to unblock the tor network?
+16:23:39 &lt;meskio&gt; ggus: -^?
+16:24:43 &lt;ggus&gt; meskio: we didn't manage to ask legally to unblock the tor network because they never confirmed doing that. the process is about tor website and app stores
+16:26:00 &lt;ggus&gt; sooo gettor may get more russian users in the nearby future
+16:26:11 &lt;shelikhoo&gt; I think this is mostly a
+16:26:19 &lt;meskio&gt; uff, I see
+16:26:37 &lt;meskio&gt; the snowflake block might be https://gitlab.torproject.org/tpo/anti-censorship/censorship-analysis/-/issues/40030
+16:26:56 &lt;shelikhoo&gt; I think this is mostly a symbolic legal flight?
+16:27:12 &lt;shelikhoo&gt; but it should worth it
+16:28:48 &lt;meskio&gt; +1
+16:28:56 &lt;itchyonion&gt; Anything else on this topic?
+16:29:08 &lt;ggus&gt; meskio: shelikhoo: i think i will close this ticket: https://gitlab.torproject.org/tpo/community/support/-/issues/40050 and then we can open a new again about the snowflake block in russia? or should we keep it open until we defeat tor censorship in russia like a historical artifact? :D
+16:30:16 &lt;shelikhoo&gt; I think we could add the date or a year to ticket and create a ticket for next round of censorship
+</pre></details>
+</li>
+</ul>
+<p>I can see that there are still connections from Russia. It is <span class="hashtag">#4</span> ranked by number of users still. But it could be that it was blocked in some but not all ISPs in Russia, and with the giant number of users in Iran we did not notice.</p>
+<pre><code class="lang-nohighlight">dirreq-stats-end 2022-12-18 07:00:35 (86400 s)
+dirreq-v3-reqs ir=38168,us=11000,??=4544,ru=1504,cn=968,de=368,mu=240,...
+</code></pre>
+<p><a class="mention" href="/u/anon94384997">@anon94384997</a> it looks like in your case, Snowflake is blocked by DTLS, which is <a href="https://ntc.party/t/ooni-reports-of-tor-blocking-in-certain-isps-since-2021-12-01/1477/37">how it was done in December 2021</a>. See also <a href="https://bugs.torproject.org/tpo/anti-censorship/censorship-analysis/40030" class="inline-onebox">IRC Tip about Signature used to block Snowflake in Russia, 2022-May-16 (#40030) · Issues · The Tor Project / Anti-censorship / censorship-analysis · GitLab</a>.</p>
+<p>There are several steps to a Snowflake connection:</p>
+<ol>
+<li>Contact STUN server and construct offer. (Working for you.)</li>
+<li>Send offer to broker and receive answer using TLS domain fronting / AMP cache. (Working for you.)</li>
+<li>Peer-to-peer DTLS connection with proxy. (This is probably the step that is not working for you.)</li>
+</ol>
+<p>The evidence that (1) is working is <code>WebRTC: Created offer</code>. The evidence that (2) is working is <code>Received answer: {"answer":</code>… The evidence that (3) is not working is <code>WebRTC: timeout waiting for DataChannel.OnOpen</code>.</p></td><td>2022-12-19T04:50:14.032Z</td></tr><tr><td>anonymous83(anonymous83)</td><td><aside class="quote no-group" data-username="anon94384997" data-post="3" data-topic="3445">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/49beb7/48.png" class="avatar"> anon94384997:</div>
+<blockquote>
+<p>Но несколько месяцев назад на этом же провайдере snowflake работал</p>
+</blockquote>
+</aside>
+<aside class="quote" data-post="20" data-topic="1857">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/e495f1/48.png" class="avatar">
+    <a href="https://ntc.party/t/in-case-snowflake-rendezvous-gets-blocked/1857/20">In case Snowflake rendezvous gets blocked</a> <a class="badge-category__wrapper " href="/c/censorship-circumvention-software/11"><span data-category-id="11" style="--category-badge-color: #92278F; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Discussions of censorship circumvention software of different kinds, for all operation systems and devices"><span class="badge-category__name">Censorship circumvention methods &amp; software</span></span></a>
+  </div>
+  <blockquote>
+    Усложнили правило блокировки для snowflake и других. Одиночным пакетом из приложения выявить паттерн теперь невозможно. Проверка многоуровневая – отдельная очередь для условного webrtc и уже в ней проверка. Похоже на оптимизацию под слабое железо, потратив такты на очередь выиграли окно под правило. Если это так, блокировка snowflake заденет теперь “всех”. 
+Новое правило: ClientHello запускает проверку на HelloVerifyRequest. Направление любое.
+  </blockquote>
+</aside>
+</td><td>2022-12-19T07:55:37.360Z</td></tr><tr><td>anon94384997</td><td><p>Спасибо за инфу.<br>
+На моем провайдере (Yota) snowflake был заблокирован где-то между 8 Feb 2022 и 19 Jul 2022.<br>
+По моим наблюдениям, 7 Feb 2022 snowflake работал. 19 Jul 2022 уже не работал. В эти промежутки в основном работал.<br>
+Значит, это не исправить теперь?</p>
+<p>Конечно, большинство провайдеров не такие продвинутые, как мобильные.</p></td><td>2022-12-20T09:04:44.831Z</td></tr><tr><td>tango</td><td><p>19 Jul roughly agrees with the date that <a class="mention" href="/u/anonymous51">@anonymous51</a> reported problems caused by HelloVerifyRequest (2022-07-20).</p>
+<ul>
+<li><a href="https://ntc.party/t/in-case-snowflake-rendezvous-gets-blocked/1857/9" class="inline-onebox">In case Snowflake rendezvous gets blocked - #9 by anonymous51</a></li>
+<li><a href="https://gitlab.torproject.org/tpo/anti-censorship/censorship-analysis/-/issues/40030#note_2823140" class="inline-onebox">IRC Tip about Signature used to block Snowflake in Russia, 2022-May-16 (#40030) · Issues · The Tor Project / Anti-censorship / censorship-analysis · GitLab</a></li>
+</ul>
+<p>Indeed it seems the team has been neglecting this. What it will take is a change in <a href="https://github.com/pion/dtls">pion/dtls</a>, like the ones we did earlier:</p>
+<ul>
+<li><a href="https://github.com/pion/dtls/pull/407" class="inline-onebox">Do not include IP addresses as SNI values by cohosh · Pull Request #407 · pion/dtls · GitHub</a></li>
+<li><a href="https://github.com/pion/dtls/pull/410" class="inline-onebox">Only include supported_groups extension in ClientHello by cohosh · Pull Request #410 · pion/dtls · GitHub</a></li>
+<li><a href="https://github.com/pion/dtls/pull/474" class="inline-onebox">Shuffle Elliptic Curves in ClientHello to circumvent Russian censorship by ValdikSS · Pull Request #474 · pion/dtls · GitHub</a></li>
+</ul></td><td>2022-12-20T17:44:18.440Z</td></tr><tr><td>anonymous84(anonymous84)</td><td><aside class="quote no-group" data-username="anon94384997" data-post="6" data-topic="3445">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/49beb7/48.png" class="avatar"> anon94384997:</div>
+<blockquote>
+<p>Конечно, большинство провайдеров не такие продвинутые, как мобильные.</p>
+</blockquote>
+</aside>
+<p>Возможно в мобильном трафике нет столько сессий, которые надо сопровождать в ожидании байт похожих на snowflake. И еще мобильные сети были приоритетным направлением для блокировок, а значит там есть оперативный запас мощностей.</p>
+<p>Сейчас наблюдается оптимизация блокировок по диапазонам IP адресов, вплоть до динамического отключения/ограничения трекинга сессий. Поведение похожее на перегруз в прошлом, но теперь рукотворный и управляемый.</p>
+<aside class="quote no-group" data-username="anon94384997" data-post="6" data-topic="3445">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/49beb7/48.png" class="avatar"> anon94384997:</div>
+<blockquote>
+<p>Значит, это не исправить теперь?</p>
+</blockquote>
+</aside>
+<p>Pion останется белой вороной.<br>
+С другой стороны, переход обратно на libwebrtc в официальном приложении все равно приведет в финале к блокировке webrtc целиком или по частям.</p></td><td>2022-12-23T18:50:51.229Z</td></tr><tr><td>tango</td><td><p>Today, <a class="mention" href="/u/shelikhoo">@Shelikhoo</a> merged a change to stop sending Hello Verify Request. This may overcome Snowflake blocking by DTLS fingerprint in some ISPs in Russia.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/131">
+  <header class="source">
+      <img src="second-snowflake-bridge-available-for-testing/0d42626b49766f97d62860b9af6453878da85265.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/131" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="second-snowflake-bridge-available-for-testing/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/131" target="_blank" rel="noopener">Apply Skip Hello Verify Migration (!131) · Merge requests · The Tor Project /...</a></h3>
+
+  <p>This merge request includes the patch to remove hello verify message in the DTLS handshake process. This have been proven to be effective as a countermeasure...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>It is not present in any release yet, but you can test it manually. You need commit <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/commit/10fd00068528fd6309bbb49f9dd0fea38f1ac5ef">10fd00068528fd6309bbb49f9dd0fea38f1ac5ef</a> or later. The expected output is <code>Bootstrapped 100% (done)</code>.</p>
+<pre><code class="lang-plaintext">$ git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake.git
+$ cd snowflake/client
+$ go build
+$ tor -f torrc
+</code></pre></td><td>2023-01-17T18:10:52.528Z</td></tr><tr><td>anon94384997</td><td><p>Thank you for your work.<br>
+I was only able to connect once. The next time there were problems.</p>
+<p>I used 2B280B23E1107BB62ABFC40DDCC8824814F80A72 (not new 8838024498816A039FCBBAB14E6F40A0843051FA), without option utls-imitate=hellorandomizedalpn and clear Tor cache (data folder) before each startup.</p>
+<p>GOOD:<br>
+tor log <a href="https://pastebin.com/raw/sQMm0zwR" rel="noopener nofollow ugc">https://pastebin.com/raw/sQMm0zwR</a><br>
+snowflake log <a href="https://pastebin.com/raw/q6v8ix9J" rel="noopener nofollow ugc">https://pastebin.com/raw/q6v8ix9J</a></p>
+<p>BAD:<br>
+tor log <a href="https://pastebin.com/raw/aKr4aYLR" rel="noopener nofollow ugc">https://pastebin.com/raw/aKr4aYLR</a><br>
+snowlake log <a href="https://pastebin.com/raw/tRMgT3ag" rel="noopener nofollow ugc">https://pastebin.com/raw/tRMgT3ag</a></p>
+<p>Under VPN it works.</p>
+<p>UPD1: With 8838024498816A039FCBBBB14E6F40A0843051FA and utls-imitate=hellorandomizedalpn the same errors.<br>
+UPD2: I compiled and tested the new version, not the old one.</p></td><td>2023-01-17T21:48:54.010Z</td></tr><tr><td>tango</td><td><p><a class="mention" href="/u/anon94384997">@anon94384997</a> Thanks for testing. It appears there was a problem with commit <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/commit/10fd00068528fd6309bbb49f9dd0fea38f1ac5ef">10fd00068528fd6309bbb49f9dd0fea38f1ac5ef</a> that prevented the intended commit from working. Please try again with commit <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/commit/7b77001eaa90e09d41172a2b170dabd3f1922b4a">7b77001eaa90e09d41172a2b170dabd3f1922b4a</a> or later (tag <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/tags/v2.5.1">v2.5.1</a>).</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/134">
+  <header class="source">
+      <img src="second-snowflake-bridge-available-for-testing/79f304263a82d737a62992a11b2e5f9b577508fd.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/134" target="_blank" rel="noopener">GitLab</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="64" height="64" src="second-snowflake-bridge-available-for-testing/3197daf5565c6657f1af4758d2a9b3178181cfa5_2_64x64.jpeg" class="thumbnail onebox-avatar" data-dominant-color="F4C4BB">
+
+<h3><a href="https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/merge_requests/134" target="_blank" rel="noopener">Fix HelloVerify patch not applied and release 2.5.1 (!134) · Merge requests ·...</a></h3>
+
+  <p>This is merge request for bug fix release that fixes remove helloverify countermeasure was not effective in last release. The root cause was that a line...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2023-01-18T16:01:57.794Z</td></tr><tr><td>anon94384997</td><td><p>Yes, it works now. Finally. Tried 4 times. snowlake last git. Thanks.</p>
+<ol>
+<li><a href="https://pastebin.com/raw/WZW0Dqnr" rel="noopener nofollow ugc">https://pastebin.com/raw/WZW0Dqnr</a></li>
+<li><a href="https://pastebin.com/raw/wAyK9Uu9" rel="noopener nofollow ugc">https://pastebin.com/raw/wAyK9Uu9</a></li>
+<li><a href="https://pastebin.com/raw/eS7F8AZK" rel="noopener nofollow ugc">https://pastebin.com/raw/eS7F8AZK</a></li>
+</ol></td><td>2023-01-18T23:06:27.631Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="tango" data-post="9" data-topic="3445">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/e36b37/48.png" class="avatar"> tango:</div>
+<blockquote>
+<p>Today, <a class="mention" href="/u/shelikhoo">@Shelikhoo</a> merged a change to stop sending Hello Verify Request. This may overcome Snowflake blocking by DTLS fingerprint in some ISPs in Russia.</p>
+</blockquote>
+</aside>
+<p>The fix is now released in Tor Browser 12.0.3. Please try it if you are in Russia and Snowflake was not working for you.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://blog.torproject.org/new-release-tor-browser-1203/">
+  <header class="source">
+      <img src="second-snowflake-bridge-available-for-testing/c6d313f1cbc1694b02691ed04878a1bfde835201.png" class="site-icon" data-dominant-color="787472" width="32" height="32">
+
+      <a href="https://blog.torproject.org/new-release-tor-browser-1203/" target="_blank" rel="noopener">blog.torproject.org</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/388;"><img src="second-snowflake-bridge-available-for-testing/d64c172667dbbae682f85b72895f4e3d6284b4b7.png" class="thumbnail" data-dominant-color="340378" width="690" height="388"></div>
+
+<h3><a href="https://blog.torproject.org/new-release-tor-browser-1203/" target="_blank" rel="noopener">New Release: Tor Browser 12.0.3 | Tor Project</a></h3>
+
+  <p>Tor Browser 12.0.3 is now available from the Tor Browser download page and also from our distribution directory.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2023-02-16T15:28:32.664Z</td></tr><tr><td>anonymous99(anonymous99)</td><td><p>Ремонт занял 9 месяцев. Проработает месяц, в лучшем случае.</p></td><td>2023-02-16T16:17:34.260Z</td></tr>
+    </table>
+      </body>
+    </html>

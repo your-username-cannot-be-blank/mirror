@@ -1,0 +1,478 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>маршрутизация-на-nekoray</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>soulja(Serano)</td><td><p>Настраивал ли кто нибудь маршрутизацию на клиенте Nekoray? <a href="https://github.com/MatsuriDayo/nekoray" class="inline-onebox" rel="noopener nofollow ugc">GitHub - MatsuriDayo/nekoray: Qt based cross-platform GUI proxy configuration manager (backend: sing-box)</a><br>
+В поле direct выставляю <code>geoip:ru</code> но эффекта нет, проксируется. Прописал CIDR, все равно проксируется. Поделитесь, кто настраивал роутинг на нем. Спасибо!</p></td><td>2023-10-10T11:57:44.281Z</td></tr><tr><td>0ka(0ka)</td><td><p>а где проверяете? на яндексе работает <a href="https://yandex.ru/internet/" class="inline-onebox">Яндекс.Интернетометр — проверка скорости интернета</a></p></td><td>2023-10-10T13:18:52.645Z</td></tr><tr><td>0ka(0ka)</td><td><p>можно еще сделать “custom route (global)”</p>
+<pre><code class="lang-auto">{
+    "rules": [
+        {
+            "domain_suffix": [
+                ".ru"
+            ],
+            "outbound": "direct"
+        }
+    ]
+}
+
+</code></pre></td><td>2023-10-10T13:22:23.841Z</td></tr><tr><td>soulja(Serano)</td><td><p>На интернетометре тоже проверял. Попробую ещё раз кастом правила, первый раз не сработало.</p></td><td>2023-10-10T13:25:25.073Z</td></tr><tr><td>0ka(0ka)</td><td><p>прога кривая, отказался от неё и сделал конфиг для чистого sing-box, переустановите и сделайте всё с 0, может поможет</p></td><td>2023-10-10T13:26:20.466Z</td></tr><tr><td>soulja(Serano)</td><td><p>Возможно что кривая, у меня мак и xray + xtls reality. Ничего кроме неё не нашёл</p></td><td>2023-10-10T13:33:24.479Z</td></tr><tr><td>soulja(Serano)</td><td><aside class="quote no-group" data-username="0ka" data-post="3" data-topic="5922">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<pre><code class="lang-auto">{
+    "rules": [
+        {
+            "domain_suffix": [
+                ".ru"
+            ],
+            "outbound": "direct"
+        }
+    ]
+}
+</code></pre>
+</blockquote>
+</aside>
+<p>Такой формат прога отказалась принимать. Но есть момент со стандарт правилами, при использовании в режиме прокси, в режиме tun сработало.</p></td><td>2023-10-10T15:14:30.349Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Убедитесь, что в конфигурации Nekoray включен sniffing (sniff result for routing или как-то так).</p>
+<p>И да, сниппет, который скинули выше - он для использования Nekobox (с ядром Sing-box), а не Nekoray (там ядро X-ray).</p></td><td>2023-10-30T18:11:26.944Z</td></tr><tr><td>0ka(0ka)</td><td><p>nekoray при запуске спрашивает ядро</p></td><td>2023-10-30T19:14:56.384Z</td></tr><tr><td>Uporoty(Uporoty)</td><td><p>Да, если выбрать XRay, то он так и остаётся Nekoray, а если выбрать Sing-box, то он перезапускается уже как Nekobox. У них отличаются некоторые окна в интерфейсе, и, само собой, ядро.<br>
+То, что вы вбиваете в “Custom JSON” передается напрямую в конфиг, у ядер разные синтаксисы конфигов, и логично, что то, что работает с Sing-box скорее всего не заработает с XRay и наоборот.</p></td><td>2023-10-30T19:21:47.214Z</td></tr><tr><td>0ka(0ka)</td><td><p>с xray явно не заработает, даже не запустится конфиг</p></td><td>2023-10-30T19:28:20.568Z</td></tr><tr><td>soulja(Serano)</td><td><p>Спасибо за ответы, попробую завтра</p></td><td>2023-10-30T19:29:47.696Z</td></tr><tr><td>soulja(Serano)</td><td><aside class="quote no-group" data-username="Uporoty" data-post="8" data-topic="5922">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/u/ed655f/48.png" class="avatar"> Uporoty:</div>
+<blockquote>
+<p>sniff result for routing</p>
+</blockquote>
+</aside>
+<p>По умолчанию был установлен, но это не сработало</p></td><td>2023-10-31T17:13:32.555Z</td></tr><tr><td>Kisliy(Андрей)</td><td><p>Установил Nekoray на sing-box, прочитав из статьи о блокировках, что</p>
+<blockquote>
+<p>“Правила по суффиксам Nekobox не умеет, но их умеет sing-box в его основе, поэтому жмем “Custom” и прописываем”</p>
+</blockquote>
+<p>С суффиксами правила работают - я проверил, но вот с доменами никак не получается фильтровать <img src="https://ntc.party/images/emoji/twitter/roll_eyes.png?v=12" title=":roll_eyes:" class="emoji" alt=":roll_eyes:" loading="lazy" width="20" height="20"><br>
+Вбил такое в JSON:</p>
+<pre><code class="lang-auto">{
+    "rules": [
+        {
+            "domain": [
+                "yandex.com",
+                "google.com",
+                "yahoo.com",
+                "bing.com",
+                "tineye.com",
+                "duckduckgo.com",
+                "youtube.com",
+                "apple.com",
+                "vk.com",
+                "icq.com",
+                "livejournal.com",
+                "live.com",
+                "login.live.com"
+            ],
+            "outbound": "direct"
+        }
+    ]
+}
+</code></pre>
+<p>Или с доменами Nekobox вообще не работает? <img src="https://ntc.party/images/emoji/twitter/face_with_monocle.png?v=12" title=":face_with_monocle:" class="emoji" alt=":face_with_monocle:" loading="lazy" width="20" height="20"></p></td><td>2024-05-01T21:23:02.313Z</td></tr><tr><td>0ka(0ka)</td><td><p>зачем проксировать только корневые домены? у ваших сайтов полно доменов типа <a href="http://mail.yandex.com">mail.yandex.com</a>, <a href="http://accounts.google.com">accounts.google.com</a>,… оставьте domain_suffix (это не избавит от проблемы наличия доменов типа <a href="http://yastatic.net">yastatic.net</a> в сервисах яндекса и т.д., но если не критично, то можно забить, в противном случае делайте исключения по подсетям яндекса, гугла,…). И читайте официальный мануал, он не лучший, но с правилами типа как у вас там вроде проблем нет <a href="https://sing-box.sagernet.org/configuration/route/rule/" class="inline-onebox">Route Rule - sing-box</a></p></td><td>2024-05-01T23:18:49.747Z</td></tr><tr><td>Kisliy(Андрей)</td><td><aside class="quote no-group" data-username="0ka" data-post="15" data-topic="5922">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>зачем проксировать только корневые домены?</p>
+</blockquote>
+</aside>
+<p>Пока не заблокированы, смысл гонять тот же трафик ютуба в обход?</p>
+<aside class="quote no-group" data-username="0ka" data-post="15" data-topic="5922">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>оставьте domain_suffix (это не избавит от проблемы наличия доменов типа <a href="http://yastatic.net" rel="noopener nofollow ugc">yastatic.net</a> в сервисах яндекса</p>
+</blockquote>
+</aside>
+<p>Согласен, может это и более палевно даже, один комп а страница и статистика с двух разных ip приходят <img src="https://ntc.party/images/emoji/twitter/face_in_clouds.png?v=12" title=":face_in_clouds:" class="emoji" alt=":face_in_clouds:" loading="lazy" width="20" height="20"></p>
+<aside class="quote no-group" data-username="0ka" data-post="15" data-topic="5922">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>И читайте официальный мануал, он не лучший, но с правилами типа как у вас там вроде проблем нет <a href="https://sing-box.sagernet.org/configuration/route/rule/" rel="noopener nofollow ugc">Route Rule - sing-box</a></p>
+</blockquote>
+</aside>
+<p>Спасибо, но всё-равно не работает, идёт в обход:<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="маршрутизация-на-nekoray/112cacda7ddac8f52dcef0d81ae9b4198e00c27c.png" data-download-href="https://ntc.party/uploads/default/112cacda7ddac8f52dcef0d81ae9b4198e00c27c" title="изображение_2024-05-02_103332622"><img src="маршрутизация-на-nekoray/112cacda7ddac8f52dcef0d81ae9b4198e00c27c_2_517x315.png" alt="изображение_2024-05-02_103332622" data-base62-sha1="2rVPEMOCwsERcgKgSEtgMoiWP5G" width="517" height="315" srcset="маршрутизация-на-nekoray/112cacda7ddac8f52dcef0d81ae9b4198e00c27c_2_517x315.png, маршрутизация-на-nekoray/112cacda7ddac8f52dcef0d81ae9b4198e00c27c_2_775x472.png 1.5x, маршрутизация-на-nekoray/112cacda7ddac8f52dcef0d81ae9b4198e00c27c_2_1034x630.png 2x" data-dominant-color="F6F6F7"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение_2024-05-02_103332622</span><span class="informations">1233×752 49.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<details>
+<summary>
+правила</summary>
+<pre><code class="lang-auto">{
+    "route": {
+        "rules": [
+            {
+                "domain": [
+                    "yandex.com",
+                    "google.com",
+                    "yahoo.com",
+                    "bing.com",
+                    "tineye.com",
+                    "duckduckgo.com",
+                    "youtube.com",
+                    "apple.com",
+                    "vk.com",
+                    "icq.com",
+                    "livejournal.com",
+                    "live.com",
+                    "login.live.com"
+                ],
+                "outbound": "direct"
+            }
+        ]
+    }
+}
+
+</code></pre>
+</details></td><td>2024-05-02T07:39:14.481Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="Kisliy" data-post="16" data-topic="5922">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kisliy/48/1574_2.png" class="avatar"> Kisliy:</div>
+<blockquote>
+<p>Пока не заблокированы, смысл гонять тот же трафик ютуба в обход?</p>
+</blockquote>
+</aside>
+<p>ничего не понял, вы хотите гонять ютуб через прокси или нет? по логике надо в обход прокси. Сами видео на домене <a href="http://googlevideo.com">googlevideo.com</a> с сотней субдоменов, поэтому ставьте domain_suffix.</p>
+<aside class="quote no-group" data-username="Kisliy" data-post="16" data-topic="5922">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kisliy/48/1574_2.png" class="avatar"> Kisliy:</div>
+<blockquote>
+<p>но всё-равно не работает, идёт в обход:</p>
+</blockquote>
+</aside>
+<p>сниффинг включен? лог в info и смотрите видно ли там ваши домены и куда направляются</p></td><td>2024-05-02T11:45:52.516Z</td></tr><tr><td>Kisliy(Андрей)</td><td><aside class="quote no-group" data-username="0ka" data-post="17" data-topic="5922">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>сниффинг включен?</p>
+</blockquote>
+</aside>
+<p>Да.</p>
+<aside class="quote no-group" data-username="0ka" data-post="17" data-topic="5922">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>ничего не понял, вы хотите гонять ютуб через прокси или нет? по логике надо в обход прокси. Сами видео на домене <a href="http://googlevideo.com" rel="noopener nofollow ugc">googlevideo.com</a> с сотней субдоменов, поэтому ставьте domain_suffix.</p>
+</blockquote>
+</aside>
+<p>Верно, в обход прокси.<br>
+Domain_suffix на удивление сработал, повозится правда пришлось, ну да ладно, главное работает. Спасибо! <img src="https://ntc.party/images/emoji/twitter/+1.png?v=12" title=":+1:" class="emoji" alt=":+1:" loading="lazy" width="20" height="20"></p>
+<p>Оставлю здесь код, может кто тоже мучается с этим:</p>
+<details>
+<summary>
+Правила от Kisliy :) </summary>
+<pre><code class="lang-auto">{
+    "rules": [
+        {
+            "domain_keyword": [
+                "habr.com"
+            ],
+            "outbound": "proxy"
+        },
+        {
+            "domain_keyword": [
+                "yandex.com",
+                "google.com",
+                "yahoo.com",
+                "bing.com",
+                "tineye.com",
+                "duckduckgo.com",
+                "youtube.com",
+                "apple.com",
+                "vk.com",
+                "icq.com",
+                "livejournal.com",
+                "microsoft.com",
+                "live.com",
+                "login.live.com",
+                "tradingview.com"
+            ],
+            "outbound": "direct"
+        },
+        {
+            "domain_suffix": [
+                ".ru",
+                ".su",
+                ".by",
+                ".рф"
+            ],
+            "outbound": "direct"
+        },
+        {
+            "geoip": [
+                "private",
+                "ru",
+                "by"
+            ],
+            "outbound": "direct"
+        }
+     ]
+}
+
+</code></pre>
+</details></td><td>2024-05-02T20:02:47.585Z</td></tr><tr><td>0ka(0ka)</td><td><p>geoip это база данных стран и их айпи адресов, в вашем правиле ru - russia, by - belarus, стран su, рф в официальной базе не существует.<br>
+geosite это база данных сервисов, например steam, названий ru, su, by, рф в официальной базе не существует.</p></td><td>2024-05-02T20:14:32.139Z</td></tr><tr><td>Kisliy(Андрей)</td><td><p>Да уж, перебор вышел <img src="https://ntc.party/images/emoji/twitter/see_no_evil.png?v=12" title=":see_no_evil:" class="emoji" alt=":see_no_evil:" loading="lazy" width="20" height="20"><br>
+Сейчас подправлю.</p></td><td>2024-05-02T20:27:15.555Z</td></tr><tr><td>0ka(0ka)</td><td><p>пробуйте эти правила</p>
+<pre><code class="lang-auto">{
+    "domain_keyword": [
+        "google",
+		"yandex",
+		"yastatic",
+		"dzen",
+		"yahoo",
+		"microsoft"
+    ],
+    "outbound": "direct"
+},	
+{
+    "domain_suffix": [
+        ".ru",
+		".su",
+		".by",
+		".рф",
+		"vk.com",
+		"youtube.com",
+		"gstatic.com"
+    ],
+    "outbound": "direct"
+}
+</code></pre>
+<p>и имейте ввиду что geoip может содержать много ошибок, хотя может быть вы с ними никогда и не столкнётесь.<br>
+ru, su домены тоже могут быть заблокированы ркном.</p></td><td>2024-05-02T20:47:00.544Z</td></tr><tr><td>Kisliy(Андрей)</td><td><p>Ваши правила выглядят пологичнее, спасибо добавил себе.</p>
+<aside class="quote no-group" data-username="0ka" data-post="21" data-topic="5922">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>имейте ввиду что geoip может содержать много ошибок, хотя может быть вы с ними никогда и не столкнётесь.<br>
+ru, su домены тоже могут быть заблокированы ркном.</p>
+</blockquote>
+</aside>
+<p>Уже завёл отдельный “белый” список для таких <img src="https://ntc.party/images/emoji/twitter/wink.png?v=12" title=":wink:" class="emoji" alt=":wink:" loading="lazy" width="20" height="20"></p></td><td>2024-05-03T01:06:38.492Z</td></tr><tr><td>A.g(A.g)</td><td><p>Есть вопрос по маршрутизации и правилам. Не понимаю, как должно работать.</p>
+<p>На сервере по рекомендациям заблокирован выход на ru. По идее, если на клиенте в tun-режиме прописано правило:</p>
+<blockquote>
+<pre><code>    {
+        "domain_suffix": [
+            ".ru"
+        ],
+        "outbound": "direct"
+    },
+</code></pre>
+</blockquote>
+<p>то я должен нормально попадать на тот же яндекс, но не могу.</p>
+<p>Как должно быть и что я упустил?</p></td><td>2024-11-08T18:32:06.685Z</td></tr><tr><td>rewhat</td><td><p>попробуйте мой конфиг:</p>
+<details>
+<summary>
+Спойлер</summary>
+<pre><code class="lang-auto">{
+  "log": {
+    "level": "warning",
+    "timestamp": true
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "local-dns",
+        "address": "local",
+        "detour": "direct-out"
+      },
+      {
+        "tag": "yandex-doh",
+        "address": "https://77.88.8.8",
+        "detour": "direct-out"
+      },
+      {
+        "tag": "cloudflare-doh",
+        "address": "https://1.1.1.1/dns-query",
+        "detour": "proxy"
+      },
+	  {
+		"tag": "adguard-doh",
+        "address": "https://dns.adguard-dns.com/dns-query",
+		"address_resolver": "cloudflare-doh",
+        "detour": "proxy" 
+	  }
+    ],
+    "rules": [
+      {
+        "geoip": "ru",
+        "server": "yandex-doh",
+        "outbound": "direct-out"
+      },
+      {
+        "geosite": "category-ru",
+        "server": "yandex-doh",
+        "outbound": "direct-out"
+      },
+      {
+        "domain_suffix": [".ru", ".su", ".xn--p1ai"],
+        "server": "yandex-doh",
+        "outbound": "direct-out"
+      }
+    ],
+    "final": "cloudflare-doh",
+    "strategy": "prefer_ipv4"
+  },
+  "inbounds": [
+    {
+      "type": "direct",
+      "tag": "direct-in"
+    },
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "interface_name": "vpn-tun",
+      "auto_route": true,
+      "strict_route": true,
+      "inet4_address": "172.18.0.1/30",
+      "stack": "system",
+      "sniff": true,
+      "sniff_timeout": "300ms",
+      "domain_strategy": "prefer_ipv4"
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "vless",
+      "tag": "proxy",
+      "server": "XXXXXXXXXXXXXXXXXXX",
+      "server_port": 123456,
+      "uuid": "XXXXXXXXXXXXXXXXXXX",
+      "flow": "xtls-rprx-vision",
+      "tls": {
+        "enabled": true,
+        "server_name": "XXXXXXXXXXXXXXXXXXX",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "firefox"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "XXXXXXXXXXXXXXXXXXX",
+          "short_id": "XXXXXXXXXXXXXXXXXXX"
+        }
+      },
+      "packet_encoding": ""
+    },
+    {
+      "type": "direct",
+      "tag": "direct-out"
+    },
+    {
+      "type": "block",
+      "tag": "block-out"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    }
+  ],
+  "route": {
+    "geoip": {
+      "download_detour": "proxy"
+    },
+    "geosite": {
+      "download_detour": "proxy"
+    },
+    "rules": [
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      },
+      {
+        "geoip": "private",
+        "outbound": "direct-out"
+      },
+      {
+        "geosite": "category-ru",
+        "outbound": "direct-out"
+      },
+      {
+        "geoip": "ru",
+        "outbound": "direct-out"
+      },
+      {
+        "domain_suffix": [".ru", ".su", ".xn--p1ai"],
+        "outbound": "direct-out"
+      },
+      {
+        "geosite": "category-ads-all",
+        "outbound": "block-out"
+      },
+      {
+        "protocol": "bittorrent",
+        "outbound": "direct-out"
+      },
+      {
+        "process_name": [
+          "GoogleDriveFS.exe",
+          "YandexDisk2.exe",
+          "qbittorrent.exe",
+          "steam.exe",
+          "steamservice.exe",
+          "steamwebhelper.exe",
+          "Code.exe",
+          "wslservice.exe",
+          "Adguard.exe",
+          "AdguardSvc.exe",
+          "Docker Desktop.exe",
+          "com.docker.build.exe",
+          "com.docker.backend.exe",
+          "com.docker.build.exe",
+          "com.docker.dev-envs.exe"
+        ],
+        "outbound": "direct-out"
+      }
+    ],
+    "final": "proxy",
+    "auto_detect_interface": true
+  }
+}
+</code></pre>
+</details>
+<p>У меня всё работает как надо. Если у вас не сработает, то хз.</p></td><td>2024-11-08T18:41:24.233Z</td></tr><tr><td>A.g(A.g)</td><td><p>Спасибо, посмотрел конфиг.</p>
+<p>Но на самом деле то ли баг был, то ли в конфигах что-то насралося. Снёс всё и с чистого листа настроил, теперь работает.</p></td><td>2024-11-08T19:37:48.422Z</td></tr>
+    </table>
+      </body>
+    </html>

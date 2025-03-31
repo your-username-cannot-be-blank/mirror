@@ -1,0 +1,119 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>lantern-исходный-код-и-другие-странности</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>anonymous37(anonymous37)</td><td><p><a href="https://github.com/getlantern/lantern/" rel="noopener nofollow ugc">Репозитарий Lantern</a></p>
+<p>Бинарный код собран из недоступных исходных кодов.</p>
+<p>Сравнение на примере сообщения из логов об ограничениях на проксируемые порты назначения:</p>
+<p><a href="https://github.com/getlantern/lantern/archive/refs/tags/6.10.5.tar.gz" rel="noopener nofollow ugc">Исходный код (скачать)</a>, версия 6.10.5</p>
+<blockquote>
+<p>Port not allowed</p>
+</blockquote>
+<p><a href="https://github.com/getlantern/lantern/releases/download/6.10.5/update_linux_386.bz2" rel="noopener nofollow ugc">Бинарник (скачать)</a>, версия 6.10.5</p>
+<blockquote>
+<p>port %d not proxyable</p>
+</blockquote>
+<p>При этом ваш запрос идет напрямую.</p></td><td>2022-06-10T07:07:58.893Z</td></tr><tr><td>tango</td><td><p>I confirm your observation. <a href="https://github.com/getlantern/lantern/archive/refs/tags/6.10.5.tar.gz">lantern-6.10.5.tar.gz</a> contains the string <code>Port not allowed</code> but does not contain the string <code>port %d not proxyable</code>. <a href="https://github.com/getlantern/lantern/releases/download/6.10.5/update_linux_386.bz2">update_linux_386.bz2</a> contains <code>port %d not proxyable</code> but not <code>Port not allowed</code>.</p>
+<pre><code class="lang-nohighlight">$ sha256sum lantern-6.10.5.tar.gz update_linux_386.bz2 
+691168b2480f46ec3748acfc847a7d1bff52b20a9d44dd5fca113700e4aaa29e  lantern-6.10.5.tar.gz
+3f67d2639dfb47f2cd4969d45e46571ff74b36b3789a90dd9c56f5ed9c9ce760  update_linux_386.bz2
+
+$ tar xf lantern-6.10.5.tar.gz
+$ rg 'Port not allowed' lantern-6.10.5
+lantern-6.10.5/archive/src/github.com/getlantern/http-proxy/httpconnect/httpconnect.go
+93:     f.ServeError(op, w, req, http.StatusForbidden, "Port not allowed")
+
+lantern-6.10.5/archive/src/github.com/getlantern/flashlight/client/client.go
+228:    log.Tracef("Port not allowed, bypassing proxy and sending CONNECT request directly to %v", addr)
+$ rg 'proxyable' lantern-6.10.5
+
+$ bzip2 -dc update_linux_386.bz2 | rg -a 'Port not allowed'
+$ bzip2 -dc update_linux_386.bz2 | rg -a proxyable
+^processor\s+(\d+):.*_cgo_unsetenv missing...HashedNotCorrectport %d not proxyablepragma sync...
+</code></pre>
+<p>Also interesting to note, the matches for <code>Port not allowed</code> in the source code do not correspond to what is currently publicly available. In the <a href="https://github.com/getlantern/http-proxy/tree/2c8edb5ef419dc1a59316f6bfc3484499479fd7b">http-proxy repository</a>, the httpconnect subdirectory <a href="https://github.com/getlantern/http-proxy/commit/c712b8a15c6f86b20330d03a5c323f8dabcd0b04">was removed in 2017</a>. <a href="https://github.com/getlantern/flashlight">https://github.com/getlantern/flashlight</a> does not exist currently.</p>
+<p><a class="mention" href="/u/anonymous37">@anonymous37</a>, if you download and compare different source code releases, what differences are there?</p></td><td>2022-06-16T17:11:57.484Z</td></tr><tr><td>anonymous43(anonymous43)</td><td><p>Архивы с исходным кодом повторяют содержимое репозитария, но он превратился в <a href="https://github.com/getlantern/lantern/commit/01f37be505e72b2d22052285cdddac183fec956a" rel="noopener nofollow ugc">архив</a> on Jun 20, 2019. Через год это заметили <a href="https://en.wikipedia.org/w/index.php?title=Lantern_(software)&amp;diff=974718293&amp;oldid=959032827" rel="noopener nofollow ugc">участники Википедии</a>.</p>
+<p>Репозитарий живет изменением ссылок на бинарный код, открытая разработка не ведется с <a href="https://github.com/getlantern/lantern/commit/8b105c90bb5acfafb885c393a1a355676e350586" rel="noopener nofollow ugc">Nov 4, 2016</a></p>
+<p>Есть и другие признаки прекращения разработки с использованием открытого кода, например комментарий в <a href="https://github.com/getlantern/lantern-android" rel="noopener nofollow ugc">репозитарии для андроида</a>, где разработка закончилась в 2015</p>
+<blockquote>
+<p>Development moved to the private repo</p>
+</blockquote>
+<p>Тихо и незаметно для публики.</p>
+<p><span class="bbcode-i">Блокировка в РФ</span></p>
+<p>Сигнатура Lantern по версии ТСПУ выглядит так:</p>
+<ul>
+<li>Множество подключений к неизвестным служебным адресам по хорошо известным подсетям</li>
+<li>Подключение к неизвестному адресу прокси из хорошо известных подсетей</li>
+</ul>
+<p>Правило блокировки разбито на две части:</p>
+<ul>
+<li>Блокируют сессию прокси, следующую за подключениями к служебным адресам</li>
+<li>Блокируют адреса всех новых подключений к прокси</li>
+</ul>
+<p>Две части работают (работали) независимо, чужой клиент прыгающий по подсетям прокси устроит (при неизвестных условиях) ложные блокировки. Как при этом влияет возможный NAT провайдера и топология, учитывается ли адрес источника – неизвестно.</p>
+<p>Воспроизвести блокировки вне лаборатории для десктоп версии Lantern оказалось сложней, чем это выглядит в сетевом дампе на локалхосте. Еще сложнее воспроизвести вторую часть блокировки чужим клиентом.</p>
+<p>Это не окончательное или достоверное наблюдение. Правило блокировки сложное для наблюдателя, но использование истории соединений подтверждается.</p></td><td>2022-06-17T07:13:48.230Z</td></tr><tr><td>tango</td><td><aside class="quote no-group" data-username="anonymous43" data-post="3" data-topic="2623">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/f17d59/48.png" class="avatar"> anonymous43:</div>
+<blockquote>
+<p>Архивы с исходным кодом повторяют содержимое репозитария, но он превратился в <a href="https://github.com/getlantern/lantern/commit/01f37be505e72b2d22052285cdddac183fec956a">архив </a> on Jun 20, 2019.</p>
+</blockquote>
+</aside>
+<p>Indeed, the “source code” downloads for each release are just a copy of the archived getlantern/lantern repository, which <a href="https://github.com/getlantern/lantern/commit/e6600408fb4dbdab7417a93ee28894dabc1da4d7">rarely changes</a>.</p>
+<p>Between changes, the contents of the source code downloads are identical, except for the version number in filenames. The source code for version <a href="https://github.com/getlantern/lantern/releases/tag/6.10.5">6.10.5</a> (April 2022) is the same as for <a href="https://github.com/getlantern/lantern/releases/tag/6.10.3">6.10.3</a> (March 2022). <a href="https://github.com/getlantern/lantern/releases/tag/6.9.13">6.9.13</a> (March 2022) is the same as <a href="https://github.com/getlantern/lantern/releases/tag/6.6.0">6.6.0</a> (May 2021).</p>
+<pre><code class="lang-plaintext">$ du -b lantern-*.tar.gz
+25020819        lantern-6.10.3.tar.gz
+25020702        lantern-6.10.5.tar.gz
+14512472        lantern-6.6.0.tar.gz
+14515907        lantern-6.9.13.tar.gz
+14514863        lantern-6.9.4.tar.gz
+
+$ diff -u &lt;(tar -tf lantern-6.10.3.tar.gz --strip-components=1 --show-transformed-names) &lt;(tar -tf lantern-6.10.5.tar.gz --strip-components=1 --show-transformed-names); echo $?
+0
+
+$ diff -u &lt;(tar -tf lantern-6.6.0.tar.gz --strip-components=1 --show-transformed-names) &lt;(tar -tf lantern-6.9.13.tar.gz --strip-components=1 --show-transformed-names); echo $?
+0
+</code></pre>
+<p>That’s disappointing. The page <a href="https://getlantern.org/faq/">https://getlantern.org/faq/</a> (<a href="https://web.archive.org/web/20220617181737/https://getlantern.org/faq/">archive</a>) claims that source code is available.</p>
+<blockquote>
+<p>Can I trust Lantern?</p>
+<p>Lantern is open, anyone can check our <a href="https://github.com/getlantern/lantern">source code</a> to see how everything works and make an informed decision. We welcome experts to audit our system and would appreciate any feedback (<a href="mailto:security@getlantern.org">security@getlantern.org</a>).</p>
+</blockquote>
+<p>(However, that version of the FAQ <a href="https://github.com/getlantern/www/commit/dea6ef508f5bd3f4757675cb3bef27c3e0ae6416#diff-e28a8fdaeae1c7386bba33d61bb1ef009a623e016bef8b30c6915124caa45a59">may no longer be maintained</a>: the newer page <a href="https://getlantern.org/en_US/faq.html">https://getlantern.org/en_US/faq.html</a> (<a href="https://web.archive.org/web/20220617182358/https://getlantern.org/en_US/faq.html">archive</a>) does not have the claim.)</p></td><td>2022-06-17T18:37:07.369Z</td></tr>
+    </table>
+      </body>
+    </html>

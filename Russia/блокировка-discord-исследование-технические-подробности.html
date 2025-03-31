@@ -1,0 +1,652 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>блокировка-discord-исследование-технические-подробности</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>Kolobok</td><td><p>Сегодня, в 4 часа утра, без предъявления каких-либо претензий к Советскому Союзу, без объявления войны, Роскомнадзорские ТСПУ напали на Дискорд и подвергли бомбёжке его домены — <a href="http://discord.com" rel="noopener nofollow ugc">discord.com</a>, <a href="http://cdn.discordapp.com" rel="noopener nofollow ugc">cdn.discordapp.com</a>, gateway.discord.gg, и некоторые другие.</p>
+<p>Выглядит как классическая блокировка по SNI: <code>curl -vko /dev/null --connect-to ::ya.ru -H 'Host: ya.ru' https://discord.com</code> висит на Client Hello.</p>
+<p>Проверяла через разных провайдеров, включая ростелеком.</p></td><td>2024-08-21T03:52:26.859Z</td></tr><tr><td>DelphinNsk(Delphin Nsk)</td><td><p>С утра тоже перестал открываться.<br>
+Но добавление в списки GoodbyeDPI следующих доменов:</p>
+<pre><code class="lang-auto">discord.com
+discord.gg
+discordapp.com
+</code></pre>
+<p>Ситуацию исправило, так что не до конца уверен что по sni. <img src="https://ntc.party/images/emoji/twitter/thinking.png?v=12" title=":thinking:" class="emoji" alt=":thinking:" loading="lazy" width="20" height="20"></p>
+<p>провайдер Ростелеком Сибирь</p></td><td>2024-08-21T04:32:43.358Z</td></tr><tr><td>Kolobok</td><td><p>Upd 08:00 UTC+3:</p>
+<ul>
+<li>ттк: блокировка снята</li>
+<li>ростелеком: блокировка снята</li>
+<li>билайн: блокировка продолжается</li>
+</ul>
+<p>Блокировка нацелена на все домены, относящиеся к работе дискорда (включая CDN, шлюз и сервера апдейтов). Не регулярка: <a href="http://discordstatus.com" rel="noopener nofollow ugc">discordstatus.com</a> и <a href="http://discord.js.org" rel="noopener nofollow ugc">discord.js.org</a> не задеты.</p></td><td>2024-08-21T05:49:55.744Z</td></tr><tr><td>artenox</td><td><p>Вообще всё позаблокировали. Куда это годится.<br>
+<img src="блокировка-discord-исследование-технические-подробности/9fbcb6e641de59003d5bfc36f0793c8da1b9e8c3.png" alt="discord-browser" data-base62-sha1="mN6eFFOexcqiR62hbHlLavvMPPd" width="627" height="213"><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="блокировка-discord-исследование-технические-подробности/f9c684b24aec6ad4ca0403a7a6937fcae1d92322.png" data-download-href="https://ntc.party/uploads/default/f9c684b24aec6ad4ca0403a7a6937fcae1d92322" title="discord-wireshark"><img src="блокировка-discord-исследование-технические-подробности/f9c684b24aec6ad4ca0403a7a6937fcae1d92322_2_690x91.png" alt="discord-wireshark" data-base62-sha1="zDCdfBaaMVOWlcfeMEdz962azbs" width="690" height="91" srcset="блокировка-discord-исследование-технические-подробности/f9c684b24aec6ad4ca0403a7a6937fcae1d92322_2_690x91.png, блокировка-discord-исследование-технические-подробности/f9c684b24aec6ad4ca0403a7a6937fcae1d92322_2_1035x136.png 1.5x, блокировка-discord-исследование-технические-подробности/f9c684b24aec6ad4ca0403a7a6937fcae1d92322.png 2x" data-dominant-color="9099A4"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">discord-wireshark</span><span class="informations">1265×168 84.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+Йота.</p></td><td>2024-08-21T06:05:23.133Z</td></tr><tr><td>Kolobok</td><td><p>Upd 11:00 UTC+3:</p>
+<ul>
+<li>билайн: блокировку временно снимали и турсучили, затем заблокировали обратно</li>
+</ul></td><td>2024-08-21T08:45:32.996Z</td></tr><tr><td>electrifying</td><td><p>домашний мтс:блокировки нет<br>
+мобильный мегафон:так же блокировки нет</p></td><td>2024-08-21T10:16:58.172Z</td></tr><tr><td>Kolobok</td><td><pre data-code-wrap="r"><code class="lang-r">$ curl -vvko /dev/null --connect-to ::ya.ru -H 'Host: ya.ru' https://discord.com
+16:04:25.842897 [0-x] * Connecting to hostname: ya.ru
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     016:04:25.843668 [0-0] * Host ya.ru:443 was resolved.
+16:04:25.843697 [0-0] * IPv6: (none)
+16:04:25.843715 [0-0] * IPv4: 77.88.44.242, 5.255.255.242, 77.88.55.242
+16:04:25.843736 [0-0] * [HTTPS-CONNECT] added
+16:04:25.843764 [0-0] * [HTTPS-CONNECT] connect, init
+16:04:25.843790 [0-0] * [HTTPS-CONNECT] connect, check h21
+16:04:25.843824 [0-0] *   Trying 77.88.44.242:443...
+16:04:25.843872 [0-0] * [HTTPS-CONNECT] connect -&gt; 0, done=0
+16:04:25.843895 [0-0] * [HTTPS-CONNECT] adjust_pollset -&gt; 1 socks
+16:04:25.911446 [0-0] * [HTTPS-CONNECT] connect, check h21
+16:04:25.911482 [0-0] * Connected to ya.ru () port 443
+16:04:25.914270 [0-0] * ALPN: curl offers h2,http/1.1
+16:04:25.914486 [0-0] } [5 bytes data]
+16:04:25.914519 [0-0] * TLSv1.3 (OUT), TLS handshake, Client hello (1):
+16:04:25.914532 [0-0] } [512 bytes data]
+16:04:25.914582 [0-0] * [HTTPS-CONNECT] connect -&gt; 0, done=0
+16:04:25.914602 [0-0] * [HTTPS-CONNECT] adjust_pollset -&gt; 1 socks
+16:04:26.915707 [0-0] * [HTTPS-CONNECT] connect, check h21
+16:04:26.915760 [0-0] * [HTTPS-CONNECT] connect -&gt; 0, done=0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     016:04:26.915841 [0-0] * [HTTPS-CONNECT] adjust_pollset -&gt; 1 socks
+16:04:27.844939 [0-0] * [HTTPS-CONNECT] connect, check h21
+16:04:27.844992 [0-0] * [HTTPS-CONNECT] connect -&gt; 0, done=0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     016:04:27.845094 [0-0] * [HTTPS-CONNECT] adjust_pollset -&gt; 1 socks
+16:04:28.846273 [0-0] * [HTTPS-CONNECT] connect, check h21
+16:04:28.846325 [0-0] * [HTTPS-CONNECT] connect -&gt; 0, done=0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     016:04:28.846415 [0-0] * [HTTPS-CONNECT] adjust_pollset -&gt; 1 socks
+16:04:29.847589 [0-0] * [HTTPS-CONNECT] connect, check h21
+16:04:29.847641 [0-0] * [HTTPS-CONNECT] connect -&gt; 0, done=0
+</code></pre></td><td>2024-09-26T08:06:55.359Z</td></tr><tr><td>510</td><td><p>Ростелеком, дискорд перестал грузиться.</p></td><td>2024-09-26T08:08:47.634Z</td></tr><tr><td>CyberPashtet(Cyber Pashtet)</td><td><p>Аналогично Discord внезапно слёг у меня на проводном домру и на мобильном теле2 и билайне. ОДНАКО через впн Discord внезапно снова оживает.</p></td><td>2024-09-26T08:26:04.558Z</td></tr><tr><td>Fixator10</td><td><p>5 доменов под бан улетело, чебурнет всё ближе</p>
+<pre><code class="lang-auto">discord.com
+discord.gg
+discordapp.com
+discordapp.net
+googleapis.com (discord-attachments-uploads-prd.storage.googleapis.com)
+</code></pre></td><td>2024-09-26T08:26:24.185Z</td></tr><tr><td>kiberamlet</td><td><p>InterSvyaz и Мегафон (Челябинск) тоже блок</p></td><td>2024-09-26T08:26:41.636Z</td></tr><tr><td>Fixator10</td><td><p>Вроде ожило (?)</p></td><td>2024-09-26T08:37:21.369Z</td></tr><tr><td>BMM88</td><td><p>Вроде ожило.</p>
+<p>Я к сожалению в сетевых технологиях на уровне человека из 90х и знаю крайне мало, потому хотелось бы поинтересоваться, есть ли гайды для самых тупеньких как настроить себе обходы на такие случаи?<br>
+Антизапрет не прогружает ничего, гудбайдпи - это все таки только браузер, стоит и работает</p></td><td>2024-09-26T08:42:52.518Z</td></tr><tr><td>Cbnny</td><td><p>А есть тут кто-нибудь из СНГ хотя бы, как у вас с дискордом было? Просто однажды подумали, что ркн напал на стим, но выяснилось, что в тот день (где-то в августе) он отлетал как минимум в Казахстане и Хорватии (Инфа от проживающих там людей)</p></td><td>2024-09-26T08:46:57.437Z</td></tr><tr><td>vivi(Viki)</td><td><p>заработало без гудбайдпиай. (мтс)</p></td><td>2024-09-26T08:51:23.844Z</td></tr><tr><td>robin_blood</td><td><p>нет, гудбай бьет все, не только браузер</p></td><td>2024-09-26T09:53:35.745Z</td></tr><tr><td>BMM88</td><td><p>Можно подробнее про это? Потому что в моем случае это разблокирует только контент непосредственно в браузерах</p></td><td>2024-09-26T10:02:59.861Z</td></tr><tr><td>robin_blood</td><td><aside class="quote no-group" data-username="BMM88" data-post="17" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/82dd89/48.png" class="avatar"> BMM88:</div>
+<blockquote>
+<p>Можно подробнее про это?</p>
+</blockquote>
+</aside>
+<p>А какие тут подробности, просто работает со всеми отправляемыми пакетами.<br>
+Что означает, что со всеми программами. Примеры: ytdlp, curl, те же клиенты discord, matrix.</p></td><td>2024-09-26T10:33:42.777Z</td></tr><tr><td>510</td><td><p>Ростелеком, снова перестал работать дискорд.</p></td><td>2024-09-26T10:48:12.923Z</td></tr><tr><td>0ka(0ka)</td><td><p>дискорд это и есть грубо говоря браузер (хотя это и не важно), если goodbyeDPI запускаете с блеклистом то в лист нужно добавить и домены дискорда в том числе</p></td><td>2024-09-26T10:50:29.106Z</td></tr><tr><td>Doqsa</td><td><p>Сегодня Роскомнадзор устроил внезапную блокировку Discord. Под удар попали домены <code>discord.com</code>, <code>cdn.discordapp.com</code>, и <code>gateway.discord.gg</code>, так что многие пользователи уже не могут подключиться.</p>
+<p>Судя по всему, это типичная блокировка по SNI: если выполнить <code>curl -vko /dev/null --connect-to ::ya.ru -H 'Host: ya.ru' https://discord.com</code>, запрос зависает на этапе Client Hello. Проверено на Ростелекоме и МТС — ситуация идентичная.</p>
+<p>Обойти это можно с помощью прокси-серверов или Tor-браузера. Рабочие прокси позволяют обойти блокировку и снова зайти в Discord, а Tor шифрует трафик и маскирует подключение.</p></td><td>2024-09-26T11:34:37.196Z</td></tr><tr><td>Doqsa</td><td><p>Подтверждаю, у меня та же история — через Ростелеком Discord перестал работать. Проверил несколько команд, зависает на этапе Client Hello, так что похоже на SNI-блокировку. С VPN всё ещё норм, но ощущение, что скоро и до них доберутся</p></td><td>2024-09-26T11:38:23.429Z</td></tr><tr><td>nkrapivin(Nikita Krapivin)</td><td><p>Домру Пермь. Discord вообще не открывается, если включить впн (частный амнезия) всё начинает работать.<br>
+Tele2 Пермь, такая же история, не открывается.</p></td><td>2024-09-26T11:41:36.963Z</td></tr><tr><td>korenkonder(Korenkonder)</td><td><p>МегаФон, МТС (моб инет), МТС Home (дом инет). Все в отлёте.</p>
+<p>Магическим включением VPN всё решается</p></td><td>2024-09-27T00:35:32.843Z</td></tr><tr><td>robin_blood</td><td><p>Уже просто какой-то беспредел пошел, блокируют по желанию левой пятки. Ни  закона, ни протокола. Суды тройки начались.</p></td><td>2024-09-27T00:47:54.656Z</td></tr><tr><td>easyone11</td><td><p>вчера прила на винде не грузилась, сегодня всё норм<br>
+мгтс мск</p></td><td>2024-09-27T04:28:18.361Z</td></tr><tr><td>korenkonder(Korenkonder)</td><td><p>Это сообщение немного задержалось из-за проверки. Писал его а 11 часов по Мск. Сейчас всё работает, как и у всех.</p></td><td>2024-09-27T06:34:05.348Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="блокировка-discord-исследование-технические-подробности/6c702b23f3cbf36d2f2d205579a87523b4f52b69.jpeg" data-download-href="https://ntc.party/uploads/default/6c702b23f3cbf36d2f2d205579a87523b4f52b69" title="photo_2024-09-27_14-59-14"><img src="блокировка-discord-исследование-технические-подробности/6c702b23f3cbf36d2f2d205579a87523b4f52b69_2_653x499.jpeg" alt="photo_2024-09-27_14-59-14" data-base62-sha1="fthSYF0z3nACCkqO6tZY4adGKXD" width="653" height="499" srcset="блокировка-discord-исследование-технические-подробности/6c702b23f3cbf36d2f2d205579a87523b4f52b69_2_653x499.jpeg, блокировка-discord-исследование-технические-подробности/6c702b23f3cbf36d2f2d205579a87523b4f52b69_2_979x748.jpeg 1.5x, блокировка-discord-исследование-технические-подробности/6c702b23f3cbf36d2f2d205579a87523b4f52b69.jpeg 2x" data-dominant-color="DBE2DD"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">photo_2024-09-27_14-59-14</span><span class="informations">1280×979 103 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-27T08:04:57.389Z</td></tr><tr><td>anon9001(anon)</td><td><p>А зачем им блокировать дискорд? Я думал у них сервера по яровой тут находятся+телефон обязателен при реге? Это как если бы начали блокировать вк, нахрена спец службам себя работы лишать когда можно отдельно на людей по дампам телефонов выходить?</p></td><td>2024-09-27T10:58:43.401Z</td></tr><tr><td>ggwpsayori</td><td><p>разве в дискорде обязателен телефон?</p>
+<p>к тому же, блокировать их можно чисто за информацию, которая там имеется</p></td><td>2024-09-27T11:22:08.711Z</td></tr><tr><td>0ka(0ka)</td><td><p>У меня кажется после восстановления пароля он потребовал привязать телефон</p></td><td>2024-09-27T11:37:21.778Z</td></tr><tr><td>ggwpsayori</td><td><p>это вроде новое изменение, раньше после восстановления пароля не требовалось привязывать номер</p></td><td>2024-09-27T11:42:38.898Z</td></tr><tr><td>gosduma(aaa)</td><td><p>А кто им этот телефон то даст? И откуда информация что они что-то хранят на серверах в РФ, а не используют их, как cdn до ЦОД в США?</p>
+<p>Вот схема их CDN.</p>
+<aside class="onebox pdf" data-onebox-src="https://7178226.fs1.hubspotusercontent-na1.net/hubfs/7178226/Network%20PoP%20Maps/World%20Map_Global.pdf">
+  <header class="source">
+
+      <a href="https://7178226.fs1.hubspotusercontent-na1.net/hubfs/7178226/Network%20PoP%20Maps/World%20Map_Global.pdf" target="_blank" rel="noopener nofollow ugc">7178226.fs1.hubspotusercontent-na1.net</a>
+  </header>
+
+  <article class="onebox-body">
+    <a href="https://7178226.fs1.hubspotusercontent-na1.net/hubfs/7178226/Network%20PoP%20Maps/World%20Map_Global.pdf" target="_blank" rel="noopener nofollow ugc"><span class="pdf-onebox-logo"></span></a>
+
+<h3><a href="https://7178226.fs1.hubspotusercontent-na1.net/hubfs/7178226/Network%20PoP%20Maps/World%20Map_Global.pdf" target="_blank" rel="noopener nofollow ugc">World%20Map_Global.pdf</a></h3>
+
+  <p class="filesize">4.93 MB</p>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>В политике конфиденциальности написано, что они хранят и обрабатывают большую часть данных в США.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://discord.com/privacy#9">
+  <header class="source">
+      <img src="блокировка-discord-исследование-технические-подробности/b26d3effd4abece864940cf77f6192c9ae562d53.png" class="site-icon" data-dominant-color="8791F6" width="32" height="32">
+
+      <a href="https://discord.com/privacy#9" target="_blank" rel="noopener nofollow ugc">discord.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/362;"><img src="блокировка-discord-исследование-технические-подробности/b9b53ef0126277272038fb2bad738bf45bacaee3_2_690x362.jpeg" class="thumbnail" data-dominant-color="202054" width="690" height="362"></div>
+
+<h3><a href="https://discord.com/privacy#9" target="_blank" rel="noopener nofollow ugc">Privacy Policy | Discord</a></h3>
+
+  <p>We take your privacy seriously. Read and learn about Discord's privacy policy.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>К тому же нет информации, чтобы они раскрывали что-то РФ.</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://discord.com/safety-transparency-reports/2023-q4#title-5">
+  <header class="source">
+      <img src="блокировка-discord-исследование-технические-подробности/b26d3effd4abece864940cf77f6192c9ae562d53.png" class="site-icon" data-dominant-color="8791F6" width="32" height="32">
+
+      <a href="https://discord.com/safety-transparency-reports/2023-q4#title-5" target="_blank" rel="noopener nofollow ugc">discord.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/362;"><img src="блокировка-discord-исследование-технические-подробности/6db667cec5fb612e37c6c6b178814bc85e367dec_2_690x362.png" class="thumbnail" data-dominant-color="7081E5" width="690" height="362"></div>
+
+<h3><a href="https://discord.com/safety-transparency-reports/2023-q4#title-5" target="_blank" rel="noopener nofollow ugc">Discord Transparency Reports</a></h3>
+
+  <p>Read our Transparency Report covering our enforcement actions against accounts and servers violating Discord's platform policies as well as our response to legal, emergency, and intellectual property removal requests.</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p><div class="lightbox-wrapper"><a class="lightbox" href="блокировка-discord-исследование-технические-подробности/7ed0108add354d3930d2b5cb422c3b460109190b.png" data-download-href="https://ntc.party/uploads/default/7ed0108add354d3930d2b5cb422c3b460109190b" title="65a6c2ef9b36241bf09d43bf_naD-lp48aVmLVrar28M1UIG7EB8HBEIScNqoTpJ8ZocPcdYwO03Mo93j2iL9fkZJ2C9A09DSnJc5IQ5Zzw3nyNmP2aUOXtUlCmbOtpSHKMtVMsmJxcUGEDMeyN1ZARr_4X_PAQjOShq0_sWNpUl3f7g"><img src="блокировка-discord-исследование-технические-подробности/7ed0108add354d3930d2b5cb422c3b460109190b_2_265x500.png" alt="65a6c2ef9b36241bf09d43bf_naD-lp48aVmLVrar28M1UIG7EB8HBEIScNqoTpJ8ZocPcdYwO03Mo93j2iL9fkZJ2C9A09DSnJc5IQ5Zzw3nyNmP2aUOXtUlCmbOtpSHKMtVMsmJxcUGEDMeyN1ZARr_4X_PAQjOShq0_sWNpUl3f7g" data-base62-sha1="i5PW8odMBXClliaYQ8YRxAliveH" width="265" height="500" srcset="блокировка-discord-исследование-технические-подробности/7ed0108add354d3930d2b5cb422c3b460109190b_2_265x500.png, блокировка-discord-исследование-технические-подробности/7ed0108add354d3930d2b5cb422c3b460109190b_2_397x750.png 1.5x, блокировка-discord-исследование-технические-подробности/7ed0108add354d3930d2b5cb422c3b460109190b_2_530x1000.png 2x" data-dominant-color="EEEFF0"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">65a6c2ef9b36241bf09d43bf_naD-lp48aVmLVrar28M1UIG7EB8HBEIScNqoTpJ8ZocPcdYwO03Mo93j2iL9fkZJ2C9A09DSnJc5IQ5Zzw3nyNmP2aUOXtUlCmbOtpSHKMtVMsmJxcUGEDMeyN1ZARr_4X_PAQjOShq0_sWNpUl3f7g</span><span class="informations">848×1600 78.5 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>Думаю, что из-за этого РКН и ноет.</p></td><td>2024-09-27T12:46:59.648Z</td></tr><tr><td>crubik(Crubik)</td><td><aside class="quote no-group" data-username="gosduma" data-post="36" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/g/9de053/48.png" class="avatar"> gosduma:</div>
+<blockquote>
+<p>используют их, как cdn до ЦОД в США</p>
+</blockquote>
+</aside>
+<p>но в настройках каналов есть выбор сервера в России. Значит и в РФ у них что-то есть<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="блокировка-discord-исследование-технические-подробности/466654729889855caf4dadd0c77db28e7cc08d3f.png" data-download-href="https://ntc.party/uploads/default/466654729889855caf4dadd0c77db28e7cc08d3f" title="Screenshot_1"><img src="блокировка-discord-исследование-технические-подробности/466654729889855caf4dadd0c77db28e7cc08d3f_2_690x277.png" alt="Screenshot_1" data-base62-sha1="a2MF9ad7VbOV8EPZmx0xyL0DfNZ" width="690" height="277" srcset="блокировка-discord-исследование-технические-подробности/466654729889855caf4dadd0c77db28e7cc08d3f_2_690x277.png, блокировка-discord-исследование-технические-подробности/466654729889855caf4dadd0c77db28e7cc08d3f_2_1035x415.png 1.5x, блокировка-discord-исследование-технические-подробности/466654729889855caf4dadd0c77db28e7cc08d3f.png 2x" data-dominant-color="33353A"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot_1</span><span class="informations">1041×418 25.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-09-27T13:50:26.017Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><aside class="quote no-group" data-username="ggwpsayori" data-post="32" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/ggwpsayori/48/8658_2.png" class="avatar"> ggwpsayori:</div>
+<blockquote>
+<p>разве в дискорде обязателен телефон?</p>
+</blockquote>
+</aside>
+<p>На многих серверах в дискорде владельцы включают в настройках сервера обязательность привязки номера, чтобы снизить поток ботов и спамеров.</p></td><td>2024-09-27T15:35:45.562Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="dartraiden" data-post="38" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>На многих серверах в дискорде владельцы включают в настройках сервера обязательность привязки номера</p>
+</blockquote>
+</aside>
+<p><img src="https://ntc.party/images/emoji/twitter/astonished.png?v=12" title=":astonished:" class="emoji only-emoji" alt=":astonished:" loading="lazy" width="20" height="20"></p></td><td>2024-09-28T07:54:17.599Z</td></tr><tr><td>ani917(ani)</td><td><p>в самаом дискорде может и не обязателен, но по закону обязателен:</p>
+<blockquote>
+<p>Согласно документу, владелец сайта, страницы, информационной системы или компьютерной программы, являющийся российским юридическим лицом или гражданином РФ и осуществляющий свою деятельность в Интернете в России, в случае, если доступ к информации, размещенной на его ресурсе, предоставляется пользователям, прошедшим — авторизацию, обязан проводить её в отношении пользователей, находящихся на территории РФ, одним из четырёх способов:</p>
+<ul>
+<li>с использованием абонентского номера оператора связи;</li>
+<li>с использованием ГИС «Единая система — идентификации и аутентификации в инфраструктуре, обеспечивающей информационно-технологическое взаимодействие информационных систем, используемых для предоставления государственных и муниципальных услуг в электронной форме»;</li>
+<li>с использованием ГИС «Единая система идентификации и аутентификации физических лиц с использованием биометрических персональных данных»;</li>
+<li>с использованием иной информационной системы (подразумеваются российские сервисы, например «ВКонтакте», или почта на российских почтовых сервисах, например <a href="http://mail.ru" rel="noopener nofollow ugc">mail.ru</a>), обеспечивающей авторизацию пользователей сайтов и (или) страниц сайтов Интернете, и (или) информационных систем, и (или) программ для ЭВМ и соответствующей требованиям о защите информации, владельцем которой является гражданин РФ, не имеющий гражданства другого государства, или российское юридическое лицо.</li>
+</ul>
+</blockquote>
+<p>на это можно было бы сказать что дискорд это не российское юридическое лицо, но тут уже по другому закону приземления они обязаны также оформляться внутри страны</p></td><td>2024-09-28T08:26:59.302Z</td></tr><tr><td>its5Q(its5Q)</td><td><p>Видимо пошла вторая волна блокировок по SNI, во многих регионах блочат *.discord.com, где-то <a href="http://discord.com" rel="noopener nofollow ugc">discord.com</a> доступен, но недоступен <a href="http://updates.discord.com" rel="noopener nofollow ugc">updates.discord.com</a><br>
+<div class="lightbox-wrapper"><a class="lightbox" href="блокировка-discord-исследование-технические-подробности/6f72a3c28337db3e145c3b3918028c16f4b4fdd1.png" data-download-href="https://ntc.party/uploads/default/6f72a3c28337db3e145c3b3918028c16f4b4fdd1" title="image"><img src="блокировка-discord-исследование-технические-подробности/6f72a3c28337db3e145c3b3918028c16f4b4fdd1.png" alt="image" data-base62-sha1="fTUC2JSdkUIkhHgGMovAy6I2hBD" width="690" height="190" data-dominant-color="62666F"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">729×201 7.41 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<a href="https://ping-admin.com/free_test/result/17283724703ki62r1048nur3103uw5740.html" class="inline-onebox" rel="noopener nofollow ugc">Free site availability checks all over the world: Ping-Admin.Com - web site and server monitoring. Site availability checks</a></p></td><td>2024-10-08T07:36:10.016Z</td></tr><tr><td>Laomedon</td><td><p>Кажется снова начали блочить. У меня не работает, у некоторых знакомых на разных серверах не работает. Но не так много жалуются, как в прошлый раз. И тут тоже люди репотят о проблемах <a href="https://downdetector.su/discord" class="inline-onebox" rel="noopener nofollow ugc">Дискорд не работает сегодня? Нет соединения с сервером Дискорд?</a></p></td><td>2024-10-08T07:39:53.518Z</td></tr><tr><td>Hakray</td><td><p>Судя по репортам проблемы у дальнего востока и части сибири только</p></td><td>2024-10-08T07:44:31.892Z</td></tr><tr><td>Fixator10</td><td><p>И снова седая ночь… Самара - отвал, ERR_CONNECTION_RESET</p></td><td>2024-10-08T07:45:29.081Z</td></tr><tr><td>Laomedon</td><td><p>Судя по всему еще не все города затронуты, в основном Москва и Питер вне блокировок, как я понял.</p></td><td>2024-10-08T07:58:27.824Z</td></tr><tr><td>Hakray</td><td><p>Когда всё началось, затронуты были польностью лишь дв и Якутия, сейчас по процентному соотношению репортов действительно можно попробовать сказать, что оно движется</p>
+<p>Энивей анонса о замедлении не было, как и блокировки, поэтому единственное, что успокаивает, что кажется оно несет в себе тестовый характер</p></td><td>2024-10-08T08:00:02.804Z</td></tr><tr><td>c5sa(c5sa)</td><td><p>Может кто шарит, как ему socks5 прокси подкинуть? с интерфейсом в прокси работает (tun mode), но не хочу такое на системах использовать чисто ради дискорда</p></td><td>2024-10-08T08:06:36.949Z</td></tr><tr><td>tavl(Vlad)</td><td><p>proxifier?<br>
+<div class="lightbox-wrapper"><a class="lightbox" href="блокировка-discord-исследование-технические-подробности/ee300e76fd63e4ca7ad34dbdacf9545bfece9e83.png" data-download-href="https://ntc.party/uploads/default/ee300e76fd63e4ca7ad34dbdacf9545bfece9e83" title="image"><img src="блокировка-discord-исследование-технические-подробности/ee300e76fd63e4ca7ad34dbdacf9545bfece9e83.png" alt="image" data-base62-sha1="xZ6B6PdXWdW6FJnyUWOOfZ5FmRJ" width="690" height="123" data-dominant-color="E5E9ED"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1028×184 15.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-10-08T08:11:00.629Z</td></tr><tr><td>append</td><td><pre><code class="lang-auto">discord.com
+discord.gg
+discordapp.com
+updates.discord.com
+gateway.discord.gg
+cdn.discordapp.com
+media.discordapp.net
+discord.media
+googleapis.com
+</code></pre>
+<p>Но вебсокеты видимо не проходят на адресах discord.media</p>
+<p>upd: дополнил <a href="http://googleapis.com" rel="noopener nofollow ugc">googleapis.com</a> для загрузки файлов by @<a href="https://ntc.party/u/Laomedon">Laomedon</a></p></td><td>2024-10-08T08:18:10.590Z</td></tr><tr><td>Laomedon</td><td><p>Не смог загрузить свою картинку в дискорд. Сейчас лично убедился, что помогло добавить в твой список:</p>
+<pre><code class="lang-auto">googleapis.com
+</code></pre></td><td>2024-10-08T08:24:24.066Z</td></tr><tr><td>ApathyKnight(Apathy Knight)</td><td><p>Тюмень, билайн: дискорд тоже лёг где-то час назад. С гудбай зайти получилось, вроде пока нормально работает.</p></td><td>2024-10-08T08:26:12.528Z</td></tr><tr><td>artem_duck</td><td><p>Казань, лег в 11:00, сайт, мобильное приложение не обновляется. Ростелеком</p></td><td>2024-10-08T08:36:33.391Z</td></tr><tr><td>iliveinyourwalls</td><td><p>Поволжье, ~10:20 лег дискорд, провайдер - Ростелеком. С гудбаем работает всё кроме голосовых каналов</p></td><td>2024-10-08T08:37:24.347Z</td></tr><tr><td>HelloThere</td><td><p>Екатеринбург. Полчаса назад лег дс, помогло добавление в список доменов от <a class="mention" href="/u/append">@append</a>. Но голосовые чаты не работают, ошибка No Route.</p></td><td>2024-10-08T08:48:26.128Z</td></tr><tr><td>Kolobok</td><td><p>Блокировка на сию минуту действует; фильтруют по SNI, да ещё и все субдомены под одну гребёнку.</p></td><td>2024-10-08T08:49:49.998Z</td></tr><tr><td>Altuskhins</td><td><p>Тюмень, МТС. Примерно в 10:52 по МСК перестал работать дискорд, с гудбайдпиаем работает всё кроме голосовых каналов.</p></td><td>2024-10-08T08:53:55.085Z</td></tr><tr><td>Armenko</td><td><p>Кемерово, ростелеком, в 10:00 МСК отвалился дискорд, с гдпи работает но без войс чата, очень круто</p></td><td>2024-10-08T09:02:20.000Z</td></tr><tr><td>salvage</td><td><p>Краснодарский Край, МТС, перестал работать около 11:20.</p>
+<p>Полную функциональность восстановил, обходя через туннель домены ниже, вайлдкардом:</p>
+<pre><code class="lang-auto">discord.com
+discord.media
+discord.gg
+discordapp.com
+discordapp.net
+</code></pre>
+<p>С войсом пока не очень ясно, он сначала не работал, но начал. При коннекте к войсу дискорд сначала обращается к одному из доменов вида russiaXXX.discord.media, за этими доменами IP Cloudflare и это спокойно туннелируется. Но потом он коннектится напрямую по IPшнику вида 66.22.216.*, это я так понял RTC-сервера в России, которые можно поменять в настройках войс-чата.</p></td><td>2024-10-08T09:13:37.497Z</td></tr><tr><td>Kobe(Kobe)</td><td><p>Самарская область, не работает войс</p></td><td>2024-10-08T09:16:07.966Z</td></tr><tr><td>bafomet042</td><td><p>Нижегородская область - войс не работает с 10 утра</p></td><td>2024-10-08T11:19:56.412Z</td></tr><tr><td>KyleSpace(Kyle)</td><td><p>Была такая проблема, смена клиента помогла!</p></td><td>2024-10-08T11:24:37.726Z</td></tr><tr><td>c5sa(c5sa)</td><td><p>С tun mode заводится, с шлюзом xray тоже, по vless, а вот с прокси в браузере webrtc не дружит по крайней мере у меня, в идеале разрабов дискорда уломать добавить socks5 и udp по socks5</p></td><td>2024-10-08T11:25:04.089Z</td></tr><tr><td>wigeance(Wigeance)</td><td><p>Ради одно небольшого рынка с отключенной монетизацией никто это делать не будет</p></td><td>2024-10-08T11:34:32.630Z</td></tr><tr><td>ani917(ani)</td><td><p>тут странно не то что блокируют, а то что не делали это раньше</p></td><td>2024-10-08T11:45:50.701Z</td></tr><tr><td>Infraction7(Infraction7)</td><td><p>Томск, Ростелеком, отказывается работать вообще, ни один известный метод не помог</p></td><td>2024-10-08T11:46:28.285Z</td></tr><tr><td>novalike</td><td><p>Калиниград, на двух разных провайдерах всё работает</p></td><td>2024-10-08T11:48:48.965Z</td></tr><tr><td>anon9001(anon)</td><td><p>Я думал не блокировали потому что он был кэгэбэшным из-за необходимости телефона и то что у опсосов больно подозрительная “бесплатная” опция для дискорда, я думал по яровой их сервера полностью в россии были и весь траффик прослушивался. То есть все это время не так было что ли???</p></td><td>2024-10-08T12:12:53.963Z</td></tr><tr><td>AlexSoft1911(Alexandr)</td><td><pre><code class="lang-auto">[RTCControlSocket(default)] [CONNECT] wss://india10021.discord.media/
+[RTCConnection(id1, default)] Connecting to RTC server wss://india10021.discord.media/, rtc-connection-id: &lt;id2&gt;
+[RTCConnection(id1, default)] RTC connection state: AWAITING_ENDPOINT =&gt; CONNECTING
+[RTCConnection(id1, default)] Connected to RTC server.
+[RTCConnection(id1, default)] RTC connection state: CONNECTING =&gt; AUTHENTICATING
+[RTCControlSocket(default)] [CONNECTED] wss://india10021.discord.media/ in 756 ms
+[RTCControlSocket(default)] [HELLO] heartbeat interval: 13750, version: 8, took 757 ms
+[RTCControlSocket(default)] Starting heartbeat with interval: 13750
+[RTCControlSocket(default)] [READY] took 970 ms
+[RTCConnection(id1, default)] RTC connection state: AUTHENTICATING =&gt; RTC_CONNECTING
+[Connection(default)] Creating connection to 35.207.227.143:50001 with audio ssrc: 11480
+[Connection(default)] updateVideoQuality: {
+    "remoteSinkWantsMaxFramerate": 30
+}
+[Connection(default)] updateVideoQuality: {
+ &lt;video settings call&gt;
+}
+[Connection(default)] Connection state change: CONNECTING =&gt; NO_ROUTE
+[RTCConnection(id1, default)] RTC media connection state change: RTC_CONNECTING =&gt; NO_ROUTE
+[RTCConnection(id1, default)] RTC connection state: RTC_CONNECTING =&gt; NO_ROUTE
+[RTCConnection(id1, default)] Error occurred while connecting to RTC server: [OnConnectAttemptTimedOut] Connection timed out 3 times.
+[RTCControlSocket(default)] CLOSE
+[RTCConnection(id1, default)] Disconnected from RTC server, clean: true, code: 1000, reason: Force Close, state: NO_ROUTE
+[Connection(default)] Connection state change: NO_ROUTE =&gt; DISCONNECTED
+[RTCConnection(id1, default)] RTC media connection state change: NO_ROUTE =&gt; DISCONNECTED
+[RTCConnection(id1, default)] RTC connection state: NO_ROUTE =&gt; RTC_DISCONNECTED
+[Connection(default)] Connection state change: DISCONNECTED =&gt; DISCONNECTED
+[RTCConnection(id1, default)] RTC media connection state change: RTC_DISCONNECTED =&gt; DISCONNECTED
+[RTCConnection(id1, default)] RTC connection state: RTC_DISCONNECTED =&gt; RTC_DISCONNECTED
+[RTCConnection(id1, default)] RTC connection state: RTC_DISCONNECTED =&gt; DISCONNECTED
+</code></pre>
+<p>Если каким-то умельцам вдруг понадобится - лог из дискорда.<br>
+india10021.discord.media - просто рандомный сервак, пробовал другие – эффект тот же.<br>
+id1 - судя по всему индетификатор голосовой сессии потёр его и id2 - судя по всему айдишник пользователя - тоже потёр.</p></td><td>2024-10-08T12:32:04.817Z</td></tr><tr><td>KAcidi(K Acidi)</td><td><p>Есть мнение, что не блокируют европейскую часть РФ потому, что Дискорд нужен для военных.</p></td><td>2024-10-08T12:36:44.532Z</td></tr><tr><td>chernobyl8841(chernobyl8841)</td><td><p>Спасибо, но лично мне сейчас это не помогло, так как 70% этих ссылок я добавил, добавил и эти сейчас, стопарится на RTC connecting либо No route</p></td><td>2024-10-08T08:25:24.779Z</td></tr><tr><td>UnknownCreator</td><td><p>удаляй сервис лол, и по новой устанавливай.<br>
+<img src="блокировка-discord-исследование-технические-подробности/c3d65300f84d87ea6c7be21454c8997d82b3179e.png" alt="изображение" data-base62-sha1="rWsiffAOCA4ttOWePZB1FnGz2lo" width="152" height="34"></p></td><td>2024-10-08T08:27:36.188Z</td></tr><tr><td>KDS</td><td><p>Не надо указывать поддомены, GDPI их сама найдет</p></td><td>2024-10-08T08:28:41.502Z</td></tr><tr><td>chernobyl8841(chernobyl8841)</td><td><p>Я не настолько туп, чтобы этого не сделать</p></td><td>2024-10-08T08:29:23.032Z</td></tr><tr><td>UnknownCreator</td><td><p>Ок, я в этой теме не шарю, просто предложил ему сделать так же как и я.</p></td><td>2024-10-08T08:29:24.140Z</td></tr><tr><td>UnknownCreator</td><td><p>Ну у меня всё заработало после моих манипуляций.</p></td><td>2024-10-08T08:29:59.701Z</td></tr><tr><td>AsyaBondi(Asya Bondi)</td><td><p>А кто то нашел как сделать чтоб работал воис хотя бы с браузера?</p></td><td>2024-10-08T08:30:29.765Z</td></tr><tr><td>chernobyl8841(chernobyl8841)</td><td><p>Это касается и ГС каналов?</p></td><td>2024-10-08T08:30:36.958Z</td></tr><tr><td>chernobyl8841(chernobyl8841)</td><td><p>Читай внимательнее, я указал что стоп происходит именно в ГС каналах.</p></td><td>2024-10-08T08:31:30.677Z</td></tr><tr><td>chernobyl8841(chernobyl8841)</td><td><p>Добавить ссылки в блэклист (ссылки выше) и перезапустить сервис, сайт откроется, сообщения отправляются, вохможно даже ГС заработает, но лично у меня ГС не работает</p></td><td>2024-10-08T08:32:29.401Z</td></tr><tr><td>AsyaBondi(Asya Bondi)</td><td><p>Я в прошлый раз создал тему как обойти блокировку дс, но слишком глуп чтобы обойти войс)))</p></td><td>2024-10-08T08:36:05.617Z</td></tr><tr><td>KDS</td><td><p>Войс гудбаем не обойти, он не умеет UDP обходить.</p></td><td>2024-10-08T08:41:46.681Z</td></tr><tr><td>AsyaBondi(Asya Bondi)</td><td><p>понял спасибо</p></td><td>2024-10-08T08:42:14.416Z</td></tr><tr><td>ValdikSS</td><td><p>79 posts were merged into an existing topic: <a href="/t/%D0%B3%D0%BE%D0%BB%D0%BE%D1%81%D0%BE%D0%B2%D0%BE%D0%B9-%D1%87%D0%B0%D1%82-%D0%B4%D0%B8%D1%81%D0%BA%D0%BE%D1%80%D0%B4-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8/11132">Голосовой чат дискорд (обход блокировки)</a></p></td><td>2024-10-08T13:07:34.036Z</td></tr><tr><td>chernobyl8841(chernobyl8841)</td><td><p>Кажется, что блок дискорда уже происходит, к вечеру все заверещат, то что он не работает</p></td><td>2024-10-08T08:48:10.776Z</td></tr><tr><td>2bedtobtru(fmsiosef)</td><td><p>я так понимаю от провайдера это не зависит…у моих московских друзей, в отличие от меня, все робит <img src="https://ntc.party/images/emoji/twitter/confused.png?v=12" title=":confused:" class="emoji" alt=":confused:" loading="lazy" width="20" height="20"><br>
+с чем это связано вообще? пока не долетел до них блок или что</p></td><td>2024-10-08T08:55:38.573Z</td></tr><tr><td>Hakray</td><td><p>Неизвестно, на данный момент, все, что мы знаем, что проблемы только у тех, кто не в европейской части Рф</p></td><td>2024-10-08T08:57:19.158Z</td></tr><tr><td>chernobyl8841(chernobyl8841)</td><td><p>Тоже самое, Москва говорит, пока работает</p></td><td>2024-10-08T08:58:40.290Z</td></tr><tr><td>TheKing-OfTime(The King Of Time)</td><td><p>Через X-ray у меня вроде бы работает</p></td><td>2024-10-08T08:58:48.843Z</td></tr><tr><td>Sheridance(Victoria)</td><td><p>спасибо, это обнадеживает )   и отдельное спасибо Вам за вашу помощь всем и во всем</p></td><td>2024-10-08T08:59:00.297Z</td></tr><tr><td>2bedtobtru(fmsiosef)</td><td><p>москву в последнюю очередь отключают от аппарата жизнеобеспечения <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"></p></td><td>2024-10-08T08:59:25.196Z</td></tr><tr><td>Sheridance(Victoria)</td><td><p>ростелеком, краснодарский край. ДС отлетел</p></td><td>2024-10-08T09:00:08.794Z</td></tr><tr><td>IIIelKot</td><td><p>Краснодар. Час назад не работал, а 5 минут назад заработал.</p></td><td>2024-10-08T09:00:13.193Z</td></tr><tr><td>GreenFox(Green Fox)</td><td><p>Питер - не работает.</p></td><td>2024-10-08T09:00:44.932Z</td></tr><tr><td>KDS</td><td><p>Переместил.</p>
+<p>Еще как блокируют.</p></td><td>2024-10-08T12:51:38.910Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Kolobok" data-post="56" data-topic="9555" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kolobok/48/8347_2.png" class="avatar"> Kolobok:</div>
+<blockquote>
+<p>Блокировка на сию минуту действует; фильтруют по SNI, да ещё и все субдомены под одну гребёнку.</p>
+</blockquote>
+</aside>
+<p>Только на части провайдеров. <span class="discourse-local-date" data-date="2024-10-08" data-email-preview="2024-10-08T12:56:00Z UTC" data-time="15:56:00" data-timezone="Europe/Moscow">2024-10-08T12:56:00Z</span></p>
+<div class="md-table">
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>isp</th>
+<th>asn</th>
+<th>city</th>
+<th>curl https://discord.com</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ru-001</td>
+<td>ТТК</td>
+<td>AS8427</td>
+<td>Magnitogorsk</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-003</td>
+<td>МТС</td>
+<td>AS28832</td>
+<td>Chelyabinsk</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-004</td>
+<td>МГТС</td>
+<td>AS25513</td>
+<td>Moscow</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-005</td>
+<td>Dom.ru</td>
+<td>AS49048</td>
+<td>Tver</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-006</td>
+<td>Dom.ru</td>
+<td>AS50544</td>
+<td>Krasnoyarsk</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-008</td>
+<td>Ростелеком (онлайм)</td>
+<td>AS42610</td>
+<td>Moscow</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-009</td>
+<td>Линклайн</td>
+<td>AS44041</td>
+<td>Moscow</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-010</td>
+<td>МГТС</td>
+<td>AS25513</td>
+<td>Moscow</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-011</td>
+<td>ENEVA/OBIT</td>
+<td>AS8492</td>
+<td>Saint Petersburg</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-012</td>
+<td>Beeline/Corbina</td>
+<td>AS8402</td>
+<td>Tula</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-013</td>
+<td>Dom.ru</td>
+<td>AS50543</td>
+<td>Saratov</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-014</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Orenburg</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-018</td>
+<td>Evpanet</td>
+<td>AS43936</td>
+<td>Krimea</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-019</td>
+<td>JSC Ufanet</td>
+<td>AS60095</td>
+<td>Nizhny Novgorod</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-020</td>
+<td>PJSC MegaFon</td>
+<td>AS31205</td>
+<td>Khakasiya</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-021</td>
+<td>ER-Telecom Holding</td>
+<td>AS56981</td>
+<td>Tomsk</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-022</td>
+<td>Sibirskie Seti</td>
+<td>AS40995</td>
+<td>Novokuznetsk</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-023</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Perm region</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-024</td>
+<td>Beeline</td>
+<td>AS34038</td>
+<td>Tyumen</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-025</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Kemerovo</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-026</td>
+<td>Rostelecom</td>
+<td>AS12389</td>
+<td>Kemerovo</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-027</td>
+<td>Sibirskie Seti</td>
+<td>AS47433</td>
+<td>Kemerovo</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-028</td>
+<td>Beeline</td>
+<td>AS3216</td>
+<td>Kemerovo</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-029</td>
+<td>Beeline</td>
+<td>AS16345</td>
+<td>Kemerovo</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-031</td>
+<td>Beeline</td>
+<td>AS42110</td>
+<td>Sochi</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-032</td>
+<td>Sibirskie Seti Ltd.</td>
+<td>AS34757</td>
+<td>Novosibirsk</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-033</td>
+<td>P.a.k.t LLC</td>
+<td>AS39087</td>
+<td>Saint Petersburg</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-035</td>
+<td>UBS (ubsnet.ru)</td>
+<td>AS50042</td>
+<td>Sevastopol</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-036</td>
+<td>Igra-Service</td>
+<td>AS33991</td>
+<td>Krasnoyarsk</td>
+<td>ERROR: timeout</td>
+</tr>
+<tr>
+<td>ru-038</td>
+<td>Beeline</td>
+<td>AS8402</td>
+<td>Krasnodar</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>ru-039</td>
+<td>Luhansk Home Networks</td>
+<td>AS202619</td>
+<td>Luhansk</td>
+<td>OK</td>
+</tr>
+</tbody>
+</table>
+</div></td><td>2024-10-08T13:00:03.560Z</td></tr><tr><td>Kolobok</td><td><aside class="quote no-group quote-modified" data-username="ValdikSS" data-post="179" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>ru-012 	Beeline/Corbina 	AS8402 	Tula 	OK<br>
+ru-024 	Beeline 	AS34038 	Tyumen 	ERROR: timeout<br>
+ru-028 	Beeline 	AS3216 	Kemerovo 	ERROR: timeout<br>
+ru-029 	Beeline 	AS16345 	Kemerovo 	ERROR: timeout<br>
+ru-031 	Beeline 	AS42110 	Sochi 	OK<br>
+ru-038 	Beeline 	AS8402 	Krasnodar 	OK</p>
+</blockquote>
+</aside>
+<aside class="quote no-group quote-modified" data-username="ValdikSS" data-post="179" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>ru-005 	<a href="http://Dom.ru" rel="noopener nofollow ugc">Dom.ru</a> 	AS49048 	Tver 	OK<br>
+ru-006 	<a href="http://Dom.ru" rel="noopener nofollow ugc">Dom.ru</a> 	AS50544 	Krasnoyarsk 	ERROR: timeout<br>
+ru-013 	<a href="http://Dom.ru" rel="noopener nofollow ugc">Dom.ru</a> 	AS50543 	Saratov 	ERROR: timeout</p>
+</blockquote>
+</aside>
+<p>Не уверена, это совсем не похоже на разброс по провайдерам. А вот на развал страны на две доли по географическому признаку - вполне.<br>
+Симптомы во всех местах одинаковые, или где-то шлюзы Дискорда впридачу по IP заблокированы?</p></td><td>2024-10-08T13:13:55.806Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Kolobok" data-post="183" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/kolobok/48/8347_2.png" class="avatar"> Kolobok:</div>
+<blockquote>
+<p>Симптомы во всех местах одинаковые, или где-то шлюзы Дискорда впридачу по IP заблокированы?</p>
+</blockquote>
+</aside>
+<p>Блокировки по IP не вижу.</p>
+<pre><code class="lang-auto">root@ru-013:~# dig +short discord.com
+162.159.128.233
+162.159.137.232
+162.159.138.232
+162.159.136.232
+162.159.135.232
+
+root@ru-013:~# dig +short discord.com | xargs -I{} bash -c 'echo -n {} ""; curl https://discord.com -s --max-time 7 -o/dev/null --connect-to ::{}; echo $?'
+162.159.128.233 28 // timeout
+162.159.137.232 28 // timeout
+162.159.136.232 28 // timeout
+162.159.135.232 28 // timeout
+162.159.138.232 28 // timeout
+
+# dig +short discord.com | xargs -I{} bash -c 'echo -n {} ""; curl https://notdiscord.com -s --max-time 7 -o/dev/null --connect-to ::{}; echo $?'
+162.159.128.233 35 // certificate error
+162.159.135.232 35 // certificate error
+162.159.138.232 35 // certificate error
+162.159.136.232 35 // certificate error
+162.159.137.232 35 // certificate error
+</code></pre></td><td>2024-10-08T13:24:36.109Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>4 posts were merged into an existing topic: <a href="/t/%D0%B3%D0%BE%D0%BB%D0%BE%D1%81%D0%BE%D0%B2%D0%BE%D0%B9-%D1%87%D0%B0%D1%82-discord-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8/11132/134">Голосовой чат Discord (обход блокировки)</a></p></td><td>2024-10-08T15:19:44.198Z</td></tr><tr><td>Post</td><td><p>Петрозаводск, Ростелеком ВСЁ</p></td><td>2024-10-08T14:45:43.764Z</td></tr><tr><td>denium</td><td><p><code>curl https://discord.com/</code> на Йоте Новосибирск открывается.<br>
+Сайт за Cloudflare, но без ECH (зря).</p></td><td>2024-10-08T14:48:19.460Z</td></tr><tr><td>ggwpsayori</td><td><p>Московская область, МТС - дискорд больше не алё <img src="https://ntc.party/images/emoji/twitter/frowning.png?v=12" title=":frowning:" class="emoji" alt=":frowning:" loading="lazy" width="20" height="20"><br>
+Не работает как на обычном интернете, так и на мобильном.</p></td><td>2024-10-08T15:09:06.732Z</td></tr><tr><td>TheDarkKRONOS(TheDarkKRONOS)</td><td><p>Московская область: билайн, ттк, теле2 - везде поблочили сразу</p></td><td>2024-10-08T15:13:57.416Z</td></tr><tr><td>Rusinator(Rusinator)</td><td><p>мтс ,киров, дискорд полностью заблочен, через gdbdpi смог зайти в дискорд как и писали выше, чатики работают, а войс нет, но есть вариант как сделать чтоб войс заработал(у меня по крайней мере рабочий): перед звонком\входом в войс чат врубите на компе впн и с ним присоединитесь к войсу, как только соединение установится, впн можно вырубить и вас не выкинет с войса. при перезаходе  в войс махинацию с впн повторить.</p></td><td>2024-10-08T15:20:46.586Z</td></tr><tr><td>Nara</td><td><p>ТАСС сообщает, что теперь блокировка discord’а официальна</p></td><td>2024-10-08T15:22:49.799Z</td></tr><tr><td>Erquint(Murad "Gness Erquint" Beybalaev)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="блокировка-discord-исследование-технические-подробности/3a5d82233242952a1a242a79c832db7a834a98f4.png" data-download-href="https://ntc.party/uploads/default/3a5d82233242952a1a242a79c832db7a834a98f4" title="image"><img src="блокировка-discord-исследование-технические-подробности/3a5d82233242952a1a242a79c832db7a834a98f4.png" alt="image" data-base62-sha1="8kk26HodWq6LTIuaonhjwGWVSRK" width="690" height="293" data-dominant-color="6E6870"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">1204×512 62.3 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-10-08T15:48:03.678Z</td></tr><tr><td>Vadimsrzn</td><td><p>Рязанская область через МТС с к компа не работает, через йоту с телефона тоже.<br>
+С GDPI заработало всё кроме голоса.</p></td><td>2024-10-08T16:14:07.589Z</td></tr><tr><td>Kamora</td><td><p>КРД Билайн<br>
+Через web октрывается нормально<br>
+Desktop изначально не работал, но сейчас поднялся<br>
+Файлы грузит норм<br>
+Единственное  - отвалилась связь</p></td><td>2024-10-08T16:15:27.379Z</td></tr><tr><td>KrownKrow</td><td><p>Веб-версия работает через GDPI</p>
+<p>А вот десктопная при запуске пытается проверить обновление, стучится в <a href="http://updates.discord.com" rel="noopener nofollow ugc">updates.discord.com</a>, не может подсоединится и запуск не идёт дальше. Похоже это подключение не обрабатывается GDPI по какой-то причине. В браузере <a href="http://updates.discord.com" rel="noopener nofollow ugc">updates.discord.com</a> работает</p>
+<p>У меня старая версия GDPI, “работает—не трожь”, попозже более новую попробую, но не думаю что поможет.</p></td><td>2024-10-08T16:49:04.055Z</td></tr><tr><td>Debosh1r</td><td><p>Дискорд лег окончательно, не грузит с ВПН, GoodbyeDPI. Провайдер Домру, Волгоград.(РКН - обезьяна с гранатометом)</p></td><td>2024-10-08T17:01:46.774Z</td></tr><tr><td>phantomka4(phantomka4)</td><td><p>Дискорд открывается, но к голосовому чату не подключается</p></td><td>2024-10-08T18:30:54.739Z</td></tr><tr><td>ValdikSS</td><td><p>2 posts were merged into an existing topic: <a href="/t/%D0%B3%D0%BE%D0%BB%D0%BE%D1%81%D0%BE%D0%B2%D0%BE%D0%B9-%D1%87%D0%B0%D1%82-discord-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8/11132/208">Голосовой чат Discord (обход блокировки)</a></p></td><td>2024-10-08T19:24:35.356Z</td></tr><tr><td>denium</td><td><aside class="quote no-group" data-username="KrownKrow" data-post="202" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/k/aca169/48.png" class="avatar"> KrownKrow:</div>
+<blockquote>
+<p>А вот десктопная при запуске пытается проверить обновление, стучится в <a href="http://updates.discord.com/" rel="noopener nofollow ugc">updates.discord.com </a>, не может подсоединится и запуск не идёт дальше</p>
+</blockquote>
+</aside>
+<p>Подтверждаю. И если найдёт старую версию (не очень-то и старую) тоже. Довольно токсичное поведение.</p></td><td>2024-10-08T23:58:35.076Z</td></tr><tr><td>Valenok</td><td><p>ТываСвязьИнформ, дискорд работает без GoodbyeDPI, могу зайти в голосовой чат и говорить.<br>
+Так же документация про сам голосовой чат <a href="https://discord.com/developers/docs/topics/voice-connections" rel="noopener nofollow ugc">Discord Developer Portal — Documentation — Voice Connections</a>, есть Gateway Versions и кажется можно их переключить, кто то пытался уже это сделать?</p></td><td>2024-10-09T05:53:55.022Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>A post was merged into an existing topic: <a href="/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-discord-%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8/11132/375">Блокировка Discord (обсуждение + обход блокировки)</a></p></td><td>2024-10-09T07:22:03.762Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>A post was merged into an existing topic: <a href="/t/%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0-discord-%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8/11132/457">Блокировка Discord (обсуждение + обход блокировки)</a></p></td><td>2024-10-09T23:31:57.330Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="Nara" data-post="198" data-topic="9555" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/n/e5b9ba/48.png" class="avatar"> Nara:</div>
+<blockquote>
+<p>ТАСС сообщает, что теперь блокировка discord’а официальна</p>
+</blockquote>
+</aside>
+<p>Фейки распространяют</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="блокировка-discord-исследование-технические-подробности/6abd36ee17fe343d4c58525bf24e85d38850362b.jpeg" data-download-href="https://ntc.party/uploads/default/6abd36ee17fe343d4c58525bf24e85d38850362b" title="Screenshot"><img src="блокировка-discord-исследование-технические-подробности/6abd36ee17fe343d4c58525bf24e85d38850362b_2_690x306.jpeg" alt="Screenshot" data-base62-sha1="feg08vY3nOsdi1lXCxbYkRyxd6b" width="690" height="306" srcset="блокировка-discord-исследование-технические-подробности/6abd36ee17fe343d4c58525bf24e85d38850362b_2_690x306.jpeg, блокировка-discord-исследование-технические-подробности/6abd36ee17fe343d4c58525bf24e85d38850362b.jpeg 1.5x, блокировка-discord-исследование-технические-подробности/6abd36ee17fe343d4c58525bf24e85d38850362b.jpeg 2x" data-dominant-color="36444D"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot</span><span class="informations">924×411 88.8 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-10-09T15:00:40.462Z</td></tr><tr><td>Infraction7(Infraction7)</td><td><p>в реестр роскомпозора загляните, там будет официальная информация</p></td><td>2024-10-09T15:40:29.012Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="Infraction7" data-post="218" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/infraction7/48/6923_2.png" class="avatar"> Infraction7:</div>
+<blockquote>
+<p>официальная информация</p>
+</blockquote>
+</aside>
+<p><code>discord.com</code> отсутствует в списках.</p></td><td>2024-10-09T16:01:27.325Z</td></tr><tr><td>Infraction7(Infraction7)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="блокировка-discord-исследование-технические-подробности/2b43ac49e66fb06d4d0b503368809d20f119dae1.png" data-download-href="https://ntc.party/uploads/default/2b43ac49e66fb06d4d0b503368809d20f119dae1" title="image"><img src="блокировка-discord-исследование-технические-подробности/2b43ac49e66fb06d4d0b503368809d20f119dae1.png" alt="image" data-base62-sha1="6aJweL730ZrkzV597sIHidmTFlv" width="506" height="499" data-dominant-color="F1F2F2"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">590×582 23.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div><br>
+<a href="http://discord.com" rel="noopener nofollow ugc">discord.com</a> в <a href="http://eais.rkn.gov.ru" rel="noopener nofollow ugc">eais.rkn.gov.ru</a></p></td><td>2024-10-09T17:55:05.946Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><p><div class="lightbox-wrapper"><a class="lightbox" href="блокировка-discord-исследование-технические-подробности/6b3b387a0081c194c0bd255fbe0636f9bc12b03a.jpeg" data-download-href="https://ntc.party/uploads/default/6b3b387a0081c194c0bd255fbe0636f9bc12b03a" title="Screenshot"><img src="блокировка-discord-исследование-технические-подробности/6b3b387a0081c194c0bd255fbe0636f9bc12b03a_2_280x500.jpeg" alt="Screenshot" data-base62-sha1="fiBY4v9EM6wUejTnXdEYyvf8D5o" width="280" height="500" srcset="блокировка-discord-исследование-технические-подробности/6b3b387a0081c194c0bd255fbe0636f9bc12b03a_2_280x500.jpeg, блокировка-discord-исследование-технические-подробности/6b3b387a0081c194c0bd255fbe0636f9bc12b03a_2_420x750.jpeg 1.5x, блокировка-discord-исследование-технические-подробности/6b3b387a0081c194c0bd255fbe0636f9bc12b03a_2_560x1000.jpeg 2x" data-dominant-color="CDD6DA"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">Screenshot</span><span class="informations">1080×1928 313 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p><a href="https://blocklist.rkn.gov.ru/" class="onebox" target="_blank" rel="noopener">https://blocklist.rkn.gov.ru/</a></p>
+<p>В выгрузке блокировок для операторов связи сайт отсутствует.</p></td><td>2024-10-10T01:19:10.004Z</td></tr><tr><td>dartraiden(Alexander Gavrilov)</td><td><p>Роскомнадзор <a href="https://t.me/rkn_tg/1229">подчёркивает</a>, что основывать суждение о заблокированности ресурса лишь по информации из Единого реестра запрещенной к распространению информации, некорректно.</p>
+<p>Согласно постановлению Правительства РФ № 127 от 12 февраля 2020 года, ЦМУ ССОП может реагировать на угрозы, не внося их в какие-либо реестры.</p>
+<aside class="quote no-group" data-username="Anonimno" data-post="221" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a88e57/48.png" class="avatar"> Anonimno:</div>
+<blockquote>
+<p>В выгрузке блокировок для операторов связи сайт отсутствует.</p>
+</blockquote>
+</aside>
+<p>Операторы связи не блокируют доступ к Discord. Доступ блокируется на ТСПУ, эти устройства оператору связи неподконтрольны.</p></td><td>2024-10-10T22:37:57.030Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="dartraiden" data-post="224" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>Согласно постановлению Правительства РФ № 127 от 12 февраля 2020 года, ЦМУ ССОП может реагировать на угрозы, не внося их в какие-либо реестры.</p>
+</blockquote>
+</aside>
+<p>Как понимаю есть автоматизированная выгрузка по реестру, с заблокированными ресурсами для операторов связи, которую за основу берёт в том числе AntiZapret. И есть полу ручная из разряда “хотим и добавили, что вы нам за это сделаете?”</p>
+<aside class="quote no-group" data-username="dartraiden" data-post="224" data-topic="9555">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/dartraiden/48/15299_2.png" class="avatar"> dartraiden:</div>
+<blockquote>
+<p>Операторы связи не блокируют доступ к Discord</p>
+</blockquote>
+</aside>
+<p>Это не противоречит тому что выгрузка блокировок предназначена для операторов связи.</p></td><td>2024-10-11T05:07:11.241Z</td></tr><tr><td>Kolobok</td><td><p>Во-первых, причём тут постановление от февраля 2020 года? Постановление-то - это, считай, как патч на старое платье, а сам федеральный закон с тех пор обновлялся не раз. А вот постановлений суда и в помине нет, одно лишь балабольство внезаконное.<br>
+Во-вторых, в законе всё же чётко написано, прямо по-нашему, чёрным по белому: механизм централизованный, связь с операторами и прочими вовлечёнными лицами налажена быстро, как калачи по праздникам раздают. А не вот это вот - кручу что хочу, и я тут не причём, не знаю что почём.<br>
+И в-третьих, скажи-ка мне, милый, под какой же пункт данного закона этот конкретный домен попадал? Вот и ответь на это, прежде чем путать всех.</p></td><td>2024-10-11T05:34:29.194Z</td></tr>
+    </table>
+      </body>
+    </html>

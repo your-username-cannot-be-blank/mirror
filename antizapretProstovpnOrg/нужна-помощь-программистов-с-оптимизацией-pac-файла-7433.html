@@ -1,0 +1,706 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>нужна-помощь-программистов-с-оптимизацией-pac-файла-7433</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>ValdikSS</td><td><p>PAC-файл (Proxy Auto-Configuration) АнтиЗапрета не обновляется с 28 января, из-за слишком большого количества заблокированных доменов в Реестре запрещённых сайтов, которые не укладываются в <a href="https://issues.chromium.org/issues/41293370">лимит браузеров на основе Chrome</a>.</p>
+<p>Эта проблема не нова, но до недавнего времени с ней удавалось справляться фильтром нерабочих (и припаркованных) доменов, исключением мусорных зеркал вручную, простыми алгоритмами сжатия и оптимизации. Сейчас же доменов стало так много, что у меня не получается справится в этим эффективно и автоматизированно.</p>
+<p>Поэтому принимаются любые предложения, идеи, реализации в виде кода, которые помогут уменьшить размер файла.<br>
+Задача заключается в реализации алгоритма сжатия (упаковки) доменов и IP-адресов, который бы уменьшил размер файла до приемлемого (&lt;950 КиБ), а также алгоритмов исключения нерабочих, разделегированных и припаркованных доменов из списка, «мусорных» зеркал сайтов.</p>
+<p>Сейчас реализовано:</p>
+<ul>
+<li>Исключение нерабочих доменов, которые возвращают NXDOMAIN/YXDOMAIN</li>
+<li>Исключение припаркованных доменов, если у них указан <a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/82b7c38a1eea2c3afc25271b02fc5a1cf5a9c185/scripts/resolve-dns-nxdomain.py#lines-28">один из известных парковочных NS-серверов</a></li>
+<li>Сжатие доменов <a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/fixmeplz/scripts/topsequences.py">алгоритмом а-ля RLE</a>, который не требует разжатия (запрашиваемый домен наоборот <a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/82b7c38a1eea2c3afc25271b02fc5a1cf5a9c185/generate-pac.sh#lines-108">сжимается</a>)</li>
+<li><a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/fixmeplz/scripts/getzones.awk">Уплощение доменов до зоны</a> (избавление от поддоменов, кроме определённых исключений)</li>
+<li>Не особо эффективный <a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/fixmeplz/scripts/generate-pac-ipaddrs.awk">разностный алгоритм</a> для паковки заблокированных IP-адресов</li>
+</ul>
+<p>Что нужно учитывать:</p>
+<ul>
+<li>PAC это Javascript, но с особым API/Runtime. В нём нельзя выполнять HTTP-запросы (вроде fetch/XMLHttpRequest), но можно резолвить DNS. В нём нет доступа до DOM/document, нет HTML.</li>
+<li>Нет поддержки Unicode, содержимое парсится как однобитовая кодировка cp1252. Русскоязычные домены должны паковаться в punycode, бинарные данные — в base64/base85 сотоварищи.</li>
+<li>Скрипт исполняется целиком при инициализации контекста JS (на каждый поток/процесс), в это время можно однократно выполнить какую-то затратную по CPU/RAM операцию. Затем на каждый сетевой запрос вызывается функция FindProxyForURL, которая возвращает результат необходимости проксирования.</li>
+<li>Файл должен работать в очень старых браузерах, вроде Internet Explorer 9/10/11. Если установить ссылку на PAC-файл в старой версии Windows, все программы, использующие функции wininet для общения по сети, будут исполнять файл в системной версии IE. Если в файле используются слишком новые технологии, старые клиенты в случае ошибки начнут бесконтрольно запрашивать файл по сто раз в секунду.</li>
+<li>В браузерах есть (неустановленное и разное) ограничение на количество потребляемой оперативной памяти PAC-файлом, поэтому алгоритмы инициализации и сжатия должны укладываться во вменяемые размеры heap. Самый ограниченный в этом плане — Firefox 52 на Windows XP 32 bit, с <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1346183">лимитом в 4 МБ</a>.</li>
+<li>Сжатие в идеале не должно требовать инициализации при запуске: лучше сжимать/преобразовывать запрашиваемый домен при каждом запросе, а не разжимать списки блокировок в память.</li>
+</ul>
+<p>Более-менее детальную информацию о структуре и функциях PAC-файла можно найти на сайте <a href="http://findproxyforurl.com/">http://findproxyforurl.com/</a>, дополнительная информация:</p>
+<ul>
+<li><a href="https://github.com/anticensority/about-pac-scripts" class="inline-onebox">GitHub - anticensority/about-pac-scripts: What we know about PAC scripts</a></li>
+<li><a href="https://github.com/anticensority/about-pac-scripts/blob/master/pac-script-api-chrome-55.md" class="inline-onebox">about-pac-scripts/pac-script-api-chrome-55.md at master · anticensority/about-pac-scripts · GitHub</a></li>
+</ul>
+<p>Исходный код генератора: <a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/fixmeplz/" class="inline-onebox">Bitbucket</a> <strong>(branch fixmeplz)</strong><br>
+Скачивание листов и резолвинг отключён, запускайте doall.sh и проверяйте размер <code>result/proxy-host-ssl.pac</code>.<br>
+Если хотите тестировать nxdomain-резолвер, запускайте только его: <code>scripts/resolve-dns-nxdomain.py result/hostlist_zones.txt</code></p></td><td>2024-03-08T18:00:44.184Z</td></tr><tr><td>ValdikSS</td><td></td><td>2024-03-08T18:01:08.275Z</td></tr><tr><td>gfqwdgecewgcdw</td><td><p>Ой только не питухон</p></td><td>2024-03-08T18:19:53.691Z</td></tr><tr><td>Safety1st</td><td><p>Пора уже отказаться о поддержки старого софта, раз это уже реально мешает развитию – XP, IE и всё такое.</p></td><td>2024-03-08T18:25:15.044Z</td></tr><tr><td>p13dz</td><td><p>Присылайте на клиент вместо полного списка простой bloom-фильтр - он супер дешевый. O(1) по процессору и O(1) по памяти. Минус - это вероятностный алгоритм, и есть шанс ложноположительных срабатываний (ложноотрицательных быть не может). Вероятность коллизий будет зависеть от числа записей и размера таблицы.</p>
+<p>Я не знаю, сколько записей сейчас в списках РКН, но допустим 1 миллион. Тогда скажем при таблице размером 10 мегабайт вероятность ложного срабатывания будет 1 из 7 миллионов. То есть вам придется какие-то редкие незаблокированные домены через себя проксировать.</p>
+<p>В интернете полно калькуляторов, чтобы рассчитать вероятности коллизий - <a href="https://hur.st/bloomfilter/?n=1000000&amp;p=1.0E-7&amp;m=80000000&amp;k=" class="inline-onebox" rel="noopener nofollow ugc">Bloom filter calculator</a>. Заведите туда ваши реальные параметры (сколько доменов в списке и сколько памяти готовы пожертвовать), и получите вероятность коллизии.</p>
+<p>Если случайно попадется какой-то дорогой домен (ну не дай бог Ютуб будет ложноположительным), вы можете рядом с блум-фильтром ещё и черный список положить доменов, которые ни при каких условиях нельзя проксировать. И будете туда добавлять домены, если вдруг от какой-то коллизии больно будет. Но скорее всего вам никогда в жизни не придется туда ничего класть.</p></td><td>2024-03-08T18:51:58.673Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="1" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>иначе старые клиенты в случае ошибки начнут бесконтрольно запрашивать файл по сто раз в секунду.</p>
+</blockquote>
+</aside>
+<p>От этого можно избавиться, установив проверку user-agent на сервере.<br>
+Выдавать что-то вроде 404. Посмотреть какая реакция будет на разные кода.<br>
+От дятлов может спасти iptables/nftables   limit /sec<br>
+Против гигантских дятлов что-то на подобии fail2ban</p></td><td>2024-03-08T19:26:17.237Z</td></tr><tr><td>libneko</td><td><aside class="quote no-group" data-username="p13dz" data-post="5" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/p13dz/48/4579_2.png" class="avatar"> p13dz:</div>
+<blockquote>
+<p>Я не знаю, сколько записей сейчас в списках РКН, но допустим 1 миллион. Тогда скажем при таблице размером 10 мегабайт вероятность ложного срабатывания будет 1 из 7 миллио</p>
+</blockquote>
+</aside>
+<p>Вопрос как её впилить в плейнтекст-файл. Текущий размер pac-файла в районе мегабайта</p></td><td>2024-03-08T19:41:23.965Z</td></tr><tr><td>qkeen</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a>, сколько у тебя остаётся адресов после выкидывания ненужных? Для оценки того, сколько необходимо в таблицу Блума засунуть.</p></td><td>2024-03-08T20:13:45.780Z</td></tr><tr><td>p13dz</td><td><p>Ну это уже чисто технический вопрос. От кодировок типа base64 до встраивания png-файла и чтения попиксельно.</p></td><td>2024-03-08T20:35:02.727Z</td></tr><tr><td>goodrussian666(Goodrussian666)</td><td><p>есть странный вопрос, а пробовали упаковать в формате privoxy ? что-то кажется, что PAC файлы это немного тупиковое</p></td><td>2024-03-08T21:55:41.557Z</td></tr><tr><td>goodrussian666(Goodrussian666)</td><td><p>PAC-и я покопаю. может что придумается</p></td><td>2024-03-08T22:52:56.406Z</td></tr><tr><td>libneko</td><td><aside class="quote no-group" data-username="p13dz" data-post="9" data-topic="7433" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/p13dz/48/4579_2.png" class="avatar"> p13dz:</div>
+<blockquote>
+<p>Ну это уже чисто технический вопрос. От кодировок типа base64 до встраивания png-файла и чтения попиксельно.</p>
+</blockquote>
+</aside>
+<p>Но при этом все еще надо как-то влезть в мегабайт. Base64 дает примерно +30% к размеру, вариант с png не звучит как реализуемый в принципе в рамках pac.</p></td><td>2024-03-09T06:09:17.377Z</td></tr><tr><td>qkeen</td><td><p><a class="mention" href="/u/p13dz">@p13dz</a>, <a class="mention" href="/u/goodrussian666">@goodrussian666</a> PAC-скрипт – это скрипт, написанный на JS, но с особым API/Runtime. В нём нельзя делать HTTP-запросы, по типу <code>fetch</code>, только DNS. В нём нет DOM/<code>document</code> и никакого HTML. Подробнее см. <a href="https://github.com/anticensority/about-pac-scripts" class="inline-onebox" rel="noopener nofollow ugc">GitHub - anticensority/about-pac-scripts: What we know about PAC scripts</a> и <a href="https://github.com/anticensority/about-pac-scripts/blob/master/pac-script-api-chrome-55.md" class="inline-onebox" rel="noopener nofollow ugc">about-pac-scripts/pac-script-api-chrome-55.md at master · anticensority/about-pac-scripts · GitHub</a>.</p></td><td>2024-03-09T08:45:43.452Z</td></tr><tr><td>goodrussian666(Goodrussian666)</td><td><p>да, я в курсе, я имел в виду privoxy вместо pac</p></td><td>2024-03-09T10:10:41.730Z</td></tr><tr><td>ALLIGATOR</td><td><p>Некий вариант префиксного дерева?</p></td><td>2024-03-09T13:29:47.040Z</td></tr><tr><td>ALLIGATOR</td><td><p>Более эффективное использование всего диапазона значений символов, а не только разрешенных в DNS ?</p></td><td>2024-03-09T13:37:16.414Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="p13dz" data-post="5" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/p13dz/48/4579_2.png" class="avatar"> p13dz:</div>
+<blockquote>
+<p>Минус - это вероятностный алгоритм, и есть шанс ложноположительных срабатываний</p>
+</blockquote>
+</aside>
+<p>Это не вариант, т.к. сломает часть сайтов. Чтобы проксировать случайные ложноположительные срабатывания, придётся на прокси-серверах разрешать всё.</p>
+<aside class="quote no-group" data-username="p13dz" data-post="5" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/p13dz/48/4579_2.png" class="avatar"> p13dz:</div>
+<blockquote>
+<p>Я не знаю, сколько записей сейчас в списках РКН, но допустим 1 миллион. Тогда скажем при таблице размером 10 мегабайт</p>
+</blockquote>
+</aside>
+<p>Записей 1.7 млн, ограничение <em>файла</em> — 1 048 576 байт.</p></td><td>2024-03-09T16:16:20.544Z</td></tr><tr><td>ValdikSS</td><td><pre data-code-wrap="sh"><code class="lang-sh">$ wc -l hostlist_zones.txt
+127293 hostlist_zones.txt
+</code></pre>
+<p>Но это с исключёнными доменами, начинающимися на цифру, и другими хаками.</p></td><td>2024-03-09T16:17:58.510Z</td></tr><tr><td>DigitalRes77</td><td><p>А ограничение на 4 Mb в браузерах на основе chrome возможно обойти? Сделать больше по размеру или разделить их по частям.Выбирать ту часть которая необходимо в данное время для прокси</p></td><td>2024-03-09T16:27:48.165Z</td></tr><tr><td>ValdikSS</td><td><p>Как вы это представляете реализовывать технически?</p></td><td>2024-03-09T16:52:23.554Z</td></tr><tr><td>DigitalRes77</td><td><p>Не только на питоне это делается <a href="https://searchfox.org/mozilla-central/source/netwerk/base/ProxyAutoConfig.cpp" class="inline-onebox" rel="noopener nofollow ugc">ProxyAutoConfig.cpp - mozsearch</a></p></td><td>2024-03-09T17:08:29.434Z</td></tr><tr><td>irdkwmnsb(Maxim)</td><td><p>Я вижу несколько вариантов:</p>
+<ol>
+<li>разбить скрипт на несколько скриптов: отдельный скрипт для .ru зоны, отдельный для .com, отдельный для .org и т.д. Подгружать динамически в зависимости от запрашиваемого домена</li>
+<li>хранить в файле хеши в бинарном виде</li>
+<li>хранить в файле бинарный бор:<br>
+Если в списке домены “aaa”, “aab”, “aba”, “caa” то нужно хранить структуру вида<br>
+{“a”: {“a”: {“a”: true, “b”: true}, “b”: {“a”: true} }, “c”: {“a”: {“a”: true} } }</li>
+<li>сжать список алгоритмом хаффмана (вариация бора когда преждевременно анализируем потенциально самые частоиспользуемые ребра)<br>
+Плюсы подхода 3 и 4 это то что мы явно не храним весь список и нам не нужно его полностью восстанавливать для проверки на вхождение. При этом не возможны коллизии.</li>
+</ol>
+<p>Немного оффтоп. Но с чем связаны такие строгие ограничения на IE7 и Windows XP?<br>
+Казалось бы сами заблокирвоанные сайты не очень умеют с ним работать.<br>
+Для таких старых устройств есть смысл делать обход блокировки средствами роутера или гейтвея или через операционную систему, не через браузер</p></td><td>2024-03-09T17:36:46.672Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="irdkwmnsb" data-post="22" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/irdkwmnsb/48/4547_2.png" class="avatar"> irdkwmnsb:</div>
+<blockquote>
+<p>разбить скрипт на несколько скриптов: отдельный скрипт для .ru зоны, отдельный для .com, отдельный для .org и т.д. Подгружать динамически в зависимости от запрашиваемого домена</p>
+</blockquote>
+</aside>
+<p>Такой возможности нет, PAC-файлы не могут загружать сторонние ресурсы.</p>
+<aside class="quote no-group" data-username="irdkwmnsb" data-post="22" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/irdkwmnsb/48/4547_2.png" class="avatar"> irdkwmnsb:</div>
+<blockquote>
+<p>хранить в файле хеши в бинарном виде</p>
+</blockquote>
+</aside>
+<p>Только ASCII 7-бит, не все браузеры поддерживают не-однобитные кодировки.</p>
+<aside class="quote no-group" data-username="irdkwmnsb" data-post="22" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/irdkwmnsb/48/4547_2.png" class="avatar"> irdkwmnsb:</div>
+<blockquote>
+<p>Но с чем связаны такие строгие ограничения на IE7 и Windows XP?</p>
+</blockquote>
+</aside>
+<p>Сервисом до сих пор пользуются со старых компьютеров, не хотелось бы ломать доступ без сильной на то необходимости.<br>
+Но даже если ориентироваться на Windows 7 и его версию IE, там тоже не получится использовать современные технологии.</p></td><td>2024-03-09T17:48:03.987Z</td></tr><tr><td>irdkwmnsb(Maxim)</td><td><p>Я не знаю насколько моё мнение важно, но<br>
+Мне кажется что если выбирать между</p>
+<ol>
+<li>поддерживать для 99% пользователей (а есть ли статистика?) браузер которых выпущен в последние 2 года</li>
+<li>не поддерживать из-за 1% пользователей которые пользуются морально устаревшими технологиями</li>
+</ol>
+<p>всегда нужно выбирать первое</p></td><td>2024-03-09T17:51:09.623Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="irdkwmnsb" data-post="22" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/irdkwmnsb/48/4547_2.png" class="avatar"> irdkwmnsb:</div>
+<blockquote>
+<p>хранить в файле бинарный бор:</p>
+</blockquote>
+</aside>
+<p>В текущем виде выглядит расточительно, нужно придумывать алгоритм паковки данных.<br>
+Я думал для сжатия IP-адресов реализовать Elias gamma coding.</p></td><td>2024-03-09T17:54:39.232Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="irdkwmnsb" data-post="24" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/irdkwmnsb/48/4547_2.png" class="avatar"> irdkwmnsb:</div>
+<blockquote>
+<p>браузер которых выпущен в последние 2 года</p>
+</blockquote>
+</aside>
+<p>Пользователи, добавляющие PAC-файл в ОС, начинают использовать его в браузере ОС (старые версии IE и wininet, основанный на нём).</p></td><td>2024-03-09T17:55:17.872Z</td></tr><tr><td>zxczxc</td><td><p>Как насчёт взять <a href="https://github.com/LZMA-JS/LZMA-JS" class="inline-onebox" rel="noopener nofollow ugc">GitHub - LZMA-JS/LZMA-JS: A JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm</a> (декомпрессор весит 6.8 КБ) и зипануть все домены?</p></td><td>2024-03-09T17:58:33.429Z</td></tr><tr><td>goodrussian666(Goodrussian666)</td><td><p>кстати, а если выделить в общую кучу Cloudflare, по идее его может быть довольно много (из-за казино), и заменить общим правилом “если адрес ресолвится в клаудфлер, то проксировать”</p></td><td>2024-03-09T17:59:13.560Z</td></tr><tr><td>spcfox(Viktor Yudov)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="17" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Это не вариант, т.к. сломает часть сайтов. Чтобы проксировать случайные ложноположительные срабатывания, придётся на прокси-серверах разрешать всё.</p>
+</blockquote>
+</aside>
+<p>Нельзя ли на сервере проверять домены по тому же фильтру?</p></td><td>2024-03-09T20:49:14.607Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="zxczxc" data-post="27" data-topic="7433" data-full="true">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/z/a5b964/48.png" class="avatar"> zxczxc:</div>
+<blockquote>
+<p>Как насчёт взять <a href="https://github.com/LZMA-JS/LZMA-JS">GitHub - LZMA-JS/LZMA-JS: A JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm </a> (декомпрессор весит 6.8 КБ) и зипануть все домены?</p>
+</blockquote>
+</aside>
+<p>Здесь уместен вопрос. Дергается ли прокси пак каждый раз при обращении к URL или есть какое-то кэширование результатов ? Может в разных броузерах по разному ?<br>
+Если на каждое обращение, то будет тяжеловато, особенно на старых компах.<br>
+lzma 1 мб  в нативном варианте разжимается около 50 мсек даже на 12700K<br>
+JS - сразу в несколько раз минуc.  Если вызов идет при каждом дергании URL, на селероне 15 летней давности будете ждать секунды, если не 10+ секунд, а ноут будет выть<br>
+Сюда же в копилку гораздо более слабая оптимизация JS на старых броузерах типа iE</p>
+<p>Потому есть предложение дифференцировать размер proxy.pac в зависимости от user-agent. Если броузер не налагает жестких ограничений, использовать лайтовую версию</p></td><td>2024-03-10T07:20:25.459Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="bolvan" data-post="30" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Дергается ли прокси пак каждый раз при обращении к URL или есть какое-то кэширование результатов ?</p>
+</blockquote>
+</aside>
+<p>Скрипт исполняется целиком при инициализации контекста js (на каждый поток/процесс, полагаю), в это время можно однократно выполнить какую-то затратную по CPU/RAM операцию. Затем на каждый запрос вызывается функция, которая возвращает результат необходимости проксирования.</p></td><td>2024-03-10T09:19:25.735Z</td></tr><tr><td>Toshik</td><td><p>По мере прочтения темы, появилось несколько мыслей:</p>
+<ol>
+<li>
+<p>Если проблема ограничения размера pac-файла в 1 MB касается только браузеров на основе Chrome, можно ли автоматически собирать отдельную неурезанную версию pac-файла для свежих Firefox, где таких ограничений нет?</p>
+</li>
+<li>
+<p>Не совсем понятно, зачем привязываться к ограничениям в Windows 7 и её версии IE, если сам IE не способен нормально отобразить современные сайты?<br>
+Изобретать способ уменьшения размера pac-файла для браузера, который не может отобразить большую часть разблокированных сайтов, выглядит нелогичной тратой людских ресурсов, которые могли бы быть использованы в других вопросах касательно обхода блокировок.</p>
+</li>
+</ol></td><td>2024-03-10T09:57:49.821Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="31" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Затем на каждый запрос вызывается функция, которая возвращает результат необходимости проксирования.</p>
+</blockquote>
+</aside>
+<p>Там еще вроде бы есть ограничения на RAM. Разжать и все хранить в виде JS переменных может быть тоже проблемно</p></td><td>2024-03-10T10:35:22.435Z</td></tr><tr><td>DigitalRes77</td><td><p>Я ранее предлагал эту идею насчет дифференциации размера в зависимости user-agent.Но думаю не взлетит из-за излишней нагрузки на сервер.Здесь важно понимание того  до какого  верхнего предела по кол-ву записей можно достигнуть.Если их сейчас 1,7, то на следующий год может оказаться в три раза выше.Рост в геометрической прогрессии( хуже в экспоненциальной)</p></td><td>2024-03-10T13:08:44.620Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="DigitalRes77" data-post="34" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/d/58f4c7/48.png" class="avatar"> DigitalRes77:</div>
+<blockquote>
+<p>Но думаю не взлетит из-за излишней нагрузки на сервер</p>
+</blockquote>
+</aside>
+<p>Нагрузка ложится на прокси, и она не особо зависит от размера proxy.pac<br>
+Она зависит от количества значимых доменов. Всякий мусор типа проституток новосибирска практически никому не интересен, а он как раз и составляет основу.<br>
+Сам веб сервер, выдающий прокси пак, вообще минимален по нагрузке. Статическая выдача или простейший скрипт - разницы почти нет</p></td><td>2024-03-10T13:38:39.412Z</td></tr><tr><td>crocodileorangejuice</td><td><p>У меня есть вариант, который конкретно домены жмет лучше, чем текущий. Получается около 870 KиБ данных в самом proxy.pac (считая код, нужный для распаковки). Я не пробовал включить в него IP-адреса, и не проверял, сколько он потребляет памяти; буду благодарен, если кто-то с этим поможет.</p>
+<p>Сам код сжатия работает в Node.js (почти любой версии). Он ожидает в файле <code>src.txt</code> в текущей директории список доменов, и выдает готовый <code>out.pac</code>.</p>
+<p>Алгоритм основан на трех идеях:</p>
+<ul>
+<li>хосты для матчинга переворачиваются, т.е. с последнего по первый символ</li>
+<li>на перевернутых хостах строится, фактически, бор, но упаковывается в RegExp</li>
+<li>сам RegExp затем сжимается заменой диграмм, примерно так, как сжимаются хосты в текущем репо</li>
+</ul>
+<p><a class="attachment" href="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/6PFAW0Kqjyg3kfePQAGxA9GmUhs.js">compress.js</a> (2.2 KB)</p>
+<p>Если в качестве входных данных беру <code>result/hostlist_zones.txt</code> из репо, то <code>out.pac</code> имеет размер 875 КиБ. Прикрепляю также его, чтобы легче было тестировать потребление памяти - буду рад, если кто-то с этим поможет. На саму правильность матчинга я тестировал, но в Node.js (т.е. без учета ограничений PAC-файлов).</p>
+<p><a class="attachment" href="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/370cIRgY7DQGaCtMolJF5XswOzs.pac">out.pac</a> (874.2 KB)</p></td><td>2024-03-13T12:01:32.082Z</td></tr><tr><td>ValdikSS</td><td><p>Подход интересный, но regexp — точно не самое быстрое решение.</p></td><td>2024-03-15T14:11:09.183Z</td></tr><tr><td>crocodileorangejuice</td><td><p>Там основная стоимость на компиляцию при первом запуске скрипта. Потом, когда функция вызывается - она дешёвая; линейная относительно длины host, если прямо заморачиваться асимптотикой.</p>
+<p>Не знаю, насколько это приемлемо, плюс не измерял по абсолютным цифрам.</p>
+<p>Учитывая, что сам регексп получается без бектрекинга - можно накидать простой алгоритм, который будет матчить его без именно использования RegExp. Попробую в ближайшие дни сделать.</p></td><td>2024-03-15T16:16:44.347Z</td></tr><tr><td>libneko</td><td><p>Идея на подумать:</p>
+<p>Произвольно руками посмотрел на cloudfront в списке, его есть смысл пытаться резолвить и выкидывать строки не резолвящиеся в какой-либо IP. Одного этого уже может быть достаточно на какое-то время</p></td><td>2024-03-16T19:39:38.965Z</td></tr><tr><td>borouhin(Alexander Borouhin)</td><td><p>А есть какой-то сакральный смысл в том, чтобы использовать исключительно один только PAC-файл? Если добавить в инструкцию для пользователей, кроме пункта “укажите в настройках URL PAC-файла” второй пункт “а в другом месте настроек укажите адрес нашего DoH-сервера” - дальше можно реализовать ту же самую подмену IP, как и в VPN-версии, а весь PAC-файл  при этом сведётся к нескольким строчкам кода, проверяющим попадание отресолвленного IP для домена в наш подменный диапазон.</p></td><td>2024-03-16T22:20:48.750Z</td></tr><tr><td>Tatam</td><td><p>Во-первых, спасибо за всё, что вы делаете!<br>
+Регулярно пользуюсь вашими сервисами.</p>
+<p>Исходя из требований и объёма данных, предлагаю перейти на сравнение хэшей.<br>
+Каждый домен хэшируется каким-нибудь алгоритмом, например, SHA1.<br>
+(Мы не занимаемся проверкой целостности и криптографией, поэтому не имеет смысла брать более мощные алгоритмы. Можно вообще взять MD5 и даже CRC32, хоть он и предназначен для другого.)<br>
+Потом берём домен пользователя, хэшируем и сравниваем полученный хэш с таблицей хэшей исходных доменов.<br>
+Такой подход используется во многих продуктах, например, Safe Search для AdGuard.</p>
+<p>Целые хэши занимают много места, поэтому будем брать их часть - 32 бита.<br>
+<a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf" rel="noopener nofollow ugc">FIPS.180-4</a> предлагает брать префикс хэша, то есть просто обрезать остаток строки, получаем 4 байта на домен. Я провел тест на исходных 128к доменах, все 4-байтовые значения получились уникальные. Думаю, вполне хватит 4 байта.</p>
+<p>Теперь по хранению всего этого безобразия.<br>
+Для ускорения поиска нужно разбить данные на части.<br>
+От хэша домена возьмём старший байт, который будет использоваться для индекса.<br>
+(Индекс лучше хранить в десятичном виде, занимает меньше места.)<br>
+Оставшиеся 3 байта можно закодировать алгоритмом BASE64, который для 3 байт <a href="https://cryptii.com/pipes/text-to-base64" rel="noopener nofollow ugc">выдаст</a> строку 4 байта.<br>
+В эту строку добавим граничный символ “#”, чтобы было проще искать.<br>
+В результате получается следующая структура:</p>
+<pre><code class="lang-auto">domains = {
+...
+123:"#ABCD#EFGH#...",
+124:"#IJKL#MNOP#...",
+...
+};
+</code></pre>
+<p>Оценка размера структуры.<br>
+У нас получается 5 байт на домен и накладные 256 по 8 байт (3 на индекс, 2 на кавычки, 1 на двоеточие, 1 на запятую, 1 на новую строку).<br>
+Итого 128000 * 5 + 256 * 8 = <strong>642048 байт</strong>.</p>
+<p>Алгоритм поиска.<br>
+На входе домен пользователя host, считаем от него хэш SHA1(host), берём старшие 4 байта WXYZ.<br>
+Байты XYZ кодируем: host64 = BASE64(XYZ).<br>
+Добавляем в host64 граничный символ: host64 = “#” + host64.<br>
+Если domains[W] существует, тогда в строке domains[W] ищем подстроку host64 с помощью indexOf().<br>
+Если значение не равно -1, то хэш найден, домен пользователя в списке.</p>
+<p>Оценка реализации.<br>
+Получается, что браузеру пользователя нужно посчитать хэш SHA1 для домена, BASE64 для 3 байт хэша и выполнить поиск подстроки в строке.<br>
+Это лучше, чем использовать регулярные выражения и алгоритмы сжатия для всей таблицы.<br>
+Если предположить, что 128к доменов распределены равномерно по таблице, тогда размер строки равен 128000 * 5 / 256 = 2500 байт.<br>
+Пусть даже строка будет в 10 раз длиннее, всё равно поиск будет выполняться достаточно быстро.<br>
+Реализация SHA1 <a href="https://github.com/brix/crypto-js/blob/develop/src/sha1.js" rel="noopener nofollow ugc">занимает около 3 КБ</a>, где-то видел варианты поменьше.<br>
+BASE64 в современных браузерах реализован в виде функций atob()/btoa(), для старых можно реализовать отдельно (<a href="https://github.com/brix/crypto-js/blob/develop/src/enc-base64.js" rel="noopener nofollow ugc">1</a>, <a href="https://github.com/dcodeIO/lxiv" rel="noopener nofollow ugc">2</a>).<br>
+Думаю, с учётом размера структуры и реализации этих алгоритмов получится вписаться в <strong>700 КБ</strong>.</p>
+<p>Возможные проблемы.<br>
+Из-за коллизии может получиться так, что 32 бита хэша легитимного домена совпадут с таблицей.<br>
+На этот случай можно предусмотреть список исключений. Не думаю, что он будет большой.<br>
+Реализации SHA1/BASE64 надо тщательно проверять под все версии браузеров, особенно старых.</p>
+<p>Оптимизация 1.<br>
+Можно отказаться от граничного символа и хранить все хэши подряд “ABCDEFGH…”, это уменьшит размер структуры до 500 КБ.<br>
+Но тогда придётся искать все совпадения подстроки и смотреть, чтобы подстрока приходилась на начало блока. Если индекс совпадает с началом блока (index % 4 == 0), тогда хэш найден, иначе искать дальше вплоть до конца строки.<br>
+Размер уменьшается, но скорость обработки увеличивается.</p>
+<p>Оптимизация 2.<br>
+Вариант оптимизации 1 можно улучшить сортировкой хэшей и использованием бинарного поиска.</p>
+<p>Думаю, пока можно обойтись без оптимизаций, этого хватит на какое-то время.<br>
+Надо бы сделать прототип, но я давно не писал на JS, быстро не получится.</p></td><td>2024-03-17T08:43:08.706Z</td></tr><tr><td>crocodileorangejuice</td><td><aside class="quote no-group" data-username="Tatam" data-post="41" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/48db29/48.png" class="avatar"> Tatam:</div>
+<blockquote>
+<p>Из-за коллизии может получиться так, что 32 бита хэша легитимного домена совпадут с таблицей.<br>
+На этот случай можно предусмотреть список исключений. Не думаю, что он будет большой.</p>
+</blockquote>
+</aside>
+<p>Вот насчёт этого сомневаюсь, кстати. Заблокированных доменов очень намного меньше, чем незаблокированных, поэтому не уверен, что решение с false positives тут подойдёт.</p>
+<p>Кроме того, этот список исключений нереалистично будет обновлять автоматически. Для заблокированных есть источники, а исключения собирать как? Проверять хэши вообще всех доменов в интернете?</p></td><td>2024-03-17T09:28:32.357Z</td></tr><tr><td>Tatam</td><td><blockquote>
+<p>а исключения собирать как?</p>
+</blockquote>
+<p>Видимо, автоматически никак, только по жалобам пользователей.</p></td><td>2024-03-17T09:32:26.599Z</td></tr><tr><td>Tatam</td><td><p>Если 32 бита хэша кажется мало, можно взять 40 бит.<br>
+Тогда придётся заменить BASE64 на ASCII85, который 4 байта <a href="https://cryptii.com/pipes/ascii85-encoding" rel="noopener nofollow ugc">кодирует</a> в 5 байт.<br>
+В этом случае размер таблицы данных будет 128000 * 6 + 256 * 8 = 770048 байт.</p></td><td>2024-03-17T09:36:45.428Z</td></tr><tr><td>Dhohbr</td><td><p>А что, если исключать сайты и адреса, которые действительно являются scam, spam, срам… Которые в базах, например, virustotal содержатся.</p></td><td>2024-03-17T14:38:15.633Z</td></tr><tr><td>c5sa(c5sa)</td><td><p>Идея мало практичная, но тем не менее, если можно резолвить dns, можно складывать данные в поддомен, получать обратно 32 бита в виде айпишки с собственного ns сервера. Без понятия какие данные так гонять (сами адреса стрёмно, может хеши или что-то такое? по 32 хеша?), оно будет оседать в кешах dns, что и хорошо и плохо.<br>
+Плохо, что у большенства юзеров dns открытым текстом</p></td><td>2024-03-18T04:39:25.223Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="Tatam" data-post="41" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/t/48db29/48.png" class="avatar"> Tatam:</div>
+<blockquote>
+<p>Можно отказаться от граничного символа и хранить все хэши подряд</p>
+</blockquote>
+</aside>
+<p>Сейчас в списке примерно так и сделано: домены группируются по длине и добавляются в строку без разделителей, а затем разделяются (также по известной длине) в массив строк. Это требует инициализации, но не затратной.</p>
+<aside class="quote no-group" data-username="c5sa" data-post="46" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/c/b9bd4f/48.png" class="avatar"> c5sa:</div>
+<blockquote>
+<p>если можно резолвить dns</p>
+</blockquote>
+</aside>
+<p>Идея а-ля DNSBL рабочая, но лучше к ней не прибегать: это заметно повысит latency запросов, добавит еще одну точку отказа, да и браузеры иногда с DNS в PAC-файле плохо работают.</p>
+<p>Проще уж тогда на VPN-серверах каждый день собирать статистику по доменам и генерировать PAC-лист только из тех, к которым регулярно обращаются. Что тоже дерьмовый вариант.</p></td><td>2024-03-18T10:49:15.409Z</td></tr><tr><td>bolvan</td><td><p>Кстати, а что на счет расширения броузера ?<br>
+Расширение имеет куда большие полномочия и не имеет столь жестких ограничений<br>
+Да, недоступно для мобильников, но там и так в основном пользуют VPN</p>
+<p>Вот тут нагуглилось “supports inline PAC script”</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://chromewebstore.google.com/detail/proxy-switcher-and-manage/onnfghpihccifgojkpnnncpagjcdbjod">
+  <header class="source">
+      <img src="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/f8c432330b057ee9fbe2c618914eb278aba0ce77.png" class="site-icon" data-dominant-color="D2BBB2" width="48" height="48">
+
+      <a href="https://chromewebstore.google.com/detail/proxy-switcher-and-manage/onnfghpihccifgojkpnnncpagjcdbjod" target="_blank" rel="noopener">chromewebstore.google.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <img width="128" height="128" src="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/0a4ef3fe588e60957158937393a608d953357115.jpeg" class="thumbnail onebox-avatar" data-dominant-color="CBCBCB">
+
+<h3><a href="https://chromewebstore.google.com/detail/proxy-switcher-and-manage/onnfghpihccifgojkpnnncpagjcdbjod" target="_blank" rel="noopener">Proxy Switcher and Manager - Chrome Web Store</a></h3>
+
+  <p>Manage and switch between multiple proxy types (SOCKS, PAC, and Direct) with profile support</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<p>
+Значит он его в себя подгружает, и  там уже нет ограничений</p></td><td>2024-03-18T14:41:37.401Z</td></tr><tr><td>ValdikSS</td><td><p>В расширениях такого ограничения нет. PAC-файлы и так используются в «Обходе блокировок Рунета» и CensorTracker.</p></td><td>2024-03-18T14:58:58.464Z</td></tr><tr><td>bolvan</td><td><p>Тогда чего мы мучаемся. Возможности PAC исчерпаны. Загоняем всех на расширение и дело с концом.<br>
+Расширения есть на всех современных броузерах для PC, а ослика давно пора отправить на покой</p>
+<p>Кстати, в условиях отсутствия публичного списка заблокированных сайтов, как планируется обновлять список доменов ? Основные значимые - руками вносить ?</p></td><td>2024-03-18T15:01:19.797Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="bolvan" data-post="50" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Загоняем всех на расширение и дело с концом.</p>
+</blockquote>
+</aside>
+<p>PAC-файл работает не только в браузерах.</p>
+<aside class="quote no-group" data-username="bolvan" data-post="50" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>в условиях отсутствия публичного списка заблокированных сайтов, как планируется обновлять список доменов ?</p>
+</blockquote>
+</aside>
+<p>У меня есть пара идей по автоматическому обнаружению блокировок, напишу позже.</p></td><td>2024-03-18T15:11:10.556Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="51" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>PAC-файл работает не только в браузерах.</p>
+</blockquote>
+</aside>
+<p>Но ведь ограничение на 1 мб только хромовское ? В других местах пусть будет большой pac</p></td><td>2024-03-18T15:21:32.634Z</td></tr><tr><td>goodrussian666(Goodrussian666)</td><td><p>смотрите какая красота. в list.csv примерно 500 тыс записей</p>
+<p>если сделать вот так</p>
+<p><code>cat list.csv  | awk 'BEGIN{FS=";"} NR &gt;1 {print $1}' | sort | uniq -c | sort -rn | more</code></p>
+<p>в топе значительная доля клаудфлера</p>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/c309068522b9b6f4dc16676d7bc1a0201480eccf.png" data-download-href="https://ntc.party/uploads/default/c309068522b9b6f4dc16676d7bc1a0201480eccf" title="изображение"><img src="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/c309068522b9b6f4dc16676d7bc1a0201480eccf.png" alt="изображение" data-base62-sha1="rPmrvDS9YyrDQWYlv0S5cEIMs6H" width="690" height="352" data-dominant-color="3B1730"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">изображение</span><span class="informations">1539×787 30.1 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p></td><td>2024-03-18T18:41:07.387Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="bolvan" data-post="52" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Но ведь ограничение на 1 мб только хромовское ?</p>
+</blockquote>
+</aside>
+<p>Electron’овское ещё.</p>
+<aside class="quote no-group" data-username="goodrussian666" data-post="53" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/goodrussian666/48/4580_2.png" class="avatar"> goodrussian666:</div>
+<blockquote>
+<p>в топе значительная доля клаудфлера</p>
+</blockquote>
+</aside>
+<p>Как предлагаете использовать этот факт?</p></td><td>2024-03-19T04:49:14.057Z</td></tr><tr><td>goodrussian666(Goodrussian666)</td><td><p>схлопнуть клаудфлеровские адреса в ноль и через isInNet() маршрутизировать их на прокси</p></td><td>2024-03-19T06:40:36.278Z</td></tr><tr><td>ValdikSS</td><td><p>Не анализируя домен? Проксироваться будет пол интернета в таком случае.</p>
+<p>А IP-адреса в PAC-файле и так небольшую часть занимают, меньше 20 КБ.</p></td><td>2024-03-19T07:12:08.531Z</td></tr><tr><td>KlonD90(Nick)</td><td><p><code>awk: cmd. line:1: warning: regexp escape sequence </code>_’ is not a known regexp operator`</p>
+<p>а как это фиксить?</p></td><td>2024-03-22T11:57:45.246Z</td></tr><tr><td>ValdikSS</td><td><p>Так и должно быть, это не ошибка.</p></td><td>2024-03-22T18:34:28.122Z</td></tr><tr><td>KlonD90(Nick)</td><td><p>Я попробовал другую библиотеку но с тем же алгоритмом. Изначальный файл 2.2 мб, выходит 1.3 мб после сжатия. Попробовал сжать уже сжатое и выходит теже 1.3 при том что сжатый файл 1.1 мб.</p></td><td>2024-03-23T07:38:02.227Z</td></tr><tr><td>KlonD90(Nick)</td><td><p>Пока есть идея сжать просто по модулю. Всего 39 символов то есть в 128 бит ASCII можно вместить 3 символа в одном. И сейчас те 2 мегабайта как 700 килобайт представить + алгоритм разжатия довольно простой. Тьфу в 128 возможных чисел. Взять по модулю. И будет сжатие в 3 раза по сути. Нужно конечно проскипать символы закрывающих кавычек, экранироваия и перевода строки.</p></td><td>2024-03-23T10:15:43.026Z</td></tr><tr><td>ValdikSS</td><td><p>Реализовал алгоритм сжатия LZ Prediction (LZP) из <a href="https://www.ietf.org/rfc/rfc1978.txt">протокола PPP</a>, изменив хеш-функцию эмпирическим путём. Prediction-байты сохраняются отдельно от данных, в base64-переменную, которая еще дополнительно обрабатывается существующим RLE-сжатием.</p>
+<p>Приличную часть времени потратил на поддержку Internet Explorer 8 и Firefox 52: последним сёрфят как минимум 400 пользователей сервиса (кто-то «чистым» FF, кто-то K-Meleon/PaleMoon/SeaMonkey).<br>
+Визуально скорость не пострадала, но детально не измерял.</p>
+<p>Сильно это, увы, не помогло. Файл опять едва вписывается в лимиты (но хотя бы обновляется).</p>
+<p><code>1007799 proxy.pac</code></p>
+<p>Принимаются другие идеи. Можно сконцентрироваться на исключении мусорных доменов.</p></td><td>2024-03-24T16:36:41.631Z</td></tr><tr><td>qkeen</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="62" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Принимаются другие идеи.</p>
+</blockquote>
+</aside>
+<p>Раздавать два PAC-скрипта: с ограничением в 1МБ и без этого ограничения.</p></td><td>2024-03-24T17:06:31.000Z</td></tr><tr><td>PstalDude(Pstal Dude)</td><td><p>Здравствуйте. Со вчерашнего дня софт pacproxy перестал работать с новым pac файлом. При этом браузер работает нормально. Могу я попросить ссылку на предыдущую версию рас файла, если таковая имеется? Также присоединяюсь к предложнению из предыдущего поста о распространении двух версий файлов. И извините если немного не в тему.</p></td><td>2024-03-25T01:40:13.585Z</td></tr><tr><td>bolvan</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="62" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>Можно сконцентрироваться на исключении мусорных доменов.</p>
+</blockquote>
+</aside>
+<p>Можно так сделать. Взять все эти домены и пройтись по ним CURLом. Если там нет ответа, ошибка http или прочая ерунда, а так же заглушки паркингов или какие-то стандартные странички (надо изучать) , то в помойку.<br>
+Переделывать этот список, скажем, раз в неделю или 2. Лучше сделать так, что не сразу в помойку, а если 2 раза подряд в проверках он плохой, то надолго его в бан. А то мало ли временная проблема<br>
+Держать 2 последних плохих листа и в бан заносить только их пересечение.<br>
+Запускать по 50 тхредов, чтобы было быстрее.<br>
+Можно не париться на счет обиды кого-то. С точки зрения хостера это просто трафик определенного обьема, а для конечных сайтов это всего лишь 1 запрос. Нагрузки на CPU так же особо не усматривается.<br>
+Применять подмену user-agent на броузерный, иначе некоторые сайты могут неправильно себя повести.</p>
+<p>Как вариант можно не курлами это делать из шелла, а на питоне что-то написать не очень сложное</p>
+<p>Много так, увы, не вырезать. У меня есть список ресолвящихся доменов тут : <a href="https://raw.githubusercontent.com/bol-van/rulist/main/reestr_hostname_resolvable.txt">https://raw.githubusercontent.com/bol-van/rulist/main/reestr_hostname_resolvable.txt</a><br>
+и в основном там есть какой-то сайт</p>
+<p>Еще можно взять тот список и посмотреть на счет зеркал. Составить список regexp, чтобы резать многочисленные зеркала.<br>
+Пример : maxbet*, pinup* pin-up*, sex0*, solcasino*<br>
+проституток, наркоту и дипломы можно сразу убивать, возможно так же и казино</p></td><td>2024-03-25T06:32:21.459Z</td></tr><tr><td>runalsh(runalsh)</td><td><aside class="quote no-group" data-username="bolvan" data-post="65" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/b/8e8cbc/48.png" class="avatar"> bolvan:</div>
+<blockquote>
+<p>Пример : maxbet*, pinup* pin-up*, sex0*, solcasino*</p>
+</blockquote>
+</aside>
+<p>Это и сейчас реализовано с поиском по паттернам. У <a href="https://raw.githubusercontent.com/runalsh/antizapret-pac-generator-light/main/excludepattern.sh" rel="noopener nofollow ugc">себя</a> отбрасываю все вхождения с числом больше 1100 и результирующий файл получается ~800кб.<br>
+На счет ливнесс пробы в скрипте есть чекинг nxdomains. Он уменьшает размер на 400кб.</p></td><td>2024-03-25T06:58:24.965Z</td></tr><tr><td>bolvan</td><td><pre><code class="lang-auto">wc -l reestr_hostname_resolvable.txt
+347090
+grep  casino reestr_hostname_resolvable.txt  | wc -l
+48700
+grep bet reestr_hostname_resolvable.txt  | wc -l
+18121
+grep  prostitut reestr_hostname_resolvable.txt  | wc -l
+4486
+grep  diplom reestr_hostname_resolvable.txt  | wc -l
+3904
+grep  spravk reestr_hostname_resolvable.txt  | wc -l
+963
+grep pinup reestr_hostname_resolvable.txt  | wc -l
+3441
+grep pin-up reestr_hostname_resolvable.txt  | wc -l
+2264
+</code></pre>
+<p>Это уже около 25%</p></td><td>2024-03-25T07:11:13.794Z</td></tr><tr><td>ValdikSS</td><td><p>Это уже всё используется<br>
+<a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/master/config/exclude-regexp-dist.awk" class="onebox" target="_blank" rel="noopener">https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/master/config/exclude-regexp-dist.awk</a></p></td><td>2024-03-25T08:15:24.194Z</td></tr><tr><td>pochta.andrew(Andrew)</td><td><p>Может подойти к проблеме с другой стороны - составить частотную характеристику запрашиваемых на стороне прокси доменов? И не включать в pac домены с популярностью менее определенного порога. Технические способы помогут только отсрочить проблему, но не решить ее кардинально, ибо данный список будет только увеличиваться. Я сильно сомневаюсь, что оставшиеся после фильтрации какие-нибудь *azino также востребованы, как и топовые новостные ресурсы  в известной зоне. Так зачем тащить этот мертвый груз? А порог можно сделать плавающим, на основе собираемой статистики, чтобы укладываться в лимиты. Если конечно ведется такая статистика.</p></td><td>2024-03-29T11:24:41.354Z</td></tr><tr><td>mercurykd(Konstantin)</td><td><p>а дайте пожалуйста референсный исходник, не обязательно ркновский. давайте сделаем референсный файл на 10000 строк и будем смотреть на его примере что лучше сжимает. я сделал для себя lzw компрессию и минификацию. <a href="https://p.thenewone.lol:8443/proxy.pac" rel="noopener nofollow ugc">https://p.thenewone.lol:8443/proxy.pac</a> тут на одних переносах строки можно не слабо сэкономить. еще можно миллиард азино превратить в один *.азино</p></td><td>2024-04-01T21:28:06.382Z</td></tr><tr><td>ValdikSS</td><td><p>Референс есть в репозитории.</p></td><td>2024-04-03T05:40:19.241Z</td></tr><tr><td>mercurykd(Konstantin)</td><td><p>ну нет, угадывать репо и файл в нем такое. как говорится, какое тз такое и хз</p></td><td>2024-04-03T09:07:41.540Z</td></tr><tr><td>ValdikSS</td><td><p>Что конкретно непонятно? Все ссылки есть в первом сообщении. В указанном бранче не выполняется обновление листа, и списки заморожены на дату коммита бранча, на них и тестируйте.</p></td><td>2024-04-03T09:14:42.252Z</td></tr><tr><td>mercurykd(Konstantin)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="75" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>списки</p>
+</blockquote>
+</aside>
+<p>вот именно что списки, их поди еще там найди. а нужно один референсный исходный файл. типа “вот вам файл, задача сделать из него pac минимального размера без потери данных”.</p></td><td>2024-04-03T09:26:51.516Z</td></tr><tr><td>ValdikSS</td><td><p>Исходный файл списка, чтобы сделать другой PAC-файл с нуля?<br>
+Списки <a href="https://github.com/zapret-info/z-i/">вот</a> и <a href="https://github.com/fz139/vigruzki">вот</a>, но эта другая задача, не по теме.</p></td><td>2024-04-03T09:30:00.899Z</td></tr><tr><td>mercurykd(Konstantin)</td><td><aside class="quote no-group" data-username="ValdikSS" data-post="77" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar"> ValdikSS:</div>
+<blockquote>
+<p>но эта другая задача, не по теме</p>
+</blockquote>
+</aside>
+<p>понял, вы не ищите способы минификации рас, вам нужно чтоб именно ваш файл оптимизировали.</p></td><td>2024-04-03T09:39:58.742Z</td></tr><tr><td>SagePtr(Sage Pointer)</td><td><p>Можно ли проверять User-Agent браузера? К примеру, пользователям IE и старых браузеров возвращать усечённый по объёму файл с наиболее популярными сайтами, а пользователям современных браузеров - полный?<br>
+Ещё вариант - некоторые зоны вынести сразу на прокси, к примеру, .com.ua и .co.il (новостные порталы Украины и Израиля), т.к. в этих зонах такое чувство, что гораздо больше заблоченных сайтов, чем не заблоченных.</p></td><td>2024-04-04T19:30:08.410Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="SagePtr" data-post="79" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/sageptr/48/5272_2.png" class="avatar"> SagePtr:</div>
+<blockquote>
+<p>пользователям IE и старых браузеров возвращать усечённый по объёму файл с наиболее популярными сайтами, а пользователям современных браузеров - полный?</p>
+</blockquote>
+</aside>
+<p>Ограничение на размер файла есть только в Chrome и браузерах, основанных на нём. Выходит наоборот.</p></td><td>2024-04-05T06:34:25.154Z</td></tr><tr><td>goodrussian666(Goodrussian666)</td><td><p>небольшую правку примете ?</p>
+<p><a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light/pull-requests/1" class="onebox" target="_blank" rel="noopener nofollow ugc">https://bitbucket.org/anticensority/antizapret-pac-generator-light/pull-requests/1</a></p></td><td>2024-04-06T15:06:55.790Z</td></tr><tr><td>atz</td><td><p>Мы у себя не один год пользовались файлом <a href="https://antizapret.prostovpn.org/proxy.pac" rel="noopener nofollow ugc">https://antizapret.prostovpn.org/proxy.pac</a>, заменяя в нем прокси-сервер на свой. Но <a href="http://antizapret.prostovpn.org" rel="noopener nofollow ugc">antizapret.prostovpn.org</a> заблокировали, поэтому прямой доступ стал невозможен. А через VPN предсказуемо получается “Your geoip is not RU, contact <a href="mailto:antizapret@prostovpn.org">antizapret@prostovpn.org</a> if you believe this is an error. THE SERVICE WORKS ONLY IN RUSSIA! Do not forget to include your IP address in the message.”<br>
+Ладно, решили делать proxy.pac сами, скачали/запустили <a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light" class="inline-onebox" rel="noopener nofollow ugc">Bitbucket</a>. Но вот только результат 1.5Mb - нерабочий.</p>
+<p>Поиском по темам нашелся <a href="https://github.com/onminonA/proxy.pac" class="inline-onebox" rel="noopener nofollow ugc">GitHub - onminonA/proxy.pac: RU-PAC file anti-censorship in Russian Federation</a> . Видимо пока будем использовать его, но мне кажется стоит сделать держать репозиторий antizapret-pac-generator-light в таком состоянии, чтобы им можно было практически пользоваться. Плюс сделать “официальный” аналог <a href="https://github.com/onminonA/proxy.pac" class="inline-onebox" rel="noopener nofollow ugc">GitHub - onminonA/proxy.pac: RU-PAC file anti-censorship in Russian Federation</a>, для локального использования.</p>
+<p>Что же касается исходной проблемы, мне кажется надо активнее пользоваться списками исключений. Например отдельным скриптом составлять списки того, чего нет в whois, коммитить исключения в репозиторий (чтобы скрипт обновления не тормозил). Да и зеркала всяких казино в какой-то момент можно будет начать исключать.</p></td><td>2024-06-12T14:51:36.814Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote no-group" data-username="atz" data-post="82" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/5fc32e/48.png" class="avatar"> atz:</div>
+<blockquote>
+<p>Видимо пока будем использовать его, но мне кажется стоит сделать держать репозиторий antizapret-pac-generator-light в таком состоянии, чтобы им можно было практически пользоваться.</p>
+</blockquote>
+</aside>
+<p>Репозиторий находится именно в таком состоянии, в плане генерации PAC-файла он в точности соответствует версии на сервере. Отлаживайте.</p></td><td>2024-06-12T14:59:22.164Z</td></tr><tr><td>atz</td><td><p>Дело оказалось в RESOLVE_NXDOMAIN=“yes” (в репозитарии “no”).</p>
+<p>И раз залез сюда, в topsequences.py имеет смысл обрабатывать последовательности длинее 4-х символов. Если обрабатывать 6 символов, используя или существующий символ из алфавита или почему-то неиспользуемый ‘_’, получается 989798 байт против исходных 1011183. Если использовать половину алфавита для 6, половину для 5 получится еще чуть короче. Но  2% это все равно конечно гомеопатия, РКН ничего не мешает за день столько добавить. Так что увы, боюсь без более активного использования исключений никуда.</p>
+<p>diff -u topsequences.py.ok topsequences.py</p>
+<p>…<br>
++wordreplace_6 = [“_” + x for x in wordreplace]</p>
+<p>…<br>
+for patternlen in (6,):<br>
+for round, _ in enumerate(wordreplace_6):</p>
+<p>…<br>
+-wordreplace = wordreplace_big + wordreplace<br>
++wordreplace = wordreplace_6 + wordreplace_big + wordreplace</p></td><td>2024-06-12T20:34:05.762Z</td></tr><tr><td>1andrevich(Andrevich)</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a> вариант с вычищенным списком РКН рассматривается? Есть сам список и наработки по методологии очищения списка (тесты, проверки)</p></td><td>2024-09-11T16:47:40.337Z</td></tr><tr><td>ValdikSS</td><td><aside class="quote" data-post="68" data-topic="7433">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/valdikss/48/2_2.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BD%D1%83%D0%B6%D0%BD%D0%B0-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C-%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%81%D1%82%D0%BE%D0%B2-%D1%81-%D0%BE%D0%BF%D1%82%D0%B8%D0%BC%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D0%B5%D0%B9-pac-%D1%84%D0%B0%D0%B9%D0%BB%D0%B0/7433/68">Нужна помощь программистов с оптимизацией PAC-файла</a> <a class="badge-category__wrapper " href="/c/antizapret-prostovpn-org/5"><span data-category-id="5" style="--category-badge-color: #8C6238; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category " title="Proxy and VPN service for Russian censorship circumvention, discussion and official support forum. Обсуждение работы сервиса обхода блокировок России АнтиЗапрет. Новости, уведомления о проблемах и помощь в настройке."><span class="badge-category__name">antizapret.prostovpn.org</span></span></a>
+  </div>
+  <blockquote>
+    Это уже всё используется 
+<a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/master/config/exclude-regexp-dist.awk" class="onebox" target="_blank" rel="noopener">https://bitbucket.org/anticensority/antizapret-pac-generator-light/src/master/config/exclude-regexp-dist.awk</a>
+  </blockquote>
+</aside>
+
+<p>Если есть дополнения и улучшения — добавляйте, конечно.</p></td><td>2024-09-12T05:31:04.516Z</td></tr><tr><td>ValdikSS</td><td><p>Файл опять близится к переполнению.</p></td><td>2024-09-18T10:31:35.963Z</td></tr><tr><td>ValdikSS</td><td></td><td>2024-09-18T10:31:44.383Z</td></tr><tr><td>Verity-Freedom</td><td><p>Тяжело…</p></td><td>2024-09-18T16:19:42.615Z</td></tr><tr><td>yatolkosprosit</td><td><p>Я не программист. Предлагаю взять список заблокированных доменов, да и выкинуть оттуда половину. Если есть статистика, наверняка активно используется 1% из этого списка.</p></td><td>2024-09-18T17:36:10.064Z</td></tr><tr><td>lylipvtoey</td><td><p>А если выкинуть всё, что не ресолвится, просрочено?<br>
+Как показала история с морзянкой, такого там предостаточно.</p></td><td>2024-09-19T15:09:24.252Z</td></tr><tr><td>VioletViscount(Violet Viscount)</td><td><p>Уже неоднократно и нересолв выкидывали, и от зеркал чистили, и откровенные непотребства удаляли; по-моему разве что именно не выкидывали намеренно сайты, которыми “типа никто ни пользуеца”, но так действительно делать не желательно. Все равно это паллиатив. Нужны именно мозги программистов чтобы решать эти проблемы. Простым юзверям тут особо делать нечего.</p></td><td>2024-09-19T15:14:05.923Z</td></tr><tr><td>fapane</td><td><p>Как на счёт упакованного trie или минимальных хешей для доменов с последующим Elias-Fano кодированием для идентифиаторов нод?</p></td><td>2024-09-21T06:50:06.686Z</td></tr><tr><td>Verity-Freedom</td><td><p>Я хочу отметить что Роскомнадзор будет существовать ещё какое-то время в любом случае. Если ориентироваться на заранее заданный запас прочности, он рано или поздно всё равно исчерпается. Как минимум ОЧЕНЬ старые браузеры стоит отбросить из уравнения. Задача по определению нерешаемая. Ещё год назад было сложно что-то новое придумать, сейчас тем более. А если и появится что-то новое, это даст год очередной, может два, от поддержки старых браузеров придётся всё равно отказываться, а у новых скорее всего и ограничения будут другие.</p></td><td>2024-09-21T07:23:03.536Z</td></tr><tr><td>Verity-Freedom</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a> подумайте, отказ от старых браузеров естественный процесс. Я предлагаю брать за новый ориентир флэш-хромиумы 87-й версии 2020 года - ими пользуются из-за любви к флэшплееру и там ещё была поддержка Windows xp. И то даже они уже очень многие сайты нормально не открывают. Тут же у вас по ссылке речь идёт ещё о 50-х версиях Файрфокса из 2017 года. Такой некрофилией занимаются очень, очень немногие. Ну и по файрфоксам логика примерно та же самая - вглубь сильно дальше чем на 5 лет не уходить. А вы пытаетесь держать живыми ещё интернет-эксплореры, не в обиду вам, это очень почётно, я ценю невероятно подобное уважение к своим пользователям.</p>
+<p>Должно быть именно это резервным вариантом на случай если сжать всё же не получится, а не произвольно выкидывать домёны, как тут предлагали Шариковы.</p></td><td>2024-09-21T07:33:25.314Z</td></tr><tr><td>zzr</td><td><p>нусуде по всему проблему решили если учитывать что последний раз обновлялось 15 августа</p></td><td>2024-09-24T09:01:37.263Z</td></tr><tr><td>bolshayasmetana</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a>, можно попробовать оформить как задачу с отфильтрованным от казино списком доменов для <a href="https://codegolf.stackexchange.com/" rel="noopener nofollow ugc">https://codegolf.stackexchange.com/</a><br>
+Там соответствующая аудитория найдёт лучшие варианты алгоритмов сжатия</p></td><td>2024-10-04T12:44:55.777Z</td></tr><tr><td>Karasique</td><td><p>Что вообще происходит с серверами Антизапрета? Читал что они заблокированы, но иногда они работают, а иногда нет. Можно каким-то образом защитить их от цензуры, к примеру использовать устойчивый протокол вроде shadowsocks или сделать обфускацию как с мостами в торе?</p></td><td>2024-10-10T20:10:26.737Z</td></tr><tr><td>Tyman</td><td><p>Как вариант, убирать повторяющиеся домены типа:</p>
+<p>0-111.lordfilm0.biz<br>
+0-112.lordfilm0.biz<br>
+0-113.lordfilm0.biz<br>
+0-115.lordfilm0.biz</p>
+<p>заменяя их на<br>
+lordfilm0.biz</p></td><td>2024-10-11T05:38:51.560Z</td></tr><tr><td>Tyman</td><td><p>такую замену сделал в своем скрипте <a href="https://github.com/GubernievS/AntiZapret-VPN/blob/main/setup/root/antizapret/parse.sh" class="inline-onebox">AntiZapret-VPN/setup/root/antizapret/parse.sh at main · GubernievS/AntiZapret-VPN · GitHub</a></p>
+<p>с обработкой исключений из nxdomain и заменой повторяющихся более 3х раз доменов на домены 2 уровня выходит 169 тысяч</p></td><td>2024-10-11T21:14:40.990Z</td></tr><tr><td>Tyman</td><td><p>в exclude-regexp-dist.awk можно добавить еще исключения:</p>
+<pre><code class="lang-auto">(/login/) {next}
+(/signin/) {next}
+(/bank/) {next}
+(/secure/) {next}
+(/verify/) {next}
+(/account/) {next}
+(/billing/) {next}
+(/password/) {next}
+(/invoice/) {next}
+(/casino/) {next}
+(/bet/) {next}
+(/poker/) {next}
+(/blackjack/) {next}
+(/roulette/) {next}
+(/slots/) {next}
+(/winbig/) {next}
+(/jackpot/) {next}
+(/1win/) {next}
+(/admiralx/) {next}
+(/escort/) {next}
+(/striptiz/) {next}
+(/massaj/) {next}
+(/stavki/) {next}
+(/vulkan/) {next}
+(/sloty/) {next}
+(/prostitutki/) {next}
+(/intim/) {next}
+(/kokain/) {next}
+(/xanax/) {next}
+(/xanaks/) {next}
+(/anasha/) {next}
+(/escort/) {next}
+(/pytana/) {next}
+(/prostitutka/) {next}
+(/metadon/) {next}
+(/mefedron/) {next}
+(/krokodil/) {next}
+(/amfetamin/) {next}
+(/drug/) {next}
+(/narcotic/) {next}
+(/meth/) {next}
+(/weed/) {next}
+(/vzyatka/) {next}
+(/bribe/) {next}
+(/russianbrides/) {next}
+(/gamble/) {next}
+(/blacksprut/) {next}
+(/ecstasy/) {next}
+</code></pre></td><td>2024-10-14T10:50:01.469Z</td></tr><tr><td>Elle(Elle)</td><td><p>У меня до сих пор жив EEEPC 904 HD и на нём стоит Windows 7 и даже обновляется каждый месяц расширенными апдейтами. Похоронить ОС древнее 7 пора уже давно и везде.</p></td><td>2024-10-18T17:54:23.327Z</td></tr><tr><td>Viktor45(Viktor45)</td><td><p>Рассмотрите вариант использование списков скриптов-чистилок с re:filter<br>
+(отсортированный и причесанный от мусора zapret-info)</p><aside class="onebox allowlistedgeneric" data-onebox-src="https://habr.com/ru/articles/850292/">
+  <header class="source">
+      <img src="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/e8fc7b34a1237fbc93fd62548efc1a4df1f7fa72.png" class="site-icon" data-dominant-color="97BFD2" width="16" height="16">
+
+      <a href="https://habr.com/ru/articles/850292/" target="_blank" rel="noopener nofollow ugc">Хабр</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/361;"><img src="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/1557834368779be24e277f5ec0be00056e71ef49_2_690x389.jpeg" class="thumbnail" data-dominant-color="F4F5F5" width="690" height="389"></div>
+
+<h3><a href="https://habr.com/ru/articles/850292/" target="_blank" rel="noopener nofollow ugc">Альтернативный список заблокированных в РФ ресурсов Re:filter</a></h3>
+
+  <p>В этой статье я хочу описать проблему с которой я столкнулся будучи пользователем существующих списков заблокированных ресурсов, шаги к решению и результаты работы. Статья в меньшей степени...</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/1andrevich/Re-filter-lists">
+  <header class="source">
+
+      <a href="https://github.com/1andrevich/Re-filter-lists" target="_blank" rel="noopener nofollow ugc">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/e2e39530d2e36dfabc37d4436eb9931a61608cae_2_690x344.png" class="thumbnail" data-dominant-color="EAECED">
+
+  <h3><a href="https://github.com/1andrevich/Re-filter-lists" target="_blank" rel="noopener nofollow ugc">GitHub - 1andrevich/Re-filter-lists: Re:filter is (an attempt to create) an actual list...</a></h3>
+
+    <p><span class="github-repo-description">Re:filter is (an attempt to create) an actual list of blocked domains and IPs in RU + popular and blocked for RU users </span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+</td><td>2024-10-19T15:14:17.990Z</td></tr><tr><td>Garykom(Garykom)</td><td><p>Как насчет формировать PAC-файл динамически под клиента?</p>
+<p>Отдельный обучающий PAC-файл, в котором вместо перечня всех заблокированных только используемые/посещаемые клиентом ресурсы с разделением на DIRECT/PROXY.</p>
+<p>Для всех пока не классифицированных ресурсов по умолчанию возвращает специальные обучающие PROXY.<br>
+Которые идентифицируют клиента и сохраняют для него списки для формирования его личного PAC-файла.</p>
+<p>Подобный обучающий прокси может быть поднят самостоятельно.</p></td><td>2024-10-20T01:32:42.994Z</td></tr><tr><td>Garykom(Garykom)</td><td><p>Иной вариант это использование специального DNS-сервера и функции PAC-файла dnsResolve.<br>
+Скрипт добавляет нечто к исходному имени ресурса и пытается разрешить в IP-адрес.<br>
+Например для url c “ntc.party” добавляем несуществующий корневой домен “.antizapret” и полученное имя сервера “ntc.party.antizapret” пытаемся получить IP.<br>
+Если IP получили (или нет) можно сделать вывод надо или нет проксировать исходный URL.<br>
+А в зависимости от IP можно отправлять на разные прокси.</p></td><td>2024-10-20T01:55:32.654Z</td></tr><tr><td>0x0737</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a> Рассматривали сжатый DAWG (Directed Acyclic Word Graph)? Возможно подойдёт что-то такое<br>
+Да и base85 маловато для cp1252. Если оно все печатаемые символы хавает, можно намного больше взять</p></td><td>2024-10-23T12:38:09.418Z</td></tr><tr><td>Garykom(Garykom)</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a><br>
+Попробовал на своем домене и vps поднять dnsmasq и поиграться с идеей разрешения адреса прокси.<br>
+Прикольно, оно работает.</p>
+<p>Практически даже не требуется в dns-сервера (клиента) прописывать этот специальный dns, через глобальную dns прекрасно работает.<br>
+Так же можно не только домены но и отдельные заблокированные страницы и ip-адреса/подсети через dns узнавать онлайн - требуется проксирование  или нет.<br>
+И получать свежие адреса прокси-серверов, без изменения PAC-скрипта.</p>
+<p>Фактически некая маскировка под dns-трафик получается, двустороннее общение (из PAC-файла) со своими серверами, посредством функции dnsResolve.<br>
+Осталось продумать кодирование запросов/ответов и реализовать заполнение conf для dnsmasq.</p></td><td>2024-10-23T22:00:34.153Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote no-group" data-username="Tyman" data-post="103" data-topic="7433">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/tyman/48/6894_2.png" class="avatar"> Tyman:</div>
+<blockquote>
+<p>в exclude-regexp-dist.awk можно добавить еще исключения:</p>
+</blockquote>
+</aside>
+<p>В этот же список можно добавить:</p>
+<pre><code class="lang-auto">(/caino/) {next}
+(/cassino/) {next}
+(/cazzino/) {next}
+(/cazinno/) {next}
+(/casiino/) {next}
+(/casin0/) {next}
+(/casi1no/) {next}
+(/cas1no/) {next}
+(/kacino/) {next}
+(/kazzino/) {next}
+(/cocaine/) {next}
+(/businessinvest/) {next}
+(/syka/) {next}
+(/slot/) {next}
+(/seeds/) {next}
+(/fontan/) {next}
+</code></pre></td><td>2024-10-30T09:44:51.727Z</td></tr><tr><td>Tyman</td><td><p>Спасибо, дополнил <a href="https://github.com/GubernievS/AntiZapret-VPN/blob/main/setup/root/antizapret/config/exclude-regexp-dist.awk">свой список</a></p></td><td>2024-11-01T11:08:46.432Z</td></tr><tr><td>ClovesZurt</td><td><p>Вариант с PAC файлом в принципе не работает. По ссылке <a href="https://p.thenewone.lol:8443/proxy.pac" rel="noopener nofollow ugc">https://p.thenewone.lol:8443/proxy.pac</a> открывается заглушка “This content has been blocked. Please contact team@pinata.cloud for more information - ERR_ID:00023”</p></td><td>2024-12-09T17:57:19.505Z</td></tr><tr><td>Verity-Freedom</td><td><p>Ссылка была заблочена но при этом сам pac-файл работал (у тех у кого это две отдельные сущности). Сейчас и он сам не работает. Нужно победить эту проблему, а она сложная.</p></td><td>2024-12-10T00:39:08.831Z</td></tr><tr><td>Anonimno(Anonimno)</td><td><aside class="quote" data-post="21" data-topic="13634">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/a88e57/48.png" class="avatar">
+    <a href="https://ntc.party/t/%D0%BE%D0%B1%D1%85%D0%BE%D0%B4-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA-%D1%80%D1%83%D0%BD%D0%B5%D1%82%D0%B0-pac-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82-%D0%BD%D0%B5-%D0%BE%D0%B1%D0%BD%D0%BE%D0%B2%D0%BB%D1%8F%D0%B5%D1%82%D1%81%D1%8F-%D1%81-7-%D0%B4%D0%B5%D0%BA%D0%B0%D0%B1%D1%80%D1%8F-2024-%D0%BF%D1%80%D0%BE%D0%B2%D0%B0%D0%B9%D0%B4%D0%B5%D1%80-%D1%82%D1%82%D0%BA-%D0%BA%D0%B5%D0%BC%D0%B5%D1%80%D0%BE%D0%B2%D0%BE-%D0%BD%D0%B0-%D0%B2%D1%81%D0%B5%D1%85-%D0%BA%D0%BE%D0%BC%D0%BF%D1%8C%D1%8E%D1%82%D0%B5%D1%80%D0%B0%D1%85-%D0%B8-%D0%B1%D1%80%D0%B0%D1%83%D0%B7%D0%B5%D1%80%D0%B0%D1%85/13634/21">Обход блокировок Рунета, PAC-скрипт не обновляется с 7 декабря 2024 - провайдер ТТК Кемерово, на всех компьютерах и браузерах</a> <a class="badge-category__wrapper " href="/c/community-software/runet-censorship-bypass-extension/7"><span data-category-id="7" style="--category-badge-color: #0088CC; --category-badge-text-color: #FFFFFF; --parent-category-badge-color: #BF1E2E;" data-parent-category-id="27" data-drop-close="true" class="badge-category --has-parent" title="Official support forum for Runet Censorship Bypass — a Chrome/Chromium extension for bypassing censorship in Russia.
+Обсуждение работы расширения «Обход блокировок Рунета» для браузеров, основанных на Chrome/Chromium, и FireFox. Техническая поддержка от автора расширения @ilyaigpetrov."><span class="badge-category__name">Обход блокировок Рунета</span></span></a>
+  </div>
+  <blockquote>
+    Временный файл AntiZapret (вместо временно не доступного <a href="https://p.thenewone.lol:8443/proxy.pac">https://p.thenewone.lol:8443/proxy.pac</a>) - <a href="https://bitbucket.org/onminona/proxy.pac/raw/main/proxy.pac">https://bitbucket.org/onminona/proxy.pac/raw/main/proxy.pac</a>
+  </blockquote>
+</aside>
+</td><td>2024-12-12T05:40:11.844Z</td></tr><tr><td>ValdikSS</td><td><p>PAC-файл уменьшен в размере путём проверки HTTP/HTTPS-работоспособности доменов, должен снова работать в Chrome-подобных браузерах при добавлении в настройки ОС.</p></td><td>2025-02-06T19:48:10.989Z</td></tr><tr><td>Dmitriy1</td><td><p>А где взять рабочую ссылку на PAC-файл?</p></td><td>2025-02-16T22:43:33.755Z</td></tr><tr><td>Verity-Freedom</td><td><p><a class="mention" href="/u/valdikss">@ValdikSS</a> <a class="mention" href="/u/ilyaigpetrov">@ilyaigpetrov</a> Антицензорити придерживается лимитов на размер в 10 мегабайт и я используя его в ZeroOmega не замечаю каких-либо тяжёлых негативных эффектов. Можно спросить, почему лимит в 1 мегабайт так важен для Антизапрета и кого именно затронет практически НЕИЗБЕЖНЫЙ отход от лимита в 1 мегабайт? Допустим файл весит 3 мегабайта вместо 900 килобайт, какие негативные эффекты сразу ощутят конечные пользователи, в каких сценариях?</p></td><td>2025-03-11T05:48:45.538Z</td></tr><tr><td>ValdikSS</td><td><p>Все браузеры, основанные на Chromium (Chrome, Edge, Opera, Vivaldi, Brave), а также программы на CEF (Electron) не работают с PAC-файлами больше 1 МБ.</p>
+<p>И ладно бы если просто не работали, но если файл по PAC-ссылке больше 1 МБ, они воспринимают это как временную проблему и не кешируют ответ, постоянно отправляя всё новые и новые запросы на скачивание файла, устраивая DDoS.</p>
+<p>PAC-файл АнтиЗапрета &gt;1МБ, вероятно, привёл к блокировке российских IP-адресов на IPFS-гейтвее pinata, а после переключения — к огромному количеству запросов на IPFS-гейтвей <a href="http://ipfs.io">ipfs.io</a>, что они были вынуждены сделать rate limit на 5 запросов в час с одного адреса — запросы PAC-файла просто съедали всю их пропускную способность.</p>
+<blockquote>
+<p>I’m looking at our bandwidth utilization and <code>/ipfs/CID/proxy-ssl.js</code> and <code>/ipfs/CID/proxy-nossl.js</code> are in TOP 3 of requested paths.</p>
+</blockquote>
+<blockquote>
+<p>ok, seems that the fix was you ensuring size below 1MiB - it significantly cut down (1) bandwidth<br>
+it spiked again when I disabled rate-limits (2) and then got back down again (3) once I re-enabled them.<br>
+rate-limiting does not seem to have the same runaway effect as 1MiB thing – I think modern browsers/windows do support Retry-After, or have some sort of smart backoff when != 200 or 429 is returned.</p>
+</blockquote>
+<p><div class="lightbox-wrapper"><a class="lightbox" href="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/0558220b014deb2899ac890567c7142a74d9f501.png" data-download-href="https://ntc.party/uploads/default/0558220b014deb2899ac890567c7142a74d9f501" title="image"><img src="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/0558220b014deb2899ac890567c7142a74d9f501_2_517x262.png" alt="image" data-base62-sha1="Lhd6ACAEY6CwnrR9C0zmWXauid" width="517" height="262" srcset="нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/0558220b014deb2899ac890567c7142a74d9f501_2_517x262.png, нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/0558220b014deb2899ac890567c7142a74d9f501_2_775x393.png 1.5x, нужна-помощь-программистов-с-оптимизацией-pac-файла-7433/0558220b014deb2899ac890567c7142a74d9f501.png 2x" data-dominant-color="F6F7F8"><div class="meta"><svg class="fa d-icon d-icon-far-image svg-icon" aria-hidden="true"><use href="#far-image"></use></svg><span class="filename">image</span><span class="informations">775×394 41.4 KB</span><svg class="fa d-icon d-icon-discourse-expand svg-icon" aria-hidden="true"><use href="#discourse-expand"></use></svg></div></a></div></p>
+<p>PAC-файлы больше 1 МБ поддерживаются только в расширениях.</p>
+<p>Чем меньше доменов в файле, тем быстрее он обрабатывается. Каждый запрос проиходит через PAC-функцию, поэтому чем быстрее она работает, тем меньше замедляются сетевые функции браузера.<br>
+В Реестре куча мусорных доменов/зеркал, которые технически работают, но никому не нужны.</p></td><td>2025-03-11T19:10:20.503Z</td></tr><tr><td>ValdikSS</td><td><p><a href="https://bitbucket.org/anticensority/antizapret-pac-generator-light/commits/4e00d40fca09c1ae0025ffc29fc3d27fa06c0c2e">Проблема устранена</a>, по крайней мере на время. Если у кого есть более продуктивные идеи — пишите личным сообщением.</p></td><td>2025-03-11T19:25:05.510Z</td></tr><tr><td>ValdikSS</td><td></td><td>2025-03-11T19:25:10.933Z</td></tr>
+    </table>
+      </body>
+    </html>

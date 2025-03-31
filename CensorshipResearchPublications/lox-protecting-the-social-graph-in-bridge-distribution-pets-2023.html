@@ -1,0 +1,69 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>lox-protecting-the-social-graph-in-bridge-distribution-pets-2023</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>Lox: Protecting the Social Graph in Bridge Distribution<br>
+Lindsey Tulloch, Ian Goldberg<br>
+<a href="https://censorbib.nymity.ch/#Tulloch2023a">https://censorbib.nymity.ch/#Tulloch2023a</a><br>
+<a href="https://www.youtube.com/watch?v=hT2PkFs-61A&amp;list=PLWSQygNuIsPeSo_mDoX9MPrVDZEaq_umi&amp;index=19">Presentation video</a><br>
+<a href="https://gitlab.torproject.org/tpo/anti-censorship/lox">Source code</a></p>
+<p>Lox is a bridge distribution system, a way of allocating scarce bridge resources (such as IP addresses) to users of a circumvention system. The challenge in bridge distribution is making bridges available to honest users, without revealing them all to a censor that wants to block them. To resist infiltration by censors, Lox uses a system of escalating trust levels and invitations by established users. It uses cryptography to keep the social graph of inviters and invitees private. Users that don’t have an invitation can still bootstrap trust through an open-entry system, without a central identity arbiter.</p>
+<p>Lox takes ideas from earlier bridge distribution systems. <a href="https://censorbib.nymity.ch/#Wang2013a">rBridge</a> (2013) and <a href="https://patternsinthevoid.net/hyphae/">Hyphae</a> (2017) used invitations and anonymous credentials, but did not have a way for users to enter the system other than by being invited. <a href="https://censorbib.nymity.ch/#Douglas2016a">Salmon</a> (2016) introduced the idea of users advancing in trust levels over time, and had a way for new users to enter at trust level 0 without an invitation, but it required interfacing with a non-private third-party identity service, such as Facebook. Lox combines the best features of these other systems: invitations, trust levels, open entry for new users, and privacy of the social graph.</p>
+<p>The core cryptographic tool in Lox is an unlinkable <a href="https://en.wikipedia.org/wiki/Digital_credential#Anonymous">anonymous credential</a>. It uses specifically the <a href="https://eprint.iacr.org/2013/516">keyed algebraic MAC credentials</a> of Chase et al. 2013, the same scheme used in Hyphae. A Lox credential represents the attributes:</p>
+<blockquote>
+<p>(<em>ID</em>, <em>Time</em>, <em>Trust level</em>, <em>Bridge bucket</em>, <em>Number of invitations</em>, <em>Number of blockages</em>)</p>
+</blockquote>
+<p>A user exchange credentials with a central server called the <em>Lox Authority</em>. On each interaction, the user reveals to the Lox Authority only the attributes that are necessary for that interaction, keeping the others hidden (<a href="https://petsymposium.org/popets/2023/popets-2023-0029.pdf#page=8">Table 3</a>). Each credential is used only once: after being redeemed, the Lox Authority re-issues the user a new credential to be used in the next interaction, with attributes modified as appropriate, and a new random <em>ID</em>.</p>
+<p>Users are eligible to upgrade to higher trust levels after their bridges have remained unblocked for certain lengths of time (<a href="https://petsymposium.org/popets/2023/popets-2023-0029.pdf#page=7">Table 2</a>). This gives users an incentive to keep their bridges secret and not share them widely. At higher trust levels, users gain a limited number of invitations which they may spend to invite trusted friends into the system. The idea of <em>inheritance</em> is built into Lox; this is what prevents a censor from getting leverage by acting as numerous fake “sock puppet” users. When a new user is invited, they enter at trust level 1 and inherit the same bridges as the user that invited them. This way, a censor does not learn new bridges or gain additional privileges by inviting their own accounts. New users without an invitation enter at trust level 0 and are given bridges from a pool that is separate from the invitation pool. If one of a user’s bridges gets blocked, there is a way for them to migrate to a new unblocked bridge, but a user with too many blockages is considered suspicious and will not be able to advance in trust levels or learn additional bridges from the trusted pool.</p></td><td>2023-12-30T17:49:39.843Z</td></tr><tr><td>anon57137390</td><td><p>del</p></td><td>2023-12-30T20:15:24.061Z</td></tr><tr><td>tango</td><td><p>“Shadow ban” is not quite the right word, because there are no accounts, or anything like that, that the Lox Authority could use to secretly track a user and give the user different answers from others. That’s the purpose of the anonymous credentials. If the Lox Authority gets hacked, there is no user database or log of who invited whom.</p>
+<p>For example, when issuing an invite, the Lox Authority sees an anonymous credential with a number of invitations <em>a</em> = 2. But the Lox Authority does not directly see the value of <em>a</em> (see ℋ in <a href="https://petsymposium.org/popets/2023/popets-2023-0029.pdf#page=8">Table 3</a>), because that would enable user tracking. The Lox Authority sees an anonymous credential and a zero-knowledge proof that <em>a</em> &gt; 0, for example. The Lox Authority issues a new credential with <em>a</em> = 1, but it does not know the value <em>a</em> it is giving out; it decrements the attribute under homomorphic encryption.</p>
+<p>I admit I don’t understand what makes the cryptography work. It’s possible even my high-level understanding is mistaken; maybe the authors can clarify if so.</p>
+<p>To your question about how you know when a bridge is blocked, it’s true that Lox relies on an oracle to tell it when bridges are blocked. My understanding is that defining such an oracle has been a major challenge and is still something of an open problem. I haven’t been involved with it directly, but here are some links:</p>
+<ul>
+<li><a href="https://gitlab.torproject.org/tpo/anti-censorship/lox/-/issues/33" class="inline-onebox">Implement reasonable handling for bridge blocking (#33) · Issues · The Tor Project / Anti-censorship / lox · GitLab</a></li>
+<li><a href="http://meetbot.debian.net/tor-meeting/2023/tor-meeting.2023-05-18-15.58.log.html#l-160" class="inline-onebox">#tor-meeting log</a><pre><code class="lang-plaintext">&lt;dcf1&gt; there's some aspects that are assumed to exist and to be plugged into the Lox system, which is what you're doing now with integration
+&lt;dcf1&gt; like for example you need a signal when a bridge has been blocked, and to realize that somehow
+&lt;dcf1&gt; my impression of the model in the paper is that bridge operators are trusted(?) to report their level of use, and when it goes to zero that indicates a block?
+&lt;onyinyang&gt; yes. There are many missing pieces that make the full system tricky in practice, blocking being a major sticking point.
+&lt;cohosh_away&gt; that luckily exists with rdsys
+&lt;cohosh_away&gt; https://gitlab.torproject.org/cohosh/rdsys-backend-api
+&lt;cohosh_away&gt; or rather telling whether bridges are gone does
+&lt;cohosh_away&gt; not blocked
+</code></pre>
+</li>
+</ul></td><td>2024-01-06T17:18:04.271Z</td></tr>
+    </table>
+      </body>
+    </html>

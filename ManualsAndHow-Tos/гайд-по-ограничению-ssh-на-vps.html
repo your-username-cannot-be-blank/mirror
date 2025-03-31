@@ -1,0 +1,228 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>гайд-по-ограничению-ssh-на-vps</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>MasterYoba</td><td><p>Часто вижу на этом форуме советы, мол нужно перенести ssh на высокие порты, якобы это каким-то образом поможет скрыть его от пробинга цензора и других злоумышленников, и сделает ваш прокси сервер незаметнее. Это полнейшая чушь, цензор использует портскан (см. <a href="https://github.com/tread-lightly/CyberOK_Skipa_ips" class="inline-onebox" rel="noopener nofollow ugc">GitHub - tread-lightly/CyberOK_Skipa_ips: Это вам не балалайка, получается</a>), найти ssh на нестандартном порте проблемой не является. Можете попробовать сами: <code>nmap -p- IP_ВАШЕГО_VPS</code><br>
+Нужно закрывать сервер правилами фаервола, но многие говорят, мол нет такой возможности, т.к. домашний IP не статический, а дополнительного джамп сервера нет. Опишу способ, как можно это сделать даже с динамическим домашним адресом.</p>
+<h1>Подготовка</h1>
+Прежде всего нужно настроить у себя дома динамический DNS (DDNS). Подробно разбирать не буду, этих сервисов целая куча, настраиваются элементарно, хотя бы 1-2 поддерживаются любым "домашним" роутером. Лично я долгое время использовал duckdns, пока не перешёл на cloudflare.
+<p>В конечном итоге у вас должен быть DDNS домен, который резолвит на ваш текущий домашний ip. Проверяем, если выполнить команду <code>dig +short ВАШ_DDNS_ДОМЕН</code> на VPS, должно вывести ваш текущий домашний IP-адрес.</p>
+<h1>Решение</h1>
+Решение простое, мы создадим разрешающее правило в фаерволе vps, которое будет использовать ipset, а ipset будет постоянно обновляться IP-адресом из DDNS с помощью скрипта.
+<p>Сам скрипт:</p>
+<pre><code class="lang-auto">#!/bin/bash
+# Update ipset to let my dynamic IP in
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+set=whitelist
+host=ВАШ_DDNS_ДОМЕН
+
+me=$(basename "$0")
+
+ip=$(dig +short $host)
+
+if [ -z "$ip" ]; then
+    logger -t "$me" "IP for '$host' not found"
+    exit 1
+fi
+
+# make sure the set exists
+ipset -exist create $set hash:ip
+
+if ipset -q test $set $ip; then
+    logger -t "$me" "IP '$ip' already in set '$set'."
+else
+    logger -t "$me" "Adding IP '$ip' to set '$set'."
+    ipset flush $set
+    ipset add $set $ip
+fi
+</code></pre>
+<p>Размещаем скрипт в любом удобном месте, например в <strong>/etc/ipset-update-ddns.sh</strong><br>
+Проверяем работу скрипта: <code>sh /etc/ipset-update-ddns.sh</code><br>
+Должен был создаться ipset “whitelist” с текущим IP-адресом DDNS. Проверка: <code>ipset list whitelist</code></p>
+<p>Настроим обновление ipset в crontab:</p>
+<pre><code class="lang-auto">*/5 * * * * /etc/ipset-update-ddns.sh
+@reboot /etc/ipset-update-ddns.sh
+</code></pre>
+<p>И наконец добавляем разрешающее правило для ipset: (тут разрешён весь TCP, при желании можно ограничить порты)<br>
+<code>iptables -A INPUT -p tcp -m set --match-set whitelist src -m state --state NEW -j ACCEPT</code></p>
+<p>После этого можно отключить общее разрешающее правило для ssh и любые другие лишние правила. С вашего домашнего адреса теперь всегда будет открыт доступ. В качестве резервного доступа, если вдруг что-то пойдёт не так, можно использовать веб-консоль хостинга. Ещё можно прокинуть ssh внутри прокси соединения, например я прокидываю через vless-reality с socks5 инбаундом:</p>
+<pre><code class="lang-auto">Host vps
+        ProxyCommand  nc -X connect -x LOCAL_SOCKS5_PROXY_IP:PROXY_PORT %h %p
+        Hostname IP_ВАШЕГО_VPS
+        User ВАШ_VPS_USER
+</code></pre></td><td>2024-12-09T13:09:54.781Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group quote-modified" data-username="MasterYoba" data-post="1" data-topic="13691">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/masteryoba/48/6182_2.png" class="avatar"> MasterYoba:</div>
+<blockquote>
+<p>нужно перенести ssh на высокие порты, якобы это сделает ваш прокси сервер незаметнее</p>
+</blockquote>
+</aside>
+<p>Сделает менее заметным ввиду количества попыток сканирования высоких портов в 1% от общего числа скан пакетов.</p>
+<aside class="quote no-group" data-username="MasterYoba" data-post="1" data-topic="13691">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/masteryoba/48/6182_2.png" class="avatar"> MasterYoba:</div>
+<blockquote>
+<p>Нужно закрывать сервер правилами фаервола, но многие говорят, мол нет такой возможности, т.к. домашний IP не статический</p>
+</blockquote>
+</aside>
+<p>Достаточно добавить в список разрешенных подсеть AS ISP.</p>
+<aside class="quote no-group" data-username="MasterYoba" data-post="1" data-topic="13691">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/masteryoba/48/6182_2.png" class="avatar"> MasterYoba:</div>
+<blockquote>
+<p>Ещё можно прокинуть ssh внутри прокси соединения</p>
+</blockquote>
+</aside>
+<p>TCP прокси будет определятся сканерами и также, как и на ssh, возможна какая-нибудь атака RCE с повышением привелегий из-за ошибок/закладок програмной реализации.</p>
+<p>Лучше использовать тунель с запретом ответа без аутентификации (UDP с preshared key/tls-crypt или, например, для TCP udp2raw в режиме TCP raw — на сканирующие пакеты отвечать не будет, но используется симметричная криптография).</p></td><td>2024-12-09T13:51:47.791Z</td></tr><tr><td>spotted_giraffe</td><td><blockquote>
+<p>мол нужно перенести ssh на высокие порты</p>
+</blockquote>
+<p>port-knocking можно попробовать еще настроить, на те случаи когда лазить по ssh на впс часто не нужно, для вариантов “поставил и забыл”</p></td><td>2024-12-09T15:21:56.019Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>port-knocking нужно настроить, но только в комбинации с вышеописанным. А то можно случайно себя забанить</p></td><td>2024-12-09T18:21:06.489Z</td></tr><tr><td>spotted_giraffe</td><td><p>Это да, мне не впервой. Обычно тогда хожу через сайт хостера и чиню все, с помощью VNC например. Минусы у способа есть, не особо понятно например что делать если со смартфона захочется, придется самому клиент писать скорее всего</p></td><td>2024-12-09T19:24:30.491Z</td></tr><tr><td>Xunlei</td><td><aside class="quote no-group" data-username="spotted_giraffe" data-post="5" data-topic="13691">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/spotted_giraffe/48/12771_2.png" class="avatar"> spotted_giraffe:</div>
+<blockquote>
+<p>что делать если со смартфона захочется</p>
+</blockquote>
+</aside>
+<p><a href="https://termux.dev/" rel="noopener nofollow ugc">Termux</a>, вроде бы есть возможность работать с некоторыми утилитами и без root.</p></td><td>2024-12-09T19:28:42.686Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Такой вопрос (возможно глупый) - будет ли работать данная схема, если IP’шник одновременно динамический и находится за CGNAT?<br>
+По идее должно, AnyDesk как-то же пробивается со своим пакетом Wake-on-Lan, ДАЖЕ когда ПК выключен (магия какая-то), но мне самому трудно сказать…</p></td><td>2024-12-09T19:37:12.539Z</td></tr><tr><td>c5sa(c5sa)</td><td><p>Вообще должна, ddns будет видеть внешний адрес<br>
+А вот anydesk скорее всего находит не спящий комп с anydesk в твоей сети (об этом явно сказано) или даже в сети провайдера, заранее оставив проброс по upnp и заранее его опробовав (тут уже сильно больше переменных, круто если работает)</p></td><td>2024-12-09T22:55:04.935Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Хм, а ведь действительно. У меня на постоянке лежит включенный старый нетбук, тоже как раз с установленным AnyDesk (на всякий случай). Не знал, что таким образом автоматически пробрасывается порт, это и вправду круто.</p></td><td>2024-12-09T23:12:45.483Z</td></tr><tr><td>c5sa(c5sa)</td><td><p>В таком случаее он и отправляет wake on lan)<br>
+Без какого либо проброса</p></td><td>2024-12-09T23:23:55.101Z</td></tr><tr><td>s.v.d(00svd00)</td><td><p>Удобнее в таскер набить последовательность шелл комманд. Там можно довольно сложную логику наворотить, в т.ч. с пакетами рандомной длины, чтобы сниффером нельзя было однозначно считать последовательность.</p></td><td>2024-12-10T08:01:26.498Z</td></tr><tr><td>MasterYoba</td><td><blockquote>
+<p>Достаточно добавить в список разрешенных подсеть AS ISP.</p>
+</blockquote>
+<p>Можно конечно, только правило получится сильно шире, и менее универсальное, чем мой способ, который будет просто работать даже в случае переезда или смены оператора.</p>
+<aside class="quote no-group" data-username="Xunlei" data-post="2" data-topic="13691">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>TCP прокси будет определятся сканерами</p>
+</blockquote>
+</aside>
+<p>Пока нет информации, способны ли они обнаружить ssh in tls или tls in tls. Скорее нет, чем да, потому что пока что их использование не вызывает сработку фильтра на хецнер. В любом случае это лучше голого ssh</p>
+<aside class="quote no-group" data-username="Xunlei" data-post="2" data-topic="13691">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/x/8e7dd6/48.png" class="avatar"> Xunlei:</div>
+<blockquote>
+<p>возможна какая-нибудь атака</p>
+</blockquote>
+</aside>
+<p>Да, в теории всё возможно, но на мой взгляд вероятность этого минимальна, я оцениваю риск как допустимый. Даже в худшем случае RCE это всего-лишь прокси сервер для обхода, который можно “обнулить” через панель хостера. Все эти способы конечно использовать можно</p></td><td>2024-12-10T08:30:36.417Z</td></tr><tr><td>xofamim548</td><td><p>Простите за возможно глупый вопрос, но все же. По поводу того, что в каких-то странах цензор банит серверы с открытым SSH портом - это подтвержденная информация?</p></td><td>2024-12-10T19:35:01.349Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>Недавно писал кто-то, что ему забанили айпишник за соединение с сервером по SSH через ключ, причём при входе через пароль не блокировали. ИМХО, подключаться к серверу по SSH стоит только через сторонний VPN (к примеру WARP с AWG) либо через VNC панель хостера, так безопаснее.</p></td><td>2024-12-10T22:30:13.163Z</td></tr><tr><td>Asahi</td><td><blockquote>
+<blockquote>
+<p>либо через VNC панель хостера, так безопаснее.</p>
+</blockquote>
+</blockquote>
+<p>+1</p>
+<p>Как вариант еще можно перевесить ssh на onion hidden service. Я так сделал, теперь порт наружу не торчит, а задержки минимальные. И VNC (xfce) тоже.<br>
+Настраивается за 10-15 мин.</p></td><td>2024-12-11T08:00:32.754Z</td></tr><tr><td>MasterYoba</td><td><p>Была информация от иранских товарищей, что могут банить reality сервер после активного пробинга, если на нём открытые порты не соответствуют открытым портам на dest сервере, под который маскируешься. Собственно, отсюда и пошли рассуждения о необходимости прятать порты. Другое решение это маскировка под свой собственный сервер, тогда и прятать ничего не нужно.</p></td><td>2024-12-12T06:23:16.696Z</td></tr><tr><td>xX_RUP3R7_P4UL50N_Xx</td><td><p>А если перенаправлять все порты (кроме 443 и SSH разумеется) с помощью iptables, то это спасёт от active probing’а? К примеру вот так:</p>
+<pre><code class="lang-auto">iptables -t nat -A PREROUTING -i ens3 -p tcp -m multiport ! --dports 443,1337 -j DNAT --to-destination &lt;DONOR_IP&gt;
+iptables -t nat -A PREROUTING -i ens3 -p udp -j DNAT --to-destination &lt;DONOR_IP&gt;
+iptables -t nat -A POSTROUTING -o ens3 -j SNAT --to-source &lt;SERVER_IP&gt;
+</code></pre></td><td>2024-12-12T09:29:50.090Z</td></tr><tr><td>Elevator</td><td><p>Единственный правильный способ сокрытия ssh это обернуть его во что-то. Т.к могут собрать статистику через DPI</p></td><td>2024-12-12T10:02:35.254Z</td></tr><tr><td>mipeje</td><td><p>А зачем это всё? Нельзя просто доступ по паролю закрыть и оставить только по ключу?</p></td><td>2024-12-13T16:46:02.685Z</td></tr><tr><td>kekmaster(Silence)</td><td><p>По своему опыту, использую 3 метода для vps/vds:</p>
+<ol>
+<li>
+<p>port knocking (+ ssh порт нестандарт, порт для открытия брать подальше)</p>
+</li>
+<li>
+<p>ssh вообще вырубаю, там где подключаюсь редко (включил и забыл).<br>
+Если надо подключаюсь через саму панель (noVNC/realVNC и т.д.)</p>
+</li>
+<li>
+<p>ssh jump host (gateway), подключение к ssh через другую сессию ssh (ssh gateway должен быть в доверенной зоне)</p>
+</li>
+</ol></td><td>2024-12-15T10:13:01.638Z</td></tr><tr><td>MasterYoba</td><td><p>Да, джамп хост на другом хостинге за пределами юрисдикции цензора на мой взгляд это самый идеальный вариант, я его и использую.</p>
+<p>Порт нокинг это одноразовый трюк, т.к. мы тут пытаемся защищаться от цензора, который видит весь наш трафик и анализирует его в реальном времени, то как только я воспользоваться нокингом, комбинация сразу скомпроментирована и известна цензору. Я бы оставил нокинг как резервный вариант, если все остальное поломалось.</p></td><td>2024-12-15T10:28:16.044Z</td></tr><tr><td>kencarson</td><td><p>а если такая идея:<br>
+на сайте хостинга есть VNC, через которую можно зайти и исключительно через неё настраивать панель<br>
+остальное уже сделать по вашим рекомендациям в изначальном посте, а точнее закрыть вообще любые SSH и всё кроме непосредственно 443</p></td><td>2024-12-16T01:30:44.951Z</td></tr><tr><td>naykaminka(Sergey)</td><td><p>почему столько споров о переносе перебросе ssh если можно его тотально вырубить и заходить через консоль провайдера ? уточните пожалуйста.<br>
+Кстати возникает вопрос не будет ли РКН сидеть палить что я на сайт провайдера VDSок захожу ? А потом с моего айпишника запросы на нидерландский сервер местной газеты, так то палево ?</p></td><td>2024-12-17T17:03:01.832Z</td></tr><tr><td>allula</td><td><aside class="quote no-group" data-username="naykaminka" data-post="23" data-topic="13691">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/naykaminka/48/13848_2.png" class="avatar"> naykaminka:</div>
+<blockquote>
+<p>почему столько споров о переносе перебросе ssh если можно его тотально вырубить и заходить через консоль провайдера ?</p>
+</blockquote>
+</aside>
+<p>Для меня ssh удобнее VNC. Я бы выбрал схему: включить ssh, всё настроить и выключить. Если не хочется палиться, то либо VNC, либо ssh через прокси. Если держать ssh включённым (удобно человеку так, не хочет он выключать), то точно надо перевешивать повыше. На хабре видел сравнение нагрузки на сервер, если ssh на стандартном порту и если ssh на порту сильно выше. Разница была разительная.</p></td><td>2024-12-17T17:12:08.871Z</td></tr><tr><td>naykaminka(Sergey)</td><td><p>А в чем смысл перевешивать выше ? Надеяться что на каком-то порту до вашего роскомнадзору станет лень и он прекратит попытки поиска ? Мне кажется сотрудники РКН тут частые гости и прекрасно знают что все уже поперевешивали порты, поэтому будут мониторить до талого.</p>
+<aside class="quote no-group" data-username="allula" data-post="24" data-topic="13691">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Для меня ssh удобнее VNC.</p>
+</blockquote>
+</aside>
+<p>Подскажите чем именно ?</p></td><td>2024-12-17T17:33:58.263Z</td></tr><tr><td>allula</td><td><p>Как я написал выше, смысл в уменьшении лишней нагрузки на сервер от скриптов, которые будут ломиться в 22‐й порт. От цензора, естественно, это не спасёт. Для защиты от цензора нужно либо не использовать ssh в принципе, либо проксировать его через VLESS, например.</p>
+<aside class="quote no-group quote-modified" data-username="naykaminka" data-post="25" data-topic="13691">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/naykaminka/48/13848_2.png" class="avatar"> naykaminka:</div>
+<blockquote>
+<aside class="quote no-group" data-username="allula" data-post="24" data-topic="13691">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/a/ebca7d/48.png" class="avatar"> allula:</div>
+<blockquote>
+<p>Для меня ssh удобнее VNC.</p>
+</blockquote>
+</aside>
+<p>Подскажите чем именно ?</p>
+</blockquote>
+</aside>
+<p>Когда привык быстро печатать, через VNC труднее работать из-за задержек. ssh работает гораздо быстрее и отзывчивее.</p>
+<p>Но VNC всё равно может пригодиться, потому что позволяет управлять сервером до загрузки системы (подключиться по ssh можно только после успешной загрузки системы). Например, в следующих случаях без VNC не получится ничего сделать.</p>
+<ol>
+<li>Система падает на этапе загрузки и надо с этим разобраться, а не переустанавливать.</li>
+<li>Диск зашифрован и, чтобы система загрузилась, нужно ввести пароль (на самом деле можно расшифровывать диск через ssh, но это требует дополнительной настройки системы).</li>
+<li>Нужно загрузиться в другой дистрибутив, если ты решил установить рядом ещё один.</li>
+</ol></td><td>2024-12-17T17:58:53.519Z</td></tr><tr><td>allula</td><td><p>Пока отвечал в другом треде, понял, в чём ещё удобство ssh. Можно заставить 3X-UI слушать <code>127.0.0.1</code> и заходить на неё через проброс порта по ssh. Пусть лучше в Интернет торчит ssh, чем целая панель для настройки прокси. Альтернативна (если никак не хочется использовать ssh) — не использовать панели, либо через sqlite править настройки панели руками, либо открывать и закрывать панель через VNC на время настройки.</p></td><td>2024-12-18T19:54:43.091Z</td></tr><tr><td>naykaminka(Sergey)</td><td><p>Чем опасна торчащая панель если порт изменён и сам адрес панели не только из ip состоит ?<br>
+Кстати, по поводу быстрого набора в VNC - на одном из провайдеров он действительно с задержкой, на другом по скорости ничем не отличается от консоли</p></td><td>2024-12-18T20:03:45.028Z</td></tr><tr><td>allula</td><td><aside class="quote no-group" data-username="naykaminka" data-post="28" data-topic="13691">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/naykaminka/48/13848_2.png" class="avatar"> naykaminka:</div>
+<blockquote>
+<p>Чем опасна торчащая панель если порт изменён и сам адрес панели не только из ip состоит ?</p>
+</blockquote>
+</aside>
+<p>Если адрес с секретом, включён TLS (!) и всё это сделано перед первым заходом в панель, то я сильных рисков не вижу, вы правы. Если забыть про секрет или TLS, то пусть лучше ssh торчит.</p></td><td>2024-12-18T20:10:48.541Z</td></tr>
+    </table>
+      </body>
+    </html>

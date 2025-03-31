@@ -1,0 +1,48 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>paper-summary-symtcp-eluding-stateful-deep-packet-inspection-with-automated-discrepancy-discovery-ndss-20</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>tango</td><td><p>SymTCP: Eluding Stateful Deep Packet Inspection with Automated Discrepancy Discovery<br>
+Zhongjie Wang, Shitong Zhu, Yue Cao, Zhiyun Qian, Chengyu Song, Srikanth V. Krishnamurthy, Kevin S. Chan, Tracy D. Braun<br>
+<a href="https://censorbib.nymity.ch/#Wang2020a" class="onebox" target="_blank" rel="nofollow noopener">https://censorbib.nymity.ch/#Wang2020a</a><br>
+<a href="https://github.com/seclab-ucr/SymTCP" rel="nofollow noopener">https://github.com/seclab-ucr/SymTCP</a></p>
+<p>This paper presents SymTCP, a system to automatically discovering packet sequences that desynchronize DPI middleboxes. A middlebox is desynchronized when its notion of the state of a TCP connection differs from that of the client and server. The core idea is to use <a href="https://en.wikipedia.org/wiki/Symbolic_execution" rel="nofollow noopener">symbolic execution</a> to explore code paths that leads to state changes in an actual implementation of TCP. Implementations of TCP are complicated, and middlebox simulations of endpoint TCP state tend to be simplified approximations. Even though a middlebox may not be directly inspectable, a diverse set of packets that exercise most of an endpoint’s code paths are also likely to exercise most of a middlebox’s code paths, and some of those code paths will lead the endpoint and middlebox to different internal states. The output of SymTCP is a set of packet sequences that terminate in an <em>evasion packet</em>—a packet that is ignored by the middlebox but interpreted by the server—or an <em>insertion packet</em>—a packet that is interpreted by the server but ignored by the middlebox. Either of these cases (made formal in Section III) is good for desynchronizing the middlebox.</p>
+<p>The process begins by manually annotating <em>accept points</em> and <em>drop points</em> in a TCP implementation—places in the code where a packet either modifies the state of a connection, or is removed from consideration. The authors label 6 accept points and 38 drop points in the Linux 5.4.5 TCP server implementation. The next step is the “offline” phase: symbolic execution to find constraints on packets that lead to known accept and drop points. Section V discusses the challenges involved in symbolically executing a complicated piece of code like the Linux kernel TCP implementation. After that comes the “online” phase: solving the constraints to generate packet sequences, and sending them through the middlebox. In the authors’ experience, there were too many packet sequences to test effectively, so they sub-sampled the list, while retaining all the distinct accept and drop points. The middlebox is presumed to be a black box whose state is not directly knowable, so there is a final probe step that sends packets containing a keyword designed to provoke a reaction (e.g. blocking) by the middlebox. The output of executing this process for many sets of constraints is a set of packet sequences, each of which terminates in an evasion packet or an insertion packet. These sequences can then be manually examined to understand how they work.</p>
+<p>They tested using the Linux TCP server implementation and three middleboxes: <a href="https://zeek.org/" rel="nofollow noopener">Zeek</a>, <a href="https://www.snort.org/" rel="nofollow noopener">Snort</a>, and the Great Firewall of China. SymTCP found evasion and insertion strategies against all, some new and some previously known (Tables IV, V, and VI).</p>
+<p>Thanks to Zhongjie Wang for commenting on a draft of this post.</p></td><td>2020-04-27T23:02:28.763Z</td></tr>
+    </table>
+      </body>
+    </html>

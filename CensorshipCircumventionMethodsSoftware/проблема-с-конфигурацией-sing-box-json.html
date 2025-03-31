@@ -1,0 +1,454 @@
+
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+    th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      word-wrap: break-word;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid black;
+      border-collapse: collapse;
+      table-layout: fixed;
+      word-wrap: break-word
+    }
+    code {
+      word-wrap: break-word;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    </style>
+        <title>проблема-с-конфигурацией-sing-box-json</title>
+      </head>
+      <body>
+        <table border="1" width="100%" cellpadding="5">
+          <tr>
+            <th style="width: 10%;">Ник</th>
+            <th>Пост</th>
+            <th style="width: 10%;">Дата</th>
+          </tr>
+    <tr><td>1unknown(Unknown)</td><td><p>Всем доброго времени суток!<br>
+Помогите, пожалуйста, изменить нынешний конфиг так, чтобы он работал и пропускал нужные домены через vless соединение которое находится на сервере, а остальные запросы блокировал.</p>
+<p>Я использую AdGuard Home на VPS (Ubuntu) с перезаписью DNS запросов под эти домены чтобы они шли сперва через мой сервер. Аналог DNS от comss, только свой под нужные мне сайты)<br>
+Пробовал напрямую через сам sing-box по <a href="https://ntc.party/t/%D0%BF%D1%80%D0%BE%D0%B7%D1%80%D0%B0%D1%87%D0%BD%D1%8B%D0%B9-%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8/11011/4">инструкции</a>, но, к сожалению, происходили затыки с соединением на некоторых сайтах, с другими работало стабильно.<br>
+Допилить с нейросетями не вышло <img src="https://ntc.party/images/emoji/twitter/melting_face.png?v=12" title=":melting_face:" class="emoji" alt=":melting_face:" loading="lazy" width="20" height="20"></p>
+<pre><code class="lang-auto">{
+    "dns": {
+        "servers": [
+            {
+                "address": "94.140.14.14",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote"
+            },
+            {
+                "address": "94.140.15.15",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote-2"
+            },
+            {
+                "address": "77.88.8.8",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote-3"
+            },
+            {
+                "address": "77.88.8.1",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote-4"
+            },
+            {
+                "address": "1.1.1.1",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote-5"
+            },
+            {
+                "address": "1.0.0.1",
+                "detour": "direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote-6"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "domain_strategy": "prefer_ipv4",
+            "listen": "0.0.0.0",
+            "listen_port": 443,
+            "sniff": true,
+            "sniff_override_destination": true,
+            "tag": "direct-proxy",
+            "type": "direct"
+        }
+    ],
+    "log": {
+        "level": "debug"
+    },
+    "outbounds": [
+        {
+            "tag": "direct",
+            "type": "direct"
+        },
+        {
+            "type": "vless",
+            "tag": "VPN for DNS",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "XX.XXX.XXX.XX",
+                        "port": 443,
+                        "users": [
+                            {
+                                "id": "XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                                "flow": "xtls-rprx-vision",
+                                "encryption": "none"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "reality",
+                "tlsSettings": {
+                    "serverName": "xxx.com",
+                    "utls": {
+                        "enabled": true,
+                        "fingerprint": "chrome"
+                    }
+                },
+                "realitySettings": {
+                    "show": false,
+                    "publicKey": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                    "shortId": "XXXXXXXX",
+                    "spiderX": "/"
+                }
+            }
+        },
+        {
+            "tag": "block",
+            "type": "block"
+        },
+        {
+            "tag": "dns-out",
+            "type": "dns"
+        }
+    ],
+    "route": {
+        "final": "block",
+        "rules": [
+            {
+                "outbound": "dns-out",
+                "protocol": "dns"
+            },
+            {
+                "domain": [
+                    "2ip.ru",
+                    "2ip.ua",
+                    "4pda.to",
+                    "canva.com",
+                    "habr.com",
+                    "megogo.net",
+                    "pornhub.com",
+                    "browserleaks.com"
+                ],
+                "outbound": "VPN for DNS"
+            }
+        ]
+    }
+}
+
+</code></pre>
+<p><a class="attachment" href="проблема-с-конфигурацией-sing-box-json/vwvQrfExWWvNRCW2RVnB7mCiPXf.json">Help with sing-box.json</a> (3,6 КБ)</p></td><td>2024-11-16T20:46:40.765Z</td></tr><tr><td>0ka(0ka)</td><td><p>Кучка днсов не делают вообще ничего, работает только первый. И вопрос непонятен, на первый взгляд конфиг и так уже такой как вы хотите, может быть “domain” стоит поменять на “domain_suffix”, не знаю, вы не сказали какая у вас вообще проблема. И зачем поднимать прокси в рф если у вас уже есть сервер с реалити, можно же поднять прокси там же.</p></td><td>2024-11-16T21:12:47.892Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>Проблема что с таким конфигом не проходит через мой зарубежный VPS, а пускает напрямую)</p>
+<ol>
+<li>Можно ли вписать запасные DNS сервера, если первый не работает  (такое изредка происходит), то включается второй и т.д.?</li>
+<li>Прокси поднимаю именно на зарубежном VPS на Ubuntu (Adguard Home с перезаписью DNS-запросов на Sing-Box который перенаправляет на 3X-UI (vless)).<br>
+То есть для сторонних людей кто будет использовать мой VPS IP как DNS, то он будет лишь ретранслятором Adguard DNS, а вот для меня на нужные сайты VPS будет уже как прокси DNS.</li>
+</ol></td><td>2024-11-16T21:21:09.523Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="1unknown" data-post="3" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>если первый не работает</p>
+</blockquote>
+</aside>
+<p>ставь 1.1.1.1 и проблем не будет, в любом случае это уже не относится к сингбоксу, а к днс серверу где можно прописать бекапы, в agh точно можно.</p>
+<aside class="quote no-group" data-username="1unknown" data-post="3" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>Прокси поднимаю именно на зарубежном VPS</p>
+</blockquote>
+</aside>
+<p>тогда я не понимаю смысла reality outbound</p>
+<aside class="quote no-group" data-username="1unknown" data-post="3" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>на Sing-Box который перенаправляет на 3X-UI (vless)</p>
+</blockquote>
+</aside>
+<p>зачем?</p>
+<aside class="quote no-group" data-username="1unknown" data-post="3" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<ol>
+<li>То есть для сторонних людей кто будет использовать мой VPS IP как DNS, то он будет лишь ретранслятором Adguard DNS, а вот для меня на нужные сайты VPS будет уже как прокси DNS.</li>
+</ol>
+</blockquote>
+</aside>
+<p>ничего непонятно</p></td><td>2024-11-16T21:30:03.779Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="1unknown" data-post="3" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>Проблема что с таким конфигом не проходит через мой зарубежный VPS, а пускает напрямую</p>
+</blockquote>
+</aside>
+<p>без лога можно было не писать пост. в конфиге sing-box прописан блок всех неизвестных доменов, то, что сайты открываются напрямую, может говорить о том, что ваш днс не переписывает ответы а оставляет как есть</p></td><td>2024-11-16T21:31:04.829Z</td></tr><tr><td>1unknown(Unknown)</td><td><aside class="quote no-group" data-username="0ka" data-post="4" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>ставь 1.1.1.1 и проблем не будет, в любом случае это уже не относится к сингбоксу, а к днс серверу где можно прописать бекапы, в agh точно можно.</p>
+</blockquote>
+</aside>
+<p>Окей)</p>
+<aside class="quote no-group" data-username="0ka" data-post="4" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>зачем?</p>
+</blockquote>
+</aside>
+<p>Возникла такая идея потому что часть сайтов не стали нормально работать, сейчас запущу прежний конфиг, скажу точно какая ошибка)</p>
+<aside class="quote no-group" data-username="0ka" data-post="4" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>ничего непонятно</p>
+</blockquote>
+</aside>
+<p>Если использовать IP адрес моего сервера как DNS, то он просто будет работать как Adguard DNS через 94.140.14.14 и 94.140.15.15</p></td><td>2024-11-16T21:59:56.879Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="1unknown" data-post="6" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>Если использовать IP адрес моего сервера как DNS, то он просто будет работать как Adguard DNS через 94.140.14.14 и 94.140.15.15</p>
+</blockquote>
+</aside>
+<p>вы хотите сделать аналог COMSS, соответственно вам нужно переписывать ответы днс сервера, зеркало на adguard не имеет никакого смысла</p></td><td>2024-11-16T22:17:54.335Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>Adguard Home (DNS 94.140.14.14 и 94.140.15.15) для 3X-UI, а перезапись DNS-запросов это для Sing-Box <img src="https://ntc.party/images/emoji/twitter/blush.png?v=12" title=":blush:" class="emoji" alt=":blush:" loading="lazy" width="20" height="20"></p></td><td>2024-11-16T22:20:29.187Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>Придется переустановить систему, сегодня днем это сделаю, ещё раз протестирую и покажу ошибку <img src="https://ntc.party/images/emoji/twitter/handshake.png?v=12" title=":handshake:" class="emoji" alt=":handshake:" loading="lazy" width="20" height="20"></p></td><td>2024-11-16T22:33:11.174Z</td></tr><tr><td>1unknown(Unknown)</td><td><p>Здравствуйте! <img src="https://ntc.party/images/emoji/twitter/handshake.png?v=12" title=":handshake:" class="emoji" alt=":handshake:" loading="lazy" width="20" height="20"><br>
+В итоге я пошел по другому пути с тем же набором:<br>
+Adguard Home + Sing-Box, но с другим настройками.</p>
+<p>У AGH есть настройки доступа к DNS-серверу, там в “Разрешённые клиенты” я вписал свои IP-адреса + 127.0.0.1. Теперь AGH принимает запросы только от них, всем остальным выдает “Forbidden”. У меня белый IP, что решает вопрос о приватности DNS прокси.<br>
+После чего я использовал следующий config.json:</p>
+<pre><code class="lang-auto">{
+  "dns": {
+    "servers": [
+      {
+        "address": "1.1.1.1",
+        "detour": "direct",
+        "strategy": "prefer_ipv4",
+        "tag": "dns-remote"
+      },
+      {
+        "address": "8.8.8.8",
+        "detour": "direct",
+        "strategy": "prefer_ipv4",
+        "tag": "dns-remote-secondary"
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "domain_strategy": "prefer_ipv4",
+      "listen": "0.0.0.0",
+      "listen_port": 443,
+      "sniff": true,
+      "sniff_override_destination": true,
+      "tag": "direct-proxy",
+      "type": "direct"
+    }
+  ],
+  "log": {
+    "level": "error"
+  },
+  "outbounds": [
+    {
+      "tag": "direct",
+      "type": "direct"
+    },
+    {
+      "tag": "block",
+      "type": "block"
+    },
+    {
+      "tag": "dns-out",
+      "type": "dns"
+    }
+  ],
+  "route": {
+    "final": "block",
+    "rules": [
+      {
+        "outbound": "dns-out",
+        "protocol": "dns"
+      },
+      {
+        "domain_suffix": [
+          ".ac",
+          ".ai",
+          ".app",
+          ".bg",
+          ".ca",
+          ".cc",
+          ".co",
+          ".co.uk",
+          ".com",
+          ".com.ua",
+          ".cz",
+          ".de",
+          ".eu",
+          ".gg",
+          ".gov",
+          ".guru",
+          ".in",
+          ".io",
+          ".jp",
+          ".net",
+          ".nl",
+          ".org",
+          ".ru",
+          ".to",
+          ".ua",
+          ".video"
+        ],
+        "outbound": "direct"
+      }
+    ]
+  }
+}
+
+</code></pre>
+<p>Теперь придется лезть туда намного реже чтобы проксировать нужный мне сайт.</p>
+<p>Далее в AGH на моем VPS перезаписал DNS-запросы для нужных мне доменов в таком виде:</p>
+<pre><code class="lang-auto">4pda.to XX.XX.XX.XX
+*.4pda.to XX.XX.XX.XX
+canva.com XX.XX.XX.XX
+*.canva.com XX.XX.XX.XX
+и т.д.
+</code></pre>
+<p>И в AGH на роутере написал так:<br>
+<code>[/4pda.to/*.4pda.to/canva.com/*.canva.com/и т.д.]XX.XX.XX.XX</code></p>
+<p>И у меня возникло не понимание почему некоторые сайты не дают соединиться, если я вписал все домены и поддомены которые они используют.<br>
+Например <a href="https://gemini.google.com/app" rel="noopener nofollow ugc">Gemini</a> - используя те же домены, только через comss, то я могу зайти. А если использую свой сервер, то не дает, пишет что в вашей стране не обслуживается. Не понимаю где может загвоздка…IP уже как месяц по основным базам определяется как немецкий.<br>
+В chatGPT пускает без проблем, на 4pda в закрытый раздел про VPN тоже.<br>
+В <a href="http://browserleaks.com" rel="noopener nofollow ugc">browserleaks.com</a> показывает что мой основной IP немецкий, от VPS. Возможно он сверяет с WebRTC Leak Test где показан мой настоящий российский IP? Или что по TCP/IP Fingerprint у меня OS Android, а захожу через chrome на Windows 10?<br>
+Судя по traceroute к Gemini идет через мой VPS серверу как и положено.<br>
+Куда стоит копнуть?</p></td><td>2024-11-19T18:27:47.962Z</td></tr><tr><td>0ka(0ka)</td><td><p>смотрите логи браузера, все запросы на сайте должны идти на ip vps, если так и есть то верните приоритет на ipv6.<br>
+и повторюсь, что второй днс в конфиге синга бесполезен, и правило с кучей доменов первого уровня выглядит очень странно, я не вижу в этом никакого смысла, если вы хотите проксировать все домены, то удалите правило с доменами и поменяйте final: block на direct, но тогда есть шанс что вашу впс забанят за абьюз или спам, или будут гонять кучу трафика</p></td><td>2024-11-19T18:33:51.287Z</td></tr><tr><td>1unknown(Unknown)</td><td><aside class="quote no-group" data-username="0ka" data-post="11" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>смотрите логи браузера, все запросы на сайте должны идти на ip vps, если так и есть то верните приоритет на ipv6.</p>
+</blockquote>
+</aside>
+<p>Сейчас сделаю.</p>
+<aside class="quote no-group" data-username="0ka" data-post="11" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>второй днс в конфиге синга бесполезен</p>
+</blockquote>
+</aside>
+<p>Если 1.1.1.1 будет не доступен, разве второй ДНС не сработает?</p>
+<aside class="quote no-group" data-username="0ka" data-post="11" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>удалите правило с доменами и поменяйте final: block на direct, но тогда есть шанс что вашу впс забанят за абьюз или спам, или будут гонять кучу трафика</p>
+</blockquote>
+</aside>
+<p>Разве возможно будет его использовать, если DNS доступ к sing-box есть только у моего IP и localhost? Я проверял что с другого IP он отвечает :Forbidden" что равно не отвечает)</p></td><td>2024-11-19T18:37:02.370Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="1unknown" data-post="12" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>Если 1.1.1.1 будет не доступен, разве второй ДНС не сработает?</p>
+</blockquote>
+</aside>
+<p>нет</p>
+<aside class="quote no-group" data-username="1unknown" data-post="12" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>Разве возможно будет его использовать, если DNS доступ к sing-box есть только у моего IP и localhost?</p>
+</blockquote>
+</aside>
+<p>днс и прокси не связаны друг с другом, вы блокируете запросы только в днс сервере, прокси остаётся открыт для всех</p></td><td>2024-11-19T18:38:01.426Z</td></tr><tr><td>1unknown(Unknown)</td><td><aside class="quote no-group" data-username="0ka" data-post="13" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>нет</p>
+</blockquote>
+</aside>
+<p>Невозможно сделать запасной DNS? Хочется более устойчивую систему)</p>
+<aside class="quote no-group" data-username="0ka" data-post="13" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>днс и прокси не связаны друг с другом, вы блокируете запросы только в днс сервере, прокси остаётся открыт для всех</p>
+</blockquote>
+</aside>
+<p>Понял. Тогда буду проксировать только нужные мне сайты.</p></td><td>2024-11-19T18:40:11.329Z</td></tr><tr><td>0ka(0ka)</td><td><aside class="quote no-group" data-username="1unknown" data-post="14" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>Понял. Тогда буду проксировать только нужные мне сайты</p>
+</blockquote>
+</aside>
+<p>как и в днс сервере, в сингбоксе можно сделать белый список ip адресов, читайте доки как</p>
+<aside class="quote no-group" data-username="1unknown" data-post="14" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/user_avatar/ntc.party/1unknown/48/14635_2.png" class="avatar"> 1unknown:</div>
+<blockquote>
+<p>Невозможно сделать запасной DNS?</p>
+</blockquote>
+</aside>
+<p>возможно, но смысла нет</p></td><td>2024-11-19T18:44:01.281Z</td></tr><tr><td>1unknown(Unknown)</td><td><aside class="quote no-group" data-username="0ka" data-post="11" data-topic="13196">
+<div class="title">
+<div class="quote-controls"></div>
+<img loading="lazy" alt="" width="24" height="24" src="https://ntc.party/letter_avatar_proxy/v4/letter/0/d78d45/48.png" class="avatar"> 0ka:</div>
+<blockquote>
+<p>смотрите логи браузера, все запросы на сайте должны идти на ip vps, если так и есть то верните приоритет на ipv6.</p>
+</blockquote>
+</aside>
+<p>Вы оказались правы, таким образом он загружает как нужно. Благодарю за вашу отзывчивость <img src="https://ntc.party/images/emoji/twitter/handshake.png?v=12" title=":handshake:" class="emoji" alt=":handshake:" loading="lazy" width="20" height="20"> И посылаю лучи добра раз тут нету плюсов <img src="https://ntc.party/images/emoji/twitter/partying_face.png?v=12" title=":partying_face:" class="emoji" alt=":partying_face:" loading="lazy" width="20" height="20"></p></td><td>2024-11-19T21:06:47.150Z</td></tr>
+    </table>
+      </body>
+    </html>
